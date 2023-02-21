@@ -13717,6 +13717,112 @@ error:
 } /* end external_link_with_committed_datatype() */
 
 /*-------------------------------------------------------------------------
+ * Function:    external_link_public_macros
+ *
+ * Purpose:     Test public macros for external links
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_public_macros(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid = -1;               /* File ID */
+    H5L_info2_t linfo;                  /* Link information */
+    char        objname[NAME_BUF_SIZE]; /* Object name */
+    char        filename1[NAME_BUF_SIZE];
+    char        filename2[NAME_BUF_SIZE];
+    unsigned    flags; /* External link flags, packed as a bitmap */
+    const char *file;  /* File from external link */
+    const char *path;  /* Path from external link */
+
+    if (new_format)
+        TESTING("external link public macros (w/new group format)");
+    else
+        TESTING("external link public macros");
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[3], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[4], fapl, filename2, sizeof filename2);
+
+    /* Create file to point to */
+    if ((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Close file */
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Check that external links are registered with the library */
+    if (H5Lis_registered(H5L_TYPE_EXTERNAL) != TRUE)
+        TEST_ERROR;
+
+    /* Create file with link to first file */
+    if ((fid = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create external link to object in first file */
+    if (H5Lcreate_external(filename1, "/", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Check information for external link */
+    if (H5Lget_info2(fid, "ext_link", &linfo, H5P_DEFAULT) < 0)
+        goto error;
+
+    if (H5L_TYPE_EXTERNAL != linfo.type) {
+        H5_FAILED();
+        HDputs("    Unexpected object type - should have been an external link");
+        goto error;
+    }
+
+    if (H5Lget_val(fid, "ext_link", objname, sizeof(objname), H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if (H5Lunpack_elink_val(objname, linfo.u.val_size, &flags, &file, &path) < 0)
+        TEST_ERROR;
+
+    if (HDstrcmp(file, filename1) != 0) {
+        H5_FAILED();
+        HDputs("    External link file name incorrect");
+        goto error;
+    }
+
+    if (HDstrcmp(path, "/") != 0) {
+        H5_FAILED();
+        HDputs("    External link path incorrect");
+        goto error;
+    }
+
+    /* External link version & flags */
+    if (flags != ((H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL)) {
+        H5_FAILED();
+        HDputs("    External link version or flags are incorrect");
+        goto error;
+    }
+
+    /* Close first file */
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Check that all file IDs have been closed */
+    if (H5I_nmembers(H5I_FILE) != 0)
+        TEST_ERROR;
+    H5F_sfile_assert_num(0);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+    return FAIL;
+} /* end external_link_public_macros() */
+
+/*-------------------------------------------------------------------------
  * Function:    ud_hard_links
  *
  * Purpose:     Check that the functionality of hard links can be duplicated
@@ -22717,6 +22823,7 @@ main(void)
                     nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_public_macros(my_fapl, new_format) < 0 ? 1 : 0;
                 } /* with/without external file cache */
             }
 
