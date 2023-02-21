@@ -910,7 +910,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
                 FAIL_STACK_ERROR;
         }
 
-        /* dset0: H5T_NATIVE_INT, the other datsets: H5T_NATIVE_LLONG or H5T_NATIVE_SHORT */
+        /* dset0: H5T_NATIVE_INT, the other datasets: H5T_NATIVE_LLONG or H5T_NATIVE_SHORT */
         if (i == 0) {
             if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT,
                                            file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
