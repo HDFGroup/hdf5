@@ -11,8 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * A test suite to test HDF5's collective metadata read capabilities, as enabled
- * by making a call to H5Pset_all_coll_metadata_ops().
+ * A test suite to test HDF5's collective metadata read and write capabilities,
+ * as enabled by making a call to H5Pset_all_coll_metadata_ops() and/or
+ * H5Pset_coll_metadata_write().
  */
 
 #include "testphdf5.h"
@@ -37,6 +38,10 @@
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_COLL_THRESH_NUM 10000
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DATASET_NAME    "linked_chunk_io_sort_chunk_issue"
 #define LINK_CHUNK_IO_SORT_CHUNK_ISSUE_DIMS            1
+
+#define COLL_GHEAP_WRITE_ATTR_NELEMS 10
+#define COLL_GHEAP_WRITE_ATTR_NAME   "coll_gheap_write_attr"
+#define COLL_GHEAP_WRITE_ATTR_DIMS   1
 
 /*
  * A test for issue HDFFV-10501. A parallel hang was reported which occurred
@@ -521,6 +526,76 @@ test_link_chunk_io_sort_chunk_issue(void)
     VRFY((H5Pclose(dcpl_id) >= 0), "H5Pclose succeeded");
     VRFY((H5Pclose(dxpl_id) >= 0), "H5Pclose succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "H5Dclose succeeded");
+    VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+}
+
+/*
+ * A test for GitHub issue #2433 which causes a collective metadata write
+ * of global heap data. This test is meant to ensure that global heap data
+ * gets correctly mapped as raw data during a collective metadata write
+ * using vector I/O.
+ *
+ * An assertion exists in the library that should be triggered if global
+ * heap data is not correctly mapped as raw data.
+ */
+void
+test_collective_global_heap_write(void)
+{
+    const char *filename;
+    hsize_t     attr_dims[COLL_GHEAP_WRITE_ATTR_DIMS];
+    hid_t       file_id   = H5I_INVALID_HID;
+    hid_t       fapl_id   = H5I_INVALID_HID;
+    hid_t       attr_id   = H5I_INVALID_HID;
+    hid_t       vl_type   = H5I_INVALID_HID;
+    hid_t       fspace_id = H5I_INVALID_HID;
+    hvl_t       vl_data;
+    int         mpi_rank, mpi_size;
+    int         data_buf[COLL_GHEAP_WRITE_ATTR_NELEMS];
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    filename = GetTestParameters();
+
+    fapl_id = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    VRFY((fapl_id >= 0), "create_faccess_plist succeeded");
+
+    /*
+     * Even though the testphdf5 framework currently sets collective metadata
+     * writes on the FAPL, we call it here just to be sure this is futureproof,
+     * since demonstrating this issue relies upon it.
+     */
+    VRFY((H5Pset_coll_metadata_write(fapl_id, true) >= 0), "Set collective metadata writes succeeded");
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    attr_dims[0] = 1;
+
+    fspace_id = H5Screate_simple(COLL_GHEAP_WRITE_ATTR_DIMS, attr_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    vl_type = H5Tvlen_create(H5T_NATIVE_INT);
+    VRFY((vl_type >= 0), "H5Tvlen_create succeeded");
+
+    vl_data.len = COLL_GHEAP_WRITE_ATTR_NELEMS;
+    vl_data.p   = data_buf;
+
+    /*
+     * Create a variable-length attribute that will get written to the global heap
+     */
+    attr_id = H5Acreate2(file_id, COLL_GHEAP_WRITE_ATTR_NAME, vl_type, fspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((attr_id >= 0), "H5Acreate2 succeeded");
+
+    for (size_t i = 0; i < COLL_GHEAP_WRITE_ATTR_NELEMS; i++)
+        data_buf[i] = (int)i;
+
+    VRFY((H5Awrite(attr_id, vl_type, &vl_data) >= 0), "H5Awrite succeeded");
+
+    VRFY((H5Sclose(fspace_id) >= 0), "H5Sclose succeeded");
+    VRFY((H5Tclose(vl_type) >= 0), "H5Sclose succeeded");
+    VRFY((H5Aclose(attr_id) >= 0), "H5Aclose succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "H5Pclose succeeded");
     VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 }
