@@ -28,7 +28,7 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {"native_vol_test", NULL};
+const char *FILENAME[] = {"vol_test_file", NULL};
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -2285,7 +2285,7 @@ error:
     H5E_END_TRY;
 
     return FAIL;
-} /* end test_vol_cap_flags() */
+} /* end test_get_vol_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_wrap_register()
