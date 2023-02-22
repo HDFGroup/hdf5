@@ -575,6 +575,7 @@ fake_vol_info_to_str(const void *info, char **str)
 {
     herr_t    ret_value = SUCCEED; /* Return value */
     const int val       = *(const int *)info;
+    const int str_size  = 16; /* The size of the string */
 
     /* Verify the info is correct before continuing */
     if (val != INT_MAX) {
@@ -582,9 +583,10 @@ fake_vol_info_to_str(const void *info, char **str)
         return FAIL;
     }
 
-    *str = (char *)malloc(16);
+    /* Allocate the string long enough for the info */
+    *str = (char *)malloc(str_size);
 
-    HDsnprintf(*str, 16, "%d", *((const int *)info));
+    HDsnprintf(*str, str_size, "%d", *((const int *)info));
 
     return ret_value;
 } /* end fake_vol_info_to_str() */
