@@ -27,13 +27,15 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-o]"
-   echo "-h            Print this help."
-   echo "-v            Verbose output."
-   echo "-q            Quiet all output."
-   echo "-i            Ignore missing subfiles. Useful for node local storage."
-   echo "-o filename   HDF5 output file."
-   echo "-f filename   Subfile configuration file."
+   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-o] [-r] [-p]"
+   echo "-h           Print this help."
+   echo "-v           Verbose output."
+   echo "-q           Quiet all output."
+   echo "-p           Run fuse in parellel, requires MPI program 'h5fuse_p_opt' in the current directory. "
+   echo "-r           Remove completed subfiles."
+   echo "-i           Ignore missing subfiles. Useful for node local storage."
+   echo "-o filename  HDF5 output file."
+   echo "-f filename  Subfile configuration file."
    echo ""
 }
 
@@ -52,7 +54,9 @@ verbose="false"
 quiet="false"
 ignore="false"
 hdf5_file=""
-while getopts "ihqvf:o:" option; do
+rm_subf="false"
+parallel="false"
+while getopts "rihqvf:o:p" option; do
    case $option in
       h) # display Help
          usage
@@ -61,12 +65,16 @@ while getopts "ihqvf:o:" option; do
          file_config=$OPTARG;;
       q) # quiet all output
          quiet="true";;
+      r) # remove completed subfiles
+         rm_subf="true";;
       i) # ignore missing subfiles
          ignore="true";;
       v) # verbose output
          verbose="true";;
       o) # HDF5 fused file
          hdf5_file=$OPTARG;;
+      p) # HDF5 fused file
+         parallel="true";;
      \?) # Invalid option
          usage
          exit 1;;
@@ -84,11 +92,20 @@ nfiles=1
 SUBF_CONFDIR="${H5FD_SUBFILING_SUBFILE_PREFIX:-.}"
 WRKDIR=$PWD
 
+#if running script in parallel, make sure h5fuse mpi is accessable
+if [ "$parallel" == "true" ]; then
+  if [ ! -f "h5fuse_p_opt" ]; then
+    echo -e "$RED running h5fuse in parallel requires h5fuse_p_opt in the same directory. "
+    echo -e " h5fuse_p_opt does not exist. $NC"
+    exit $FAILED
+  fi
+fi
+
 # cd to the subfiles location
 cd "$SUBF_CONFDIR"
 # cp the configure file from the global file system
-cp "$WRKDIR/*.config" . > /dev/null 2>&1
-
+#cp "$WRKDIR/*.config" . > /dev/null 2>&1
+cp "$WRKDIR/*.config" . 2>/dev/null
 if [ -z "$file_config" ]; then
     nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
     if [[ "$nfiles" != "1" ]]; then
@@ -140,7 +157,6 @@ if [ ${#subfiles[@]} -eq 0 ]; then
     exit $FAILED
 fi
 nsubfiles=${#subfiles[@]}
-#rm -f "$hdf5_file"
 
 ## COMBINE SUBFILES INTO AN HDF5 FILE ##
 skip=0
@@ -150,7 +166,30 @@ skip=0
 seek=0
 seek_cnt=0
 subfile_exists="true"
+
+mpi_rank=0
+mpi_size=1
+nstart=1
+nend=$nsubfiles
+
+if [ "$parallel" == "true" ]; then
+    rank_size=$(./h5fuse_p_opt)
+    read -r mpi_rank mpi_size <<<"$rank_size"
+
+    # Divide the subfiles among the ranks
+    iwork1=$(( nsubfiles / mpi_size ))
+    iwork2=$(( nsubfiles % mpi_size ))
+    min=$(( mpi_rank < iwork2 ? mpi_rank : iwork2 ))
+    nstart=$(( mpi_rank * iwork1 + 1 + min ))
+    nend=$(( nstart + iwork1 - 1 ))
+    if [ $iwork2 -gt "$mpi_rank" ]; then
+        nend=$(( nend + 1 ))
+    fi
+fi
+
+icnt=1
 for i in "${subfiles[@]}"; do
+
     subfile="${subfile_dir}/${i}"
     fsize=0
     # Verify the file exists, it might not for node-local storage.
@@ -177,35 +216,48 @@ for i in "${subfiles[@]}"; do
         seek_cnt=$((seek_cnt+1))
         seek=$seek_cnt
     else
+
       # If the subfile is empty, skip fusing it
       if [ "$fsize" -ne 0 ]; then
-        records_left=$fsize
-        while [ "$status" -gt 0 ]; do
-            if [ $((skip*stripe_size)) -le "$fsize"  ] && [ "$records_left" -gt 0 ]; then
-                EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc"
-                if [ "$quiet" == "false" ]; then
-                    echo -e "$GRN $EXEC $NC"
-                fi
-                err="$( $EXEC > /dev/null 2>&1 &)"
-                if [ "$verbose" == "true" ]; then
-                    echo -e "$CYN" $err "$NC"
-                fi
-                records_left=$((records_left-stripe_size))
-                skip=$((skip+1))
-                seek=$((seek_cnt+skip*nsubfiles))
-            else
-                status=0
-                skip=0
-            fi
-        done; wait
+        
+        if [ $icnt -ge "$nstart" ] && [ $icnt -le "$nend" ]; then
+
+          records_left=$fsize
+          while [ "$status" -gt 0 ]; do
+              if [ $((skip*stripe_size)) -le "$fsize"  ] && [ "$records_left" -gt 0 ]; then
+                  EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc"
+                  if [ "$quiet" == "false" ]; then
+                      echo -e "$GRN $EXEC $NC"
+                  fi
+                  err="$( $EXEC > /dev/null 2>&1 &)"
+                  if [ "$verbose" == "true" ]; then
+                      echo -e "$CYN" $err "$NC"
+                  fi
+                  records_left=$((records_left-stripe_size))
+                  skip=$((skip+1))
+                  seek=$((seek_cnt+skip*nsubfiles))
+              else
+                  status=0
+                  skip=0
+              fi
+          done; wait
+
+        fi
+
         seek_cnt=$((seek_cnt+1))
         seek=$seek_cnt
       fi
+
+   fi
+   icnt=$(( icnt +1 ))
+   if [ "$rm_subf" == "true" ]; then
+      \rm -f "$subfile"
    fi
 done; wait
 
 END=$(( $(date +%s%N) - START ))
 DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
-if [ "$quiet" == "false" ]; then
+#if [ "$quiet" == "false" ]; then
     echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
-fi
+#fi
+
