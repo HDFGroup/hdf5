@@ -92,7 +92,7 @@ nfiles=1
 SUBF_CONFDIR="${H5FD_SUBFILING_SUBFILE_PREFIX:-.}"
 WRKDIR=$PWD
 
-#if running script in parallel, make sure h5fuse mpi is accessable
+#if running script in parallel, make sure h5fuse mpi is accessible
 if [ "$parallel" == "true" ]; then
   if [ ! -f "h5fuse_p_opt" ]; then
     echo -e "$RED running h5fuse in parallel requires h5fuse_p_opt in the same directory. "
