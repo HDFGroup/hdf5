@@ -49,6 +49,31 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to build libaec and zlib inline with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      The HDF options (and defaults) for using this are:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
+          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
+          ZLIB_USE_LOCALCONTENT:BOOL=OFF
+
+      The CMake variables to control the path and file names:
+          LIBAEC_TGZ_ORIGPATH:STRING
+          LIBAEC_TGZ_ORIGNAME:STRING
+          ZLIB_TGZ_ORIGPATH:STRING
+          ZLIB_TGZ_ORIGNAME:STRING
+
+      See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
+
+      (ADB - 2023/02/21)
+
     - Add new CMake configuration variable HDF5_USE_GNU_DIRS
 
       HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
