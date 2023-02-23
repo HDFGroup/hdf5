@@ -13,6 +13,7 @@ Section V:    Options for building HDF5 Libraries with CMake command line
 Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
+Section IX:   Considerations for cross-compiling
 
 ************************************************************************
 
@@ -899,6 +900,86 @@ is run without a debugger attached.
 The HDF5_ENABLE_COVERAGE option will add "-g -O0 -fprofile-arcs -ftest-coverage"
 to CMAKE_C_FLAGS.
 
+
+========================================================================
+IX:   Considerations for cross-compiling
+========================================================================
+
+Cross-compiling has several consequences for CMake:
+    CMake cannot automatically detect the target platform.
+    CMake cannot find libraries and headers in the default system directories.
+    Executables built during cross compiling cannot be executed.
+
+Cross-compiling support means that CMake separates information about the
+build platform and target platform and gives the user mechanisms to solve
+cross-compiling issues without additional requirements such as running
+virtual machines, etc.
+
+CMake uses a toolchain of utilities to compile, link libraries and create
+archives, and other tasks to drive the build. The toolchain utilities
+available are determined by the languages enabled.
+
+CMake stores info about the current toolchain in the following variables:
+    CMAKE_C_COMPILER,
+    CMAKE_CXX_COMPILER.
+They contain paths to the C and C++ compilers respectively. This is usually
+enough on desktop platforms. In the case of embedded systems, a custom
+linker and assembler setting may be needed. In more complex projects
+you may need to additionally specify binaries to other parts of the toolchain
+(size, ranlib, objcopy…). All these tools should be set in the corresponding
+variables:
+    CMAKE_AR,
+    CMAKE_ASM_COMPILER,
+    CMAKE_LINKER,
+    CMAKE_OBJCOPY,
+    CMAKE_RANLIB
+
+As for the host and target operating systems, CMake stores their names in the
+following variables:
+    CMAKE_HOST_SYSTEM_NAME – name of the platform, on which CMake is running (host platform).
+        On major operating systems this is set to the Linux, Windows or
+        Darwin (MacOS) value.
+    CMAKE_SYSTEM_NAME – name of the platform, for which we are building (target platform).
+        By default, this value is the same as CMAKE_HOST_SYSTEM_NAME, which
+        means that we are building for the local platform (no cross-compilation).
+
+Put the toolchain variables into a separate file (e.g. <toolchain_name>.cmake)
+and set CMAKE_TOOLCHAIN_FILE variable to the path of that file.
+If cmake is invoked with the command line parameter:
+    --toolchain path/to/file
+or
+    -DCMAKE_TOOLCHAIN_FILE=path/to/file
+the file will be loaded early to set values for the compilers. The
+CMAKE_CROSSCOMPILING variable is set to true when CMake is cross-compiling.
+
+Structure of the toolchain file
+-------------------------------
+In fact, the toolchain file doesn’t have any structure. You can put anything you
+want there. But the best practice is to define at least these settings:
+path to the toolchain binaries (C compiler, C++ compiler, linker, etc.)
+name of the target platform (and optionally target processor architecture)
+required compilation and linking flags on that particular platform
+toolchain sysroot settings
+
+It is recommended that you set the CMAKE_FIND_ROOT_PATH variable to a path where
+you have an exact copy of the root filesystem you have on your target device (with
+libraries and binaries pre-compiled for the target processor).
+
+References:
+    https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html
+    https://gitlab.com/embeddedlinux/libs/platform
+    https://discourse.cmake.org/t/cross-compile-for-aarch64-on-ubuntu/2161/10
+    https://stackoverflow.com/questions/54539682/how-to-set-up-cmake-to-cross-compile-with-clang-for-arm-embedded-on-windows?rq=1
+    https://developer.android.com/ndk/guides/cmake
+
+Predefine H5Tinit.c file
+-------------------------------
+The one file that needs to be pre-generated is the H5Tinit.c file. The variables
+indicated in the error log (see above) are the variables that need to match the target system.
+
+The HDF5 CMake variables;
+    HDF5_USE_PREGEN: set this to true
+    HDF5_USE_PREGEN_DIR: set this path to the preset H5Tinit.c file
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org
