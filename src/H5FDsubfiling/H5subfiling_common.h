@@ -208,6 +208,7 @@ typedef struct {
     int            sf_group_size;           /* IOC count (in sf_group_comm)                      */
     int            sf_group_rank;           /* IOC rank  (in sf_group_comm)                      */
     char          *subfile_prefix;          /* If subfiles are node-local                        */
+    char          *config_file_prefix;      /* Prefix added to config file name                  */
     char          *h5_filename;             /* The user supplied file name                       */
     void          *ioc_data;                /* Private data for underlying IOC                   */
     sf_topology_t *topology;                /* Pointer to our topology                           */
