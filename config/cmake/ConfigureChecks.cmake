@@ -769,56 +769,56 @@ if (HDF5_BUILD_FORTRAN)
   endif ()
 
   if (NOT CMAKE_CROSSCOMPILING)
-#-----------------------------------------------------------------------------
-# The provided CMake C macros don't provide a general compile/run function
-# so this one is used.
-#-----------------------------------------------------------------------------
-  set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
-  macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
-      message (VERBOSE "Detecting C ${FUNCTION_NAME}")
-      file (WRITE
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-          ${SOURCE_CODE}
-      )
-      TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-          ${CMAKE_BINARY_DIR}
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-          COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
-          COMPILE_OUTPUT_VARIABLE COMPILEOUT
-          RUN_OUTPUT_VARIABLE OUTPUT_VAR
-      )
+    #-----------------------------------------------------------------------------
+    # The provided CMake C macros don't provide a general compile/run function
+    # so this one is used.
+    #-----------------------------------------------------------------------------
+    set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
+    macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
+        message (VERBOSE "Detecting C ${FUNCTION_NAME}")
+        file (WRITE
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+            ${SOURCE_CODE}
+        )
+        TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+            ${CMAKE_BINARY_DIR}
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+            COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
+            COMPILE_OUTPUT_VARIABLE COMPILEOUT
+            RUN_OUTPUT_VARIABLE OUTPUT_VAR
+        )
 
-      set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
+        set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-      message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
-      message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+        message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+        message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
+        message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
+        message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+        message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
+        message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-      if (COMPILE_RESULT_VAR)
-        if (RUN_RESULT_VAR EQUAL "0")
-          set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
-          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-              "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
-              "${OUTPUT_VAR}\n\n"
-          )
+        if (COMPILE_RESULT_VAR)
+          if (RUN_RESULT_VAR EQUAL "0")
+            set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+            message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
+            file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+                "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
+                "${OUTPUT_VAR}\n\n"
+            )
+          else ()
+            message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
+            set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+            file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+                "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
+                "${OUTPUT_VAR}\n\n")
+          endif ()
         else ()
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
-          set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-              "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
-              "${OUTPUT_VAR}\n\n")
+            message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
         endif ()
-      else ()
-          message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
-      endif ()
-  endmacro ()
+    endmacro ()
 
-  set (PROG_SRC
-      "
+    set (PROG_SRC
+        "
 #include <float.h>\n\
 #include <stdio.h>\n\
 #define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
@@ -839,17 +839,17 @@ if (HDF5_BUILD_FORTRAN)
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
 #endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
-       "
-  )
+         "
+    )
 
-  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
-  message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
+    C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
+    message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
-  # dnl The output from the above program will be:
-  # dnl  -- long double decimal precision  --  __float128 decimal precision
+    # dnl The output from the above program will be:
+    # dnl  -- long double decimal precision  --  __float128 decimal precision
 
-  list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
-  list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+    list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
+    list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
   endif ()
 
   if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
