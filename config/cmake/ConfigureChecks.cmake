@@ -768,6 +768,7 @@ if (HDF5_BUILD_FORTRAN)
     set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
   endif ()
 
+  if (NOT CMAKE_CROSSCOMPILING)
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
@@ -849,6 +850,7 @@ if (HDF5_BUILD_FORTRAN)
 
   list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
   list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+  endif ()
 
   if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
     set (${HDF_PREFIX}_HAVE_FLOAT128 0)
