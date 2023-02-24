@@ -18,6 +18,8 @@ main()
 
     printf("%d %d ", world_rank, world_size);
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     // Finalize the MPI environment.
     MPI_Finalize();
 }

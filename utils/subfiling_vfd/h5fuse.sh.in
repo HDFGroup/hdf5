@@ -31,7 +31,7 @@ function usage() {
    echo "-h           Print this help."
    echo "-v           Verbose output."
    echo "-q           Quiet all output."
-   echo "-p           Run in parallel, requires MPI program 'h5fuse_p_opt' in the current directory. "
+   echo "-p           Run in parallel, requires MPI program 'h5fuse_p_opt' in the current directory."
    echo "-r           Remove fused subfiles."
    echo "-i           Ignore missing subfiles. Useful for node local storage."
    echo "-f filename  Subfile configuration file."
@@ -54,7 +54,7 @@ quiet="false"
 ignore="false"
 rm_subf="false"
 parallel="false"
-while getopts "rihqvf:o:p" option; do
+while getopts "rihqvpf:" option; do
    case $option in
       h) # display Help
          usage
@@ -80,7 +80,6 @@ while getopts "rihqvf:o:p" option; do
 done
 
 FAILED=1
-nfiles=1
 ############################################################
 # Configure file checks                                    #
 ############################################################
@@ -98,7 +97,10 @@ if [ "$parallel" == "true" ]; then
 fi
 
 # cd to the subfiles location
-cd "$SUBF_CONFDIR"
+if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
+   cd "$SUBF_CONFDIR"
+fi
+
 # cp the configure file from the global file system
 #cp "$WRKDIR/*.config" . > /dev/null 2>&1
 cp "$WRKDIR/*.config" . 2>/dev/null
@@ -152,20 +154,29 @@ if [ ${#subfiles[@]} -eq 0 ]; then
 fi
 nsubfiles=${#subfiles[@]}
 
-## COMBINE SUBFILES INTO AN HDF5 FILE ##
-skip=0
+# Get the number of local subfiles
+subfiles_loc=()
+subfiles_size=()
+for i in "${subfiles[@]}"; do
+    subfile="${subfile_dir}/${i}"
+    if [ -f "${subfile}" ]; then
+        subfiles_loc+=($subfile)
+        subfiles_size+=($(wc -c "${subfile}" | awk '{print $1}'))
+    else
+        subfiles_size+=(0)
+    fi
+done
+
+nsubfiles_loc=${#subfiles_loc[@]}
+
 START="$(date +%s%N)"
 
-skip=0
-seek=0
-seek_cnt=0
 subfile_exists="true"
 
 mpi_rank=0
 mpi_size=1
 nstart=1
 nend=$nsubfiles
-
 if [ "$parallel" == "true" ]; then
     rank_size=$(./h5fuse_p_opt)
     read -r mpi_rank mpi_size <<<"$rank_size"
@@ -181,23 +192,15 @@ if [ "$parallel" == "true" ]; then
     fi
 fi
 
+## COMBINE SUBFILES INTO AN HDF5 FILE ##
+
 icnt=1
+skip=0
+seek=0
+seek_cnt=0
 for i in "${subfiles[@]}"; do
 
     subfile="${subfile_dir}/${i}"
-    fsize=0
-    # Verify the file exists, it might not for node-local storage.
-    if [ ! -f "${subfile}" ]; then
-        if [ "${ignore}" == "false" ];then
-            echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
-            exit $FAILED
-        fi
-        subfile_exists="false"
-    else
-        subfile_exists="true"
-        # Get the number of bytes of the file
-        fsize=$(wc -c "${subfile}" | awk '{print $1}')
-    fi
 
     # bs=BYTES read and write up to BYTES bytes at a time; overrides ibs and obs
     # ibs=BYTES read up to BYTES bytes at a time
@@ -206,16 +209,17 @@ for i in "${subfiles[@]}"; do
     # skip=N skip N ibs-sized blocks at start of input
 
     status=1
-    if [ "$subfile_exists" == "false" ]; then
-        seek_cnt=$((seek_cnt+1))
-        seek=$seek_cnt
+    fsize=${subfiles_size[icnt-1]}
+    if [ "$fsize" -eq "0" ]; then
+       seek_cnt=$((seek_cnt+1))
+       seek=$seek_cnt
+       if [ "$rm_subf" == "true" ]; then
+           if [ -f "${subfile}" ]; then
+               \rm -f "$subfile"
+           fi
+       fi
     else
-
-      # If the subfile is empty, skip fusing it
-      if [ "$fsize" -ne 0 ]; then
-        
-        if [ $icnt -ge "$nstart" ] && [ $icnt -le "$nend" ]; then
-
+       if [ $icnt -ge "$nstart" ] && [ $icnt -le "$nend" ]; then
           records_left=$fsize
           while [ "$status" -gt 0 ]; do
               if [ $((skip*stripe_size)) -le "$fsize"  ] && [ "$records_left" -gt 0 ]; then
@@ -236,15 +240,13 @@ for i in "${subfiles[@]}"; do
               fi
           done; wait
           if [ "$rm_subf" == "true" ]; then
-             \rm -f "$subfile"
+              \rm -f "$subfile"
           fi
-        fi
-        seek_cnt=$((seek_cnt+1))
-        seek=$seek_cnt
-      fi
-
-   fi
-   icnt=$(( icnt +1 ))
+       fi
+       seek_cnt=$((seek_cnt+1))
+       seek=$seek_cnt
+    fi
+    icnt=$(( icnt +1 ))
 done; wait
 
 END=$(( $(date +%s%N) - START ))
