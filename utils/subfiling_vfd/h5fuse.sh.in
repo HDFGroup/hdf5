@@ -27,14 +27,13 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-o] [-r] [-p]"
+   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-r] [-p]"
    echo "-h           Print this help."
    echo "-v           Verbose output."
    echo "-q           Quiet all output."
-   echo "-p           Run fuse in parellel, requires MPI program 'h5fuse_p_opt' in the current directory. "
-   echo "-r           Remove completed subfiles."
+   echo "-p           Run in parallel, requires MPI program 'h5fuse_p_opt' in the current directory. "
+   echo "-r           Remove fused subfiles."
    echo "-i           Ignore missing subfiles. Useful for node local storage."
-   echo "-o filename  HDF5 output file."
    echo "-f filename  Subfile configuration file."
    echo ""
 }
@@ -53,7 +52,6 @@ file_config=""
 verbose="false"
 quiet="false"
 ignore="false"
-hdf5_file=""
 rm_subf="false"
 parallel="false"
 while getopts "rihqvf:o:p" option; do
@@ -71,8 +69,6 @@ while getopts "rihqvf:o:p" option; do
          ignore="true";;
       v) # verbose output
          verbose="true";;
-      o) # HDF5 fused file
-         hdf5_file=$OPTARG;;
       p) # HDF5 fused file
          parallel="true";;
      \?) # Invalid option
@@ -133,12 +129,10 @@ if test -z "$stripe_size"; then
     exit $FAILED
 fi
 
-if [ "$hdf5_file" = "" ]; then
-    hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
-    if test -z "$hdf5_file"; then
-        echo -e "$RED failed to find hdf5 output file in $file_config $NC"
-        exit $FAILED
-    fi
+hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
+if test -z "$hdf5_file"; then
+    echo -e "$RED failed to find hdf5 output file in $file_config $NC"
+    exit $FAILED
 fi
 
 subfile_dir="$(grep "subfile_dir=" "$file_config"  | cut -d "=" -f2)"
@@ -241,18 +235,16 @@ for i in "${subfiles[@]}"; do
                   skip=0
               fi
           done; wait
-
+          if [ "$rm_subf" == "true" ]; then
+             \rm -f "$subfile"
+          fi
         fi
-
         seek_cnt=$((seek_cnt+1))
         seek=$seek_cnt
       fi
 
    fi
    icnt=$(( icnt +1 ))
-   if [ "$rm_subf" == "true" ]; then
-      \rm -f "$subfile"
-   fi
 done; wait
 
 END=$(( $(date +%s%N) - START ))
