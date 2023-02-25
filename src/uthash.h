@@ -1164,7 +1164,7 @@ typedef struct UT_hash_handle {
     void                  *next;    /* next element in app order      */
     struct UT_hash_handle *hh_prev; /* previous hh in bucket order    */
     struct UT_hash_handle *hh_next; /* next hh in bucket order        */
-    const void *           key;     /* ptr to enclosing struct's key  */
+    const void            *key;     /* ptr to enclosing struct's key  */
     unsigned               keylen;  /* enclosing struct's key len     */
     unsigned               hashv;   /* result of hash-fcn(key)        */
 } UT_hash_handle;
