@@ -35,6 +35,9 @@
 /* The smallest Subfiling stripe size used for testing */
 #define SUBFILING_MIN_STRIPE_SIZE 128
 
+/* Temporary test directory */
+#define SUBFILING_CONFIG_FILE_DIR "subfiling_config_file_dir"
+
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
@@ -75,6 +78,8 @@ static int      ioc_comm_size;
 static long long stripe_size_g          = -1;
 static long      ioc_per_node_g         = -1;
 static int       ioc_thread_pool_size_g = -1;
+
+static char *config_dir = NULL;
 
 int nerrors      = 0;
 int curr_nerrors = 0;
@@ -279,8 +284,8 @@ test_config_file(void)
         config_filename = HDmalloc(PATH_MAX);
         VRFY(config_filename, "HDmalloc succeeded");
 
-        HDsnprintf(config_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, SUBF_FILENAME,
-                   (uint64_t)file_info.st_ino);
+        HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                   SUBF_FILENAME, (uint64_t)file_info.st_ino);
 
         config_file = HDfopen(config_filename, "r");
         VRFY(config_file, "HDfopen succeeded");
@@ -1636,8 +1641,8 @@ test_subfiling_h5fuse(void)
             VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
             /* Generate name for configuration file */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, SUBF_FILENAME,
-                       (uint64_t)file_info.st_ino);
+            HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                       SUBF_FILENAME, (uint64_t)file_info.st_ino);
 
             args[0] = HDstrdup("env");
             args[1] = HDstrdup("sh");
@@ -1751,14 +1756,29 @@ parse_subfiling_env_vars(void)
         if (ioc_thread_pool_size_g <= 0)
             ioc_thread_pool_size_g = -1;
     }
+
+    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
+        HDassert(config_dir);
+
+        HDstrncpy(config_dir, env_value, PATH_MAX);
+
+        /* Just in case.. */
+        config_dir[PATH_MAX - 1] = '\0';
+
+        if (*config_dir == '\0') {
+            *config_dir       = '.';
+            *(config_dir + 1) = '\0';
+        }
+    }
 }
 
 int
 main(int argc, char **argv)
 {
     unsigned seed;
-    int      required = MPI_THREAD_MULTIPLE;
-    int      provided = 0;
+    char    *env_value = NULL;
+    int      required  = MPI_THREAD_MULTIPLE;
+    int      provided  = 0;
 
     HDcompile_assert(SUBFILING_MIN_STRIPE_SIZE <= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
 
@@ -1885,6 +1905,18 @@ main(int argc, char **argv)
     if (MAINPROCESS)
         HDprintf("Using seed: %u\n\n", seed);
 
+    /* Allocate buffer for possible config file directory specified */
+    config_dir = HDmalloc(PATH_MAX);
+    if (!config_dir) {
+        if (MAINPROCESS)
+            HDprintf("couldn't allocate space for subfiling config file directory buffer\n");
+        nerrors++;
+        goto exit;
+    }
+
+    /* Initialize to current working directory for now */
+    HDsnprintf(config_dir, PATH_MAX, ".");
+
     /* Grab values from environment variables if set */
     parse_subfiling_env_vars();
 
@@ -1967,6 +1999,57 @@ main(int argc, char **argv)
         }
     }
 
+    if (!(env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
+        int rand_value = 0;
+
+        if (MAINPROCESS)
+            rand_value = rand() % 2;
+
+        mpi_code_g = MPI_Bcast(&rand_value, 1, MPI_INT, 0, comm_g);
+        VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+
+        /* Randomly set config file prefix to either "." or a real
+         * directory to test both cases
+         */
+        if (rand_value == 0) {
+            int mkdir_success = 0;
+
+            if (MAINPROCESS) {
+                if ((HDmkdir(SUBFILING_CONFIG_FILE_DIR, (mode_t)0755) < 0) && (errno != EEXIST)) {
+                    HDprintf("couldn't create temporary testing directory\n");
+                    mkdir_success = 0;
+                }
+                else
+                    mkdir_success = 1;
+            }
+
+            mpi_code_g = MPI_Bcast(&mkdir_success, 1, MPI_INT, 0, comm_g);
+            VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+
+            if (!mkdir_success) {
+                if (MAINPROCESS)
+                    HDprintf("HDmkdir failed\n");
+                nerrors++;
+                goto exit;
+            }
+
+            if (HDsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX, SUBFILING_CONFIG_FILE_DIR, 1) < 0) {
+                if (MAINPROCESS)
+                    HDprintf("HDsetenv failed\n");
+                nerrors++;
+                goto exit;
+            }
+        }
+        else {
+            if (HDsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX, ".", 1) < 0) {
+                if (MAINPROCESS)
+                    HDprintf("HDsetenv failed\n");
+                nerrors++;
+                goto exit;
+            }
+        }
+    }
+
     /* Grab values from environment variables */
     parse_subfiling_env_vars();
 
@@ -2004,6 +2087,13 @@ main(int argc, char **argv)
         HDputs("All Subfiling VFD tests passed\n");
 
 exit:
+    if (MAINPROCESS) {
+        if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
+            HDprintf("couldn't remove temporary testing directory\n");
+            nerrors++;
+        }
+    }
+
     if (nerrors) {
         if (MAINPROCESS)
             HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");

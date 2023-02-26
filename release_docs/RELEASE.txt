@@ -75,7 +75,17 @@ New Features
 
     Library:
     --------
-    -
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+      (JTH - 2023/02/22)
 
 
     Parallel Library:
