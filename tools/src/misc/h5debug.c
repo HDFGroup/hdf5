@@ -816,8 +816,12 @@ main(int argc, char *argv[])
 done:
     if (fapl > 0)
         H5Pclose(fapl);
-    if (fid > 0)
-        H5Fclose(fid);
+    if (fid > 0) {
+        if (H5Fclose(fid) < 0) {
+            HDfprintf(stderr, "Error in closing file!\n");
+            exit_value = 1;
+        }
+    }
 
     /* Pop API context */
     if (api_ctx_pushed)
