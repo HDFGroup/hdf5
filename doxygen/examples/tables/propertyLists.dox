@@ -86,7 +86,7 @@
 <td>Iterates over properties in a property class or list</td>
 </tr>
 <tr>
-<td>#H5Pregister/H5Punregister</td>
+<td>#H5Pregister/#H5Punregister</td>
 <td>Registers/removes a permanent property with/from a property list class</td>
 </tr>
 <tr>
