@@ -904,6 +904,7 @@
  *
  * \ref PLCR
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \ref PLCR
  * \snippet{doc} tables/propertyLists.dox lapl_table
@@ -1007,6 +1008,7 @@
  * can be adjusted at runtime before a file is created or opened.
  *
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \defgroup FCPL File Creation Properties
  * \ingroup GCPL
