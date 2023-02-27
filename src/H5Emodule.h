@@ -84,24 +84,24 @@
  * an error stack ID is needed as a parameter, \ref H5E_DEFAULT can be used to indicate the library’s default
  * stack. The first error record of the error stack, number #000, is produced by the API function itself and
  * is usually sufficient to indicate to the application what went wrong.
- * <table>
- *   <caption align=top>Example: An Error Message</caption>
- *   <tr>
- *     <td>
- *       <p>If an application calls \ref H5Tclose  on a
+ *  <table>
+ *     <caption align=top>Example: An Error Message</caption>
+ *     <tr>
+ *       <td>
+ *         <p>If an application calls \ref H5Tclose  on a
  *       predefined datatype then the following message is
  *       printed on the standard error stream.  This is a
  *       simple error that has only one component, the API
  *       function; other errors may have many components.
- *       <p><code><pre>
+ *         <p><code><pre>
  * HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  *    #000: H5T.c line ### in H5Tclose(): predefined datatype
  *       major: Function argument
  *       minor: Bad value
- *       </pre></code>
- *     </td>
- *   </tr>
- * </table>
+ *         </pre></code>
+ *       </td>
+ *     </tr>
+ *   </table>
  * In the example above, we can see that an error record has a major message and a minor message. A major
  * message generally indicates where the error happens. The location can be a dataset or a dataspace, for
  * example. A minor message explains further details of the error. An example is “unable to open file”.
