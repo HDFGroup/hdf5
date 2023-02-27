@@ -138,10 +138,6 @@
 <td>#H5T_STD_REF_DSETREG</td>
 <td>Dataset region reference</td>
 </tr>
-<tr>
-<td>#H5T_STD_REF</td>
-<td>Generic reference</td>
-</tr>
 </table>
 //! [predefined_std_datatypes_table]
  *
