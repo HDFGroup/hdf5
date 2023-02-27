@@ -1,4 +1,4 @@
-# Doxyfile 1.8.18
+# Doxyfile
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -853,31 +853,20 @@ INPUT_ENCODING         = UTF-8
 # C comment), *.py, *.pyw, *.f90, *.f95, *.f03, *.f08, *.f18, *.f, *.for, *.vhd,
 # *.vhdl, *.ucf, *.qsf and *.ice.
 
-FILE_PATTERNS          = H5*public.h \
-                         H5*module.h \
-                         H5FDcore.h \
-                         H5FDdirect.h \
-                         H5FDfamily.h \
-                         H5FDhdfs.h \
-                         H5FDlog.h \
-                         H5FDmirror.h \
-                         H5FDmpi.h \
-                         H5FDmpio.h \
-                         H5FDmulti.h \
-                         H5FDros3.h \
-                         H5FDsec2.h \
-                         H5FDsplitter.h \
-                         H5FDstdio.h \
-                         H5FDwindows.h \
-                         H5VLconnector.h \
-                         H5VLconnector_passthru.h \
-                         H5VLnative.h \
-                         H5Zdevelop.h \
-                         H5version.h \
-                         H5*.java \
-                         HDF*.java \
-                         *.F90 \
-                         *.dox
+FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
+                 H5VLconnector.h H5VLconnector_passthru.h H5VLnative.h H5PLextern.h \
+                 H5Zdevelop.h \
+                 H5version.h \
+                 H5*.java \
+                 HDF*.java \
+                 *.F90 \
+                 *.dox \
+                 H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5CommonFG.h H5CompType.h \
+                 H5DataSet.h H5DataSpace.h H5DataType.h H5OcreatProp.h H5DaccProp.h H5DcreatProp.h \
+                 H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h H5FcreatProp.h H5File.h \
+                 H5FloatType.h H5Group.h H5IdComponent.h H5Include.h H5IntType.h H5LcreatProp.h \
+                 H5LaccProp.h H5Library.h H5Location.h H5Object.h H5PredType.h H5PropList.h H5StrType.h \
+                 H5ArrayType.h H5VarLenType.h
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -908,7 +897,15 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */fortran/test/*
+EXCLUDE_PATTERNS      += */fortran/testpar/*
+EXCLUDE_PATTERNS      += */fortran/examples/*
+EXCLUDE_PATTERNS      += */fortran/src/*.c
+EXCLUDE_PATTERNS      += */fortran/src/*.h
+EXCLUDE_PATTERNS      += */hl/fortran/examples/*
+EXCLUDE_PATTERNS      += */hl/fortran/test/*
+EXCLUDE_PATTERNS      += */hl/fortran/src/*.c
+EXCLUDE_PATTERNS      += */hl/fortran/src/*.h
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

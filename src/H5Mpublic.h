@@ -208,6 +208,9 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
  * \details H5Mget_create_plist() returns an identifier for a copy of the
  *          creation property list for a map object specified by \p map_id.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
+ *
  * \since 1.12.0
  *
  */

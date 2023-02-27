@@ -464,6 +464,9 @@ H5_DLL hid_t H5Dget_type(hid_t dset_id);
  *          a copy of the dataset creation property list associated with
  *          the dataset specified by \p dset_id.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
+ *
  */
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 
@@ -633,6 +636,7 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  */
 H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask,
                                          haddr_t *addr, hsize_t *size);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -656,7 +660,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
  *
- * \since 1.12.3, 1.13.0
+ * \since 1.12.3
  *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);

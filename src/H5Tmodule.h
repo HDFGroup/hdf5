@@ -3872,26 +3872,6 @@ filled according to the value of this property. The padding can be:
  * to HDF5 files and linked to groups as HDF5 datatype objects or so-called
  * \Emph{committed datatypes}.
  *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5T_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5T_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5T_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5T_examples.c delete
- *   </td>
- * </tr>
- * </table>
- *
  * \defgroup ARRAY Array Datatypes
  * \ingroup H5T
  * \defgroup ATOM Atomic Datatypes
@@ -3912,33 +3892,36 @@ filled according to the value of this property. The padding can be:
  *
  * \defgroup PDT Predefined Datatypes
  * \ingroup H5T
- * \details What is a predefined HDF5 datatype?
- * \todo Fill in the blanks!
  *
  * \defgroup PDTCPU By CPU
  * \ingroup PDT
  * \details CPU-specific datatypes
  * \defgroup PDTALPHA DEC Alpha
  * \ingroup PDTCPU
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_dec_datatypes_table
  * \defgroup PDTX86 AMD & INTEL
  * \ingroup PDTCPU
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_intel_datatypes_table
  * \defgroup PDTMIPS SGI MIPS
  * \ingroup PDTCPU
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_mips_datatypes_table
  *
  * \defgroup PDTIEEE IEEE
  * \ingroup PDT
  * \details The IEEE floating point types in big- and little-endian byte orders.
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
  *
  * \defgroup PDTSTD Standard Datatypes
  * \ingroup PDT
  * \details These are "standard" types. For instance, signed (2's complement)
  *          and unsigned integers of various sizes in big- and little-endian
  *          byte orders.
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_std_datatypes_table
  *
  * \defgroup PDTUNIX UNIX-specific Datatypes
  * \ingroup PDT
  * \details Types which are particular to Unix.
- * \todo Fill in the blanks!
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_unix_datatypes_table
  *
  * \defgroup PDTNAT Native Datatypes
  * \ingroup PDT
@@ -3952,13 +3935,16 @@ filled according to the value of this property. The padding can be:
  *          \li The datatype \c LLONG corresponds C's \Code{long long} and
  *              \c LDOUBLE is \Code{long double}. These types might be the same
  *              as \c LONG and \c DOUBLE, respectively.
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_native_datatypes_table
+ *
  * \defgroup PDTC9x C9x Integer Datatypes
  * \ingroup PDTNAT
  * \details C9x integer types
- * \todo Fill in the blanks!
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_c9x_datatypes_table
  *
  * \defgroup PDTS Strings
  * \ingroup PDT
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_string_datatypes_table
  *
  */
 

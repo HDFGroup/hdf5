@@ -104,10 +104,10 @@ H5_DLL herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
  * \param[out] info MPI-2 info object
  * \returns \herr_t
  *
- * \details H5Pget_fapl_mpio() returns duplicates of the stored MPI communicator
+ * \details If the file access property list is set to the #H5FD_MPIO driver,
+ *          H5Pget_fapl_mpio() returns duplicates of the stored MPI communicator
  *          and Info object through the \p comm and \p info pointers, if those
- *          values are non-null. The file access property list must be set to the
- *          #H5FD_MPIO driver.
+ *          values are non-null.
  *
  *          Since the MPI communicator and Info object are duplicates of the
  *          stored information, future modifications to the access property list
