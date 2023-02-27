@@ -86,7 +86,7 @@
 <td>Iterates over properties in a property class or list</td>
 </tr>
 <tr>
-<td>#H5Pregister/H5Punregister</td>
+<td>#H5Pregister/#H5Punregister</td>
 <td>Registers/removes a permanent property with/from a property list class</td>
 </tr>
 <tr>
@@ -270,26 +270,6 @@ versions used when creating objects.</td>
 <td>Retrieves the current small data block size setting.</td>
 </tr>
 <tr>
-<td>#H5Pset_vol</td>
-<td>Sets the file VOL connector for a file access property list.</td>
-</tr>
-<tr>
-<td>#H5Pget_vol_cap_flags</td>
-<td>Retrieves the capability flags for the VOL connector that will be used with a file access property list.</td>
-</tr>
-<tr>
-<td>#H5Pget_vol_id</td>
-<td>Retrieves the identifier of the current VOL connector.</td>
-</tr>
-<tr>
-<td>#H5Pget_vol_info</td>
-<td>Retrieves a copy of the VOL information for a connector.</td>
-</tr>
-<tr>
-<td>#H5Pset_mpi_params/#H5Pget_mpi_params</td>
-<td>Sets/retrieves the MPI communicator and info.</td>
-</tr>
-<tr>
 <td>#H5Pset_coll_metadata_write/#H5Pget_coll_metadata_write</td>
 <td>Sets/retrieves metadata write mode setting.</td>
 </tr>
@@ -316,18 +296,6 @@ versions used when creating objects.</td>
 <td>Returns a pointer to file driver information.</td>
 </tr>
 <tr>
-<td>#H5Pset_driver_by_name</td>
-<td>Sets a file driver according to a given driver name.</td>
-</tr>
-<tr>
-<td>#H5Pset_driver_by_value</td>
-<td>Sets a file driver according to a given driver value.</td>
-</tr>
-<tr>
-<td>#H5Pget_driver_config_str</td>
-<td>Retrieves a string representation of the configuration for the driver.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_core/#H5Pget_fapl_core</td>
 <td>Sets the driver for buffered memory files (in RAM) or retrieves information regarding
 the driver.</td>
@@ -346,16 +314,8 @@ larger than 2 gigabytes, or retrieves information regarding driver.</td>
 <td>.</td>
 </tr>
 <tr>
-<td>#H5Pset_fapl_ioc/#H5Pget_fapl_ioc</td>
-<td>Modifies/queries the file driver properties of the I/O concentrator driver.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_log</td>
 <td>Sets logging driver.</td>
-</tr>
-<tr>
-<td>#H5Pset_fapl_mirror/#H5Pget_fapl_mirror</td>
-<td>Modifies/queries the file driver properties of the mirror driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_mpio/#H5Pget_fapl_mpio</td>
@@ -363,17 +323,9 @@ larger than 2 gigabytes, or retrieves information regarding driver.</td>
 regarding the driver.</td>
 </tr>
 <tr>
-<td>H5Pset_fapl_mpiposix/H5Pget_fapl_mpiposix</td>
-<td>No longer available.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_multi/#H5Pget_fapl_multi</td>
 <td>Sets driver for multiple files, separating categories of metadata and raw data,
 or retrieves information regarding driver.</td>
-</tr>
-<tr>
-<td>#H5Pset_fapl_onion/#H5Pget_fapl_onion</td>
-<td>Modifies/queries the file driver properties of the onion driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_sec2</td>
@@ -387,10 +339,6 @@ and one raw data file.</td>
 <tr>
 <td>#H5Pset_fapl_stdio</td>
 <td>Sets driver for buffered permanent files.</td>
-</tr>
-<tr>
-<td>#H5Pset_fapl_subfiling/#H5Pget_fapl_subfiling</td>
-<td>Modifies/queries the file driver properties of the subfiling driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_windows</td>
@@ -744,10 +692,6 @@ C function is a macro: \see \ref api-compat-macros.</td>
 <tr>
 <td>#H5Pset_fletcher32</td>
 <td>Sets up use of the Fletcher32 checksum filter.</td>
-</tr>
-<tr>
-<td>#H5Pset_local_heap_size_hint#H5Pget_local_heap_size_hint/</td>
-<td>Sets/gets the anticipated maximum size of a local heap.</td>
 </tr>
 <tr>
 <td>#H5Pset_link_phase_change</td>
