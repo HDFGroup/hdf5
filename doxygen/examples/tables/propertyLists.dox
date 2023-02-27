@@ -579,10 +579,6 @@ pointers to application-allocated buffers.</td>
 <td>Sets/gets a data transform expression.</td>
 </tr>
 <tr>
-<td>#H5Pset_dataset_io_hyperslab_selection</td>
-<td>Sets a hyperslab file selection for a dataset I/O operation.</td>
-</tr>
-<tr>
 <td>#H5Pset_edc_check/#H5Pget_edc_check</td>
 <td>Sets/gets whether to enable error-detection when reading a dataset.</td>
 </tr>
