@@ -9,7 +9,7 @@ Self-describing data captures all information about itself necessary to reproduc
 
 The "marriage"[^1] of the HDF5 file format and library is a specific implementation of the primitives and operations defined by the HDF5 data model and adapted for several specific use cases.
 
-![HDF5 models and implementations]([https://myoctocat.com/assets/images/base-octocat.svg](https://docs.hdfgroup.org/hdf5/develop/Dmodel_fig1.gif))
+![HDF5 models and implementations](https://docs.hdfgroup.org/hdf5/develop/Dmodel_fig1.gif)
 
 The following values[^2][^3] guide the implementation (in no particular order):
 
