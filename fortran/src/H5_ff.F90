@@ -256,7 +256,7 @@ CONTAINS
        END FUNCTION h5init1_flags_c
 
     END INTERFACE
-
+    error = 0
     ! Check if H5open_f has already been called. If so, skip doing it again.
     IF(H5OPEN_NUM_OBJ .NE. 0) RETURN
 

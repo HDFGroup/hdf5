@@ -39,7 +39,42 @@ MODULE test_async_APIs
   USE TH5_MISC
   USE TH5_MISC_GEN
 
+  INTEGER(C_INT), PARAMETER :: op_data_type = 200
+  INTEGER(C_INT), PARAMETER :: op_data_command = 99
+
+  ! Custom group iteration callback data
+  TYPE, bind(c) ::  iter_info
+     CHARACTER(KIND=C_CHAR), DIMENSION(1:12) :: name !  The name of the object
+     INTEGER(c_int) :: TYPE    !  The TYPE of the object
+     INTEGER(c_int) :: command ! The TYPE of RETURN value
+  END TYPE iter_info
+
 CONTAINS
+
+  INTEGER(KIND=C_INT) FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), VALUE :: group
+    CHARACTER(LEN=1), DIMENSION(1:12) :: name
+    TYPE (H5L_info_t) :: link_info
+    TYPE(iter_info) :: op_data
+
+    liter_cb = 0
+
+    op_data%name(1:12) = name(1:12)
+
+    SELECT CASE (op_data%command)
+
+    CASE(0)
+       liter_cb = 0
+    CASE(2)
+       liter_cb = op_data%command*10
+    END SELECT
+    op_data%command = op_data_command
+    op_data%type = op_data_type
+
+  END FUNCTION liter_cb
 
   SUBROUTINE H5ES_tests(cleanup, total_error)
     !
@@ -110,7 +145,7 @@ CONTAINS
 
   SUBROUTINE H5A_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5A async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -298,7 +333,7 @@ CONTAINS
 
   SUBROUTINE H5D_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5D async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -510,7 +545,7 @@ CONTAINS
 
   SUBROUTINE H5G_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5G async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -646,7 +681,7 @@ CONTAINS
 
   SUBROUTINE H5F_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5F async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -722,7 +757,7 @@ CONTAINS
 
   SUBROUTINE H5L_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5L async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -739,19 +774,43 @@ CONTAINS
     INTEGER(hid_t)  :: gid = -1, gid2 = -1, gid3 = -1  ! Group IDs
     INTEGER(hid_t)  :: aid = -1, aid2 = -1, aid3 = -1 ! Attribute ID
     INTEGER(hid_t)  :: sid = -1  ! Dataspace ID
-    INTEGER(hid_t)  :: gcpl_id
-    CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME = "corder_group"
+    CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME  = "corder_group"
+    CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME2 = "corder_grp00"
     LOGICAL(C_BOOL), TARGET :: exists1, exists2
     LOGICAL :: exists
     TYPE(C_PTR) :: f_ptr
 
+    INTEGER(HID_T) :: group_id !  Group ID
+    INTEGER(HID_T) :: gcpl_id  !  Group creation property list ID
+
+    INTEGER :: idx_type        !  Type of index to operate on
+    LOGICAL, DIMENSION(1:2) :: use_index = (/.FALSE.,.TRUE./)
+    !  Use index on creation order values
+    INTEGER :: max_compact     !  Maximum # of links to store in group compactly
+    INTEGER :: min_dense       !  Minimum # of links to store in group "densely"
+
+    CHARACTER(LEN=7) :: objname   !  Object name
+
+    INTEGER :: u !  Local index variable
+    INTEGER :: Input1, i
+    INTEGER(HID_T) :: group_id2
+    INTEGER :: iorder !  Order within in the index
+    CHARACTER(LEN=2) :: chr2
+    !
+    INTEGER(hsize_t) idx               ! Index in the group
+    TYPE(iter_info), TARGET :: info
+    TYPE(C_FUNPTR) :: f1
+    TYPE(C_PTR) :: f2
+    INTEGER(C_INT) :: ret_value
+
     INTEGER :: error  ! Error flags
     INTEGER :: mpierror       ! MPI error flag
-    INTEGER :: comm, info
+    INTEGER :: comm
     INTEGER :: mpi_size, mpi_rank
 
+    INTEGER(SIZE_T) :: count
+
     comm = MPI_COMM_WORLD
-    info = MPI_INFO_NULL
 
     CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
@@ -881,24 +940,103 @@ CONTAINS
     CALL check("H5Lexist_f",hdferror, total_error)
     CALL VERIFY("H5Ldelete_async_f", exists, .FALSE., total_error)
 
-    CALL h5gopen_f(file_id, CORDER_GROUP_NAME, gid3, hdferror)
-
-  !  CALL H5Gopen_f(file_id, "/Group1/Group2", gid, hdferror)
-
-  !  CALL H5Ldelete_by_idx_f(gid3, ".", &
-  !       H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), hdferror)
-  !  CALL check("H5Ldelete_by_idx_async_f",hdferror,total_error)
-
-
-    CALL h5gclose_f(gid3, error)
-    CALL check("h5gclose_f",error,total_error)
-
-   ! CALL H5Lexists_f(file_id, "hard_one", exists, hdferror)
-   ! CALL check("H5Lexist_f",hdferror, total_error)
-   ! CALL VERIFY("H5Ldelete_by_idx_async_f", exists, .FALSE., total_error)
-
     CALL H5Fclose_f(file_id, hdferror)
-    CALL check("H5Fclose_f",hdferror,total_error)
+    CALL check("H5Fclose_f", hdferror,total_error)
+
+    !CALL H5ESget_count_f(es_id, count, hdferror)
+    !  Loop over operating on different indices on link fields
+    DO idx_type = H5_INDEX_NAME_F, H5_INDEX_CRT_ORDER_F
+       !  Loop over operating in different orders
+       DO iorder = H5_ITER_INC_F,  H5_ITER_DEC_F
+          !  Loop over using index for creation order value
+          DO i = 1, 2
+             !  Create file
+             CALL H5Fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, hdferror, access_prp=fapl_id)
+             CALL check("H5Fcreate_async_f", hdferror, total_error)
+
+             !  Create group creation property list
+             CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl_id, hdferror )
+             CALL check("H5Pcreate_f", hdferror, total_error)
+
+             !  Set creation order tracking & indexing on group
+             IF(use_index(i))THEN
+                Input1 = H5P_CRT_ORDER_INDEXED_F
+             ELSE
+                Input1 = 0
+             ENDIF
+
+             CALL H5Pset_link_creation_order_f(gcpl_id, IOR(H5P_CRT_ORDER_TRACKED_F, Input1), hdferror)
+             CALL check("H5Pset_link_creation_order_f", hdferror, total_error)
+
+             !  Create group with creation order tracking on
+             CALL H5Gcreate_async_f(file_id, CORDER_GROUP_NAME2, group_id, es_id, hdferror, gcpl_id=gcpl_id)
+             CALL check("H5Gcreate_async_f", hdferror, total_error)
+
+             !  Query the group creation properties
+             CALL H5Pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferror)
+             CALL check("H5Pget_link_phase_change_f", hdferror, total_error)
+
+             !  Create several links, up to limit of compact form
+             DO u = 0, max_compact-1
+                !  Make name for link
+                WRITE(chr2,'(I2.2)') u
+                objname = 'fill '//chr2
+
+                !  Create hard link, with group object
+                CALL H5Gcreate_async_f(group_id, objname, group_id2, es_id, hdferror)
+                CALL check("H5Gcreate_async_f", hdferror, total_error)
+                CALL H5Gclose_async_f(group_id2, es_id, hdferror)
+                CALL check("H5Gclose_async_f", hdferror, total_error)
+             ENDDO
+
+             !  Delete links from compact group
+             DO u = 0, (max_compact - 1) -1
+                !  Delete first link in appropriate order
+                CALL H5Ldelete_by_idx_async_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), es_id, hdferror)
+                CALL check("H5Ldelete_by_idx_async_f", hdferror, total_error)
+             ENDDO
+
+             idx = 0
+             info%command = 2
+             f1 = C_FUNLOC(liter_cb)
+             f2 = C_LOC(info)
+
+             !CALL H5ESget_count_f(es_id, count, hdferror)
+             !PRINT*,"a",count
+
+             CALL H5Literate_async_f(file_id, H5_INDEX_NAME_F, H5_ITER_INC_F, idx, f1, f2, ret_value, es_id, hdferror)
+             CALL check("H5Literate_async_f", error, total_error)
+
+             !CALL H5ESget_count_f(es_id, count, hdferror)
+             !PRINT*,"b",count
+
+             !  Close the group
+             CALL H5Gclose_async_f(group_id, es_id, hdferror)
+             CALL check("H5Gclose_async_f", hdferror, total_error)
+             ! Close the group creation property list
+             CALL H5Pclose_f(gcpl_id, hdferror)
+             CALL check("H5Pclose_f", hdferror, total_error)
+             ! Close the file
+             CALL H5Fclose_async_f(file_id, es_id, hdferror)
+             CALL check("H5Fclose_async_f", hdferror, total_error)
+
+             CALL H5ESget_count_f(es_id, count, hdferror)
+
+             ! Complete the operations
+             CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
+             CALL check("H5ESwait_f", hdferror, total_error)
+             CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+             CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
+
+             ! NOTE: ret_value will not be correct since H5Literate_async is not returning a pointer return value, herr_t.
+             CALL VERIFY("H5Literate_async_f", info%type, op_data_type, total_error)
+             CALL VERIFY("H5Literate_async_f", info%command, op_data_command, total_error)
+             CALL VERIFY("H5Literate_async_f", info%name(1)(1:1), CORDER_GROUP_NAME2(1:1), total_error)
+
+          ENDDO
+       ENDDO
+
+    ENDDO
 
     CALL H5Pclose_f(fapl_id, hdferror)
     CALL check(" H5Pclose_f",hdferror, total_error)
@@ -911,7 +1049,7 @@ CONTAINS
 
   SUBROUTINE H5O_async_tests(cleanup, total_error)
     !
-    ! Test H5ES routines
+    ! Test H5O async routines
     !
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -926,13 +1064,11 @@ CONTAINS
     INTEGER(HID_T) :: ocpypl_id
     TYPE(C_H5O_INFO_T), TARGET :: oinfo_f
     TYPE(C_PTR) :: f_ptr
-    CHARACTER(len=80) :: filename = "h5a_tests.h5"
-
-    INTEGER, PARAMETER :: TRUE = 1
+    CHARACTER(len=80) :: filename = "h5o_tests.h5"
 
     INTEGER ::  hdferror  !  Value returned from API calls
 
-    ! Data for tested h5ocopy_f
+    ! Data for tested h5ocopy_async_f
     CHARACTER(LEN=3) , PARAMETER :: dataset = "DS1"
     INTEGER          , PARAMETER :: dim0     = 4
 
@@ -1042,7 +1178,7 @@ CONTAINS
     CALL h5pcreate_f(H5P_LINK_CREATE_F, lcpl_id, hdferror)
     CALL check("h5Pcreate_f", hdferror, total_error)
 
-    CALL h5pset_create_inter_group_f(lcpl_id, TRUE, hdferror)
+    CALL h5pset_create_inter_group_f(lcpl_id, 1, hdferror)
     CALL check("H5Pset_create_inter_group_f", hdferror, total_error)
     !
     ! Check optional parameter lcpl_id, this would fail if lcpl_id was not specified

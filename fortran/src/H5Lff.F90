@@ -1369,11 +1369,12 @@ CONTAINS
 !!                     Position at which an interrupted iteration may be restarted
 !! \param op           Callback function passing data regarding the link to the calling application.
 !! \param op_data      User-defined pointer to data required by the application for its processing of the link.
-!! \param return_value Return context:
-!!                      \li Success: The return value of the first operator that
-!!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
-!!                      \li Failure: Negative if something goes wrong within the
-!!                               library, or the negative value returned by one of the operators.
+!! \param return_value N/A
+!!                     
+!! \warning            The returned value of the callback routine op will not be set
+!!                     in \p return_value for H5Literate_async_f(), so \p return_value should
+!!                     not be used for determining the return state of the callback routine.
+!!
 !! \param es_id        \es_id
 !! \param hdferr       \fortran_error
 !!
