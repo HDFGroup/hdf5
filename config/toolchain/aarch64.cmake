@@ -1,5 +1,5 @@
 set(TOOLCHAIN_PREFIX aarch64-linux-gnu)
-set(ANDROID_NDK /opt/android-ndk-r25b-linux/android-ndk-r25b)
+set(ANDROID_NDK /opt/android-ndk-linux)
 set (CMAKE_SYSTEM_NAME Android)
 set (CMAKE_ANDROID_ARCH_ABI x86_64)
 #set (CMAKE_ANDROID_STANDALONE_TOOLCHAIN ${ANDROID_NDK}/build/cmake/andriod.toolchain.cmake)
