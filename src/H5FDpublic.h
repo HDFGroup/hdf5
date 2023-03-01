@@ -18,8 +18,13 @@
 #ifndef H5FDpublic_H
 #define H5FDpublic_H
 
-#include "H5public.h"
-#include "H5Fpublic.h" /*for H5F_close_degree_t */
+/* Public headers needed by this file */
+#include "H5public.h"  /* Generic Functions */
+#include "H5Fpublic.h" /* Files */
+
+/*****************/
+/* Public Macros */
+/*****************/
 
 #define H5_HAVE_VFL      1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0 /* Default VFL driver value */
@@ -462,7 +467,26 @@ H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FDunlock(H5FD_t *file);
 
-/* Allows querying a VFD ID for features before the file is opened */
+/**
+ * \ingroup H5FD
+ *
+ * \brief Allows querying a VFD ID for features before the file is opened
+ *
+ * \param[in] driver_id Virtual File Driver (VFD) ID
+ * \param[out] flags VFD flags supported
+ *
+ * \return \herr_t
+ *
+ * \details Queries a virtual file driver (VFD) for feature flags. Takes a
+ *          VFD hid_t so it can be used before the file is opened. For example,
+ *          this could be used to check if a VFD supports SWMR.
+ *
+ * \note The flags obtained here are just those of the base driver and
+ *       do not take any configuration options (e.g., set via a fapl
+ *       call) into consideration.
+ *
+ * \since 1.10.2
+ */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);
 
 #ifdef __cplusplus
