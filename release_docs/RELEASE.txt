@@ -120,7 +120,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Ported the existing VOL Connector Author Guide document to doxygen.
+
+      Added new dox file, VOLConnGuide.dox.
+
+      (ADB - 2022/12/20)
 
 
 Support for new platforms, languages and compilers
