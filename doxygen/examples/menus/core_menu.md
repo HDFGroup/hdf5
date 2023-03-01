@@ -20,6 +20,10 @@ HDF5 datatypes describe the element type of HDF5 datasets and attributes.
 <br />
 HDF5 library error reporting.
 
+- @ref H5ES "Event Set (H5ES)"
+<br />
+HDF5 event set life cycle used with HDF5 VOL connectors that enable the asynchronous feature in HDF5.
+
 - @ref H5F "Files (H5F)"
 <br />
 Manage HDF5 files.

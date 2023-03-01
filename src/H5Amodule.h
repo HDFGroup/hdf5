@@ -364,7 +364,7 @@
  * will be ignored by HDF5.
  *
  * The use of ASCII or UTF-8 characters is determined by the character encoding property. See
- * #H5Pset_char_encoding in the \ref RM.
+ * #H5Pset_char_encoding in the \ref RM.
  *
  * <h4>No Special I/O or Storage</h4>
  *

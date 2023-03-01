@@ -182,250 +182,11 @@
  * </tr>
  * </table>
  *
- * <table>
- * <caption>Dataset creation property list functions (H5P)</caption>
- * <tr>
- * <th>Function</th>
- * <th>Purpose</th>
- * </tr>
- * <tr>
- * <td>#H5Pset_layout</td>
- * <td>Sets the type of storage used to store the raw data for a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_layout</td>
- * <td>Returns the layout of the raw data for a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_chunk</td>
- * <td>Sets the size of the chunks used to store a chunked layout dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_chunk</td>
- * <td>Retrieves the size of chunks for the raw data of a chunked layout dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_deflate</td>
- * <td>Sets compression method and compression level.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_fill_value</td>
- * <td>Sets the fill value for a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_fill_value</td>
- * <td>Retrieves a dataset fill value.</td>
- * </tr>
- * <tr>
- * <td>#H5Pfill_value_defined</td>
- * <td>Determines whether the fill value is defined.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_fill_time</td>
- * <td>Sets the time when fill values are written to a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_fill_time</td>
- * <td>Retrieves the time when fill value are written to a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_alloc_time</td>
- * <td>Sets the timing for storage space allocation.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_alloc_time</td>
- * <td>Retrieves the timing for storage space allocation.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_filter</td>
- * <td>Adds a filter to the filter pipeline.</td>
- * </tr>
- * <tr>
- * <td>#H5Pall_filters_avail</td>
- * <td>Verifies that all required filters are available.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_nfilters</td>
- * <td>Returns the number of filters in the pipeline.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_filter</td>
- * <td>Returns information about a filter in a pipeline.
- * The C function is a macro: \see \ref api-compat-macros.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_filter_by_id</td>
- * <td>Returns information about the specified filter.
- * The C function is a macro: \see \ref api-compat-macros.</td>
- * </tr>
- * <tr>
- * <td>#H5Pmodify_filter</td>
- * <td>Modifies a filter in the filter pipeline.</td>
- * </tr>
- * <tr>
- * <td>#H5Premove_filter</td>
- * <td>Deletes one or more filters in the filter pipeline.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_fletcher32</td>
- * <td>Sets up use of the Fletcher32 checksum filter.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_nbit</td>
- * <td>Sets up use of the n-bit filter.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_scaleoffset</td>
- * <td>Sets up use of the scale-offset filter.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_shuffle</td>
- * <td>Sets up use of the shuffle filter.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_szip</td>
- * <td>Sets up use of the Szip compression filter.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_external</td>
- * <td>Adds an external file to the list of external files.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_external_count</td>
- * <td>Returns the number of external files for a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_external</td>
- * <td>Returns information about an external file.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_char_encoding</td>
- * <td>Sets the character encoding used to encode a string. Use to set ASCII or UTF-8 character
- * encoding for object names.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_char_encoding</td>
- * <td>Retrieves the character encoding used to create a string.</td>
- * </tr>
- * </table>
+ * \anchor dcpl_table_tag Dataset creation property list functions (H5P)
+ * \snippet{doc} tables/propertyLists.dox dcpl_table
  *
- * <table>
- * <caption>Dataset access property list functions (H5P)</caption>
- * <tr>
- * <th>Function</th>
- * <th>Purpose</th>
- * </tr>
- * <tr>
- * <td>#H5Pset_buffer</td>
- * <td>Sets type conversion and background buffers.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_buffer</td>
- * <td>Reads buffer settings.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_chunk_cache</td>
- * <td>Sets the raw data chunk cache parameters.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_chunk_cache</td>
- * <td>Retrieves the raw data chunk cache parameters.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_edc_check</td>
- * <td>Sets whether to enable error-detection when reading a dataset.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_edc_check</td>
- * <td>Determines whether error-detection is enabled for dataset reads.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_filter_callback</td>
- * <td>Sets user-defined filter callback function.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_data_transform</td>
- * <td>Sets a data transform expression.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_data_transform</td>
- * <td>Retrieves a data transform expression.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_type_conv_cb</td>
- * <td>Sets user-defined datatype conversion callback function.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_type_conv_cb</td>
- * <td>Gets user-defined datatype conversion callback function.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_hyper_vector_size</td>
- * <td>Sets number of I/O vectors to be read/written in hyperslab I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_hyper_vector_size</td>
- * <td>Retrieves number of I/O vectors to be read/written in hyperslab I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_btree_ratios</td>
- * <td>Sets B-tree split ratios for a dataset transfer property list.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_btree_ratios</td>
- * <td>Gets B-tree split ratios for a dataset transfer property list.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_vlen_mem_manager</td>
- * <td>Sets the memory manager for variable-length datatype allocation in #H5Dread and
- * #H5Dvlen_reclaim.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_vlen_mem_manager</td>
- * <td>Gets the memory manager for variable-length datatype allocation in #H5Dread and
- * #H5Dvlen_reclaim.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_dxpl_mpio</td>
- * <td>Sets data transfer mode.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_dxpl_mpio</td>
- * <td>Returns the data transfer mode.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_dxpl_mpio_chunk_opt</td>
- * <td>Sets a flag specifying linked-chunk I/O or multi-chunk I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_dxpl_mpio_chunk_opt_num</td>
- * <td>Sets a numeric threshold for linked-chunk I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_dxpl_mpio_chunk_opt_ratio</td>
- * <td>Sets a ratio threshold for collective I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_dxpl_mpio_collective_opt</td>
- * <td>Sets a flag governing the use of independent versus collective I/O.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_multi_type</td>
- * <td>Sets the type of data property for the MULTI driver.</td>
- * </tr>
- * <tr>
- * <td>#H5Pget_multi_type</td>
- * <td>Retrieves the type of data property for the MULTI driver.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_small_data_block_size</td>
- * <td>Sets the size of a contiguous block reserved for small data.</td>
- * </tr>
-  * <tr>
- * <td>#H5Pget_small_data_block_size</td>
- * <td>Retrieves the current small data block size setting.</td>
- * </tr>
- * </table>
+ * \anchor dapl_table_tag Dataset access property list functions (H5P)
+ * \snippet{doc} tables/propertyLists.dox dapl_table
  *
  * \subsection subsec_dataset_program Programming Model for Datasets
  * This section explains the programming model for datasets.
@@ -1106,41 +867,7 @@
  * the pipeline processing: the pipeline and filter operations are identical no matter what data access
  * mechanism is used.
  *
- * <table>
- * <caption>I/O file drivers</caption>
- * <tr>
- * <th>File Driver</th>
- * <th>Description</th>
- * </tr>
- * <tr>
- * <td>#H5FD_CORE</td>
- * <td>Store in memory (optional backing store to disk file).</td>
- * </tr>
- * <tr>
- * <td>#H5FD_FAMILY</td>
- * <td>Store in a set of files.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_LOG</td>
- * <td>Store in logging file.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_MPIO</td>
- * <td>Store using MPI/IO.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_MULTI</td>
- * <td>Store in multiple files. There are several options to control layout.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_SEC2</td>
- * <td>Serial I/O to file using Unix “section 2” functions.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_STDIO</td>
- * <td>Serial I/O to file using Unix “stdio” functions.</td>
- * </tr>
- * </table>
+ * \snippet{doc} tables/propertyLists.dox lcpl_table
  *
  * Each file driver writes/reads contiguous blocks of bytes from a logically contiguous address
  * space. The file driver is responsible for managing the details of the different physical storage
@@ -1157,29 +884,7 @@
  * Data transfer properties set optional parameters that control parts of the data pipeline. The
  * function listing below shows transfer properties that control the behavior of the library.
  *
- * <table>
- * <caption>Data transfer property list functions</caption>
- * <tr>
- * <th>C Function</th>
- * <th>Purpose</th>
- * </tr>
- * <tr>
- * <td>#H5Pset_buffer</td>
- * <td>Maximum size for the type conversion buffer and the background buffer. May also supply
- * pointers to application-allocated buffers.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_hyper_vector_size</td>
- * <td>set the number of "I/O vectors" (offset and length pairs) which are to be
- * accumulated in memory before being issued to the lower levels
- * of the library for reading or writing the actual data.</td>
- * </tr>
- * <tr>
- * <td>#H5Pset_btree_ratios</td>
- * <td>Set the B-tree split ratios for a dataset transfer property list. The split ratios determine
- * what percent of children go in the first node when a node splits.</td>
- * </tr>
- * </table>
+ * \snippet{doc} tables/fileDriverLists.dox file_driver_table
  *
  * Some filters and file drivers require or use additional parameters from the application program.
  * These can be passed in the data transfer property list. The table below shows file driver property
@@ -1897,10 +1602,10 @@ allocated if necessary.
  * <th>byte 0</th>
  * </tr>
  * <tr>
- * <td> ???????? </td>
- * <td> ????SPPP </td>
- * <td> PPPPPPPP </td>
- * <td> PPPP???? </td>
+ *   <td> ???????? </td>
+ *   <td> ????SPPP </td>
+ *   <td> PPPPPPPP </td>
+ *   <td> PPPP???? </td>
  * </tr>
  * <tr>
  * <td colspan="4">
