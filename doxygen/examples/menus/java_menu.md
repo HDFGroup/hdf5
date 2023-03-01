@@ -61,6 +61,10 @@ This package is the Java interface for the HDF5 library plugin APIs.
 <br />
 This package is the Java interface for the HDF5 library reference APIs.
 
+- @ref JH5VL
+<br />
+This package is the Java interface for the HDF5 library VOL connector APIs.
+
 - @ref HDF5CONST
 <br />
 This class contains C constants and enumerated types of HDF5 library.

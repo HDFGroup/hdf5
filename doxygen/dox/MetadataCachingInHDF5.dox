@@ -724,7 +724,7 @@ is allowed to write to file, and then only after entering a sync point with the
 other caches. After it writes entries to file, it sends the base addresses of
 the now clean entries to the other caches, so they can mark these entries clean
 as well, and then leaves the sync point. The other caches mark the specified
-entries as clean before they leave the synch point as well. (Observe, that since
+entries as clean before they leave the sync point as well. (Observe, that since
 all caches see the same stream of dirty metadata, they will all have the same
 set of dirty entries upon sync point entry and exit.)
 

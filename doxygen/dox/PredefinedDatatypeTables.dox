@@ -1,0 +1,22 @@
+/** \page predefined_datatypes_tables HDF5 Predefined Datatypes
+ *
+ * The following datatypes are predefined in HDF5.
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_ieee_datatypes_table
+ * 
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_std_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_unix_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_string_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_intel_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_dec_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_mips_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_native_datatypes_table
+ *
+ * \snippet{doc} tables/predefinedDatatypes.dox predefined_c9x_datatypes_table
+ */
