@@ -28,11 +28,14 @@ const char *FILENAME[] = {"select_io", /* 0 */
  * Test configurations
  */
 typedef enum {
-    TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
-    TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
-    TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
-    TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
-    TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
+    TEST_NO_TYPE_CONV,              /* no type conversion (null case) */
+    TEST_NO_SIZE_CHANGE_NO_BKG,     /* no size change, no bkg buffer */
+    TEST_LARGER_MEM_NO_BKG,         /* larger memory type, no bkg buffer */
+    TEST_SMALLER_MEM_NO_BKG,        /* smaller memory type, no bkg buffer */
+    TEST_CMPD_WITH_BKG,             /* compound types with bkg buffer */
+    TEST_MULTI_CONV_NO_BKG,         /* multi dataset test 1 */
+    TEST_MULTI_CONV_BKG,            /* multi dataset test 2 */
+    TEST_MULTI_CONV_SIZE_CHANGE,    /* multi dataset test 3 */
     TEST_SELECT_NTESTS
 } test_select_config_t;
 
@@ -821,16 +824,15 @@ error:
 } /* test_cmpd_with_bkg() */
 
 /*
- *  Test for multi-dataset:
- *  --Datasets with no type conversion+smaller/larger mem type+no background buffer
+ *  Test 1 for multi-dataset:
+ *  --Datasets with/without type conversion+smaller/larger mem type+no background buffer
  *
- *  Create dset0: H5T_NATIVE_INT
- *  Create other datasets: randomized H5T_NATIVE_LLONG or H5T_NATIVE_SHORT
+ *  Create datasets: randomized H5T_NATIVE_INT or H5T_NATIVE_LONG
  *
- *  Case a--setting for write to ndsets:
+ *  Case a--setting for multi write/read to ndsets:
  *    Datatype for all datasets: H5T_NATIVE_INT
  *
- *  Case b--setting for read from ndsets:
+ *  Case b--setting for multi write/read to ndsets:
  *    Datatype for all datasets: H5T_NATIVE_LONG
  */
 static herr_t
@@ -855,12 +857,17 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     int   *total_wbuf       = NULL;
     int   *total_trans_wbuf = NULL;
     int   *total_rbuf       = NULL;
+    long  *total_lwbuf      = NULL;
+    long  *total_trans_lwbuf = NULL;
     long  *total_lrbuf      = NULL;
 
     int  *wbufi[MULTI_NUM_DSETS];
     int  *trans_wbufi[MULTI_NUM_DSETS];
     int  *rbufi[MULTI_NUM_DSETS];
-    long *l_rbufi[MULTI_NUM_DSETS];
+
+    long *lwbufi[MULTI_NUM_DSETS];
+    long  *trans_lwbufi[MULTI_NUM_DSETS];
+    long *lrbufi[MULTI_NUM_DSETS];
 
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
@@ -911,18 +918,10 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
                 FAIL_STACK_ERROR;
         }
 
-        /* dset0: H5T_NATIVE_INT, the other datasets: H5T_NATIVE_LLONG or H5T_NATIVE_SHORT */
-        if (i == 0) {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
-                                           dcpl, H5P_DEFAULT)) < 0)
+        if ((dset_dids[i] =
+             H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_INT),
+                        file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
-        }
-        else {
-            if ((dset_dids[i] =
-                     H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
-                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                FAIL_STACK_ERROR;
-        }
     }
 
     buf_size = ndsets * DSET_SELECT_DIM * sizeof(int);
@@ -932,9 +931,16 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         FAIL_STACK_ERROR;
     if (NULL == (total_trans_wbuf = (int *)HDmalloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_rbuf = (int *)HDmalloc(ndsets * DSET_SELECT_DIM * sizeof(int))))
+    if (NULL == (total_rbuf = (int *)HDmalloc(buf_size)))
         FAIL_STACK_ERROR;
-    if (NULL == (total_lrbuf = (long *)HDmalloc(ndsets * DSET_SELECT_DIM * sizeof(long))))
+
+    buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
+
+    if (NULL == (total_lwbuf = (long *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+    if (NULL == (total_trans_lwbuf = (long *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+    if (NULL == (total_lrbuf = (long *)HDmalloc(buf_size)))
         FAIL_STACK_ERROR;
 
     /* Initialize buffer indices */
@@ -954,7 +960,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
             trans_wbufi[i][j] = 2 * wbufi[i][j];
         }
 
-    /* Datatype setting for multi write */
+    /* Case a */
+
+    /* Datatype setting for multi write/read */
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_INT;
 
@@ -995,25 +1003,37 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Case b */
 
-    /*
-     * Setting for read from NUM_DSETS datasets:
-     */
+    /* Datatype setting for multi write/read */
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_LONG;
 
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
-        l_rbufi[i] = total_lrbuf + (i * DSET_SELECT_DIM);
-        rbufs[i]   = l_rbufi[i];
+        lwbufi[i] = total_lwbuf + (i * DSET_SELECT_DIM);
+        trans_lwbufi[i] = total_trans_lwbuf + (i * DSET_SELECT_DIM);
+        lrbufi[i] = total_lrbuf + (i * DSET_SELECT_DIM);
+        wbufs[i]   = lwbufi[i];
+        rbufs[i]   = lrbufi[i];
     }
 
-    /* Read data from the dataset with/without data transform set in dxpl */
+    /* Initialize the buffer data */
+    for (i = 0; i < (int)ndsets; i++)
+        for (j = 0; j < DSET_SELECT_DIM; j++) {
+            lwbufi[i][j]       = (int)j + DSET_SELECT_DIM;
+            trans_lwbufi[i][j] = 2 * lwbufi[i][j];
+        }
+
+    /* Write data to the dataset with/without data transform */
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
+        TEST_ERROR;
+
+    /* Read data from the dataset (if dtrans, with data transform again in dxpl) */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
 
     for (i = 0; i < (int)ndsets; i++) {
         for (j = 0; j < DSET_SELECT_DIM; j++) {
-            if (l_rbufi[i][j] != (long)(dtrans ? (2 * trans_wbufi[i][j]) : wbufi[i][j])) {
+            if (lrbufi[i][j] != (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j])) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    For dset %d at index %d\n", i, j);
@@ -1041,7 +1061,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     HDfree(total_wbuf);
     HDfree(total_rbuf);
     HDfree(total_trans_wbuf);
+    HDfree(total_lwbuf);
     HDfree(total_lrbuf);
+    HDfree(total_trans_lwbuf);
 
     PASSED();
 
@@ -1064,7 +1086,11 @@ error:
         HDfree(total_trans_wbuf);
     if (total_rbuf)
         HDfree(total_rbuf);
+    if (total_lwbuf)
+        HDfree(total_lrbuf);
     if (total_lrbuf)
+        HDfree(total_lrbuf);
+    if (total_trans_lwbuf)
         HDfree(total_lrbuf);
 
     return FAIL;
@@ -1072,7 +1098,7 @@ error:
 } /* test_multi_dsets_no_bkg() */
 
 /*
- * Test for multi-dataset:
+ * Test 2 for multi-dataset:
  *
  *   Datasets with compound types+background buffer
  *
@@ -1109,7 +1135,7 @@ error:
  *      --Verify values read
  */
 static herr_t
-test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
+test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
 {
     size_t  ndsets;
     int     i, j, mm;
@@ -1258,9 +1284,6 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
         H5Tinsert(ss_ac_tid, "c", HOFFSET(s1_t, c), H5T_NATIVE_INT) < 0)
         FAIL_STACK_ERROR;
 
-    /* Datatype setting for write to dset0 */
-    mem_tids[0] = ss_ac_tid;
-
     /* Untouched memory and file spaces for other datasets */
     for (i = 0; i < (int)ndsets; i++) {
         if (i == 0)
@@ -1271,6 +1294,9 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
         if (H5Sselect_none(file_sids[i]) < 0)
             TEST_ERROR;
     }
+
+    /* Datatype setting for write to dset0 */
+    mem_tids[0] = ss_ac_tid;
 
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
         TEST_ERROR;
@@ -1322,9 +1348,6 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
     if (H5Tinsert(ss_bc_tid, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0 ||
         H5Tinsert(ss_bc_tid, "c", HOFFSET(s1_t, c), H5T_NATIVE_INT) < 0)
         FAIL_STACK_ERROR;
-
-    /* Datatype setting for read from dset1 */
-    mem_tids[mm] = ss_bc_tid;
 
     /* Reset memory and file space for <mm> dataset */
     if (H5Sselect_all(mem_sids[mm]) < 0)
@@ -1432,8 +1455,17 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
         TEST_ERROR;
 
     /* Verify data read */
-    if (0 != HDmemcmp(s2_total_wbuf, s2_total_rbuf, s2_buf_size))
-        TEST_ERROR;
+    for (i = 0; i < (int)ndsets; i++)
+        for (j = 0; j < DSET_SELECT_DIM; j++)
+            if (s2_wbufi[i][j].a != s2_rbufi[i][j].a || 
+                s2_wbufi[i][j].b != s2_rbufi[i][j].b ||
+                s2_wbufi[i][j].c != s2_rbufi[i][j].c || 
+                s2_wbufi[i][j].d != s2_rbufi[i][j].d) {
+                    H5_FAILED();
+                    HDprintf("    Read different values than written.\n");
+                    HDprintf("    For dset %d at index %d\n", i, j);
+                    TEST_ERROR;
+            }
 
     if (H5Pclose(dcpl) < 0)
         FAIL_STACK_ERROR;
@@ -1477,7 +1509,326 @@ error:
 
     return FAIL;
 
-} /* test_multi_dsets_with_bkg() */
+} /* test_multi_dsets_cmpd_with_bkg() */
+
+/*
+ *  Test 3 for multi-dataset:
+ *  --Datasets with/without type conv+size change+no background buffer
+ *
+ *  Create dset0: H5T_STD_I32BE
+ *  Create other dateasets: randomized H5T_STD_I64LE or H5T_STD_I16LE
+ *
+ *  Case a--setting for write/read to ndsets:
+ *    Datatype for all datasets: H5T_STD_I32BE
+ *
+ *  Case b--setting for write/read to ndsets
+ *    Datatype for all datasets: H5T_STD_I64BE
+ *
+ *  Case c--setting for write/read to ndsets
+ *    Datatype for all datasets: H5T_STD_I16BE
+ */
+static herr_t
+test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
+{
+    size_t  ndsets;
+    int     i, j;
+    hid_t   dcpl        = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+
+    hid_t file_sids[MULTI_NUM_DSETS];
+    hid_t mem_sids[MULTI_NUM_DSETS];
+    hid_t mem_tids[MULTI_NUM_DSETS];
+
+    char  dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
+    hid_t dset_dids[MULTI_NUM_DSETS];
+
+    size_t buf_size, ss;
+    uint8_t *total_wbuf       = NULL;
+    uint8_t *total_rbuf       = NULL;
+    uint8_t *total_lwbuf       = NULL;
+    uint8_t *total_lrbuf       = NULL;
+    uint8_t *total_swbuf       = NULL;
+    uint8_t *total_srbuf       = NULL;
+
+    uint8_t *wbufi[MULTI_NUM_DSETS];
+    uint8_t *rbufi[MULTI_NUM_DSETS];
+    uint8_t *lwbufi[MULTI_NUM_DSETS];
+    uint8_t *lrbufi[MULTI_NUM_DSETS];
+    uint8_t *swbufi[MULTI_NUM_DSETS];
+    uint8_t *srbufi[MULTI_NUM_DSETS];
+
+    const void *wbufs[MULTI_NUM_DSETS];
+    void       *rbufs[MULTI_NUM_DSETS];
+
+    ndsets = MAX(MULTI_MIN_DSETS, MULTI_NUM_DSETS);
+
+    dims[0] = DSET_SELECT_DIM;
+
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (chunked) {
+        cdims[0] = DSET_SELECT_CHUNK_DIM;
+        if (H5Pset_chunk(dcpl, 1, cdims) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    /* Set up file space ids, mem space ids, and dataset ids */
+    for (i = 0; i < (int)ndsets; i++) {
+        if ((file_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
+            FAIL_STACK_ERROR;
+
+        if ((mem_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Create ith dataset */
+        if (snprintf(dset_names[i], DSET_NAME_LEN, 
+                     chunked ? "multi_chk_size_dset%u" : "multi_contig_size_dset%u", i) < 0)
+            FAIL_STACK_ERROR;
+    
+        if (i == 0) {
+            if ((dset_dids[i] =
+                     H5Dcreate2(fid, dset_names[i], H5T_STD_I32BE,
+                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR;
+        }
+        else { 
+            if ((dset_dids[i] =
+                     H5Dcreate2(fid, dset_names[i], 
+                                ((HDrandom() % 2) ? H5T_STD_I64LE : H5T_STD_I16LE),
+                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR;
+        }
+        
+    }
+
+    /* Case a */
+
+    ss = H5Tget_size(H5T_STD_I32BE);
+    buf_size = ndsets * ss * DSET_SELECT_DIM;
+
+    /* Allocate buffers for all datasets */
+    if (NULL == (total_wbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+    if (NULL == (total_rbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+
+    /* Initialize buffer indices */
+    for (i = 0; i < (int)ndsets; i++) {
+        wbufi[i]       = total_wbuf + (i * (int)ss * DSET_SELECT_DIM);
+        rbufi[i]       = total_rbuf + (i * (int)ss * DSET_SELECT_DIM);
+
+        wbufs[i] = wbufi[i];
+        rbufs[i] = rbufi[i];
+    }
+
+    /* Initialize the buffer data: big endian */
+    for (i = 0; i < (int)ndsets; i++)
+        for (j = 0; j < DSET_SELECT_DIM; j++) {
+            wbufi[i][j * (int)ss + 0]       = 0x1;
+            wbufi[i][j * (int)ss + 1]       = 0x2;
+            wbufi[i][j * (int)ss + 2]       = 0x3;
+            wbufi[i][j * (int)ss + 3]       = (uint8_t)(0x4 + j);
+        }
+
+    /* Datatype setting for multi write/read */
+    for (i = 0; i < (int)ndsets; i++)
+        mem_tids[i] = H5T_STD_I32BE;
+
+
+    /* Write data to the dataset */
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+        TEST_ERROR;
+
+    /* Read data from the dataset */
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+        TEST_ERROR;
+
+    /* Verify */
+    for (i = 0; i < (int)ndsets; i++)
+        /* Only compare when it's at least the size of H5T_STD_I32BE */
+        if (H5Tget_size(H5Dget_type(dset_dids[i])) >= ss) {
+            for (j = 0; j < DSET_SELECT_DIM; j++)
+                if (rbufi[i][(int)ss * j + 0] != wbufi[i][(int)ss * j + 0] || 
+                    rbufi[i][(int)ss * j + 1] != wbufi[i][(int)ss * j + 1] ||
+                    rbufi[i][(int)ss * j + 2] != wbufi[i][(int)ss * j + 2] || 
+                    rbufi[i][(int)ss * j + 3] != wbufi[i][(int)ss * j + 3]) {
+                    H5_FAILED();
+                    HDprintf("    Read different values than written.\n");
+                    HDprintf("    For dset %d at index %d\n", i, j);
+                    TEST_ERROR;
+                }
+        }
+
+    /* Case b */
+
+    ss = H5Tget_size(H5T_STD_I64BE);
+    buf_size = ndsets * (ss * DSET_SELECT_DIM);
+
+    /* Allocate buffers for all datasets */
+    if (NULL == (total_lwbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+    if (NULL == (total_lrbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+
+    /* Initialize buffer indices */
+    for (i = 0; i < (int)ndsets; i++) {
+        lwbufi[i]       = total_lwbuf + (i * (int)ss * DSET_SELECT_DIM);
+        lrbufi[i]       = total_lrbuf + (i * (int)ss * DSET_SELECT_DIM);
+
+        wbufs[i] = lwbufi[i];
+        rbufs[i] = lrbufi[i];
+    }
+
+    /* Initialize the buffer data: big endian */
+    for (i = 0; i < (int)ndsets; i++)
+        for (j = 0; j < DSET_SELECT_DIM; j++) {
+            lwbufi[i][j * (int)ss + 0]       = 0x1;
+            lwbufi[i][j * (int)ss + 1]       = 0x2;
+            lwbufi[i][j * (int)ss + 2]       = 0x3;
+            lwbufi[i][j * (int)ss + 3]       = 0x4;
+            lwbufi[i][j * (int)ss + 4]       = 0x5;
+            lwbufi[i][j * (int)ss + 5]       = 0x6;
+            lwbufi[i][j * (int)ss + 6]       = 0x7;
+            lwbufi[i][j * (int)ss + 7]       = (uint8_t)(0x8 + j);
+        }
+
+
+    /* Datatype setting for multi write/read */
+    for (i = 0; i < (int)ndsets; i++)
+        mem_tids[i] = H5T_STD_I64BE;
+
+    /* Write data to the dataset */
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+        TEST_ERROR;
+
+    /* Read data from the dataset */
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+        TEST_ERROR;
+
+    /* Verify */
+    for (i = 0; i < (int)ndsets; i++)
+        /* Only compare when it's the size of H5T_STD_I64BE */
+        if (H5Tget_size(H5Dget_type(dset_dids[i])) >= ss) {
+            for (j = 0; j < DSET_SELECT_DIM; j++)
+                if (lrbufi[i][(int)ss * j + 0] != lwbufi[i][(int)ss * j + 0] || 
+                    lrbufi[i][(int)ss * j + 1] != lwbufi[i][(int)ss * j + 1] ||
+                    lrbufi[i][(int)ss * j + 2] != lwbufi[i][(int)ss * j + 2] || 
+                    lrbufi[i][(int)ss * j + 3] != lwbufi[i][(int)ss * j + 3] || 
+                    lrbufi[i][(int)ss * j + 4] != lwbufi[i][(int)ss * j + 4] || 
+                    lrbufi[i][(int)ss * j + 5] != lwbufi[i][(int)ss * j + 5] || 
+                    lrbufi[i][(int)ss * j + 6] != lwbufi[i][(int)ss * j + 6] || 
+                    lrbufi[i][(int)ss * j + 7] != lwbufi[i][(int)ss * j + 7]) {
+                    H5_FAILED();
+                    HDprintf("    Read different values than written.\n");
+                    HDprintf("    For dset %d at index %d\n", i, j);
+                    TEST_ERROR;
+                }
+        }
+
+    /* Case c */
+
+    ss = H5Tget_size(H5T_STD_I16BE);
+    buf_size = ndsets * (ss * DSET_SELECT_DIM);
+
+    /* Allocate buffers for all datasets */
+    if (NULL == (total_swbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+    if (NULL == (total_srbuf = (uint8_t *)HDmalloc(buf_size)))
+        FAIL_STACK_ERROR;
+
+    /* Initialize buffer indices */
+    for (i = 0; i < (int)ndsets; i++) {
+        swbufi[i]       = total_swbuf + (i * (int)ss * DSET_SELECT_DIM);
+        srbufi[i]       = total_srbuf + (i * (int)ss * DSET_SELECT_DIM);
+
+        wbufs[i] = swbufi[i];
+        rbufs[i] = srbufi[i];
+    }
+
+    /* Initialize the buffer data: big endian */
+    for (i = 0; i < (int)ndsets; i++)
+        for (j = 0; j < DSET_SELECT_DIM; j++) {
+            swbufi[i][j * (int)ss + 0]       = 0x1;
+            swbufi[i][j * (int)ss + 1]       = (uint8_t)(0x2 + j);
+        }
+
+
+    /* Datatype setting for multi write/read */
+    for (i = 0; i < (int)ndsets; i++)
+        mem_tids[i] = H5T_STD_I16BE;
+
+    /* Write data to the dataset */
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+        TEST_ERROR;
+
+    /* Read data from the dataset */
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+        TEST_ERROR;
+
+    /* Verify */
+    for (i = 0; i < (int)ndsets; i++) 
+        /* Can compare for all cases */
+        for (j = 0; j < DSET_SELECT_DIM; j++)
+           if (srbufi[i][(int)ss * j + 0] != swbufi[i][(int)ss * j + 0] || 
+               srbufi[i][(int)ss * j + 1] != swbufi[i][(int)ss * j + 1]) {
+                H5_FAILED();
+                HDprintf("    Read different values than written.\n");
+                HDprintf("    For dset %d at index %d\n", i, j);
+                TEST_ERROR;
+            }
+
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+
+    for (i = 0; i < (int)ndsets; i++) {
+        if (H5Sclose(file_sids[i]) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Sclose(mem_sids[i]) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Dclose(dset_dids[i]) < 0)
+            FAIL_STACK_ERROR;
+    }
+
+    HDfree(total_wbuf);
+    HDfree(total_rbuf);
+    HDfree(total_lwbuf);
+    HDfree(total_lrbuf);
+    HDfree(total_swbuf);
+    HDfree(total_srbuf);
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    H5Pclose(dcpl);
+    for (i = 0; i < (int)ndsets; i++) {
+        H5Sclose(file_sids[i]);
+        H5Sclose(mem_sids[i]);
+        H5Dclose(dset_dids[i]);
+    }
+    H5E_END_TRY;
+
+    if (total_wbuf)
+        HDfree(total_wbuf);
+    if (total_rbuf)
+        HDfree(total_rbuf);
+    if (total_lwbuf)
+        HDfree(total_lwbuf);
+    if (total_lrbuf)
+        HDfree(total_lrbuf);
+    if (total_swbuf)
+        HDfree(total_swbuf);
+    if (total_srbuf)
+        HDfree(total_srbuf);
+
+    return FAIL;
+
+} /* test_multi_dsets_size_change_no_bkg() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1550,12 +1901,10 @@ main(void)
                         TESTING_2("No size change, no background buffer");
 
                         /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        if (dtrans)
                             SKIPPED();
-                            continue;
-                        }
-
-                        nerrors += (test_no_size_change_no_bkg(fid, chunked) < 0 ? 1 : 0);
+                        else
+                            nerrors += (test_no_size_change_no_bkg(fid, chunked) < 0 ? 1 : 0);
 
                         break;
 
@@ -1577,12 +1926,38 @@ main(void)
                         TESTING_2("Compound types with background buffer");
 
                         /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        if (dtrans)
                             SKIPPED();
-                            continue;
-                        }
+                        else
+                            nerrors += (test_cmpd_with_bkg(fid, chunked) < 0 ? 1 : 0);
 
-                        nerrors += (test_cmpd_with_bkg(fid, chunked) < 0 ? 1 : 0);
+                        break;
+
+                    case TEST_MULTI_CONV_NO_BKG: /* case 6 */
+                        TESTING_2("multi-datasets: type conversion+no bkg buffer");
+                        nerrors += test_multi_dsets_no_bkg(fid, chunked, dtrans);
+                        break;
+
+
+                    case TEST_MULTI_CONV_BKG: /* case 7 */
+                        TESTING_2("multi-datasets: type conversion+bkg buffer");
+
+                        /* Data transforms does not apply to the dataset datatype for this test */
+                        if (dtrans)
+                            SKIPPED();
+                        else 
+                            nerrors += test_multi_dsets_cmpd_with_bkg(fid, chunked);
+
+                        break;
+
+                    case TEST_MULTI_CONV_SIZE_CHANGE: /* case 8 */
+                        TESTING_2("multi-datasets: type conversion+size change+no bkg buffer");
+
+                        /* Data transforms does not apply to the dataset datatype for this test */
+                        if (dtrans)
+                            SKIPPED();
+                        else
+                            nerrors += test_multi_dsets_size_change_no_bkg(fid, chunked);
 
                         break;
 
@@ -1593,14 +1968,7 @@ main(void)
                 } /* end switch */
             }     /* end for test_select_config */
 
-            TESTING_2("multi-datasets: with/without type conversion + no background buffer");
-            nerrors += test_multi_dsets_no_bkg(fid, chunked, dtrans);
 
-            TESTING_2("multi-datasets: type conversion + background buffer");
-            if (dtrans)
-                SKIPPED();
-            else
-                nerrors += test_multi_dsets_with_bkg(fid, chunked);
 
         } /* end dtrans */
 
