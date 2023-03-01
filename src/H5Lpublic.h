@@ -729,7 +729,7 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          \p cset specifies the character set in which the link name is
  *          encoded. Valid values include the following:
  *          \csets
- *          This value is set with H5Pset_char_encoding().
+ *          This value is set with #H5Pset_char_encoding.
  *
  *          \c token is the location that a hard link points to, and
  *          \c val_size is the size of a soft link or user defined link value.
@@ -884,10 +884,12 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is
@@ -923,6 +925,11 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
+ *
+ * \warning The returned value of the callback routine op will not be set
+ *          in the return value for H5Literate_async(), so the \p herr_t value
+ *          should not be used for determining the return state of the callback routine.
+ *
  * \async_variant_of{H5Literate}
  */
 #ifndef H5_DOXYGEN
@@ -1520,7 +1527,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *          \c cset specifies the character set in which the link name is
  *          encoded. Valid values include the following:
  *          \csets
- *          This value is set with H5Pset_char_encoding().
+ *          This value is set with #H5Pset_char_encoding.
  *
  *          \c address and \c val_size are returned for hard and symbolic
  *          links, respectively. Symbolic links include soft and external links
@@ -1636,10 +1643,12 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is

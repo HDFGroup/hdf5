@@ -76,13 +76,15 @@ typedef int64_t hid_t;
 #define H5I_INVALID_HID (-1)
 
 /**
- * A function for freeing objects. This function will be called with an object
- * ID type number and a pointer to the object. The function should free the
- * object and return non-negative to indicate that the object
- * can be removed from the ID type. If the function returns negative
- * (failure) then the object will remain in the ID type.
+ * A function for freeing objects. This function will be called with a pointer
+ * to the object and a pointer to a pointer to the asynchronous request object.
+ * The function should free the object and return non-negative to indicate that
+ * the object can be removed from the ID type. If the function returns negative
+ * (failure) then the object will remain in the ID type. For asynchronous
+ * operations and handling the request parameter, see the HDF5 user guide and
+ * VOL connector author guide.
  */
-typedef herr_t (*H5I_free_t)(void *, void **);
+typedef herr_t (*H5I_free_t)(void *obj, void **request);
 
 /**
  * The type of a function to compare objects & keys

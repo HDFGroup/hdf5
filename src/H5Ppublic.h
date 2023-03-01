@@ -5329,7 +5329,7 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
  * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
  *              operations are supported by the VOL connector stack.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags);
@@ -8194,7 +8194,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  *          please see the documentation for that routine for details about
  *          their use.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,

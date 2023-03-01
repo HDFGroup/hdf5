@@ -330,6 +330,11 @@ typedef struct {
 #define MISC35_SPACE_DIM3 13
 #define MISC35_NPOINTS    10
 
+/* Definitions for misc. test #37 */
+/* The test file is formerly named h5_nrefs_POC.
+   See https://nvd.nist.gov/vuln/detail/CVE-2020-10812 */
+#define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -3943,7 +3948,7 @@ test_misc22(void)
     unsigned int flags;
     size_t       cd_nelmts = 32;
     unsigned int cd_values[32];
-    unsigned     correct;
+    size_t       correct;
 
     if (h5_szip_can_encode() != 1)
         return;
@@ -4037,7 +4042,7 @@ test_misc22(void)
                                            NULL);
                 CHECK(ret, FAIL, "H5Pget_filter_by_id2");
 
-                VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
+                VERIFY(cd_values[2], (unsigned)correct, "SZIP filter returned value for precision");
 
                 ret = H5Dclose(dsid);
                 CHECK(ret, FAIL, "H5Dclose");
@@ -6046,6 +6051,47 @@ test_misc36(void)
 
 /****************************************************************
 **
+**  test_misc37():
+**      Test for seg fault issue when closing the provided test file
+**      which has an illegal file size in its cache image.
+**      See HDFFV-11052/CVE-2020-10812 for details.
+**
+****************************************************************/
+static void
+test_misc37(void)
+{
+    const char *testfile = H5_get_srcdir_filename(CVE_2020_10812_FILENAME);
+    hbool_t     driver_is_default_compatible;
+    hid_t       fid;
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Fix for HDFFV-11052/CVE-2020-10812"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
+
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* This should fail due to the illegal file size.
+       It should fail gracefully and not seg fault */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid);
+    }
+    H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Fclose");
+
+} /* end test_misc37() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 **
 ****************************************************************/
@@ -6111,6 +6157,7 @@ test_misc(void)
     test_misc34(); /* Test behavior of 0 and NULL in H5MM API calls */
     test_misc35(); /* Test behavior of free-list & allocation statistics API calls */
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
+    test_misc37(); /* Test for seg fault failure at file close */
 
 } /* test_misc() */
 

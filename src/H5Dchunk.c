@@ -2456,8 +2456,8 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
-                     hbool_t write_op)
+H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dset_io_info_t *dset_info,
+                     haddr_t caddr, hbool_t write_op)
 {
     const H5D_t *dataset     = NULL;  /* Local pointer to dataset info */
     hbool_t      has_filters = FALSE; /* Whether there are filters on the chunk or not */
@@ -2466,7 +2466,6 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
     HDassert(dset_info);
     dataset = dset_info->dset;
     HDassert(dataset);
@@ -4266,8 +4265,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5D__chunk_lock(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, H5D_chunk_ud_t *udata,
-                hbool_t relax, hbool_t prev_unfilt_chunk)
+H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_dset_io_info_t *dset_info,
+                H5D_chunk_ud_t *udata, hbool_t relax, hbool_t prev_unfilt_chunk)
 {
     const H5D_t *dset;      /* Convenience pointer to the dataset */
     H5O_pline_t *pline;     /* I/O pipeline info - always equal to the pline passed to H5D__chunk_mem_alloc */
@@ -4674,7 +4673,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+H5D__chunk_unlock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_dset_io_info_t *dset_info,
                   const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk, uint32_t naccessed)
 {
     const H5O_layout_t *layout; /* Dataset layout */
@@ -7453,10 +7452,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__nonexistent_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
-                        size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[],
-                        hsize_t chunk_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                        size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__nonexistent_readvv(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info,
+                        const H5D_dset_io_info_t *dset_info, size_t chunk_max_nseq, size_t *chunk_curr_seq,
+                        size_t chunk_len_arr[], hsize_t chunk_off_arr[], size_t mem_max_nseq,
+                        size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_chunk_readvv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t               ret_value = -1; /* Return value */
@@ -8279,8 +8278,8 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for callback failure and pass along return value */
-    if ((ret_value = (data->op)(offset, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes,
-                                data->op_data)) < 0)
+    if ((ret_value = (data->op)(offset, (unsigned)chunk_rec->filter_mask, chunk_rec->chunk_addr,
+                                (hsize_t)chunk_rec->nbytes, data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)

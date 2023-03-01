@@ -91,6 +91,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V18 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V110 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
+    H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -134,7 +135,7 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     /* Version */
     if (p + 4 - 1 > p_end) /* 4 byte is minimum for all versions */
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off the end of the buffer: current p = %p, p_end = %p",
-                    p + 4, p_end)
+                    (const void *)(p + 4), (const void *)p_end)
     pline->version = *p++;
     if (pline->version < H5O_PLINE_VERSION_1 || pline->version > H5O_PLINE_VERSION_LATEST)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message")
@@ -165,7 +166,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         /* Filter ID */
         if (p + 6 - 1 > p_end) /* 6 bytes minimum */
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                        "ran off the end of the buffer: current p = %p, p_end = %p", p + 6, p_end)
+                        "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 6),
+                        (const void *)p_end)
         UINT16DECODE(p, filter->id);
 
         /* Length of filter name */
@@ -177,7 +179,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight")
             if (p + 4 - 1 > p_end) /* with name_length 4 bytes to go */
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                            "ran off the end of the buffer: current p = %p, p_end = %p", p + 4, p_end)
+                            "ran off the end of the buffer: current p = %p, p_end = %p",
+                            (const void *)(p + 4), (const void *)p_end)
         } /* end if */
 
         /* Filter flags */

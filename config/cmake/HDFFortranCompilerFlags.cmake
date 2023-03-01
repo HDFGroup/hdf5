@@ -79,6 +79,11 @@ if (NOT MSVC AND NOT MINGW)
     # Append more extra warning flags that only gcc 4.8+ knows about
     if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 4.8)
       ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-4.8")
+      if (HDF5_ENABLE_DEV_WARNINGS)
+        ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-developer-4.8")
+      else ()
+        ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-no-developer-4.8")
+      endif ()
     endif ()
 
     # Append more extra warning flags that only gcc 4.9+ knows about

@@ -1,6 +1,6 @@
 /** \page Attributes
 
-\section Attributes
+\section secAttributes Attributes
 
 \subsection CB_LargeAttributes Creating "Large" HDF5 Attributes
 

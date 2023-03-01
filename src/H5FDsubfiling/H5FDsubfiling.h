@@ -148,6 +148,27 @@
  * pathname.
  */
 #define H5FD_SUBFILING_SUBFILE_PREFIX "H5FD_SUBFILING_SUBFILE_PREFIX"
+/**
+ * \def H5FD_SUBFILING_CONFIG_FILE_PREFIX
+ * Macro for name of the environment variable that specifies a prefix
+ * to apply to the subfiling configuration filename. Useful for cases
+ * where the application wants to place the configuration file in a
+ * different directory than the default of putting it alongside the
+ * generated subfiles. For example, when writing to node-local storage
+ * one may wish to place the configuration file on a scratch file
+ * system readable by all nodes, while the subfiles are initially
+ * written to the node-local storage.
+ *
+ * The value set for this environment variable is interpreted as a
+ * pathname that must already exist.
+ *
+ * NOTE: As this prefix string will be encoded in the driver info
+ *       message that gets written to the file, there is an upper
+ *       limit of about ~900 single-byte characters for this string,
+ *       though possibly less due to other information the driver
+ *       may encode. Avoid long prefix names where possible.
+ */
+#define H5FD_SUBFILING_CONFIG_FILE_PREFIX "H5FD_SUBFILING_CONFIG_FILE_PREFIX"
 
 /**
  * \enum H5FD_subfiling_ioc_select_t
@@ -336,7 +357,7 @@ H5_DLL hid_t H5FD_subfiling_init(void);
  *       H5FD_subfiling_config_t documentation for information about configuration
  *       for the #H5FD_SUBFILING driver.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config);
@@ -370,7 +391,7 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  *       environment variables to get accurate values for the #H5FD_SUBFILING driver
  *       properties.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);

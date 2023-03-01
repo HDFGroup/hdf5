@@ -1,4 +1,4 @@
-HDF5 version 1.13.4-1 currently under development
+HDF5 version 1.15.0 currently under development
 ================================================================================
 
 
@@ -47,6 +47,31 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to build libaec and zlib inline with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      The HDF options (and defaults) for using this are:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
+          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
+          ZLIB_USE_LOCALCONTENT:BOOL=OFF
+
+      The CMake variables to control the path and file names:
+          LIBAEC_TGZ_ORIGPATH:STRING
+          LIBAEC_TGZ_ORIGNAME:STRING
+          ZLIB_TGZ_ORIGPATH:STRING
+          ZLIB_TGZ_ORIGNAME:STRING
+
+      See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
+
+      (ADB - 2023/02/21)
+
     - Removal of MPE support
 
       The ability to build with MPE instrumentation has been removed along with
@@ -71,7 +96,7 @@ New Features
           HDF5_ENABLE_USING_DMALLOC
 
       (DER - 2022/11/08)
-      
+
     - Removal of memory allocation sanity checks configure options
 
       With the removal of the memory allocation sanity checks feature, the
@@ -89,6 +114,50 @@ New Features
 
     Library:
     --------
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+      (JTH - 2023/02/22)
+
+    - Overhauled the Virtual Object Layer (VOL)
+
+      The virtual object layer (VOL) was added in HDF5 1.12.0 but the initial
+      implementation required API-breaking changes to better support optional
+      operations and pass-through VOL connectors. The original VOL API is
+      now considered deprecated and VOL users and connector authors should
+      target the 1.14 VOL API.
+
+      The specific changes are too extensive to document in a release note, so
+      VOL users and connector authors should consult the updated VOL connector
+      author's guide and the 1.12-1.14 VOL migration guide.
+
+      (DER - 2022/12/28)
+
+    - H5VLquery_optional() signature change
+
+      The last parameter of this API call has changed from a pointer to hbool_t
+      to a pointer to uint64_t. Due to the changes in how optional operations
+      are handled in the 1.14 VOL API, we cannot make the old API call work
+      with the new scheme, so there is no API compatibility macro for it.
+
+      (DER - 2022/12/28)
+
+    - H5I_free_t callback signature change
+
+      In order to support asynchronous operations and future IDs, the signature
+      of the H5I_free_t callback has been modified to take a second 'request'
+      parameter. Due to the nature of the internal library changes, no API
+      compatibility macro is available for this change.
+
+      (DER - 2022/12/28)
+
     - Fix for CVE-2019-8396
 
       Malformed HDF5 files may have truncated content which does not match
@@ -160,18 +229,55 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Ported the existing VOL Connector Author Guide document to doxygen.
+
+      Added new dox file, VOLConnGuide.dox.
+
+      (ADB - 2022/12/20)
 
 
 Support for new platforms, languages and compilers
 ==================================================
     -
-
-
+    
 Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed an issue with collective metadata writes of global heap data
+
+      New test failures in parallel netCDF started occurring with debug
+      builds of HDF5 due to an assertion failure and this was reported in
+      GitHub issue #2433. The assertion failure began happening after the
+      collective metadata write pathway in the library was updated to use
+      vector I/O so that parallel-enabled HDF5 Virtual File Drivers (other
+      than the existing MPI I/O VFD) can support collective metadata writes.
+
+      The assertion failure was fixed by updating collective metadata writes
+      to treat global heap metadata as raw data, as done elsewhere in the
+      library. 
+
+      (JTH - 2023/02/16, GH #2433)
+
+    - Seg fault on file close
+
+      h5debug fails at file close with core dump on a file that has an
+      illegal file size in its cache image.  In H5F_dest(), the library
+      performs all the closing operations for the file and keeps track of
+      the error encountered when reading the file cache image.  
+      At the end of the routine, it frees the file's file structure and 
+      returns error.  Due to the error return, the file object is not removed 
+      from the ID node table.  This eventually causes assertion failure in 
+      H5VL__native_file_close() when the library finally exits and tries to 
+      access that file object in the table for closing.
+
+      The closing routine, H5F_dest(), will not free the file structure if
+      there is error, keeping a valid file structure in the ID node table.
+      It will be freed later in H5VL__native_file_close() when the
+      library exits and terminates the file package.
+
+      (VC - 2022/12/14, HDFFV-11052, CVE-2020-10812)
+
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
@@ -200,6 +306,17 @@ Bug Fixes since HDF5-1.13.3 release
 
       (EFE - 2022/10/09 GH-2233)
 
+    - CVE-2021-46244 / GHSA-vrxh-5gxg-rmhm
+
+      Compound datatypes may not have members of size 0
+ 
+      A member size of 0 may lead to an FPE later on as reported in
+      CVE-2021-46244. To avoid this, check for this as soon as the
+      member is decoded.
+
+      (EFE - 2022/10/05 GEH-2242)
+
+
     - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
 
       Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
@@ -213,6 +330,32 @@ Bug Fixes since HDF5-1.13.3 release
 
       (EFE - 2022/10/05 GH-2228)
 
+    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
+
+      When evicting driver info block, NULL the corresponding entry.
+
+      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
+      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
+      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
+      used in other functions (like  H5F__dest()) - as other places will check
+      whether the pointer is initialized before using its value.
+
+      (EFE - 2022/09/29 GH-2254)
+
+    - Fix CVE-2021-45833 / GHSA-x57p-jwp6-4v79
+
+      Report error if dimensions of chunked storage in data layout < 2
+    
+      For Data Layout Messages version 1 & 2 the specification state
+      that the value stored in the data field is 1 greater than the
+      number of dimensions in the dataspace. For version 3 this is
+      not explicitly stated but the implementation suggests it to be
+      the case.
+      Thus the set value needs to be at least 2. For dimensionality
+      < 2 an out-of-bounds access occurs.
+ 
+      (EFE - 2022/09/28 GH-2240)
+      
     - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
 
       Parent of enum datatype message must have the same size as the
@@ -246,6 +389,45 @@ Bug Fixes since HDF5-1.13.3 release
 
     Configuration
     -------------
+    - Correct the CMake generated pkg-config file
+
+      The pkg-config file generated by CMake had the order and placement of the
+      libraries wrong. Also added support for debug library names.
+
+      Changed the order of Libs.private libraries so that dependencies come after
+      dependents. Did not move the compression libraries into Requires.private
+      because there was not a way to determine if the compression libraries had
+      supported pkconfig files. Still recommend that the CMake config file method
+      be used for building projects with CMake.
+
+      (ADB - 2023/02/16 GH-1546,GH-2259)
+
+    - Remove Javadoc generation
+
+      The use of doxygen now supersedes the requirement to build javadocs. We do not
+      have the resources to continue to support two documentation methods and have
+      chosen doxygen as our standard.
+
+      (ADB - 2022/12/19)
+
+    - Change the default for building the high-level tools
+
+      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
+      in a future release. The default build setting for them have been changed from enabled
+      to disabled. A user can enable the build of these tools if needed.
+          autotools:   --enable-hlgiftools
+          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
+      (ADB - 2022/12/16)
+
+    - Change the settings of the *pc files to use the correct format
+
+      The pkg-config files generated by CMake uses incorrect syntax for the 'Requires'
+      settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
+      fixes the issue
+
+      (ADB - 2022/12/06 HDFFV-11355)
+
     - Move MPI libraries link from PRIVATE to PUBLIC
 
       The install dependencies were not including the need for MPI libraries when
@@ -257,7 +439,12 @@ Bug Fixes since HDF5-1.13.3 release
 
     Tools
     -----
-    -
+    - Fix h5repack to only print output when verbose option is selected
+
+      When timing option was added to h5repack, the check for verbose was
+      incorrectly implemented.
+
+      (ADB -  2022/12/02, GH #2270)
 
 
     Performance
@@ -418,7 +605,10 @@ Platforms Tested
                                     Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
                                     Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ clang 15.0.1
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
@@ -512,7 +702,7 @@ The issues with the gif tool are:
     HDFFV-10592 CVE-2018-17433
     HDFFV-10593 CVE-2018-17436
     HDFFV-11048 CVE-2020-10809
-These CVE issues have not yet been addressed and can be avoided by not building
-the gif tool. Disable building the High-Level tools with these options:
-    autotools:   --disable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=OFF
+These CVE issues have not yet been addressed and are avoided by not building
+the gif tool by default. Enable building the High-Level tools with these options:
+    autotools:   --enable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=ON

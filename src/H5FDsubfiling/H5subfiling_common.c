@@ -73,8 +73,8 @@ static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id
 static void   clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static herr_t ioc_open_files(int64_t file_context_id, int file_acc_flags);
 static herr_t create_config_file(subfiling_context_t *sf_context, const char *base_filename,
-                                 const char *subfile_dir, hbool_t truncate_if_exists);
-static herr_t open_config_file(const char *base_filename, const char *subfile_dir, uint64_t file_id,
+                                 const char *config_dir, const char *subfile_dir, hbool_t truncate_if_exists);
+static herr_t open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id,
                                const char *mode, FILE **config_file_out);
 
 /*-------------------------------------------------------------------------
@@ -382,6 +382,9 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 
     HDfree(sf_context->subfile_prefix);
     sf_context->subfile_prefix = NULL;
+
+    HDfree(sf_context->config_file_prefix);
+    sf_context->config_file_prefix = NULL;
 
     HDfree(sf_context->h5_filename);
     sf_context->h5_filename = NULL;
@@ -721,6 +724,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     FILE                *config_file   = NULL;
     char                *file_basename = NULL;
     char                *subfile_dir   = NULL;
+    char                *prefix_env    = NULL;
     int                  mpi_rank;
     int                  mpi_size;
     int                  mpi_code;
@@ -748,6 +752,13 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     new_context->sf_node_comm  = MPI_COMM_NULL;
     new_context->sf_group_comm = MPI_COMM_NULL;
 
+    /* Check if a prefix has been set for the configuration file name */
+    prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+    if (prefix_env) {
+        if (NULL == (new_context->config_file_prefix = HDstrdup(prefix_env)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, FAIL, "couldn't copy config file prefix string");
+    }
+
     /*
      * If there's an existing subfiling configuration file for
      * this file, read the stripe size and number of subfiles
@@ -767,7 +778,12 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
             }
 
             if (config[0] >= 0) {
-                if (open_config_file(file_basename, subfile_dir, file_id, "r", &config_file) < 0)
+                /*
+                 * If a prefix has been specified, try to read the config file
+                 * from there, otherwise look for it next to the generated subfiles.
+                 */
+                if (open_config_file(file_basename, prefix_env ? prefix_env : subfile_dir, file_id, "r",
+                                     &config_file) < 0)
                     config[0] = -1;
             }
 
@@ -2133,7 +2149,19 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
      * check if we also need to create a config file.
      */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->ioc_idx == 0)) {
-        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0)
+        char *config_dir = NULL;
+
+        /*
+         * If a config file prefix has been specified, place the
+         * config file there, otherwise place it next to the
+         * generated subfiles.
+         */
+        if (sf_context->config_file_prefix)
+            config_dir = sf_context->config_file_prefix;
+        else
+            config_dir = subfile_dir;
+
+        if (create_config_file(sf_context, base, config_dir, subfile_dir, (file_acc_flags & O_TRUNC)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL,
                                     "couldn't create subfiling configuration file");
     }
@@ -2174,8 +2202,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-create_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *subfile_dir,
-                   hbool_t truncate_if_exists)
+create_config_file(subfiling_context_t *sf_context, const char *base_filename, const char *config_dir,
+                   const char *subfile_dir, hbool_t truncate_if_exists)
 {
     hbool_t config_file_exists = FALSE;
     FILE   *config_file        = NULL;
@@ -2186,6 +2214,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
     HDassert(sf_context);
     HDassert(base_filename);
+    HDassert(config_dir);
     HDassert(subfile_dir);
 
     if (sf_context->h5_file_id == UINT64_MAX)
@@ -2194,6 +2223,8 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
     if (*base_filename == '\0')
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid base HDF5 filename '%s'",
                                 base_filename);
+    if (*config_dir == '\0')
+        config_dir = ".";
     if (*subfile_dir == '\0')
         subfile_dir = ".";
 
@@ -2201,7 +2232,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
                base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
@@ -2226,7 +2257,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
         if (NULL == (config_file = HDfopen(config_filename, "w+")))
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
-                                        "couldn't open subfiling configuration file");
+                                        "couldn't create/truncate subfiling configuration file");
 
         if (NULL == (line_buf = HDmalloc(PATH_MAX)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -2302,7 +2333,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-open_config_file(const char *base_filename, const char *subfile_dir, uint64_t file_id, const char *mode,
+open_config_file(const char *base_filename, const char *config_dir, uint64_t file_id, const char *mode,
                  FILE **config_file_out)
 {
     hbool_t config_file_exists = FALSE;
@@ -2312,7 +2343,7 @@ open_config_file(const char *base_filename, const char *subfile_dir, uint64_t fi
     herr_t  ret_value          = SUCCEED;
 
     HDassert(base_filename);
-    HDassert(subfile_dir);
+    HDassert(config_dir);
     HDassert(file_id != UINT64_MAX);
     HDassert(mode);
     HDassert(config_file_out);
@@ -2322,14 +2353,14 @@ open_config_file(const char *base_filename, const char *subfile_dir, uint64_t fi
     if (*base_filename == '\0')
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid base HDF5 filename '%s'",
                                 base_filename);
-    if (*subfile_dir == '\0')
-        subfile_dir = ".";
+    if (*config_dir == '\0')
+        config_dir = ".";
 
     if (NULL == (config_filename = HDmalloc(PATH_MAX)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
                base_filename, file_id);
 
     /* Determine whether a subfiling configuration file exists */

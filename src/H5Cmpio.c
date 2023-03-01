@@ -1003,6 +1003,10 @@ H5C__collective_write(H5F_t *f)
         bufs[0]  = base_buf;
         types[0] = entry_ptr->type->mem_type;
 
+        /* Treat global heap as raw data */
+        if (types[0] == H5FD_MEM_GHEAP)
+            types[0] = H5FD_MEM_DRAW;
+
         node = H5SL_next(node);
         i    = 1;
         while (node) {
@@ -1015,6 +1019,10 @@ H5C__collective_write(H5F_t *f)
             sizes[i] = entry_ptr->size;
             bufs[i]  = entry_ptr->image_ptr;
             types[i] = entry_ptr->type->mem_type;
+
+            /* Treat global heap as raw data */
+            if (types[i] == H5FD_MEM_GHEAP)
+                types[i] = H5FD_MEM_DRAW;
 
             /* Advance to next node & array location */
             node = H5SL_next(node);
