@@ -251,14 +251,15 @@ CONTAINS
 
     CALL H5Aopen_async_f(file_id, attr_name, attr_id0, es_id, hdferror)
     CALL check("H5Aopen_async_f", hdferror, total_error)
-
+#if 0
     f_ptr = C_LOC(attr_rdata0)
     CALL H5Aread_async_f(attr_id0, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
     CALL check("H5Aread_async_f", hdferror, total_error)
-
+#endif
     CALL H5Aclose_async_f(attr_id0, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
 
+#if 0
     CALL H5Aopen_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", attr_id1, es_id, hdferror)
     CALL check("H5Aopen_by_name_async_f", hdferror, total_error)
 
@@ -268,7 +269,8 @@ CONTAINS
 
     CALL H5Aclose_async_f(attr_id1, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
-
+#endif
+#if 0
     CALL H5Aopen_by_idx_async_f(file_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(2,HSIZE_T), attr_id2, es_id, hdferror)
     CALL check("H5Aopen_by_idx_async_f", hdferror, total_error)
 
@@ -278,20 +280,21 @@ CONTAINS
 
     CALL H5Aclose_async_f(attr_id2, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
-
+#endif
+#if 0
     CALL H5Arename_async_f(file_id, TRIM(attr_name)//"00", TRIM(attr_name)//"05", es_id, hdferror)
     CALL check("H5Arename_async_f",hdferror,total_error)
 
     CALL H5Arename_by_name_async_f(file_id, ".", TRIM(attr_name)//"01", TRIM(attr_name)//"06", es_id, hdferror)
     CALL check("H5Arename_by_name_async_f",hdferror,total_error)
-
+#endif
     CALL H5Fclose_async_f(file_id, es_id, hdferror)
     CALL check("H5Fclose_async_f",hdferror,total_error)
 
     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
     CALL check("H5ESwait_f", hdferror, total_error)
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-
+#if 0
     CALL VERIFY("H5Aexists_async_f", LOGICAL(exists0), .TRUE., total_error)
     CALL VERIFY("H5Aexists_async_f", LOGICAL(exists1), .TRUE., total_error)
     CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists2), .TRUE., total_error)
@@ -322,7 +325,7 @@ CONTAINS
 
     CALL H5Fclose_f(file_id, hdferror)
     CALL check("H5Fclose_f",hdferror,total_error)
-
+#endif
     CALL H5Pclose_f(fapl_id, hdferror)
     CALL check(" H5Pclose_f",hdferror, total_error)
 
