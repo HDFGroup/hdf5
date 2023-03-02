@@ -221,10 +221,6 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, un
     else
         p += attr->shared->ds_size;
 
-    /* Get the datatype's size */
-    if (0 == (dt_size = H5T_get_size(attr->shared->dt)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "unable to get datatype size")
-
     /* Get the datatype & dataspace sizes */
     if (0 == (dt_size = H5T_get_size(attr->shared->dt)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "unable to get datatype size")
@@ -234,6 +230,9 @@ H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, un
 
     /* Compute the size of the data */
     H5_CHECKED_ASSIGN(attr->shared->data_size, size_t, ds_size * (hsize_t)dt_size, hsize_t);
+    /* Check if multiplication has overflown */
+    if ((attr->shared->data_size / dt_size) != ds_size)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds addressable range")
 
     /* Go get the data */
     if (attr->shared->data_size) {

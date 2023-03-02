@@ -327,6 +327,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_old.h5
       ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_new.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tCVE-2021-37501_attr_decode.h5
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
@@ -1145,6 +1146,9 @@
   # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
   ADD_H5_TEST (tCVE_2018_11206_fill_old 1 tCVE_2018_11206_fill_old.h5)
   ADD_H5_TEST (tCVE_2018_11206_fill_new 1 tCVE_2018_11206_fill_new.h5)
+  # test to verify fix for CVE-2021-37501: multiplication overflow in H5O__attr_decode()
+  # https://github.com/ST4RF4LL/Something_Found/blob/main/HDF5_v1.13.0_h5dump_heap_overflow.assets/poc
+  ADD_H5_TEST (tCVE-2021-37501_attr_decode 1 tCVE-2021-37501_attr_decode.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
