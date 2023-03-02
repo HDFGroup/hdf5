@@ -2562,14 +2562,11 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
     dataset = dset_info->dset;
     HDassert(dataset);
 
-    /* Don't use selection I/O if it's globally disabled, there is a type
-     * conversion, or if there are filters on the dataset (for now) */
-    if (dset_info->io_ops.single_read != H5D__select_read || dataset->shared->dcpl_cache.pline.nused > 0)
+    /* Don't use selection I/O if there are filters on the dataset (for now) */
+    if (dataset->shared->dcpl_cache.pline.nused > 0)
         ret_value = FALSE;
     else {
         hbool_t page_buf_enabled;
-
-        HDassert(dset_info->io_ops.single_write == H5D__select_write);
 
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
@@ -2768,7 +2765,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
 
-        /* Only perform I/O if not performing multi dataset I/O, otherwise the
+        /* Only perform I/O if not performing multi dataset I/O or type conversion, otherwise the
          * higher level will handle it after all datasets have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             /* Issue selection I/O call (we can skip the page buffer because we've
@@ -2789,6 +2786,11 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
         }     /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was requested) */
+        io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
     }         /* end if */
     else {
         H5D_io_info_t ctg_io_info; /* Contiguous I/O info object */
@@ -3151,7 +3153,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
 
-        /* Only perform I/O if not performing multi dataset I/O, otherwise the
+        /* Only perform I/O if not performing multi dataset I/O or type conversion, otherwise the
          * higher level will handle it after all datasets have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             /* Issue selection I/O call (we can skip the page buffer because we've
@@ -3172,6 +3174,11 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
         }     /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was requested) */
+        io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
     }         /* end if */
     else {
         /* Iterate through nodes in chunk skip list */

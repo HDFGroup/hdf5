@@ -1437,13 +1437,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
         HDassert(io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused == 0);
         if (io_info->dsets_info[i].layout->type == H5D_CHUNKED)
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
-        else if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
+        else if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS)
             actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-
-            /* if only single-dset */
-            if (1 == io_info->count)
-                actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
-        }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
     }
