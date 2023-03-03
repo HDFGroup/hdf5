@@ -848,7 +848,7 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Report that collective contiguous I/O was used */
         io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
+    }  /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_read)(io_info, dinfo) < 0)
@@ -918,7 +918,6 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 if (io_info->sel_pieces)
                     io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
                 io_info->pieces_added++;
-
             }
         }
 
@@ -926,7 +925,7 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Report that collective contiguous I/O was used */
         io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
+    }  /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_write)(io_info, dinfo) < 0)

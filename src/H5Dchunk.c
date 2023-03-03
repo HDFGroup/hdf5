@@ -2788,10 +2788,11 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         }     /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was requested) */
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was
+         * requested) */
         io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    }         /* end if */
+    }  /* end if */
     else {
         H5D_io_info_t ctg_io_info; /* Contiguous I/O info object */
         H5D_storage_t ctg_store;   /* Chunk storage information as contiguous dataset */
@@ -3176,10 +3177,11 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         }     /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was requested) */
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was
+         * requested) */
         io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
 #endif /* H5_HAVE_PARALLEL */
-    }         /* end if */
+    }  /* end if */
     else {
         /* Iterate through nodes in chunk skip list */
         chunk_node = H5D_CHUNK_GET_FIRST_NODE(dset_info);
