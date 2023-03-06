@@ -79,12 +79,14 @@ while getopts "rihqvpf:" option; do
    esac
 done
 
+#echo "PMI_RANK $PMI_RANK $OMPI_COMM_WORLD_LOCAL_SIZE"
+
 FAILED=1
 ############################################################
 # Configure file checks                                    #
 ############################################################
 #
-SUBF_CONFDIR="${H5FD_SUBFILING_SUBFILE_PREFIX:-.}"
+SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-.}"
 WRKDIR=$PWD
 
 #if running script in parallel, make sure h5fuse mpi is accessible
@@ -96,14 +98,12 @@ if [ "$parallel" == "true" ]; then
   fi
 fi
 
-# cd to the subfiles location
+# cd to the subfile configuration location
 if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
    cd "$SUBF_CONFDIR"
 fi
 
-# cp the configure file from the global file system
-#cp "$WRKDIR/*.config" . > /dev/null 2>&1
-cp "$WRKDIR/*.config" . 2>/dev/null
+# Try to find the config file
 if [ -z "$file_config" ]; then
     nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
     if [[ "$nfiles" != "1" ]]; then
