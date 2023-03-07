@@ -4017,7 +4017,7 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  * \brief Returns maximum data sieve buffer size
  *
  * \fapl_id{fapl_id}
- * \param[in] size Maximum size, in bytes, of data sieve buffer
+ * \param[out] size Maximum size, in bytes, of data sieve buffer
  *
  * \return \herr_t
  *
