@@ -15,8 +15,6 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/red ${PROJECT_BINARY_DIR}/blue ${PROJECT_BINARY_DIR}/u2w)
-
 set (text_dox_ex_CLEANFILES
     d1.h5
 )
@@ -56,9 +54,6 @@ if (HDF5_TEST_SERIAL)
       )
     endif ()
     set_tests_properties (DOXYGEN-EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_DOXYGEN_EXAMPLES)
-    if (last_test)
-      set_tests_properties (DOXYGEN-EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
-    endif ()
     set (last_test "DOXYGEN-EXAMPLES-${example}")
   endforeach ()
 endif ()
