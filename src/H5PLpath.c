@@ -819,7 +819,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5PL__find_plugin_in_path
  *
- * Purpose:     Given a path, this function opens the directory and envokes
+ * Purpose:     Given a path, this function opens the directory and invokes
  *              another function to go through all files to find the right
  *              plugin library. Two function definitions are for Unix and
  *              Windows.
