@@ -2326,8 +2326,8 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *          used as parameters to control the filter. In a filter's
  *          \p set_local method (called from \p H5Dcreate), the values are
  *          interpreted and possibly modified before they are used to control
- *          the filter. These, possibly modified, values are then stored in
- *          the dataset object header as part of the filter information.
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
  *
  *          The \p flags argument is a bit vector with the following
  *          fields specifying certain general properties of the filter:
