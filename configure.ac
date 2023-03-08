@@ -2507,7 +2507,7 @@ AC_ARG_ENABLE([optimization],
                                details.
                                Alternatively, optimization options can
                                be specified directly by specifying them as a
-                               string value. These custom optimzation flags will
+                               string value. These custom optimization flags will
                                completely replace all other optimization flags.
                                [default depends on build mode: debug=debug,
                                 production=high, clean=none]
