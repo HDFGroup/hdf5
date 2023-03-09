@@ -84,7 +84,7 @@
  *
  * The HDF5 library does not support filters for contiguous datasets because of
  * the difficulty of implementing random access for partial I/O. Compact dataset
- * filters are not supported because it would not produce significant results.
+ * filters are not supported because they would not produce significant results.
  *
  * Filter identifiers for the filters distributed with the HDF5
  * Library are as follows:
