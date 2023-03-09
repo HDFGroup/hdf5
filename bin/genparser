@@ -21,7 +21,7 @@
 #
 # There is NO dependency in either the autotools or CMake to regenerate
 # the parser code. If you modify H5LT analyze.l or H5LTparse.y, you
-# will need to run this scrpit manually on a system with a suitable
+# will need to run this script manually on a system with a suitable
 # lexer and parser generator.
 #
 # IMPORTANT OS X NOTE
