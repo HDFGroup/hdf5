@@ -1118,7 +1118,7 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          (with an absolute name based in the file’s root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
- *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          (a dot). (Note that when \p loc_id fully specifies the group
  *          that is to serve as the root of the iteration, the user may wish to
  *          consider using H5Lvisit2() instead of H5Lvisit_by_name2().)
  *
@@ -1879,7 +1879,7 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          (with an absolute name based in the file’s root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
- *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          (a dot). (Note that when \p loc_id fully specifies the group
  *          that is to serve as the root of the iteration, the user may wish to
  *          consider using H5Lvisit1() instead of H5Lvisit_by_name1().)
  *

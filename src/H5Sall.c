@@ -1109,7 +1109,7 @@ done:
  NAME
     H5S_select_all
  PURPOSE
-    Specify the the entire extent is selected
+    Specify the entire extent is selected
  USAGE
     herr_t H5S_select_all(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify
@@ -1152,7 +1152,7 @@ done:
  NAME
     H5Sselect_all
  PURPOSE
-    Specify the the entire extent is selected
+    Specify the entire extent is selected
  USAGE
     herr_t H5Sselect_all(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify

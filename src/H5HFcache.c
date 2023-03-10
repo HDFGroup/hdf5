@@ -3385,7 +3385,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                  * If the entry is unprotected and unpinned, we simply
                  * protect it.
                  *
-                 * If, however, the the child iblock is already protected,
+                 * If, however, the child iblock is already protected,
                  * but not pinned, we have a bit of a problem, as we have
                  * no legitimate way of looking up its pointer in memory.
                  *

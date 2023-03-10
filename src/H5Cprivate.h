@@ -1125,7 +1125,7 @@ typedef int H5C_ring_t;
  *              flag will only be applied to one entry, the superblock,
  *              and the code utilizing these flags is protected with HDasserts
  *              to enforce this. This restraint can certainly be relaxed in
- *              the future if the the need for multiple entries getting flushed
+ *              the future if the need for multiple entries getting flushed
  *              last or collectively arises, though the code allowing for that
  *              will need to be expanded and tested appropriately if that
  *              functionality is desired.
