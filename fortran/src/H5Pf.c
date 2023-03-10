@@ -1756,7 +1756,7 @@ DONE:
  * INPUTS
  *  prp_id   - property list identifier
  * OUTPUTS
- *  nfilters - number of filters defined in the filter pipline
+ *  nfilters - number of filters defined in the filter pipeline
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

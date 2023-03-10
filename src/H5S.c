@@ -1650,7 +1650,7 @@ H5S_decode(const unsigned char **p)
 {
     H5F_t               *f = NULL;         /* Fake file structure*/
     H5S_t               *ds;               /* Decoded dataspace */
-    H5S_extent_t        *extent;           /* Entent of decoded dataspace */
+    H5S_extent_t        *extent;           /* Extent of decoded dataspace */
     const unsigned char *pp = (*p);        /* Local pointer for decoding */
     size_t               extent_size;      /* size of the extent message*/
     uint8_t              sizeof_size;      /* 'Size of sizes' for file */
