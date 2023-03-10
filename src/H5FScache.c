@@ -436,7 +436,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          *        H5F_addr_defined(fspace->addr)
          *
-         *    will both be TRUE.  If this contition does not hold, then
+         *    will both be TRUE.  If this condition does not hold, then
          *    either the free space info is not persistent
          *    (!H5F_addr_defined(fspace->addr)???) or the section info
          *    contains no free space data that must be written to file
