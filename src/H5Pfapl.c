@@ -5957,7 +5957,7 @@ H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc,
                     "Minimum metadata fractions must be between 0 and 100 inclusive")
     if (min_raw_perc > 100)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "Minimum rawdata fractions must be between 0 and 100 inclusive")
+                    "Minimum raw data fractions must be between 0 and 100 inclusive")
 
     if (min_meta_perc + min_raw_perc > 100)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -5969,7 +5969,7 @@ H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc,
     if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &min_meta_perc) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set percentage of min metadata entries")
     if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &min_raw_perc) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set percentage of min rawdata entries")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set percentage of min raw data entries")
 
 done:
     FUNC_LEAVE_API(ret_value)
