@@ -181,6 +181,10 @@ if [ "$parallel" == "true" ]; then
     rank_size=$(./h5fuse_p_opt)
     read -r mpi_rank mpi_size <<<"$rank_size"
 
+    #nstart=$(( mpi_rank*nsubfiles/mpi_size ))
+    #nend=$(( (mpi_rank+1)*nsubfiles/mpi_size ))
+
+
     # Divide the subfiles among the ranks
     iwork1=$(( nsubfiles / mpi_size ))
     iwork2=$(( nsubfiles % mpi_size ))
@@ -198,6 +202,8 @@ icnt=1
 skip=0
 seek=0
 seek_cnt=0
+bckgrd="" # run dd in the backgroud, don't do that if running as a parallel job
+#bckgrd="&"
 for i in "${subfiles[@]}"; do
 
     subfile="${subfile_dir}/${i}"
@@ -227,7 +233,7 @@ for i in "${subfiles[@]}"; do
                   if [ "$quiet" == "false" ]; then
                       echo -e "$GRN $EXEC $NC"
                   fi
-                  err="$( $EXEC > /dev/null 2>&1 &)"
+                  err="$( $EXEC > /dev/null 2>&1 $bckgrd)"
                   if [ "$verbose" == "true" ]; then
                       echo -e "$CYN" $err "$NC"
                   fi
