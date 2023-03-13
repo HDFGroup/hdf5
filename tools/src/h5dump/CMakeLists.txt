@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5DUMP C)
 # --------------------------------------------------------------------
 # Add the h5dump executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5dump
       ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump.c
       ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
@@ -50,7 +50,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5DUMP_SRC_FORMAT h5dump)
   else ()
     clang_format (HDF5_H5DUMP_SRC_FORMAT h5dump-shared)

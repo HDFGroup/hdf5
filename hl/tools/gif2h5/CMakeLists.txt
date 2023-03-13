@@ -14,7 +14,7 @@ set (GIF2H5_SOURCES
 )
 
 #-- Add gif2hdf5 program
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (gif2h5 ${GIF2H5_SOURCES})
   target_compile_options(gif2h5 PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (gif2h5 PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -44,7 +44,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_HL_TOOLS_GIF2H5_FORMAT gif2h5)
   else ()
     clang_format (HDF5_HL_TOOLS_GIF2H5_FORMAT gif2h5-shared)
@@ -56,7 +56,7 @@ set (hdf2gif_SOURCES
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdf2gif.c
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdfgifwr.c
 )
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h52gif ${hdf2gif_SOURCES})
   target_compile_options(h52gif PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (h52gif PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -86,7 +86,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_HL_TOOLS_H52GIF_FORMAT h52gif)
   else ()
     clang_format (HDF5_HL_TOOLS_H52GIF_FORMAT h52gif-shared)
@@ -99,7 +99,7 @@ if (BUILD_TESTING AND HDF5_TEST_SERIAL)
   #  used in the CMake Build system as we rely on the test files that are
   #  shipped with HDF5 source archives
   # --------------------------------------------------------------------
-  if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+  if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
       add_executable (hl_h52gifgentest ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/h52gifgentst.c)
       target_include_directories (hl_h52gifgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
       TARGET_C_PROPERTIES (hl_h52gifgentest STATIC)
