@@ -475,6 +475,11 @@ if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
   set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
 endif ()
 
+# Force only shared libraries if BUILD_STATIC_LIBS OFF
+if (NOT BUILD_STATIC_LIBS AND BUILD_SHARED_LIBS)
+  set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
+endif ()
+
 if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
   set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
