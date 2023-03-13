@@ -82,7 +82,7 @@ foreach (example ${F2003_examples})
   if(MSVC)
     set_property(TARGET f03_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     target_include_directories (f03_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
@@ -123,7 +123,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   if(MSVC)
     set_property(TARGET f90_ex_ph5example PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     target_include_directories (f90_ex_ph5example
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
