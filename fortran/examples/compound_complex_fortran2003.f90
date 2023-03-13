@@ -1,6 +1,5 @@
 ! This is the F2003 version of the h5_compound.c example source code.
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-! Copyright by the Board of Trustees of the University of Illinois.         *
 ! All rights reserved.                                                      *
 !                                                                           *
 ! This file is part of HDF5.  The full HDF5 copyright notice, including     *
