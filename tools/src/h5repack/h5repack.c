@@ -530,10 +530,12 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             buf = NULL;
         } /*H5T_REFERENCE*/
 
-        if (options->verbose == 2)
-            HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
-        else
-            HDprintf(FORMAT_OBJ_ATTR, "attr", name);
+        if (options->verbose > 0) {
+            if (options->verbose == 2)
+                HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
+            else
+                HDprintf(FORMAT_OBJ_ATTR, "attr", name);
+        }
 
         /*---------------------------------------------------------------------
          * close
