@@ -949,7 +949,7 @@ endif ()
 ##############################################################################
 ##############################################################################
 
-if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
     target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

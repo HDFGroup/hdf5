@@ -4,7 +4,7 @@ project (HDF5_TOOLS_TEST_H5DIFF C)
 # --------------------------------------------------------------------
 # Add the h5diff and test executables
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   add_executable (h5diffgentest ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
   target_include_directories (h5diffgentest PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5diffgentest STATIC)
