@@ -470,7 +470,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T__enum_valueof
  *
- * Purpose:	Finds the value that corresponds the specified symbol
+ * Purpose:	Finds the value that corresponds to the specified symbol
  *		NAME of an enumeration data type DT and copy it to the VALUE
  *		result buffer. The VALUE should be allocated by the caller to
  *		be large enough for the result.
