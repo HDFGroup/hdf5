@@ -790,7 +790,7 @@ H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_
  *          H5Odecr_refcount() should be used.
  *
  *          An object’s reference count is the number of hard links in the
- *          file that points to that object. See the “Programming Model”
+ *          file that point to that object. See the “Programming Model”
  *          section of the HDF5 Groups chapter in the -- <em>\ref UG</em>
  *          for a complete discussion of reference counts.
  *
