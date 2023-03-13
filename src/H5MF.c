@@ -3236,7 +3236,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *           multi file drivers, as the self referential free space
          *           manager header and section info can be stored in up to
          *           two different files -- requiring that up to two EOA's
-         *           be stored in the free space managers super block
+         *           be stored in the free space manager's superblock
          *           extension message.
          *
          *           As of this writing, we are solving this problem by
