@@ -456,30 +456,30 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to Build Shared and Static libs, default is both
 #-----------------------------------------------------------------------------
+option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
+mark_as_advanced (ONLY_SHARED_LIBS)
 option (BUILD_STATIC_LIBS "Build Static Libraries" ON)
 set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
-option (ONLY_SHARED_LIBS "Only Build Shared Libraries" OFF)
-mark_as_advanced (ONLY_SHARED_LIBS)
+
+# only shared libraries is true if all OFF
+if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
+  set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
+endif ()
+
+# only shared libraries is true forces settings
+if (ONLY_SHARED_LIBS)
+  set (H5_ENABLE_STATIC_LIB NO)
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+  set (BUILD_STATIC_LIBS OFF CACHE BOOL "Build Static Libraries")
+endif ()
 
 if (BUILD_STATIC_LIBS)
   set (H5_ENABLE_STATIC_LIB YES)
 endif ()
 if (BUILD_SHARED_LIBS)
   set (H5_ENABLE_SHARED_LIB YES)
-endif ()
-
-# only shared libraries is true if all OFF or static is off
-if (NOT BUILD_STATIC_LIBS)
-  set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
-else ()
-  set (ONLY_SHARED_LIBS OFF CACHE BOOL "Only Build Shared Libraries" FORCE)
-endif ()
-
-if (ONLY_SHARED_LIBS)
-  set (H5_ENABLE_STATIC_LIB NO)
-  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
 endif ()
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
