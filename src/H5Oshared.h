@@ -418,7 +418,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to update native message")
 #endif /* H5O_SHARED_POST_COPY_FILE_UPD */
 
-    /* Make sure that if the the source or destination is committed, both are
+    /* Make sure that if the source or destination is committed, both are
      * committed */
     HDassert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) ==
              (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));

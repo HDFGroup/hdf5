@@ -211,7 +211,7 @@ extern "C" {
  * \details H5Mcreate() creates a new map object for storing key-value
  *          pairs. The in-file datatype for keys is defined by \p key_type_id
  *          and the in-file datatype for values is defined by \p val_type_id. \p
- *          loc_id specifies the location to create the the map object and \p
+ *          loc_id specifies the location to create the map object and \p
  *          name specifies the name of the link to the map object relative to
  *          \p loc_id.
  *

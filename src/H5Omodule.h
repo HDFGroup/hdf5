@@ -52,7 +52,7 @@
  *
  * HDF5 objects are deleted as a side effect of rendering them unreachable
  * from the root group. The net effect is the diminution of the object's
- * reference count to zero, which can (but should not usually) be effected
+ * reference count to zero, which can (but should not usually) be affected
  * by a function in this module.
  *
  * <table>

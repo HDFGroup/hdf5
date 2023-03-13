@@ -1016,7 +1016,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
 #endif /* H5O_ENABLE_BOGUS */
 
     /* Add a modification time message, if using older format. */
-    /* (If using v18 format versions and above, the the modification time is part of the object
+    /* (If using v18 format versions and above, the modification time is part of the object
      *  header and doesn't use a separate message -QAK)
      */
     if (!use_at_least_v18)
@@ -1506,7 +1506,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
         if (H5FO_top_incr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
 
-        /* We're the first dataset to use the the shared info */
+        /* We're the first dataset to use the shared info */
         dataset->shared->fo_count = 1;
 
         /* Set the external file prefix */
