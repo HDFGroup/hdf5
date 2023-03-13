@@ -209,7 +209,7 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *
  *          H5Lcopy() retains the creation time and the target of the original
  *          link. However, since the link may be renamed, the character
- *          encoding is  specified in \p lcpl_id rather than that of the
+ *          encoding is specified in \p lcpl_id rather than in that of the
  *          original link. Other link creation properties are ignored.
  *
  *          If the link is a soft link, also known as a symbolic link, its
