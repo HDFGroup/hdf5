@@ -15,7 +15,7 @@ on:
       - 'COPYING**'
       - '**.md'
 
-# Using concurrency to cancel any in-progress job or run
+#  Using concurrency to cancel any in-progress job or run
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
