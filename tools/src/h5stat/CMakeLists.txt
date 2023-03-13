@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5STAT C)
 # --------------------------------------------------------------------
 # Add the h5stat executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5stat ${HDF5_TOOLS_SRC_H5STAT_SOURCE_DIR}/h5stat.c)
   target_include_directories (h5stat PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5stat PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -32,7 +32,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5STAT_SRC_FORMAT h5stat)
   else ()
     clang_format (HDF5_H5STAT_SRC_FORMAT h5stat-shared)
