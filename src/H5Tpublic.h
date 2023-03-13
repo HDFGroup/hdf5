@@ -1138,7 +1138,7 @@ H5_DLL herr_t H5Tlock(hid_t type_id);
  * \ingroup H5T
  *
  * \brief Commits a transient datatype, linking it into the file and creating
- *        a newly committed datatype
+ *        a new committed datatype
  *
  * \fg_loc_id
  * \param[in] name Name given to committed datatype
