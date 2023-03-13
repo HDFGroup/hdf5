@@ -463,12 +463,12 @@ set (H5_ENABLE_STATIC_LIB NO)
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
 
-# only shared libraries is true if all OFF
+# only shared libraries is true if user forces all OFF
 if (NOT BUILD_STATIC_LIBS AND NOT BUILD_SHARED_LIBS)
   set (ONLY_SHARED_LIBS ON CACHE BOOL "Only Build Shared Libraries" FORCE)
 endif ()
 
-# only shared libraries is true forces settings
+# only shared libraries is set ON by user then force settings
 if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
   set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
