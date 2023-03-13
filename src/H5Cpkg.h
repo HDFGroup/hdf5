@@ -4034,7 +4034,7 @@ typedef struct H5C_tag_info_t {
  *
  *      2) A pinned entry can be accessed or modified at any time.
  *         This places an additional burden on the associated pre-serialize
- *       and serialize callbacks, which must ensure the the entry is in
+ *       and serialize callbacks, which must ensure the entry is in
  *       a consistent state before creating an image of it.
  *
  *      3) A pinned entry can be marked as dirty (and possibly
@@ -4398,7 +4398,7 @@ typedef struct H5C_tag_info_t {
  * order, we scan the index repeatedly, once for each flush dependency
  * height in increasing order.
  *
- * This operation is complicated by the fact that entries other the the
+ * This operation is complicated by the fact that entries other than the
  * target may be inserted, loaded, relocated, or removed from the cache
  * (either by eviction or the take ownership flag) as the result of a
  * pre_serialize or serialize callback.  While entry removals are not

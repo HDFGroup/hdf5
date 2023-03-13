@@ -120,7 +120,7 @@
  *
  * \brief Event Set Interface
  *
- * \details \Bold{This interface can be only used with the HDF5 VOL connectors that
+ * \details \Bold{This interface can only be used with the HDF5 VOL connectors that
  *          enable the asynchronous feature in HDF5.} The native HDF5 library has
  *          only synchronous operations.
  *
