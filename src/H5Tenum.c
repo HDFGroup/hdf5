@@ -333,7 +333,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T__enum_nameof
  *
- * Purpose:	Finds the symbol name that corresponds the specified
+ * Purpose:	Finds the symbol name that corresponds to the specified
  *		VALUE of an enumeration data type DT. At most SIZE characters
  *		of the symbol name are copied into the NAME buffer. If the
  *		entire symbol name and null terminator do not fit in the NAME
