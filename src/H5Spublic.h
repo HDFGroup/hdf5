@@ -293,7 +293,7 @@ H5_DLL hid_t H5Screate(H5S_class_t type);
  *       H5Sselect_elements() selects array elements in a dataspace. These
  *       functions are used for subsetting. H5Sselect_none() removes all
  *       selections from a dataspace and is used in Parallel HDF5 when a process
- *       does not have or needs to write data.
+ *       does not have or need to write data.
  *
  * \version 1.4.0 Fortran subroutine introduced.
  *
