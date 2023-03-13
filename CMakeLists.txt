@@ -471,8 +471,8 @@ endif ()
 # only shared libraries is set ON by user then force settings
 if (ONLY_SHARED_LIBS)
   set (H5_ENABLE_STATIC_LIB NO)
-  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
-  set (BUILD_STATIC_LIBS OFF CACHE BOOL "Build Static Libraries")
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
+  set (BUILD_STATIC_LIBS OFF CACHE BOOL "Build Static Libraries" FORCE)
 endif ()
 
 if (BUILD_STATIC_LIBS)
