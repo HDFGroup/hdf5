@@ -15,15 +15,14 @@ on:
       - 'COPYING**'
       - '**.md'
 
-# Using concurrency to cancel any in-progress job or run
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
-
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
 jobs:
+
+    concurrency:
+      group: build-linux-${{ github.workflow }}
+      cancel-in-progress: true
 
   # A workflow that builds the library and runs all the tests
   build_and_test:
