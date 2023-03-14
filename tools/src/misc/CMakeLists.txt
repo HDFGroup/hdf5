@@ -5,7 +5,7 @@ project (HDF5_TOOLS_SRC_MISC C)
 # Add the misc executables
 # --------------------------------------------------------------------
 #-- Misc Executables
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5debug ${HDF5_TOOLS_SRC_MISC_SOURCE_DIR}/h5debug.c)
   target_include_directories (h5debug PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5debug PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -90,7 +90,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5DEBUG_SRC_FORMAT h5debug)
     clang_format (HDF5_H5REPART_SRC_FORMAT h5repart)
     clang_format (HDF5_H5MKGRP_SRC_FORMAT h5mkgrp)
