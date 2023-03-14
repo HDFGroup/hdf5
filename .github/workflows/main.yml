@@ -1,5 +1,9 @@
 name: hdf5 dev CI
 
+concurrency: 
+      group: build-linux-${{ github.workflow }}-${{ github.sha }}
+      cancel-in-progress: true
+
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
   workflow_dispatch:
@@ -20,9 +24,6 @@ on:
 # run in parallel.
 jobs:
 
-    concurrency:
-      group: build-linux-${{ github.workflow }}
-      cancel-in-progress: true
 
   # A workflow that builds the library and runs all the tests
   build_and_test:
