@@ -87,7 +87,7 @@ endif ()
 # This executable is used to generate test files for the test_ds test.
 # It should only be run during development when new test files are needed
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
   target_compile_options(hl_gen_test_ds PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (hl_gen_test_ds PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")

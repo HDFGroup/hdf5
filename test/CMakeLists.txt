@@ -27,7 +27,7 @@ set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
   target_include_directories (${HDF5_TEST_LIB_TARGET}
       PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -76,7 +76,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIB_TARGET})
   else ()
     clang_format (HDF5_TEST_SRC_FORMAT ${HDF5_TEST_LIBSH_TARGET})
