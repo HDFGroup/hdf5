@@ -95,6 +95,7 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t cus
 static void test_create_and_close(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
+static void test_selection_strategies(void);
 static void test_read_different_stripe_size(void);
 static void test_subfiling_precreate_rank_0(void);
 static void test_subfiling_write_many_read_one(void);
@@ -105,6 +106,7 @@ static test_func tests[] = {
     test_create_and_close,
     test_config_file,
     test_stripe_sizes,
+    test_selection_strategies,
     test_read_different_stripe_size,
     test_subfiling_precreate_rank_0,
     test_subfiling_write_many_read_one,
@@ -793,6 +795,199 @@ test_stripe_sizes(void)
 }
 #undef SUBF_FILENAME
 #undef SUBF_NITER
+
+/*
+ * Test the different I/O Concentator selection strategies
+ * for the Subfiling VFD
+ */
+#define SUBF_FILENAME        "test_subfiling_selection_strategies.h5"
+#define NUM_RANKS_CHOICES    2
+#define NUM_CRITERIA_FORMATS 2
+static void
+test_selection_strategies(void)
+{
+    H5FD_subfiling_params_t cfg;
+    hid_t                   file_id      = H5I_INVALID_HID;
+    hid_t                   fapl_id      = H5I_INVALID_HID;
+    char                   *tmp_filename = NULL;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("I/O concentrator selection strategies");
+
+    tmp_filename = HDmalloc(PATH_MAX);
+    VRFY(tmp_filename, "HDmalloc succeeded");
+
+    for (H5FD_subfiling_ioc_select_t strategy = 0; strategy < ioc_selection_options; strategy++) {
+        /* Skip 1 IOC per node strategy since we assume it's
+         * the default strategy tested in this file. Skip
+         * "with config" strategy since it isn't supported.
+         */
+        if (strategy == SELECT_IOC_ONE_PER_NODE || strategy == SELECT_IOC_WITH_CONFIG)
+            continue;
+
+        /* Test with 1 MPI rank and then all MPI ranks */
+        for (size_t num_ranks_choice = 0; num_ranks_choice < NUM_RANKS_CHOICES; num_ranks_choice++) {
+            int num_active_ranks = mpi_size;
+
+            if (num_ranks_choice == 0)
+                num_active_ranks = 1;
+
+            /* Test with a selection strategy criteria string
+             * in the 'integer:[integer|string]' form and in
+             * the form of just a single value.
+             */
+            for (size_t criteria_format_choice = 0; criteria_format_choice < NUM_CRITERIA_FORMATS;
+                 criteria_format_choice++) {
+                MPI_Comm file_comm = comm_g;
+                char     criteria_buf[256];
+                char     sel_criteria[128]; /* Use char buffer for criteria as we may support
+                                               the "with config" strategy in the future */
+                int expected_num_subfiles;
+
+                cfg.ioc_selection = strategy;
+                cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+                cfg.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
+
+                switch (strategy) {
+                    case SELECT_IOC_EVERY_NTH_RANK: {
+                        int stride;
+
+                        /* Try to select a reasonable stride value */
+                        if (num_active_ranks <= 2)
+                            stride = 1;
+                        else if (num_active_ranks <= 8)
+                            stride = 2;
+                        else if (num_active_ranks <= 32)
+                            stride = 4;
+                        else if (num_active_ranks <= 128)
+                            stride = 8;
+                        else
+                            stride = 16;
+
+                        HDsnprintf(sel_criteria, 128, "%d", stride);
+
+                        expected_num_subfiles = ((num_active_ranks - 1) / stride) + 1;
+
+                        break;
+                    }
+
+                    case SELECT_IOC_TOTAL: {
+                        int n_iocs;
+
+                        /* Try to select a reasonable number of IOCs */
+                        if (num_active_ranks <= 2)
+                            n_iocs = 1;
+                        else if (num_active_ranks <= 8)
+                            n_iocs = 2;
+                        else if (num_active_ranks <= 32)
+                            n_iocs = 4;
+                        else if (num_active_ranks <= 128)
+                            n_iocs = 8;
+                        else
+                            n_iocs = 16;
+
+                        HDsnprintf(sel_criteria, 128, "%d", n_iocs);
+
+                        expected_num_subfiles = n_iocs;
+
+                        break;
+                    }
+
+                    case SELECT_IOC_ONE_PER_NODE:
+                    case SELECT_IOC_WITH_CONFIG:
+                    default:
+                        HDprintf("invalid IOC selection strategy\n");
+                        MPI_Abort(comm_g, -1);
+                }
+
+                if (criteria_format_choice == 0) {
+                    HDsnprintf(criteria_buf, 256, "%d:%s", strategy, sel_criteria);
+                }
+                else if (criteria_format_choice == 1) {
+                    HDsnprintf(criteria_buf, 256, "%s", sel_criteria);
+                }
+
+                VRFY(HDsetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA, criteria_buf, 1) >= 0,
+                     "HDsetenv succeeded");
+
+                HDassert(num_active_ranks == mpi_size || num_active_ranks == 1);
+
+                if ((num_active_ranks == mpi_size) || (mpi_rank == 0)) {
+                    h5_stat_t file_info;
+                    FILE     *subfile_ptr;
+                    int       num_digits;
+
+                    if (num_active_ranks < mpi_size)
+                        file_comm = MPI_COMM_SELF;
+
+                    fapl_id = create_subfiling_ioc_fapl(file_comm, info_g, TRUE, &cfg,
+                                                        H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+                    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+                    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+                    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+                    /*
+                     * Get the file inode value so we can construct the subfile names
+                     */
+                    VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+                    num_digits = (int)(HDlog10(expected_num_subfiles) + 1);
+
+                    /* Ensure all the subfiles are present */
+                    for (int i = 0; i < expected_num_subfiles; i++) {
+                        HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                                   (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
+
+                        /* Ensure file exists */
+                        subfile_ptr = HDfopen(tmp_filename, "r");
+                        VRFY(subfile_ptr, "HDfopen on subfile succeeded");
+                        VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                    }
+
+                    /* Ensure no extra subfiles are present */
+                    HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                               (uint64_t)file_info.st_ino, num_digits, expected_num_subfiles + 1,
+                               expected_num_subfiles);
+
+                    /* Ensure file doesn't exist */
+                    subfile_ptr = HDfopen(tmp_filename, "r");
+                    VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+
+                    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+                    mpi_code_g = MPI_Barrier(file_comm);
+                    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+                    H5E_BEGIN_TRY
+                    {
+                        H5Fdelete(SUBF_FILENAME, fapl_id);
+                    }
+                    H5E_END_TRY;
+
+                    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+                    VRFY(HDunsetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA) >= 0, "HDunsetenv succeeded");
+                }
+
+                mpi_code_g = MPI_Barrier(comm_g);
+                VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+            }
+        }
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    HDfree(tmp_filename);
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+#undef NUM_RANKS_CHOICES
+#undef NUM_CRITERIA_FORMATS
 
 /*
  * Test that opening a file with a different stripe
