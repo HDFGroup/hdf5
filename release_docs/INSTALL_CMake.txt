@@ -530,7 +530,7 @@ These five steps are described in detail below.
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
                 set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
-                set (LIBAEC_TGZ_ORIGPATH "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.0.6" CACHE STRING "Use LIBAEC from original location" FORCE)
+                set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original location" FORCE)
                 set (LIBAEC_TGZ_ORIGNAME "libaec-v1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
                 set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
                 #######################
@@ -567,7 +567,7 @@ These five steps are described in detail below.
                 #######
                 # fpzip
                 #######
-                set (FPZIP_GIT_URL "https://https://github.com/LLNL/fpzip" CACHE STRING "Use FPZIP from github repository" FORCE)
+                set (FPZIP_GIT_URL "https://github.com/LLNL/fpzip" CACHE STRING "Use FPZIP from github repository" FORCE)
                 set (FPZIP_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (FPZIP_TGZ_NAME "fpzip.tar.gz" CACHE STRING "Use FPZIP from compressed file" FORCE)
                 set (FPZIP_PACKAGE_NAME "fpzip" CACHE STRING "Name of FPZIP package" FORCE)
@@ -868,7 +868,7 @@ else ()
     H5_DEFAULT_PLUGINDIR    "/usr/local/hdf5/lib/plugin"
 endif ()
 if (BUILD_SZIP_WITH_FETCHCONTENT)
-    LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.0.6"
+    LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
     LIBAEC_TGZ_ORIGNAME       "Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
     LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    OFF
 if (BUILD_ZLIB_WITH_FETCHCONTENT)
