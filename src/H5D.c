@@ -2510,32 +2510,6 @@ done:
  *              H5D_chunk_iter_op_t cb  IN: User callback function, called for every chunk.
  *              void *op_data           IN/OUT: Optional user data passed on to user callback.
  *
- * Callback information:
- *      H5D_chunk_iter_op_t is defined as:
- *
- *        typedef int (*H5D_chunk_iter_op_t)(
- *            const hsize_t *offset,
- *            unsigned filter_mask,
- *            haddr_t addr,
- *            hsize_t size,
- *            void *op_data);
- *
- *      H5D_chunk_iter_op_t parameters:
- *          hsize_t *offset;        IN/OUT: Logical position of the chunk’s first element in units of dataset
- *                                          elements
- *          unsigned filter_mask;   IN: Bitmask indicating the filters used when the chunk was written haddr_t
- *          addr;                   IN: Chunk address in the file
- *          hsize_t;                IN: Chunk size in bytes, 0 if the chunk does not exist
- *          void *op_data;          IN/OUT: Pointer to any user-defined data associated with the operation.
- *
- *      The return values from an operator are:
- *          Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
- *              elements have been processed.
- *          Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
- *              value, indicating short-circuit success.
- *          Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
- *              indicating failure.
- *
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Gaute Hope
