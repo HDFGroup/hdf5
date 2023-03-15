@@ -567,7 +567,7 @@ These five steps are described in detail below.
                 #######
                 # fpzip
                 #######
-                set (FPZIP_GIT_URL "https://https://github.com/LLNL/fpzip" CACHE STRING "Use FPZIP from github repository" FORCE)
+                set (FPZIP_GIT_URL "https://github.com/LLNL/fpzip" CACHE STRING "Use FPZIP from github repository" FORCE)
                 set (FPZIP_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (FPZIP_TGZ_NAME "fpzip.tar.gz" CACHE STRING "Use FPZIP from compressed file" FORCE)
                 set (FPZIP_PACKAGE_NAME "fpzip" CACHE STRING "Name of FPZIP package" FORCE)
