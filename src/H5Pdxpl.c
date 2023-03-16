@@ -169,10 +169,10 @@
 #define H5D_XFER_DSET_IO_SEL_DEC H5P__dxfr_edc_dec
 #endif /* QAK */
 /* Definition for selection I/O mode property */
-#define H5D_XFER_SELECTION_IO_MODE_SIZE  sizeof(H5D_selection_io_mode_t)
-#define H5D_XFER_SELECTION_IO_MODE_DEF   H5D_SELECTION_IO_MODE_DEFAULT
-#define H5D_XFER_SELECTION_IO_MODE_ENC   H5P__dxfr_selection_io_mode_enc
-#define H5D_XFER_SELECTION_IO_MODE_DEC   H5P__dxfr_selection_io_mode_dec
+#define H5D_XFER_SELECTION_IO_MODE_SIZE sizeof(H5D_selection_io_mode_t)
+#define H5D_XFER_SELECTION_IO_MODE_DEF  H5D_SELECTION_IO_MODE_DEFAULT
+#define H5D_XFER_SELECTION_IO_MODE_ENC  H5P__dxfr_selection_io_mode_enc
+#define H5D_XFER_SELECTION_IO_MODE_DEC  H5P__dxfr_selection_io_mode_dec
 
 /******************/
 /* Local Typedefs */
@@ -284,7 +284,7 @@ static const H5T_conv_cb_t H5D_def_conv_cb_g =
 static const void  *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
 static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
-static const H5D_selection_io_mode_t      H5D_def_selection_io_mode_g = H5D_XFER_SELECTION_IO_MODE_DEF;
+static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g = H5D_XFER_SELECTION_IO_MODE_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -450,9 +450,8 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     if (H5P__register_real(pclass, H5D_XFER_SELECTION_IO_MODE_NAME, H5D_XFER_SELECTION_IO_MODE_SIZE,
-                           &H5D_def_selection_io_mode_g, NULL, NULL, NULL,
-                           H5D_XFER_SELECTION_IO_MODE_ENC, H5D_XFER_SELECTION_IO_MODE_DEC, NULL, NULL,
-                           NULL, NULL) < 0)
+                           &H5D_def_selection_io_mode_g, NULL, NULL, NULL, H5D_XFER_SELECTION_IO_MODE_ENC,
+                           H5D_XFER_SELECTION_IO_MODE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2290,7 +2289,7 @@ done:
 static herr_t
 H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
 {
-    const H5D_selection_io_mode_t *select_io_mode = 
+    const H5D_selection_io_mode_t *select_io_mode =
         (const H5D_selection_io_mode_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
@@ -2328,9 +2327,8 @@ H5P__dxfr_selection_io_mode_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dxfr_selection_io_mode_dec(const void **_pp, void *_value)
 {
-    H5D_selection_io_mode_t *select_io_mode =
-        (H5D_selection_io_mode_t *)_value; /* Selection I/O mode */
-    const uint8_t **pp = (const uint8_t **)_pp;
+    H5D_selection_io_mode_t *select_io_mode = (H5D_selection_io_mode_t *)_value; /* Selection I/O mode */
+    const uint8_t          **pp             = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2480,7 +2478,7 @@ done:
  * Purpose:     To set the selection I/O mode in the dataset
  *              transfer property list.
  *
- * Note:        The library may not perform selection I/O as it asks for if 
+ * Note:        The library may not perform selection I/O as it asks for if
  *              the layout callback determines that it is not feasible to do so.
  *
  * Return:      Success:    Non-negative
@@ -2521,7 +2519,7 @@ done:
  * Purpose:     To retrieve the selection I/O mode that is set in
  *              the dataset transfer property list.
  *
- * Note:        The library may not perform selection I/O as it asks for if 
+ * Note:        The library may not perform selection I/O as it asks for if
  *              the layout callback determines that it is not feasible to do so.
  *
  * Return:      Success:    Non-negative
