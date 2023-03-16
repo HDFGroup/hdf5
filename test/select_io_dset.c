@@ -101,6 +101,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
     hid_t       sid  = H5I_INVALID_HID;
     hid_t       dcpl = H5I_INVALID_HID;
     hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
     int         wbuf[DSET_SELECT_DIM];
@@ -143,6 +144,12 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
+        FAIL_STACK_ERROR;
+
     /* Set data transform */
     if (dtrans)
         if (H5Pset_data_transform(dxpl, expr) < 0)
@@ -153,7 +160,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         FAIL_STACK_ERROR;
 
     /* Read data from the dataset without data transform set in dxpl */
-    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data or transformed data read */
@@ -185,7 +192,11 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
     if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -197,7 +208,9 @@ error:
     {
         H5Sclose(sid);
         H5Dclose(did);
+        H5Pclose(dcpl);
         H5Pclose(dxpl);
+        H5Pclose(ntrans_dxpl);
     }
     H5E_END_TRY;
 
@@ -218,6 +231,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     hid_t   did  = H5I_INVALID_HID;
     hid_t   sid  = H5I_INVALID_HID;
     hid_t   dcpl = H5I_INVALID_HID;
+    hid_t   dxpl = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
     char   *wbuf = NULL;
@@ -226,6 +240,13 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
     if ((rbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
+        FAIL_STACK_ERROR;
+
+    /* Create dataset transfer property list */
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
     /* Create 1d data space */
@@ -256,11 +277,11 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     }
 
     /* Write the data to the dataset with little endian */
-    if (H5Dwrite(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+    if (H5Dwrite(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Read the data from the dataset with little endian */
-    if (H5Dread(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if (H5Dread(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data read little endian */
@@ -274,7 +295,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
         }
 
     /* Read the data from the dataset with big endian */
-    if (H5Dread(did, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if (H5Dread(did, H5T_STD_I32BE, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data read in big endian */
@@ -291,6 +312,10 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
 
     HDfree(wbuf);
     HDfree(rbuf);
@@ -304,6 +329,8 @@ error:
     {
         H5Sclose(sid);
         H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
     }
     H5E_END_TRY;
 
@@ -331,6 +358,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     hid_t       sid  = H5I_INVALID_HID;
     hid_t       dcpl = H5I_INVALID_HID;
     hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
     long        wbuf[DSET_SELECT_DIM];
@@ -372,6 +400,12 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
+        FAIL_STACK_ERROR;
+
     /* Set data transform */
     if (dtrans)
         if (H5Pset_data_transform(dxpl, expr) < 0)
@@ -381,8 +415,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    /* Read the data from the dataset with default dxpl */
-    if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    /* Read the data from the dataset without data transform in dxpl */
+    if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data or transformed data read */
@@ -414,7 +448,11 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
     if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -426,7 +464,9 @@ error:
     {
         H5Sclose(sid);
         H5Dclose(did);
+        H5Pclose(dcpl);
         H5Pclose(dxpl);
+        H5Pclose(ntrans_dxpl);
     }
     H5E_END_TRY;
 
@@ -448,6 +488,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     hid_t       sid  = H5I_INVALID_HID;
     hid_t       dcpl = H5I_INVALID_HID;
     hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
     short       wbuf[DSET_SELECT_DIM];
@@ -491,6 +532,12 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
+        FAIL_STACK_ERROR;
+
     /* Set data transform */
     if (dtrans) {
         if (H5Pset_data_transform(dxpl, expr) < 0)
@@ -501,8 +548,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dwrite(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    /* Read data from the dataset with default dxpl */
-    if (H5Dread(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    /* Read data from the dataset without data tranform in dxpl */
+    if (H5Dread(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data or transformed data read */
@@ -534,7 +581,11 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
     if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -546,7 +597,9 @@ error:
     {
         H5Sclose(sid);
         H5Dclose(did);
+        H5Pclose(dcpl);
         H5Pclose(dxpl);
+        H5Pclose(ntrans_dxpl);
     }
     H5E_END_TRY;
 
@@ -583,6 +636,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     hid_t   did       = H5I_INVALID_HID;
     hid_t   sid       = H5I_INVALID_HID;
     hid_t   dcpl      = H5I_INVALID_HID;
+    hid_t   dxpl      = H5I_INVALID_HID;
     hid_t   s1_tid    = H5I_INVALID_HID;
     hid_t   s2_tid    = H5I_INVALID_HID;
     hid_t   ss_ac_tid = H5I_INVALID_HID;
@@ -593,6 +647,13 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     s1_t   *s1_rbuf = NULL;
     s2_t   *s2_wbuf = NULL;
     s2_t   *s2_rbuf = NULL;
+
+    /* Create dataset transfer property list */
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        FAIL_STACK_ERROR;
 
     /* Allocate buffers for datasets */
     if (NULL == (s1_wbuf = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
@@ -643,11 +704,11 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     }
 
     /* Write all the data to the dataset */
-    if (H5Dwrite(did, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1_wbuf) < 0)
+    if (H5Dwrite(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, s1_wbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Read all the data from the dataset */
-    if (H5Dread(did, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1_rbuf) < 0)
+    if (H5Dread(did, s1_tid, H5S_ALL, H5S_ALL, dxpl, s1_rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
@@ -681,11 +742,11 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         FAIL_STACK_ERROR;
 
     /* Write s1_wbuf to the dataset with only subset members in ss_tid */
-    if (H5Dwrite(did, ss_ac_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1_wbuf) < 0)
+    if (H5Dwrite(did, ss_ac_tid, H5S_ALL, H5S_ALL, dxpl, s1_wbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Read the whole compound back */
-    if (H5Dread(did, ss_ac_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1_rbuf) < 0)
+    if (H5Dread(did, ss_ac_tid, H5S_ALL, H5S_ALL, dxpl, s1_rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify the compound fields have the correct (old or new) values */
@@ -719,7 +780,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         FAIL_STACK_ERROR;
 
     /* Read the dataset: will read only what is set in */
-    if (H5Dread(did, ss_bc_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1_rbuf) < 0)
+    if (H5Dread(did, ss_bc_tid, H5S_ALL, H5S_ALL, dxpl, s1_rbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
@@ -757,11 +818,11 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         s2_wbuf[i].c = (8 * i) + 2;
         s2_wbuf[i].d = (short)((8 * i) + 3);
     }
-    if (H5Dwrite(did, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2_wbuf) < 0)
+    if (H5Dwrite(did, s2_tid, H5S_ALL, H5S_ALL, dxpl, s2_wbuf) < 0)
         FAIL_STACK_ERROR;
 
     /* Read it back */
-    if (H5Dread(did, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2_rbuf) < 0) {
+    if (H5Dread(did, s2_tid, H5S_ALL, H5S_ALL, dxpl, s2_rbuf) < 0) {
         goto error;
     }
 
@@ -788,6 +849,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
 
     /* Release buffers */
     HDfree(s1_wbuf);
@@ -808,6 +873,8 @@ error:
         H5Tclose(ss_ac_tid);
         H5Tclose(ss_bc_tid);
         H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
     }
     H5E_END_TRY;
 
@@ -888,6 +955,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Create dataset transfer property list */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
@@ -1073,6 +1143,7 @@ error:
     H5E_BEGIN_TRY
     H5Pclose(dcpl);
     H5Pclose(dxpl);
+    H5Pclose(ntrans_dxpl);
     for (i = 0; i < (int)ndsets; i++) {
         H5Sclose(file_sids[i]);
         H5Sclose(mem_sids[i]);
@@ -1140,6 +1211,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     size_t  ndsets;
     int     i, j, mm;
     hid_t   dcpl = H5I_INVALID_HID;
+    hid_t   dxpl = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
 
@@ -1174,6 +1246,13 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     void       *rbufs[MULTI_NUM_DSETS];
 
     ndsets = MAX(MULTI_MIN_DSETS, MULTI_NUM_DSETS);
+
+    /* Create dataset transfer property list */
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        FAIL_STACK_ERROR;
 
     dims[0] = DSET_SELECT_DIM;
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1247,10 +1326,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = s1_tid;
 
-    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
-    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
 
     /* Verify data read */
@@ -1298,10 +1377,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     /* Datatype setting for write to dset0 */
     mem_tids[0] = ss_ac_tid;
 
-    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
-    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
 
     /* Verify data read */
@@ -1368,7 +1447,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     /* Datatype setting for read from <mm> dataset */
     mem_tids[mm] = ss_bc_tid;
 
-    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
 
     /* Verify data read */
@@ -1448,10 +1527,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
             s2_wbufi[i][j].d = (short)((8 * j) + 3);
         }
 
-    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
+    if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         TEST_ERROR;
 
-    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, rbufs) < 0)
+    if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         TEST_ERROR;
 
     /* Verify data read */
@@ -1466,6 +1545,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
             }
 
     if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dxpl) < 0)
         FAIL_STACK_ERROR;
 
     for (i = 0; i < (int)ndsets; i++) {
@@ -1488,12 +1569,13 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
 error:
     H5E_BEGIN_TRY
-    H5Pclose(dcpl);
-    for (i = 0; i < (int)ndsets; i++) {
-        H5Sclose(file_sids[i]);
-        H5Sclose(mem_sids[i]);
-        H5Dclose(dset_dids[i]);
-    }
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+        for (i = 0; i < (int)ndsets; i++) {
+            H5Sclose(file_sids[i]);
+            H5Sclose(mem_sids[i]);
+            H5Dclose(dset_dids[i]);
+        }
     H5E_END_TRY;
 
     if (total_wbuf)
@@ -1821,6 +1903,107 @@ error:
 
 } /* test_multi_dsets_size_change_no_bkg() */
 
+/*
+ * Verify H5Pset/get_selection_io API works as expected
+ */
+static herr_t
+test_set_get_select_io_mode(hid_t fid)
+{
+    hid_t       did  = H5I_INVALID_HID;
+    hid_t       sid  = H5I_INVALID_HID;
+    hid_t       dcpl = H5I_INVALID_HID;
+    hid_t       dxpl = H5I_INVALID_HID;
+    hsize_t     dims[1];
+    hsize_t     cdims[1];
+    int         i;
+    long        wbuf[DSET_SELECT_DIM];
+    H5D_selection_io_mode_t selection_io_mode;
+
+    if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+
+    /* default case */
+    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
+        TEST_ERROR;
+
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_DEFAULT)
+        TEST_ERROR;
+
+    /* Disable case */
+    if (H5Pset_selection_io(dxpl,H5D_SELECTION_IO_MODE_OFF) < 0)
+        TEST_ERROR;
+
+    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
+        TEST_ERROR;
+
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_OFF)
+        TEST_ERROR;
+
+    /* Enable case */
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+        TEST_ERROR;
+
+    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
+        TEST_ERROR;
+
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_ON)
+        TEST_ERROR;
+
+    /* Create 1d data space */
+    dims[0] = DSET_SELECT_DIM;
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR;
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+
+    cdims[0] = DSET_SELECT_CHUNK_DIM;
+    if (H5Pset_chunk(dcpl, 1, cdims) < 0)
+        FAIL_STACK_ERROR;
+
+    if ((did = H5Dcreate2(fid, "test_chk_dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+
+    /* Initialize data */
+    for (i = 0; i < DSET_SELECT_DIM; i++)
+        wbuf[i]       = i;
+
+    /* May change the selection io actually performed */
+    if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
+        TEST_ERROR;
+
+    /* Should still be enabled */
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_ON)
+        TEST_ERROR;
+
+    if (H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Pclose(dxpl);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* test_set_get_select_io_mode() */
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1842,10 +2025,6 @@ main(void)
     int      test_select_config;
     unsigned chunked;
     unsigned dtrans;
-
-    /* Activate selection I/O via environment variable */
-    if (HDsetenv("HDF5_USE_SELECTION_IO", "true", TRUE) < 0)
-        FAIL_STACK_ERROR;
 
     /* Testing setup */
     h5_reset();
@@ -1961,6 +2140,8 @@ main(void)
         } /* end dtrans */
 
     } /* end chunked */
+
+    nerrors += test_set_get_select_io_mode(fid);
 
     if (H5Fclose(fid) < 0)
         TEST_ERROR;

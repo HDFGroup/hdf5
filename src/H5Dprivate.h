@@ -84,6 +84,7 @@
 #define H5D_XFER_CONV_CB_NAME     "type_conv_cb"      /* Type conversion callback function */
 #define H5D_XFER_XFORM_NAME       "data_transform"    /* Data transform */
 #define H5D_XFER_DSET_IO_SEL_NAME "dset_io_selection" /* Dataset I/O selection */
+#define H5D_XFER_SELECTION_IO_MODE_NAME     "selection_io_mode"     /* Selection I/O mode */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_LINK_HARD_NAME        "coll_chunk_link_hard"

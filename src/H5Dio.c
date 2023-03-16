@@ -881,6 +881,8 @@ done:
 static herr_t
 H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info)
 {
+    H5D_selection_io_mode_t selection_io_mode;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
@@ -902,9 +904,10 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     /* Use provided dset_info */
     io_info->dsets_info = dset_info;
 
-    /* Start with selection I/O on if the global is on, layout callback will
+    /* Start with default selection I/O mode. If enabled, layout callback will
      * turn it off if appropriate */
-    io_info->use_select_io = H5_use_selection_io_g;
+    H5CX_get_selection_io_mode(&selection_io_mode);
+    io_info->use_select_io = (selection_io_mode == H5D_SELECTION_IO_MODE_ON);
 
 #ifdef H5_HAVE_PARALLEL
     /* Determine if the file was opened with an MPI VFD */

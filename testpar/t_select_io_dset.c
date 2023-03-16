@@ -121,6 +121,27 @@ typedef struct s2_t {
 } s2_t;
 
 /*
+ * Helper routine to set dxpl
+ * --selection I/O mode
+ * --type of I/O
+ * --type of collective I/O
+ */
+static void
+set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, 
+         H5FD_mpio_xfer_t mpio_type, H5FD_mpio_collective_opt_t mpio_coll_opt)
+{
+    if (H5Pset_selection_io(dxpl, select_io_mode) < 0)
+        P_TEST_ERROR;
+
+    if (H5Pset_dxpl_mpio(dxpl, mpio_type) < 0)
+        P_TEST_ERROR;
+
+    if (H5Pset_dxpl_mpio_collective_opt(dxpl, mpio_coll_opt) < 0)
+        P_TEST_ERROR;
+
+} /* set_dxpl() */
+
+/*
  * Helper routine to check actual I/O mode on a dxpl
  */
 static void
@@ -185,10 +206,10 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
 
-        /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
-                              sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
+    /* Create 1d chunked dataset with/without data transform */
+    if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
+                          sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        P_TEST_ERROR;
     }
     else {
 
@@ -225,10 +246,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -284,6 +303,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dclose(did) < 0)
         P_TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
+        P_TEST_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -365,10 +386,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     /* Write the data to the dataset with little endian */
     if (H5Dwrite(did, H5T_STD_I32LE, mspace_id, fspace_id, dxpl, wbuf) < 0)
@@ -501,10 +520,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -559,6 +576,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dclose(did) < 0)
         P_TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
+        P_TEST_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -644,10 +663,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -704,6 +721,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dclose(did) < 0)
         P_TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
+        P_TEST_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -826,10 +845,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     /* Write all the data to the dataset */
     if (H5Dwrite(did, s1_tid, mspace_id, fspace_id, dxpl, s1_wbuf) < 0)
@@ -1061,10 +1078,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -1243,6 +1258,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
         P_TEST_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
+        P_TEST_ERROR;
 
     CHECK_PASSED();
 
@@ -1322,10 +1339,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -1619,10 +1634,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -2039,10 +2052,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     /* Set up file space ids, mem space ids, and dataset ids */
     for (i = 0; i < (int)ndsets; i++) {
@@ -2364,10 +2375,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-        P_TEST_ERROR;
-    if (H5Pset_dxpl_mpio_collective_opt(dxpl, H5FD_MPIO_COLLECTIVE_IO) < 0)
-        P_TEST_ERROR;
+    /* Set selection I/O mode, type of I/O and type of collective I/O */
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -2615,6 +2624,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
     if (H5Pclose(dxpl) < 0)
         P_TEST_ERROR;
+    if (H5Pclose(ntrans_dxpl) < 0)
+        P_TEST_ERROR;
 
     for (i = 0; i < (int)ndsets; i++) {
         if (H5Sclose(file_sids[i]) < 0)
@@ -2662,10 +2673,6 @@ main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    /* Activate selection I/O via environment variable */
-    if (HDsetenv("HDF5_USE_SELECTION_IO", "true", TRUE) < 0)
-        P_TEST_ERROR;
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         P_TEST_ERROR;

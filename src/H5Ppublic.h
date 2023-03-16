@@ -361,6 +361,23 @@ typedef enum H5D_mpio_no_collective_cause_t {
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
 
+//! <!--[H5D_selection_io_mode_t_snip] -->
+/**
+ * Selection I/O mode property
+ *
+ * \details For now, the default value, #H5D_SELECTION_IO_MODE_DEFAULT, 
+ *          indicates no selection I/O is performed.
+ */
+typedef enum H5D_selection_io_mode_t {
+    H5D_SELECTION_IO_MODE_DEFAULT = 0,
+    /**< Default selection I/O mode. */
+    H5D_SELECTION_IO_MODE_OFF,
+    /**< Selection I/O is off. */
+    H5D_SELECTION_IO_MODE_ON
+    /**< Selection I/O is on. */
+} H5D_selection_io_mode_t;
+//! <!--[H5D_selection_io_mode_t_snip] -->
+
 /********************/
 /* Public Variables */
 /********************/
@@ -8199,6 +8216,60 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
 H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
                                                     const hsize_t start[], const hsize_t stride[],
                                                     const hsize_t count[], const hsize_t block[]);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets 
+ *
+ * \param[in] dxpl_id   Property list identifier
+ * \param[in] selection_io_mode    The selection I/O mode to be set
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_selection_io() sets the selection I/O mode 
+ *          \p selection_io_mode in the dataset transfer property 
+ *          list \p dxpl_id.
+ *
+ *          Values that can be set in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selection_io_mode);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief 
+ *
+ * \param[in] plist_id Property list identifier
+ * \param[out] selection_io_mode   The selection I/O mode 
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_selection_io() queries the selection I/O mode set in
+ *          in the dataset transer property list \p dxpl_id.
+ *
+ *          Values retured in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode);
+
 
 /**
  * \ingroup LCPL

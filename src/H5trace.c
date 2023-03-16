@@ -673,6 +673,30 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
+                        case 'C': /* H5D_selection_io_mode_t */
+                        {
+                            H5D_selection_io_mode_t selection_io_mode = (H5D_selection_io_mode_t)HDva_arg(ap, int);
+
+                            switch (selection_io_mode) {
+                                case H5D_SELECTION_IO_MODE_DEFAULT:
+                                    H5RS_acat(rs, "H5D_SELECTION_IO_MODE_DEFAULT");
+                                    break;
+
+                                case H5D_SELECTION_IO_MODE_OFF:
+                                    H5RS_acat(rs, "H5D_SELECTION_IO_MODE_OFF");
+                                    break;
+
+                                case H5D_SELECTION_IO_MODE_ON:
+                                    H5RS_acat(rs, "H5D_SELECTION_IO_MODE_ON");
+                                    break;
+
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)selection_io_mode);
+                                    break;
+                            } /* end switch */
+                        }     /* end block */
+                        break;
+
                         case 'f': /* H5D_fill_time_t */
                         {
                             H5D_fill_time_t fill_time = (H5D_fill_time_t)HDva_arg(ap, int);

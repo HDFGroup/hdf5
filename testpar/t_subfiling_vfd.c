@@ -422,6 +422,9 @@ test_stripe_sizes(void)
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl_id >= 0), "DCPL creation succeeded");
 
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
+
     for (size_t i = 0; i < SUBF_NITER; i++) {
         H5FD_subfiling_params_t cfg;
         h5_stat_size_t          file_size;
@@ -812,11 +815,18 @@ test_read_different_stripe_size(void)
     hid_t                   file_id      = H5I_INVALID_HID;
     hid_t                   fapl_id      = H5I_INVALID_HID;
     hid_t                   dset_id      = H5I_INVALID_HID;
+    hid_t                   dxpl_id      = H5I_INVALID_HID;
     hid_t                   fspace_id    = H5I_INVALID_HID;
     char                   *tmp_filename = NULL;
     void                   *buf          = NULL;
 
     curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
 
     if (MAINPROCESS)
         TESTING_2("file re-opening with different stripe size");
@@ -867,7 +877,7 @@ test_read_different_stripe_size(void)
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
 
-    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
     HDfree(buf);
@@ -934,7 +944,7 @@ test_read_different_stripe_size(void)
     buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
     VRFY(buf, "HDcalloc succeeded");
 
-    VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset read succeeded");
 
     for (size_t i = 0; i < count[0]; i++) {
@@ -986,6 +996,7 @@ test_read_different_stripe_size(void)
     }
     H5E_END_TRY;
 
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
     HDfree(tmp_filename);
@@ -1015,10 +1026,17 @@ test_subfiling_precreate_rank_0(void)
     hid_t   file_id   = H5I_INVALID_HID;
     hid_t   fapl_id   = H5I_INVALID_HID;
     hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   dxpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *buf       = NULL;
 
     curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
 
     if (MAINPROCESS)
         TESTING_2("file pre-creation on rank 0");
@@ -1079,7 +1097,7 @@ test_subfiling_precreate_rank_0(void)
         for (size_t i = 0; i < dset_dims[0]; i++)
             ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((i / n_elements_per_rank) + (i % n_elements_per_rank));
 
-        VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+        VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
              "Dataset write succeeded");
 
         HDfree(buf);
@@ -1158,7 +1176,7 @@ test_subfiling_precreate_rank_0(void)
     buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
     VRFY(buf, "HDcalloc succeeded");
 
-    VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset read succeeded");
 
     for (size_t i = 0; i < n_elements_per_rank; i++) {
@@ -1181,6 +1199,7 @@ test_subfiling_precreate_rank_0(void)
     H5E_END_TRY;
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
     CHECK_PASSED();
 }
@@ -1206,10 +1225,17 @@ test_subfiling_write_many_read_one(void)
     hid_t   file_id   = H5I_INVALID_HID;
     hid_t   fapl_id   = H5I_INVALID_HID;
     hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   dxpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *buf       = NULL;
 
     curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
 
     if (MAINPROCESS)
         TESTING_2("reading back file with single MPI rank");
@@ -1262,7 +1288,7 @@ test_subfiling_write_many_read_one(void)
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
 
-    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
     HDfree(buf);
@@ -1287,7 +1313,7 @@ test_subfiling_write_many_read_one(void)
         buf = HDcalloc(1, target_size);
         VRFY(buf, "HDcalloc succeeded");
 
-        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
 
         for (size_t i = 0; i < (size_t)mpi_size; i++) {
@@ -1317,6 +1343,7 @@ test_subfiling_write_many_read_one(void)
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
     CHECK_PASSED();
 }
@@ -1344,10 +1371,17 @@ test_subfiling_write_many_read_few(void)
     hid_t    file_id   = H5I_INVALID_HID;
     hid_t    fapl_id   = H5I_INVALID_HID;
     hid_t    dset_id   = H5I_INVALID_HID;
+    hid_t    dxpl_id   = H5I_INVALID_HID;
     hid_t    fspace_id = H5I_INVALID_HID;
     void    *buf       = NULL;
 
     curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
 
     if (MAINPROCESS)
         TESTING_2("reading back file with fewer MPI ranks than written with");
@@ -1410,7 +1444,7 @@ test_subfiling_write_many_read_few(void)
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
 
-    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
     HDfree(buf);
@@ -1465,7 +1499,7 @@ test_subfiling_write_many_read_few(void)
         buf = HDcalloc(1, target_size);
         VRFY(buf, "HDcalloc succeeded");
 
-        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
 
         for (size_t i = 0; i < (size_t)mpi_size; i++) {
@@ -1500,6 +1534,7 @@ test_subfiling_write_many_read_few(void)
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
     CHECK_PASSED();
 }
@@ -1525,11 +1560,18 @@ test_subfiling_h5fuse(void)
     hid_t   file_id   = H5I_INVALID_HID;
     hid_t   fapl_id   = H5I_INVALID_HID;
     hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   dxpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *buf       = NULL;
     int     skip_test = 0;
 
     curr_nerrors = nerrors;
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
+
+    /* Set selection I/O mode on DXPL */
+    VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
 
     if (MAINPROCESS)
         TESTING_2("h5fuse utility");
@@ -1607,7 +1649,7 @@ test_subfiling_h5fuse(void)
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
 
-    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
     HDfree(buf);
@@ -1683,7 +1725,7 @@ test_subfiling_h5fuse(void)
         buf = HDcalloc(1, target_size);
         VRFY(buf, "HDcalloc succeeded");
 
-        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
 
         for (size_t i = 0; i < (size_t)mpi_size; i++) {
@@ -1711,6 +1753,7 @@ test_subfiling_h5fuse(void)
     H5E_END_TRY;
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
     CHECK_PASSED();
 #else
@@ -1851,9 +1894,6 @@ main(int argc, char **argv)
     }
 
     H5open();
-
-    /* Enable selection I/O using internal temporary workaround */
-    H5_use_selection_io_g = TRUE;
 
     if (MAINPROCESS) {
         HDprintf("Testing Subfiling VFD functionality\n");
