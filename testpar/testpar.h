@@ -34,7 +34,7 @@
         if (VERBOSE_MED && *mesg != '\0') {                                                                  \
             HDprintf("%s\n", mesg);                                                                          \
         }                                                                                                    \
-    } while (0)                                                                                              \
+    } while (0)
 
 /*
  * VRFY: Verify if the condition val is true.
