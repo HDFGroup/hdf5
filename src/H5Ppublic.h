@@ -2321,10 +2321,13 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          The array \p c_values contains \p cd_nelmts integers which are
- *          auxiliary data for the filter. The integer values will be
- *          stored in the dataset object header as part of the filter
- *          information.
+ *          The array \p cd_values contains \p cd_nelmts unsigned integers
+ *          which are auxiliary data for the filter. The values are typically
+ *          used as parameters to control the filter. In a filter's
+ *          \p set_local method (called from \p H5Dcreate), the values are
+ *          interpreted and possibly modified before they are used to control
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
  *
  *          The \p flags argument is a bit vector with the following
  *          fields specifying certain general properties of the filter:
