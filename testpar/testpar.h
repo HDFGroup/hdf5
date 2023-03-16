@@ -30,8 +30,11 @@
  * mesg is not an empty string.
  */
 #define MESG(mesg)                                                                                           \
-    if (VERBOSE_MED && *mesg != '\0')                                                                        \
-    HDprintf("%s\n", mesg)
+    do {                                                                                                     \
+        if (VERBOSE_MED && *mesg != '\0') {                                                                  \
+            HDprintf("%s\n", mesg);                                                                          \
+        }                                                                                                    \
+    } while(0)                                                                                               \
 
 /*
  * VRFY: Verify if the condition val is true.
