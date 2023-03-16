@@ -8256,9 +8256,9 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  * \return \herr_t
  *
  * \details H5Pget_selection_io() queries the selection I/O mode set in
- *          in the dataset transer property list \p dxpl_id.
+ *          in the dataset transfer property list \p dxpl_id.
  *
- *          Values retured in \p selection_io_mode:
+ *          Values returned in \p selection_io_mode:
  *          \snippet this H5D_selection_io_mode_t_snip
  *          \click4more
  *
