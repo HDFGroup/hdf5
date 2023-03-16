@@ -7,10 +7,10 @@
 
 //! <!-- [H5Dchunk_iter_cb] -->
 int
-chunk_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data)
+chunk_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *op_data)
 {
     // only print the allocated chunk size only
-    printf("%d\n", nbytes);
+    printf("%" PRIuHSIZE "\n", size);
     return EXIT_SUCCESS;
 }
 //! <!-- [H5Dchunk_iter_cb] -->
@@ -67,7 +67,7 @@ H5Ovisit_cb(hid_t obj, const char *name, const H5O_info2_t *info, void *op_data)
                 retval = -1;
                 goto fail_fig;
             }
-
+fail_fig:
 fail_shape:
             H5Sclose(dspace);
 fail_dspace:
