@@ -328,7 +328,6 @@ typedef enum H5D_mpio_actual_io_mode_t {
     H5D_MPIO_CHUNK_MIXED = 0x1 | 0x2,
     /**< HDF5 performed one the chunk collective optimization schemes and some
          chunks were accessed independently, some collectively. */
-    /** \internal The contiguous case is separate from the bit field. */
     H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
     /**< Collective I/O was performed on a contiguous dataset */
 } H5D_mpio_actual_io_mode_t;

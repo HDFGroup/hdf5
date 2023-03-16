@@ -135,13 +135,15 @@ check_io_mode(hid_t dxpl, unsigned chunked)
         if (actual_io_mode != H5D_MPIO_CHUNK_COLLECTIVE) {
             nerrors++;
             if (MAINPROCESS)
-                HDprintf("\n     Failed: Incorrect I/O mode (chunked)     ");
+                HDprintf("\n     Failed: Incorrect I/O mode (expected chunked, returned %u)",
+                         (unsigned)actual_io_mode);
         }
     }
     else if (actual_io_mode != H5D_MPIO_CONTIGUOUS_COLLECTIVE) {
         nerrors++;
         if (MAINPROCESS)
-            HDprintf("\n     Failed: Incorrect I/O mode (contiguous)     ");
+            HDprintf("\n     Failed: Incorrect I/O mode (expected contiguous, returned %u)",
+                     (unsigned)actual_io_mode);
     }
 
 } /* check_io_mode() */

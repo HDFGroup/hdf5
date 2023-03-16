@@ -677,7 +677,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
     if (io_info->use_select_io) {
-        if ((use_selection_io = H5D__contig_may_use_select_io(io_info, dinfo, H5D_IO_OP_READ)) < 0)
+        if ((use_selection_io = H5D__contig_may_use_select_io(io_info, dinfo, io_info->op_type)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
         io_info->use_select_io = (hbool_t)use_selection_io;
     }
@@ -808,8 +808,8 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->file_space);
 
     if (io_info->use_select_io) {
-        /* Only perform I/O if not performing multi dataset I/O with selection
-         * I/O, otherwise the higher level will handle it after all datasets
+        /* Only perform I/O if not performing multi dataset I/O or type conversion,
+         * otherwise the higher level will handle it after all datasets
          * have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             size_t dst_type_size = dinfo->type_info.dst_type_size;
@@ -843,7 +843,12 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->pieces_added++;
             }
         }
-    } /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective contiguous I/O was used */
+        io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
+    }  /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_read)(io_info, dinfo) < 0)
@@ -880,8 +885,8 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->file_space);
 
     if (io_info->use_select_io) {
-        /* Only perform I/O if not performing multi dataset I/O with selection
-         * I/O, otherwise the higher level will handle it after all datasets
+        /* Only perform I/O if not performing multi dataset I/O or type conversion,
+         * otherwise the higher level will handle it after all datasets
          * have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             size_t dst_type_size = dinfo->type_info.dst_type_size;
@@ -915,7 +920,12 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->pieces_added++;
             }
         }
-    } /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective contiguous I/O was used */
+        io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
+    }  /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_write)(io_info, dinfo) < 0)

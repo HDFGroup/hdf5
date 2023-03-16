@@ -397,6 +397,21 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
             }
         }
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report the actual I/O mode to the application if appropriate */
+        if (io_info.using_mpi_vfd) {
+            H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+
+            /* Get the parallel I/O transfer mode */
+            if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+
+            /* Only report the collective I/O mode if we're actually performing collective I/O */
+            if (xfer_mode == H5FD_MPIO_COLLECTIVE)
+                H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
+        }
+#endif /* H5_HAVE_PARALLEL */
     }
 
 done:
@@ -781,6 +796,21 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
             }
         }
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report the actual I/O mode to the application if appropriate */
+        if (io_info.using_mpi_vfd) {
+            H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+
+            /* Get the parallel I/O transfer mode */
+            if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+
+            /* Only report the collective I/O mode if we're actually performing collective I/O */
+            if (xfer_mode == H5FD_MPIO_COLLECTIVE)
+                H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
+        }
+#endif /* H5_HAVE_PARALLEL */
     }
 
 #ifdef OLD_WAY
