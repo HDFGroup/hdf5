@@ -675,7 +675,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'C': /* H5D_selection_io_mode_t */
                         {
-                            H5D_selection_io_mode_t selection_io_mode = (H5D_selection_io_mode_t)HDva_arg(ap, int);
+                            H5D_selection_io_mode_t selection_io_mode =
+                                (H5D_selection_io_mode_t)HDva_arg(ap, int);
 
                             switch (selection_io_mode) {
                                 case H5D_SELECTION_IO_MODE_DEFAULT:

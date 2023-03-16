@@ -596,7 +596,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    unsigned prop_value;
+    unsigned                prop_value;
     H5D_selection_io_mode_t selection_io_mode;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 

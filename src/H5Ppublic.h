@@ -365,7 +365,7 @@ typedef enum H5D_mpio_no_collective_cause_t {
 /**
  * Selection I/O mode property
  *
- * \details For now, the default value, #H5D_SELECTION_IO_MODE_DEFAULT, 
+ * \details For now, the default value, #H5D_SELECTION_IO_MODE_DEFAULT,
  *          indicates no selection I/O is performed.
  */
 typedef enum H5D_selection_io_mode_t {
@@ -8221,15 +8221,15 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *
  * \ingroup DXPL
  *
- * \brief Sets 
+ * \brief Sets
  *
  * \param[in] dxpl_id   Property list identifier
  * \param[in] selection_io_mode    The selection I/O mode to be set
  *
  * \return \herr_t
  *
- * \details H5Pset_selection_io() sets the selection I/O mode 
- *          \p selection_io_mode in the dataset transfer property 
+ * \details H5Pset_selection_io() sets the selection I/O mode
+ *          \p selection_io_mode in the dataset transfer property
  *          list \p dxpl_id.
  *
  *          Values that can be set in \p selection_io_mode:
@@ -8248,10 +8248,10 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  *
  * \ingroup DXPL
  *
- * \brief 
+ * \brief
  *
  * \param[in] plist_id Property list identifier
- * \param[out] selection_io_mode   The selection I/O mode 
+ * \param[out] selection_io_mode   The selection I/O mode
  *
  * \return \herr_t
  *
@@ -8269,7 +8269,6 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  *
  */
 H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode);
-
 
 /**
  * \ingroup LCPL

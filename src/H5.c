@@ -82,7 +82,6 @@ hbool_t H5_libinit_g = FALSE; /* Library hasn't been initialized */
 hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
-
 char           H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t H5_dont_atexit_g     = FALSE;
 H5_debug_t     H5_debug_g; /* debugging info */
@@ -140,7 +139,7 @@ herr_t
 H5_init_library(void)
 {
     size_t i;
-    herr_t ret_value         = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 

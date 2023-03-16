@@ -97,10 +97,10 @@ static herr_t
 test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
 {
     int         i;
-    hid_t       did  = H5I_INVALID_HID;
-    hid_t       sid  = H5I_INVALID_HID;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
     hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
@@ -354,10 +354,10 @@ static herr_t
 test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 {
     int         i;
-    hid_t       did  = H5I_INVALID_HID;
-    hid_t       sid  = H5I_INVALID_HID;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
     hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
@@ -484,10 +484,10 @@ static herr_t
 test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 {
     int         i;
-    hid_t       did  = H5I_INVALID_HID;
-    hid_t       sid  = H5I_INVALID_HID;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
     hid_t       ntrans_dxpl = H5I_INVALID_HID;
     hsize_t     dims[1];
     hsize_t     cdims[1];
@@ -1569,13 +1569,13 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
 error:
     H5E_BEGIN_TRY
-        H5Pclose(dcpl);
-        H5Pclose(dxpl);
-        for (i = 0; i < (int)ndsets; i++) {
-            H5Sclose(file_sids[i]);
-            H5Sclose(mem_sids[i]);
-            H5Dclose(dset_dids[i]);
-        }
+    H5Pclose(dcpl);
+    H5Pclose(dxpl);
+    for (i = 0; i < (int)ndsets; i++) {
+        H5Sclose(file_sids[i]);
+        H5Sclose(mem_sids[i]);
+        H5Dclose(dset_dids[i]);
+    }
     H5E_END_TRY;
 
     if (total_wbuf)
@@ -1909,14 +1909,14 @@ error:
 static herr_t
 test_set_get_select_io_mode(hid_t fid)
 {
-    hid_t       did  = H5I_INVALID_HID;
-    hid_t       sid  = H5I_INVALID_HID;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    int         i;
-    long        wbuf[DSET_SELECT_DIM];
+    hid_t                   did  = H5I_INVALID_HID;
+    hid_t                   sid  = H5I_INVALID_HID;
+    hid_t                   dcpl = H5I_INVALID_HID;
+    hid_t                   dxpl = H5I_INVALID_HID;
+    hsize_t                 dims[1];
+    hsize_t                 cdims[1];
+    int                     i;
+    long                    wbuf[DSET_SELECT_DIM];
     H5D_selection_io_mode_t selection_io_mode;
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -1930,7 +1930,7 @@ test_set_get_select_io_mode(hid_t fid)
         TEST_ERROR;
 
     /* Disable case */
-    if (H5Pset_selection_io(dxpl,H5D_SELECTION_IO_MODE_OFF) < 0)
+    if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
         TEST_ERROR;
 
     if (H5Pget_selection_io(dxpl, &selection_io_mode) < 0)
@@ -1961,11 +1961,11 @@ test_set_get_select_io_mode(hid_t fid)
         FAIL_STACK_ERROR;
 
     if ((did = H5Dcreate2(fid, "test_chk_dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Initialize data */
     for (i = 0; i < DSET_SELECT_DIM; i++)
-        wbuf[i]       = i;
+        wbuf[i] = i;
 
     /* May change the selection io actually performed */
     if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)

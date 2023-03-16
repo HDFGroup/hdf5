@@ -127,8 +127,8 @@ typedef struct s2_t {
  * --type of collective I/O
  */
 static void
-set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, 
-         H5FD_mpio_xfer_t mpio_type, H5FD_mpio_collective_opt_t mpio_coll_opt)
+set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, H5FD_mpio_xfer_t mpio_type,
+         H5FD_mpio_collective_opt_t mpio_coll_opt)
 {
     if (H5Pset_selection_io(dxpl, select_io_mode) < 0)
         P_TEST_ERROR;
@@ -206,10 +206,10 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
 
-    /* Create 1d chunked dataset with/without data transform */
-    if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
-                          sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        P_TEST_ERROR;
+        /* Create 1d chunked dataset with/without data transform */
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
+                              sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            P_TEST_ERROR;
     }
     else {
 

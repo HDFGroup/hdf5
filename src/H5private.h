@@ -1966,7 +1966,6 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
-
 #ifdef H5_HAVE_CODESTACK
 
 /* Include required function stack header */
