@@ -992,17 +992,24 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                     HDprintf("invalid IOC selection strategy string '%s' for strategy "
                              "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
                              ioc_sel_str);
+
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
+
+                    H5_CHECK_OVERFLOW(iocs_per_node, long, int);
+                    ioc_count = (int)iocs_per_node;
+
+                    break;
                 }
             }
 
-            H5_CHECK_OVERFLOW(ioc_select_val, long, int);
-            ioc_count = (comm_size / (int)ioc_select_val);
+            if (ioc_select_val > comm_size)
+                ioc_select_val = comm_size;
 
-            if ((comm_size % ioc_select_val) != 0) {
-                ioc_count++;
-            }
+            H5_CHECK_OVERFLOW(ioc_select_val, long, int);
+            ioc_count = ((comm_size - 1) / (int)ioc_select_val) + 1;
+
+            rank_multiple = (int)ioc_select_val;
 
             break;
         }
@@ -1017,19 +1024,31 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
             if (ioc_sel_str) {
                 errno          = 0;
                 ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
-                if ((ERANGE == errno) || (ioc_select_val <= 0) || (ioc_select_val >= comm_size)) {
+                if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     HDprintf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
                              "defaulting to SELECT_IOC_ONE_PER_NODE\n",
                              ioc_sel_str);
+
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
+
+                    H5_CHECK_OVERFLOW(iocs_per_node, long, int);
+                    ioc_count = (int)iocs_per_node;
+
+                    break;
                 }
             }
+
+            if (ioc_select_val > comm_size)
+                ioc_select_val = comm_size;
 
             H5_CHECK_OVERFLOW(ioc_select_val, long, int);
             ioc_count = (int)ioc_select_val;
 
-            rank_multiple = (comm_size / ioc_count);
+            if (ioc_select_val > 1)
+                rank_multiple = (comm_size - 1) / ((int)ioc_select_val - 1);
+            else
+                rank_multiple = 1;
 
             break;
         }
@@ -1145,34 +1164,48 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
     *ioc_sel_info_str = NULL;
 
     if (env_value) {
-        long check_value;
-
         /*
-         * For non-default options, the environment variable
-         * should have the following form:  integer:[integer|string]
-         * In particular, EveryNthRank == 1:64 or every 64 ranks assign an IOC
-         * or WithConfig == 2:/<full_path_to_config_file>
+         * Parse I/O Concentrator selection strategy criteria as
+         * either a single value or two colon-separated values of
+         * the form 'integer:[integer|string]'. If two values are
+         * given, the first value specifies the I/O Concentrator
+         * selection strategy to use (given as the integer value
+         * corresponding to the H5FD_subfiling_ioc_select_t enum
+         * value for that strategy) and the second value specifies
+         * the criteria for that strategy.
+         *
+         * For example, to assign every 64th MPI rank as an I/O
+         * Concentrator, the criteria string should have the format
+         * '1:64' to specify the "every Nth rank" strategy with a
+         * criteria of '64'.
          */
-        if ((opt_value = HDstrchr(env_value, ':')))
+        opt_value = HDstrchr(env_value, ':');
+        if (opt_value) {
+            long check_value;
+
             *opt_value++ = '\0';
 
-        errno       = 0;
-        check_value = HDstrtol(env_value, NULL, 0);
+            errno       = 0;
+            check_value = HDstrtol(env_value, NULL, 0);
 
-        if (errno == ERANGE)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
-                                        "couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
-                                        " environment variable");
+            if (errno == ERANGE)
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                            "couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+                                            " environment variable");
 
-        if ((check_value < 0) || (check_value >= ioc_selection_options))
-            H5_SUBFILING_GOTO_ERROR(
-                H5E_VFL, H5E_BADVALUE, FAIL,
-                "invalid IOC selection type value %ld from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
-                " environment variable",
-                check_value);
+            if ((check_value < 0) || (check_value >= ioc_selection_options))
+                H5_SUBFILING_GOTO_ERROR(
+                    H5E_VFL, H5E_BADVALUE, FAIL,
+                    "invalid IOC selection type value %ld from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+                    " environment variable",
+                    check_value);
 
-        *ioc_selection_type = (H5FD_subfiling_ioc_select_t)check_value;
-        *ioc_sel_info_str   = opt_value;
+            *ioc_selection_type = (H5FD_subfiling_ioc_select_t)check_value;
+            *ioc_sel_info_str   = opt_value;
+        }
+        else {
+            *ioc_sel_info_str = env_value;
+        }
     }
 
 done:
@@ -1562,8 +1595,8 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 
     max_iocs = app_topology->n_io_concentrators;
 
-    if (NULL == (app_topology->io_concentrators = HDmalloc((size_t)app_topology->n_io_concentrators *
-                                                           sizeof(*app_topology->io_concentrators))))
+    if (NULL == (app_topology->io_concentrators =
+                     HDmalloc((size_t)max_iocs * sizeof(*app_topology->io_concentrators))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate array of I/O concentrator ranks");
 
@@ -1622,30 +1655,29 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 
         case SELECT_IOC_EVERY_NTH_RANK:
         case SELECT_IOC_TOTAL: {
-            int world_size = app_layout->world_size;
-            int ioc_next   = 0;
+            int num_iocs_assigned = 0;
+            int world_size        = app_layout->world_size;
 
             HDassert(rank_stride > 0);
 
-            for (int i = 0; ioc_next < app_topology->n_io_concentrators; ioc_next++) {
+            for (int i = 0; num_iocs_assigned < max_iocs; num_iocs_assigned++) {
                 int ioc_index = rank_stride * i++;
 
+                if (num_iocs_assigned >= max_iocs)
+                    break;
                 if (ioc_index >= world_size)
                     break;
 
-                io_concentrators[ioc_next] = app_layout->layout[ioc_index].rank;
+                io_concentrators[num_iocs_assigned] = app_layout->layout[ioc_index].rank;
 
-                if (app_layout->world_rank == io_concentrators[ioc_next]) {
-                    app_topology->ioc_idx     = ioc_next;
+                if (app_layout->world_rank == io_concentrators[num_iocs_assigned]) {
+                    app_topology->ioc_idx     = num_iocs_assigned;
                     app_topology->rank_is_ioc = TRUE;
                 }
-
-                if (ioc_next + 1 >= max_iocs)
-                    break;
             }
 
             /* Set final number of I/O concentrators after adjustments */
-            app_topology->n_io_concentrators = ioc_next;
+            app_topology->n_io_concentrators = num_iocs_assigned;
 
             break;
         }
