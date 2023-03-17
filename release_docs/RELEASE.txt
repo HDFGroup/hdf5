@@ -146,6 +146,26 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
+      or SELECT_IOC_TOTAL I/O concentrator selection strategies
+
+      Multiple bugs involving these I/O concentrator selection strategies
+      were fixed, including:
+
+        * A bug that caused the selection strategy to be altered when
+          criteria for the strategy was specified in the
+          H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variable as
+          a single value, rather than in the old and undocumented
+          'integer:integer' format
+        * Two bugs which caused a request for 'N' I/O concentrators to
+          result in 'N - 1' I/O concentrators being assigned, which also
+          lead to issues if only 1 I/O concentrator was requested
+
+      Also added a regression test for these two I/O concentrator selection
+      strategies to prevent future issues. 
+
+      (JTH - 2023/03/15)
+
     - Fixed an issue with collective metadata writes of global heap data
 
       New test failures in parallel netCDF started occurring with debug
