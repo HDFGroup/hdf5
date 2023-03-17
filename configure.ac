@@ -159,6 +159,8 @@ AM_JNIFLAGS="${AM_JNIFLAGS}"
 AM_JAVACFLAGS="${AM_JAVACFLAGS}"
 AM_JAVAFLAGS="${AM_JAVAFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
+
+## Flags passed in by the user
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -620,7 +622,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -795,7 +797,7 @@ HDF_CXX=no
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
 AC_PROG_CXX
-AC_PROG_CXXCPP    ## this is checked for when AC_HEADER_STDC is done
+AC_PROG_CXXCPP
 
 AC_MSG_CHECKING([if c++ interface enabled])
 
@@ -902,7 +904,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
-## the AM_PROG_LIBTOOL macro.
+## the LT_INIT macro.
 ##
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
@@ -1834,10 +1836,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 #include "szlib.h"
             ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-                if(SZ_encoder_enabled() == 1)
-                    exit(0);
-                else
-                    exit(1);
+                return SZ_encoder_enabled() != 1;
             ]])]
         , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
    )
@@ -2028,10 +2027,8 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
-            #if STDC_HEADERS
             #include <stdlib.h>
             #include <pthread.h>
-            #endif
         ],[
               pthread_attr_t attribute;
               int ret;
@@ -2645,8 +2642,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
+## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,O,S,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
