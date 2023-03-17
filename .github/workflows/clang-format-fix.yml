@@ -1,3 +1,12 @@
+# NOTE: This action requires write permissions to be set in your GitHub
+#       repo/fork for it to be able to commit changes.
+#
+# This is currently enabled via:
+#
+#   settings > Actions > General > Workflow permissions
+#
+# which you will need to set to "Read and write permissions"
+#
 name: clang-format Commit Changes
 on: 
   workflow_dispatch:
