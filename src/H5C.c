@@ -323,8 +323,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     if (NULL == (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list")
 
-    if (NULL == (cache_ptr->tag_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list for tagged entry addresses")
+    cache_ptr->tag_list = NULL;
 
     /* If we get this far, we should succeed.  Go ahead and initialize all
      * the fields.
@@ -542,16 +541,16 @@ done:
             if (cache_ptr->slist_ptr != NULL)
                 H5SL_close(cache_ptr->slist_ptr);
 
-            if (cache_ptr->tag_list != NULL)
-                H5SL_close(cache_ptr->tag_list);
+            HASH_CLEAR(hh, cache_ptr->tag_list);
+            cache_ptr->tag_list = NULL;
 
             if (cache_ptr->log_info != NULL)
                 H5MM_xfree(cache_ptr->log_info);
 
             cache_ptr->magic = 0;
             cache_ptr        = H5FL_FREE(H5C_t, cache_ptr);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_create() */
@@ -689,33 +688,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             break;
     }
 } /* H5C_def_auto_resize_rpt_fcn() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_free_tag_list_cb
- *
- * Purpose:     Callback function to free tag nodes from the skip list.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *        January 2014
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C_free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
-{
-    H5C_tag_info_t *tag_info = (H5C_tag_info_t *)_item;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(tag_info);
-
-    /* Release the item */
-    tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
-
-    FUNC_LEAVE_NOAPI(0)
-} /* H5C_free_tag_list_cb() */
 
 /*-------------------------------------------------------------------------
  *
@@ -880,27 +852,24 @@ H5C_dest(H5F_t *f)
      *           point?  If no, shouldn't this if statement be an assert?
      */
     if (cache_ptr->slist_ptr != NULL) {
-
         HDassert(cache_ptr->slist_len == 0);
         HDassert(cache_ptr->slist_size == 0);
 
         H5SL_close(cache_ptr->slist_ptr);
 
         cache_ptr->slist_ptr = NULL;
-
-    } /* end if */
-
-    if (cache_ptr->tag_list != NULL) {
-
-        H5SL_destroy(cache_ptr->tag_list, H5C_free_tag_list_cb, NULL);
-        cache_ptr->tag_list = NULL;
-
-    } /* end if */
-
-    if (cache_ptr->log_info != NULL) {
-
-        H5MM_xfree(cache_ptr->log_info);
     }
+
+    H5C_tag_info_t *item = NULL;
+    H5C_tag_info_t *tmp  = NULL;
+    HASH_ITER(hh, cache_ptr->tag_list, item, tmp)
+    {
+        HASH_DELETE(hh, cache_ptr->tag_list, item);
+        item = H5FL_FREE(H5C_tag_info_t, item);
+    }
+
+    if (cache_ptr->log_info != NULL)
+        H5MM_xfree(cache_ptr->log_info);
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS
@@ -8224,7 +8193,7 @@ done:
 herr_t
 H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 {
-    H5C_tag_info_t *tag_info; /* Points to a tag info struct */
+    H5C_tag_info_t *tag_info  = NULL;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -8235,7 +8204,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     HDassert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */
-    tag_info = (H5C_tag_info_t *)H5SL_search(cache_ptr->tag_list, &obj_addr);
+    HASH_FIND(hh, cache_ptr->tag_list, &obj_addr, sizeof(haddr_t), tag_info);
 
     if (H5C__GET_CORKED == action) {
         HDassert(corked);
@@ -8243,7 +8212,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             *corked = TRUE;
         else
             *corked = FALSE;
-    } /* end if */
+    }
     else {
         /* Sanity check */
         HDassert(H5C__SET_CORK == action || H5C__UNCORK == action);
@@ -8259,25 +8228,24 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 /* Set the tag for all entries */
                 tag_info->tag = obj_addr;
 
-                /* Insert tag info into skip list */
-                if (H5SL_insert(cache_ptr->tag_list, tag_info, &(tag_info->tag)) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert tag info in skip list")
-            } /* end if */
+                /* Insert tag info into hash table */
+                HASH_ADD(hh, cache_ptr->tag_list, tag, sizeof(haddr_t), tag_info);
+            }
             else {
                 /* Check for object already corked */
                 if (tag_info->corked)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked")
                 HDassert(tag_info->entry_cnt > 0 && tag_info->head);
-            } /* end else */
+            }
 
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
             cache_ptr->num_objs_corked++;
-
-        } /* end if */
+        }
         else {
             /* Sanity check */
-            HDassert(tag_info);
+            if (NULL == tag_info)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "tag info pointer is NULL")
 
             /* Check for already uncorked */
             if (!tag_info->corked)
@@ -8292,16 +8260,15 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 /* Sanity check */
                 HDassert(NULL == tag_info->head);
 
-                if (H5SL_remove(cache_ptr->tag_list, &(tag_info->tag)) != tag_info)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove tag info from list")
+                HASH_DELETE(hh, cache_ptr->tag_list, tag_info);
 
                 /* Release the tag info */
                 tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
-            } /* end if */
+            }
             else
                 HDassert(NULL != tag_info->head);
-        } /* end else */
-    }     /* end else */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
