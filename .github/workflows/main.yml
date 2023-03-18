@@ -250,7 +250,7 @@ jobs:
             mirror_vfd: enable
             direct_vfd: enable
             deprec_sym: disable
-            default_api: v110
+            default_api: default
             szip: yes
             toolchain: ""
             generator: "autogen"
