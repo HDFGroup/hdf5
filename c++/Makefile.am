@@ -26,6 +26,7 @@ endif
 ## Only recurse into subdirectories if C++ interface is enabled.
 if BUILD_CXX_CONDITIONAL
    SUBDIRS=src $(TEST_DIR)
+
 endif
 DIST_SUBDIRS = src test examples
 
