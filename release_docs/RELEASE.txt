@@ -49,6 +49,15 @@ New Features
 
     Configuration:
     -------------
+    - Allow parallel and threadsafe to be built
+
+      In the past, we required --enable-unsupported (Autotools) or
+      ALLOW_UNSUPPORTED (CMake) in order to build the parallel library with
+      thread-safety support. The parallel, thread-safe library can now be
+      built without these options.
+
+      (DER - 2023/03/17)
+
     - Added new option to build libaec and zlib inline with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
