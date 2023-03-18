@@ -267,6 +267,16 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     #  ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-10")
     endif ()
   endif ()
+
+  # Append more extra warning flags that only gcc 12.x+ knows about
+  # or which should only be enabled for gcc 12.x+
+  if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.0)
+    if (HDF5_ENABLE_DEV_WARNINGS)
+      ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-12")
+    #else ()
+    #  ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-12")
+    endif ()
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
