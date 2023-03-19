@@ -203,7 +203,9 @@ sub argstring ($$$) {
 
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
-  $atype =~ s/^\bconst\b//;
+  $atype =~ s/^\bconst\b//;     # Leading const
+  $atype =~ s/\s*const\s*//;    # const after type, possibly in the middle of '*'s
+  $atype =~ s/^\bstatic\b//;
   $atype =~ s/\bH5_ATTR_UNUSED\b//g;
   $atype =~ s/\bH5_ATTR_DEPRECATED_USED\b//g;
   $atype =~ s/\bH5_ATTR_NDEBUG_UNUSED\b//g;
@@ -325,9 +327,9 @@ sub rewrite_func ($$$$$) {
 
       # Wrap lines that will be longer than the limit
       if ($len_if_added > $max_trace_macro_line_len) {
-        # Wrap line, with indention
+        # Wrap line, with indentation
         $trace .= ",\n             ";
-        $len = 13;              # Set to 13, for indention
+        $len = 13;              # Set to 13, for indentation
 
         # Indent an extra space to account for extra digit in 'H5TRACE' macro
         if (scalar(@arg_str) >= 10) {
@@ -378,14 +380,16 @@ my $total_api = 0;
 for $file (@ARGV) {
   # Ignore some files that do not need tracing macros
   unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c") {
-  
+
     # Snarf up the entire file
     open SOURCE, $file or die "$file: $!\n";
     $Source = join "", <SOURCE>;
     close SOURCE;
 
-    # Make modifications
+    # Make a copy of the original data
     my $original = $Source;
+
+    # Make modifications
     my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
                               (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
                               \s*\((.*?)\)\s*               #args
