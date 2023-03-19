@@ -152,11 +152,6 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 
-VFD_LIST = sec2 stdio core core_paged split multi family
-if DIRECT_VFD_CONDITIONAL
-  VFD_LIST += direct
-endif
-
 # Additional target for running timing test
 timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \
