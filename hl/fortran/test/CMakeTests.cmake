@@ -17,10 +17,10 @@
 ##############################################################################
 
 set (test_hl_fortran_CLEANFILES
-          dsetf1.h5
-          dsetf2.h5
-          dsetf3.h5
-          dsetf4.h5
+    dsetf1.h5
+    dsetf2.h5
+    dsetf3.h5
+    dsetf4.h5
           dsetf5.h5
           f1img.h5
           f1tab.h5
@@ -49,7 +49,7 @@ macro (ADD_H5_FORTRAN_TEST file)
         -D "TEST_OUTPUT=hl_f90_${file}.txt"
         #-D "TEST_REFERENCE=hl_f90_${file}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES

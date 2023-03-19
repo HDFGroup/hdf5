@@ -85,7 +85,7 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_OUTPUT=${example}.txt"
           #-D "TEST_REFERENCE=${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (EXAMPLES-${example} PROPERTIES FIXTURES_REQUIRED clear_EXAMPLES)
@@ -115,7 +115,7 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
           -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
           #-D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
     endif ()
     if (last_test)

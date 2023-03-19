@@ -111,7 +111,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
@@ -135,7 +135,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.mty"
               -D "TEST_ERRREF=${resultfile}.err"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()

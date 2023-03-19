@@ -22,7 +22,6 @@ H5_CREATE_VFD_DIR()
 ###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
-
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     add_test (

@@ -41,7 +41,7 @@ foreach (example ${examples})
         -D "TEST_OUTPUT=cpp_ex_${example}.txt"
         #-D "TEST_REFERENCE=cpp_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (CPP_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_cppex)
@@ -53,7 +53,6 @@ endforeach ()
 #the following dependencies are handled by the order of the files
 #  SET_TESTS_PROPERTIES(CPP_ex_readdata PROPERTIES DEPENDS CPP_ex_create)
 #  SET_TESTS_PROPERTIES(CPP_ex_chunks PROPERTIES DEPENDS CPP_ex_extend_ds)
-
 add_test (
     NAME CPP_ex_tutr-clear-objects
     COMMAND    ${CMAKE_COMMAND}
@@ -80,7 +79,7 @@ foreach (example ${tutr_examples})
         -D "TEST_OUTPUT=cpp_ex_${example}.txt"
         #-D "TEST_REFERENCE=cpp_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (CPP_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_cppex_tutr)
