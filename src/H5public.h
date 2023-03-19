@@ -126,7 +126,6 @@ extern "C" {
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
 
-
 /* Version numbers */
 /**
  * For major interface/format changes
