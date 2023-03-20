@@ -99,7 +99,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ls"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
@@ -128,7 +128,7 @@
               -D "TEST_REFERENCE=vds/prefix/${resultfile}.ls"
               -D "TEST_ENV_VAR=HDF5_VDS_PREFIX"
               -D "TEST_ENV_VALUE=\${ORIGIN}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
