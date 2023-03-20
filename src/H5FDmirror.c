@@ -242,13 +242,15 @@ H5FD_mirror_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     LOG_OP_CALL(FUNC);
 
-    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g))
+    if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g)) {
         H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), FALSE);
-
+        if (H5I_INVALID_HID == H5FD_MIRROR_g)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register mirror");
+    }
     ret_value = H5FD_MIRROR_g;
 
 done:
