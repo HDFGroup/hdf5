@@ -35,11 +35,7 @@
 #endif
 
 /* C library header files for things that appear in HDF5 public headers */
-#ifdef __cplusplus
-#include <cinttypes>
-#else
 #include <inttypes.h>
-#endif
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
