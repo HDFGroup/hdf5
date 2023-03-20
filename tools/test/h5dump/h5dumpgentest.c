@@ -10496,12 +10496,16 @@ gent_bitnopaquefields(void)
 static void
 gent_intsfourdims(void)
 {
-    hid_t        fid, dataset, space;
-    hsize_t      dims[F81_RANK];
-    uint32_t     dset1[F81_ZDIM][F81_YDIM][F81_XDIM][F81_WDIM];
+    hid_t   fid, dataset, space;
+    hsize_t dims[F81_RANK];
+    struct {
+        uint32_t arr[F81_ZDIM][F81_YDIM][F81_XDIM][F81_WDIM];
+    } * dset1;
     unsigned int i, j, k, l;
 
     fid = H5Fcreate(FILE81, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    dset1 = malloc(sizeof(*dset1));
 
     /* Dataset of 32 bits unsigned int */
     dims[0] = F81_ZDIM;
@@ -10515,7 +10519,7 @@ gent_intsfourdims(void)
         for (j = 0; j < F81_YDIM; j++)
             for (k = 0; k < F81_XDIM; k++)
                 for (l = 0; l < F81_WDIM; l++)
-                    dset1[i][j][k][l] =
+                    dset1->arr[i][j][k][l] =
                         i * F81_YDIM * F81_XDIM * F81_WDIM + j * F81_XDIM * F81_WDIM + k * F81_WDIM + l;
 
     H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
@@ -10523,6 +10527,7 @@ gent_intsfourdims(void)
     H5Dclose(dataset);
 
     H5Fclose(fid);
+    free(dset1);
 }
 
 /*-------------------------------------------------------------------------

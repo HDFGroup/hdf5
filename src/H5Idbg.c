@@ -93,11 +93,15 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             break;
         }
         case H5I_DATASET: {
+            H5_GCC_CLANG_DIAG_OFF("discarded-qualifiers")
             path = H5D_nameof(info->object);
+            H5_GCC_CLANG_DIAG_ON("discarded-qualifiers")
             break;
         }
         case H5I_DATATYPE: {
+            H5_GCC_CLANG_DIAG_OFF("discarded-qualifiers")
             path = H5T_nameof(info->object);
+            H5_GCC_CLANG_DIAG_ON("discarded-qualifiers")
             break;
         }
         case H5I_UNINIT:
