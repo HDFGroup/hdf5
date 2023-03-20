@@ -189,7 +189,7 @@ set (last_test "H5WATCH-clearall-objects")
 add_test (NAME H5WATCH-h5watchgentest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5watchgentest>)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    DEPENDS "H5WATCH-clearall-objects"
+    DEPENDS H5WATCH-clearall-objects
 )
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_SETUP gen_test_watch)
 set_tests_properties (H5WATCH-h5watchgentest PROPERTIES FIXTURES_REQUIRED swmr_vfd_check_compat)
