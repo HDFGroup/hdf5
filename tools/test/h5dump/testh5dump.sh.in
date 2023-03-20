@@ -183,16 +183,7 @@ $SRC_H5DUMP_TESTFILES/tvms.h5
 $SRC_H5DUMP_TESTFILES/err_attr_dspace.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_old.h5
 $SRC_H5DUMP_TESTFILES/tCVE_2018_11206_fill_new.h5
-<<<<<<< HEAD
-=======
 $SRC_H5DUMP_TESTFILES/tCVE-2021-37501_attr_decode.h5
-$SRC_H5DUMP_TESTFILES/tst_onion_objs.h5
-$SRC_H5DUMP_TESTFILES/tst_onion_objs.h5.onion
-$SRC_H5DUMP_TESTFILES/tst_onion_dset_ext.h5
-$SRC_H5DUMP_TESTFILES/tst_onion_dset_ext.h5.onion
-$SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.h5
-$SRC_H5DUMP_TESTFILES/tst_onion_dset_1d.h5.onion
->>>>>>> b16ec83... Check for overflow when calculating on-disk attribute data size (#2459)
 "
 
 LIST_OTHER_TEST_FILES="
