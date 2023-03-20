@@ -382,15 +382,14 @@ done:
 static void *
 H5FD_direct_fapl_get(H5FD_t *_file)
 {
-    H5FD_direct_t *file = (H5FD_direct_t *)_file;
-    void          *ret_value; /* Return value */
+    H5FD_direct_t *file      = (H5FD_direct_t *)_file;
+    void          *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
     ret_value = H5FD_direct_fapl_copy(&(file->fa));
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_direct_fapl_get() */
 
@@ -443,10 +442,10 @@ H5FD_direct_fapl_copy(const void *_old_fa)
 static H5FD_t *
 H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    int                 o_flags;
-    int                 fd   = (-1);
-    H5FD_direct_t      *file = NULL;
-    H5FD_direct_fapl_t *fa;
+    int                       o_flags;
+    int                       fd   = (-1);
+    H5FD_direct_t            *file = NULL;
+    const H5FD_direct_fapl_t *fa;
 #ifdef H5_HAVE_WIN32_API
     HFILE                              filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
@@ -495,7 +494,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     /* Get the driver specific information */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (H5FD_direct_fapl_t *)H5P_peek_driver_info(plist)))
+    if (NULL == (fa = (const H5FD_direct_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
     file->fd = fd;
@@ -545,7 +544,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         }
         else {
             file->fa.must_align = FALSE;
-            HDftruncate(file->fd, (HDoff_t)0);
+            if (-1 == HDftruncate(file->fd, (HDoff_t)0))
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to truncate file")
         }
     }
     else {
@@ -792,7 +792,7 @@ H5FD_direct_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_direct_t *file = (const H5FD_direct_t *)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(file->eof)
 }

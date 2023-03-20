@@ -1221,8 +1221,10 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             const hdset_reg_ref_t *ref_buf1, *ref_buf2; /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
+            H5_GCC_DIAG_OFF("cast-qual")
             ref_buf1 = (const hdset_reg_ref_t *)buf1;
             ref_buf2 = (const hdset_reg_ref_t *)buf2;
+            H5_GCC_DIAG_ON("cast-qual")
             for (u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t      obj1_id, obj2_id;     /* IDs for objects referenced */
                 hid_t      obj1_sid, obj2_sid;   /* Dataspace IDs for objects referenced */
