@@ -21,11 +21,11 @@ set (test_hl_fortran_CLEANFILES
     dsetf2.h5
     dsetf3.h5
     dsetf4.h5
-          dsetf5.h5
-          f1img.h5
-          f1tab.h5
-          f2tab.h5
-          tstds.h5
+    dsetf5.h5
+    f1img.h5
+    f1tab.h5
+    f2tab.h5
+    tstds.h5
 )
 
 # Remove any output file left over from previous test run
@@ -54,6 +54,7 @@ macro (ADD_H5_FORTRAN_TEST file)
   endif ()
   set_tests_properties (HL_FORTRAN_f90_${file} PROPERTIES
       FIXTURES_REQUIRED clear_HL_FORTRAN_test
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
 endmacro ()
 

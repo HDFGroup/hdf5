@@ -1,7 +1,7 @@
 /* Open the file with non-SWMR access and default file access property list */
 fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-/* Get the file's file access roperty list */
+/* Get the file's file access property list */
 file_fapl = H5Fget_access_plist(fid);
 
 /* Retrieve the # of read attempts from the file's file access property list */
@@ -26,7 +26,7 @@ H5Pset_metadata_read_attempts(fapl, 20);
 /* Open the file with non-SWMR access and the non-default file access property list */
 fid = H5Fopen(FILE, H5F_ACC_RDONLY, fapl);
 
-/* Get the file's file access roperty list */
+/* Get the file's file access property list */
 file_fapl = H5Fget_access_plist(fid);
 
 /* Retrieve the # of read attempts from the file's file access property list */
