@@ -97,6 +97,10 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
    5. From the "myhdfstuff" directory execute the CTest Script with the
       following options:
 
+      On 32-bit Windows with Visual Studio 2022, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2022 -C Release -VV -O hdf5.log
+      On 64-bit Windows with Visual Studio 2022, execute:
+         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS202264 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2019, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2019 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2019, execute:
@@ -105,10 +109,6 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2017, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log
-      On 32-bit Windows with Visual Studio 2015, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2015 -C Release -VV -O hdf5.log
-      On 64-bit Windows with Visual Studio 2015, execute:
-         ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -VV -O hdf5.log
       On Linux and Mac, execute:
          ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -VV -O hdf5.log
       The supplied build scripts are versions of the above.

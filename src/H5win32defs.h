@@ -17,7 +17,8 @@
  *
  */
 
-/* _MSC_VER = 192x  VS2019
+/* _MSC_VER = 193x  VS2022
+ * _MSC_VER = 192x  VS2019
  * _MSC_VER = 191x  VS2017
  * _MSC_VER = 1900  VS2015
  * _MSC_VER = 1800  VS2013
