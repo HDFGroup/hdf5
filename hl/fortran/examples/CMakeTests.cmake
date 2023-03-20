@@ -44,5 +44,6 @@ foreach (example ${examples})
   endif ()
   set_tests_properties (HL_FORTRAN_f90_ex_${example} PROPERTIES
       FIXTURES_REQUIRED clear_HL_FORTRAN_f90_ex
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
   )
 endforeach ()

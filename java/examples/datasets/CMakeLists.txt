@@ -93,7 +93,8 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     else ()
       add_test (
           NAME JAVA_datasets-${example}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
       )
     endif ()
 

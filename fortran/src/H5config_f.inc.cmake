@@ -11,7 +11,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
-! Define if we have parallel support
+! Define if there is parallel support
 #cmakedefine01 H5_HAVE_PARALLEL
 #if H5_HAVE_PARALLEL == 0
 #undef H5_HAVE_PARALLEL

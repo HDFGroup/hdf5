@@ -150,3 +150,10 @@ add_test (
 set_tests_properties (FORTRAN_fflush2 PROPERTIES
     DEPENDS FORTRAN_fflush1
 )
+add_test (
+    NAME FORTRAN_flush1-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove flush.h5
+)
+set_tests_properties (FORTRAN_flush1-clean-objects PROPERTIES
+    DEPENDS FORTRAN_fflush2
+)

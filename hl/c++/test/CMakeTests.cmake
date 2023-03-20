@@ -21,6 +21,7 @@ add_test (
     COMMAND    ${CMAKE_COMMAND}
         -E remove ${example}.txt
 )
+
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME HL_CPP_ptableTest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:hl_ptableTest>)
 else ()
