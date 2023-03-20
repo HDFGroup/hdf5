@@ -169,7 +169,7 @@
  *
  ****************************************************************************/
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
 if ( ( (head_ptr) == NULL ) ||                                               \
@@ -334,7 +334,7 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
     H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size)        \
 } /* H5C__DLL_UPDATE_FOR_SIZE_CHANGE() */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
@@ -471,7 +471,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
     }                                                                        \
 } /* H5C__AUX_DLL_REMOVE() */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                  \
@@ -996,7 +996,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #define H5C__HASH_FCN(x)    (int)((unsigned)((x) & H5C__HASH_MASK) >> 3)
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)           \
 if ( ( (cache_ptr) == NULL ) ||                                         \
@@ -1600,7 +1600,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *        two #defines are easy to confuse.
  */
 
-#if H5C_DO_SLIST_SANITY_CHECKS
+#ifdef H5C_DO_SLIST_SANITY_CHECKS
 
 #define ENTRY_IN_SLIST(cache_ptr, entry_ptr) \
     H5C_entry_in_skip_list((cache_ptr), (entry_ptr))
@@ -1612,7 +1612,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
@@ -1746,7 +1746,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *-------------------------------------------------------------------------
  */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
@@ -1883,7 +1883,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *-------------------------------------------------------------------------
  */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
 {                                                                             \
@@ -3307,7 +3307,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #ifdef H5_HAVE_PARALLEL
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
@@ -4861,7 +4861,7 @@ struct H5C_t {
     size_t            slist_ring_size[H5C_RING_NTYPES];
     H5SL_t *                    slist_ptr;
     uint32_t                    num_last_entries;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     int32_t            slist_len_increase;
     int64_t            slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */

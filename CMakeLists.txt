@@ -657,6 +657,13 @@ if (${HDF_CFG_NAME} MATCHES "Debug")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add some definitions for Developer Builds
+#-----------------------------------------------------------------------------
+if (${HDF_CFG_NAME} MATCHES "Developer")
+  include (${HDF_RESOURCES_DIR}/HDF5DeveloperBuild.cmake)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to embed library info into executables
 #-----------------------------------------------------------------------------
 if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
