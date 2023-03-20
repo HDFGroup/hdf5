@@ -229,7 +229,6 @@ typedef int herr_t;
  * (true). The typical true value is 1 but don't bet on it.
  * \attention Boolean functions cannot fail.
  */
-#include <stdbool.h>
 typedef bool hbool_t;
 /**
  * Three-valued Boolean type. Functions that return #htri_t however return zero
