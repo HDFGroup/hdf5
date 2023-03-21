@@ -29,6 +29,8 @@ if (HDF5_TEST_SERIAL)
       COMMAND    ${CMAKE_COMMAND}
           -E remove
           chunk.h5
+          direct_write.h5
+          unix.raw
           iopipe.h5
           iopipe.raw
           x-diag-rd.dat
@@ -36,20 +38,6 @@ if (HDF5_TEST_SERIAL)
           x-rowmaj-rd.dat
           x-rowmaj-wr.dat
           x-gnuplot
-          h5perf_serial.txt
-          h5perf_serial.txt.err
-          chunk.txt
-          chunk.txt.err
-          iopipe.txt
-          iopipe.txt.err
-          overhead.txt
-          overhead.txt.err
-          perf_meta.txt
-          perf_meta.txt.err
-          zip_perf-h.txt
-          zip_perf-h.txt.err
-          zip_perf.txt
-          zip_perf.txt.err
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -71,10 +59,6 @@ if (HDF5_TEST_SERIAL)
       TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
       DEPENDS "PERFORM_h5perform-clearall-objects"
   )
-
-  if (HDF5_BUILD_PERFORM_STANDALONE)
-    add_test (NAME PERFORM_h5perf_serial_alone COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5perf_serial_alone>)
-  endif ()
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_chunk COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:chunk>)
@@ -192,13 +176,6 @@ if (HDF5_TEST_SERIAL)
 endif ()
 
 if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
-  if (UNIX)
-    add_test (NAME MPI_TEST_PERFORM_perf COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:perf> ${MPIEXEC_POSTFLAGS})
-  endif ()
-
   add_test (NAME MPI_TEST_PERFORM_h5perf COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5perf> ${MPIEXEC_POSTFLAGS})
 
-  if (HDF5_BUILD_PERFORM_STANDALONE)
-    add_test (NAME MPI_TEST_PERFORM_h5perf_alone COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5perf_alone> ${MPIEXEC_POSTFLAGS})
-  endif ()
 endif ()
