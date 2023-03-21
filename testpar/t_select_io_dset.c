@@ -137,15 +137,15 @@ typedef struct s4_t {
 
 /* Defines for test_multi_dsets_all() */
 typedef enum {
-    DSET_WITH_NO_CONV,          /* Dataset with no type conversion */
-    DSET_WITH_CONV_AND_NO_BKG,  /* Dataset with type conversion but no background buffer */
-    DSET_WITH_CONV_AND_BKG,     /* Dataset with type conversion and background buffer */
+    DSET_WITH_NO_CONV,         /* Dataset with no type conversion */
+    DSET_WITH_CONV_AND_NO_BKG, /* Dataset with type conversion but no background buffer */
+    DSET_WITH_CONV_AND_BKG,    /* Dataset with type conversion and background buffer */
     DSET_NTTYPES
 } multi_dset_type_t;
 
 /* Test setting A and B */
-#define SETTING_A   1
-#define SETTING_B   2
+#define SETTING_A 1
+#define SETTING_B 2
 
 /*
  * Helper routine to set dxpl
@@ -2675,60 +2675,60 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 
 /*
  * Test 5 for multi-dataset:
- * 
+ *
  * Repeat the following test for niter times to ensure the
  * random combinations of all dataset types are hit.
  *
  * Create randomized contiguous or chunked datasets with:
- * --DSET_WITH_NO_CONV: 
+ * --DSET_WITH_NO_CONV:
  *   --with no type conversion
  *   --dataset with H5T_NATIVE_INT
- * --DSET_WITH_CONV_AND_NO_BKG: 
+ * --DSET_WITH_CONV_AND_NO_BKG:
  *   --type conversion without background buffer
  *   --dataset with H5T_NATIVE_LONG
- * --DSET_WITH_CONV_AND_BKG: 
+ * --DSET_WITH_CONV_AND_BKG:
  *   --type conversion with background buffer
  *   --dataset with compound type s1_t
  *
  * Do H5Dwrite_multi() and H5Dread_multi() for the above randomized
  * datasets with the settings below:
  * Setting A:
- * --DSET_WITH_NO_CONV: 
+ * --DSET_WITH_NO_CONV:
  *   --write: mem_tids[] = H5T_NATIVE_INT
  *   --read: r_mem_tids[] = H5T_NATIVE_INT
- * --DSET_WITH_CONV_AND_NO_BKG: 
+ * --DSET_WITH_CONV_AND_NO_BKG:
  *   --write: mem_tids[] = H5T_NATIVE_ULONG
  *   --read: r_mem_tids[] = H5T_NATIVE_LONG
- * --DSET_WITH_CONV_AND_BKG: 
+ * --DSET_WITH_CONV_AND_BKG:
  *   --write: mem_tids[] = s1_tid;
  *   --read: r_mem_tids[i] = s3_tid;
  *
  * Setting B:
- * --DSET_WITH_NO_CONV: 
+ * --DSET_WITH_NO_CONV:
  *   --write: mem_tids[] = H5T_NATIVE_INT
  *   --read: r_mem_tids[] = H5T_NATIVE_INT
- * --DSET_WITH_CONV_AND_NO_BKG: 
+ * --DSET_WITH_CONV_AND_NO_BKG:
  *   --write: mem_tids[] = H5T_NATIVE_LONG;
  *   --read: r_mem_tids[] = H5T_NATIVE_SHORT;
- * --DSET_WITH_CONV_AND_BKG: 
+ * --DSET_WITH_CONV_AND_BKG:
  *   --write: mem_tids[] = s4_tid;
  *   --read: r_mem_tids[i] = s1_tid;
  *
  * Verify the result read as below:
  * Setting A:
- * --DSET_WITH_NO_CONV: 
+ * --DSET_WITH_NO_CONV:
  *   --verify data read in rbufi1[i][j] is same as wbufi1[i][j]
- * --DSET_WITH_CONV_AND_NO_BKG: 
+ * --DSET_WITH_CONV_AND_NO_BKG:
  *   --verify data read in l_rbufi2[i][j] is all LONG_MAX
- * --DSET_WITH_CONV_AND_BKG: 
- *   --verify all fields read in s3_rbufi3[i][j] is the 
+ * --DSET_WITH_CONV_AND_BKG:
+ *   --verify all fields read in s3_rbufi3[i][j] is the
  *     reverse of s1_wbufi3[i][j]
  * Setting B:
- * --DSET_WITH_NO_CONV: 
+ * --DSET_WITH_NO_CONV:
  *   --verify data read in rbufi1[i][j] is same as wbufi1[i][j]
- * --DSET_WITH_CONV_AND_NO_BKG: 
+ * --DSET_WITH_CONV_AND_NO_BKG:
  *   --verify data read in s_rbufi2[i][j] is all SHRT_MAX
- * --DSET_WITH_CONV_AND_BKG: 
+ * --DSET_WITH_CONV_AND_BKG:
  *   --verify fields read in s1_rbufi3[i][j] is as follows:
  *     --fields 'a' and 'c' are as  s1_wbufi3[i][j].a and s1_wbufi3[i][j].c
  *     --fields 'b' and 'd' are (DSET_SELECT_DIM + j + start[0])
@@ -2736,11 +2736,11 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 {
-    size_t  ndsets;
-    int     i, j, mm;
-    int     s, n;
-    hid_t   dcpl = H5I_INVALID_HID;
-    hid_t   dxpl = H5I_INVALID_HID;
+    size_t ndsets;
+    int    i, j, mm;
+    int    s, n;
+    hid_t  dcpl = H5I_INVALID_HID;
+    hid_t  dxpl = H5I_INVALID_HID;
 
     hsize_t dims[1];
     hsize_t cdims[1];
@@ -2753,9 +2753,9 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 
     multi_dset_type_t dset_types[MULTI_NUM_DSETS];
 
-    hid_t s1_tid    = H5I_INVALID_HID;
-    hid_t s3_tid    = H5I_INVALID_HID;
-    hid_t s4_tid    = H5I_INVALID_HID;
+    hid_t s1_tid = H5I_INVALID_HID;
+    hid_t s3_tid = H5I_INVALID_HID;
+    hid_t s4_tid = H5I_INVALID_HID;
 
     char  dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
     hid_t dset_dids[MULTI_NUM_DSETS];
@@ -2769,13 +2769,13 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
     int *rbufi1[MULTI_NUM_DSETS];
 
     unsigned long *ul_total_wbuf2 = NULL;
-    long *l_total_rbuf2 = NULL;
+    long          *l_total_rbuf2  = NULL;
     unsigned long *ul_wbufi2[MULTI_NUM_DSETS];
-    long *l_rbufi2[MULTI_NUM_DSETS];
+    long          *l_rbufi2[MULTI_NUM_DSETS];
 
-    long *l_total_wbuf2 = NULL;
+    long  *l_total_wbuf2 = NULL;
     short *s_total_rbuf2 = NULL;
-    long *l_wbufi2[MULTI_NUM_DSETS];
+    long  *l_wbufi2[MULTI_NUM_DSETS];
     short *s_rbufi2[MULTI_NUM_DSETS];
 
     s1_t *s1_total_wbuf3 = NULL;
@@ -2861,30 +2861,33 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                 P_TEST_ERROR;
 
             mm = HDrandom() % (int)ndsets;
-            if(mm == 0) {
+            if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
                 if (snprintf(dset_names[i], DSET_NAME_LEN,
-                        chunked ? "multi_all_chk_nconv_dset%u" : "multi_all_contig_nconv_dset%u", i) < 0)
+                             chunked ? "multi_all_chk_nconv_dset%u" : "multi_all_contig_nconv_dset%u", i) < 0)
                     P_TEST_ERROR;
-                if ((dset_dids[i] =
-                        H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
+                                               dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
-
-            } else if (mm == 1) { 
+            }
+            else if (mm == 1) {
                 dset_types[i] = DSET_WITH_CONV_AND_NO_BKG;
                 if (snprintf(dset_names[i], DSET_NAME_LEN,
-                        chunked ? "multi_all_chk_conv_nbkg_dset%u" : "multi_all_contig_conv_nbkg_dset%u", i) < 0)
+                             chunked ? "multi_all_chk_conv_nbkg_dset%u" : "multi_all_contig_conv_nbkg_dset%u",
+                             i) < 0)
                     P_TEST_ERROR;
-                if ((dset_dids[i] =
-                        H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT,
+                                               dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
-            } else {
+            }
+            else {
                 dset_types[i] = DSET_WITH_CONV_AND_BKG;
                 if (snprintf(dset_names[i], DSET_NAME_LEN,
-                        chunked ? "multi_all_chk_conv_bkg_dset%u" : "multi_all_contig_conv_bkg_dset%u", i) < 0)
+                             chunked ? "multi_all_chk_conv_bkg_dset%u" : "multi_all_contig_conv_bkg_dset%u",
+                             i) < 0)
                     P_TEST_ERROR;
-                if ((dset_dids[i] =
-                        H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl,
+                                               H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
             }
 
@@ -2918,17 +2921,17 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
             P_TEST_ERROR;
 
         /* DSET_WITH_CONV_AND_BKG */
-        buf_size    = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
+        buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
         if (NULL == (s1_total_wbuf3 = (s1_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
-        buf_size    = ndsets * DSET_SELECT_DIM * sizeof(s3_t);
+        buf_size = ndsets * DSET_SELECT_DIM * sizeof(s3_t);
         if (NULL == (s3_total_rbuf3 = (s3_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
 
-        buf_size    = ndsets * DSET_SELECT_DIM * sizeof(s4_t);
+        buf_size = ndsets * DSET_SELECT_DIM * sizeof(s4_t);
         if (NULL == (s4_total_wbuf3 = (s4_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
-        buf_size    = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
+        buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
         if (NULL == (s1_total_rbuf3 = (s1_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
 
@@ -2942,18 +2945,18 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 
                     case DSET_WITH_NO_CONV:
                         /* Initialize buffer indices */
-                        wbufi1[i]       = total_wbuf1 + (i * DSET_SELECT_DIM);
-                        rbufi1[i]       = total_rbuf1 + (i * DSET_SELECT_DIM);
+                        wbufi1[i] = total_wbuf1 + (i * DSET_SELECT_DIM);
+                        rbufi1[i] = total_rbuf1 + (i * DSET_SELECT_DIM);
 
                         wbufs[i] = wbufi1[i];
                         rbufs[i] = rbufi1[i];
 
                         /* Initialize the buffer data */
                         for (j = 0; j < (int)block[0]; j++)
-                            wbufi1[i][j]       = j + (int)start[0];
+                            wbufi1[i][j] = j + (int)start[0];
 
                         /* Same for all cases */
-                        mem_tids[i] = H5T_NATIVE_INT;
+                        mem_tids[i]   = H5T_NATIVE_INT;
                         r_mem_tids[i] = H5T_NATIVE_INT;
 
                         break;
@@ -2961,33 +2964,33 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                     case DSET_WITH_CONV_AND_NO_BKG:
                         if (s == SETTING_A) {
                             /* Initialize buffer indices */
-                            ul_wbufi2[i]       = ul_total_wbuf2 + (i * DSET_SELECT_DIM);
-                            l_rbufi2[i]       = l_total_rbuf2 + (i * DSET_SELECT_DIM);
+                            ul_wbufi2[i] = ul_total_wbuf2 + (i * DSET_SELECT_DIM);
+                            l_rbufi2[i]  = l_total_rbuf2 + (i * DSET_SELECT_DIM);
 
                             wbufs[i] = ul_wbufi2[i];
                             rbufs[i] = l_rbufi2[i];
 
                             for (j = 0; j < (int)block[0]; j++)
-                                ul_wbufi2[i][j]       = ULONG_MAX - (unsigned long)(j + (int)start[0]);
+                                ul_wbufi2[i][j] = ULONG_MAX - (unsigned long)(j + (int)start[0]);
 
-                            mem_tids[i] = H5T_NATIVE_ULONG;
+                            mem_tids[i]   = H5T_NATIVE_ULONG;
                             r_mem_tids[i] = H5T_NATIVE_LONG;
-
-                        } else if (s == SETTING_B) {
+                        }
+                        else if (s == SETTING_B) {
                             /* Initialize buffer indices */
-                            l_wbufi2[i]       = l_total_wbuf2 + (i * DSET_SELECT_DIM);
-                            s_rbufi2[i]       = s_total_rbuf2 + (i * DSET_SELECT_DIM);
+                            l_wbufi2[i] = l_total_wbuf2 + (i * DSET_SELECT_DIM);
+                            s_rbufi2[i] = s_total_rbuf2 + (i * DSET_SELECT_DIM);
 
                             wbufs[i] = l_wbufi2[i];
                             rbufs[i] = s_rbufi2[i];
 
                             /* Initialize the buffer data */
                             for (j = 0; j < (int)block[0]; j++)
-                                l_wbufi2[i][j]       = LONG_MAX - (long)(j + (int)start[0]);
+                                l_wbufi2[i][j] = LONG_MAX - (long)(j + (int)start[0]);
 
-                            mem_tids[i] = H5T_NATIVE_LONG;
+                            mem_tids[i]   = H5T_NATIVE_LONG;
                             r_mem_tids[i] = H5T_NATIVE_SHORT;
-                        } 
+                        }
 
                         break;
 
@@ -3008,10 +3011,10 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                                 s1_wbufi3[i][j].c = (4 * j + (int)start[0]) + 2;
                                 s1_wbufi3[i][j].d = (4 * j + (int)start[0]) + 3;
                             }
-                            mem_tids[i] = s1_tid;
+                            mem_tids[i]   = s1_tid;
                             r_mem_tids[i] = s3_tid;
-
-                        } else if (s == SETTING_B) {
+                        }
+                        else if (s == SETTING_B) {
                             /* Initialize buffer indices */
                             s4_wbufi3[i] = s4_total_wbuf3 + (i * DSET_SELECT_DIM);
                             s1_rbufi3[i] = s1_total_rbuf3 + (i * DSET_SELECT_DIM);
@@ -3024,7 +3027,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                                 s4_wbufi3[i][j].b = DSET_SELECT_DIM + (unsigned int)(j + (int)start[0]);
                                 s4_wbufi3[i][j].d = DSET_SELECT_DIM + (unsigned int)(j + (int)start[0]);
                             }
-                            mem_tids[i] = s4_tid;
+                            mem_tids[i]   = s4_tid;
                             r_mem_tids[i] = s1_tid;
                         }
 
@@ -3035,7 +3038,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                         P_TEST_ERROR;
 
                 } /* end switch dset_types */
-    
+
             } /* end for i ndsets */
 
             if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
@@ -3070,8 +3073,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                                     HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
-
-                        } else if (s == SETTING_B) {
+                        }
+                        else if (s == SETTING_B) {
                             for (j = 0; j < (int)block[0]; j++)
                                 if (s_rbufi2[i][j] != SHRT_MAX) {
                                     nerrors++;
@@ -3079,7 +3082,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                                     HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
-                        } 
+                        }
 
                         break;
 
@@ -3090,25 +3093,25 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                                     s3_rbufi3[i][j].b != s1_wbufi3[i][j].b ||
                                     s3_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
                                     s3_rbufi3[i][j].d != s1_wbufi3[i][j].d) {
-                                        nerrors++;
-                                        HDprintf("    Read different values than written.\n");
-                                        HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
-                                        break;
-                                 }
-
-                        } else if (s == SETTING_B) {
-                                for (j = 0; j < (int)block[0]; j++)
-                                    if (s1_rbufi3[i][j].a != s1_wbufi3[i][j].a ||
-                                        s1_rbufi3[i][j].b != (DSET_SELECT_DIM + j + (int)start[0]) ||
-                                        s1_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
-                                        s1_rbufi3[i][j].d != (DSET_SELECT_DIM + j + (int)start[0])) {
-                                            nerrors++;
-                                            HDprintf("    Read different values than written.\n");
-                                            HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
-                                            break;
-                                    }
+                                    nerrors++;
+                                    HDprintf("    Read different values than written.\n");
+                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    break;
+                                }
                         }
-    
+                        else if (s == SETTING_B) {
+                            for (j = 0; j < (int)block[0]; j++)
+                                if (s1_rbufi3[i][j].a != s1_wbufi3[i][j].a ||
+                                    s1_rbufi3[i][j].b != (DSET_SELECT_DIM + j + (int)start[0]) ||
+                                    s1_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
+                                    s1_rbufi3[i][j].d != (DSET_SELECT_DIM + j + (int)start[0])) {
+                                    nerrors++;
+                                    HDprintf("    Read different values than written.\n");
+                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    break;
+                                }
+                        }
+
                         break;
 
                     case DSET_NTTYPES:
@@ -3116,7 +3119,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
                         P_TEST_ERROR;
 
                 } /* end switch dset_types */
-    
+
             } /* end for i ndsets */
 
         } /* end for s settings */
@@ -3140,7 +3143,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
             if (H5Dclose(dset_dids[i]) < 0)
                 P_TEST_ERROR;
             /* Don't delete the last set of datasets */
-            if((n + 1) != niter)
+            if ((n + 1) != niter)
                 if (H5Ldelete(fid, dset_names[i], H5P_DEFAULT) < 0)
                     P_TEST_ERROR;
         }
@@ -3345,7 +3348,8 @@ main(int argc, char *argv[])
                         if (dtrans) {
                             if (MAINPROCESS)
                                 SKIPPED();
-                        } else
+                        }
+                        else
                             test_multi_dsets_all(2, fid, chunked);
 
                         break;
