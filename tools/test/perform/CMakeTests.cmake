@@ -23,11 +23,7 @@ add_custom_target(zip_perf_files ALL COMMENT "Copying files needed by zip_perf t
 # Add Tests
 #-----------------------------------------------------------------------------
 if (HDF5_TEST_SERIAL)
-  # Remove any output file left over from previous test run
-  add_test (
-      NAME PERFORM_h5perform-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
+  set (PERFORM_CLEANFILES
           chunk.h5
           direct_write.h5
           unix.raw
@@ -39,6 +35,20 @@ if (HDF5_TEST_SERIAL)
           x-rowmaj-wr.dat
           x-gnuplot
   )
+  # Remove any output file left over from previous test run
+  add_test (
+      NAME PERFORM_h5perform-clear-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove ${PERFORM_CLEANFILES}
+  )
+  set_tests_properties (PERFORM_h5perform-clear-objects PROPERTIES FIXTURES_SETUP clear_perform)
+
+  add_test (
+      NAME PERFORM_h5perform-clean-objects
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove ${PERFORM_CLEANFILES}
+  )
+  set_tests_properties (PERFORM_h5perform-clean-objects PROPERTIES FIXTURES_CLEANUP clear_perform)
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME PERFORM_h5perf_serial COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5perf_serial>)
@@ -57,7 +67,7 @@ if (HDF5_TEST_SERIAL)
   endif ()
   set_tests_properties (PERFORM_h5perf_serial PROPERTIES
       TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -76,7 +86,7 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_chunk PROPERTIES
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -95,7 +105,7 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_iopipe PROPERTIES
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -114,7 +124,7 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_overhead PROPERTIES
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -133,7 +143,7 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_perf_meta PROPERTIES
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -152,7 +162,7 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf_help PROPERTIES
-      DEPENDS "PERFORM_h5perform-clearall-objects"
+      FIXTURES_REQUIRED clear_perform
   )
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -171,7 +181,8 @@ if (HDF5_TEST_SERIAL)
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf PROPERTIES
-      DEPENDS "PERFORM_zip_perf_help;PERFORM_h5perform-clearall-objects"
+      DEPENDS "PERFORM_zip_perf_help"
+      FIXTURES_REQUIRED clear_perform
   )
 endif ()
 

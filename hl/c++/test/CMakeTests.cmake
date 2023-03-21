@@ -15,11 +15,17 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-
+# Remove any output file left over from previous test run
+set (HL_CPP_PT_CLEANFILES
+            packettest.h5
+)
 add_test (
     NAME HL_CPP_ptableTest-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove ${example}.txt
+        -E remove ${HL_CPP_PT_CLEANFILES}
+)
+set_tests_properties (HL_CPP_ptableTest-clear-objects PROPERTIES
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -38,3 +44,12 @@ else ()
   )
 endif ()
 set_tests_properties (HL_CPP_ptableTest PROPERTIES DEPENDS HL_CPP_ptableTest-clear-objects)
+add_test (
+    NAME HL_CPP_ptableTest-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${HL_CPP_PT_CLEANFILES}
+)
+set_tests_properties (HL_CPP_ptableTest-clean-objects PROPERTIES
+    DEPENDS HL_CPP_ptableTest
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
