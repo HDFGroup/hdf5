@@ -53,7 +53,6 @@ struct timezone {
 #define HDgetcwd(S, Z)       _getcwd(S, Z)
 #define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
 #define HDgetdrive()         _getdrive()
-#define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDisatty(F)          _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
@@ -100,7 +99,6 @@ extern "C" {
 H5_DLL int      Wgettimeofday(struct timeval *tv, struct timezone *tz);
 H5_DLL int      Wsetenv(const char *name, const char *value, int overwrite);
 H5_DLL int      Wflock(int fd, int operation);
-H5_DLL char    *Wgetlogin(void);
 H5_DLL herr_t   H5_expand_windows_env_vars(char **env_var);
 H5_DLL wchar_t *H5_get_utf16_str(const char *s);
 H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
