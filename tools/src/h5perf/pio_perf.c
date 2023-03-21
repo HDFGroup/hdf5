@@ -80,11 +80,6 @@
 #define PIO_MPI   0x2
 #define PIO_HDF5  0x4
 
-#ifdef STANDALONE
-#define DBL_EPSILON            2.2204460492503131e-16
-#define H5_DBL_ABS_EQUAL(X, Y) (fabs((X) - (Y)) < DBL_EPSILON)
-#endif
-
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
@@ -199,8 +194,8 @@ static int             destroy_comm_world(void);
 static void  output_results(const struct options *options, const char *name, minmax *table, int table_size,
                             off_t data_size);
 static void  output_times(const struct options *options, const char *name, minmax *table, int table_size);
-static void  output_report(const char *fmt, ...);
-static void  print_indent(register int indent);
+static void  output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+static void  print_indent(int indent);
 static void  usage(const char *prog);
 static void  report_parameters(struct options *opts);
 static off_t squareo(off_t);
@@ -220,10 +215,8 @@ main(int argc, char *argv[])
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
 
-#ifndef STANDALONE
     /* Initialize h5tools lib */
     h5tools_init();
-#endif
 
     output = stdout;
 
@@ -318,7 +311,7 @@ run_test_loop(struct options *opts)
 {
     parameters parms;
     int        num_procs;
-    int        doing_pio; /* if this process is doing PIO */
+    int        doing_pio = 0; /* if this process is doing parallel IO */
 
     parms.num_files     = opts->num_files;
     parms.num_dsets     = opts->num_dsets;
@@ -336,7 +329,7 @@ run_test_loop(struct options *opts)
     /* start with max_num_procs and decrement it by half for each loop. */
     /* if performance needs restart, fewer processes may be needed. */
     for (num_procs = opts->max_num_procs; num_procs >= opts->min_num_procs; num_procs >>= 1) {
-        register size_t buf_size;
+        size_t buf_size;
 
         parms.num_procs = num_procs;
 
@@ -346,7 +339,7 @@ run_test_loop(struct options *opts)
 
         /* only processes doing PIO will run the tests */
         if (doing_pio) {
-            output_report("Number of processors = %ld\n", parms.num_procs);
+            output_report("Number of processors = %d\n", parms.num_procs);
 
             /* multiply the xfer buffer size by 2 for each loop iteration */
             for (buf_size = opts->min_xfer_size; buf_size <= opts->max_xfer_size; buf_size <<= 1) {
@@ -411,34 +404,34 @@ run_test_loop(struct options *opts)
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
 {
-    results      res;
-    register int i, ret_value = SUCCESS;
-    int          comm_size;
-    off_t        raw_size;
-    minmax      *write_mpi_mm_table   = NULL;
-    minmax      *write_mm_table       = NULL;
-    minmax      *write_gross_mm_table = NULL;
-    minmax      *write_raw_mm_table   = NULL;
-    minmax      *read_mpi_mm_table    = NULL;
-    minmax      *read_mm_table        = NULL;
-    minmax      *read_gross_mm_table  = NULL;
-    minmax      *read_raw_mm_table    = NULL;
-    minmax      *read_open_mm_table   = NULL;
-    minmax      *read_close_mm_table  = NULL;
-    minmax      *write_open_mm_table  = NULL;
-    minmax      *write_close_mm_table = NULL;
-    minmax       write_mpi_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       write_mm             = {0.0, 0.0, 0.0, 0};
-    minmax       write_gross_mm       = {0.0, 0.0, 0.0, 0};
-    minmax       write_raw_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       read_mpi_mm          = {0.0, 0.0, 0.0, 0};
-    minmax       read_mm              = {0.0, 0.0, 0.0, 0};
-    minmax       read_gross_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       read_raw_mm          = {0.0, 0.0, 0.0, 0};
-    minmax       read_open_mm         = {0.0, 0.0, 0.0, 0};
-    minmax       read_close_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       write_open_mm        = {0.0, 0.0, 0.0, 0};
-    minmax       write_close_mm       = {0.0, 0.0, 0.0, 0};
+    results res;
+    int     i, ret_value = SUCCESS;
+    int     comm_size;
+    off_t   raw_size;
+    minmax *write_mpi_mm_table   = NULL;
+    minmax *write_mm_table       = NULL;
+    minmax *write_gross_mm_table = NULL;
+    minmax *write_raw_mm_table   = NULL;
+    minmax *read_mpi_mm_table    = NULL;
+    minmax *read_mm_table        = NULL;
+    minmax *read_gross_mm_table  = NULL;
+    minmax *read_raw_mm_table    = NULL;
+    minmax *read_open_mm_table   = NULL;
+    minmax *read_close_mm_table  = NULL;
+    minmax *write_open_mm_table  = NULL;
+    minmax *write_close_mm_table = NULL;
+    minmax  write_mpi_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  write_mm             = {0.0, 0.0, 0.0, 0};
+    minmax  write_gross_mm       = {0.0, 0.0, 0.0, 0};
+    minmax  write_raw_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  read_mpi_mm          = {0.0, 0.0, 0.0, 0};
+    minmax  read_mm              = {0.0, 0.0, 0.0, 0};
+    minmax  read_gross_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  read_raw_mm          = {0.0, 0.0, 0.0, 0};
+    minmax  read_open_mm         = {0.0, 0.0, 0.0, 0};
+    minmax  read_close_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  write_open_mm        = {0.0, 0.0, 0.0, 0};
+    minmax  write_close_mm       = {0.0, 0.0, 0.0, 0};
 
     raw_size      = parms.num_files * (off_t)parms.num_dsets * (off_t)parms.num_bytes;
     parms.io_type = iot;
@@ -904,7 +897,7 @@ accumulate_minmax_stuff(minmax *mm, int count)
     int    i;
     minmax total_mm;
 
-    total_mm.sum = 0.0f;
+    total_mm.sum = 0.0;
     total_mm.max = -DBL_MAX;
     total_mm.min = DBL_MAX;
     total_mm.num = count;
@@ -1059,14 +1052,14 @@ output_times(const struct options *opts, const char *name, minmax *table, int ta
     /* Note: The maximum throughput uses the minimum amount of time & vice versa */
 
     print_indent(4);
-    output_report("Minimum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files, (total_mm.min));
+    output_report("Minimum Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files, (total_mm.min));
 
     print_indent(4);
-    output_report("Average Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,
+    output_report("Average Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files,
                   (total_mm.sum / total_mm.num));
 
     print_indent(4);
-    output_report("Maximum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files, (total_mm.max));
+    output_report("Maximum Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files, (total_mm.max));
 }
 
 /*
@@ -1087,7 +1080,9 @@ output_report(const char *fmt, ...)
         va_list ap;
 
         HDva_start(ap, fmt);
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         HDvfprintf(output, fmt, ap);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         HDva_end(ap);
     }
 }
@@ -1098,10 +1093,9 @@ output_report(const char *fmt, ...)
  *              things.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. October 2001
- * Modifications:
  */
 static void
-print_indent(register int indent)
+print_indent(int indent)
 {
     int myrank;
 
@@ -1122,25 +1116,25 @@ recover_size_and_print(long long val, const char *end)
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "GB%s",
                           val / ONE_GB, end);
             else
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "MB%s",
                           val / ONE_MB, end);
         }
         else {
             HDfprintf(output,
-                      "%" H5_PRINTF_LL_WIDTH "d"
+                      "%lld"
                       "KB%s",
                       val / ONE_KB, end);
         }
     }
     else {
         HDfprintf(output,
-                  "%" H5_PRINTF_LL_WIDTH "d"
+                  "%lld"
                   "%s",
                   val, end);
     }
@@ -1278,7 +1272,7 @@ report_parameters(struct options *opts)
 static struct options *
 parse_command_line(int argc, const char *const *argv)
 {
-    register int    opt;
+    int             opt;
     struct options *cl_opts;
 
     cl_opts = (struct options *)malloc(sizeof(struct options));

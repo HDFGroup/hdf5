@@ -13,15 +13,10 @@
 #ifndef SIO_PERF_H
 #define SIO_PERF_H
 
-#ifndef STANDALONE
 #include "io_timer.h"
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
-#else
-#include "io_timer.h"
-#include "sio_standalone.h"
-#endif
 
 /* setup the dataset no fill option if this is v1.5 or more */
 #if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4

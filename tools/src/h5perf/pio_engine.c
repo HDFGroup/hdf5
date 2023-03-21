@@ -16,12 +16,10 @@
 
 #include "hdf5.h"
 
-#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>
@@ -148,7 +146,7 @@ do_pio(parameters param)
     file_descr fd;
     iotype     iot;
 
-    char  fname[FILENAME_MAX];
+    char *fname = NULL;
     long  nf;
     long  ndsets;
     off_t nbytes;         /*number of bytes per dataset  */
@@ -169,6 +167,9 @@ do_pio(parameters param)
 
     /* IO type */
     iot = param.io_type;
+
+    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     switch (iot) {
         case MPIO:
@@ -236,7 +237,7 @@ do_pio(parameters param)
     }
     if ((snbytes % pio_mpi_nprocs_g) != 0) {
         HDfprintf(stderr,
-                  "Dataset size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                  "Dataset size (%lld) must be a multiple of the "
                   "number of processes (%d)\n",
                   (long long)snbytes, pio_mpi_nprocs_g);
         GOTOERROR(FAIL);
@@ -245,7 +246,7 @@ do_pio(parameters param)
     if (!param.dim2d) {
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
             HDfprintf(stderr,
-                      "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset size/process (%lld) must be a multiple of the "
                       "transfer buffer size (%zu)\n",
                       (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
@@ -254,7 +255,7 @@ do_pio(parameters param)
     else {
         if (((size_t)snbytes % buf_size) != 0) {
             HDfprintf(stderr,
-                      "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset side size (%lld) must be a multiple of the "
                       "transfer buffer size (%zu)\n",
                       (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
@@ -284,8 +285,8 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        HDsprintf(base_name, "#pio_tmp_%lu", nf);
-        pio_create_filename(iot, base_name, fname, sizeof(fname));
+        HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
+        pio_create_filename(iot, base_name, fname, FILENAME_MAX);
         if (pio_debug_level > 0)
             HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
 
@@ -367,8 +368,8 @@ done:
     }
 
     /* release generic resources */
-    if (buffer)
-        HDfree(buffer);
+    HDfree(buffer);
+    HDfree(fname);
     res.ret_code = ret_code;
     return res;
 }
@@ -422,7 +423,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         /* If the prefix specifies the HDF5_PARAPREFIX directory, then
          * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
          * directory instead. */
-        register char *user, *login, *subdir;
+        char *user, *login, *subdir;
 
         user   = HDgetenv("USER");
         login  = HDgetenv("LOGIN");
@@ -504,18 +505,18 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
          void *buffer)
 {
     int            ret_code = SUCCESS;
-    int            rc; /*routine return code                   */
+    int            rc; /* Return code */
     long           ndset;
     size_t         blk_size;            /* The block size to subdivide the xfer buffer into */
     off_t          nbytes_xfer;         /* Total number of bytes transferred so far */
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square  */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer     */
@@ -627,15 +628,13 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
         if (!parms->dim2d) {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
+                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
                       buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
                       buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
                       (long long)bytes_count);
         }
@@ -900,7 +899,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                     }     /* end if */
                 }         /* end else */
 
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, h5dcpl);
 
                 if (h5ds_id < 0) {
@@ -1185,7 +1184,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform write */
@@ -1321,7 +1320,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform write */
@@ -1531,11 +1530,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer    */
@@ -1641,15 +1640,13 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
         if (!parms->dim2d) {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
+                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
                       buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
                       buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
                       (long long)bytes_count);
         }
@@ -1880,7 +1877,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                 break;
 
             case PHDF5:
-                HDsprintf(dname, "Dataset_%ld", ndset);
+                HDsnprintf(dname, sizeof(dname), "Dataset_%ld", ndset);
                 h5ds_id = H5DOPEN(fd->h5fd, dname);
                 if (h5ds_id < 0) {
                     HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -2155,7 +2152,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
 
                                 /* Set the file view */
                                 mrc = MPI_File_set_view(fd->mpifd, mpi_offset, mpi_blk_type, mpi_file_type,
-                                                        (char *)"native", h5_io_info_g);
+                                                        "native", h5_io_info_g);
                                 VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                                 /* Perform collective read */
@@ -2291,7 +2288,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                         else {
                             /* Set the file view */
                             mrc = MPI_File_set_view(fd->mpifd, mpi_offset, MPI_BYTE, mpi_collective_type,
-                                                    (char *)"native", h5_io_info_g);
+                                                    "native", h5_io_info_g);
                             VRFY((mrc == MPI_SUCCESS), "MPIO_VIEW");
 
                             /* Perform read */

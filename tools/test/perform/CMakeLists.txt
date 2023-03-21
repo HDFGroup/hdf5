@@ -1,39 +1,9 @@
 cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST_PERFORM C)
 
-# --------------------------------------------------------------------
-# Add the executables
-# --------------------------------------------------------------------
-
-if (HDF5_BUILD_PERFORM_STANDALONE)
-  #-- Adding test for h5perf_serial_alone - io_timer.c includes
-  set (h5perf_serial_alone_SOURCES
-      ${HDF5_TOOLS_DIR}/lib/io_timer.c
-      ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/sio_perf.c
-      ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/sio_engine.c
-      ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/sio_standalone.c
-  )
-  add_executable (h5perf_serial_alone ${h5perf_serial_alone_SOURCES})
-  target_include_directories (h5perf_serial_alone PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_TOOLS_DIR}/lib;${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR};${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  if (NOT BUILD_SHARED_LIBS)
-    TARGET_C_PROPERTIES (h5perf_serial_alone STATIC)
-    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
-  else ()
-    TARGET_C_PROPERTIES (h5perf_serial_alone SHARED)
-    target_link_libraries (h5perf_serial_alone PRIVATE ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
-  endif ()
-  set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
-  set_property (TARGET h5perf_serial_alone APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE)
-
-  #-----------------------------------------------------------------------------
-  # Add Target to clang-format
-  #-----------------------------------------------------------------------------
-  if (HDF5_ENABLE_FORMATTERS)
-    clang_format (HDF5_TOOLS_TEST_PERFORM_h5perf_serial_alone_FORMAT h5perf_serial_alone)
-  endif ()
-endif ()
-
-#-- Adding test for chunk
+#-----------------------------------------------------------------------------
+# chunk
+#-----------------------------------------------------------------------------
 set (chunk_SOURCES
     ${HDF5_TOOLS_TEST_PERFORM_SOURCE_DIR}/chunk.c
 )
