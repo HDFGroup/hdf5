@@ -2319,7 +2319,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             /* Copy over the point's coordinates */
             HDmemset(new_node->pnt, 0, sizeof(hsize_t) * rank_diff);
             H5MM_memcpy(&new_node->pnt[rank_diff], base_node->pnt,
-                        (new_space->extent.rank * sizeof(hsize_t)));
+                        (base_space->extent.rank * sizeof(hsize_t)));
 
             /* Keep the order the same when copying */
             if (NULL == prev_node)
