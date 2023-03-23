@@ -880,6 +880,8 @@ test_write_same_element(void)
     hsize_t     coord[SPACE1_RANK][NUMP];
     herr_t      ret;
 
+    MESSAGE(5, ("Testing writing to same element of VL string dataset twice\n"));
+
     file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");
 
@@ -1000,7 +1002,11 @@ test_vlstrings(void)
 void
 cleanup_vlstrings(void)
 {
-    HDremove(DATAFILE);
-    HDremove(DATAFILE2);
-    HDremove(DATAFILE3);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(DATAFILE, H5P_DEFAULT);
+        H5Fdelete(DATAFILE2, H5P_DEFAULT);
+        H5Fdelete(DATAFILE3, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

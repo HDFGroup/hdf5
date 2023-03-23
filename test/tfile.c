@@ -213,11 +213,13 @@ static void test_rw_noupdate(void);
 static void
 test_file_create(void)
 {
-    hid_t    fid1, fid2, fid3; /* HDF5 File IDs */
-    hid_t    tmpl1, tmpl2;     /* file creation templates */
-    hsize_t  ublock;           /* sizeof userblock */
-    size_t   parm;             /* file-creation parameters */
-    size_t   parm2;            /* file-creation parameters */
+    hid_t    fid1 = H5I_INVALID_HID;
+    hid_t    fid2 = H5I_INVALID_HID;
+    hid_t    fid3 = H5I_INVALID_HID; /* HDF5 File IDs               */
+    hid_t    tmpl1, tmpl2;           /* file creation templates     */
+    hsize_t  ublock;                 /* sizeof userblock            */
+    size_t   parm;                   /* file-creation parameters    */
+    size_t   parm2;                  /* file-creation parameters    */
     unsigned iparm;
     unsigned iparm2;
     herr_t   ret; /*generic return value        */
@@ -226,10 +228,18 @@ test_file_create(void)
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
     /* First ensure the file does not exist */
-    HDremove(FILE1);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILE1, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
     /* Try opening a non-existent file */
-    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(fid1, FAIL, "H5Fopen");
 
     /* Test create with various sequences of H5F_ACC_EXCL and */
@@ -243,21 +253,33 @@ test_file_create(void)
      * try to create the same file with H5F_ACC_TRUNC. This should fail
      * because fid1 is the same file and is currently open.
      */
-    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Close all files */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 
-    ret = H5Fclose(fid2);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid2);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose"); /*file should not have been open */
 
     /*
      * Try again with H5F_ACC_EXCL. This should fail because the file already
      * exists from the previous steps.
      */
-    fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(fid1, FAIL, "H5Fcreate");
 
     /* Test create with H5F_ACC_TRUNC. This will truncate the existing file. */
@@ -268,14 +290,22 @@ test_file_create(void)
      * Try to truncate first file again. This should fail because fid1 is the
      * same file and is currently open.
      */
-    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /*
      * Try with H5F_ACC_EXCL. This should fail too because the file already
      * exists.
      */
-    fid2 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Get the file-creation template */
@@ -598,11 +628,19 @@ test_file_open(const char *env_h5_drvr)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Open file for second time, which should fail. */
-    fid2 = H5Fopen(FILE2, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE2, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     /* Check that the intent fails for an invalid ID */
-    ret = H5Fget_intent(fid1, &intent);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fget_intent(fid1, &intent);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fget_intent");
 
     /* Close dataset from first open */
@@ -662,7 +700,12 @@ test_file_reopen(void)
     CHECK(ret, FAIL, "H5Fclose");
     ret = H5Fclose(rfid);
     CHECK(ret, FAIL, "H5Fclose");
-    HDremove(REOPEN_FILE);
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(REOPEN_FILE, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
 } /* test_file_reopen() */
 
@@ -681,6 +724,9 @@ test_file_close(void)
     H5F_close_degree_t fc_degree;
     herr_t             ret;
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing File Closing with file close degrees\n"));
+
     /* Test behavior while opening file multiple times with different
      * file close degree value
      */
@@ -697,7 +743,11 @@ test_file_close(void)
     VERIFY(fc_degree, H5F_CLOSE_STRONG, "H5Pget_fclose_degree");
 
     /* should fail */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
@@ -751,7 +801,11 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pset_fclose_degree");
 
     /* should fail */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
@@ -784,7 +838,11 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pset_fclose_degree");
 
     /* should fail */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
@@ -799,12 +857,20 @@ test_file_close(void)
 
     /* Close first open, should fail since it is SEMI and objects are
      * still open. */
-    ret = H5Fclose(fid1);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid1);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose");
 
     /* Close second open, should fail since it is SEMI and objects are
      * still open. */
-    ret = H5Fclose(fid2);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid2);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose");
 
     ret = H5Dclose(dataset_id);
@@ -822,11 +888,19 @@ test_file_close(void)
 
     /* Close second open, should fail since it is SEMI and one group ID is
      * still open. */
-    ret = H5Fclose(fid2);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fclose(fid2);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Fclose");
 
     /* Same check with H5Idec_ref() (should fail also) */
-    ret = H5Idec_ref(fid2);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Idec_ref(fid2);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Idec_ref");
 
     ret = H5Gclose(group_id3);
@@ -848,7 +922,11 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pset_fclose_degree");
 
     /* should fail */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
@@ -897,7 +975,11 @@ test_file_close(void)
     CHECK(ret, FAIL, "H5Pset_fclose_degree");
 
     /* should fail */
-    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Fopen");
 
     ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
@@ -1101,6 +1183,8 @@ test_get_obj_ids(void)
     ssize_t oid_list_size = NDSETS;
     char    gname[64], dname[64];
 
+    MESSAGE(5, ("Testing retrieval of object IDs\n"));
+
     /* Create a new file */
     fid = H5Fcreate(FILE7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
@@ -1196,11 +1280,15 @@ test_get_obj_ids(void)
     /* Get the list of all opened objects */
     ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
     CHECK(ret_count, FAIL, "H5Fget_obj_ids");
-    VERIFY(ret_count, NDSETS, "H5Fget_obj_count");
+    VERIFY(ret_count, NDSETS, "H5Fget_obj_ids");
 
-    /* Close all open objects with H5Oclose */
-    for (n = 0; n < oid_count; n++)
-        H5Oclose(oid_list[n]);
+    H5E_BEGIN_TRY
+    {
+        /* Close all open objects with H5Oclose */
+        for (n = 0; n < oid_count; n++)
+            H5Oclose(oid_list[n]);
+    }
+    H5E_END_TRY;
 
     HDfree(oid_list);
 }
@@ -1219,6 +1307,8 @@ test_get_file_id(void)
     hsize_t  dims[F2_RANK];
     unsigned intent;
     herr_t   ret;
+
+    MESSAGE(5, ("Testing H5Iget_file_id\n"));
 
     /* Create a file */
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2870,7 +2960,7 @@ test_file_double_datatype_open(void)
     herr_t ret; /* Generic return value */
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing double dataset open\n"));
+    MESSAGE(5, ("Testing double datatype open\n"));
 
     file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1_id, FAIL, "H5Fcreate");
@@ -5587,7 +5677,11 @@ test_libver_bounds_copy(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Remove the destination file */
-    HDremove(DST_FILE);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(DST_FILE, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
 } /* end test_libver_bounds_copy() */
 
