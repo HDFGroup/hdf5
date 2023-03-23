@@ -367,6 +367,9 @@ main(void)
             if ((H5Pset_data_transform(dxpl, c_to_f)) < 0)
                 FAIL_STACK_ERROR;
 
+            if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+                FAIL_STACK_ERROR;
+
             /* Test encoding & decoding property list */
             if (test_encode_decode(dxpl, low, high) < 0)
                 FAIL_PUTS_ERROR("DXPL encoding/decoding failed\n");

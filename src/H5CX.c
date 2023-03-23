@@ -242,16 +242,18 @@ typedef struct H5CX_t {
     unsigned mpio_chunk_opt_ratio;       /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
     hbool_t  mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
 #endif                                   /* H5_HAVE_PARALLEL */
-    H5Z_EDC_t             err_detect;    /* Error detection info (H5D_XFER_EDC_NAME) */
-    hbool_t               err_detect_valid;     /* Whether error detection info is valid */
-    H5Z_cb_t              filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
-    hbool_t               filter_cb_valid;      /* Whether filter callback function is valid */
-    H5Z_data_xform_t     *data_transform;       /* Data transform info (H5D_XFER_XFORM_NAME) */
-    hbool_t               data_transform_valid; /* Whether data transform info is valid */
-    H5T_vlen_alloc_info_t vl_alloc_info;        /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
-    hbool_t               vl_alloc_info_valid;  /* Whether VL datatype alloc info is valid */
-    H5T_conv_cb_t         dt_conv_cb;           /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
-    hbool_t               dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
+    H5Z_EDC_t               err_detect;  /* Error detection info (H5D_XFER_EDC_NAME) */
+    hbool_t                 err_detect_valid;     /* Whether error detection info is valid */
+    H5Z_cb_t                filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
+    hbool_t                 filter_cb_valid;      /* Whether filter callback function is valid */
+    H5Z_data_xform_t       *data_transform;       /* Data transform info (H5D_XFER_XFORM_NAME) */
+    hbool_t                 data_transform_valid; /* Whether data transform info is valid */
+    H5T_vlen_alloc_info_t   vl_alloc_info;        /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
+    hbool_t                 vl_alloc_info_valid;  /* Whether VL datatype alloc info is valid */
+    H5T_conv_cb_t           dt_conv_cb;           /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
+    hbool_t                 dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
+    H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
+    hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -370,15 +372,16 @@ typedef struct H5CX_dxpl_cache_t {
     uint32_t mpio_global_no_coll_cause;       /* Global reason for breaking collective I/O
                                                  (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
     H5FD_mpio_chunk_opt_t
-             mpio_chunk_opt_mode;         /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
-    unsigned mpio_chunk_opt_num;          /* Collective chunk threshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
-    unsigned mpio_chunk_opt_ratio;        /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
-#endif                                    /* H5_HAVE_PARALLEL */
-    H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */
-    H5Z_cb_t              filter_cb;      /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
-    H5Z_data_xform_t     *data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
-    H5T_vlen_alloc_info_t vl_alloc_info;  /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
-    H5T_conv_cb_t         dt_conv_cb;     /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
+             mpio_chunk_opt_mode;       /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
+    unsigned mpio_chunk_opt_num;        /* Collective chunk threshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
+    unsigned mpio_chunk_opt_ratio;      /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
+#endif                                  /* H5_HAVE_PARALLEL */
+    H5Z_EDC_t               err_detect; /* Error detection info (H5D_XFER_EDC_NAME) */
+    H5Z_cb_t                filter_cb;  /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
+    H5Z_data_xform_t       *data_transform;    /* Data transform info (H5D_XFER_XFORM_NAME) */
+    H5T_vlen_alloc_info_t   vl_alloc_info;     /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
+    H5T_conv_cb_t           dt_conv_cb;        /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
+    H5D_selection_io_mode_t selection_io_mode; /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -565,6 +568,9 @@ H5CX_init(void)
     /* Get datatype conversion struct */
     if (H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
+
+    if (H5P_get(dx_plist, H5D_XFER_SELECTION_IO_MODE_NAME, &H5CX_def_dxpl_cache.selection_io_mode) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
 
     /* Reset the "default LCPL cache" information */
     HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
@@ -2562,6 +2568,42 @@ H5CX_get_dt_conv_cb(H5T_conv_cb_t *dt_conv_cb)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_dt_conv_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_selection_io_mode
+ *
+ * Purpose:     Retrieves the selection I/O mode for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              March 5, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_selection_io_mode(H5D_selection_io_mode_t *selection_io_mode)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(selection_io_mode);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_SELECTION_IO_MODE_NAME,
+                             selection_io_mode)
+
+    /* Get the value */
+    *selection_io_mode = (*head)->ctx.selection_io_mode;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding

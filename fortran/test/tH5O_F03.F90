@@ -440,7 +440,7 @@ SUBROUTINE test_obj_visit(total_error)
   ! Construct "interesting" file to visit
   CALL build_visit_file(fid)
 
-  ! Inialize udata for testing purposes
+  ! Initialize udata for testing purposes
   udata%info(1)%path(1:1) ="."
   udata%info(1)%type_obj = H5O_TYPE_GROUP_F
   udata%info(2)%path(1:12) = &

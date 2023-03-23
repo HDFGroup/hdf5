@@ -3348,13 +3348,26 @@ test_actual_io_mode(int selection_mode)
 void
 actual_io_mode_tests(void)
 {
-    int mpi_size = -1;
+    H5D_selection_io_mode_t selection_io_mode;
+    hid_t                   dxpl_id = H5I_INVALID_HID;
+    herr_t                  ret;
+    int                     mpi_size = -1;
+    int                     mpi_rank = -1;
+
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* Only run these tests if selection I/O is not being used - selection I/O
      * bypasses this IO mode decision - it's effectively always multi chunk
      * currently */
-    if (!H5_use_selection_io_g) {
+
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    ret     = H5Pget_selection_io(dxpl_id, &selection_io_mode);
+    VRFY((ret >= 0), "retrieving selection io mode succeeded");
+    ret = H5Pclose(dxpl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    if (selection_io_mode != H5D_SELECTION_IO_MODE_ON) {
         test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
 
         /*

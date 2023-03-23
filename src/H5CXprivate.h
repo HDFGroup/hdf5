@@ -115,6 +115,7 @@ H5_DLL herr_t H5CX_get_filter_cb(H5Z_cb_t *filter_cb);
 H5_DLL herr_t H5CX_get_data_transform(H5Z_data_xform_t **data_transform);
 H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
+H5_DLL herr_t H5CX_get_selection_io_mode(H5D_selection_io_mode_t *selection_io_mode);
 
 /* "Getter" routines for LCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_encoding(H5T_cset_t *encoding);
