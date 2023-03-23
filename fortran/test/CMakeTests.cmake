@@ -57,7 +57,18 @@ add_test (
     NAME FORTRAN_testhdf5-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_fortran_CLEANFILES}
 )
-set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES FIXTURES_SETUP clear_testhdf5_fortran)
+set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_testhdf5_fortran
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME FORTRAN_testhdf5-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_fortran_CLEANFILES}
+)
+set_tests_properties (FORTRAN_testhdf5-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_testhdf5_fortran
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME FORTRAN_testhdf5_fortran COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran>)

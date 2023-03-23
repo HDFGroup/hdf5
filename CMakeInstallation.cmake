@@ -52,7 +52,7 @@ endif ()
 # Set includes needed for build
 #-----------------------------------------------------------------------------
 set (HDF5_INCLUDES_BUILD_TIME
-    ${HDF5_SRC_DIR} ${HDF5_CPP_SRC_DIR} ${HDF5_HL_SRC_DIR}
+    ${HDF5_SRC_INCLUDE_DIRS} ${HDF5_CPP_SRC_DIR} ${HDF5_HL_SRC_DIR}
     ${HDF5_TOOLS_SRC_DIR} ${HDF5_SRC_BINARY_DIR}
 )
 

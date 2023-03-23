@@ -123,5 +123,23 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_datasets-${example} PROPERTIES
         DEPENDS JAVA_datasets-${example}-copy-objects
     )
+
+    if (example STREQUAL "H5Ex_D_External")
+      add_test (
+          NAME JAVA_datasets-${example}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.data
+      )
+    else ()
+      add_test (
+          NAME JAVA_datasets-${example}-clean-objects
+          COMMAND ${CMAKE_COMMAND} -E remove
+              ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+      )
+    set_tests_properties (JAVA_datasets-${example}-clean-objects PROPERTIES
+        DEPENDS JAVA_datasets-${example}
+    )
+    endif ()
   endforeach ()
 endif ()

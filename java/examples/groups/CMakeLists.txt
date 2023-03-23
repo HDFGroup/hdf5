@@ -113,5 +113,25 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_groups-${example} PROPERTIES
         DEPENDS JAVA_groups-${example}-copy-objects
     )
+
+    if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
+      if (example STREQUAL "H5Ex_G_Compact")
+        add_test (
+            NAME JAVA_groups-${example}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}1.h5
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}2.h5
+        )
+      else ()
+        add_test (
+            NAME JAVA_groups-${example}-clean-objects
+            COMMAND ${CMAKE_COMMAND} -E remove
+                ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        )
+      endif ()
+      set_tests_properties (JAVA_groups-${example}-clean-objects PROPERTIES
+          DEPENDS JAVA_groups-${example}
+      )
+    endif ()
   endforeach ()
 endif ()

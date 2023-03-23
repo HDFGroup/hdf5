@@ -17,14 +17,28 @@
 ##############################################################################
 
 # Remove any output file left over from previous test run
+set (HL_FORTRAN_F90_EX_CLEANFILES
+    ex_ds1.h5
+    exlite.h5
+)
 add_test (
     NAME HL_FORTRAN_f90_ex-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-            ex_ds1.h5
-            exlite.h5
+        -E remove ${HL_FORTRAN_F90_EX_CLEANFILES}
 )
-set_tests_properties (HL_FORTRAN_f90_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_HL_FORTRAN_f90_ex)
+set_tests_properties (HL_FORTRAN_f90_ex-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_HL_FORTRAN_f90_ex
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME HL_FORTRAN_f90_ex-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${HL_FORTRAN_F90_EX_CLEANFILES}
+)
+set_tests_properties (HL_FORTRAN_f90_ex-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_HL_FORTRAN_f90_ex
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)

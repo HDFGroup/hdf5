@@ -70,7 +70,18 @@ if (HDF5_TEST_SERIAL)
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
   )
-  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)

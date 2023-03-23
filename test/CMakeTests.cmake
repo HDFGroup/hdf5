@@ -213,6 +213,12 @@ add_test (
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-testhdf5-clear-objects PROPERTIES FIXTURES_SETUP clear_testhdf5)
+add_test (
+    NAME H5TEST-testhdf5-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-testhdf5-clean-objects PROPERTIES FIXTURES_CLEANUP clear_testhdf5)
 
 add_test (NAME H5TEST-testhdf5-base COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5> -x file -x select)
 set_tests_properties (H5TEST-testhdf5-base PROPERTIES
@@ -240,228 +246,94 @@ set_tests_properties (H5TEST-testhdf5-select PROPERTIES
 ##############################################################################
 
 set (test_CLEANFILES
-    accum.h5
-    cmpd_dset.h5
-    compact_dataset.h5
-    dataset.h5
-    dset_offset.h5
-    max_compact_dataset.h5
-    simple.h5
-    set_local.h5
-    random_chunks.h5
-    huge_chunks.h5
-    chunk_cache.h5
-    big_chunk.h5
-    chunk_fast.h5
-    chunk_expand.h5
-    chunk_fixed.h5
-    copy_dcpl_newfile.h5
-    partial_chunks.h5
-    layout_extend.h5
-    zero_chunk.h5
-    chunk_single.h5
-    swmr_non_latest.h5
-    earray_hdr_fd.h5
-    farray_hdr_fd.h5
-    bt2_hdr_fd.h5
-    storage_size.h5
-    dls_01_strings.h5
-    extend.h5
-    istore.h5
-    extlinks*.h5
-    frspace.h5
-    links*.h5
-    sys_file1
-    tfile*.h5
-    th5s*.h5
-    lheap.h5
-    fheap.h5
-    ohdr.h5
-    ohdr_min_a.h5
-    ohdr_min_b.h5
+    cmpd_dtransform.h5
+    direct_chunk.h5
+    dt_arith1.h5
+    dt_arith2.h5
+    dtransform.h5
+    dtypes3.h5
+    dtypes4.h5
     min_dset_ohdr_testfile.h5
-    stab.h5
-    extern_*.h5
-    extern_*.raw
-    gheap*.h5
-    dt_arith1
-    dt_arith2
-    links.h5
-    links*.h5
-    extlinks16A00000.h5
-    extlinks16A00001.h5
-    extlinks16A00002.h5
+    ohdr_min_a.h5
+    sec2_file.h5
+    single_latest.h5
+    source_file.h5
+    splitter_rw_file.h5
+    splitter_tmp.h5
+    splitter_wo_file.h5
+    stdio_file.h5
+    swmr0.h5
+    tfile_is_accessible_non_hdf5.h5
+    tfile_is_accessible.h5
+    tfile1.h5.h5
+    tfile8.h5
+    tfile8.h5.h5
+    tmisc15.h5.h5
+    tstint1.h5
+    tstint2.h5
+    tverbounds_dtype.h5
+    virtual_file1.h5
+    objcopy_ext.dat
+    log_vfd_out.log
+    splitter.log
+    tbogus.h5.copy
+    tmp_vds/vds_src_2.h5
+)
+
+set (EXTLINKS_CLEANFILES
+    extlinks16A-000000.h5
+    extlinks16A-000001.h5
     extlinks16B-b.h5
     extlinks16B-g.h5
     extlinks16B-l.h5
     extlinks16B-r.h5
     extlinks16B-s.h5
-    extlinks19B00000.h5
-    extlinks19B00001.h5
-    extlinks19B00002.h5
-    extlinks19B00003.h5
-    extlinks19B00004.h5
-    extlinks19B00005.h5
-    extlinks19B00006.h5
-    extlinks19B00007.h5
-    extlinks19B00008.h5
-    extlinks19B00009.h5
-    extlinks19B00010.h5
-    extlinks19B00011.h5
-    extlinks19B00012.h5
-    extlinks19B00013.h5
-    extlinks19B00014.h5
-    extlinks19B00015.h5
-    extlinks19B00016.h5
-    extlinks19B00017.h5
-    extlinks19B00018.h5
-    extlinks19B00019.h5
-    extlinks19B00020.h5
-    extlinks19B00021.h5
-    extlinks19B00022.h5
-    extlinks19B00023.h5
-    extlinks19B00024.h5
-    extlinks19B00025.h5
-    extlinks19B00026.h5
-    extlinks19B00027.h5
-    extlinks19B00028.h5
-    big.data
-    big*.h5
-    stdio.h5
-    sec2.h5
-    dtypes0.h5
-    dtypes1.h5
-    dtypes2.h5
-    dtypes3.h5
-    dtypes4.h5
-    dtypes5.h5
-    dtypes6.h5
-    dtypes7.h5
-    dtypes8.h5
-    dtypes9.h5
-    dtypes10.h5
-    dt_arith1.h5
-    dt_arith2.h5
-    tattr.h5
-    tselect.h5
-    mtime.h5
-    unlink.h5
-    unicode.h5
-    coord.h5
-    fillval_*.h5
-    fillval.raw
-    mount_*.h5
-    testmeta.h5
-    ttime.h5
-    trefer1.h5
-    trefer2.h5
-    trefer3.h5
-    tvltypes.h5
-    tvlstr.h5
-    tvlstr2.h5
-    twriteorder.dat
-    enum1.h5
-    titerate.h5
-    ttsafe.h5
-    tarray1.h5
-    tgenprop.h5
-    tmisc*.h5
-    set_extent1.h5
-    set_extent2.h5
-    set_extent3.h5
-    set_extent4.h5
-    set_extent5.h5
-    ext1.bin
-    ext2.bin
-    getname.h5
-    getname1.h5
-    getname2.h5
-    getname3.h5
-    sec2_file.h5
-    direct_file.h5
-    family_file000*.h5
-    new_family_v16_000*.h5
-    multi_file-r.h5
-    multi_file-s.h5
-    core_file
-    filter_plugin.h5
-    new_move_a.h5
-    new_move_b.h5
-    ntypes.h5
-    dangle.h5
-    error_test.h5
-    err_compat.h5
-    dtransform.h5
-    test_filters.h5
-    get_file_name.h5
-    tstint1.h5
-    tstint2.h5
-    unlink_chunked.h5
-    btree2.h5
-    btree2_tmp.h5
-    objcopy_src.h5
-    objcopy_dst.h5
-    objcopy_ext.dat
-    trefer1.h5
-    trefer2.h5
-    app_ref.h5
-    farray.h5
-    farray_tmp.h5
-    earray.h5
-    earray_tmp.h5
-    efc0.h5
-    efc1.h5
-    efc2.h5
-    efc3.h5
-    efc4.h5
-    efc5.h5
-    log_vfd_out.log
-    new_multi_file_v16-r.h5
-    new_multi_file_v16-s.h5
-    split_get_file_image_test-m.h5
-    split_get_file_image_test-r.h5
-    file_image_core_test.h5.copy
-    unregister_filter_1.h5
-    unregister_filter_2.h5
-    vds_virt.h5
-    vds_dapl.h5
-    vds_src_0.h5
-    vds_src_1.h5
-    swmr_data.h5
-    use_use_append_chunk.h5
-    use_append_mchunks.h5
-    use_disable_mdc_flushes.h5
-    tbogus.h5.copy
-    flushrefresh.h5
-    flushrefresh_VERIFICATION_START
-    flushrefresh_VERIFICATION_CHECKPOINT1
-    flushrefresh_VERIFICATION_CHECKPOINT2
-    flushrefresh_VERIFICATION_DONE
-    filenotclosed.h5
-    del_many_dense_attrs.h5
-    atomic_data
-    accum_swmr_big.h5
-    ohdr_swmr.h5
-    test_swmr*.h5
-    cache_logging.h5
-    cache_logging.out
-    vds_swmr.h5
-    vds_swmr_src_*.h5
-    tmp_vds_env/vds_src_2.h5
-    direct_chunk.h5
-    splitter*.h5
-    splitter.log
-    mirror_rw/*
-    mirror_wo/*
+    extlinks19B-000000.h5
+    extlinks19B-000001.h5
+    extlinks19B-000002.h5
+    extlinks19B-000003.h5
+    extlinks19B-000004.h5
+    extlinks19B-000005.h5
+    extlinks19B-000006.h5
+    extlinks19B-000007.h5
+    extlinks19B-000008.h5
+    extlinks19B-000009.h5
+    extlinks19B-000010.h5
+    extlinks19B-000011.h5
+    extlinks19B-000012.h5
+    extlinks19B-000013.h5
+    extlinks19B-000014.h5
+    extlinks19B-000015.h5
+    extlinks19B-000016.h5
+    extlinks19B-000017.h5
+    extlinks19B-000018.h5
+    extlinks19B-000019.h5
+    extlinks19B-000020.h5
+    extlinks19B-000021.h5
+    extlinks19B-000022.h5
+    extlinks19B-000023.h5
+    extlinks19B-000024.h5
+    extlinks19B-000025.h5
+    extlinks19B-000026.h5
+    extlinks19B-000027.h5
+    extlinks19B-000028.h5
 )
 
 # Remove any output file left over from previous test run
 add_test (
     NAME H5TEST-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES}
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
+    COMMAND_EXPAND_LISTS
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_H5TEST)
+add_test (
+    NAME H5TEST-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
+    COMMAND_EXPAND_LISTS
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-clean-objects PROPERTIES FIXTURES_CLEANUP clear_H5TEST)
 
 set (H5TEST_SEPARATE_TESTS
     testhdf5
@@ -477,7 +349,7 @@ foreach (h5_test ${H5_TESTS})
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5TEST-${h5_test} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:${h5_test}>)
       set_tests_properties (H5TEST-${h5_test} PROPERTIES
-          FIXTURES_REQUIRED clear_objects
+          FIXTURES_REQUIRED clear_H5TEST
           ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
       )
@@ -518,10 +390,18 @@ set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT ${CTEST_VERY_LONG_TIMEOU
 if (NOT CYGWIN)
   add_test (
       NAME H5TEST-cache-clear-objects
-      COMMAND ${CMAKE_COMMAND} -E remove cache_test.h5
+      COMMAND ${CMAKE_COMMAND} -E remove
+          cache_test.h5
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
   set_tests_properties (H5TEST-cache-clear-objects PROPERTIES FIXTURES_SETUP clear_cache)
+  add_test (
+      NAME H5TEST-cache-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove
+          cache_test.h5
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  set_tests_properties (H5TEST-cache-clean-objects PROPERTIES FIXTURES_CLEANUP clear_cache)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME H5TEST-cache COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cache>)
   else ()
@@ -553,6 +433,12 @@ if (TEST_CACHE_IMAGE)
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
   set_tests_properties (H5TEST-cache_image-clear-objects PROPERTIES FIXTURES_SETUP clear_cache_image)
+  add_test (
+      NAME H5TEST-cache_image-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove cache_image_test.h5
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
+  set_tests_properties (H5TEST-cache_image-clean-objects PROPERTIES FIXTURES_CLEANUP clear_cache_image)
   add_test (NAME H5TEST_cache_image COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:cache_image>)
   set_tests_properties (H5TEST-cache_image PROPERTIES
       FIXTURES_REQUIRED clear_cache_image
@@ -562,21 +448,28 @@ if (TEST_CACHE_IMAGE)
 endif ()
 
 #-- Adding test for external_env
+set (H5TEST_EXTERNAL_CLEANFILES
+    extern_1r.raw
+    extern_2r.raw
+    extern_3r.raw
+    extern_4r.raw
+    extern_1w.raw
+    extern_2w.raw
+    extern_3w.raw
+    extern_4w.raw
+)
 add_test (
     NAME H5TEST-external_env-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E remove
-        extern_1r.raw
-        extern_2r.raw
-        extern_3r.raw
-        extern_4r.raw
-        extern_1w.raw
-        extern_2w.raw
-        extern_3w.raw
-        extern_4w.raw
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
+    COMMAND ${CMAKE_COMMAND} -E remove ${H5TEST_EXTERNAL_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-external_env-clear-objects PROPERTIES FIXTURES_SETUP clear_external_env)
+add_test (
+    NAME H5TEST-external_env-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${H5TEST_EXTERNAL_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-external_env-clean-objects PROPERTIES FIXTURES_CLEANUP clear_external_env)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-external_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:external_env>)
 else ()
@@ -602,15 +495,13 @@ set_tests_properties (H5TEST-external_env PROPERTIES
 
 #-- Adding test for vds_env
 add_test (
-    NAME H5TEST-vds_env-clear-objects
+    NAME H5TEST-vds_env-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove
-        vds_virt_0.h5
-        vds_virt_3.h5
-        vds_src_2.h5
+        tmp_vds_env/vds_env_src_2.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
-set_tests_properties (H5TEST-vds_env-clear-objects PROPERTIES FIXTURES_SETUP clear_vds_env)
+set_tests_properties (H5TEST-vds_env-clean-objects PROPERTIES FIXTURES_CLEANUP clear_vds_env)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-vds_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vds_env>)
 else ()
@@ -635,20 +526,26 @@ set_tests_properties (H5TEST-vds_env PROPERTIES
 )
 
 #-- Adding test for flush1/2
+set (FLUSH_CLEANFILES
+    flush.h5
+    flush-swmr.h5
+    noflush.h5
+    noflush-swmr.h5
+    flush_extend.h5
+    flush_extend-swmr.h5
+    noflush_extend.h5
+    noflush_extend-swmr.h5
+)
 add_test (NAME H5TEST-flush-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E remove
-        flush.h5
-        flush-swmr.h5
-        noflush.h5
-        noflush-swmr.h5
-        flush_extend.h5
-        flush_extend-swmr.h5
-        noflush_extend.h5
-        noflush_extend-swmr.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
+    COMMAND ${CMAKE_COMMAND} -E remove ${FLUSH_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-flush-clear-objects PROPERTIES FIXTURES_SETUP clear_flush)
+add_test (NAME H5TEST-flush-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${FLUSH_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-flush-clean-objects PROPERTIES FIXTURES_CLEANUP clear_flush)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-flush1 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:flush1>)
 else ()
@@ -743,6 +640,12 @@ add_test (
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-filenotclosed-clear-objects PROPERTIES FIXTURES_SETUP clear_filenotclosed)
+add_test (
+    NAME H5TEST-filenotclosed-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove filenotclosed.h5
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-filenotclosed-clean-objects PROPERTIES FIXTURES_CLEANUP clear_filenotclosed)
 add_test (NAME H5TEST-filenotclosed COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:filenotclosed>)
 set_tests_properties (H5TEST-filenotclosed PROPERTIES
     FIXTURES_REQUIRED clear_filenotclosed
@@ -757,6 +660,12 @@ add_test (
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-del_many_dense_attrs-clear-objects PROPERTIES FIXTURES_SETUP clear_del_many_dense_attrs)
+add_test (
+    NAME H5TEST-del_many_dense_attrs-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove del_many_dense_attrs.h5
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-del_many_dense_attrs-clean-objects PROPERTIES FIXTURES_CLEANUP clear_del_many_dense_attrs)
 add_test (NAME H5TEST-del_many_dense_attrs COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:del_many_dense_attrs>)
 set_tests_properties (H5TEST-del_many_dense_attrs PROPERTIES
     FIXTURES_REQUIRED clear_del_many_dense_attrs
@@ -836,6 +745,14 @@ else ()
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
+  add_test (
+      NAME H5TEST-error_test-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove error_test.txt
+  )
+  set_tests_properties (H5TEST-error_test-clean-objects PROPERTIES
+      DEPENDS H5TEST-error_test
+      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+  )
 endif ()
 
 #-- Adding test for links_env
@@ -848,6 +765,15 @@ add_test (NAME H5TEST-links_env-clear-objects
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-links_env-clear-objects PROPERTIES FIXTURES_SETUP clear_links_env)
+add_test (NAME H5TEST-links_env-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
+        extlinks_env0.h5
+        extlinks_env1.h5
+        tmp_links_env/extlinks_env1.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+set_tests_properties (H5TEST-links_env-clean-objects PROPERTIES FIXTURES_CLEANUP clear_links_env)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-links_env COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:links_env>)
 else ()
@@ -933,10 +859,20 @@ if (ENABLE_EXTENDED_TESTS)
   if (H5_PERL_FOUND)
     add_test (
         NAME H5TEST-testflushrefresh-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove flushrefresh.h5
+        COMMAND ${CMAKE_COMMAND} -E remove
+            flushrefresh.h5
+            flushrefresh_test/flushrefresh.h5
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
     )
     set_tests_properties (H5TEST-testflushrefresh-clear-objects PROPERTIES FIXTURES_SETUP clear_testflushrefresh)
+    add_test (
+        NAME H5TEST-testflushrefresh-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            flushrefresh.h5
+            flushrefresh_test/flushrefresh.h5
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
+    )
+    set_tests_properties (H5TEST-testflushrefresh-clean-objects PROPERTIES FIXTURES_CLEANUP clear_testflushrefresh)
     add_test (NAME H5TEST-testflushrefresh COMMAND "${CMAKE_COMMAND}"
         -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
         -D "TEST_PROGRAM=$<TARGET_FILE:flushrefresh>"
@@ -980,7 +916,7 @@ endif ()
 if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)

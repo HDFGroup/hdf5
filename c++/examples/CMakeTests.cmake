@@ -16,17 +16,31 @@
 ##############################################################################
 ##############################################################################
   # Remove any output file left over from previous test run
+set (CPP_EX_CLEANFILES
+    Group.h5
+    SDS.h5
+    SDScompound.h5
+    SDSextendible.h5
+    Select.h5
+)
 add_test (
     NAME CPP_ex-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-             Group.h5
-             SDS.h5
-             SDScompound.h5
-             SDSextendible.h5
-             Select.h5
+        -E remove ${CPP_EX_CLEANFILES}
 )
-set_tests_properties (CPP_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_cppex)
+set_tests_properties (CPP_ex-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_cppex
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME CPP_ex-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${CPP_EX_CLEANFILES}
+)
+set_tests_properties (CPP_ex-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_cppex
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 foreach (example ${examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -53,18 +67,32 @@ endforeach ()
 #the following dependencies are handled by the order of the files
 #  SET_TESTS_PROPERTIES(CPP_ex_readdata PROPERTIES DEPENDS CPP_ex_create)
 #  SET_TESTS_PROPERTIES(CPP_ex_chunks PROPERTIES DEPENDS CPP_ex_extend_ds)
+set (CPP_EX_TUTR_CLEANFILES
+    h5tutr_cmprss.h5
+    h5tutr_dset.h5
+    h5tutr_extend.h5
+    h5tutr_group.h5
+    h5tutr_groups.h5
+    h5tutr_subset.h5
+)
 add_test (
     NAME CPP_ex_tutr-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-            h5tutr_cmprss.h5
-            h5tutr_dset.h5
-            h5tutr_extend.h5
-            h5tutr_group.h5
-            h5tutr_groups.h5
-            h5tutr_subset.h5
+        -E remove ${CPP_EX_TUTR_CLEANFILES}
 )
-set_tests_properties (CPP_ex_tutr-clear-objects PROPERTIES FIXTURES_SETUP clear_cppex_tutr)
+set_tests_properties (CPP_ex_tutr-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_cppex_tutr
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME CPP_ex_tutr-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${CPP_EX_TUTR_CLEANFILES}
+)
+set_tests_properties (CPP_ex_tutr-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_cppex_tutr
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 foreach (example ${tutr_examples})
   if (HDF5_ENABLE_USING_MEMCHECKER)
