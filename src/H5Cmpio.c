@@ -168,7 +168,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
     H5C_cache_entry_t *entry_ptr = NULL;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
@@ -247,7 +247,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     }     /* end else */
     HDassert((candidate_assignment_table[mpi_size - 1] + n) == num_candidates);
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     /* Verify that the candidate assignment table has the expected form */
     for (u = 1; u < (unsigned)(mpi_size - 1); u++) {
         unsigned a, b;
@@ -283,7 +283,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
         addr = candidates_list_ptr[u];
         HDassert(H5F_addr_defined(addr));
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
         if (u > 0) {
             if (last_addr == addr)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate entry in cleaned list")
@@ -341,7 +341,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
         } /* end if */
     }     /* end for */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     m = 0;
     n = 0;
     for (u = 0; u < H5C_RING_NTYPES; u++) {
@@ -682,7 +682,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     unsigned initial_list_len;
     haddr_t  addr;
     unsigned pinned_entries_marked = 0;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     unsigned protected_entries_marked = 0;
     unsigned other_entries_marked     = 0;
     haddr_t  last_addr;
@@ -703,7 +703,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     HDassert(ce_array_len > 0);
     HDassert(ce_array_ptr != NULL);
 
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C_validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
@@ -712,7 +712,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     for (u = 0; u < ce_array_len; u++) {
         addr = ce_array_ptr[u];
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
         if (u == 0)
             last_addr = addr;
         else {
@@ -722,7 +722,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cleaned list not sorted")
         } /* end else */
 
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
         if (H5C_validate_protected_entry_list(cache_ptr) < 0 ||
             H5C_validate_pinned_entry_list(cache_ptr) < 0 || H5C_validate_lru_list(cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed in for loop")
@@ -734,14 +734,14 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
         H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
 
         if (entry_ptr == NULL) {
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
             HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR " not in cache.\n", u,
                       addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if (!entry_ptr->is_dirty) {
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
             HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %" PRIuHADDR " is not dirty!?!\n", addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
@@ -762,7 +762,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
             entry_ptr->clear_on_unprotect = TRUE;
             if (entry_ptr->is_pinned)
                 pinned_entries_marked++;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
             else if (entry_ptr->is_protected)
                 protected_entries_marked++;
             else
@@ -817,7 +817,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
         entries_examined++;
     } /* end while */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     HDassert(entries_cleared == other_entries_marked);
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -848,14 +848,14 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
         } /* end while */
     }     /* end while */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     HDassert(entries_cleared == pinned_entries_marked + other_entries_marked);
     HDassert(entries_cleared + protected_entries_marked == ce_array_len);
 #endif /* H5C_DO_SANITY_CHECKS */
 
     HDassert((entries_cleared == ce_array_len) || ((ce_array_len - entries_cleared) <= cache_ptr->pl_len));
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     u         = 0;
     entry_ptr = cache_ptr->pl_head_ptr;
     while (entry_ptr != NULL) {
@@ -869,7 +869,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 #endif /* H5C_DO_SANITY_CHECKS */
 
 done:
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C_validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
@@ -1119,7 +1119,7 @@ static herr_t
 H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES],
                              unsigned entries_to_clear[H5C_RING_NTYPES])
 {
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     int      i;
     uint32_t index_len        = 0;
     size_t   index_size       = (size_t)0;
@@ -1146,7 +1146,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
     HDassert(entries_to_flush[H5C_RING_UNDEFINED] == 0);
     HDassert(entries_to_clear[H5C_RING_UNDEFINED] == 0);
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     HDassert(cache_ptr->index_ring_len[H5C_RING_UNDEFINED] == 0);
     HDassert(cache_ptr->index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
     HDassert(cache_ptr->clean_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
@@ -1172,7 +1172,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
     HDassert(cache_ptr->slist_size == slist_size);
 #endif /* H5C_DO_SANITY_CHECKS */
 
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
         H5C_validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
@@ -1241,7 +1241,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     hbool_t  restart_scan    = FALSE;
     unsigned entries_flushed = 0;
     unsigned entries_cleared = 0;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     unsigned init_index_len;
 #endif /* H5C_DO_SANITY_CHECKS */
     unsigned clear_flags =
@@ -1264,13 +1264,13 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     HDassert(ring > H5C_RING_UNDEFINED);
     HDassert(ring < H5C_RING_NTYPES);
 
-#if H5C_DO_EXTREME_SANITY_CHECKS
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
         (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     /* index len should not change */
     init_index_len = cache_ptr->index_len;
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -1553,7 +1553,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                *             ( progress ) )
                */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     HDassert(init_index_len == cache_ptr->index_len);
 #endif /* H5C_DO_SANITY_CHECKS */
 

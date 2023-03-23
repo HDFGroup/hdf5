@@ -4262,7 +4262,7 @@ error:
 static unsigned
 check_invalid_tag_application(void)
 {
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
     H5F_t  *f   = NULL;
     hid_t   fid = -1;
@@ -4274,7 +4274,7 @@ check_invalid_tag_application(void)
     /* Testing Macro */
     TESTING("failure on invalid tag application");
 
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
     /* Create a test file */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
@@ -4337,13 +4337,13 @@ check_invalid_tag_application(void)
 
     return 0;
 
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
 error:
-#if H5C_DO_TAGGING_SANITY_CHECKS
     if (api_ctx_pushed)
         H5CX_pop();
-#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 1;
+#endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 } /* check_invalid_tag_application */
 
 /*-------------------------------------------------------------------------

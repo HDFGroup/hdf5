@@ -88,7 +88,7 @@ if [ $? != 0 ]; then
 fi
 
 # setup plugin path
-ENVCMD="env HDF5_PLUGIN_PATH=../${PLUGIN_LIBDIR}"
+ENVCMD="env HDF5_PLUGIN_PATH=../${PLUGIN_LIBDIR}:${HDF5_PLUGIN_PATH}"
 
 #
 # copy test files and expected output files from source dirs to test dir

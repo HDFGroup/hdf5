@@ -150,7 +150,7 @@ Follow these simple rules and stay out of trouble:
 \li \Bold{Dynamic memory allocation:} The API contains a few functions in which the
     HDF5 library dynamically allocates memory on the caller's behalf. The caller owns
     this memory and eventually must free it by calling H5free_memory() and not language-explicit memory functions.
-\li \Bold{Be careful with that saw:} Do not modify the underlying collection when an
+\li \Bold{Don't modify while iterating:} Do not modify the underlying collection when an
     iteration is in progress!
 \li \Bold{Use of locations:} Certain API functions, typically called \Code{H5***_by_name}
     use a combination of identifiers and path names to refer to HDF5 objects.

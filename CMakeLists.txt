@@ -241,6 +241,8 @@ set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.33.jar)
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
+set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
+
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
@@ -655,6 +657,13 @@ if (${HDF_CFG_NAME} MATCHES "Debug")
 endif ()
 
 #-----------------------------------------------------------------------------
+# Add some definitions for Developer Builds
+#-----------------------------------------------------------------------------
+if (${HDF_CFG_NAME} MATCHES "Developer")
+  include (${HDF_RESOURCES_DIR}/HDF5DeveloperBuild.cmake)
+endif ()
+
+#-----------------------------------------------------------------------------
 # Option to embed library info into executables
 #-----------------------------------------------------------------------------
 if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
@@ -1040,6 +1049,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 
     # Parallel IO usage requires MPI to be Linked and Included
     if (H5_HAVE_PARALLEL)
+      find_package(MPI REQUIRED COMPONENTS Fortran)
       set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")

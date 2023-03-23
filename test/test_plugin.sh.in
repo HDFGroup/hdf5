@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/usr/bin/env bash
 #
 # Copyright by The HDF Group.
 # All rights reserved.
@@ -18,6 +18,9 @@ DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
+
+CP="cp -p"    # Use -p to preserve mode,ownership, timestamps
+RM="rm -rf"
 
 nerrors=0
 verbose=yes

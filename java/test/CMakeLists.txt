@@ -115,27 +115,43 @@ else ()
 endif ()
 
 get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
+set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
+set (CMAKE_JAVA_CLASSPATH ".")
+foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+  set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
+endforeach ()
 
 if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
-  foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
-    set (CMAKE_JAVA_CLASSPATH ".")
-    foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
-      set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
-    endforeach ()
-    set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_${test_file}_JAR_FILE}")
+  add_test (
+    NAME JUnit-clear-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
+        test.h5
+        testF2.h5
+        testPf00000.h5
+        testPf00001.h5
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test
+  )
+  set_tests_properties (JUnit-clear-objects PROPERTIES FIXTURES_SETUP clear_JUnit)
 
-    add_test (
-      NAME JUnit-${test_file}-clearall-objects
-      COMMAND ${CMAKE_COMMAND} -E remove
-          JUnit-${test_file}.out
-          JUnit-${test_file}.out.err
-    )
+  add_test (
+    NAME JUnit-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove
+        test.h5
+        testF2.h5
+        testPf00000.h5
+        testPf00001.h5
+    WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test
+  )
+  set_tests_properties (JUnit-clean-objects PROPERTIES FIXTURES_CLEANUP clear_JUnit)
+
+  foreach (test_file ${HDF5_JAVA_TEST_SOURCES})
+    set (TEST_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_${test_file}_JAR_FILE}")
+
     add_test (
         NAME JUnit-${test_file}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
-            -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}"
+            -D "TEST_CLASSPATH:STRING=${TEST_JAVA_CLASSPATH}"
             -D "TEST_ARGS:STRING=${CMD_ARGS}-ea;org.junit.runner.JUnitCore"
             -D "TEST_PROGRAM=test.${test_file}"
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
@@ -151,7 +167,8 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
     )
     set_tests_properties (JUnit-${test_file} PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
-        DEPENDS "JUnit-${test_file}-clearall-objects"
+        FIXTURES_REQUIRED clear_JUnit
+        WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test
     )
   endforeach ()
 endif ()

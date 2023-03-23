@@ -316,7 +316,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         aux_ptr->dirty_bytes_threshold   = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
         aux_ptr->dirty_bytes             = 0;
         aux_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
         aux_ptr->dirty_bytes_propagations      = 0;
         aux_ptr->unprotect_dirty_bytes         = 0;
         aux_ptr->unprotect_dirty_bytes_updates = 0;

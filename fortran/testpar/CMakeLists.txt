@@ -4,7 +4,7 @@ project (HDF5_FORTRAN_TESTPAR C Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-set (TESTPAR_INCLUDES ${MPI_Fortran_INCLUDE_DIRS} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src))
+set (TESTPAR_INCLUDES ${MPI_Fortran_INCLUDE_DIRS} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 if (NOT BUILD_SHARED_LIBS)
   set (TESTPAR_INCLUDES ${TESTPAR_INCLUDES} ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 else ()
@@ -53,8 +53,6 @@ else ()
   )
 endif ()
 
-#set_property(TARGET parallel_test APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
-#set_property(TARGET parallel_test APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET parallel_test PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()

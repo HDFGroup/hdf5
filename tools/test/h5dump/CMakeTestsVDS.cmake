@@ -119,12 +119,8 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (${resultcode})
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif ()
-      if (last_vds_test)
-        set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
     else ()
       add_test (
@@ -140,6 +136,9 @@
               -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
+    set_tests_properties (H5DUMP-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
+    )
   endmacro ()
 
   macro (ADD_H5_VDS_PREFIX_TEST resultfile resultcode)
