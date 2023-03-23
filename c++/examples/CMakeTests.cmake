@@ -104,8 +104,8 @@ foreach (example ${tutr_examples})
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_SKIP_COMPARE=TRUE"
-        -D "TEST_OUTPUT=tutr_cpp_ex_${example}.txt"
-        #-D "TEST_REFERENCE=cpp_ex_tutr_${example}.out"
+        -D "TEST_OUTPUT=cpp_ex_${example}.txt"
+        #-D "TEST_REFERENCE=cpp_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
         -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )

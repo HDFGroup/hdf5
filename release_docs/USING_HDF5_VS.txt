@@ -54,11 +54,11 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
           and select "x64".
 
       2.2 Find the box "Show directories for", choose "Include files", add the
-          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.13.x\include)
+          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.15.x\include)
           to the included directories.
 
       2.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.13.x\lib)
+          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.15.x\lib)
           to the library directories.
 
       2.4 If using Fortran libraries, you will also need to setup the path
