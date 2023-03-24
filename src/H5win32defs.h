@@ -38,32 +38,13 @@ typedef __int64         h5_stat_size_t;
 #define HDfileno(F)    _fileno(F)
 #define HDfstat(F, B)  _fstati64(F, B)
 #define HDisatty(F)    _isatty(F)
-
-#endif /* H5_HAVE_VISUAL_STUDIO */
-
-#define HDaccess(F, M)       _access(F, M)
-#define HDchdir(S)           _chdir(S)
-#define HDclose(F)           _close(F)
-#define HDcreat(S, M)        Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
-#define HDdup(F)             _dup(F)
-#define HDfdopen(N, S)       _fdopen(N, S)
-#define HDfileno(F)          _fileno(F)
-#define HDflock(F, L)        Wflock(F, L)
-#define HDfstat(F, B)        _fstati64(F, B)
 #define HDgetcwd(S, Z)       _getcwd(S, Z)
 #define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
 #define HDgetdrive()         _getdrive()
-#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define HDisatty(F)          _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmkdir(S, M)        _mkdir(S)
-
-/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
- * so we define HDoff_t to be __int64, which is the type of the st_size field
- * of the _stati64 struct.
- */
-#define HDoff_t __int64
+#define HDoff_t              __int64
 
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.
