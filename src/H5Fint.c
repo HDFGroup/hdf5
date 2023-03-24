@@ -1798,22 +1798,53 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     else
         tent_flags = flags;
 
-    H5E_BEGIN_TRY
-    {
-        lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+    /*
+     * When performing a tentative open of a file where we have stripped away
+     * flags such as H5F_ACC_CREAT from the specified file access flags, the
+     * H5E_BEGIN/END_TRY macros are used to suppress error output since there
+     * is an expectation that the tentative open might fail. Even though we
+     * explicitly clear the error stack after such a failure, the underlying
+     * file driver might maintain its own error stack and choose whether to
+     * display errors based on whether the library has disabled error reporting.
+     * Since we wish to suppress that error output as well for the case of
+     * tentative file opens, surrounding the file open call with the
+     * H5E_BEGIN/END_TRY macros is an explicit instruction to the file driver
+     * not to display errors. If the tentative file open call fails, another
+     * attempt at opening the file will be made without error output being
+     * suppressed.
+     *
+     * However, if stripping away the H5F_ACC_CREAT flag and others left us
+     * with the same file access flags as before, then we will only make a
+     * single attempt at opening the file and will simply fail here if that
+     * file open call fails. In this case, we don't want to suppress error
+     * output since the underlying file driver might provide more details on
+     * why the file open failed.
+     */
+    if (tent_flags != flags) {
+        /* Make tentative attempt to open file */
+        H5E_BEGIN_TRY
+        {
+            lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+        }
+        H5E_END_TRY;
     }
-    H5E_END_TRY;
 
-    if (NULL == lf) {
-        if (tent_flags == flags)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
-                        name, tent_flags)
-        H5E_clear_stack(NULL);
-        tent_flags = flags;
+    /*
+     * If a tentative attempt to open the file wasn't necessary, attempt
+     * to open the file now. Otherwise, if the tentative open failed, clear
+     * the error stack and reset the file access flags, then make another
+     * attempt at opening the file.
+     */
+    if ((tent_flags == flags) || (lf == NULL)) {
+        if (tent_flags != flags) {
+            H5E_clear_stack(NULL);
+            tent_flags = flags;
+        }
+
         if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
-    } /* end if */
+    }
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {
