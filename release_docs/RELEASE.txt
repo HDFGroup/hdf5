@@ -205,6 +205,20 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
+    - Fixed a memory corruption issue that can occur when reading
+      from a dataset using a hyperslab selection in the file
+      dataspace and a point selection in the memory dataspace
+
+      When reading from a dataset using a hyperslab selection in
+      the dataset's file dataspace and a point selection in the
+      dataset's memory dataspace where the file dataspace's "rank"
+      is greater than the memory dataspace's "rank", memory corruption
+      could occur due to an incorrect number of selection points
+      being copied when projecting the point selection onto the
+      hyperslab selection's dataspace.
+
+      (JTH - 2023/03/23)
+
     - Seg fault on file close
 
       h5debug fails at file close with core dump on a file that has an
