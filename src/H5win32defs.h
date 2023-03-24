@@ -29,15 +29,16 @@
 typedef struct _stati64 h5_stat_t;
 typedef __int64         h5_stat_size_t;
 
-#define HDaccess(F, M)     _access(F, M)
-#define HDchdir(S)         _chdir(S)
-#define HDclose(F)         _close(F)
-#define HDcreat(S, M)      Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
-#define HDdup(F)           _dup(F)
-#define HDfdopen(N, S)     _fdopen(N, S)
-#define HDfileno(F)        _fileno(F)
-#define HDfstat(F, B)      _fstati64(F, B)
-#define HDisatty(F)        _isatty(F)
+#define HDaccess(F, M) _access(F, M)
+#define HDchdir(S)     _chdir(S)
+#define HDclose(F)     _close(F)
+#define HDcreat(S, M)  Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
+#define HDdup(F)       _dup(F)
+#define HDfdopen(N, S) _fdopen(N, S)
+#define HDfileno(F)    _fileno(F)
+#define HDfstat(F, B)  _fstati64(F, B)
+#define HDisatty(F)    _isatty(F)
+
 #define HDgetcwd(S, Z)     _getcwd(S, Z)
 #define HDgetdcwd(D, S, Z) _getdcwd(D, S, Z)
 #define HDgetdrive()       _getdrive()
