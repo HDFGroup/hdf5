@@ -147,10 +147,10 @@ get_vol_cap_flags(const char *connector_name)
     }
 
     if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5VLclose(connector_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 

@@ -630,11 +630,11 @@ generate_random_dataspace(int rank, const hsize_t *max_dims, hsize_t *dims_out, 
     hid_t   dataspace_id = H5I_INVALID_HID;
 
     if (rank < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (is_compact && (rank > COMPACT_SPACE_MAX_DIMS)) {
         HDprintf("    current rank of compact dataspace (%lld) exceeds maximum dimensionality (%lld)\n",
                  (long long)rank, (long long)COMPACT_SPACE_MAX_DIMS);
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     /*
@@ -652,7 +652,7 @@ generate_random_dataspace(int rank, const hsize_t *max_dims, hsize_t *dims_out, 
     }
 
     if ((dataspace_id = H5Screate_simple(rank, dataspace_dims, max_dims)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return dataspace_id;
 
