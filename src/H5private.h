@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
@@ -44,6 +43,7 @@
 #endif
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#include <sys/types.h>
 #endif
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
@@ -64,6 +64,25 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+
+/*
+ * If a program may include both `time.h' and `sys/time.h' then
+ * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
+ * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
+ * protected against multiple inclusion, so programs should not explicitly
+ * include both files. This macro is useful in programs that use, for example,
+ * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
+ * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
+ * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
+ */
+#if defined(H5_TIME_WITH_SYS_TIME)
+#include <sys/time.h>
+#include <time.h>
+#elif defined(H5_HAVE_SYS_TIME_H)
+#include <sys/time.h>
+#else
+#include <time.h>
 #endif
 
 /*
@@ -107,8 +126,8 @@
 #include <dirent.h>
 #endif
 
-/* Define the default VFD for this platform.  Since the removal of the
- * Windows VFD, this is sec2 for all platforms.
+/* Define the default VFD for this platform.
+ * Since the removal of the Windows VFD, this is sec2 for all platforms.
  */
 #define H5_DEFAULT_VFD H5FD_SEC2
 
@@ -382,16 +401,91 @@
 #endif
 
 /*
- * The max value for ssize_t.
- *
- * Only needed where ssize_t isn't a thing (e.g., Windows)
+ * Numeric data types.  Some of these might be defined in Posix.1g, otherwise
+ * we define them with the closest available type which is at least as large
+ * as the number of bits indicated in the type name.  The `int8' types *must*
+ * be exactly one byte wide because we use it for pointer calculations to
+ * void* memory.
  */
-#ifndef SSIZE_MAX
-#define SSIZE_MAX ((ssize_t)(((size_t)1 << (8 * sizeof(ssize_t) - 1)) - 1))
+#if H5_SIZEOF_INT8_T == 0
+typedef signed char int8_t;
+#undef H5_SIZEOF_INT8_T
+#define H5_SIZEOF_INT8_T H5_SIZEOF_CHAR
+#elif H5_SIZEOF_INT8_T == 1
+#else
+#error "the int8_t type must be 1 byte wide"
+#endif
+
+#if H5_SIZEOF_UINT8_T == 0
+typedef unsigned char uint8_t;
+#undef H5_SIZEOF_UINT8_T
+#define H5_SIZEOF_UINT8_T H5_SIZEOF_CHAR
+#elif H5_SIZEOF_UINT8_T == 1
+#else
+#error "the uint8_t type must be 1 byte wide"
+#endif
+
+#if H5_SIZEOF_INT16_T >= 2
+#elif H5_SIZEOF_SHORT >= 2
+typedef short          int16_t;
+#undef H5_SIZEOF_INT16_T
+#define H5_SIZEOF_INT16_T H5_SIZEOF_SHORT
+#elif H5_SIZEOF_INT >= 2
+typedef int      int16_t;
+#undef H5_SIZEOF_INT16_T
+#define H5_SIZEOF_INT16_T H5_SIZEOF_INT
+#else
+#error "nothing appropriate for int16_t"
+#endif
+
+#if H5_SIZEOF_UINT16_T >= 2
+#elif H5_SIZEOF_SHORT >= 2
+typedef unsigned short uint16_t;
+#undef H5_SIZEOF_UINT16_T
+#define H5_SIZEOF_UINT16_T H5_SIZEOF_SHORT
+#elif H5_SIZEOF_INT >= 2
+typedef unsigned uint16_t;
+#undef H5_SIZEOF_UINT16_T
+#define H5_SIZEOF_UINT16_T H5_SIZEOF_INT
+#else
+#error "nothing appropriate for uint16_t"
+#endif
+
+#if H5_SIZEOF_INT32_T >= 4
+#elif H5_SIZEOF_SHORT >= 4
+typedef short          int32_t;
+#undef H5_SIZEOF_INT32_T
+#define H5_SIZEOF_INT32_T H5_SIZEOF_SHORT
+#elif H5_SIZEOF_INT >= 4
+typedef int      int32_t;
+#undef H5_SIZEOF_INT32_T
+#define H5_SIZEOF_INT32_T H5_SIZEOF_INT
+#elif H5_SIZEOF_LONG >= 4
+typedef long int32_t;
+#undef H5_SIZEOF_INT32_T
+#define H5_SIZEOF_INT32_T H5_SIZEOF_LONG
+#else
+#error "nothing appropriate for int32_t"
 #endif
 
 /*
- * Maximum & minimum values for HDF5 typedefs.
+ * Maximum and minimum values.  These should be defined in <limits.h> for the
+ * most part.
+ */
+#ifndef LLONG_MAX
+#define LLONG_MAX ((long long)(((unsigned long long)1 << (8 * sizeof(long long) - 1)) - 1))
+#define LLONG_MIN ((long long)(-LLONG_MAX) - 1)
+#endif
+#ifndef ULLONG_MAX
+#define ULLONG_MAX ((unsigned long long)((long long)(-1)))
+#endif
+#ifndef SIZET_MAX
+#define SIZET_MAX  ((size_t)(ssize_t)(-1))
+#define SSIZET_MAX ((ssize_t)(((size_t)1 << (8 * sizeof(ssize_t) - 1)) - 1))
+#endif
+
+/*
+ * Maximum & minimum values for our typedefs.
  */
 #define HSIZET_MAX  ((hsize_t)ULLONG_MAX)
 #define HSSIZET_MAX ((hssize_t)LLONG_MAX)
@@ -431,7 +525,7 @@
 #else
 #define h5_posix_io_t         size_t
 #define h5_posix_io_ret_t     ssize_t
-#define H5_POSIX_MAX_IO_BYTES SSIZE_MAX
+#define H5_POSIX_MAX_IO_BYTES SSIZET_MAX
 #endif
 
 /* POSIX I/O mode used as the third parameter to open/_open
@@ -540,29 +634,14 @@ typedef struct {
     haddr_t       addr;   /* The unique address of the object's header in that file */
 } H5_obj_t;
 
-#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
-
-/* Put all Windows-specific definitions in H5win32defs.h so we
- * can (mostly) assume a POSIX platform. Not all of the POSIX calls
- * will have a Windows equivalent so some #ifdef protection is still
- * necessary (e.g., fork()).
+/*
+ * Redefine all the POSIX functions.  We should never see a POSIX
+ * function (or any other non-HDF5 function) in the source!
  */
-#include "H5win32defs.h"
 
-/* Platform-independent definitions for struct stat and off_t */
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
- */
-typedef struct stat h5_stat_t;
-typedef off_t       h5_stat_size_t;
-#define HDoff_t off_t
-#endif
-
-/* Redefine all the POSIX and C functions.  We should never see an
- * undecorated POSIX or C function (or any other non-HDF5 function)
- * in the source.
- */
+/* Put all platform-specific definitions in the following file */
+/* so that the following definitions are platform free. */
+#include "H5win32defs.h" /* For Windows-specific definitions */
 
 #ifndef HDabort
 #define HDabort() abort()
@@ -580,7 +659,11 @@ typedef off_t       h5_stat_size_t;
 #define HDacos(X) acos(X)
 #endif
 #ifndef HDalarm
+#ifdef H5_HAVE_ALARM
 #define HDalarm(N) alarm(N)
+#else
+#define HDalarm(N) (0)
+#endif
 #endif
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
@@ -685,7 +768,11 @@ typedef off_t       h5_stat_size_t;
 #define HDcuserid(S) cuserid(S)
 #endif
 #ifndef HDdifftime
+#ifdef H5_HAVE_DIFFTIME
 #define HDdifftime(X, Y) difftime(X, Y)
+#else
+#define HDdifftime(X, Y) ((double)(X) - (double)(Y))
+#endif
 #endif
 #ifndef HDdiv
 #define HDdiv(X, Y) div(X, Y)
@@ -696,6 +783,9 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDdup2
 #define HDdup2(F, I) dup2(F, I)
 #endif
+/* execl() variable arguments */
+/* execle() variable arguments */
+/* execlp() variable arguments */
 #ifndef HDexecv
 #define HDexecv(S, AV) execv(S, AV)
 #endif
@@ -729,8 +819,10 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
 #endif
+#ifdef H5_HAVE_FCNTL
 #ifndef HDfcntl
 #define HDfcntl(F, C, ...) fcntl(F, C, __VA_ARGS__)
+#endif
 #endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
@@ -818,11 +910,20 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
 #endif
+/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
 #ifndef HDfrexpf
+#ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
+#else
+#define HDfrexpf(X, N) frexp(X, N)
+#endif
 #endif
 #ifndef HDfrexpl
+#ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
+#else
+#define HDfrexpl(X, N) frexp(X, N)
+#endif
 #endif
 #ifndef HDfscanf
 #define HDfscanf fscanf
@@ -836,6 +937,24 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfstat
 #define HDfstat(F, B) fstat(F, B)
 #endif
+#ifndef HDlstat
+#define HDlstat(S, B) lstat(S, B)
+#endif
+#ifndef HDstat
+#define HDstat(S, B) stat(S, B)
+#endif
+
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
+ */
+typedef struct stat h5_stat_t;
+typedef off_t       h5_stat_size_t;
+#define HDoff_t off_t
+#endif /* H5_HAVE_WIN32_API */
+
+#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
+
 #ifndef HDftell
 #define HDftell(F) ftell(F)
 #endif
@@ -1028,9 +1147,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
 #endif
-#ifndef HDlstat
-#define HDlstat(S, B) lstat(S, B)
-#endif
 #ifndef HDmalloc
 #define HDmalloc(Z) malloc(Z)
 #endif
@@ -1206,9 +1322,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
 #endif
-#ifndef HDscanf
-#define HDscanf scanf /*varargs*/
-#endif
+/* scanf() variable arguments */
 #ifndef HDselect
 #define HDselect(N, RD, WR, ER, T) select(N, RD, WR, ER, T)
 #endif
@@ -1303,10 +1417,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDsqrt(X) sqrt(X)
 #endif
 #ifndef HDsscanf
-#define HDsscanf sscanf /*varargs*/
-#endif
-#ifndef HDstat
-#define HDstat(S, B) stat(S, B)
+#define HDsscanf(S, FMT, ...) sscanf(S, FMT, __VA_ARGS__)
 #endif
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
@@ -1375,7 +1486,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrtol(S, R, N) strtol(S, R, N)
 #endif
 #ifndef HDstrtoll
+#ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
+#else
+H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
+#endif
 #endif
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
@@ -1389,8 +1504,10 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrxfrm
 #define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
 #endif
+#ifdef H5_HAVE_SYMLINK
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
+#endif
 #endif
 #ifndef HDsysconf
 #define HDsysconf(N) sysconf(N)
@@ -1472,7 +1589,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
@@ -1730,52 +1847,51 @@ extern char H5libhdf5_settings[]; /* embedded library information */
 
 #define H5TRACE0(R, T)                                                                                       \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T)
+    CALLTIME = H5_trace(NULL, FUNC, T)
 #define H5TRACE1(R, T, A0)                                                                                   \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0)
 #define H5TRACE2(R, T, A0, A1)                                                                               \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1)
 #define H5TRACE3(R, T, A0, A1, A2)                                                                           \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2)
 #define H5TRACE4(R, T, A0, A1, A2, A3)                                                                       \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3)
 #define H5TRACE5(R, T, A0, A1, A2, A3, A4)                                                                   \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4)
 #define H5TRACE6(R, T, A0, A1, A2, A3, A4, A5)                                                               \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5)
 #define H5TRACE7(R, T, A0, A1, A2, A3, A4, A5, A6)                                                           \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6)
 #define H5TRACE8(R, T, A0, A1, A2, A3, A4, A5, A6, A7)                                                       \
-    RTYPE = R;                                                                                               \
-    CALLTIME =                                                                                               \
-        H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7)
+    RTYPE    = R;                                                                                            \
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7, A7)
 #define H5TRACE9(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8)                                                   \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7,   \
+                        A7, #A8, A8)
 #define H5TRACE10(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9)                                              \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7,   \
+                        A7, #A8, A8, #A9, A9)
 #define H5TRACE11(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10)                                         \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9, #A10, A10)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7,   \
+                        A7, #A8, A8, #A9, A9, #A10, A10)
 #define H5TRACE12(R, T, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11)                                    \
     RTYPE    = R;                                                                                            \
-    CALLTIME = H5_trace(NULL, __func__, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6,    \
-                        #A7, A7, #A8, A8, #A9, A9, #A10, A10, #A11, A11)
+    CALLTIME = H5_trace(NULL, FUNC, T, #A0, A0, #A1, A1, #A2, A2, #A3, A3, #A4, A4, #A5, A5, #A6, A6, #A7,   \
+                        A7, #A8, A8, #A9, A9, #A10, A10, #A11, A11)
 
 #define H5TRACE_RETURN(V)                                                                                    \
     if (RTYPE) {                                                                                             \
-        H5_trace(&CALLTIME, __func__, RTYPE, NULL, V);                                                       \
+        H5_trace(&CALLTIME, FUNC, RTYPE, NULL, V);                                                           \
         RTYPE = NULL;                                                                                        \
     }
 #else
@@ -1922,7 +2038,7 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 /* Include required function stack header */
 #include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC H5CS_push(__func__);
+#define H5_PUSH_FUNC H5CS_push(FUNC);
 #define H5_POP_FUNC  H5CS_pop();
 #else                /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC /* void */
@@ -2007,7 +2123,7 @@ H5_DLL herr_t H5CX_pop(void);
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
-    FUNC_ENTER_COMMON(H5_IS_API(__func__));                                                                  \
+    FUNC_ENTER_COMMON(H5_IS_API(FUNC));                                                                      \
     FUNC_ENTER_API_THREADSAFE;
 
 #define FUNC_ENTER_API_INIT(err)                                                                             \
@@ -2016,7 +2132,7 @@ H5_DLL herr_t H5CX_pop(void);
         H5_INIT_GLOBAL = TRUE;                                                                               \
         if (H5_init_library() < 0)                                                                           \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
-    }                                                                                                        \
+    } /* end if */                                                                                           \
                                                                                                              \
     /* Initialize the package, if appropriate */                                                             \
     H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
@@ -2088,7 +2204,7 @@ H5_DLL herr_t H5CX_pop(void);
             {                                                                                                \
                 {                                                                                            \
                     FUNC_ENTER_API_VARS                                                                      \
-                    FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                            \
+                    FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                                \
                     FUNC_ENTER_API_THREADSAFE;                                                               \
                     BEGIN_MPE_LOG                                                                            \
                     {
@@ -2105,7 +2221,7 @@ H5_DLL herr_t H5CX_pop(void);
             {                                                                                                \
                 {                                                                                            \
                     {                                                                                        \
-                        FUNC_ENTER_COMMON(H5_IS_API(__func__));                                              \
+                        FUNC_ENTER_COMMON(H5_IS_API(FUNC));                                                  \
                         FUNC_ENTER_API_THREADSAFE;                                                           \
                         FUNC_ENTER_API_INIT(err);                                                            \
                         {
@@ -2121,14 +2237,14 @@ H5_DLL herr_t H5CX_pop(void);
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                                                 \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
+        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                                           \
         FUNC_ENTER_NOAPI_INIT(-)                                                                             \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2142,7 +2258,7 @@ H5_DLL herr_t H5CX_pop(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT                                                                              \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                                                 \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2157,7 +2273,7 @@ H5_DLL herr_t H5CX_pop(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOERR                                                                        \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
+        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                                           \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2169,7 +2285,7 @@ H5_DLL herr_t H5CX_pop(void);
  */
 #define FUNC_ENTER_NOAPI_NOFS                                                                                \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                                                 \
                                                                                                              \
         /* Initialize the package, if appropriate */                                                         \
         H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                 \
@@ -2186,7 +2302,7 @@ H5_DLL herr_t H5CX_pop(void);
  */
 #define FUNC_ENTER_NOAPI_NOERR_NOFS                                                                          \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
+        FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                                           \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
@@ -2196,7 +2312,7 @@ H5_DLL herr_t H5CX_pop(void);
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                                                 \
         H5AC_tag(tag, &prev_tag);                                                                            \
         FUNC_ENTER_NOAPI_INIT(err)                                                                           \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2205,7 +2321,7 @@ H5_DLL herr_t H5CX_pop(void);
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
+        FUNC_ENTER_COMMON(!H5_IS_API(FUNC));                                                                 \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2213,14 +2329,14 @@ H5_DLL herr_t H5CX_pop(void);
 /* Use this macro for all "normal" package-level functions */
 #define FUNC_ENTER_PACKAGE                                                                                   \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
+        FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                                                  \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use this macro for package-level functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2230,7 +2346,7 @@ H5_DLL herr_t H5CX_pop(void);
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
+        FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                                                  \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2238,14 +2354,14 @@ H5_DLL herr_t H5CX_pop(void);
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC                                                                                    \
     {                                                                                                        \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
+        FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                                                  \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR                                                                              \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
@@ -2253,7 +2369,7 @@ H5_DLL herr_t H5CX_pop(void);
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
     {                                                                                                        \
-        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
+        FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                                            \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
 /* Use the following macro as replacement for the FUNC_ENTER_STATIC
@@ -2262,7 +2378,7 @@ H5_DLL herr_t H5CX_pop(void);
     {                                                                                                        \
         haddr_t prev_tag = HADDR_UNDEF;                                                                      \
                                                                                                              \
-        FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
+        FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                                                  \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
         if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
@@ -2412,18 +2528,6 @@ H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
-
-/* Private typedefs */
-
-/* Union for const/non-const pointer for use by functions that manipulate
- * pointers but do not write to their targets or return pointers to const
- * specified locations.  Also used for I/O functions that work for read and
- * write - these functions are expected to never write to these locations in the
- * write case.  This helps us avoid compiler warnings. */
-typedef union {
-    void       *vp;
-    const void *cvp;
-} H5_flexible_const_ptr_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

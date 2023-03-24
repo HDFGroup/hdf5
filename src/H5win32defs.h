@@ -26,18 +26,18 @@
  */
 #ifdef H5_HAVE_WIN32_API
 
-/* __int64 is the correct type for the st_size field of the _stati64 struct.
- * MSDN isn't very clear about this.
- */
 typedef struct _stati64 h5_stat_t;
 typedef __int64         h5_stat_size_t;
 
-#ifdef H5_HAVE_VISUAL_STUDIO
-
-struct timezone {
-    int tz_minuteswest;
-    int tz_dsttime;
-};
+#define HDaccess(F, M) _access(F, M)
+#define HDchdir(S)     _chdir(S)
+#define HDclose(F)     _close(F)
+#define HDcreat(S, M)  Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
+#define HDdup(F)       _dup(F)
+#define HDfdopen(N, S) _fdopen(N, S)
+#define HDfileno(F)    _fileno(F)
+#define HDfstat(F, B)  _fstati64(F, B)
+#define HDisatty(F)    _isatty(F)
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -77,7 +77,6 @@ struct timezone {
 #define HDread(F, M, Z)       _read(F, M, Z)
 #define HDremove(S)           Wremove_utf8(S)
 #define HDrmdir(S)            _rmdir(S)
-#define HDsetenv(N, V, O)     Wsetenv(N, V, O)
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, (Z > 1 ? Z : 2))
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
@@ -88,10 +87,19 @@ struct timezone {
 #define HDunlink(S)           _unlink(S)
 #define HDwrite(F, M, Z)      _write(F, M, Z)
 
-#ifndef H5_HAVE_MINGW
-#define HDftruncate(F, L) _chsize_s(F, L)
-#define HDfseek(F, O, W)  _fseeki64(F, O, W)
-#endif /* H5_HAVE_MINGW */
+#ifdef H5_HAVE_VISUAL_STUDIO
+
+/*
+ * The (void*) cast just avoids a compiler warning in MSVC
+ */
+#define HDmemset(X, C, Z) memset((void *)(X), C, Z)
+
+struct timezone {
+    int tz_minuteswest;
+    int tz_dsttime;
+};
+
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,5 +115,17 @@ H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
+#define HDsetenv(N, V, O)    Wsetenv(N, V, O)
+#define HDflock(F, L)        Wflock(F, L)
+#define HDgetlogin()         Wgetlogin()
+
+/* Non-POSIX functions */
+
+#ifndef H5_HAVE_MINGW
+#define HDftruncate(F, L) _chsize_s(F, L)
+#define HDfseek(F, O, W)  _fseeki64(F, O, W)
+#endif /* H5_HAVE_MINGW */
 
 #endif /* H5_HAVE_WIN32_API */

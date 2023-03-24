@@ -118,7 +118,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     esac
 
     # C++-specific
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch -std=c++98"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch"
 
     ##############
     # Production #
