@@ -1849,7 +1849,7 @@ main(int argc, char **argv)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
 
     /* set alarm. */
-    TestAlarmOn();
+    ALARM_ON;
 
     ExpressMode = do_express_test(mpi_rank_g);
 
@@ -1872,7 +1872,7 @@ main(int argc, char **argv)
     }
 
     /* turn off alarm */
-    TestAlarmOff();
+    ALARM_OFF;
 
     if (mpi_rank_g == 0)
         HDremove(FILENAME[0]);

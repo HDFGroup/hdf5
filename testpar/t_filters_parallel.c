@@ -8799,7 +8799,7 @@ main(int argc, char **argv)
     if (VERBOSE_MED)
         h5_show_hostname();
 
-    TestAlarmOn();
+    ALARM_ON;
 
     num_filters = ARRAY_SIZE(filterIDs);
 
@@ -8967,7 +8967,7 @@ exit:
         if (MAINPROCESS)
             HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
 
-    TestAlarmOff();
+    ALARM_OFF;
 
     h5_clean_files(FILENAME, fapl_id);
     fapl_id = H5I_INVALID_HID;
