@@ -1814,11 +1814,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * suppressed.
      *
      * However, if stripping away the H5F_ACC_CREAT flag and others left us
-     * with the same file access flags as before, then we will only make a
-     * single attempt at opening the file and will simply fail here if that
-     * file open call fails. In this case, we don't want to suppress error
-     * output since the underlying file driver might provide more details on
-     * why the file open failed.
+     * with the same file access flags as before, then we will skip this
+     * tentative file open and only make a single attempt at opening the file.
+     * In this case, we don't want to suppress error output since the underlying
+     * file driver might provide more details on why the file open failed.
      */
     if (tent_flags != flags) {
         /* Make tentative attempt to open file */
