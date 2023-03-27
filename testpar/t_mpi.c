@@ -1095,7 +1095,7 @@ main(int argc, char **argv)
     H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     /* set alarm. */
-    ALARM_ON;
+    TestAlarmOn();
 
     /*=======================================
      * MPIO 1 write Many read test
@@ -1204,7 +1204,7 @@ finish:
     }
 
     /* turn off alarm */
-    ALARM_OFF;
+    TestAlarmOff();
 
     h5_clean_files(FILENAME, fapl);
     H5close();
