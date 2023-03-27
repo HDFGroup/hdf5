@@ -1,0 +1,4 @@
+[hooks]
+	url = https://gitlab.kitware.com/utils/gitsetup.git
+[upstream]
+	url = https://gitlab.kitware.com/utils/kwsys.git
