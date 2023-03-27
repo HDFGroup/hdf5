@@ -555,6 +555,12 @@ Platforms Tested
 
 Known Problems
 ==============
+    The function prototype for H5Treclaim was mistakenly added to code for HDF5
+    1.10.9;  however no implementation code was added.  This prototype has been
+    removed, resulting in a source incompatibility for shared library versions 
+    between HDF5 versions 1.10.10 and 1.10.9, but not binary incompatibility 
+    since the function was not implemented.
+
     Setting a variable-length dataset fill value will leak the memory allocated
     for the p field of the hvl_t struct. A fix is in progress for this.
     HDFFV-10840
