@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+echo "Adding 'git prepush' alias" &&
+git config alias.prepush 'log --graph --stat origin/master..' &&
+gerrit_disabled="KWSys no longer uses Gerrit.  Please use GitLab." &&
+git config alias.gerrit-push '!sh -c "echo '"${gerrit_disabled}"'"' &&
+true
