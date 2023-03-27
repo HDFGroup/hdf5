@@ -2894,50 +2894,49 @@ test_object_copy_shallow_group_copy(void)
     if (H5Gclose(tmp_group_id) < 0)
         TEST_ERROR;
 
-        /*
-         * Ensure that the last immediate member of the copied group doesn't
-         * contain any members after the shallow copy.
-         */
-        {
-            char grp_name[OBJECT_COPY_SHALLOW_TEST_BUF_SIZE];
+    /*
+     * Ensure that the last immediate member of the copied group doesn't
+     * contain any members after the shallow copy.
+     */
+    {
+        char grp_name[OBJECT_COPY_SHALLOW_TEST_BUF_SIZE];
 
-            snprintf(grp_name, OBJECT_COPY_SHALLOW_TEST_BUF_SIZE,
-                     OBJECT_COPY_SHALLOW_TEST_NEW_GROUP_NAME "/grp%d",
-                     OBJECT_COPY_SHALLOW_TEST_NUM_NESTED_OBJS - 1);
+        snprintf(grp_name, OBJECT_COPY_SHALLOW_TEST_BUF_SIZE,
+                 OBJECT_COPY_SHALLOW_TEST_NEW_GROUP_NAME "/grp%d",
+                 OBJECT_COPY_SHALLOW_TEST_NUM_NESTED_OBJS - 1);
 
-            if ((tmp_group_id = H5Gopen2(group_id, grp_name, H5P_DEFAULT)) < 0) {
-                H5_FAILED();
-                HDprintf("    failed to open group '%s'\n", grp_name);
-                goto error;
-            }
-
-            memset(&group_info, 0, sizeof(group_info));
-
-            /*
-             * Set link count to non-zero in case the connector doesn't support
-             * retrieval of group info.
-             */
-            group_info.nlinks = 1;
-
-            if (H5Gget_info(tmp_group_id, &group_info) < 0) {
-                H5_FAILED();
-                HDprintf("    failed to retrieve group info\n");
-                goto error;
-            }
-
-            if (group_info.nlinks != 0) {
-                H5_FAILED();
-                HDprintf(
-                    "    copied group's immediate members contained nested members after a shallow copy!\n");
-                goto error;
-            }
-
-            if (H5Gclose(tmp_group_id) < 0) {
-                H5_FAILED();
-                HDprintf("    failed to close group '%s'\n", grp_name);
-                goto error;
-            }
+        if ((tmp_group_id = H5Gopen2(group_id, grp_name, H5P_DEFAULT)) < 0) {
+            H5_FAILED();
+            HDprintf("    failed to open group '%s'\n", grp_name);
+            goto error;
         }
+
+        memset(&group_info, 0, sizeof(group_info));
+
+        /*
+         * Set link count to non-zero in case the connector doesn't support
+         * retrieval of group info.
+         */
+        group_info.nlinks = 1;
+
+        if (H5Gget_info(tmp_group_id, &group_info) < 0) {
+            H5_FAILED();
+            HDprintf("    failed to retrieve group info\n");
+            goto error;
+        }
+
+        if (group_info.nlinks != 0) {
+            H5_FAILED();
+            HDprintf("    copied group's immediate members contained nested members after a shallow copy!\n");
+            goto error;
+        }
+
+        if (H5Gclose(tmp_group_id) < 0) {
+            H5_FAILED();
+            HDprintf("    failed to close group '%s'\n", grp_name);
+            goto error;
+        }
+    }
 
     if (H5Pclose(ocpypl_id) < 0)
         TEST_ERROR;
