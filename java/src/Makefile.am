@@ -106,6 +106,7 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5AC_cache_config_t.java \
 	${pkgpath}/H5.java  \
 	${pkgpath}/HDF5Constants.java  \
+	${pkgpath}/HDF5GroupInfo.java  \
 	${pkgpath}/HDFArray.java  \
 	${pkgpath}/HDFNativeData.java
 
