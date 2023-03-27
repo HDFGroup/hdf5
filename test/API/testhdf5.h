@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -69,7 +68,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, (ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (!(ret)) {                                                                                        \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", (where), (int)__LINE__,  \
@@ -83,7 +82,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, (ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (ret) {                                                                                           \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n", (where),             \
@@ -149,7 +148,7 @@
                        "%s \n",                                                                              \
                        (where), (int)__LINE__, __FILE__, x);                                                 \
         }                                                                                                    \
-        if (HDstrcmp(x, val)) {                                                                              \
+        if (HDstrcmp(x, val) != 0) {                                                                         \
             TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d "                \
                           "in %s\n",                                                                         \
                           where, val, x, (int)__LINE__, __FILE__);                                           \
@@ -179,7 +178,7 @@
 #if defined(H5_HAVE_PARALLEL) && defined(H5_PARALLEL_TEST)
 #define MESSAGE(V, A)                                                                                        \
     {                                                                                                        \
-        int mpi_rank = 0;                                                                                    \
+        int mpi_rank;                                                                                        \
                                                                                                              \
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                                            \
         if (mpi_rank == 0 && VERBO_LO /* HDGetTestVerbosity() */ >= (V))                                     \
@@ -282,10 +281,12 @@ int   print_func(const char *format, ...);
 int   TestErrPrintf(const char *format, ...);
 hid_t h5_fileaccess(void);
 /* Functions that will replace components of a FAPL */
-herr_t h5_get_vfd_fapl(hid_t fapl_id);
-herr_t h5_get_libver_fapl(hid_t fapl_id);
-char  *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-char  *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+herr_t  h5_get_vfd_fapl(hid_t fapl_id);
+herr_t  h5_get_libver_fapl(hid_t fapl_id);
+char   *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+char   *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+hbool_t h5_using_default_driver(const char *drv_name);
+herr_t  h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
 
 #ifdef H5_HAVE_PARALLEL
 char *getenv_all(MPI_Comm comm, int root, const char *name);
@@ -294,8 +295,6 @@ char *getenv_all(MPI_Comm comm, int root, const char *name);
 /* Prototypes for the test routines */
 void test_metadata(void);
 void test_checksum(void);
-void test_tst(void);
-void test_heap(void);
 void test_refstr(void);
 void test_file(void);
 void test_h5o(void);
@@ -314,6 +313,7 @@ void test_iterate(void);
 void test_array(void);
 void test_genprop(void);
 void test_configure(void);
+void test_h5_system(void);
 void test_misc(void);
 void test_ids(void);
 void test_skiplist(void);
@@ -338,6 +338,7 @@ void cleanup_iterate(void);
 void cleanup_array(void);
 void cleanup_genprop(void);
 void cleanup_configure(void);
+void cleanup_h5_system(void);
 void cleanup_sohm(void);
 void cleanup_misc(void);
 void cleanup_unicode(void);

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,8 +52,8 @@ typedef struct {
 #define CORRUPTED_ATNAMELEN_FILE "memleak_H5O_dtype_decode_helper_H5Odtype.h5"
 #define DSET_NAME                "image"
 typedef struct searched_err_t {
-    char message[256];
-    bool found;
+    char    message[256];
+    hbool_t found;
 } searched_err_t;
 #if 0
 /* Call back function for test_corrupted_attnamelen */
@@ -166,7 +165,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -228,9 +227,14 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                                          dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
+        //! [H5Oget_info_by_idx3_snip]
+
         ret = H5Oget_info_by_idx3(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                   H5O_INFO_BASIC, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx");
+
+        //! [H5Oget_info_by_idx3_snip]
+
     } /* end for */
 
     H5E_BEGIN_TRY
@@ -262,7 +266,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
         ret = H5Oget_info_by_idx3(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo, H5O_INFO_BASIC,
                                   H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Oget_info_by_idx");
+        CHECK(ret, FAIL, "H5Oget_info_by_idx3");
     } /* end for */
 
     H5E_BEGIN_TRY
@@ -457,7 +461,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for (i = 0; i < NATTR; i++) {
-        HDsprintf(name, "Attribute %02d", i);
+        HDsnprintf(name, sizeof(name), "Attribute %02d", i);
         attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate2");
 
@@ -615,7 +619,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     H5O_info2_t      oinfo;
     herr_t           ret; /* Generic return value        */
 
-    if (HDstrcmp(name, test_info->name)) {
+    if (HDstrcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */
@@ -624,7 +628,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
      * Get type of the object and check it.
      */
     ret = H5Oget_info_by_name3(loc_id, name, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    CHECK(ret, FAIL, "H5Oget_info_by_name3");
 
     if (test_info->type != oinfo.type) {
         TestErrPrintf("test_info->type = %d, oinfo.type = %d\n", test_info->type, (int)oinfo.type);
@@ -684,7 +688,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Create a bunch of groups */
     for (i = 0; i < ITER_NGROUPS; i++) {
-        HDsprintf(gname, "Group_%d", i);
+        HDsnprintf(gname, sizeof(gname), "Group_%d", i);
 
         /* Add the name to the list of objects in the root group */
         HDstrcpy(names[i].name, gname);
@@ -802,7 +806,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -878,7 +882,7 @@ test_grp_memb_funcs(hid_t fapl)
 
         ret = H5Oget_info_by_idx3(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                   H5O_INFO_BASIC, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Oget_info_by_idx");
+        CHECK(ret, FAIL, "H5Oget_info_by_idx3");
 
         if (!HDstrcmp(dataset_name, "grp"))
             VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
@@ -978,7 +982,7 @@ test_links(hid_t fapl)
         if (linfo.type == H5L_TYPE_HARD) {
             ret = H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                       H5O_INFO_BASIC, H5P_DEFAULT);
-            CHECK(ret, FAIL, "H5Oget_info_by_idx");
+            CHECK(ret, FAIL, "H5Oget_info_by_idx3");
         } /* end if */
 
         if (!HDstrcmp(obj_name, "g1.1"))
@@ -988,7 +992,7 @@ test_links(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
@@ -1016,17 +1020,16 @@ test_links(hid_t fapl)
 static int
 find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_client_data)
 {
-    int status = H5_ITER_CONT;
+    int             status       = H5_ITER_CONT;
     searched_err_t *searched_err = (searched_err_t *)_client_data;
 
     if (searched_err == NULL)
         return H5_ITER_ERROR;
 
     /* If the searched error message is found, stop the iteration */
-    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0)
-    {
-        searched_err->found = true;
-        status = H5_ITER_STOP;
+    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
+        searched_err->found = TRUE;
+        status              = H5_ITER_STOP;
     }
 
     return status;
@@ -1041,20 +1044,30 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
 **
 **************************************************************************/
 #if 0
-static void test_corrupted_attnamelen(void)
+static void
+test_corrupted_attnamelen(void)
 {
-    hid_t          fid = -1;            /* File ID */
-    hid_t          did = -1;            /* Dataset ID */
-    searched_err_t err_caught;          /* Data to be passed to callback func */
-    int            err_status;          /* Status returned by H5Aiterate2 */
-    herr_t         ret;                 /* Return value */
-    const char *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
+    hid_t          fid = -1;   /* File ID */
+    hid_t          did = -1;   /* Dataset ID */
+    searched_err_t err_caught; /* Data to be passed to callback func */
+    int            err_status; /* Status returned by H5Aiterate2 */
+    herr_t         ret;        /* Return value */
+    hbool_t        driver_is_default_compatible;
+    const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
     const char *err_message = "attribute name has different length than stored length";
-                        /* the error message produced when the failure occurs */
+    /* the error message produced when the failure occurs */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
@@ -1069,18 +1082,17 @@ static void test_corrupted_attnamelen(void)
     VERIFY(err_status, FAIL, "H5Aiterate2");
 
     /* Make sure the intended error was caught */
-    if(err_status == -1)
-    {
+    if (err_status == -1) {
         /* Initialize client data */
         HDstrcpy(err_caught.message, err_message);
-        err_caught.found = false;
+        err_caught.found = FALSE;
 
         /* Look for the correct error message */
         ret = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, find_err_msg_cb, &err_caught);
         CHECK(ret, FAIL, "H5Ewalk2");
 
         /* Fail if the indicated message is not found */
-        CHECK(err_caught.found, false, "test_corrupted_attnamelen: Expected error not found");
+        CHECK(err_caught.found, FALSE, "test_corrupted_attnamelen: Expected error not found");
     }
 
     /* Close the dataset and file */
@@ -1091,6 +1103,92 @@ static void test_corrupted_attnamelen(void)
     CHECK(ret, FAIL, "H5Fclose");
 
 } /* test_corrupted_attnamelen() */
+#endif
+
+#if 0
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+/****************************************************************
+**
+**  test_links_deprec(): Test soft and hard link iteration
+**
+****************************************************************/
+static void
+test_links_deprec(hid_t fapl)
+{
+    hid_t      file;              /* File ID */
+    char       obj_name[NAMELEN]; /* Names of the object in group */
+    ssize_t    name_len;          /* Length of object's name */
+    hid_t      gid, gid1;
+    H5G_info_t ginfo; /* Buffer for querying object's info */
+    hsize_t    i;
+    herr_t     ret; /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Soft and Hard Link Iteration Functionality Using Deprecated Routines\n"));
+
+    /* Create the test file with the datasets */
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* create groups */
+    gid = H5Gcreate2(file, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    gid1 = H5Gcreate2(file, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gcreate2");
+
+    /* create soft and hard links to the group "/g1". */
+    ret = H5Lcreate_soft("something", gid, "softlink", H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_soft");
+
+    ret = H5Lcreate_hard(gid, "/g1", H5L_SAME_LOC, "hardlink", H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_hard");
+
+    ret = H5Gget_info(gid, &ginfo);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, 3, "H5Gget_info");
+
+    /* Test these two functions, H5Oget_info_by_idx and H5Lget_name_by_idx */
+    for (i = 0; i < ginfo.nlinks; i++) {
+        H5O_info2_t oinfo; /* Object info */
+        H5L_info2_t linfo; /* Link info */
+
+        /* Get link name */
+        name_len = H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, i, obj_name, (size_t)NAMELEN,
+                                      H5P_DEFAULT);
+        CHECK(name_len, FAIL, "H5Lget_name_by_idx");
+
+        /* Get link type */
+        ret = H5Lget_info_by_idx2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &linfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Lget_info_by_idx1");
+
+        /* Get object type */
+        if (linfo.type == H5L_TYPE_HARD) {
+            ret = H5Oget_info_by_idx3(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
+                                      H5O_INFO_BASIC, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Oget_info_by_idx");
+        } /* end if */
+
+        if (!HDstrcmp(obj_name, "g1.1"))
+            VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
+        else if (!HDstrcmp(obj_name, "hardlink"))
+            VERIFY(oinfo.type, H5O_TYPE_GROUP, "H5Lget_name_by_idx");
+        else if (!HDstrcmp(obj_name, "softlink"))
+            VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
+        else
+            ERROR("unknown object name");
+    } /* end for */
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* test_links_deprec() */
+#endif
 #endif
 
 /****************************************************************
@@ -1127,7 +1225,12 @@ test_iterate(void)
         test_iter_attr(new_format ? fapl2 : fapl, new_format); /* Test attribute iteration */
         test_grp_memb_funcs(new_format ? fapl2 : fapl);        /* Test group member information functions */
         test_links(new_format ? fapl2 : fapl);                 /* Test soft and hard link iteration */
-    }                                                          /* end for */
+#if 0
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        test_links_deprec(new_format ? fapl2 : fapl); /* Test soft and hard link iteration */
+#endif
+#endif
+    } /* end for */
 #if 0
     /* Test the fix for issue HDFFV-10588 */
     test_corrupted_attnamelen();

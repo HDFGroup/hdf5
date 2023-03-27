@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,6 +16,11 @@
 
 #include "hdf5.h"
 #include "testphdf5.h"
+
+#if 0
+#include "H5ACprivate.h"
+#include "H5Pprivate.h"
+#endif
 
 static int
 test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
@@ -69,14 +73,22 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
             HDfree(rbuf);
     } /* end if */
 
-    if (0 == mpi_rank)
+    if (0 == mpi_rank) {
+        /* gcc 11 complains about passing MPI_STATUSES_IGNORE as an MPI_Status
+         * array. See the discussion here:
+         *
+         * https://github.com/pmodels/mpich/issues/5687
+         */
+        /* H5_GCC_DIAG_OFF("stringop-overflow") */
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
+        /* H5_GCC_DIAG_ON("stringop-overflow") */
+    }
 
     if (NULL != sbuf)
         HDfree(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    return (0);
+    return 0;
 }
 
 void
@@ -98,10 +110,10 @@ test_plist_ed(void)
     int mpi_size, mpi_rank, recv_proc;
 
     hsize_t             chunk_size = 16384; /* chunk size */
-    double              fill       = 2.7f;  /* Fill value */
+    double              fill       = 2.7;   /* Fill value */
     size_t              nslots     = 521 * 2;
     size_t              nbytes     = 1048576 * 10;
-    double              w0         = 0.5f;
+    double              w0         = 0.5;
     unsigned            max_compact;
     unsigned            min_dense;
     hsize_t             max_size[1]; /*data space maximum size */
@@ -114,26 +126,26 @@ test_plist_ed(void)
                                            TRUE,
                                            FALSE,
                                            (2 * 2048 * 1024),
-                                           0.3f,
+                                           0.3,
                                            (64 * 1024 * 1024),
                                            (4 * 1024 * 1024),
                                            60000,
                                            H5C_incr__threshold,
-                                           0.8f,
-                                           3.0f,
+                                           0.8,
+                                           3.0,
                                            TRUE,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
-                                           2.0f,
-                                           0.25f,
+                                           2.0,
+                                           0.25,
                                            H5C_decr__age_out_with_threshold,
-                                           0.997f,
-                                           0.8f,
+                                           0.997,
+                                           0.8,
                                            TRUE,
                                            (3 * 1024 * 1024),
                                            3,
                                            FALSE,
-                                           0.2f,
+                                           0.2,
                                            (256 * 2048),
                                            1 /* H5AC__DEFAULT_METADATA_WRITE_STRATEGY */};
 
@@ -215,7 +227,7 @@ test_plist_ed(void)
     dxpl = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
-    ret = H5Pset_btree_ratios(dxpl, 0.2f, 0.6f, 0.2f);
+    ret = H5Pset_btree_ratios(dxpl, 0.2, 0.6, 0.2);
     VRFY((ret >= 0), "H5Pset_btree_ratios succeeded");
 
     ret = H5Pset_hyper_vector_size(dxpl, 5);
@@ -354,7 +366,7 @@ test_plist_ed(void)
     ret = H5Pset_alignment(fapl, 2, 1024);
     VRFY((ret >= 0), "H5Pset_alignment succeeded");
 
-    ret = H5Pset_cache(fapl, 1024, 128, 10485760, 0.3f);
+    ret = H5Pset_cache(fapl, 1024, 128, 10485760, 0.3);
     VRFY((ret >= 0), "H5Pset_cache succeeded");
 
     ret = H5Pset_elink_file_cache_size(fapl, 10485760);
@@ -441,3 +453,194 @@ test_plist_ed(void)
     ret = H5Pclose(acpl);
     VRFY((ret >= 0), "H5Pclose succeeded");
 }
+
+#if 0
+void
+external_links(void)
+{
+    hid_t lcpl  = H5I_INVALID_HID; /* link create prop. list */
+    hid_t lapl  = H5I_INVALID_HID; /* link access prop. list */
+    hid_t fapl  = H5I_INVALID_HID; /* file access prop. list */
+    hid_t gapl  = H5I_INVALID_HID; /* group access prop. list */
+    hid_t fid   = H5I_INVALID_HID; /* file id */
+    hid_t group = H5I_INVALID_HID; /* group id */
+    int   mpi_size, mpi_rank;
+
+    MPI_Comm comm;
+    int      doIO;
+    int      i, mrc;
+
+    herr_t ret;        /* Generic return value */
+    htri_t tri_status; /* tri return value */
+
+    const char *filename     = "HDF5test.h5";
+    const char *filename_ext = "HDF5test_ext.h5";
+    const char *group_path   = "/Base/Block/Step";
+    const char *link_name    = "link"; /* external link */
+    char        link_path[50];
+
+    if (VERBOSE_MED)
+        HDprintf("Check external links\n");
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* Check MPI communicator access properties are passed to
+       linked external files */
+
+    if (mpi_rank == 0) {
+
+        lcpl = H5Pcreate(H5P_LINK_CREATE);
+        VRFY((lcpl >= 0), "H5Pcreate succeeded");
+
+        ret = H5Pset_create_intermediate_group(lcpl, 1);
+        VRFY((ret >= 0), "H5Pset_create_intermediate_group succeeded");
+
+        /* Create file to serve as target for external link.*/
+        fid = H5Fcreate(filename_ext, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((fid >= 0), "H5Fcreate succeeded");
+
+        group = H5Gcreate2(fid, group_path, lcpl, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((group >= 0), "H5Gcreate succeeded");
+
+        ret = H5Gclose(group);
+        VRFY((ret >= 0), "H5Gclose succeeded");
+
+        ret = H5Fclose(fid);
+        VRFY((ret >= 0), "H5Fclose succeeded");
+
+        fapl = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((fapl >= 0), "H5Pcreate succeeded");
+
+        /* Create a new file using the file access property list. */
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+        VRFY((fid >= 0), "H5Fcreate succeeded");
+
+        ret = H5Pclose(fapl);
+        VRFY((ret >= 0), "H5Pclose succeeded");
+
+        group = H5Gcreate2(fid, group_path, lcpl, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((group >= 0), "H5Gcreate succeeded");
+
+        /* Create external links to the target files. */
+        ret = H5Lcreate_external(filename_ext, group_path, group, link_name, H5P_DEFAULT, H5P_DEFAULT);
+        VRFY((ret >= 0), "H5Lcreate_external succeeded");
+
+        /* Close and release resources. */
+        ret = H5Pclose(lcpl);
+        VRFY((ret >= 0), "H5Pclose succeeded");
+        ret = H5Gclose(group);
+        VRFY((ret >= 0), "H5Gclose succeeded");
+        ret = H5Fclose(fid);
+        VRFY((ret >= 0), "H5Fclose succeeded");
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /*
+     * For the first  case, use all the  processes. For the second case
+     * use  a sub-communicator  to verify  the  correct communicator is
+     * being used for the externally linked files.
+     * There is no way to determine if MPI info is being used for the
+     * externally linked files.
+     */
+
+    for (i = 0; i < 2; i++) {
+
+        comm = MPI_COMM_WORLD;
+
+        if (i == 0)
+            doIO = 1;
+        else {
+            doIO = mpi_rank % 2;
+            mrc  = MPI_Comm_split(MPI_COMM_WORLD, doIO, mpi_rank, &comm);
+            VRFY((mrc == MPI_SUCCESS), "");
+        }
+
+        if (doIO) {
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            VRFY((fapl >= 0), "H5Pcreate succeeded");
+            ret = H5Pset_fapl_mpio(fapl, comm, MPI_INFO_NULL);
+            VRFY((fapl >= 0), "H5Pset_fapl_mpio succeeded");
+
+            fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+            VRFY((fid >= 0), "H5Fopen succeeded");
+
+            /* test opening a group that is to an external link, the external linked
+               file should inherit the source file's access properties */
+            HDsnprintf(link_path, sizeof(link_path), "%s%s%s", group_path, "/", link_name);
+            group = H5Gopen2(fid, link_path, H5P_DEFAULT);
+            VRFY((group >= 0), "H5Gopen succeeded");
+            ret = H5Gclose(group);
+            VRFY((ret >= 0), "H5Gclose succeeded");
+
+            /* test opening a group that is external link by setting group
+               creation property */
+            gapl = H5Pcreate(H5P_GROUP_ACCESS);
+            VRFY((gapl >= 0), "H5Pcreate succeeded");
+
+            ret = H5Pset_elink_fapl(gapl, fapl);
+            VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
+
+            group = H5Gopen2(fid, link_path, gapl);
+            VRFY((group >= 0), "H5Gopen succeeded");
+
+            ret = H5Gclose(group);
+            VRFY((ret >= 0), "H5Gclose succeeded");
+
+            ret = H5Pclose(gapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            /* test link APIs */
+            lapl = H5Pcreate(H5P_LINK_ACCESS);
+            VRFY((lapl >= 0), "H5Pcreate succeeded");
+
+            ret = H5Pset_elink_fapl(lapl, fapl);
+            VRFY((ret >= 0), "H5Pset_elink_fapl succeeded");
+
+            tri_status = H5Lexists(fid, link_path, H5P_DEFAULT);
+            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+
+            tri_status = H5Lexists(fid, link_path, lapl);
+            VRFY((tri_status == TRUE), "H5Lexists succeeded");
+
+            group = H5Oopen(fid, link_path, H5P_DEFAULT);
+            VRFY((group >= 0), "H5Oopen succeeded");
+
+            ret = H5Oclose(group);
+            VRFY((ret >= 0), "H5Oclose succeeded");
+
+            group = H5Oopen(fid, link_path, lapl);
+            VRFY((group >= 0), "H5Oopen succeeded");
+
+            ret = H5Oclose(group);
+            VRFY((ret >= 0), "H5Oclose succeeded");
+
+            ret = H5Pclose(lapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            /* close the remaining resources */
+
+            ret = H5Pclose(fapl);
+            VRFY((ret >= 0), "H5Pclose succeeded");
+
+            ret = H5Fclose(fid);
+            VRFY((ret >= 0), "H5Fclose succeeded");
+        }
+
+        if (comm != MPI_COMM_WORLD) {
+            mrc = MPI_Comm_free(&comm);
+            VRFY((mrc == MPI_SUCCESS), "MPI_Comm_free succeeded");
+        }
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* delete the test files */
+    if (mpi_rank == 0) {
+        MPI_File_delete(filename, MPI_INFO_NULL);
+        MPI_File_delete(filename_ext, MPI_INFO_NULL);
+    }
+}
+#endif

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,8 +36,9 @@
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
 #define vrfy_macrosize(type, macro, macroname)                                                               \
-    if (sizeof(type) != macro)                                                                               \
-        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname, (int)macro);
+    if (sizeof(type) != (macro))                                                                             \
+        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname,             \
+                      (int)(macro));
 
 /* local routine prototypes */
 void test_config_ctypes(void);
@@ -113,30 +113,14 @@ test_config_ctypes(void)
     vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
-#if H5_SIZEOF_LONG_DOUBLE > 0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
-#endif
 
     /* standard C99 basic types */
-#if H5_SIZEOF_LONG_LONG > 0
     vrfy_cint_type(long long, unsigned long long, H5_SIZEOF_LONG_LONG);
-#endif
-
-#if H5_SIZEOF_INT8_T > 0
     vrfy_cint_type(int8_t, uint8_t, H5_SIZEOF_INT8_T);
-#endif
-
-#if H5_SIZEOF_INT16_T > 0
     vrfy_cint_type(int16_t, uint16_t, H5_SIZEOF_INT16_T);
-#endif
-
-#if H5_SIZEOF_INT32_T > 0
     vrfy_cint_type(int32_t, uint32_t, H5_SIZEOF_INT32_T);
-#endif
-
-#if H5_SIZEOF_INT64_T > 0
     vrfy_cint_type(int64_t, uint64_t, H5_SIZEOF_INT64_T);
-#endif
 
     /* Some vendors have different sizes for the signed and unsigned */
     /* fast8_t.  Need to check them individually. */
@@ -174,11 +158,6 @@ test_config_ctypes(void)
 
 #if H5_SIZEOF_INT_LEAST64_T > 0
     vrfy_cint_type(int_least64_t, uint_least64_t, H5_SIZEOF_INT_LEAST64_T);
-#endif
-
-    /* pseudo standard basic types */
-#if H5_SIZEOF___INT64 > 0
-    vrfy_cint_type(__int64, unsigned __int64, H5_SIZEOF___INT64);
 #endif
 
 #if H5_SIZEOF_OFF_T > 0

@@ -2,6 +2,10 @@
 #include "hdf5.h"
 #include "testphdf5.h"
 
+#if 0
+#include "H5Dprivate.h" /* For Chunk tests */
+#endif
+
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NULL};
 
@@ -25,8 +29,7 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 #define DATASET4             "DSET4"
 #define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT       (1 < 29)
-#define LARGE_DIM            805306368
+#define DXFER_BIGCOUNT       (1 << 29)
 
 #define HYPER 1
 #define POINT 2
@@ -37,7 +40,7 @@ typedef hsize_t B_DATATYPE;
 
 int        facc_type       = FACC_MPIO; /*Test file access type */
 int        dxfer_coll_type = DXFER_COLLECTIVE_IO;
-size_t     bigcount        = (size_t)1310720;
+size_t     bigcount        = (size_t) /* DXFER_BIGCOUNT */ 1310720;
 int        nerrors         = 0;
 static int mpi_size_g, mpi_rank_g;
 
@@ -1108,13 +1111,14 @@ single_rank_independent_io(void)
         HDprintf("single_rank_independent_io\n");
 
     if (MAIN_PROCESS) {
-        hsize_t dims[]    = {LARGE_DIM};
-        hid_t   file_id   = -1;
-        hid_t   fapl_id   = -1;
-        hid_t   dset_id   = -1;
-        hid_t   fspace_id = -1;
-        hid_t   mspace_id = -1;
-        void   *data      = NULL;
+        hsize_t  dims[1];
+        hid_t    file_id   = -1;
+        hid_t    fapl_id   = -1;
+        hid_t    dset_id   = -1;
+        hid_t    fspace_id = -1;
+        herr_t   ret;
+        int     *data = NULL;
+        uint64_t i;
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         VRFY_G((fapl_id >= 0), "H5P_FILE_ACCESS");
@@ -1122,6 +1126,12 @@ single_rank_independent_io(void)
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
         file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         VRFY_G((file_id >= 0), "H5Dcreate2 succeeded");
+
+        /*
+         * Calculate the number of elements needed to exceed
+         * MPI's INT_MAX limitation
+         */
+        dims[0] = (INT_MAX / sizeof(int)) + 10;
 
         fspace_id = H5Screate_simple(1, dims, NULL);
         VRFY_G((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
@@ -1134,20 +1144,31 @@ single_rank_independent_io(void)
 
         VRFY_G((dset_id >= 0), "H5Dcreate2 succeeded");
 
-        data = malloc(LARGE_DIM * sizeof(int));
+        data = malloc(dims[0] * sizeof(int));
 
-        if (mpi_rank_g == 0)
-            H5Sselect_all(fspace_id);
-        else
-            H5Sselect_none(fspace_id);
+        /* Initialize data */
+        for (i = 0; i < dims[0]; i++)
+            data[i] = (int)(i % (uint64_t)DXFER_BIGCOUNT);
 
-        dims[0]   = LARGE_DIM;
-        mspace_id = H5Screate_simple(1, dims, NULL);
-        VRFY_G((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
-        H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        /* Write data */
+        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
+        VRFY_G((ret >= 0), "H5Dwrite succeeded");
+
+        /* Wipe buffer */
+        HDmemset(data, 0, dims[0] * sizeof(int));
+
+        /* Read data back */
+        ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
+        VRFY_G((ret >= 0), "H5Dread succeeded");
+
+        /* Verify data */
+        for (i = 0; i < dims[0]; i++)
+            if (data[i] != (int)(i % (uint64_t)DXFER_BIGCOUNT)) {
+                HDfprintf(stderr, "verify failed\n");
+                exit(1);
+            }
 
         free(data);
-        H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
         H5Fclose(file_id);
@@ -1225,13 +1246,11 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  * Programmer:    Unknown
  *        July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Descriptions for the selection: One big singular selection inside one chunk
  *  Two dimensions,
  *
  *  dim1       = space_dim1(5760)*mpi_size
@@ -1331,13 +1350,11 @@ coll_chunk2(void)
  * Programmer:    Unknown
  *        July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = space_dim1*mpi_size
@@ -1387,16 +1404,8 @@ coll_chunk3(void)
  *
  *        Failure:    -1
  *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
  * Programmer:    Unknown
  *        July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1413,6 +1422,10 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     int    *data_origin1 = NULL;
 
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    unsigned prop_value;
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     herr_t   status;
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -1585,9 +1598,108 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
         default:;
     }
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    if (facc_type == FACC_MPIO) {
+        switch (api_option) {
+            case API_LINK_HARD:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, H5D_XFER_COLL_CHUNK_SIZE,
+                                    &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            case API_MULTI_HARD:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, H5D_XFER_COLL_CHUNK_SIZE,
+                                    &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            case API_LINK_TRUE:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status =
+                    H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, H5D_XFER_COLL_CHUNK_SIZE,
+                               &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            case API_LINK_FALSE:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status =
+                    H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, H5D_XFER_COLL_CHUNK_SIZE,
+                               &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            case API_MULTI_COLL:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status =
+                    H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,
+                               H5D_XFER_COLL_CHUNK_SIZE, &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            case API_MULTI_IND:
+                prop_value = H5D_XFER_COLL_CHUNK_DEF;
+                status =
+                    H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, H5D_XFER_COLL_CHUNK_SIZE,
+                               &prop_value, NULL, NULL, NULL, NULL, NULL, NULL);
+                VRFY_G((status >= 0), "testing property list inserted succeeded");
+                break;
+
+            default:;
+        }
+    }
+#endif
+
     /* write data collectively */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_dataspace, file_dataspace, xfer_plist, data_array1);
     VRFY_G((status >= 0), "dataset write succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    if (facc_type == FACC_MPIO) {
+        switch (api_option) {
+            case API_LINK_HARD:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0), "API to set LINK COLLECTIVE IO directly succeeded");
+                break;
+
+            case API_MULTI_HARD:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0), "API to set MULTI-CHUNK COLLECTIVE IO optimization succeeded");
+                break;
+
+            case API_LINK_TRUE:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0), "API to set LINK COLLECTIVE IO succeeded");
+                break;
+
+            case API_LINK_FALSE:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0), "API to set LINK IO transferring to multi-chunk IO succeeded");
+                break;
+
+            case API_MULTI_COLL:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0), "API to set MULTI-CHUNK COLLECTIVE IO with optimization succeeded");
+                break;
+
+            case API_MULTI_IND:
+                status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, &prop_value);
+                VRFY_G((status >= 0), "testing property list get succeeded");
+                VRFY_G((prop_value == 0),
+                       "API to set MULTI-CHUNK IO transferring to independent IO  succeeded");
+                break;
+
+            default:;
+        }
+    }
+#endif
 
     status = H5Dclose(dataset);
     VRFY_G((status >= 0), "");
@@ -1747,8 +1859,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
 int
 main(int argc, char **argv)
 {
-    int   ExpressMode = 0;
-    hid_t acc_plist   = H5I_INVALID_HID;
+    hid_t acc_plist = H5I_INVALID_HID;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
@@ -1759,9 +1870,11 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
-    };
+
+    /* set alarm. */
+    /* TestAlarmOn(); */
 
     acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
 
@@ -1793,21 +1906,32 @@ main(int argc, char **argv)
     dataset_big_read();
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (ExpressMode > 0) {
-        if (mpi_rank_g == 0)
-            HDprintf("***Express test mode on.  Several tests are skipped\n");
-    }
-    else {
-        coll_chunk1();
-        MPI_Barrier(MPI_COMM_WORLD);
-        coll_chunk2();
-        MPI_Barrier(MPI_COMM_WORLD);
-        coll_chunk3();
-        MPI_Barrier(MPI_COMM_WORLD);
-        single_rank_independent_io();
-    }
+    coll_chunk1();
+    MPI_Barrier(MPI_COMM_WORLD);
+    coll_chunk2();
+    MPI_Barrier(MPI_COMM_WORLD);
+    coll_chunk3();
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    H5Fdelete(FILENAME[0], acc_plist);
+    single_rank_independent_io();
+
+    /* turn off alarm */
+    /* TestAlarmOff(); */
+
+    if (mpi_rank_g == 0) {
+        hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME[0], fapl_id);
+            H5Fdelete(FILENAME[1], fapl_id);
+        }
+        H5E_END_TRY;
+
+        H5Pclose(fapl_id);
+    }
 
     H5Pclose(acc_plist);
 

@@ -5,13 +5,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
-   This program will test independant and collective reads and writes between
+   This program will test independent and collective reads and writes between
    selections of different rank that non-the-less are deemed as having the
    same shape by H5Sselect_shape_same().
  */
@@ -20,6 +20,10 @@
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5S_TESTING
+
+#if 0
+#include "H5Spkg.h" /* Dataspaces                           */
+#endif
 
 #include "hdf5.h"
 #include "testphdf5.h"
@@ -363,14 +367,9 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
          *
          *                                         JRM -- 9/16/10
          */
-        if (express_test == 0) {
 
-            tv_ptr->chunk_dims[0] = 1;
-        }
-        else {
+        tv_ptr->chunk_dims[0] = 1;
 
-            tv_ptr->chunk_dims[0] = 1;
-        }
         tv_ptr->chunk_dims[1] = tv_ptr->chunk_dims[2] = tv_ptr->chunk_dims[3] = tv_ptr->chunk_dims[4] =
             (hsize_t)(tv_ptr->chunk_edge_size);
 
@@ -431,11 +430,11 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     /* setup selections for writing initial data to the small data set */
     ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) succeeded");
 
     if (MAINPROCESS) { /* add an additional slice to the selections */
 
@@ -443,11 +442,11 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
         ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_OR, tv_ptr->start, tv_ptr->stride,
                                   tv_ptr->count, tv_ptr->block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, or) succeeded");
 
         ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_OR, tv_ptr->start, tv_ptr->stride,
                                   tv_ptr->count, tv_ptr->block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, or) succeeded");
     }
 
     /* write the initial value of the small data set to file */
@@ -491,21 +490,21 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->file_large_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) succeeded");
 
     /* In passing, setup the process slice dataspaces as well */
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_process_slice_sid, H5S_SELECT_SET, tv_ptr->start,
                               tv_ptr->stride, tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_process_slice_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_process_slice_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->file_large_ds_process_slice_sid, H5S_SELECT_SET, tv_ptr->start,
                               tv_ptr->stride, tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_process_slice_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_process_slice_sid, set) succeeded");
 
     if (MAINPROCESS) { /* add an additional slice to the selections */
 
@@ -513,11 +512,11 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
 
         ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_sid, H5S_SELECT_OR, tv_ptr->start, tv_ptr->stride,
                                   tv_ptr->count, tv_ptr->block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(mem_large_ds_sid, or) succeeded");
 
         ret = H5Sselect_hyperslab(tv_ptr->file_large_ds_sid_0, H5S_SELECT_OR, tv_ptr->start, tv_ptr->stride,
                                   tv_ptr->count, tv_ptr->block);
-        VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, or) suceeded");
+        VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, or) succeeded");
     }
 
     /* write the initial value of the large data set to file */
@@ -752,7 +751,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      * of the large data set.  However, in the parallel version, each
      * process only works with that slice of the large cube indicated
      * by its rank -- hence we set the most slowly changing index to
-     * mpi_rank, and don't itterate over it.
+     * mpi_rank, and don't iterate over it.
      */
 
     if (PAR_SS_DR_MAX_RANK - tv_ptr->large_rank == 0) {
@@ -950,7 +949,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
     ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) succeeded");
 
 #if CONTIG_HS_DR_PIO_TEST__D2M_S2L__DEBUG
     HDfprintf(stdout, "%s reading slices of on disk small data set into slices of big data set.\n", fcnName);
@@ -982,7 +981,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -1203,11 +1202,11 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
     ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to read slices of the large cube.
@@ -1239,7 +1238,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -1481,7 +1480,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     /* set up start, stride, count, and block -- note that we will
      * change start[] so as to write slices of the small data set to
@@ -1591,7 +1590,7 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     ret = H5Dwrite(tv_ptr->large_dataset, H5T_NATIVE_UINT32, tv_ptr->large_ds_slice_sid,
                                    tv_ptr->file_large_ds_process_slice_sid, tv_ptr->xfer_plist,
                                    tv_ptr->large_ds_buf_2);
-                    VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
+                    VRFY((ret != FAIL), "H5Dwrite() to zero large ds succeeded");
 
                     /* select the portion of the in memory large cube to which we
                      * are going to write data.
@@ -2037,8 +2036,8 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 **    edge_size, and a checker_edge_size, select a checker
 **    board selection of a sel_rank (sel_rank < tgt_rank)
 **    dimensional slice through the dataspace parallel to the
-**      sel_rank fastest changing indicies, with origin (in the
-**    higher indicies) as indicated by the start array.
+**      sel_rank fastest changing indices, with origin (in the
+**    higher indices) as indicated by the start array.
 **
 **    Note that this function, like all its relatives, is
 **    hard coded to presume a maximum dataspace rank of 5.
@@ -2347,7 +2346,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 **    or writing a checker board selection of an m (1 <= m <
 **      rank) dimensional slice through this processes slice
 **    of the target data set.  Also, this slice must be parallel
-**    to the fastest changing indicies.
+**    to the fastest changing indices.
 **
 **    It is further presumed that the buffer was zeroed before
 **    the read/write, and that the full target data set (i.e.
@@ -2382,7 +2381,7 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
 **    of the buffer resides either at the origin of either
 **    a selected or an unselected checker.  (Translation:
 **    if partial checkers appear in the buffer, they will
-**    intersect the edges of the n-cube oposite the origin.)
+**    intersect the edges of the n-cube opposite the origin.)
 **
 ****************************************************************/
 
@@ -2632,7 +2631,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      * of the large data set.  However, in the parallel version, each
      * process only works with that slice of the large cube indicated
      * by its rank -- hence we set the most slowly changing index to
-     * mpi_rank, and don't itterate over it.
+     * mpi_rank, and don't iterate over it.
      */
 
     if (PAR_SS_DR_MAX_RANK - tv_ptr->large_rank == 0) {
@@ -2855,7 +2854,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -3122,11 +3121,11 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
     ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_small_ds_sid_0, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     sel_start[0] = sel_start[1] = sel_start[2] = sel_start[3] = sel_start[4] = 0;
     sel_start[tv_ptr->small_ds_offset]                                       = (hsize_t)(tv_ptr->mpi_rank);
@@ -3167,7 +3166,7 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -3416,11 +3415,11 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
 
     ret = H5Sselect_hyperslab(tv_ptr->file_large_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(file_large_ds_sid_0, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->mem_large_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(tv_ptr->mem_large_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(tv_ptr->mem_large_ds_sid, set) succeeded");
 
     /* setup a checkerboard selection of the slice of the in memory small
      * data set associated with the process's mpi rank.
@@ -3528,7 +3527,7 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      */
                     ret = H5Dwrite(tv_ptr->large_dataset, H5T_NATIVE_UINT32, tv_ptr->mem_large_ds_sid,
                                    tv_ptr->file_large_ds_sid_0, tv_ptr->xfer_plist, tv_ptr->large_ds_buf_2);
-                    VRFY((ret != FAIL), "H5Dwrite() to zero large ds suceeded");
+                    VRFY((ret != FAIL), "H5Dwrite() to zero large ds succeeded");
 
                     /* select the portion of the in memory large cube to which we
                      * are going to write data.
@@ -4182,12 +4181,11 @@ parse_options(int argc, char **argv)
         for (i = 0; i < n; i++)
             strncpy(filenames[i], FILENAME[i], PATH_MAX);
 #if 0 /* no support for VFDs right now */
-        if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
-        == NULL){
-        HDprintf("h5_fixname failed\n");
-        nerrors++;
-        return(1);
-        }
+            if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
+                HDprintf("h5_fixname failed\n");
+                nerrors++;
+                return (1);
+            }
 #endif
         if (MAINPROCESS) {
             HDprintf("Test filenames are:\n");
@@ -4252,42 +4250,42 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
     return (ret_pl);
 }
 
-/* Shape Same test using contigous hyperslab using independent IO on contigous datasets */
+/* Shape Same test using contiguous hyperslab using independent IO on contiguous datasets */
 static void
 sscontig1(void)
 {
     contig_hs_dr_pio_test(IND_CONTIG);
 }
 
-/* Shape Same test using contigous hyperslab using collective IO on contigous datasets */
+/* Shape Same test using contiguous hyperslab using collective IO on contiguous datasets */
 static void
 sscontig2(void)
 {
     contig_hs_dr_pio_test(COL_CONTIG);
 }
 
-/* Shape Same test using contigous hyperslab using independent IO on chunked datasets */
+/* Shape Same test using contiguous hyperslab using independent IO on chunked datasets */
 static void
 sscontig3(void)
 {
     contig_hs_dr_pio_test(IND_CHUNKED);
 }
 
-/* Shape Same test using contigous hyperslab using collective IO on chunked datasets */
+/* Shape Same test using contiguous hyperslab using collective IO on chunked datasets */
 static void
 sscontig4(void)
 {
     contig_hs_dr_pio_test(COL_CHUNKED);
 }
 
-/* Shape Same test using checker hyperslab using independent IO on contigous datasets */
+/* Shape Same test using checker hyperslab using independent IO on contiguous datasets */
 static void
 sschecker1(void)
 {
     ckrbrd_hs_dr_pio_test(IND_CONTIG);
 }
 
-/* Shape Same test using checker hyperslab using collective IO on contigous datasets */
+/* Shape Same test using checker hyperslab using collective IO on contiguous datasets */
 static void
 sschecker2(void)
 {
@@ -4343,6 +4341,7 @@ main(int argc, char **argv)
             HDprintf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
     };
     H5open();
+    /* h5_show_hostname(); */
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
@@ -4366,7 +4365,15 @@ main(int argc, char **argv)
         return 0;
     }
 
-    /* h5_show_hostname(); */
+#if 0
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+#endif
 
     /* Initialize testing framework */
     /* TestInit(argv[0], usage, parse_options); */
@@ -4489,6 +4496,13 @@ main(int argc, char **argv)
             HDprintf("Shape Same tests finished successfully\n");
         HDprintf("===================================\n");
     }
+
+#if 0
+    for (int i = 0; i < NFILENAME; i++) {
+        HDfree(filenames[i]);
+        filenames[i] = NULL;
+    }
+#endif
 
     /* close HDF5 library */
     H5close();

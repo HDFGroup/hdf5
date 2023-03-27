@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -241,11 +240,10 @@ parse_options(int argc, char **argv)
         for (i = 0; i < n; i++)
             strncpy(filenames[i], FILENAME[i], PATH_MAX);
 #if 0 /* no support for VFDs right now */
-            if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
-                    == NULL){
+            if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
                 HDprintf("h5_fixname failed\n");
                 nerrors++;
-                return(1);
+                return (1);
             }
 #endif
         if (MAINPROCESS) {
@@ -352,6 +350,17 @@ main(int argc, char **argv)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
+    /* h5_show_hostname(); */
+
+#if 0
+    HDmemset(filenames, 0, sizeof(filenames));
+    for (int i = 0; i < NFILENAME; i++) {
+        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+            HDprintf("couldn't allocate filename array\n");
+            MPI_Abort(MPI_COMM_WORLD, -1);
+        }
+    }
+#endif
 
     /* Set up file access property list with parallel I/O access */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -362,8 +371,6 @@ main(int argc, char **argv)
     /* Get the capability flag of the VOL connector being used */
     ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags);
     VRFY((ret >= 0), "H5Pget_vol_cap_flags succeeded");
-
-    /* h5_show_hostname(); */
 
     /* Initialize testing framework */
     /* TestInit(argv[0], usage, parse_options); */
@@ -979,6 +986,13 @@ main(int argc, char **argv)
             HDprintf("PHDF5 tests finished successfully\n");
         HDprintf("===================================\n");
     }
+
+#if 0
+    for (int i = 0; i < NFILENAME; i++) {
+        HDfree(filenames[i]);
+        filenames[i] = NULL;
+    }
+#endif
 
     /* close HDF5 library */
     H5close();

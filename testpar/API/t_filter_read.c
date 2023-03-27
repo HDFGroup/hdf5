@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -170,7 +169,7 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
         VRFY(hrc >= 0, "H5Dwrite");
 #if 0
         *dset_size = H5Dget_storage_size(dataset);
-        VRFY(*dset_size>0, "H5Dget_storage_size");
+        VRFY(*dset_size > 0, "H5Dget_storage_size");
 #endif
 
         hrc = H5Dclose(dataset);
@@ -222,8 +221,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     }
 #if 0
     /* Get the storage size of the dataset */
-    *dset_size=H5Dget_storage_size(dataset);
-    VRFY(*dset_size!=0, "H5Dget_storage_size");
+    *dset_size = H5Dget_storage_size(dataset);
+    VRFY(*dset_size != 0, "H5Dget_storage_size");
 #endif
 
     /* Clean up objects used for this test */
@@ -268,7 +267,7 @@ test_filter_read(void)
     hid_t         dc;                                       /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2}; /* Chunk dimensions */
 #if 0
-    hsize_t     null_size;          /* Size of dataset without filters */
+    hsize_t       null_size;                                /* Size of dataset without filters */
 #endif
     unsigned    chunk_opts;                    /* Chunk options */
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
@@ -289,7 +288,7 @@ test_filter_read(void)
 #endif /* H5_HAVE_FILTER_SZIP */
 
 #if 0
-    hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
+    hsize_t shuffle_size; /* Size of dataset with shuffle filter */
 #endif
 
 #if (defined H5_HAVE_FILTER_DEFLATE || defined H5_HAVE_FILTER_SZIP)
@@ -447,7 +446,7 @@ test_filter_read(void)
 
     filter_read_internal(filename, dc, /* &shuffle_size */ NULL);
 #if 0
-    VRFY(shuffle_size==null_size,"Shuffled size not the same as uncompressed size.");
+    VRFY(shuffle_size == null_size, "Shuffled size not the same as uncompressed size.");
 #endif
 
     /* Clean up objects used for this test */

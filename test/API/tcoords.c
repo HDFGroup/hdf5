@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,7 +16,7 @@
  *
  * Test the element coordinates for dataspace selection.  For
  * chunked dataset, when the hyperslab selection of some
- * dimensions is full, the library optimize it by "flattenning"
+ * dimensions is full, the library optimize it by "flattening"
  * the fully selected dimensions.  This program tests if the
  * coordinates of selected elements are correctly calculated.
  *
@@ -87,10 +86,10 @@ test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    memset(dset_name, 0, (size_t)NAME_LEN);
-    strcat(dset_name, SINGLE_END_DSET);
+    HDmemset(dset_name, 0, (size_t)NAME_LEN);
+    HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     did = H5Dcreate2(file, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, plid, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
@@ -259,10 +258,10 @@ test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     hsize_t mem3_block[4]  = {1, 3, 6, 1};
 
     /* Construct dataset's name */
-    memset(dset_name, 0, NAME_LEN);
-    strcat(dset_name, SINGLE_END_DSET);
+    HDmemset(dset_name, 0, NAME_LEN);
+    HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     /* Dataspace for the dataset in file */
     sid = H5Screate_simple(4, da_dims, da_dims);
@@ -380,10 +379,14 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     int     i, j, k, l, m, n, p;
     hsize_t da_dims[8]      = {4, 5, 3, 4, 2, 3, 6, 2};
     hsize_t da_chunksize[8] = {1, 5, 3, 2, 2, 3, 3, 2};
-    int     data_buf[4][5][3][4][2][3][6][2];
+    struct {
+        int arr[4][5][3][4][2][3][6][2];
+    } *data_buf = NULL;
 
     /* For testing the full selections in the fastest-growing end and in the middle dimensions */
-    int     mem1_buffer[1][1][1][4][2][1][6][2];
+    struct {
+        int arr[1][1][1][4][2][1][6][2];
+    } *mem1_buffer         = NULL;
     hsize_t mem1_dims[8]   = {1, 1, 1, 4, 2, 1, 6, 2};
     hsize_t mem1_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem1_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -391,7 +394,9 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     hsize_t mem1_block[8]  = {1, 1, 1, 4, 2, 1, 6, 2};
 
     /* For testing the full selections in the slowest-growing end and in the middle dimensions */
-    int     mem2_buffer[4][5][1][4][2][1][1][1];
+    struct {
+        int arr[4][5][1][4][2][1][1][1];
+    } *mem2_buffer         = NULL;
     hsize_t mem2_dims[8]   = {4, 5, 1, 4, 2, 1, 1, 1};
     hsize_t mem2_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem2_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -399,7 +404,9 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     hsize_t mem2_block[8]  = {4, 5, 1, 4, 2, 1, 1, 1};
 
     /* For testing two unadjacent full selections in the middle dimensions */
-    int     mem3_buffer[1][5][3][1][1][3][6][1];
+    struct {
+        int arr[1][5][3][1][1][3][6][1];
+    } *mem3_buffer         = NULL;
     hsize_t mem3_dims[8]   = {1, 5, 3, 1, 1, 3, 6, 1};
     hsize_t mem3_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem3_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -407,7 +414,9 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     hsize_t mem3_block[8]  = {1, 5, 3, 1, 1, 3, 6, 1};
 
     /* For testing the full selections in the fastest-growing end and the slowest-growing end */
-    int     mem4_buffer[4][5][1][1][1][1][6][2];
+    struct {
+        int arr[4][5][1][1][1][1][6][2];
+    } *mem4_buffer         = NULL;
     hsize_t mem4_dims[8]   = {4, 5, 1, 1, 1, 1, 6, 2};
     hsize_t mem4_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem4_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -416,12 +425,28 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
 
     /* For testing the full selections in the fastest-growing end and slowest-growing end,
      * also in the middle dimensions */
-    int     mem5_buffer[4][5][1][4][2][1][6][2];
+    struct {
+        int arr[4][5][1][4][2][1][6][2];
+    } *mem5_buffer         = NULL;
     hsize_t mem5_dims[8]   = {4, 5, 1, 4, 2, 1, 6, 2};
     hsize_t mem5_start[8]  = {0, 0, 0, 0, 0, 0, 0, 0};
     hsize_t mem5_count[8]  = {1, 1, 1, 1, 1, 1, 1, 1};
     hsize_t mem5_stride[8] = {1, 1, 1, 1, 1, 1, 1, 1};
     hsize_t mem5_block[8]  = {4, 5, 1, 4, 2, 1, 6, 2};
+
+    /* Initialize dynamic arrays */
+    data_buf = HDcalloc(1, sizeof(*data_buf));
+    CHECK_PTR(data_buf, "HDcalloc");
+    mem1_buffer = HDcalloc(1, sizeof(*mem1_buffer));
+    CHECK_PTR(data_buf, "HDcalloc");
+    mem2_buffer = HDcalloc(1, sizeof(*mem2_buffer));
+    CHECK_PTR(data_buf, "HDcalloc");
+    mem3_buffer = HDcalloc(1, sizeof(*mem3_buffer));
+    CHECK_PTR(data_buf, "HDcalloc");
+    mem4_buffer = HDcalloc(1, sizeof(*mem4_buffer));
+    CHECK_PTR(data_buf, "HDcalloc");
+    mem5_buffer = HDcalloc(1, sizeof(*mem5_buffer));
+    CHECK_PTR(data_buf, "HDcalloc");
 
     /* Create and write the dataset */
     sid = H5Screate_simple(8, da_dims, da_dims);
@@ -436,10 +461,10 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    memset(dset_name, 0, NAME_LEN);
-    strcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
+    HDmemset(dset_name, 0, NAME_LEN);
+    HDstrcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     did = H5Dcreate2(file, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, plid, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
@@ -451,10 +476,10 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
                     for (m = 0; m < 2; m++)
                         for (n = 0; n < 3; n++)
                             for (p = 0; p < 6; p++) {
-                                data_buf[i][j][k][l][m][n][p][0] =
+                                data_buf->arr[i][j][k][l][m][n][p][0] =
                                     i * 1000000 + j * 100000 + k * 10000 + l * 1000 + m * 100 + n * 10 + p;
-                                data_buf[i][j][k][l][m][n][p][1] = i * 1000000 + j * 100000 + k * 10000 +
-                                                                   l * 1000 + m * 100 + n * 10 + p + 1;
+                                data_buf->arr[i][j][k][l][m][n][p][1] = i * 1000000 + j * 100000 + k * 10000 +
+                                                                        l * 1000 + m * 100 + n * 10 + p + 1;
                             }
 
     ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data_buf);
@@ -491,7 +516,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
         for (j = 0; j < 2; j++)
             for (k = 0; k < 6; k++)
                 for (l = 0; l < 2; l++)
-                    if (data_buf[0][0][0][i][j][0][k][l] != mem1_buffer[0][0][0][i][j][0][k][l]) {
+                    if (data_buf->arr[0][0][0][i][j][0][k][l] != mem1_buffer->arr[0][0][0][i][j][0][k][l]) {
                         TestErrPrintf("%u: Read different values than written at index 0,0,0,%d,%d,0,%d,%d\n",
                                       __LINE__, i, j, k, l);
                     }
@@ -524,7 +549,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
         for (j = 0; j < 5; j++)
             for (k = 0; k < 4; k++)
                 for (l = 0; l < 2; l++)
-                    if (data_buf[i][j][0][k][l][0][0][0] != mem2_buffer[i][j][0][k][l][0][0][0]) {
+                    if (data_buf->arr[i][j][0][k][l][0][0][0] != mem2_buffer->arr[i][j][0][k][l][0][0][0]) {
                         TestErrPrintf("%u: Read different values than written at index %d,%d,0,%d,%d,0,0,0\n",
                                       __LINE__, i, j, k, l);
                     }
@@ -557,7 +582,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
         for (j = 0; j < 3; j++)
             for (k = 0; k < 3; k++)
                 for (l = 0; l < 6; l++)
-                    if (data_buf[0][i][j][0][0][k][l][0] != mem3_buffer[0][i][j][0][0][k][l][0]) {
+                    if (data_buf->arr[0][i][j][0][0][k][l][0] != mem3_buffer->arr[0][i][j][0][0][k][l][0]) {
                         TestErrPrintf("%u: Read different values than written at index 0,%d,%d,0,0,%d,%d,0\n",
                                       __LINE__, i, j, k, l);
                     }
@@ -590,7 +615,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
         for (j = 0; j < 5; j++)
             for (k = 0; k < 6; k++)
                 for (l = 0; l < 2; l++)
-                    if (data_buf[i][j][0][0][0][0][k][l] != mem4_buffer[i][j][0][0][0][0][k][l]) {
+                    if (data_buf->arr[i][j][0][0][0][0][k][l] != mem4_buffer->arr[i][j][0][0][0][0][k][l]) {
                         TestErrPrintf("%u: Read different values than written at index %d,%d,0,0,0,0,%d,%d\n",
                                       __LINE__, i, j, k, l);
                     }
@@ -626,7 +651,8 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
                 for (l = 0; l < 2; l++)
                     for (m = 0; m < 6; m++)
                         for (n = 0; n < 2; n++)
-                            if (data_buf[i][j][0][k][l][0][m][n] != mem5_buffer[i][j][0][k][l][0][m][n]) {
+                            if (data_buf->arr[i][j][0][k][l][0][m][n] !=
+                                mem5_buffer->arr[i][j][0][k][l][0][m][n]) {
                                 TestErrPrintf(
                                     "%u: Read different values than written at index %d,%d,0,%d,%d,0,%d,%d\n",
                                     __LINE__, i, j, k, l, m, n);
@@ -637,6 +663,13 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
 
     ret = H5Pclose(plid);
     CHECK(ret, FAIL, "H5Pclose");
+
+    HDfree(data_buf);
+    HDfree(mem1_buffer);
+    HDfree(mem2_buffer);
+    HDfree(mem3_buffer);
+    HDfree(mem4_buffer);
+    HDfree(mem5_buffer);
 }
 
 /****************************************************************
@@ -651,9 +684,6 @@ test_coords(void)
     hbool_t is_chunk[2] = {TRUE, FALSE};
     int     i;
     herr_t  ret; /* Generic error return */
-
-    /* Output message about test being performed */
-    MESSAGE(5, ("Testing Dataspace Coordinates\n"));
 
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");

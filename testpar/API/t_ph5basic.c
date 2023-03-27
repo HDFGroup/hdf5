@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -57,7 +56,7 @@ test_fapl_mpio_dup(void)
         HDprintf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
-     * Use MPI_Comm_split because it is simplier than MPI_Comm_create
+     * Use MPI_Comm_split because it is simpler than MPI_Comm_create
      */
     mrc = MPI_Comm_split(MPI_COMM_WORLD, 0, 0, &comm);
     VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");
@@ -146,7 +145,7 @@ test_fapl_mpio_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio neither");
 
     /* now get both and check validity too. */
-    /* Donot free the returned objects which are used in the next case. */
+    /* Do not free the returned objects which are used in the next case. */
     ret = H5Pget_fapl_mpio(acc_pl, &comm_tmp, &info_tmp);
     VRFY((ret >= 0), "H5Pget_fapl_mpio");
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,7 +54,7 @@ char prop3_def[10] = "Ten chars"; /* Property 3 default value */
 #define PROP3_DEF_VALUE (&prop3_def)
 
 #define PROP4_NAME "Property 4"
-double prop4_def = 1.41F; /* Property 4 default value */
+double prop4_def = 1.41; /* Property 4 default value */
 #define PROP4_SIZE      sizeof(prop4_def)
 #define PROP4_DEF_VALUE (&prop4_def)
 
@@ -107,7 +106,7 @@ test_genprop_basic_class(void)
     ret = H5Pequal(cid2, H5P_ROOT);
     VERIFY(ret, 1, "H5Pequal");
 
-    /* Make certain false postives aren't being returned */
+    /* Make certain false positives aren't being returned */
     ret = H5Pequal(cid2, H5P_FILE_CREATE);
     VERIFY(ret, 0, "H5Pequal");
 
@@ -185,7 +184,7 @@ test_genprop_basic_class_prop(void)
     CHECK_I(ret, "H5Pget_nprops");
     VERIFY(nprops, 0, "H5Pget_nprops");
 
-    /* Check the existance of the first property (should fail) */
+    /* Check the existence of the first property (should fail) */
     ret = H5Pexist(cid1, PROP1_NAME);
     VERIFY(ret, 0, "H5Pexist");
 
@@ -196,12 +195,14 @@ test_genprop_basic_class_prop(void)
 
     /* Try to insert the first property again (should fail) */
     H5E_BEGIN_TRY
-    ret =
-        H5Pregister2(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    {
+        ret = H5Pregister2(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pregister2");
 
-    /* Check the existance of the first property */
+    /* Check the existence of the first property */
     ret = H5Pexist(cid1, PROP1_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -222,12 +223,14 @@ test_genprop_basic_class_prop(void)
 
     /* Try to insert the second property again (should fail) */
     H5E_BEGIN_TRY
-    ret =
-        H5Pregister2(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    {
+        ret = H5Pregister2(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pregister2");
 
-    /* Check the existance of the second property */
+    /* Check the existence of the second property */
     ret = H5Pexist(cid1, PROP2_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -246,7 +249,7 @@ test_genprop_basic_class_prop(void)
         H5Pregister2(cid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(ret, "H5Pregister2");
 
-    /* Check the existance of the third property */
+    /* Check the existence of the third property */
     ret = H5Pexist(cid1, PROP3_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -266,7 +269,9 @@ test_genprop_basic_class_prop(void)
 
     /* Try to check the size of the first property (should fail) */
     H5E_BEGIN_TRY
-    ret = H5Pget_size(cid1, PROP1_NAME, &size);
+    {
+        ret = H5Pget_size(cid1, PROP1_NAME, &size);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pget_size");
 
@@ -1786,8 +1791,8 @@ test_genprop_path(void)
     hid_t cid1; /* Generic Property class ID */
     hid_t cid2; /* Generic Property class ID */
 #if 0
-    hid_t        cid3;        /* Generic Property class ID */
-    char               *path;           /* Class path */
+    hid_t  cid3; /* Generic Property class ID */
+    char  *path; /* Class path */
 #endif
     herr_t ret; /* Generic return value    */
 
@@ -1806,8 +1811,8 @@ test_genprop_path(void)
     /* Get full path for first class */
     path = H5P__get_class_path_test(cid1);
     CHECK_PTR(path, "H5P__get_class_path_test");
-    if(HDstrcmp(path,CLASS1_PATH)!=0)
-        TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
+    if (HDstrcmp(path, CLASS1_PATH) != 0)
+        TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n", path, CLASS1_PATH);
     H5free_memory(path);
 #endif
     /* Create another new generic class, derived from first class */
@@ -1822,15 +1827,15 @@ test_genprop_path(void)
     /* Get full path for second class */
     path = H5P__get_class_path_test(cid2);
     CHECK_PTR(path, "H5P__get_class_path_test");
-    if(HDstrcmp(path,CLASS2_PATH)!=0)
-        TestErrPrintf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
+    if (HDstrcmp(path, CLASS2_PATH) != 0)
+        TestErrPrintf("Class names don't match!, path=%s, CLASS2_PATH=%s\n", path, CLASS2_PATH);
 
     /* Open a copy of the class with the path name */
     cid3 = H5P__open_class_path_test(path);
     CHECK_I(cid3, "H5P__open_class_path_test");
 
     /* Check that the classes are equal */
-    ret = H5Pequal(cid2,cid3);
+    ret = H5Pequal(cid2, cid3);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Release the path string */
@@ -1950,7 +1955,7 @@ test_genprop_deprec_class(void)
     CHECK_I(ret, "H5Pget_nprops");
     VERIFY(nprops, 0, "H5Pget_nprops");
 
-    /* Check the existance of the first property (should fail) */
+    /* Check the existence of the first property (should fail) */
     ret = H5Pexist(cid1, PROP1_NAME);
     VERIFY(ret, 0, "H5Pexist");
 
@@ -1960,11 +1965,13 @@ test_genprop_deprec_class(void)
 
     /* Try to insert the first property again (should fail) */
     H5E_BEGIN_TRY
-    ret = H5Pregister1(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    {
+        ret = H5Pregister1(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pregister1");
 
-    /* Check the existance of the first property */
+    /* Check the existence of the first property */
     ret = H5Pexist(cid1, PROP1_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -1984,11 +1991,13 @@ test_genprop_deprec_class(void)
 
     /* Try to insert the second property again (should fail) */
     H5E_BEGIN_TRY
-    ret = H5Pregister1(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    {
+        ret = H5Pregister1(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pregister1");
 
-    /* Check the existance of the second property */
+    /* Check the existence of the second property */
     ret = H5Pexist(cid1, PROP2_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -2006,7 +2015,7 @@ test_genprop_deprec_class(void)
     ret = H5Pregister1(cid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(ret, "H5Pregister1");
 
-    /* Check the existance of the third property */
+    /* Check the existence of the third property */
     ret = H5Pexist(cid1, PROP3_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
@@ -2026,7 +2035,9 @@ test_genprop_deprec_class(void)
 
     /* Try to check the size of the first property (should fail) */
     H5E_BEGIN_TRY
-    ret = H5Pget_size(cid1, PROP1_NAME, &size);
+    {
+        ret = H5Pget_size(cid1, PROP1_NAME, &size);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pget_size");
 

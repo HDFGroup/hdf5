@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -110,16 +109,13 @@ test_vlstr_free_custom(void *_mem, void *info)
 static void
 test_vlstrings_basic(void)
 {
+    /* Information to write */
     const char *wdata[SPACE1_DIM1] = {
-        "Four score and seven years ago our forefathers brought forth on this continent a new "
-        "nation,",
+        "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
-        "testing whether that nation or any nation so conceived and so dedicated can long "
-        "endure."};              /* Information
-                                    to
-                                    write
-                                  */
+        "testing whether that nation or any nation so conceived and so dedicated can long endure."};
+
     char    *rdata[SPACE1_DIM1]; /* Information read in */
     char    *wdata2;
     hid_t    dataspace, dataset2;
@@ -206,7 +202,7 @@ test_vlstrings_basic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -296,7 +292,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -310,7 +306,7 @@ test_vlstrings_special(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if ((wdata[i] == NULL && rdata[i] != NULL) || (rdata[i] == NULL && wdata[i] != NULL)) {
@@ -355,7 +351,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Try to write nil strings to disk. */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
@@ -368,7 +364,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -539,7 +535,7 @@ test_compact_vlstring(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                          (int)strlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+                          (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             continue;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
@@ -662,8 +658,6 @@ test_write_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /****************************************************************
@@ -742,8 +736,6 @@ test_read_vl_string_attribute(void)
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 }
 
 /* Helper routine for test_vl_rewrite() */
@@ -780,7 +772,7 @@ read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    if (HDstrcmp(data, data_read))
+    if (HDstrcmp(data, data_read) != 0)
         TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
     ret = H5Treclaim(type, space, H5P_DEFAULT, &data_read);
@@ -824,33 +816,33 @@ test_vl_rewrite(void)
 
     /* Create in file 1 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         write_scalar_dset(file1, type, space, name, name);
     }
 
     /* Effectively copy data from file 1 to 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     }
 
     /* Read back from file 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file2, type, space, name, name);
     } /* end for */
 
     /* Remove from file 2. */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         ret = H5Ldelete(file2, name, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Ldelete");
     } /* end for */
 
     /* Effectively copy from file 1 to file 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     } /* end for */
@@ -867,8 +859,6 @@ test_vl_rewrite(void)
 
     ret = H5Fclose(file2);
     CHECK(ret, FAIL, "H5Fclose");
-
-    return;
 } /* end test_vl_rewrite() */
 
 /****************************************************************
@@ -882,14 +872,14 @@ static void
 test_write_same_element(void)
 {
 #ifndef NO_WRITE_SAME_ELEMENT_TWICE
-    hid_t   file1, dataset1;
-    hid_t   mspace, fspace, dtype;
-    hsize_t fdim[]           = {SPACE1_DIM1};
-    char   *val[SPACE1_DIM1] = {"But", "reuniting", "is a", "great joy"};
-    hsize_t marray[]         = {NUMP};
-    hsize_t coord[SPACE1_RANK][NUMP];
-    herr_t  ret;
-    char   *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
+    hid_t       file1, dataset1;
+    hid_t       mspace, fspace, dtype;
+    hsize_t     fdim[]             = {SPACE1_DIM1};
+    const char *wdata[SPACE1_DIM1] = {"Parting", "is such a", "sweet", "sorrow."};
+    const char *val[SPACE1_DIM1]   = {"But", "reuniting", "is a", "great joy"};
+    hsize_t     marray[]           = {NUMP};
+    hsize_t     coord[SPACE1_RANK][NUMP];
+    herr_t      ret;
 #endif
 
     MESSAGE(
@@ -996,7 +986,6 @@ test_vlstrings(void)
 
     /* Test writing VL datasets in files with lots of unlinking */
     test_vl_rewrite();
-
     /* Test writing to the same element more than once using H5Sselect_elements */
     test_write_same_element();
 } /* test_vlstrings() */

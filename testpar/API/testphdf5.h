@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -114,9 +113,8 @@ enum H5TEST_COLL_CHUNK_API {
 #define MSPACE1_DIM  27000 /* Dataset size in memory */
 #define FSPACE_RANK  2     /* Dataset rank as it is stored in the file */
 #define FSPACE_DIM1  9     /* Dimension sizes of the dataset as it is stored in the file */
-#define FSPACE_DIM2                                                                                          \
-    3600 /* We will read dataset back from the file                                         to the dataset   \
-            in memory with these dataspace parameters. */
+#define FSPACE_DIM2  3600
+/* We will read dataset back from the file to the dataset in memory with these dataspace parameters. */
 #define MSPACE_RANK 2
 #define MSPACE_DIM1 9
 #define MSPACE_DIM2 3600
@@ -203,10 +201,6 @@ enum H5TEST_COLL_CHUNK_API {
 #define TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES            0x010
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT  0x020
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL 0x040
-#define TEST_FILTERS                                    0x080
-/* TEST_FILTERS will take place of this after supporting mpio + filter for
- * H5Dcreate and H5Dwrite */
-#define TEST_FILTERS_READ 0x100
 
 /* Don't erase these lines, they are put here for debugging purposes */
 /*
@@ -235,8 +229,8 @@ typedef int DATATYPE;
 
 /* Shape Same Tests Definitions */
 typedef enum {
-    IND_CONTIG,  /* Independent IO on contigous datasets */
-    COL_CONTIG,  /* Collective IO on contigous datasets */
+    IND_CONTIG,  /* Independent IO on contiguous datasets */
+    COL_CONTIG,  /* Collective IO on contiguous datasets */
     IND_CHUNKED, /* Independent IO on chunked datasets */
     COL_CHUNKED  /* Collective IO on chunked datasets */
 } ShapeSameTestMethods;
@@ -253,8 +247,12 @@ extern uint64_t    vol_cap_flags;
 
 /* Test program prototypes */
 void test_plist_ed(void);
+#if 0
+void external_links(void);
+#endif
 void zero_dim_dset(void);
 void test_file_properties(void);
+void test_delete(void);
 void multiple_dset_write(void);
 void multiple_group_write(void);
 void multiple_group_read(void);
@@ -316,6 +314,7 @@ void test_dense_attr(void);
 void test_partial_no_selection_coll_md_read(void);
 void test_multi_chunk_io_addrmap_issue(void);
 void test_link_chunk_io_sort_chunk_issue(void);
+void test_collective_global_heap_write(void);
 
 /* commonly used prototypes */
 hid_t      create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);

@@ -1,18 +1,22 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
 #include "testphdf5.h"
+
+#if 0
+#include "H5Dprivate.h"
+#include "H5private.h"
+#endif
 
 #define DIM         2
 #define SIZE        32
@@ -139,12 +143,6 @@ zero_dim_dset(void)
 /*
  * Example of using PHDF5 to create ndatasets datasets.  Each process write
  * a slab of array to the file.
- *
- * Changes:    Updated function to use a dynamically calculated size,
- *        instead of the old SIZE #define.  This should allow it
- *        to function with an arbitrary number of processors.
- *
- *                        JRM - 8/11/04
  */
 void
 multiple_dset_write(void)
@@ -159,11 +157,17 @@ multiple_dset_write(void)
     double  fill       = 1.0; /* Fill value */
     char    dname[100];
     herr_t  ret;
-    char   *filename;
-    int     ndatasets;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
+    int   ndatasets;
 
-    filename  = PARATESTFILE;
-    ndatasets = NDATASETS;
+#if 0
+    pt        = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename    = PARATESTFILE;
+    /* ndatasets = pt->count; */ ndatasets = NDATASETS;
 
     size = get_size();
 
@@ -181,7 +185,7 @@ multiple_dset_write(void)
         return;
     }
 
-    outme = HDmalloc((size_t)((size_t)(size * size) * sizeof(double)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -207,7 +211,7 @@ multiple_dset_write(void)
     VRFY((ret >= 0), "set fill-value succeeded");
 
     for (n = 0; n < ndatasets; n++) {
-        HDsprintf(dname, "dataset %d", n);
+        HDsnprintf(dname, sizeof(dname), "dataset %d", n);
         dataset = H5Dcreate2(iof, dname, H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         VRFY((dataset > 0), dname);
 
@@ -236,12 +240,6 @@ multiple_dset_write(void)
 }
 
 /* Example of using PHDF5 to create, write, and read compact dataset.
- *
- * Changes:    Updated function to use a dynamically calculated size,
- *        instead of the old SIZE #define.  This should allow it
- *        to function with an arbitrary number of processors.
- *
- *                        JRM - 8/11/04
  */
 void
 compact_dataset(void)
@@ -254,6 +252,9 @@ compact_dataset(void)
     char        dname[] = "dataset";
     herr_t      ret;
     const char *filename;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+#endif
 
     size = get_size();
 
@@ -274,10 +275,10 @@ compact_dataset(void)
         return;
     }
 
-    outme = HDmalloc((size_t)((size_t)(size * size) * sizeof(double)));
+    outme = HDmalloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
-    inme = HDmalloc((size_t)((size_t)(size * size) * sizeof(double)));
+    inme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for inme");
 
     filename = PARATESTFILE /* GetTestParameters() */;
@@ -342,13 +343,28 @@ compact_dataset(void)
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value, NULL,
+                     NULL, NULL, NULL, NULL, NULL);
+    VRFY((ret >= 0), "H5Pinsert2() succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
     VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = FALSE;
+    ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+    VRFY((ret >= 0), "H5Pget succeeded");
+    VRFY((prop_value == FALSE && dxfer_coll_type == DXFER_COLLECTIVE_IO),
+         "rank 0 Bcast optimization was performed for a compact dataset");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* Verify data value */
     for (i = 0; i < size; i++)
         for (j = 0; j < size; j++)
-            if (inme[(i * size) + j] != outme[(i * size) + j])
+            if (!H5_DBL_ABS_EQUAL(inme[(i * size) + j], outme[(i * size) + j]))
                 if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
                     HDprintf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j,
                              outme[(i * size) + j], inme[(i * size) + j]);
@@ -364,14 +380,6 @@ compact_dataset(void)
 /*
  * Example of using PHDF5 to create, write, and read dataset and attribute
  * of Null dataspace.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *                                         JRM - 8/24/04
  */
 void
 null_dataset(void)
@@ -489,14 +497,6 @@ null_dataset(void)
  * Actual data is _not_ written to these datasets.  Dataspaces are exact
  * sizes(2GB, 4GB, etc.), but the metadata for the file pushes the file over
  * the boundary of interest.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *                                         JRM - 8/11/04
  */
 void
 big_dataset(void)
@@ -509,7 +509,7 @@ big_dataset(void)
     hsize_t file_dims[4];        /* Dimensions of dataspace */
     char    dname[] = "dataset"; /* Name of dataset */
 #if 0
-    MPI_Offset file_size;       /* Size of file on disk */
+    MPI_Offset  file_size;           /* Size of file on disk */
 #endif
     herr_t      ret; /* Generic return value */
     const char *filename;
@@ -635,16 +635,6 @@ big_dataset(void)
 /* Example of using PHDF5 to read a partial written dataset.   The dataset does
  * not have actual data written to the entire raw data area and relies on the
  * default fill value of zeros to work correctly.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *        Also added code to free dynamically allocated buffers.
- *
- *                                         JRM - 8/11/04
  */
 void
 dataset_fillvalue(void)
@@ -667,6 +657,9 @@ dataset_fillvalue(void)
     int         acc, i, ii, j, k, l; /* Local index variables */
     herr_t      ret;                 /* Generic return value */
     const char *filename;
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    hbool_t prop_value;
+#endif
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -721,6 +714,13 @@ dataset_fillvalue(void)
     dxpl = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl >= 0), "H5Pcreate succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret = H5Pinsert2(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, H5D_XFER_COLL_RANK0_BCAST_SIZE, &prop_value, NULL,
+                     NULL, NULL, NULL, NULL, NULL);
+    VRFY((ret >= 0), "testing property list inserted succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     for (ii = 0; ii < 2; ii++) {
 
         if (ii == 0)
@@ -736,21 +736,32 @@ dataset_fillvalue(void)
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
         VRFY((ret >= 0), "H5Dread succeeded");
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+        prop_value = FALSE;
+        ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+        VRFY((ret >= 0), "testing property list get succeeded");
+        if (ii == 0)
+            VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+        else
+            VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
         /* Verify all data read are the fill value 0 */
         trdata  = rdata;
         err_num = 0;
         for (i = 0; i < (int)dset_dims[0]; i++)
             for (j = 0; j < (int)dset_dims[1]; j++)
                 for (k = 0; k < (int)dset_dims[2]; k++)
-                    for (l = 0; l < (int)dset_dims[3]; l++, twdata++, trdata++)
+                    for (l = 0; l < (int)dset_dims[3]; l++, trdata++)
                         if (*trdata != 0)
                             if (err_num++ < MAX_ERR_REPORT || VERBOSE_MED)
-                                HDprintf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,
-                                         j, k, l, *trdata);
+                                HDprintf(
+                                    "Rank %d: Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n",
+                                    mpi_rank, i, j, k, l, *trdata);
         if (err_num > MAX_ERR_REPORT && !VERBOSE_MED)
-            HDprintf("[more errors ...]\n");
+            HDprintf("Rank %d: [more errors ...]\n", mpi_rank);
         if (err_num) {
-            HDprintf("%d errors found in check_value\n", err_num);
+            HDprintf("Rank %d: %d errors found in check_value\n", mpi_rank, err_num);
             nerrors++;
         }
     }
@@ -794,6 +805,12 @@ dataset_fillvalue(void)
      * Read dataset after partial write.
      */
 
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = H5D_XFER_COLL_RANK0_BCAST_DEF;
+    ret        = H5Pset(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+    VRFY((ret >= 0), " H5Pset succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
+
     for (ii = 0; ii < 2; ii++) {
 
         if (ii == 0)
@@ -808,6 +825,16 @@ dataset_fillvalue(void)
         /* Read the entire dataset back */
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
         VRFY((ret >= 0), "H5Dread succeeded");
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+        prop_value = FALSE;
+        ret        = H5Pget(dxpl, H5D_XFER_COLL_RANK0_BCAST_NAME, &prop_value);
+        VRFY((ret >= 0), "testing property list get succeeded");
+        if (ii == 0)
+            VRFY((prop_value == FALSE), "correctly handled rank 0 Bcast");
+        else
+            VRFY((prop_value == TRUE), "correctly handled rank 0 Bcast");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
         /* Verify correct data read */
         twdata  = wdata;
@@ -872,12 +899,6 @@ collective_group_write_independent_group_read(void)
 
 /* Write multiple groups with a chunked dataset in each group collectively.
  * These groups and datasets are for testing independent read later.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 void
 collective_group_write(void)
@@ -891,11 +912,17 @@ collective_group_write(void)
     hsize_t   chunk_dims[DIM], file_dims[DIM], count[DIM];
     hsize_t   chunk_size[2]; /* Chunk dimensions - computed shortly */
     herr_t    ret1, ret2;
-    char     *filename;
-    int       ngroups;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
+    int   ngroups;
 
-    filename = PARATESTFILE;
-    ngroups  = NGROUPS;
+#if 0
+    pt       = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
+    /* ngroups  = pt->count; */ ngroups = NGROUPS;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -918,11 +945,12 @@ collective_group_write(void)
     chunk_size[0] = (hsize_t)(size / 2);
     chunk_size[1] = (hsize_t)(size / 2);
 
-    outme = HDmalloc((size_t)(size * size) * sizeof(DATATYPE));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     fid   = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+    VRFY((fid >= 0), "H5Fcreate");
     H5Pclose(plist);
 
     /* decide the hyperslab according to process number. */
@@ -936,22 +964,22 @@ collective_group_write(void)
     ret2      = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, chunk_origin, chunk_dims, count, chunk_dims);
     VRFY((memspace >= 0), "memspace");
     VRFY((filespace >= 0), "filespace");
-    VRFY((ret1 >= 0), "mgroup memspace selection");
-    VRFY((ret2 >= 0), "mgroup filespace selection");
+    VRFY((ret1 == 0), "mgroup memspace selection");
+    VRFY((ret2 == 0), "mgroup filespace selection");
 
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     ret1 = H5Pset_chunk(dcpl, 2, chunk_size);
     VRFY((dcpl >= 0), "dataset creation property");
-    VRFY((ret1 >= 0), "set chunk for dataset creation property");
+    VRFY((ret1 == 0), "set chunk for dataset creation property");
 
     /* creates ngroups groups under the root group, writes chunked
      * datasets in parallel. */
     for (m = 0; m < ngroups; m++) {
-        HDsprintf(gname, "group%d", m);
+        HDsnprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
-        HDsprintf(dname, "dataset%d", m);
+        HDsnprintf(dname, sizeof(dname), "dataset%d", m);
         did = H5Dcreate2(gid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -959,10 +987,14 @@ collective_group_write(void)
             for (j = 0; j < size; j++)
                 outme[(i * size) + j] = (i + j) * 1000 + mpi_rank;
 
-        H5Dwrite(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, outme);
+        ret1 = H5Dwrite(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, outme);
+        VRFY((ret1 == 0), "H5Dwrite");
 
-        H5Dclose(did);
-        H5Gclose(gid);
+        ret1 = H5Dclose(did);
+        VRFY((ret1 == 0), "H5Dclose");
+
+        ret1 = H5Gclose(gid);
+        VRFY((ret1 == 0), "H5Gclose");
 
 #ifdef BARRIER_CHECKS
         if (!((m + 1) % 10)) {
@@ -975,7 +1007,9 @@ collective_group_write(void)
     H5Pclose(dcpl);
     H5Sclose(filespace);
     H5Sclose(memspace);
-    H5Fclose(fid);
+
+    ret1 = H5Fclose(fid);
+    VRFY((ret1 == 0), "H5Fclose");
 
     HDfree(outme);
 }
@@ -988,26 +1022,18 @@ independent_group_read(void)
 {
     int   mpi_rank, m;
     hid_t plist, fid;
-    char *filename;
-    int   ngroups;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char  *filename;
+    int    ngroups;
+    herr_t ret;
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf(
-                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
-
-    filename = PARATESTFILE;
-    ngroups  = NGROUPS;
+#if 0
+    pt       = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
+    /* ngroups  = pt->count; */ ngroups = NGROUPS;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
@@ -1015,6 +1041,7 @@ independent_group_read(void)
     H5Pset_all_coll_metadata_ops(plist, FALSE);
 
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
+    VRFY((fid > 0), "H5Fopen");
     H5Pclose(plist);
 
     /* open groups and read datasets. Odd number processes read even number
@@ -1029,20 +1056,11 @@ independent_group_read(void)
             group_dataset_read(fid, mpi_rank, m);
     }
 
-    H5Fclose(fid);
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "H5Fclose");
 }
 
 /* Open and read datasets and compare data
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *        Also added code to verify the results of dynamic memory
- *        allocations, and to free dynamically allocated memeory
- *        when we are done with it.
- *
- *                                              JRM - 8/16/04
  */
 static void
 group_dataset_read(hid_t fid, int mpi_rank, int m)
@@ -1055,19 +1073,19 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)(size * size) * sizeof(DATATYPE));
+    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)(size * size) * sizeof(DATATYPE));
+    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     /* open every group under root group. */
-    HDsprintf(gname, "group%d", m);
+    HDsnprintf(gname, sizeof(gname), "group%d", m);
     gid = H5Gopen2(fid, gname, H5P_DEFAULT);
     VRFY((gid > 0), gname);
 
     /* check the data. */
-    HDsprintf(dname, "dataset%d", m);
+    HDsnprintf(dname, sizeof(dname), "dataset%d", m);
     did = H5Dopen2(gid, dname, H5P_DEFAULT);
     VRFY((did > 0), dname);
 
@@ -1075,16 +1093,17 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     /* this is the original value */
     for (i = 0; i < size; i++)
-        for (j = 0; j < size; j++) {
+        for (j = 0; j < size; j++)
             outdata[(i * size) + j] = (i + j) * 1000 + mpi_rank;
-        }
 
     /* compare the original value(outdata) to the value in file(indata).*/
     ret = check_value(indata, outdata, size);
     VRFY((ret == 0), "check the data");
 
-    H5Dclose(did);
-    H5Gclose(gid);
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "H5Dclose");
+    ret = H5Gclose(gid);
+    VRFY((ret == 0), "H5Gclose");
 
     HDfree(indata);
     HDfree(outdata);
@@ -1116,11 +1135,6 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
  *      + means the group has attribute(s).
  *      ' means the datasets in the groups have attribute(s).
  *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 void
 multiple_group_write(void)
@@ -1132,11 +1146,17 @@ multiple_group_write(void)
     hsize_t chunk_origin[DIM];
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
     herr_t  ret;
-    char   *filename;
-    int     ngroups;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
+    int   ngroups;
 
-    filename = PARATESTFILE;
-    ngroups  = NGROUPS;
+#if 0
+    pt       = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
+    /* ngroups  = pt->count; */ ngroups = NGROUPS;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1178,7 +1198,7 @@ multiple_group_write(void)
     /* creates ngroups groups under the root group, writes datasets in
      * parallel. */
     for (m = 0; m < ngroups; m++) {
-        HDsprintf(gname, "group%d", m);
+        HDsnprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
@@ -1215,12 +1235,6 @@ multiple_group_write(void)
 /*
  * In a group, creates NDATASETS datasets.  Each process writes a hyperslab
  * of a data array to the file.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 static void
 write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
@@ -1236,11 +1250,11 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    outme = HDmalloc((size_t)(size * size) * sizeof(double));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     for (n = 0; n < NDATASET; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
         did = H5Dcreate2(gid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -1278,7 +1292,7 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
     }
 #endif /* BARRIER_CHECKS */
 
-    HDsprintf(gname, "%dth_child_group", counter + 1);
+    HDsnprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
     child_gid = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((child_gid > 0), gname);
 
@@ -1294,12 +1308,6 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
 /*
  * This function is to verify the data from multiple group testing.  It opens
  * every dataset in every group and check their correctness.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/11/04
  */
 void
 multiple_group_read(void)
@@ -1310,11 +1318,17 @@ multiple_group_read(void)
     hid_t   plist, fid, gid, memspace, filespace;
     hsize_t chunk_origin[DIM];
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
-    char   *filename;
-    int     ngroups;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
+    int   ngroups;
 
-    filename = PARATESTFILE;
-    ngroups  = NGROUPS;
+#if 0
+    pt       = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
+    /* ngroups  = pt->count; */ ngroups = NGROUPS;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1349,7 +1363,7 @@ multiple_group_read(void)
 
     /* open every group under root group. */
     for (m = 0; m < ngroups; m++) {
-        HDsprintf(gname, "group%d", m);
+        HDsnprintf(gname, sizeof(gname), "group%d", m);
         gid = H5Gopen2(fid, gname, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
@@ -1385,12 +1399,6 @@ multiple_group_read(void)
 /*
  * This function opens all the datasets in a certain, checks the data using
  * dataset_vrfy function.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/11/04
  */
 static int
 read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
@@ -1405,14 +1413,14 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)(size * size) * sizeof(DATATYPE));
+    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)(size * size) * sizeof(DATATYPE));
+    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     for (n = 0; n < NDATASET; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
         did = H5Dopen2(gid, dname, H5P_DEFAULT);
         VRFY((did > 0), dname);
 
@@ -1463,7 +1471,7 @@ recursive_read_group(hid_t memspace, hid_t filespace, hid_t gid, int counter)
         nerrors += err_num;
 
     if (counter < GROUP_DEPTH) {
-        HDsprintf(gname, "%dth_child_group", counter + 1);
+        HDsnprintf(gname, sizeof(gname), "%dth_child_group", counter + 1);
         child_gid = H5Gopen2(gid, gname, H5P_DEFAULT);
         VRFY((child_gid > 0), gname);
         recursive_read_group(memspace, filespace, child_gid, counter + 1);
@@ -1485,7 +1493,7 @@ write_attribute(hid_t obj_id, int this_type, int num)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (this_type == is_group) {
-        HDsprintf(attr_name, "Group Attribute %d", num);
+        HDsnprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
         sid = H5Screate(H5S_SCALAR);
         aid = H5Acreate2(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         H5Awrite(aid, H5T_NATIVE_INT, &num);
@@ -1493,7 +1501,7 @@ write_attribute(hid_t obj_id, int this_type, int num)
         H5Sclose(sid);
     } /* end if */
     else if (this_type == is_dset) {
-        HDsprintf(attr_name, "Dataset Attribute %d", num);
+        HDsnprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
         for (i = 0; i < 8; i++)
             attr_data[i] = i;
         sid = H5Screate_simple(dspace_rank, dspace_dims, NULL);
@@ -1516,14 +1524,14 @@ read_attribute(hid_t obj_id, int this_type, int num)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (this_type == is_group) {
-        HDsprintf(attr_name, "Group Attribute %d", num);
+        HDsnprintf(attr_name, sizeof(attr_name), "Group Attribute %d", num);
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);
         H5Aread(aid, H5T_NATIVE_INT, &in_num);
         vrfy_errors = dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
         H5Aclose(aid);
     }
     else if (this_type == is_dset) {
-        HDsprintf(attr_name, "Dataset Attribute %d", num);
+        HDsnprintf(attr_name, sizeof(attr_name), "Dataset Attribute %d", num);
         for (i = 0; i < 8; i++)
             out_data[i] = i;
         aid = H5Aopen(obj_id, attr_name, H5P_DEFAULT);
@@ -1537,12 +1545,6 @@ read_attribute(hid_t obj_id, int this_type, int num)
 
 /* This functions compares the original data with the read-in data for its
  * hyperslab part only by process ID.
- *
- * Changes:    Modified function to use a passed in size parameter
- *        instead of the old SIZE #define.  This should let us
- *        run with an arbitrary number of processes.
- *
- *                    JRM - 8/16/04
  */
 static int
 check_value(DATATYPE *indata, DATATYPE *outdata, int size)
@@ -1575,12 +1577,6 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
 }
 
 /* Decide the portion of data chunk in dataset by process ID.
- *
- * Changes:    Modified function to use a passed in size parameter
- *        instead of the old SIZE #define.  This should let us
- *        run with an arbitrary number of processes.
- *
- *                    JRM - 8/11/04
  */
 
 static void
@@ -1592,7 +1588,7 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[], hsize_t 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     if (chunk_origin != NULL) {
-        chunk_origin[0] = (hsize_t)(mpi_rank * (size / mpi_size));
+        chunk_origin[0] = (hsize_t)mpi_rank * (hsize_t)(size / mpi_size);
         chunk_origin[1] = 0;
     }
     if (chunk_dims != NULL) {
@@ -1622,8 +1618,6 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[], hsize_t 
  * This function reproduces this situation.  At present the test hangs
  * on failure.
  *                                         JRM - 9/13/04
- *
- * Changes:    None.
  */
 
 #define N 4
@@ -1659,9 +1653,15 @@ io_mode_confusion(void)
 
     const char   *fcn_name = "io_mode_confusion";
     const hbool_t verbose  = FALSE;
-    char         *filename;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
 
-    filename = PARATESTFILE;
+#if 0
+    pt       = GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -1873,15 +1873,11 @@ io_mode_confusion(void)
  * Open the each of the data sets in turn.  If all opens are successful,
  * the test passes.  Otherwise the test fails.
  *
- * Note that this test will probably become irrelevent shortly, when we
+ * Note that this test will probably become irrelevant shortly, when we
  * land the journaling modifications on the trunk -- at which point all
  * cache clients will have to construct on disk images on demand.
  *
  *                        JRM -- 10/13/10
- *
- * Changes:
- *    Break it into two parts, a writer to write the file and a reader
- *    the correctness of the writer. AKC -- 2010/10/27
  */
 
 #define NUM_DATA_SETS   4
@@ -1952,7 +1948,7 @@ rr_obj_hdr_flush_confusion(void)
     mrc       = MPI_Comm_split(MPI_COMM_WORLD, is_reader, mpi_rank, &comm);
     VRFY((mrc == MPI_SUCCESS), "MPI_Comm_split");
 
-    /* The reader proocesses branches off to do reading
+    /* The reader processes branches off to do reading
      * while the writer processes continues to do writing
      * Whenever writers finish one writing step, including a H5Fflush,
      * they inform the readers, via MPI_COMM_WORLD, to verify.
@@ -2015,13 +2011,19 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* test bed related variables */
     const char   *fcn_name = "rr_obj_hdr_flush_confusion_writer";
     const hbool_t verbose  = FALSE;
-    char         *filename;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
 
     /*
      * setup test bed related variables:
      */
 
-    filename = PARATESTFILE;
+#if 0
+    pt       = (const H5Ptest_param_t *)GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
@@ -2145,7 +2147,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 2: write attributes to each dataset
@@ -2200,7 +2202,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 3: write large attributes to each dataset
@@ -2233,8 +2235,8 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /*
      * flush the metadata cache yet again to clean the object headers.
      *
-     * This is an attempt to crate a situation where we have dirty
-     * object header continuation chunks, but clean opject headers
+     * This is an attempt to create a situation where we have dirty
+     * object header continuation chunks, but clean object headers
      * to verify a speculative bug fix -- it doesn't seem to work,
      * but I will leave the code in anyway, as the object header
      * code is going to change a lot in the near future.
@@ -2248,7 +2250,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /*
      * Step 4: write different large attributes to each dataset
@@ -2282,7 +2284,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* Step 5: Close all objects and the file */
 
@@ -2337,12 +2339,12 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     /* Tell the reader to check the file up to steps. */
     steps++;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     /* All done. Inform reader to end. */
     steps = 0;
     Reader_check(mrc, steps, steps_done);
-    VRFY((mrc >= 0), "Reader_check failed");
+    VRFY((MPI_SUCCESS == mrc), "Reader_check failed");
 
     if (verbose)
         HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank, fcn_name);
@@ -2392,13 +2394,19 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
     /* test bed related variables */
     const char   *fcn_name = "rr_obj_hdr_flush_confusion_reader";
     const hbool_t verbose  = FALSE;
-    char         *filename;
+#if 0
+    const H5Ptest_param_t *pt;
+#endif
+    char *filename;
 
     /*
      * setup test bed related variables:
      */
 
-    filename = PARATESTFILE;
+#if 0
+    pt       = (const H5Ptest_param_t *)GetTestParameters();
+#endif
+    /* filename = pt->name; */ filename = PARATESTFILE;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_world_size);
@@ -2503,7 +2511,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
 
                     /* compare read data with expected data */
                     for (j = 0; j < LOCAL_DATA_SIZE; j++)
-                        if (data_read[j] != data[j]) {
+                        if (!H5_DBL_ABS_EQUAL(data_read[j], data[j])) {
                             HDfprintf(stdout,
                                       "%0d:%s: Reading datasets value failed in "
                                       "Dataset %d, at position %d: expect %f, got %f.\n",
@@ -2565,7 +2573,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for (j = 0; j < LOCAL_DATA_SIZE; j++)
-                            if (att_read[j] != att[j]) {
+                            if (!H5_DBL_ABS_EQUAL(att_read[j], att[j])) {
                                 HDfprintf(stdout,
                                           "%0d:%s: Mismatched attribute data read in Dataset %d, at position "
                                           "%d: expect %f, got %f.\n",
@@ -2616,7 +2624,7 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
                         VRFY((err >= 0), "H5Aread failed.\n");
                         /* compare read attribute data with expected data */
                         for (j = 0; j < LARGE_ATTR_SIZE; j++)
-                            if (lg_att_read[j] != lg_att[j]) {
+                            if (!H5_DBL_ABS_EQUAL(lg_att_read[j], lg_att[j])) {
                                 HDfprintf(stdout,
                                           "%0d:%s: Mismatched large attribute data read in Dataset %d, at "
                                           "position %d: expect %f, got %f.\n",
@@ -2718,8 +2726,8 @@ chunk_align_bug_1(void)
     hid_t   file_id, dset_id, fapl_id, dcpl_id, space_id;
     hsize_t dims = CHUNK_SIZE * NCHUNKS, cdims = CHUNK_SIZE;
 #if 0
-    h5_stat_size_t      file_size;
-    hsize_t             align;
+    h5_stat_size_t file_size;
+    hsize_t        align;
 #endif
     herr_t      ret;
     const char *filename;

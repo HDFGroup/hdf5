@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,10 +34,13 @@ uint64_t vol_cap_flags;
 int
 main(int argc, char **argv)
 {
-    hid_t     file_id, dset_id, grp_id;
-    hid_t     fapl, sid, mem_dataspace;
-    hsize_t   dims[RANK], i;
-    herr_t    ret;
+    hid_t   file_id, dset_id, grp_id;
+    hid_t   fapl, sid, mem_dataspace;
+    hsize_t dims[RANK], i;
+    herr_t  ret;
+#if 0
+    char      filename[1024];
+#endif
     int       mpi_size, mpi_rank;
     MPI_Comm  comm = MPI_COMM_WORLD;
     MPI_Info  info = MPI_INFO_NULL;
@@ -82,14 +84,16 @@ main(int argc, char **argv)
     ret = H5Pset_fapl_mpio(fapl, comm, info);
     VRFY((ret >= 0), "");
 
-    /* h5_fixname(FILENAME[0], fapl, filename, sizeof filename); */
+#if 0
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+#endif
     file_id = H5Fcreate(FILENAME[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
     grp_id = H5Gcreate2(file_id, "Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((grp_id >= 0), "H5Gcreate succeeded");
 
-    dims[0] = (hsize_t)(ROW_FACTOR * mpi_size);
-    dims[1] = (hsize_t)(COL_FACTOR * mpi_size);
+    dims[0] = (hsize_t)ROW_FACTOR * (hsize_t)mpi_size;
+    dims[1] = (hsize_t)COL_FACTOR * (hsize_t)mpi_size;
     sid     = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 

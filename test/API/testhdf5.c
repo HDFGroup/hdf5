@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -508,6 +507,46 @@ h5_fixname_superblock(const char *base_name, hid_t fapl_id, char *fullname, size
 {
     return (h5_fixname_real(base_name, fapl_id, ".h5", fullname, size, FALSE, TRUE));
 }
+
+hbool_t
+h5_using_default_driver(const char *drv_name)
+{
+    hbool_t ret_val = TRUE;
+
+    HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
+
+    if (!drv_name)
+        drv_name = HDgetenv(HDF5_DRIVER);
+
+    if (drv_name)
+        return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
+
+    return ret_val;
+}
+
+herr_t
+h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
+{
+    unsigned long feat_flags = 0;
+    hid_t         driver_id  = H5I_INVALID_HID;
+    herr_t        ret_value  = SUCCEED;
+
+    HDassert(fapl_id >= 0);
+    HDassert(default_vfd_compatible);
+
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        return FAIL;
+
+    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+        return FAIL;
+
+    *default_vfd_compatible = (feat_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE);
+
+    return ret_value;
+} /* end h5_driver_is_default_vfd_compatible() */
 
 int
 main(int argc, char *argv[])

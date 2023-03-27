@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -34,11 +33,10 @@ static MPI_Offset
 get_filesize(const char *filename)
 {
     int        mpierr;
-    MPI_File    fd;
-    MPI_Offset    filesize;
+    MPI_File   fd;
+    MPI_Offset filesize;
 
-    mpierr = MPI_File_open(MPI_COMM_SELF, filename, MPI_MODE_RDONLY,
-    MPI_INFO_NULL, &fd);
+    mpierr = MPI_File_open(MPI_COMM_SELF, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fd);
     VRFY((mpierr == MPI_SUCCESS), "");
 
     mpierr = MPI_File_get_size(fd, &filesize);
@@ -47,7 +45,7 @@ get_filesize(const char *filename)
     mpierr = MPI_File_close(&fd);
     VRFY((mpierr == MPI_SUCCESS), "");
 
-    return(filesize);
+    return (filesize);
 }
 #endif
 
@@ -79,10 +77,9 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
     long   nchunks;
     herr_t hrc;
 #if 0
-    MPI_Offset  filesize,        /* actual file size */
-        est_filesize;        /* estimated file size */
+    MPI_Offset filesize, /* actual file size */
+        est_filesize;    /* estimated file size */
 #endif
-
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -153,8 +150,8 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 
 #if 0
         /* verify file size */
-        filesize = get_filesize(filename);
-        est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
+        filesize     = get_filesize(filename);
+        est_filesize = (MPI_Offset)nchunks * (MPI_Offset)CHUNK_SIZE * (MPI_Offset)sizeof(unsigned char);
         VRFY((filesize >= est_filesize), "file size check");
 #endif
     }
@@ -197,8 +194,8 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     long nchunks;
 #if 0
     /* MPI Gubbins */
-    MPI_Offset  filesize,        /* actual file size */
-        est_filesize;        /* estimated file size */
+    MPI_Offset filesize, /* actual file size */
+        est_filesize;    /* estimated file size */
 #endif
 
     /* Initialize MPI */
@@ -237,7 +234,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     dataspace = H5Dget_space(*dataset);
     VRFY((dataspace >= 0), "");
 
-    size[0] = (hsize_t)(nchunks * CHUNK_SIZE);
+    size[0] = (hsize_t)nchunks * CHUNK_SIZE;
 
     switch (action) {
 
@@ -295,10 +292,11 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     hrc = H5Fclose(*file_id);
     VRFY((hrc >= 0), "");
     *file_id = -1;
+
 #if 0
     /* verify file size */
-    filesize = get_filesize(filename);
-    est_filesize = nchunks*CHUNK_SIZE*sizeof(unsigned char);
+    filesize     = get_filesize(filename);
+    est_filesize = (MPI_Offset)nchunks * (MPI_Offset)CHUNK_SIZE * (MPI_Offset)sizeof(unsigned char);
     VRFY((filesize >= est_filesize), "file size check");
 #endif
 
@@ -337,7 +335,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
     hsize_t offset[1]; /* Selection offset within dataspace */
     /* Variables used in reading data back */
     char buffer[CHUNK_SIZE];
-    int  value = 0, i;
+    int  value, i;
     int  index_l;
     long nchunks;
     /* Initialize MPI */
