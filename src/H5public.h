@@ -33,27 +33,21 @@
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
+
+/* C library header files for things that appear in HDF5 public headers */
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is available
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifdef H5_STDC_HEADERS
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-#endif
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h> /* For C9x types */
-#endif
-#else
-#ifdef H5_HAVE_STDINT_H_CXX
-#include <stdint.h> /* For C9x types (when included from C++) */
-#endif
-#endif
-#ifdef H5_HAVE_INTTYPES_H
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#endif
-#ifdef H5_HAVE_STDDEF_H
-#include <stddef.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL
@@ -68,13 +62,6 @@
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
 #endif
-#endif
-
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /* Macros for enabling/disabling particular GCC / clang warnings
@@ -142,11 +129,11 @@ extern "C" {
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE "2"
+#define H5_VERS_SUBRELEASE "1"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.10.10-2"
+#define H5_VERS_INFO "HDF5 library version: 1.10.10-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -238,11 +225,16 @@ extern "C" {
 typedef int herr_t;
 
 /**
- * Boolean type.  Successful return values are zero (false) or positive
- * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return #htri_t however return zero
- * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a #htri_t function is:
+ * C99-style Boolean type. Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.
+ * \attention Boolean functions cannot fail.
+ */
+typedef bool hbool_t;
+/**
+ * Three-valued Boolean type. Functions that return #htri_t however return zero
+ * (false), positive (true), or negative (failure).
+ *
+ * The proper way to test for truth from a #htri_t function is:
  * \code
  * if ((retval = H5Tcommitted(type)) > 0) {
  *     printf("data type is committed\n");
@@ -253,21 +245,7 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#ifdef H5_HAVE_STDBOOL_H
-#include <stdbool.h>
-#else /* H5_HAVE_STDBOOL_H */
-#ifndef __cplusplus
-#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
-#define bool _Bool
-#else
-#define bool unsigned int
-#endif
-#define true 1
-#define false 0
-#endif /* __cplusplus */
-#endif /* H5_HAVE_STDBOOL_H */
-typedef bool hbool_t;
-typedef int  htri_t;
+typedef int htri_t;
 
 /* The signed version of size_t
  *
@@ -299,47 +277,10 @@ typedef long long ssize_t;
  *
  * \internal Defined as a (minimum) 64-bit integer type.
  */
-#if H5_SIZEOF_INT64_T >= 8
-#elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for int64_t"
-#endif
+typedef uint64_t hsize_t;
 
-/* uint64_t type is used for fields for H5O_info_t.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT64_T >= 8
-#ifndef UINT64_MAX
-#define UINT64_MAX ((uint64_t)-1)
-#endif
-#elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
-#define UINT64_MAX UINT_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
-#define UINT64_MAX ULONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long uint64_t;
-#define UINT64_MAX ULLONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for uint64_t"
+#ifdef H5_HAVE_PARALLEL
+#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
 #endif
 
 /**
@@ -348,93 +289,35 @@ typedef unsigned long long uint64_t;
  * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
  * should be discouraged in new code.
  */
-#if H5_SIZEOF_LONG_LONG >= 8
-H5_GCC_DIAG_OFF("long-long")
-typedef unsigned long long hsize_t;
-typedef signed long long   hssize_t;
-H5_GCC_DIAG_ON("long-long")
-#define PRIdHSIZE          H5_PRINTF_LL_WIDTH "d"
-#define PRIiHSIZE          H5_PRINTF_LL_WIDTH "i"
-#define PRIoHSIZE          H5_PRINTF_LL_WIDTH "o"
-#define PRIuHSIZE          H5_PRINTF_LL_WIDTH "u"
-#define PRIxHSIZE          H5_PRINTF_LL_WIDTH "x"
-#define PRIXHSIZE          H5_PRINTF_LL_WIDTH "X"
-#define H5_SIZEOF_HSIZE_T  H5_SIZEOF_LONG_LONG
-#define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
-#define HSIZE_UNDEF        ULLONG_MAX
-#else
-#error "nothing appropriate for hsize_t"
-#endif
-
-#ifdef H5_HAVE_PARALLEL
-#define HSIZE_AS_MPI_TYPE MPI_UINT64_T
-#endif
+typedef int64_t hssize_t;
+#define PRIdHSIZE          PRId64
+#define PRIiHSIZE          PRIi64
+#define PRIoHSIZE          PRIo64
+#define PRIuHSIZE          PRIu64
+#define PRIxHSIZE          PRIx64
+#define PRIXHSIZE          PRIX64
+#define H5_SIZEOF_HSIZE_T  8
+#define H5_SIZEOF_HSSIZE_T 8
+#define HSIZE_UNDEF        UINT64_MAX
 
 /**
  * The address of an object in the file.
  *
  * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
-#if H5_SIZEOF_INT >= 8
-typedef unsigned haddr_t;
-#define HADDR_UNDEF       UINT_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_INT
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "d"
-#define PRIoHADDR "o"
-#define PRIuHADDR "u"
-#define PRIxHADDR "x"
-#define PRIXHADDR "X"
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long haddr_t;
-#define HADDR_UNDEF       ULONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED_LONG
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "ld"
-#define PRIoHADDR "lo"
-#define PRIuHADDR "lu"
-#define PRIxHADDR "lx"
-#define PRIXHADDR "lX"
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long haddr_t;
-#define HADDR_UNDEF       ULLONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR H5_PRINTF_LL_WIDTH "d"
-#define PRIoHADDR H5_PRINTF_LL_WIDTH "o"
-#define PRIuHADDR H5_PRINTF_LL_WIDTH "u"
-#define PRIxHADDR H5_PRINTF_LL_WIDTH "x"
-#define PRIXHADDR H5_PRINTF_LL_WIDTH "X"
-#else
-#error "nothing appropriate for haddr_t"
-#endif
+typedef uint64_t haddr_t;
+#define PRIdHADDR           PRId64
+#define PRIoHADDR           PRIo64
+#define PRIuHADDR           PRIu64
+#define PRIxHADDR           PRIx64
+#define PRIXHADDR           PRIX64
+#define H5_SIZEOF_HADDR_T   8
+#define HADDR_UNDEF         UINT64_MAX
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
-/* uint32_t type is used for creation order field for messages.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT32_T >= 4
-#elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
-#else
-#error "nothing appropriate for uint32_t"
+#ifdef H5_HAVE_PARALLEL
+#define HADDR_AS_MPI_TYPE MPI_UINT64_T
 #endif
 
 //! <!-- [H5_iter_order_t_snip] -->
@@ -495,6 +378,13 @@ typedef struct H5_alloc_stats_t {
     size_t             peak_alloc_blocks_count;  /**< Peak # of blocks allocated */
 } H5_alloc_stats_t;
 
+/* API adapter header (defines H5_DLL, etc.) */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Functions in H5.c */
 /**
  * \ingroup H5
@@ -508,7 +398,7 @@ typedef struct H5_alloc_stats_t {
  *          issued. If one finds that an HDF5 library function is failing
  *          inexplicably, H5open() can be called first. It is safe to call
  *          H5open() before an application issues any other function calls to
- *          the HDF5 library as there are no damaging side effects in calling
+ *          the HDF5 library, as there are no damaging side effects in calling
  *          it more than once.
  */
 H5_DLL herr_t H5open(void);
@@ -534,13 +424,13 @@ H5_DLL herr_t H5close(void);
  *          function is in situations where the library is dynamically linked
  *          into an application and is un-linked from the application before
  *          exit() gets called. In those situations, a routine installed with
- *          atexit() would jump to a routine which was no longer in memory,
+ *          atexit() would jump to a routine that was no longer in memory,
  *          causing errors.
  *
  * \attention In order to be effective, this routine \Emph{must} be called
  *            before any other HDF5 function calls, and must be called each
  *            time the library is loaded/linked into the application (the first
- *            time and after it's been un-loaded).
+ *            time and after it's been unloaded).
  */
 H5_DLL herr_t H5dont_atexit(void);
 /**
@@ -552,7 +442,7 @@ H5_DLL herr_t H5dont_atexit(void);
  *          of the library, freeing any unused memory.
  *
  *          It is not required that H5garbage_collect() be called at any
- *          particular time; it is only necessary in certain situations where
+ *          particular time; it is only necessary for certain situations where
  *          the application has performed actions that cause the library to
  *          allocate many objects. The application should call
  *          H5garbage_collect() if it eventually releases those objects and
@@ -743,7 +633,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  * \param[in] mem Buffer to be freed. Can be NULL
  * \return \herr_t
  *
- * \details H5free_memory() frees memory that has been allocated by the caller
+ * \details H5free_memory() frees the memory that has been allocated by the caller
  *          with H5allocate_memory() or by the HDF5 library on behalf of the
  *          caller.
  *
@@ -793,7 +683,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and
- *          calloc(). However, unlike malloc() and calloc() which allow for a
+ *          calloc(). However, unlike malloc() and calloc(), which allow for a
  *          "special" pointer to be returned instead of NULL, this function
  *          always returns NULL on failure or when size is set to 0 (zero).
  *
@@ -805,7 +695,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *            the same library that initially allocated it. In most cases, the
  *            HDF5 API uses resources that are allocated and freed either
  *            entirely by the user or entirely by the library, so this is not a
- *            problem. In rare cases, however, HDF5 API calls will free memory
+ *            problem. In rare cases, however, HDF5 API calls will free the memory
  *            that the user allocated. This function allows the user to safely
  *            allocate this memory.\n
  *            It is particularly important to use this function to allocate

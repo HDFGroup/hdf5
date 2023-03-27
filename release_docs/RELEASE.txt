@@ -1,4 +1,4 @@
-HDF5 version 1.10.10-2 currently under development
+HDF5 version 1.10.10-1 currently under development
 ================================================================================
 
 
@@ -543,7 +543,6 @@ Platforms Tested
 
 Known Problems
 ==============
-    
     Setting a variable-length dataset fill value will leak the memory allocated
     for the p field of the hvl_t struct. A fix is in progress for this.
     HDFFV-10840
