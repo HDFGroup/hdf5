@@ -30,6 +30,9 @@ public class HDF5Constants {
     // Get the HDF5 constants from the library //
     // /////////////////////////////////////////////////////////////////////////
 
+    /** */
+    public static final long H5_QUARTER_HADDR_MAX = H5_QUARTER_HADDR_MAX();
+
     /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();
     /** Special parameters for szip compression */
@@ -1473,6 +1476,8 @@ public class HDF5Constants {
     // List of private native variables to get constant values from C //
     // DO NOT EDIT THE LIST UNLESS YOU KNOW WHAT YOU DO!!! //
     // /////////////////////////////////////////////////////////////////////////
+
+    private static native final long H5_QUARTER_HADDR_MAX();
 
     private static native final int H5_SZIP_MAX_PIXELS_PER_BLOCK();
 

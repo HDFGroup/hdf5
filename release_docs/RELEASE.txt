@@ -143,6 +143,14 @@ New Features
 
     Java Library:
     -------------
+    - HDF5GroupInfo class has been deprecated.
+
+      This class assumes that an object can contain four values which uniquely identify an
+      object among those HDF5 files which are open. This is no longer valid in future
+      HDF5 releases.
+
+      (ADB - 2023/03/27)
+
     - Added version of H5Rget_name to return the name as a Java string.
 
       Other functions that get_name process the get_size then get the name
