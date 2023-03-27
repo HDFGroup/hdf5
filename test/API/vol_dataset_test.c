@@ -10467,18 +10467,18 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
     if (NULL == (write_buf = HDmalloc(data_size)))
         TEST_ERROR;
 
-        /*
-         * Create 2-dimensional memory dataspace for read buffer.
-         */
-        {
-            hsize_t mdims[] = {chunk_dims[0], chunk_dims[1]};
+    /*
+     * Create 2-dimensional memory dataspace for read buffer.
+     */
+    {
+        hsize_t mdims[] = {chunk_dims[0], chunk_dims[1]};
 
-            if ((mspace_id = H5Screate_simple(2, mdims, NULL)) < 0) {
-                H5_FAILED();
-                HDprintf("    failed to create memory dataspace\n");
-                goto error;
-            }
+        if ((mspace_id = H5Screate_simple(2, mdims, NULL)) < 0) {
+            H5_FAILED();
+            HDprintf("    failed to create memory dataspace\n");
+            goto error;
         }
+    }
 
     for (i = 0; i < DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_SPACE_RANK; i++) {
         count[i] = chunk_dims[i];
