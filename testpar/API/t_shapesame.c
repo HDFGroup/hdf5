@@ -4389,7 +4389,7 @@ main(int argc, char **argv)
                  "===================================\n");
     }
 
-    /* Shape Same tests using contigous hyperslab */
+    /* Shape Same tests using contiguous hyperslab */
 #if 0
     AddTest("sscontig1", sscontig1, NULL,
     "Cntg hslab, ind IO, cntg dsets", filenames[0]);

@@ -440,7 +440,7 @@ test_multi_dataset_io(void)
                 if ((dset_id[0] = H5Dopen_async(file_id, dset_name, H5P_DEFAULT, es_id)) < 0)
                     PART_TEST_ERROR(multi_dset_close)
 
-                /* Udpate wbuf */
+                /* Update wbuf */
                 for (j = 0; j < 6; j++)
                     for (k = 0; k < 10; k++)
                         wbuf[i][j][k] += 5 * 6 * 10;
@@ -669,7 +669,7 @@ test_multi_file_dataset_io(void)
                 if ((dset_id[0] = H5Dopen_async(file_id[i], "dset", H5P_DEFAULT, es_id)) < 0)
                     PART_TEST_ERROR(multi_file_dset_dclose)
 
-                /* Udpate wbuf */
+                /* Update wbuf */
                 for (j = 0; j < 6; j++)
                     for (k = 0; k < 10; k++)
                         wbuf[i][j][k] += 5 * 6 * 10;
@@ -747,7 +747,7 @@ test_multi_file_dataset_io(void)
                 if ((dset_id[0] = H5Dopen_async(file_id[0], "dset", H5P_DEFAULT, es_id)) < 0)
                     PART_TEST_ERROR(multi_file_dset_fclose)
 
-                /* Udpate wbuf */
+                /* Update wbuf */
                 for (j = 0; j < 6; j++)
                     for (k = 0; k < 10; k++)
                         wbuf[i][j][k] += 5 * 6 * 10;
@@ -1026,7 +1026,7 @@ test_multi_file_grp_dset_io(void)
                                                H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
                     PART_TEST_ERROR(multi_file_grp_dset_kick)
 
-                /* Udpate wbuf */
+                /* Update wbuf */
                 for (j = 0; j < 6; j++)
                     for (k = 0; k < 10; k++)
                         wbuf[i][j][k] += 5 * 6 * 10;

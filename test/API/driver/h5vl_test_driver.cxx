@@ -288,7 +288,7 @@ H5VLTestDriver::StartServer(h5vl_test_sysProcess *server, const char *name,
         }
     }
     if (foundWaiting) {
-        cerr << "H5VLTestDriver: " << name << " sucessfully started.\n";
+        cerr << "H5VLTestDriver: " << name << " successfully started.\n";
         return 1;
     } else {
         cerr << "H5VLTestDriver: " << name << " never started.\n";
@@ -319,7 +319,7 @@ H5VLTestDriver::StartClientHelper(h5vl_test_sysProcess *client,
         }
     }
     if (foundWaiting) {
-        cerr << "H5VLTestDriver: " << name << " sucessfully started.\n";
+        cerr << "H5VLTestDriver: " << name << " successfully started.\n";
         return 1;
     } else {
         cerr << "H5VLTestDriver: " << name << " never started.\n";
@@ -377,7 +377,7 @@ H5VLTestDriver::StartClient(h5vl_test_sysProcess *client, const char *name)
     h5vl_test_sysProcess_Execute(client);
     if (h5vl_test_sysProcess_GetState(client)
         == h5vl_test_sysProcess_State_Executing) {
-        cerr << "H5VLTestDriver: " << name << " sucessfully started.\n";
+        cerr << "H5VLTestDriver: " << name << " successfully started.\n";
         return 1;
     } else {
         this->ReportStatus(client, name);
@@ -656,7 +656,7 @@ H5VLTestDriver::Main(int argc, char* argv[])
         if (!mpiError && this->OutputStringHasError("client", output)) {
             mpiError = 1;
         }
-        // If client has died, we wait for output from the server processess
+        // If client has died, we wait for output from the server processes
         // for this->ServerExitTimeOut, then we'll kill the servers, if needed.
         double timeout = (clientPipe) ? 0 : this->ServerExitTimeOut;
         output = "";
@@ -707,7 +707,7 @@ H5VLTestDriver::Main(int argc, char* argv[])
 
     if (mpiError) {
         cerr
-            << "H5VLTestDriver: Error string found in ouput, H5VLTestDriver returning "
+            << "H5VLTestDriver: Error string found in output, H5VLTestDriver returning "
             << mpiError << "\n";
         return mpiError;
     }

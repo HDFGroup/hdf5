@@ -1793,7 +1793,7 @@ test_datatype_property_lists(void)
         }
         PART_END(H5Tget_create_plist);
 
-        /* Now close the property lists and datatypes and see if we can still retieve copies of
+        /* Now close the property lists and datatypes and see if we can still retrieve copies of
          * the property lists upon opening (instead of creating) a datatype
          */
         if (tcpl_id1 >= 0) {

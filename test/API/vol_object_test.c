@@ -2969,7 +2969,7 @@ error:
 }
 
 /*
- * Tests to excercise the H5O_COPY_WITHOUT_ATTR_FLAG flag
+ * Tests to exercise the H5O_COPY_WITHOUT_ATTR_FLAG flag
  * of H5Ocopy.
  */
 static int

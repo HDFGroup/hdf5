@@ -7869,7 +7869,7 @@ test_dataset_set_extent_chunked_unlimited(void)
 
         if (H5Sget_simple_extent_dims(fspace_id, new_dims, NULL) < 0) {
             H5_FAILED();
-            HDprintf("    failed to retreive dataset dimensionality\n");
+            HDprintf("    failed to retrieve dataset dimensionality\n");
             goto error;
         }
 
@@ -7935,7 +7935,7 @@ test_dataset_set_extent_chunked_unlimited(void)
 
         if (H5Sget_simple_extent_dims(fspace_id, new_dims, NULL) < 0) {
             H5_FAILED();
-            HDprintf("    failed to retreive dataset dimensionality\n");
+            HDprintf("    failed to retrieve dataset dimensionality\n");
             goto error;
         }
 
@@ -8131,7 +8131,7 @@ test_dataset_set_extent_chunked_fixed(void)
 
         if (H5Sget_simple_extent_dims(fspace_id, new_dims, NULL) < 0) {
             H5_FAILED();
-            HDprintf("    failed to retreive dataset dimensionality\n");
+            HDprintf("    failed to retrieve dataset dimensionality\n");
             goto error;
         }
 
@@ -8209,7 +8209,7 @@ test_dataset_set_extent_chunked_fixed(void)
 
         if (H5Sget_simple_extent_dims(fspace_id2, new_dims, NULL) < 0) {
             H5_FAILED();
-            HDprintf("    failed to retreive dataset dimensionality\n");
+            HDprintf("    failed to retrieve dataset dimensionality\n");
             goto error;
         }
 
@@ -8446,7 +8446,7 @@ test_dataset_set_extent_data(void)
             if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_shrink) < 0)
                 PART_ERROR(H5Dset_extent_data_shrink);
 
-            /* compare the shrinked data */
+            /* compare the shrunk data */
             for (i = 0; i < (int)dims_shrink[0]; i++) {
                 for (j = 0; j < (int)dims_shrink[1]; j++) {
                     if (buf_shrink[i][j] != buf_origin[i][j]) {
@@ -8936,7 +8936,7 @@ test_dataset_set_extent_invalid_params(void)
 
         PART_BEGIN(H5Dset_extent_invalid_layout_contiguous)
         {
-            TESTING_2("H5Dset_extent with an invalid dataset layout (continguous)")
+            TESTING_2("H5Dset_extent with an invalid dataset layout (contiguous)")
 
             H5E_BEGIN_TRY
             {

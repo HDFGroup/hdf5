@@ -2827,7 +2827,7 @@ test_get_file_size(void)
         goto error;
     }
 
-    /* There is no garantee the size of metadata in file is constant.
+    /* There is no guarantee the size of metadata in file is constant.
      * Just try to check if it's reasonable.
      *
      * Currently it should be around 2 KB.

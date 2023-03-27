@@ -35,7 +35,7 @@
 /* Moved from h5test */
 
 /*
- * This contains the filename prefix specificied as command line option for
+ * This contains the filename prefix specified as command line option for
  * the parallel test files.
  */
 H5TEST_DLLVAR char *paraprefix;
