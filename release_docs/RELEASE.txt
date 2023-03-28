@@ -143,6 +143,14 @@ New Features
 
     Java Library:
     -------------
+    - HDF5GroupInfo class has been deprecated.
+
+      This class assumes that an object can contain four values which uniquely identify an
+      object among those HDF5 files which are open. This is no longer valid in future
+      HDF5 releases.
+
+      (ADB - 2023/03/27)
+
     - Added version of H5Rget_name to return the name as a Java string.
 
       Other functions that get_name process the get_size then get the name
@@ -547,7 +555,12 @@ Platforms Tested
 
 Known Problems
 ==============
-    
+    The function prototype for H5Treclaim was mistakenly added to code for HDF5
+    1.10.9;  however no implementation code was added.  This prototype has been
+    removed, resulting in a source incompatibility for shared library versions 
+    between HDF5 versions 1.10.10 and 1.10.9, but not binary incompatibility 
+    since the function was not implemented.
+
     Setting a variable-length dataset fill value will leak the memory allocated
     for the p field of the hvl_t struct. A fix is in progress for this.
     HDFFV-10840
