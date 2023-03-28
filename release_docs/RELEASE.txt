@@ -492,16 +492,16 @@ Platforms Tested
     #1 SMP x86_64 GNU/Linux       compilers:
     (jelly/kituo/moohan)          Version 4.8.5 20150623 (Red Hat 4.8.5-39)
                                      Versions 4.9.3, 5.3.0, 6.3.0, 7.2.0
-                                              8.3.0, 9.1.0, 10.1.0
+                                              8.3.0, 9.1.0, 10.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
                                   MPICH 3.1.4 built with GCC 4.9.3, 3.3 built with GCC 7.2.0
                                   OpenMPI 3.1.3, 4.0.0 compiled with GCC 7.2.0
                                   NAG Fortran Compiler Release 7.0(Yurakuchho) Build 7011
-                                  PGI C, Fortran, C++ for 64-bit target on
-                                      x86_64;
-                                         Version 19.10-0
+                                  NVIDIA C, Fortran, C++ for 64-bit target on
+                                      x86_64 Linux -tp haswell;
+                                         Version 22.5-0
                                       (autotools and cmake)
 
     Linux-3.10.0-1160.0.0.1chaos  openmpi-4.1.2
@@ -538,9 +538,6 @@ Platforms Tested
     (platypus)                    Version 4.4.7 20120313
                                      Versions 4.9.3, 5.3.0, 6.2.0
                                   MPICH 3.1.4 compiled with GCC 4.9.3
-                                  PGI C, Fortran, C++ for 64-bit target on
-                                  x86-64;
-                                      Version 19.10-0
 
     Windows 10 x64                Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
                                   Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
