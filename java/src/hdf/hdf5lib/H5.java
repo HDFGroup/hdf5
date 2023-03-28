@@ -17,9 +17,6 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import hdf.hdf5lib.callbacks.H5A_iterate_cb;
 import hdf.hdf5lib.callbacks.H5A_iterate_t;
 import hdf.hdf5lib.callbacks.H5D_iterate_cb;
@@ -59,6 +56,9 @@ import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_native_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @page HDF5LIB HDF5 Java API Package
