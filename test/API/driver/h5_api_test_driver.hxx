@@ -1,44 +1,44 @@
-#ifndef H5VL_TEST_DRIVER_H
-#define H5VL_TEST_DRIVER_H
+#ifndef H5_API_TEST_DRIVER_H
+#define H5_API_TEST_DRIVER_H
 
 #include <string>
 #include <vector>
 
-#include <h5vl_test_sys/Process.h>
+#include <h5_api_test_sys/Process.h>
 
-class H5VLTestDriver {
+class H5APITestDriver {
 public:
     int Main(int argc, char *argv[]);
-    H5VLTestDriver();
-    ~H5VLTestDriver();
+    H5APITestDriver();
+    ~H5APITestDriver();
 
 protected:
     void SeparateArguments(const char* str, std::vector<std::string> &flags);
 
     void ReportCommand(const char * const *command, const char *name);
-    int  ReportStatus(h5vl_test_sysProcess *process, const char *name);
+    int  ReportStatus(h5_api_test_sysProcess *process, const char *name);
     int  ProcessCommandLine(int argc, char *argv[]);
     void CollectConfiguredOptions();
     void CreateCommandLine(std::vector<const char *> &commandLine,
         const char *cmd, int isServer, int isHelper, const char *numProc,
         int argStart = 0, int argCount = 0, char *argv[] = 0);
 
-    int StartServer(h5vl_test_sysProcess *server, const char *name,
+    int StartServer(h5_api_test_sysProcess *server, const char *name,
         std::vector<char> &out, std::vector<char> &err);
-    int StartClientHelper(h5vl_test_sysProcess *client, const char *name,
+    int StartClientHelper(h5_api_test_sysProcess *client, const char *name,
         std::vector<char> &out, std::vector<char> &err);
-    int StartClientInit(h5vl_test_sysProcess *client, const char *name,
+    int StartClientInit(h5_api_test_sysProcess *client, const char *name,
         std::vector<char> &out, std::vector<char> &err);
-    int StartClient(h5vl_test_sysProcess *client, const char *name);
-    void Stop(h5vl_test_sysProcess *p, const char *name);
+    int StartClient(h5_api_test_sysProcess *client, const char *name);
+    void Stop(h5_api_test_sysProcess *p, const char *name);
     int OutputStringHasError(const char *pname, std::string &output);
     int OutputStringHasToken(const char *pname, const char *regex,
         std::string &output, std::string &token);
 
-    int WaitForLine(h5vl_test_sysProcess *process, std::string &line,
+    int WaitForLine(h5_api_test_sysProcess *process, std::string &line,
         double timeout, std::vector<char> &out, std::vector<char> &err);
     void PrintLine(const char *pname, const char *line);
-    int WaitForAndPrintLine(const char *pname, h5vl_test_sysProcess *process,
+    int WaitForAndPrintLine(const char *pname, h5_api_test_sysProcess *process,
         std::string &line, double timeout, std::vector<char> &out,
         std::vector<char> &err, const char *waitMsg, int *foundWaiting);
 
@@ -90,4 +90,4 @@ private:
     bool IgnoreServerResult;
 };
 
-#endif //H5VL_TEST_DRIVER_H
+#endif //H5_API_TEST_DRIVER_H

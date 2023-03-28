@@ -13,7 +13,7 @@
 #ifndef VOL_TESTS_DISABLED_H
 #define VOL_TESTS_DISABLED_H
 
-#include "h5vl_test_config.h"
+#include "h5_api_test_config.h"
 
 /* Contains #defines to temporarily disable VOL tests based
  * on problematic or unsupported functionality */

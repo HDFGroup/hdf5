@@ -21,7 +21,7 @@
 #include "vol_link_test_parallel.h"
 #include "vol_object_test_parallel.h"
 #include "vol_misc_test_parallel.h"
-#ifdef H5VL_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAS_ASYNC
 #include "vol_async_test_parallel.h"
 #endif
 
@@ -41,7 +41,7 @@ uint64_t vol_cap_flags;
  * - test function
  * - enabled by default
  */
-#ifdef H5VL_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAS_ASYNC
 #define VOL_PARALLEL_TESTS                                                                                   \
     X(VOL_TEST_NULL, "", NULL, 0)                                                                            \
     X(VOL_TEST_FILE, "file", vol_file_test_parallel, 1)                                                      \

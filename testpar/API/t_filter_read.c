@@ -36,7 +36,7 @@ static int mpi_size, mpi_rank;
 #define HS_DIM1 200
 #define HS_DIM2 100
 
-static const char *
+const char *
 h5_rmprefix(const char *filename)
 {
     const char *ret_ptr;

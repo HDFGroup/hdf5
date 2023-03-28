@@ -230,7 +230,7 @@ typedef struct {
 #define MISC20_SPACE2_DIM0 8
 #define MISC20_SPACE2_DIM1 4
 
-#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5VL_TEST_NO_FILTERS)
+#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5_API_TEST_NO_FILTERS)
 /* Definitions for misc. test #21 */
 #define MISC21_FILE       "tmisc21.h5"
 #define MISC21_DSET_NAME  "Dataset"
@@ -335,7 +335,7 @@ typedef struct {
    See https://nvd.nist.gov/vuln/detail/CVE-2020-10812 */
 #define CVE_2020_10812_FILENAME "cve_2020_10812.h5"
 
-#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5VL_TEST_NO_FILTERS)
+#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5_API_TEST_NO_FILTERS)
 /*-------------------------------------------------------------------------
  * Function:  h5_szip_can_encode
  *
@@ -3943,7 +3943,7 @@ test_misc20(void)
    and encoder is available.
                             EIP 2004/8/04
 */
-#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5VL_TEST_NO_FILTERS)
+#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5_API_TEST_NO_FILTERS)
 
 /****************************************************************
 **
@@ -6257,7 +6257,7 @@ test_misc(void)
 #if 0
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 #endif
-#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5VL_TEST_NO_FILTERS)
+#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5_API_TEST_NO_FILTERS)
     test_misc21();  /* Test that "late" allocation time is treated the same as "incremental", for chunked
                        datasets w/a filters */
     test_misc22();  /* check szip bits per pixel */
@@ -6331,7 +6331,7 @@ cleanup_misc(void)
     H5Fdelete(MISC18_FILE, H5P_DEFAULT);
     H5Fdelete(MISC19_FILE, H5P_DEFAULT);
     H5Fdelete(MISC20_FILE, H5P_DEFAULT);
-#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5VL_TEST_NO_FILTERS)
+#if defined(H5_HAVE_FILTER_SZIP) && !defined(H5_API_TEST_NO_FILTERS)
     H5Fdelete(MISC21_FILE, H5P_DEFAULT);
     H5Fdelete(MISC22_FILE, H5P_DEFAULT);
 #endif /* H5_HAVE_FILTER_SZIP */
