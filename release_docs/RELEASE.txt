@@ -121,6 +121,14 @@ New Features
 
     Java Library:
     -------------
+    - HDF5GroupInfo class has been deprecated.
+
+      This class assumes that an object can contain four values which uniquely identify an
+      object among those HDF5 files which are open. This is no longer valid in future
+      HDF5 releases.
+
+      (ADB - 2023/03/27)
+
     - Added version of H5Rget_name to return the name as a Java string.
 
       Other functions that get_name process the get_size then get the name
@@ -205,7 +213,21 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
-    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
+    - Fixed a memory corruption issue that can occur when reading
+      from a dataset using a hyperslab selection in the file
+      dataspace and a point selection in the memory dataspace
+
+      When reading from a dataset using a hyperslab selection in
+      the dataset's file dataspace and a point selection in the
+      dataset's memory dataspace where the file dataspace's "rank"
+      is greater than the memory dataspace's "rank", memory corruption
+      could occur due to an incorrect number of selection points
+      being copied when projecting the point selection onto the
+      hyperslab selection's dataspace.
+
+      (JTH - 2023/03/23)
+      
+      - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
 
       Check for overflow when calculating on-disk attribute data size.
 
