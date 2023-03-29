@@ -9,8 +9,6 @@
 # help@hdfgroup.org.
 #
 
-# TODO: rename vol files to "api"
-
 #------------------------------------------------------------------------------
 # Set module path
 #------------------------------------------------------------------------------
@@ -35,14 +33,14 @@ set (HDF5_API_PAR_TESTS_EXTRA
 foreach (api_test ${HDF5_API_TESTS})
   set (HDF5_API_PAR_TEST_SRCS
     ${HDF5_API_PAR_TEST_SRCS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/vol_${api_test}_test_parallel.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_${api_test}_test_parallel.c
   )
 endforeach ()
 
 set (HDF5_API_PAR_TEST_SRCS
   ${HDF5_API_PAR_TEST_SRCS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/vol_test_parallel.c
-  ${HDF5_TEST_API_SRC_DIR}/vol_test_util.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/H5_api_test_parallel.c
+  ${HDF5_TEST_API_SRC_DIR}/H5_api_test_util.c
 )
 
 add_executable (h5_api_test_parallel ${HDF5_API_PAR_TEST_SRCS})

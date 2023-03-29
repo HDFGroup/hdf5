@@ -4355,7 +4355,7 @@ main(int argc, char **argv)
     }
 
     /* Make sure the connector supports the API functions being tested.  This test only
-     * uses a few VOL functions, such as H5Fcreate/close/delete, H5Dcreate/write/read/close,
+     * uses a few API functions, such as H5Fcreate/close/delete, H5Dcreate/write/read/close,
      */
     if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
         if (MAINPROCESS)

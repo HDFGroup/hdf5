@@ -1,6 +1,6 @@
 #include "h5_api_test_driver.hxx"
 
-#include "h5_api_test_config.h"
+#include "H5_api_test_config.h"
 
 #include <cstdio>
 #include <sstream>
