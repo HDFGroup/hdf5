@@ -372,10 +372,6 @@ regarding the driver.</td>
 or retrieves information regarding driver.</td>
 </tr>
 <tr>
-<td>#H5Pset_fapl_onion/#H5Pget_fapl_onion</td>
-<td>Modifies/queries the file driver properties of the onion driver.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_sec2</td>
 <td>Sets driver for unbuffered permanent files or retrieves information regarding driver.</td>
 </tr>

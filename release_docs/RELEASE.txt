@@ -226,6 +226,19 @@ Bug Fixes since HDF5-1.12.1 release
       hyperslab selection's dataspace.
 
       (JTH - 2023/03/23)
+      
+      - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
+
+      Check for overflow when calculating on-disk attribute data size.
+
+      A bogus hdf5 file may contain dataspace messages with sizes
+      which lead to the on-disk data sizes to exceed what is addressable.
+      When calculating the size, make sure, the multiplication does not
+      overflow.
+      The test case was crafted in a way that the overflow caused the
+      size to be 0.
+
+      (EFE - 2023/02/11 GH-2458)
 
     - Seg fault on file close
 
