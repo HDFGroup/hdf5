@@ -273,7 +273,11 @@ set (ENV{CI_MODEL} ${MODEL})
   ## -- LOCAL_MEMCHECK_TEST executes the Valgrind testing
   ## -- LOCAL_COVERAGE_TEST executes code coverage process
   ## --------------------------
-  ctest_start (${MODEL} GROUP ${MODEL})
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.16.0")
+    ctest_start (${MODEL} GROUP ${MODEL})
+  else ()
+    ctest_start (${MODEL} TRACK ${MODEL})
+  endif ()
   if (LOCAL_UPDATE)
     ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}")
   endif ()
