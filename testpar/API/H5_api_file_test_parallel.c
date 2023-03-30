@@ -38,7 +38,7 @@ test_create_file(void)
     TESTING("H5Fcreate");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file aren't supported with this connector\n");
         return 0;
@@ -85,13 +85,13 @@ test_open_file(void)
     TESTING_MULTIPART("H5Fopen");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, TRUE)) < 0)
         TEST_ERROR;
@@ -102,7 +102,7 @@ test_open_file(void)
     {
         PART_BEGIN(H5Fopen_rdonly)
         {
-            TESTING_2("H5Fopen in read-only mode")
+            TESTING_2("H5Fopen in read-only mode");
 
             if ((file_id = H5Fopen(H5_api_test_parallel_filename, H5F_ACC_RDONLY, fapl_id)) < 0) {
                 H5_FAILED();
@@ -125,7 +125,7 @@ test_open_file(void)
 
         PART_BEGIN(H5Fopen_rdwrite)
         {
-            TESTING_2("H5Fopen in read-write mode")
+            TESTING_2("H5Fopen in read-write mode");
 
             if ((file_id = H5Fopen(H5_api_test_parallel_filename, H5F_ACC_RDWR, fapl_id)) < 0) {
                 H5_FAILED();
@@ -152,7 +152,7 @@ test_open_file(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
@@ -196,10 +196,10 @@ test_split_comm_file_access(void)
     int      newrank;
     int      err_occurred = 0;
 
-    TESTING("file access with a split communicator")
+    TESTING("file access with a split communicator");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file aren't supported with this connector\n");
         return 0;

@@ -84,11 +84,11 @@ test_create_committed_datatype(void)
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t type_id = H5I_INVALID_HID;
 
-    TESTING("creation of a committed datatype")
+    TESTING("creation of a committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
@@ -168,15 +168,15 @@ test_create_committed_datatype_invalid_params(void)
     TESTING_MULTIPART("H5Tcommit2 with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -210,7 +210,7 @@ test_create_committed_datatype_invalid_params(void)
     {
         PART_BEGIN(H5Tcommit2_invalid_loc_id)
         {
-            TESTING_2("H5Tcommit2 with an invalid loc_id")
+            TESTING_2("H5Tcommit2 with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -347,7 +347,7 @@ test_create_committed_datatype_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Tclose(type_id) < 0)
         TEST_ERROR;
@@ -386,11 +386,11 @@ test_create_anonymous_committed_datatype(void)
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t type_id = H5I_INVALID_HID;
 
-    TESTING("creation of anonymous committed datatype")
+    TESTING("creation of anonymous committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
@@ -469,15 +469,15 @@ test_create_anonymous_committed_datatype_invalid_params(void)
     TESTING_MULTIPART("H5Tcommit_anon with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -531,7 +531,7 @@ test_create_anonymous_committed_datatype_invalid_params(void)
 
         PART_BEGIN(H5Tcommit_anon_invalid_type_id)
         {
-            TESTING_2("H5Tcommit_anon with an invalid datatype ID")
+            TESTING_2("H5Tcommit_anon with an invalid datatype ID");
 
             H5E_BEGIN_TRY
             {
@@ -551,7 +551,7 @@ test_create_anonymous_committed_datatype_invalid_params(void)
 
         PART_BEGIN(H5Tcommit_anon_invalid_tcpl)
         {
-            TESTING_2("H5Tcommit_anon with an invalid TCPL")
+            TESTING_2("H5Tcommit_anon with an invalid TCPL");
 
             H5E_BEGIN_TRY
             {
@@ -571,7 +571,7 @@ test_create_anonymous_committed_datatype_invalid_params(void)
 
         PART_BEGIN(H5Tcommit_anon_invalid_tapl)
         {
-            TESTING_2("H5Tcommit_anon with an invalid TAPL")
+            TESTING_2("H5Tcommit_anon with an invalid TAPL");
 
             H5E_BEGIN_TRY
             {
@@ -591,7 +591,7 @@ test_create_anonymous_committed_datatype_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Tclose(type_id) < 0)
         TEST_ERROR;
@@ -632,18 +632,18 @@ test_create_committed_datatype_empty_types(void)
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  type_id = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("creation of committed datatype with empty types")
+    TESTING_MULTIPART("creation of committed datatype with empty types");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -671,7 +671,7 @@ test_create_committed_datatype_empty_types(void)
     {
         PART_BEGIN(H5Tcommit_empty_compound_type)
         {
-            TESTING_2("creation of committed datatype with empty compound type")
+            TESTING_2("creation of committed datatype with empty compound type");
 
             if ((type_id = H5Tcreate(H5T_COMPOUND, (size_t)32)) < 0) {
                 H5_FAILED();
@@ -724,7 +724,7 @@ test_create_committed_datatype_empty_types(void)
         {
             int enum_val = 1;
 
-            TESTING_2("creation of committed datatype with empty enum type")
+            TESTING_2("creation of committed datatype with empty enum type");
 
             if ((type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0) {
                 H5_FAILED();
@@ -808,11 +808,11 @@ test_recommit_committed_type(void)
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  type_id = H5I_INVALID_HID;
 
-    TESTING("inability to re-commit a committed datatype")
+    TESTING("inability to re-commit a committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
@@ -913,11 +913,11 @@ test_open_committed_datatype(void)
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t type_id = H5I_INVALID_HID;
 
-    TESTING("H5Topen2")
+    TESTING("H5Topen2");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
@@ -1005,15 +1005,15 @@ test_open_committed_datatype_invalid_params(void)
     TESTING_MULTIPART("H5Topen2 with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1078,7 +1078,7 @@ test_open_committed_datatype_invalid_params(void)
 
         PART_BEGIN(H5Topen2_invalid_type_name)
         {
-            TESTING_2("H5Topen2 with an invalid datatype name")
+            TESTING_2("H5Topen2 with an invalid datatype name");
 
             H5E_BEGIN_TRY
             {
@@ -1112,7 +1112,7 @@ test_open_committed_datatype_invalid_params(void)
 
         PART_BEGIN(H5Topen2_invalid_tapl)
         {
-            TESTING_2("H5Topen2 with an invalid TAPL")
+            TESTING_2("H5Topen2 with an invalid TAPL");
 
             H5E_BEGIN_TRY
             {
@@ -1133,7 +1133,7 @@ test_open_committed_datatype_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
@@ -1175,19 +1175,19 @@ test_reopen_committed_datatype_indirect(void)
     hid_t  strtype  = H5I_INVALID_HID;
     hid_t  space_id = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("reopening open committed datatypes using H5Dget_type")
+    TESTING_MULTIPART("reopening open committed datatypes using H5Dget_type");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or stored datatype aren't supported with "
                  "this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1217,7 +1217,7 @@ test_reopen_committed_datatype_indirect(void)
     {
         PART_BEGIN(reopen_compound_type)
         {
-            TESTING_2("re-open of compound datatype")
+            TESTING_2("re-open of compound datatype");
 
             if ((strtype = H5Tcopy(H5T_C_S1)) < 0) {
                 H5_FAILED();
@@ -1311,7 +1311,7 @@ test_reopen_committed_datatype_indirect(void)
         {
             int enum_value;
 
-            TESTING_2("re-open of enum datatype")
+            TESTING_2("re-open of enum datatype");
 
             if ((type_id = H5Tenum_create(H5T_NATIVE_INT)) < 0) {
                 H5_FAILED();
@@ -1391,7 +1391,7 @@ test_reopen_committed_datatype_indirect(void)
 
         PART_BEGIN(reopen_vlen_type)
         {
-            TESTING_2("reopen of a variable-length datatype")
+            TESTING_2("reopen of a variable-length datatype");
 
             if ((type_id = H5Tvlen_create(H5T_NATIVE_INT)) < 0) {
                 H5_FAILED();
@@ -1459,7 +1459,7 @@ test_reopen_committed_datatype_indirect(void)
         {
             const char *tag = "opaque_tag";
 
-            TESTING_2("reopen of an opaque datatype")
+            TESTING_2("reopen of an opaque datatype");
 
             if ((type_id = H5Tcreate(H5T_OPAQUE, (size_t)13)) < 0) {
                 H5_FAILED();
@@ -1533,7 +1533,7 @@ test_reopen_committed_datatype_indirect(void)
         {
             hsize_t array_dims[] = {2, 3};
 
-            TESTING_2("reopen of an array datatype")
+            TESTING_2("reopen of an array datatype");
 
             if ((type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, array_dims)) < 0) {
                 H5_FAILED();
@@ -1599,7 +1599,7 @@ test_reopen_committed_datatype_indirect(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
@@ -1641,10 +1641,11 @@ test_close_committed_datatype_invalid_id(void)
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
 
-    TESTING("H5Tclose with an invalid committed datatype ID")
+    TESTING("H5Tclose with an invalid committed datatype ID");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file or stored datatype aren't supported with this connector\n");
@@ -1699,18 +1700,18 @@ test_datatype_property_lists(void)
     hid_t type_id1 = H5I_INVALID_HID, type_id2 = H5I_INVALID_HID;
     hid_t tcpl_id1 = H5I_INVALID_HID, tcpl_id2 = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("datatype property list operations")
+    TESTING_MULTIPART("datatype property list operations");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, stored datatype, or getting property list aren't "
                  "supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1774,7 +1775,7 @@ test_datatype_property_lists(void)
     {
         PART_BEGIN(H5Tget_create_plist)
         {
-            TESTING_2("H5Tget_create_plist")
+            TESTING_2("H5Tget_create_plist");
 
             /* Try to receive copies for the two property lists */
             if ((tcpl_id1 = H5Tget_create_plist(type_id1)) < 0) {
@@ -1831,7 +1832,7 @@ test_datatype_property_lists(void)
 
         PART_BEGIN(H5Tget_create_plist_reopened)
         {
-            TESTING_2("H5Tget_create_plist after re-opening committed datatype")
+            TESTING_2("H5Tget_create_plist after re-opening committed datatype");
 
             if ((type_id1 = H5Topen2(group_id, DATATYPE_PROPERTY_LIST_TEST_DATATYPE_NAME1, H5P_DEFAULT)) <
                 0) {
@@ -1865,7 +1866,7 @@ test_datatype_property_lists(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(tcpl_id1) < 0)
         TEST_ERROR;
@@ -1915,11 +1916,12 @@ test_create_dataset_with_committed_type(void)
     hid_t type_id   = H5I_INVALID_HID;
     hid_t fspace_id = H5I_INVALID_HID;
 
-    TESTING("dataset creation with a committed datatype")
+    TESTING("dataset creation with a committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or stored datatype aren't supported with "
                  "this connector\n");
@@ -2058,11 +2060,12 @@ test_create_attribute_with_committed_type(void)
     hid_t  type_id  = H5I_INVALID_HID;
     hid_t  space_id = H5I_INVALID_HID;
 
-    TESTING("attribute creation with a committed datatype")
+    TESTING("attribute creation with a committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, attribute, or stored datatype aren't supported "
                  "with this connector\n");
@@ -2190,11 +2193,12 @@ test_delete_committed_type(void)
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  type_id = H5I_INVALID_HID;
 
-    TESTING("committed datatype deletion")
+    TESTING("committed datatype deletion");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, attribute, or stored datatype aren't supported "
                  "with this connector\n");
@@ -2303,13 +2307,13 @@ test_resurrect_datatype(void)
     hid_t type_id         = H5I_INVALID_HID;
 #endif /* NO_ID_PREVENTS_OBJ_DELETE */
 
-    TESTING("resurrecting datatype after deletion")
+    TESTING("resurrecting datatype after deletion");
 
 #ifndef NO_ID_PREVENTS_OBJ_DELETE
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_HARD_LINKS)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, link, hard link, or stored datatype aren't "
                  "supported with this connector\n");
@@ -2442,7 +2446,7 @@ error:
 static int
 test_flush_committed_datatype(void)
 {
-    TESTING("H5Tflush")
+    TESTING("H5Tflush");
 
     SKIPPED();
 
@@ -2452,7 +2456,7 @@ test_flush_committed_datatype(void)
 static int
 test_flush_committed_datatype_invalid_params(void)
 {
-    TESTING("H5Tflush with invalid parameters")
+    TESTING("H5Tflush with invalid parameters");
 
     SKIPPED();
 
@@ -2462,7 +2466,7 @@ test_flush_committed_datatype_invalid_params(void)
 static int
 test_refresh_committed_datatype(void)
 {
-    TESTING("H5Trefresh")
+    TESTING("H5Trefresh");
 
     SKIPPED();
 
@@ -2472,7 +2476,7 @@ test_refresh_committed_datatype(void)
 static int
 test_refresh_committed_datatype_invalid_params(void)
 {
-    TESTING("H5Trefresh with invalid parameters")
+    TESTING("H5Trefresh with invalid parameters");
 
     SKIPPED();
 
@@ -2493,11 +2497,11 @@ test_cant_commit_predefined(void)
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id        = H5I_INVALID_HID;
 
-    TESTING("inability to commit predefined types directly")
+    TESTING("inability to commit predefined types directly");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");
@@ -2573,11 +2577,11 @@ test_cant_modify_committed_type(void)
     hid_t  group_id        = H5I_INVALID_HID;
     hid_t  type_id         = H5I_INVALID_HID;
 
-    TESTING("inability to modify a committed datatype")
+    TESTING("inability to modify a committed datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or stored datatype aren't supported with this "
                  "connector\n");

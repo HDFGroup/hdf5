@@ -119,6 +119,8 @@ endif ()
 # Build the ported HDF5 test executables
 #-----------------------------------------------------------------------------
 foreach (api_test_extra ${HDF5_API_TESTS_EXTRA})
+  unset (HDF5_API_TEST_EXTRA_SRCS)
+
   set (HDF5_API_TEST_EXTRA_SRCS
     ${HDF5_API_TEST_EXTRA_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/${api_test_extra}.c

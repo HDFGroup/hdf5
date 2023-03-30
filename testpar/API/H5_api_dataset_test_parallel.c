@@ -112,15 +112,15 @@ test_write_dataset_data_verification(void)
     TESTING_MULTIPART("verification of dataset data using H5Dwrite then H5Dread");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, TRUE)) < 0)
         TEST_ERROR;
@@ -200,7 +200,7 @@ test_write_dataset_data_verification(void)
         {
             hbool_t op_failed = FALSE;
 
-            TESTING_2("H5Dwrite using H5S_ALL then H5Dread")
+            TESTING_2("H5Dwrite using H5S_ALL then H5Dread");
 
             if ((dset_id = H5Dopen2(group_id, DATASET_WRITE_DATA_VERIFY_TEST_DSET_NAME1, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -374,7 +374,7 @@ test_write_dataset_data_verification(void)
 
         PART_BEGIN(H5Dwrite_hyperslab_read)
         {
-            TESTING_2("H5Dwrite using hyperslab selection then H5Dread")
+            TESTING_2("H5Dwrite using hyperslab selection then H5Dread");
 
             for (i = 1, data_size = 1; i < DATASET_WRITE_DATA_VERIFY_TEST_SPACE_RANK; i++)
                 data_size *= dims[i];
@@ -597,7 +597,7 @@ test_write_dataset_data_verification(void)
 
         PART_BEGIN(H5Dwrite_point_sel_read)
         {
-            TESTING_2("H5Dwrite using point selection then H5Dread")
+            TESTING_2("H5Dwrite using point selection then H5Dread");
 
             for (i = 1, data_size = 1; i < DATASET_WRITE_DATA_VERIFY_TEST_SPACE_RANK; i++)
                 data_size *= dims[i];
@@ -835,7 +835,7 @@ test_write_dataset_data_verification(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (read_buf) {
         HDfree(read_buf);
@@ -927,11 +927,11 @@ test_write_dataset_independent(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("independent writing to different datasets by different ranks")
+    TESTING("independent writing to different datasets by different ranks");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1267,11 +1267,11 @@ test_write_dataset_one_proc_0_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with one rank selecting 0 rows")
+    TESTING("write to dataset with one rank selecting 0 rows");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1567,11 +1567,11 @@ test_write_dataset_one_proc_none_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with one rank using 'none' selection")
+    TESTING("write to dataset with one rank using 'none' selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1878,11 +1878,11 @@ test_write_dataset_one_proc_all_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with one rank using all selection; others none selection")
+    TESTING("write to dataset with one rank using all selection; others none selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -2175,12 +2175,12 @@ test_write_dataset_hyper_file_all_mem(void)
     void    *read_buf  = NULL;
 #endif
 
-    TESTING("write to dataset with hyperslab sel. for file space; all sel. for memory")
+    TESTING("write to dataset with hyperslab sel. for file space; all sel. for memory");
 
 #ifdef BROKEN
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -2445,11 +2445,11 @@ test_write_dataset_all_file_hyper_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with all sel. for file space; hyperslab sel. for memory")
+    TESTING("write to dataset with all sel. for file space; hyperslab sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -2721,7 +2721,7 @@ error:
 static int
 test_write_dataset_point_file_all_mem(void)
 {
-    TESTING("write to dataset with point sel. for file space; all sel. for memory")
+    TESTING("write to dataset with point sel. for file space; all sel. for memory");
 
     SKIPPED();
 
@@ -2754,11 +2754,11 @@ test_write_dataset_all_file_point_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with all sel. for file space; point sel. for memory")
+    TESTING("write to dataset with all sel. for file space; point sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -3070,11 +3070,11 @@ test_write_dataset_hyper_file_point_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with hyperslab sel. for file space; point sel. for memory")
+    TESTING("write to dataset with hyperslab sel. for file space; point sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -3391,11 +3391,11 @@ test_write_dataset_point_file_hyper_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with point sel. for file space; hyperslab sel. for memory")
+    TESTING("write to dataset with point sel. for file space; hyperslab sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -3712,11 +3712,11 @@ test_read_dataset_one_proc_0_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with one rank selecting 0 rows")
+    TESTING("read from dataset with one rank selecting 0 rows");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4047,11 +4047,11 @@ test_read_dataset_one_proc_none_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with one rank using 'none' selection")
+    TESTING("read from dataset with one rank using 'none' selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4395,11 +4395,11 @@ test_read_dataset_one_proc_all_selection(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with one rank using all selection; others none selection")
+    TESTING("read from dataset with one rank using all selection; others none selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4718,7 +4718,7 @@ error:
 static int
 test_read_dataset_hyper_file_all_mem(void)
 {
-    TESTING("read from dataset with hyperslab sel. for file space; all sel. for memory")
+    TESTING("read from dataset with hyperslab sel. for file space; all sel. for memory");
 
     SKIPPED();
 
@@ -4750,11 +4750,11 @@ test_read_dataset_all_file_hyper_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with all sel. for file space; hyperslab sel. for memory")
+    TESTING("read from dataset with all sel. for file space; hyperslab sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5067,7 +5067,7 @@ error:
 static int
 test_read_dataset_point_file_all_mem(void)
 {
-    TESTING("read from dataset with point sel. for file space; all sel. for memory")
+    TESTING("read from dataset with point sel. for file space; all sel. for memory");
 
     SKIPPED();
 
@@ -5100,11 +5100,11 @@ test_read_dataset_all_file_point_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with all sel. for file space; point sel. for memory")
+    TESTING("read from dataset with all sel. for file space; point sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5454,11 +5454,11 @@ test_read_dataset_hyper_file_point_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with hyperslab sel. for file space; point sel. for memory")
+    TESTING("read from dataset with hyperslab sel. for file space; point sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5809,11 +5809,11 @@ test_read_dataset_point_file_hyper_mem(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("read from dataset with point sel. for file space; hyperslab sel. for memory")
+    TESTING("read from dataset with point sel. for file space; hyperslab sel. for memory");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -6176,12 +6176,12 @@ test_write_multi_chunk_dataset_same_shape_read(void)
     void    *write_buf = NULL;
     int      read_buf[1][DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_FIXED_CHUNK_DIMSIZE];
 
-    TESTING("write to dataset with multiple chunks using same shaped dataspaces")
+    TESTING("write to dataset with multiple chunks using same shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or getting property list aren't "
                  "supported with this connector\n");
@@ -6640,12 +6640,12 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     int      read_buf[DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_READ_BUF_DIMSIZE]
                 [DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_READ_BUF_DIMSIZE];
 
-    TESTING("write to dataset with multiple chunks using differently shaped dataspaces")
+    TESTING("write to dataset with multiple chunks using differently shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or getting property list aren't "
                  "supported with this connector\n");
@@ -7106,12 +7106,12 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
     void    *write_buf = NULL;
     int      read_buf[1][DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_FIXED_CHUNK_DIMSIZE];
 
-    TESTING("several overwrites to dataset with multiple chunks using same shaped dataspaces")
+    TESTING("several overwrites to dataset with multiple chunks using same shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or getting property list aren't "
                  "supported with this connector\n");
@@ -7632,12 +7632,12 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
     int      read_buf[DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_READ_BUF_DIMSIZE]
                 [DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_READ_BUF_DIMSIZE];
 
-    TESTING("several overwrites to dataset with multiple chunks using differently shaped dataspaces")
+    TESTING("several overwrites to dataset with multiple chunks using differently shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or getting property list aren't "
                  "supported with this connector\n");

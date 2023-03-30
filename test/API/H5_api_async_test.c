@@ -67,9 +67,9 @@ test_one_dataset_io(void)
     int     rbuf[6][10];
     int     i, j;
 
-    TESTING_MULTIPART("single dataset I/O")
+    TESTING_MULTIPART("single dataset I/O");
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -94,7 +94,7 @@ test_one_dataset_io(void)
     {
         PART_BEGIN(single_dset_eswait)
         {
-            TESTING_2("synchronization using H5ESwait()")
+            TESTING_2("synchronization using H5ESwait()");
 
             /* Initialize wbuf */
             for (i = 0; i < 6; i++)
@@ -103,23 +103,23 @@ test_one_dataset_io(void)
 
             /* Write the dataset asynchronously */
             if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
             if (op_failed)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
 
             /* Read the dataset asynchronously */
             if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
             if (op_failed)
-                PART_TEST_ERROR(single_dset_eswait)
+                PART_TEST_ERROR(single_dset_eswait);
 
             /* Verify the read data */
             for (i = 0; i < 6; i++)
@@ -127,7 +127,7 @@ test_one_dataset_io(void)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
                         HDprintf("    data verification failed\n");
-                        PART_ERROR(single_dset_eswait)
+                        PART_ERROR(single_dset_eswait);
                     } /* end if */
 
             PASSED();
@@ -136,7 +136,7 @@ test_one_dataset_io(void)
 
         PART_BEGIN(single_dset_dclose)
         {
-            TESTING_2("synchronization using H5Dclose()")
+            TESTING_2("synchronization using H5Dclose()");
 
             /* Update wbuf */
             for (i = 0; i < 6; i++)
@@ -145,23 +145,23 @@ test_one_dataset_io(void)
 
             /* Write the dataset asynchronously */
             if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             /* Close the dataset synchronously */
             if (H5Dclose(dset_id) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             /* Re-open the dataset asynchronously */
             if ((dset_id = H5Dopen_async(file_id, "dset", H5P_DEFAULT, es_id)) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             /* Read the dataset asynchronously */
             if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             /* Close the dataset synchronously */
             if (H5Dclose(dset_id) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             /* Verify the read data */
             for (i = 0; i < 6; i++)
@@ -169,12 +169,12 @@ test_one_dataset_io(void)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
                         HDprintf("    data verification failed\n");
-                        PART_ERROR(single_dset_dclose)
+                        PART_ERROR(single_dset_dclose);
                     } /* end if */
 
             /* Re-open the dataset asynchronously */
             if ((dset_id = H5Dopen_async(file_id, "dset", H5P_DEFAULT, es_id)) < 0)
-                PART_TEST_ERROR(single_dset_dclose)
+                PART_TEST_ERROR(single_dset_dclose);
 
             PASSED();
         }
@@ -182,7 +182,7 @@ test_one_dataset_io(void)
 
         PART_BEGIN(single_dset_dflush)
         {
-            TESTING_2("synchronization using H5Oflush_async()")
+            TESTING_2("synchronization using H5Oflush_async()");
 
             /* Update wbuf */
             for (i = 0; i < 6; i++)
@@ -191,22 +191,22 @@ test_one_dataset_io(void)
 
             /* Write the dataset asynchronously */
             if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_dflush)
+                PART_TEST_ERROR(single_dset_dflush);
 
             /* Flush the dataset asynchronously.  This will effectively work as a
              * barrier, guaranteeing the read takes place after the write. */
             if (H5Oflush_async(dset_id, es_id) < 0)
-                PART_TEST_ERROR(single_dset_dflush)
+                PART_TEST_ERROR(single_dset_dflush);
 
             /* Read the dataset asynchronously */
             if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_dflush)
+                PART_TEST_ERROR(single_dset_dflush);
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(single_dset_dflush)
+                PART_TEST_ERROR(single_dset_dflush);
             if (op_failed)
-                PART_TEST_ERROR(single_dset_dflush)
+                PART_TEST_ERROR(single_dset_dflush);
 
             /* Verify the read data */
             for (i = 0; i < 6; i++)
@@ -214,7 +214,7 @@ test_one_dataset_io(void)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
                         HDprintf("    data verification failed\n");
-                        PART_ERROR(single_dset_dflush)
+                        PART_ERROR(single_dset_dflush);
                     } /* end if */
 
             PASSED();
@@ -223,7 +223,7 @@ test_one_dataset_io(void)
 
         PART_BEGIN(single_dset_fclose)
         {
-            TESTING_2("synchronization using H5Fclose()")
+            TESTING_2("synchronization using H5Fclose()");
 
             /* Update wbuf */
             for (i = 0; i < 6; i++)
@@ -232,35 +232,35 @@ test_one_dataset_io(void)
 
             /* Write the dataset asynchronously */
             if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Close the dataset asynchronously */
             if (H5Dclose_async(dset_id, es_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Close the file synchronously */
             if (H5Fclose(file_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Reopen the file asynchronously. */
             if ((file_id = H5Fopen_async(ASYNC_API_TEST_FILE, H5F_ACC_RDONLY, H5P_DEFAULT, es_id)) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Re-open the dataset asynchronously */
             if ((dset_id = H5Dopen_async(file_id, "dset", H5P_DEFAULT, es_id)) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Read the dataset asynchronously */
             if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf, es_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Close the dataset asynchronously */
             if (H5Dclose_async(dset_id, es_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Close the file synchronously */
             if (H5Fclose(file_id) < 0)
-                PART_TEST_ERROR(single_dset_fclose)
+                PART_TEST_ERROR(single_dset_fclose);
 
             /* Verify the read data */
             for (i = 0; i < 6; i++)
@@ -268,7 +268,7 @@ test_one_dataset_io(void)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
                         HDprintf("    data verification failed\n");
-                        PART_ERROR(single_dset_fclose)
+                        PART_ERROR(single_dset_fclose);
                     } /* end if */
 
             PASSED();
@@ -277,7 +277,7 @@ test_one_dataset_io(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     /* Wait for the event stack to complete */
     if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
@@ -326,9 +326,9 @@ test_multi_dataset_io(void)
     int     rbuf[5][6][10];
     int     i, j, k;
 
-    TESTING_MULTIPART("multi dataset I/O")
+    TESTING_MULTIPART("multi dataset I/O");
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -348,7 +348,7 @@ test_multi_dataset_io(void)
     {
         PART_BEGIN(multi_dset_open)
         {
-            TESTING_2("keeping datasets open")
+            TESTING_2("keeping datasets open");
 
             /* Loop over datasets */
             for (i = 0; i < 5; i++) {
@@ -358,7 +358,7 @@ test_multi_dataset_io(void)
                 /* Create the dataset asynchronously */
                 if ((dset_id[i] = H5Dcreate_async(file_id, dset_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT,
                                                   H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_dset_open)
+                    PART_TEST_ERROR(multi_dset_open);
 
                 /* Initialize wbuf.  Must use a new slice of wbuf for each dset
                  * since we can't overwrite the buffers until I/O is done. */
@@ -369,27 +369,27 @@ test_multi_dataset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i],
                                    es_id) < 0)
-                    PART_TEST_ERROR(multi_dset_open)
+                    PART_TEST_ERROR(multi_dset_open);
             } /* end for */
 
             /* Flush the file asynchronously.  This will effectively work as a
              * barrier, guaranteeing the read takes place after the write. */
             if (H5Fflush_async(file_id, H5F_SCOPE_LOCAL, es_id) < 0)
-                PART_TEST_ERROR(multi_dset_open)
+                PART_TEST_ERROR(multi_dset_open);
 
             /* Loop over datasets */
             for (i = 0; i < 5; i++) {
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_dset_open)
+                    PART_TEST_ERROR(multi_dset_open);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_dset_open)
+                PART_TEST_ERROR(multi_dset_open);
             if (op_failed)
-                PART_TEST_ERROR(multi_dset_open)
+                PART_TEST_ERROR(multi_dset_open);
             /*printf("\nwbuf:\n");
             for(i = 0; i < 5; i++) {
                 for(j = 0; j < 6; j++) {
@@ -415,13 +415,13 @@ test_multi_dataset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_dset_open)
+                            PART_ERROR(multi_dset_open);
                         } /* end if */
 
             /* Close the datasets */
             for (i = 0; i < 5; i++)
                 if (H5Dclose(dset_id[i]) < 0)
-                    PART_TEST_ERROR(multi_dset_open)
+                    PART_TEST_ERROR(multi_dset_open);
 
             PASSED();
         }
@@ -429,7 +429,7 @@ test_multi_dataset_io(void)
 
         PART_BEGIN(multi_dset_close)
         {
-            TESTING_2("closing datasets between I/O")
+            TESTING_2("closing datasets between I/O");
 
             /* Loop over datasets */
             for (i = 0; i < 5; i++) {
@@ -438,7 +438,7 @@ test_multi_dataset_io(void)
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id, dset_name, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
 
                 /* Update wbuf */
                 for (j = 0; j < 6; j++)
@@ -448,17 +448,17 @@ test_multi_dataset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i],
                                    es_id) < 0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
             } /* end for */
 
             /* Flush the file asynchronously.  This will effectively work as a
              * barrier, guaranteeing the read takes place after the write. */
             if (H5Fflush_async(file_id, H5F_SCOPE_LOCAL, es_id) < 0)
-                PART_TEST_ERROR(multi_dset_close)
+                PART_TEST_ERROR(multi_dset_close);
 
             /* Loop over datasets */
             for (i = 0; i < 5; i++) {
@@ -467,23 +467,23 @@ test_multi_dataset_io(void)
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id, dset_name, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_dset_close)
+                    PART_TEST_ERROR(multi_dset_close);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_dset_close)
+                PART_TEST_ERROR(multi_dset_close);
             if (op_failed)
-                PART_TEST_ERROR(multi_dset_close)
+                PART_TEST_ERROR(multi_dset_close);
             /*printf("\nwbuf:\n");
             for(i = 0; i < 5; i++) {
                 for(j = 0; j < 6; j++) {
@@ -509,7 +509,7 @@ test_multi_dataset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_dset_close)
+                            PART_ERROR(multi_dset_close);
                         } /* end if */
 
             PASSED();
@@ -518,7 +518,7 @@ test_multi_dataset_io(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Fclose_async(file_id, es_id) < 0)
         TEST_ERROR;
@@ -572,9 +572,9 @@ test_multi_file_dataset_io(void)
     int     rbuf[5][6][10];
     int     i, j, k;
 
-    TESTING_MULTIPART("multi file dataset I/O")
+    TESTING_MULTIPART("multi file dataset I/O");
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -590,7 +590,7 @@ test_multi_file_dataset_io(void)
     {
         PART_BEGIN(multi_file_dset_open)
         {
-            TESTING_2("keeping files and datasets open")
+            TESTING_2("keeping files and datasets open");
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -600,14 +600,14 @@ test_multi_file_dataset_io(void)
                 /* Create file asynchronously */
                 if ((file_id[i] =
                          H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
                 if (i > max_printf_file)
                     max_printf_file = i;
 
                 /* Create the dataset asynchronously */
                 if ((dset_id[i] = H5Dcreate_async(file_id[i], "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
                                                   H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
 
                 /* Initialize wbuf.  Must use a new slice of wbuf for each dset
                  * since we can't overwrite the buffers until I/O is done. */
@@ -618,7 +618,7 @@ test_multi_file_dataset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i],
                                    es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
             } /* end for */
 
             /* Loop over files */
@@ -626,19 +626,19 @@ test_multi_file_dataset_io(void)
                 /* Flush the dataset asynchronously.  This will effectively work as a
                  * barrier, guaranteeing the read takes place after the write. */
                 if (H5Oflush_async(dset_id[i], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id[i], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_dset_open)
+                PART_TEST_ERROR(multi_file_dset_open);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_dset_open)
+                PART_TEST_ERROR(multi_file_dset_open);
 
             /* Verify the read data */
             for (i = 0; i < 5; i++)
@@ -647,13 +647,13 @@ test_multi_file_dataset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_file_dset_open)
+                            PART_ERROR(multi_file_dset_open);
                         } /* end if */
 
             /* Close the datasets */
             for (i = 0; i < 5; i++)
                 if (H5Dclose(dset_id[i]) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
 
             PASSED();
         }
@@ -661,13 +661,13 @@ test_multi_file_dataset_io(void)
 
         PART_BEGIN(multi_file_dset_dclose)
         {
-            TESTING_2("closing datasets between I/O")
+            TESTING_2("closing datasets between I/O");
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id[i], "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
 
                 /* Update wbuf */
                 for (j = 0; j < 6; j++)
@@ -677,11 +677,11 @@ test_multi_file_dataset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i],
                                    es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
             } /* end for */
 
             /* Loop over files */
@@ -689,27 +689,27 @@ test_multi_file_dataset_io(void)
                 /* Flush the file asynchronously.  This will effectively work as a
                  * barrier, guaranteeing the read takes place after the write. */
                 if (H5Fflush_async(file_id[i], H5F_SCOPE_LOCAL, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_open)
+                    PART_TEST_ERROR(multi_file_dset_open);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id[i], "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_dset_dclose)
+                PART_TEST_ERROR(multi_file_dset_dclose);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_dset_dclose)
+                PART_TEST_ERROR(multi_file_dset_dclose);
 
             /* Verify the read data */
             for (i = 0; i < 5; i++)
@@ -718,13 +718,13 @@ test_multi_file_dataset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_file_dset_dclose)
+                            PART_ERROR(multi_file_dset_dclose);
                         } /* end if */
 
             /* Close the files */
             for (i = 0; i < 5; i++)
                 if (H5Fclose(file_id[i]) < 0)
-                    PART_TEST_ERROR(multi_file_dset_dclose)
+                    PART_TEST_ERROR(multi_file_dset_dclose);
 
             PASSED();
         }
@@ -732,7 +732,7 @@ test_multi_file_dataset_io(void)
 
         PART_BEGIN(multi_file_dset_fclose)
         {
-            TESTING_2("closing files between I/O")
+            TESTING_2("closing files between I/O");
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -741,11 +741,11 @@ test_multi_file_dataset_io(void)
 
                 /* Open the file asynchronously */
                 if ((file_id[0] = H5Fopen_async(file_name, H5F_ACC_RDWR, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id[0], "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Update wbuf */
                 for (j = 0; j < 6; j++)
@@ -755,22 +755,22 @@ test_multi_file_dataset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i],
                                    es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_dset_fclose)
+                PART_TEST_ERROR(multi_file_dset_fclose);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_dset_fclose)
+                PART_TEST_ERROR(multi_file_dset_fclose);
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -779,31 +779,31 @@ test_multi_file_dataset_io(void)
 
                 /* Open the file asynchronously */
                 if ((file_id[0] = H5Fopen_async(file_name, H5F_ACC_RDONLY, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id[0] = H5Dopen_async(file_id[0], "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id[0], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_dset_fclose)
+                    PART_TEST_ERROR(multi_file_dset_fclose);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_dset_fclose)
+                PART_TEST_ERROR(multi_file_dset_fclose);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_dset_fclose)
+                PART_TEST_ERROR(multi_file_dset_fclose);
 
             /* Verify the read data */
             for (i = 0; i < 5; i++)
@@ -812,7 +812,7 @@ test_multi_file_dataset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_file_dset_fclose)
+                            PART_ERROR(multi_file_dset_fclose);
                         } /* end if */
 
             PASSED();
@@ -821,7 +821,7 @@ test_multi_file_dataset_io(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     /* Wait for the event stack to complete */
     if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
@@ -874,9 +874,9 @@ test_multi_file_grp_dset_io(void)
     int     rbuf[5][6][10];
     int     i, j, k;
 
-    TESTING_MULTIPART("multi file dataset I/O with groups")
+    TESTING_MULTIPART("multi file dataset I/O with groups");
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -892,7 +892,7 @@ test_multi_file_grp_dset_io(void)
     {
         PART_BEGIN(multi_file_grp_dset_no_kick)
         {
-            TESTING_2("without intermediate calls to H5ESwait()")
+            TESTING_2("without intermediate calls to H5ESwait()");
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -902,19 +902,19 @@ test_multi_file_grp_dset_io(void)
                 /* Create file asynchronously */
                 if ((file_id = H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT, es_id)) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
                 if (i > max_printf_file)
                     max_printf_file = i;
 
                 /* Create the group asynchronously */
                 if ((grp_id = H5Gcreate_async(file_id, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, es_id)) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Create the dataset asynchronously */
                 if ((dset_id = H5Dcreate_async(grp_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
                                                H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Initialize wbuf.  Must use a new slice of wbuf for each dset
                  * since we can't overwrite the buffers until I/O is done. */
@@ -925,26 +925,26 @@ test_multi_file_grp_dset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the group asynchronously */
                 if (H5Gclose_async(grp_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_no_kick);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -953,38 +953,38 @@ test_multi_file_grp_dset_io(void)
 
                 /* Open the file asynchronously */
                 if ((file_id = H5Fopen_async(file_name, H5F_ACC_RDONLY, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Open the group asynchronously */
                 if ((grp_id = H5Gopen_async(file_id, "grp", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id = H5Dopen_async(grp_id, "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the group asynchronously */
                 if (H5Gclose_async(grp_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_no_kick);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_no_kick);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_grp_dset_no_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_no_kick);
 
             /* Verify the read data */
             for (i = 0; i < 5; i++)
@@ -993,7 +993,7 @@ test_multi_file_grp_dset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_file_grp_dset_no_kick)
+                            PART_ERROR(multi_file_grp_dset_no_kick);
                         } /* end if */
 
             PASSED();
@@ -1002,7 +1002,7 @@ test_multi_file_grp_dset_io(void)
 
         PART_BEGIN(multi_file_grp_dset_kick)
         {
-            TESTING_2("with intermediate calls to H5ESwait() (0 timeout)")
+            TESTING_2("with intermediate calls to H5ESwait() (0 timeout)");
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -1012,19 +1012,19 @@ test_multi_file_grp_dset_io(void)
                 /* Create file asynchronously */
                 if ((file_id = H5Fcreate_async(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT, es_id)) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
                 if (i > max_printf_file)
                     max_printf_file = i;
 
                 /* Create the group asynchronously */
                 if ((grp_id = H5Gcreate_async(file_id, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, es_id)) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Create the dataset asynchronously */
                 if ((dset_id = H5Dcreate_async(grp_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT,
                                                H5P_DEFAULT, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Update wbuf */
                 for (j = 0; j < 6; j++)
@@ -1034,32 +1034,32 @@ test_multi_file_grp_dset_io(void)
                 /* Write the dataset asynchronously */
                 if (H5Dwrite_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf[i], es_id) <
                     0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the group asynchronously */
                 if (H5Gclose_async(grp_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Kick the event stack to make progress */
                 if (H5ESwait(es_id, 0, &num_in_progress, &op_failed) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
                 if (op_failed)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_grp_dset_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_kick);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_grp_dset_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_kick);
 
             /* Loop over files */
             for (i = 0; i < 5; i++) {
@@ -1068,44 +1068,44 @@ test_multi_file_grp_dset_io(void)
 
                 /* Open the file asynchronously */
                 if ((file_id = H5Fopen_async(file_name, H5F_ACC_RDONLY, H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Open the group asynchronously */
                 if ((grp_id = H5Gopen_async(file_id, "grp", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Open the dataset asynchronously */
                 if ((dset_id = H5Dopen_async(grp_id, "dset", H5P_DEFAULT, es_id)) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Read the dataset asynchronously */
                 if (H5Dread_async(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[i], es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the dataset asynchronously */
                 if (H5Dclose_async(dset_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the group asynchronously */
                 if (H5Gclose_async(grp_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Close the file asynchronously */
                 if (H5Fclose_async(file_id, es_id) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
 
                 /* Kick the event stack to make progress */
                 if (H5ESwait(es_id, 0, &num_in_progress, &op_failed) < 0)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
                 if (op_failed)
-                    PART_TEST_ERROR(multi_file_grp_dset_kick)
+                    PART_TEST_ERROR(multi_file_grp_dset_kick);
             } /* end for */
 
             /* Wait for the event stack to complete */
             if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
-                PART_TEST_ERROR(multi_file_grp_dset_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_kick);
             if (op_failed)
-                PART_TEST_ERROR(multi_file_grp_dset_kick)
+                PART_TEST_ERROR(multi_file_grp_dset_kick);
 
             /* Verify the read data */
             for (i = 0; i < 5; i++)
@@ -1114,7 +1114,7 @@ test_multi_file_grp_dset_io(void)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
                             HDprintf("    data verification failed\n");
-                            PART_ERROR(multi_file_grp_dset_kick)
+                            PART_ERROR(multi_file_grp_dset_kick);
                         } /* end if */
 
             PASSED();
@@ -1123,7 +1123,7 @@ test_multi_file_grp_dset_io(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     /* Wait for the event stack to complete */
     if (H5ESwait(es_id, H5_API_TEST_WAIT_FOREVER, &num_in_progress, &op_failed) < 0)
@@ -1182,7 +1182,7 @@ test_set_extent(void)
     int     rbuf[6][10];
     int     i, j;
 
-    TESTING("H5Dset_extent() and H5Dget_space()")
+    TESTING("H5Dset_extent() and H5Dget_space()");
 
     /* Create file dataspace */
     if ((fspace_id[0] = H5Screate_simple(2, dims, mdims)) < 0)
@@ -1282,7 +1282,7 @@ test_set_extent(void)
     for (i = 0; i < 6; i++)
         for (j = 0; j < 10; j++)
             if (wbuf[i][j] != rbuf[i][j])
-                FAIL_PUTS_ERROR("    data verification failed\n")
+                FAIL_PUTS_ERROR("    data verification failed\n");
 
     /*
      * Now try extending the dataset, closing it, reopening it, and getting the
@@ -1377,7 +1377,7 @@ test_attribute_exists(void)
     size_t  num_in_progress;
     hbool_t op_failed;
 
-    TESTING("H5Aexists()")
+    TESTING("H5Aexists()");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -1429,9 +1429,9 @@ test_attribute_exists(void)
 
     /* Check if H5Aexists returned the correct values */
     if (exists1)
-        FAIL_PUTS_ERROR("    H5Aexists returned TRUE for an attribute that should not exist")
+        FAIL_PUTS_ERROR("    H5Aexists returned TRUE for an attribute that should not exist");
     if (!exists2)
-        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist")
+        FAIL_PUTS_ERROR("    H5Aexists returned FALSE for an attribute that should exist");
 
     /* Close */
     if (H5Aclose_async(attr_id, es_id) < 0)
@@ -1489,7 +1489,7 @@ test_attribute_io(void)
     int     rbuf[6][10];
     int     i, j;
 
-    TESTING("attribute I/O")
+    TESTING("attribute I/O");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -1622,7 +1622,7 @@ test_attribute_io_tconv(void)
     int     rbuf[6][10];
     int     i, j;
 
-    TESTING("attribute I/O with type conversion")
+    TESTING("attribute I/O with type conversion");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -1759,7 +1759,7 @@ test_attribute_io_compound(void)
     tattr_cmpd_t fbuf[6][10];
     int          i, j;
 
-    TESTING("attribute I/O with compound type conversion")
+    TESTING("attribute I/O with compound type conversion");
 
     /* Create datatype */
     if ((mtype_id = H5Tcreate(H5T_COMPOUND, sizeof(tattr_cmpd_t))) < 0)
@@ -2056,7 +2056,7 @@ test_group(void)
     size_t     num_in_progress;
     hbool_t    op_failed;
 
-    TESTING("group operations")
+    TESTING("group operations");
 
     /* Create GCPL */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -2145,11 +2145,11 @@ test_group(void)
 
     /* Verify group infos */
     if (info1.nlinks != 0)
-        FAIL_PUTS_ERROR("    incorrect number of links")
+        FAIL_PUTS_ERROR("    incorrect number of links");
     if (info2.nlinks != 1)
-        FAIL_PUTS_ERROR("    incorrect number of links")
+        FAIL_PUTS_ERROR("    incorrect number of links");
     if (info3.nlinks != 2)
-        FAIL_PUTS_ERROR("    incorrect number of links")
+        FAIL_PUTS_ERROR("    incorrect number of links");
 
     /* Close */
     if (H5Gclose_async(group_id, es_id) < 0)
@@ -2210,7 +2210,7 @@ test_link(void)
     size_t  num_in_progress;
     hbool_t op_failed;
 
-    TESTING("link operations")
+    TESTING("link operations");
 
     /* Create GCPL */
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
@@ -2328,17 +2328,17 @@ test_link(void)
 
     /* Check if existence returns were correct */
     if (!existsh1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (!existss1)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (!existsh2)
-        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist")
+        FAIL_PUTS_ERROR("    link exists returned FALSE for link that should exist");
     if (existss2)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
     if (existsh3)
-        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist")
+        FAIL_PUTS_ERROR("    link exists returned TRUE for link that should not exist");
 
     /* Close */
     if (H5Gclose_async(parent_group_id, es_id) < 0)
@@ -2391,7 +2391,7 @@ test_ocopy_orefresh(void)
     size_t  num_in_progress;
     hbool_t op_failed;
 
-    TESTING("H5Ocopy() and H5Orefresh()")
+    TESTING("H5Ocopy() and H5Orefresh()");
 
     /* Create dataspace */
     if ((space_id = H5Screate_simple(2, dims, NULL)) < 0)
@@ -2493,7 +2493,7 @@ test_file_reopen(void)
     size_t  num_in_progress;
     hbool_t op_failed;
 
-    TESTING("H5Freopen()")
+    TESTING("H5Freopen()");
 
     /* Create event stack */
     if ((es_id = H5EScreate()) < 0)
@@ -2574,7 +2574,7 @@ H5_api_async_test(void)
     HDprintf("**********************************************\n\n");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_ASYNC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC)) {
         SKIPPED();
         HDprintf("    Async APIs aren't supported with this connector\n");
         return 0;

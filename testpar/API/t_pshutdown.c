@@ -29,8 +29,6 @@ int nerrors = 0; /* errors count */
 
 const char *FILENAME[] = {"shutdown.h5", NULL};
 
-uint64_t vol_cap_flags;
-
 int
 main(int argc, char **argv)
 {
@@ -64,12 +62,12 @@ main(int argc, char **argv)
     VRFY((fapl >= 0), "H5Pcreate succeeded");
 
     /* Get the capability flag of the VOL connector being used */
-    ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags);
+    ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g);
     VRFY((ret >= 0), "H5Pget_vol_cap_flags succeeded");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         if (MAINPROCESS) {
             puts("SKIPPED");
             HDprintf(

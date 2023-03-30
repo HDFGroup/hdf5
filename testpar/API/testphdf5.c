@@ -26,13 +26,12 @@ int dim0;
 int dim1;
 int chunkdim0;
 int chunkdim1;
-int nerrors   = 0;                    /* errors count */
-int ndatasets = 300;                  /* number of datasets to create*/
-int ngroups   = 512;                  /* number of groups to create in root
-                                       * group. */
-int      facc_type       = FACC_MPIO; /*Test file access type */
-int      dxfer_coll_type = DXFER_COLLECTIVE_IO;
-uint64_t vol_cap_flags;
+int nerrors   = 0;               /* errors count */
+int ndatasets = 300;             /* number of datasets to create*/
+int ngroups   = 512;             /* number of groups to create in root
+                                  * group. */
+int facc_type       = FACC_MPIO; /*Test file access type */
+int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
 H5E_auto2_t old_func;        /* previous error handler */
 void       *old_client_data; /* previous error handler arg.*/
@@ -366,10 +365,10 @@ main(int argc, char **argv)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((fapl >= 0), "H5Pcreate succeeded");
 
-    vol_cap_flags = 0L;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Get the capability flag of the VOL connector being used */
-    ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags);
+    ret = H5Pget_vol_cap_flags(fapl, &vol_cap_flags_g);
     VRFY((ret >= 0), "H5Pget_vol_cap_flags succeeded");
 
     /* Initialize testing framework */

@@ -47,8 +47,6 @@ static int mpi_size_g, mpi_rank_g;
 hsize_t space_dim1 = SPACE_DIM1 * 256; // 4096
 hsize_t space_dim2 = SPACE_DIM2;
 
-uint64_t vol_cap_flags;
-
 static void coll_chunktest(const char *filename, int chunk_factor, int select_factor, int api_option,
                            int file_selection, int mem_selection, int mode);
 
@@ -1879,7 +1877,7 @@ main(int argc, char **argv)
     acc_plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
 
     /* Get the capability flag of the VOL connector being used */
-    if (H5Pget_vol_cap_flags(acc_plist, &vol_cap_flags) < 0) {
+    if (H5Pget_vol_cap_flags(acc_plist, &vol_cap_flags_g) < 0) {
         if (MAIN_PROCESS)
             HDprintf("Failed to get the capability flag of the VOL connector being used\n");
 
@@ -1890,8 +1888,8 @@ main(int argc, char **argv)
     /* Make sure the connector supports the API functions being tested.  This test only
      * uses a few API functions, such as H5Fcreate/open/close/delete, H5Dcreate/write/read/close,
      * and H5Dget_space. */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         if (MAIN_PROCESS)
             HDprintf(
                 "API functions for basic file, dataset basic or more aren't supported with this connector\n");

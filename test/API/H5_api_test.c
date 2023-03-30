@@ -42,13 +42,6 @@
 
 char H5_api_test_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
-size_t n_tests_run_g;
-size_t n_tests_passed_g;
-size_t n_tests_failed_g;
-size_t n_tests_skipped_g;
-
-uint64_t vol_cap_flags;
-
 /* X-macro to define the following for each test:
  * - enum type
  * - name
@@ -119,7 +112,8 @@ H5_api_test_run(void)
 static int
 get_vol_cap_flags(const char *connector_name)
 {
-    hid_t connector_id, fapl_id;
+    hid_t connector_id = H5I_INVALID_HID;
+    hid_t fapl_id      = H5I_INVALID_HID;
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         H5_FAILED();
@@ -139,9 +133,9 @@ get_vol_cap_flags(const char *connector_name)
         goto error;
     }
 
-    vol_cap_flags = 0L;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0) {
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
         H5_FAILED();
         HDprintf("    couldn't H5VLget_cap_flags\n");
         goto error;

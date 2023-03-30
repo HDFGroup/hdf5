@@ -32,8 +32,8 @@ size_t n_tests_passed_g;
 size_t n_tests_failed_g;
 size_t n_tests_skipped_g;
 
-int      mpi_size, mpi_rank;
-uint64_t vol_cap_flags;
+int mpi_size;
+int mpi_rank;
 
 /* X-macro to define the following for each test:
  * - enum type
@@ -170,7 +170,8 @@ error:
 static int
 get_vol_cap_flags(const char *connector_name)
 {
-    hid_t connector_id, fapl_id;
+    hid_t connector_id = H5I_INVALID_HID;
+    hid_t fapl_id      = H5I_INVALID_HID;
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         H5_FAILED();
@@ -190,9 +191,9 @@ get_vol_cap_flags(const char *connector_name)
         goto error;
     }
 
-    vol_cap_flags = 0L;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0) {
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
         H5_FAILED();
         HDprintf("    couldn't H5VLget_cap_flags\n");
         goto error;

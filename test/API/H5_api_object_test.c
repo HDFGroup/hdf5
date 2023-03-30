@@ -119,12 +119,12 @@ test_open_object(void)
 
     TESTING_MULTIPART("object opening");
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, or stored datatype aren't "
                  "supported with this connector\n");
@@ -162,7 +162,7 @@ test_open_object(void)
     {
         PART_BEGIN(H5Oopen_group)
         {
-            TESTING_2("H5Oopen on a group")
+            TESTING_2("H5Oopen on a group");
 
             if ((group_id2 = H5Gcreate2(group_id, OBJECT_OPEN_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0) {
@@ -201,7 +201,7 @@ test_open_object(void)
 
         PART_BEGIN(H5Oopen_dset)
         {
-            TESTING_2("H5Oopen on a dataset")
+            TESTING_2("H5Oopen on a dataset");
 
             if ((dset_id = H5Dcreate2(group_id, OBJECT_OPEN_TEST_DSET_NAME, dset_dtype, fspace_id,
                                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -240,7 +240,7 @@ test_open_object(void)
 
         PART_BEGIN(H5Oopen_dtype)
         {
-            TESTING_2("H5Oopen on a committed datatype")
+            TESTING_2("H5Oopen on a committed datatype");
 
             if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
                 H5_FAILED();
@@ -310,7 +310,7 @@ test_open_object(void)
 
         PART_BEGIN(H5Oopen_by_idx_group)
         {
-            TESTING_2("H5Oopen_by_idx on a group")
+            TESTING_2("H5Oopen_by_idx on a group");
 
             if ((group_id2 = H5Oopen_by_idx(container_group, OBJECT_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                             H5_ITER_INC, 1, H5P_DEFAULT)) < 0) {
@@ -325,7 +325,7 @@ test_open_object(void)
 
         PART_BEGIN(H5Oopen_by_idx_dset)
         {
-            TESTING_2("H5Oopen_by_idx on a dataset")
+            TESTING_2("H5Oopen_by_idx on a dataset");
 
             if ((dset_id = H5Oopen_by_idx(container_group, OBJECT_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_INC, 0, H5P_DEFAULT)) < 0) {
@@ -340,7 +340,7 @@ test_open_object(void)
 
         PART_BEGIN(H5Oopen_by_idx_dtype)
         {
-            TESTING_2("H5Oopen_by_idx on a committed datatype")
+            TESTING_2("H5Oopen_by_idx on a committed datatype");
 
             if ((type_id = H5Oopen_by_idx(container_group, OBJECT_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_INC, 2, H5P_DEFAULT)) < 0) {
@@ -381,7 +381,7 @@ test_open_object(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -431,15 +431,16 @@ test_open_object_invalid_params(void)
     TESTING_MULTIPART("object opening with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, or creation order aren't supported with "
                  "this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -489,7 +490,7 @@ test_open_object_invalid_params(void)
     {
         PART_BEGIN(H5Oopen_invalid_loc_id)
         {
-            TESTING_2("H5Oopen with an invalid location ID")
+            TESTING_2("H5Oopen with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -510,7 +511,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_invalid_obj_name)
         {
-            TESTING_2("H5Oopen with an invalid object name")
+            TESTING_2("H5Oopen with an invalid object name");
 
             H5E_BEGIN_TRY
             {
@@ -544,7 +545,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_invalid_lapl)
         {
-            TESTING_2("H5Oopen with an invalid LAPL")
+            TESTING_2("H5Oopen with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -565,7 +566,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_idx_invalid_loc_id)
         {
-            TESTING_2("H5Oopen_by_idx with an invalid location ID")
+            TESTING_2("H5Oopen_by_idx with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -587,7 +588,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_idx_invalid_grp_name)
         {
-            TESTING_2("H5Oopen_by_idx with an invalid group name")
+            TESTING_2("H5Oopen_by_idx with an invalid group name");
 
             H5E_BEGIN_TRY
             {
@@ -621,7 +622,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_idx_invalid_index_type)
         {
-            TESTING_2("H5Oopen_by_idx with an invalid index type")
+            TESTING_2("H5Oopen_by_idx with an invalid index type");
 
             H5E_BEGIN_TRY
             {
@@ -657,7 +658,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_idx_invalid_iter_order)
         {
-            TESTING_2("H5Oopen_by_idx with an invalid iteration order")
+            TESTING_2("H5Oopen_by_idx with an invalid iteration order");
 
             H5E_BEGIN_TRY
             {
@@ -694,7 +695,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_idx_invalid_lapl)
         {
-            TESTING_2("H5Oopen_by_idx with an invalid LAPL")
+            TESTING_2("H5Oopen_by_idx with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -716,7 +717,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_token_invalid_loc_id)
         {
-            TESTING_2("H5Oopen_by_token with an invalid location ID")
+            TESTING_2("H5Oopen_by_token with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -737,7 +738,7 @@ test_open_object_invalid_params(void)
 
         PART_BEGIN(H5Oopen_by_token_invalid_token)
         {
-            TESTING_2("H5Oopen_by_token with an invalid token")
+            TESTING_2("H5Oopen_by_token with an invalid token");
 
             H5E_BEGIN_TRY
             {
@@ -758,7 +759,7 @@ test_open_object_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(gcpl_id) < 0)
         TEST_ERROR;
@@ -805,16 +806,17 @@ test_object_exists(void)
     TESTING_MULTIPART("object existence");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags & H5VL_CAP_FLAG_SOFT_LINKS)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, stored datatype or soft link "
                  "aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -851,7 +853,7 @@ test_object_exists(void)
     {
         PART_BEGIN(H5Oexists_by_name_group)
         {
-            TESTING_2("H5Oexists_by_name on a group")
+            TESTING_2("H5Oexists_by_name on a group");
 
             if ((group_id2 = H5Gcreate2(group_id, OBJECT_EXISTS_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0) {
@@ -884,7 +886,7 @@ test_object_exists(void)
 
         PART_BEGIN(H5Oexists_by_name_dset)
         {
-            TESTING_2("H5Oexists_by_name on a dataset")
+            TESTING_2("H5Oexists_by_name on a dataset");
 
             if ((dset_id = H5Dcreate2(group_id, OBJECT_EXISTS_TEST_DSET_NAME, dset_dtype, fspace_id,
                                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -918,7 +920,7 @@ test_object_exists(void)
 
         PART_BEGIN(H5Oexists_by_name_dtype)
         {
-            TESTING_2("H5Oexists_by_name on a committed datatype")
+            TESTING_2("H5Oexists_by_name on a committed datatype");
 
             if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
                 H5_FAILED();
@@ -958,7 +960,7 @@ test_object_exists(void)
 
         PART_BEGIN(H5Oexists_by_name_soft_link)
         {
-            TESTING_2("H5Oexists_by_name for a soft link")
+            TESTING_2("H5Oexists_by_name for a soft link");
 
             if (H5Lcreate_soft("/" OBJECT_TEST_GROUP_NAME "/" OBJECT_EXISTS_TEST_SUBGROUP_NAME, group_id,
                                OBJECT_EXISTS_TEST_SOFT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -986,7 +988,7 @@ test_object_exists(void)
 
         PART_BEGIN(H5Oexists_by_name_dangling_soft_link)
         {
-            TESTING_2("H5Oexists_by_name for a dangling soft link")
+            TESTING_2("H5Oexists_by_name for a dangling soft link");
 
             if (H5Lcreate_soft(
                     "/" OBJECT_TEST_GROUP_NAME "/" OBJECT_EXISTS_TEST_SUBGROUP_NAME "/non_existent_object",
@@ -1017,7 +1019,7 @@ test_object_exists(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -1066,14 +1068,14 @@ test_object_exists_invalid_params(void)
     TESTING_MULTIPART("object existence with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or object aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1111,7 +1113,7 @@ test_object_exists_invalid_params(void)
     {
         PART_BEGIN(H5Oexists_by_name_invalid_loc_id)
         {
-            TESTING_2("H5Oexists_by_name with an invalid location ID")
+            TESTING_2("H5Oexists_by_name with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -1132,7 +1134,7 @@ test_object_exists_invalid_params(void)
 
         PART_BEGIN(H5Oexists_by_name_invalid_obj_name)
         {
-            TESTING_2("H5Oexists_by_name with an invalid object name")
+            TESTING_2("H5Oexists_by_name with an invalid object name");
 
             H5E_BEGIN_TRY
             {
@@ -1164,7 +1166,7 @@ test_object_exists_invalid_params(void)
 
         PART_BEGIN(H5Oexists_by_name_invalid_lapl)
         {
-            TESTING_2("H5Oexists_by_name with an invalid LAPL")
+            TESTING_2("H5Oexists_by_name with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -1185,7 +1187,7 @@ test_object_exists_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
@@ -1217,7 +1219,7 @@ error:
 static int
 test_get_object_info(void)
 {
-    TESTING("object info retrieval")
+    TESTING("object info retrieval");
 
     SKIPPED();
 
@@ -1232,7 +1234,7 @@ test_get_object_info(void)
 static int
 test_get_object_info_invalid_params(void)
 {
-    TESTING("object info retrieval with invalid parameters")
+    TESTING("object info retrieval with invalid parameters");
 
     SKIPPED();
 
@@ -1256,16 +1258,16 @@ test_link_object(void)
     TESTING_MULTIPART("object linking");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, or stored datatype aren't "
                  "supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1298,7 +1300,7 @@ test_link_object(void)
     {
         PART_BEGIN(H5Olink_group)
         {
-            TESTING_2("H5Olink an anonymous group")
+            TESTING_2("H5Olink an anonymous group");
 
             if ((group_id2 = H5Gcreate_anon(group_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -1318,7 +1320,7 @@ test_link_object(void)
 
         PART_BEGIN(H5Olink_dataset)
         {
-            TESTING_2("H5Olink an anonymous dataset")
+            TESTING_2("H5Olink an anonymous dataset");
 
             if ((dset_id = H5Dcreate_anon(group_id, dset_dtype, fspace_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -1338,7 +1340,7 @@ test_link_object(void)
 
         PART_BEGIN(H5Olink_datatype)
         {
-            TESTING_2("H5Olink an anonymous datatype")
+            TESTING_2("H5Olink an anonymous datatype");
 
             if (H5Tcommit_anon(group_id, dset_dtype, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -1358,7 +1360,7 @@ test_link_object(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -1412,14 +1414,14 @@ test_link_object_invalid_params(void)
     TESTING_MULTIPART("object linking with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or object aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1452,7 +1454,7 @@ test_link_object_invalid_params(void)
     {
         PART_BEGIN(H5Olink_invalid_object_id)
         {
-            TESTING_2("H5Olink with an invalid object ID")
+            TESTING_2("H5Olink with an invalid object ID");
 
             H5E_BEGIN_TRY
             {
@@ -1473,7 +1475,7 @@ test_link_object_invalid_params(void)
 
         PART_BEGIN(H5Olink_invalid_location)
         {
-            TESTING_2("H5Olink with an invalid location ID")
+            TESTING_2("H5Olink with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -1494,7 +1496,7 @@ test_link_object_invalid_params(void)
 
         PART_BEGIN(H5Olink_invalid_name)
         {
-            TESTING_2("H5Olink with an invalid name")
+            TESTING_2("H5Olink with an invalid name");
 
             H5E_BEGIN_TRY
             {
@@ -1526,7 +1528,7 @@ test_link_object_invalid_params(void)
 
         PART_BEGIN(H5Olink_invalid_lcpl)
         {
-            TESTING_2("H5Olink with an invalid LCPL")
+            TESTING_2("H5Olink with an invalid LCPL");
 
             H5E_BEGIN_TRY
             {
@@ -1547,7 +1549,7 @@ test_link_object_invalid_params(void)
 
         PART_BEGIN(H5Olink_invalid_lapl)
         {
-            TESTING_2("H5Olink with an invalid LAPL")
+            TESTING_2("H5Olink with an invalid LAPL");
 #ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
@@ -1572,7 +1574,7 @@ test_link_object_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
@@ -1617,16 +1619,17 @@ test_incr_decr_object_refcount(void)
     TESTING_MULTIPART("increment/decrement the reference count of object");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, stored datatype, basic or more object  "
                  "aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1659,7 +1662,7 @@ test_incr_decr_object_refcount(void)
     {
         PART_BEGIN(H5Oincr_decr_refcount_group)
         {
-            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a group")
+            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a group");
 
             if ((group_id2 = H5Gcreate2(group_id, OBJECT_REF_COUNT_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0) {
@@ -1728,7 +1731,7 @@ test_incr_decr_object_refcount(void)
 
         PART_BEGIN(H5Oincr_decr_refcount_dset)
         {
-            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a dataset")
+            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a dataset");
 
             if ((dset_id = H5Dcreate2(group_id, OBJECT_REF_COUNT_TEST_DSET_NAME, dset_dtype, fspace_id,
                                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -1797,7 +1800,7 @@ test_incr_decr_object_refcount(void)
 
         PART_BEGIN(H5Oincr / decr_refcount_dtype)
         {
-            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a committed datatype")
+            TESTING_2("H5Oincr_refcount/H5Odecr_refcount on a committed datatype");
 
             if (H5Tcommit2(group_id, OBJECT_REF_COUNT_TEST_TYPE_NAME, dset_dtype, H5P_DEFAULT, H5P_DEFAULT,
                            H5P_DEFAULT) < 0) {
@@ -1866,7 +1869,7 @@ test_incr_decr_object_refcount(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -1909,7 +1912,7 @@ test_incr_decr_object_refcount_invalid_params(void)
     TESTING_MULTIPART("object reference count incr./decr. with an invalid parameter");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE)) {
         SKIPPED();
         HDprintf("    API functions for more object aren't supported with this connector\n");
         return 0;
@@ -1919,7 +1922,7 @@ test_incr_decr_object_refcount_invalid_params(void)
     {
         PART_BEGIN(H5Oincr_refcount_invalid_param)
         {
-            TESTING_2("H5Oincr_refcount with invalid object ID")
+            TESTING_2("H5Oincr_refcount with invalid object ID");
 
             H5E_BEGIN_TRY
             {
@@ -1939,7 +1942,7 @@ test_incr_decr_object_refcount_invalid_params(void)
 
         PART_BEGIN(H5Odecr_refcount_invalid_param)
         {
-            TESTING_2("H5Odecr_refcount with invalid object ID")
+            TESTING_2("H5Odecr_refcount with invalid object ID");
 
             H5E_BEGIN_TRY
             {
@@ -1989,21 +1992,21 @@ test_object_copy_basic(void)
     hid_t       attr_space_id   = H5I_INVALID_HID;
     hid_t       space_id        = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("basic object copying")
+    TESTING_MULTIPART("basic object copying");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, link, dataset, attribute, iterate, or "
                  "stored datatype aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -2158,7 +2161,7 @@ test_object_copy_basic(void)
     {
         PART_BEGIN(H5Ocopy_group)
         {
-            TESTING_2("H5Ocopy on a group (default copy options)")
+            TESTING_2("H5Ocopy on a group (default copy options)");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BASIC_TEST_GROUP_NAME, group_id,
                         OBJECT_COPY_BASIC_TEST_NEW_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -2316,7 +2319,7 @@ test_object_copy_basic(void)
 
         PART_BEGIN(H5Ocopy_dset)
         {
-            TESTING_2("H5Ocopy on a dataset (default copy options)")
+            TESTING_2("H5Ocopy on a dataset (default copy options)");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BASIC_TEST_DSET_NAME, group_id,
                         OBJECT_COPY_BASIC_TEST_NEW_DSET_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -2406,7 +2409,7 @@ test_object_copy_basic(void)
 
         PART_BEGIN(H5Ocopy_dtype)
         {
-            TESTING_2("H5Ocopy on a committed datatype (default copy options)")
+            TESTING_2("H5Ocopy on a committed datatype (default copy options)");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BASIC_TEST_DTYPE_NAME, group_id,
                         OBJECT_COPY_BASIC_TEST_NEW_DTYPE_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -2497,7 +2500,7 @@ test_object_copy_basic(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(attr_space_id) < 0)
         TEST_ERROR;
@@ -2561,19 +2564,20 @@ test_object_copy_already_existing(void)
     hid_t  dset_dtype      = H5I_INVALID_HID;
     hid_t  space_id        = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("object copying to location where objects already exist")
+    TESTING_MULTIPART("object copying to location where objects already exist");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, or stored datatype aren't "
                  "supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -2637,7 +2641,7 @@ test_object_copy_already_existing(void)
     {
         PART_BEGIN(H5Ocopy_already_existing_group)
         {
-            TESTING_2("H5Ocopy group to location where group already exists")
+            TESTING_2("H5Ocopy group to location where group already exists");
 
             H5E_BEGIN_TRY
             {
@@ -2658,7 +2662,7 @@ test_object_copy_already_existing(void)
 
         PART_BEGIN(H5Ocopy_already_existing_dset)
         {
-            TESTING_2("H5Ocopy dataset to location where dataset already exists")
+            TESTING_2("H5Ocopy dataset to location where dataset already exists");
 
             H5E_BEGIN_TRY
             {
@@ -2679,7 +2683,7 @@ test_object_copy_already_existing(void)
 
         PART_BEGIN(H5Ocopy_already_existing_dtype)
         {
-            TESTING_2("H5Ocopy committed datatype to location where committed datatype already exists")
+            TESTING_2("H5Ocopy committed datatype to location where committed datatype already exists");
 
             H5E_BEGIN_TRY
             {
@@ -2701,7 +2705,7 @@ test_object_copy_already_existing(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
@@ -2758,12 +2762,12 @@ test_object_copy_shallow_group_copy(void)
     hid_t      tmp_group_id    = H5I_INVALID_HID;
     hid_t      ocpypl_id       = H5I_INVALID_HID;
 
-    TESTING("object copying with H5O_COPY_SHALLOW_HIERARCHY_FLAG flag")
+    TESTING("object copying with H5O_COPY_SHALLOW_HIERARCHY_FLAG flag");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, or link aren't supported with this "
                  "connector\n");
@@ -2993,20 +2997,21 @@ test_object_copy_no_attributes(void)
     hid_t       space_id        = H5I_INVALID_HID;
     hid_t       ocpypl_id       = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("object copying with H5O_COPY_WITHOUT_ATTR_FLAG flag")
+    TESTING_MULTIPART("object copying with H5O_COPY_WITHOUT_ATTR_FLAG flag");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, link, dataset, attribute, or stored "
                  "datatype aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3132,7 +3137,7 @@ test_object_copy_no_attributes(void)
     {
         PART_BEGIN(H5Ocopy_group_no_attributes)
         {
-            TESTING_2("H5Ocopy on a group (without attributes)")
+            TESTING_2("H5Ocopy on a group (without attributes)");
 
             if ((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) {
                 H5_FAILED();
@@ -3232,7 +3237,7 @@ test_object_copy_no_attributes(void)
 
         PART_BEGIN(H5Ocopy_dset_no_attributes)
         {
-            TESTING_2("H5Ocopy on a dataset (without attributes)")
+            TESTING_2("H5Ocopy on a dataset (without attributes)");
 
             if ((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) {
                 H5_FAILED();
@@ -3332,7 +3337,7 @@ test_object_copy_no_attributes(void)
 
         PART_BEGIN(H5Ocopy_dtype_no_attributes)
         {
-            TESTING_2("H5Ocopy on a committed datatype (without attributes)")
+            TESTING_2("H5Ocopy on a committed datatype (without attributes)");
 
             if ((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) {
                 H5_FAILED();
@@ -3432,7 +3437,7 @@ test_object_copy_no_attributes(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(attr_space_id) < 0)
         TEST_ERROR;
@@ -3500,21 +3505,21 @@ test_object_copy_by_soft_link(void)
     hid_t       attr_id         = H5I_INVALID_HID;
     hid_t       attr_space_id   = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("object copying through use of soft links")
+    TESTING_MULTIPART("object copying through use of soft links");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_SOFT_LINKS)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, link, dataset, attribute, iterate, or "
                  "soft link aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3603,7 +3608,7 @@ test_object_copy_by_soft_link(void)
     {
         PART_BEGIN(H5Ocopy_through_soft_link)
         {
-            TESTING_2("H5Ocopy through use of a soft link")
+            TESTING_2("H5Ocopy through use of a soft link");
 
             if (H5Lcreate_soft("/" OBJECT_TEST_GROUP_NAME "/" OBJECT_COPY_SOFT_LINK_TEST_SUBGROUP_NAME
                                "/" OBJECT_COPY_SOFT_LINK_TEST_GROUP_NAME,
@@ -3748,7 +3753,7 @@ test_object_copy_by_soft_link(void)
         {
             herr_t err_ret;
 
-            TESTING_2("H5Ocopy through use of a dangling soft link")
+            TESTING_2("H5Ocopy through use of a dangling soft link");
 
             if (H5Lcreate_soft("/" OBJECT_TEST_GROUP_NAME "/" OBJECT_COPY_SOFT_LINK_TEST_SUBGROUP_NAME
                                "/nonexistent_object",
@@ -3780,7 +3785,7 @@ test_object_copy_by_soft_link(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(attr_space_id) < 0)
         TEST_ERROR;
@@ -3831,20 +3836,20 @@ test_object_copy_group_with_soft_links(void)
     hid_t      tmp_group_id    = H5I_INVALID_HID;
     hid_t      ocpypl_id       = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("group copying when group contains soft links")
+    TESTING_MULTIPART("group copying when group contains soft links");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags & H5VL_CAP_FLAG_SOFT_LINKS)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, link, or soft link aren't supported with "
                  "this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3914,7 +3919,7 @@ test_object_copy_group_with_soft_links(void)
     {
         PART_BEGIN(H5Ocopy_dont_expand_soft_links)
         {
-            TESTING_2("H5Ocopy on group with soft links (soft links not expanded)")
+            TESTING_2("H5Ocopy on group with soft links (soft links not expanded)");
 
             if (H5Ocopy(group_id, OBJECT_COPY_GROUP_WITH_SOFT_LINKS_TEST_GROUP_NAME, group_id,
                         OBJECT_COPY_GROUP_WITH_SOFT_LINKS_TEST_NON_EXPAND_GROUP_NAME, H5P_DEFAULT,
@@ -4015,7 +4020,7 @@ test_object_copy_group_with_soft_links(void)
 
         PART_BEGIN(H5Ocopy_expand_soft_links)
         {
-            TESTING_2("H5Ocopy on group with soft links (soft links expanded)")
+            TESTING_2("H5Ocopy on group with soft links (soft links expanded)");
 
             if ((ocpypl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0) {
                 H5_FAILED();
@@ -4141,7 +4146,7 @@ test_object_copy_group_with_soft_links(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id2) < 0)
         TEST_ERROR;
@@ -4198,21 +4203,22 @@ test_object_copy_between_files(void)
     hid_t       space_id        = H5I_INVALID_HID;
     hid_t       ocpypl_id       = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("object copying between files")
+    TESTING_MULTIPART("object copying between files");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, link, dataset, attribute, stored "
                  "datatype, or iterate aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     /*
      * Create the second file for the between file copying tests.
@@ -4380,7 +4386,7 @@ test_object_copy_between_files(void)
     {
         PART_BEGIN(H5Ocopy_group_between_files)
         {
-            TESTING_2("H5Ocopy on group between different files")
+            TESTING_2("H5Ocopy on group between different files");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BETWEEN_FILES_TEST_GROUP_NAME, file_id2,
                         OBJECT_COPY_BETWEEN_FILES_TEST_NEW_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -4540,7 +4546,7 @@ test_object_copy_between_files(void)
 
         PART_BEGIN(H5Ocopy_dset_between_files)
         {
-            TESTING_2("H5Ocopy on dataset between different files")
+            TESTING_2("H5Ocopy on dataset between different files");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BETWEEN_FILES_TEST_DSET_NAME, file_id2,
                         OBJECT_COPY_BETWEEN_FILES_TEST_NEW_DSET_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -4634,7 +4640,7 @@ test_object_copy_between_files(void)
 
         PART_BEGIN(H5Ocopy_dtype_between_files)
         {
-            TESTING_2("H5Ocopy on committed datatype between different files")
+            TESTING_2("H5Ocopy on committed datatype between different files");
 
             if (H5Ocopy(group_id, OBJECT_COPY_BETWEEN_FILES_TEST_DTYPE_NAME, file_id2,
                         OBJECT_COPY_BETWEEN_FILES_TEST_NEW_DTYPE_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
@@ -4730,7 +4736,7 @@ test_object_copy_between_files(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(attr_space_id) < 0)
         TEST_ERROR;
@@ -4796,14 +4802,14 @@ test_object_copy_invalid_params(void)
     TESTING_MULTIPART("object copying with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_MORE)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or object aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -4838,7 +4844,7 @@ test_object_copy_invalid_params(void)
     {
         PART_BEGIN(H5Ocopy_invalid_src_loc_id)
         {
-            TESTING_2("H5Ocopy with an invalid source location ID")
+            TESTING_2("H5Ocopy with an invalid source location ID");
 
             H5E_BEGIN_TRY
             {
@@ -4859,7 +4865,7 @@ test_object_copy_invalid_params(void)
 
         PART_BEGIN(H5Ocopy_invalid_src_obj_name)
         {
-            TESTING_2("H5Ocopy with an invalid source object name")
+            TESTING_2("H5Ocopy with an invalid source object name");
 
             H5E_BEGIN_TRY
             {
@@ -4893,7 +4899,7 @@ test_object_copy_invalid_params(void)
 
         PART_BEGIN(H5Ocopy_invalid_dst_loc_id)
         {
-            TESTING_2("H5Ocopy with an invalid destination location ID")
+            TESTING_2("H5Ocopy with an invalid destination location ID");
 
             H5E_BEGIN_TRY
             {
@@ -4914,7 +4920,7 @@ test_object_copy_invalid_params(void)
 
         PART_BEGIN(H5Ocopy_invalid_dst_obj_name)
         {
-            TESTING_2("H5Ocopy with an invalid destination object name")
+            TESTING_2("H5Ocopy with an invalid destination object name");
 
             H5E_BEGIN_TRY
             {
@@ -4948,7 +4954,7 @@ test_object_copy_invalid_params(void)
 
         PART_BEGIN(H5Ocopy_invalid_ocpypl)
         {
-            TESTING_2("H5Ocopy with an invalid OcpyPL")
+            TESTING_2("H5Ocopy with an invalid OcpyPL");
 
             H5E_BEGIN_TRY
             {
@@ -4969,7 +4975,7 @@ test_object_copy_invalid_params(void)
 
         PART_BEGIN(H5Ocopy_invalid_lcpl)
         {
-            TESTING_2("H5Ocopy with an invalid LCPL")
+            TESTING_2("H5Ocopy with an invalid LCPL");
 
             H5E_BEGIN_TRY
             {
@@ -4990,7 +4996,7 @@ test_object_copy_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id2) < 0)
         TEST_ERROR;
@@ -5024,7 +5030,7 @@ error:
 static int
 test_object_comments(void)
 {
-    TESTING("object comments")
+    TESTING("object comments");
 
     SKIPPED();
 
@@ -5038,7 +5044,7 @@ test_object_comments(void)
 static int
 test_object_comments_invalid_params(void)
 {
-    TESTING("object comment ")
+    TESTING("object comment ");
 
     SKIPPED();
 
@@ -5066,18 +5072,19 @@ test_object_visit(void)
     TESTING_MULTIPART("object visiting");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, attribute, stored datatype, "
                  "iterate, or creation order aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -5156,7 +5163,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_obj_name_increasing)
         {
-            TESTING_2("H5Ovisit by object name in increasing order")
+            TESTING_2("H5Ovisit by object name in increasing order");
 
             i = 0;
 
@@ -5179,7 +5186,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
-            TESTING_2("H5Ovisit by object name in decreasing order")
+            TESTING_2("H5Ovisit by object name in decreasing order");
 #ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5207,7 +5214,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_create_order_increasing)
         {
-            TESTING_2("H5Ovisit by creation order in increasing order")
+            TESTING_2("H5Ovisit by creation order in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5231,7 +5238,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_create_order_decreasing)
         {
-            TESTING_2("H5Ovisit by creation order in decreasing order")
+            TESTING_2("H5Ovisit by creation order in decreasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5255,7 +5262,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_file)
         {
-            TESTING_2("H5Ovisit on a file ID")
+            TESTING_2("H5Ovisit on a file ID");
 
             /*
              * XXX:
@@ -5268,7 +5275,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_dset)
         {
-            TESTING_2("H5Ovisit on a dataset ID")
+            TESTING_2("H5Ovisit on a dataset ID");
 
             if (H5Ovisit3(dset_id, H5_INDEX_NAME, H5_ITER_INC, object_visit_dset_callback, NULL,
                           H5O_INFO_ALL) < 0) {
@@ -5283,7 +5290,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_dtype)
         {
-            TESTING_2("H5Ovisit on a committed datatype ID")
+            TESTING_2("H5Ovisit on a committed datatype ID");
 
             if (H5Ovisit3(type_id, H5_INDEX_NAME, H5_ITER_INC, object_visit_dtype_callback, NULL,
                           H5O_INFO_ALL) < 0) {
@@ -5298,7 +5305,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_obj_name_increasing)
         {
-            TESTING_2("H5Ovisit_by_name by object name in increasing order")
+            TESTING_2("H5Ovisit_by_name by object name in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 0;
@@ -5339,7 +5346,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
-            TESTING_2("H5Ovisit_by_name by object name in decreasing order")
+            TESTING_2("H5Ovisit_by_name by object name in decreasing order");
 #ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5384,7 +5391,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_create_order_increasing)
         {
-            TESTING_2("H5Ovisit_by_name by creation order in increasing order")
+            TESTING_2("H5Ovisit_by_name by creation order in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5425,7 +5432,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_create_order_decreasing)
         {
-            TESTING_2("H5Ovisit_by_name by creation order in decreasing order")
+            TESTING_2("H5Ovisit_by_name by creation order in decreasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
@@ -5466,7 +5473,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_file)
         {
-            TESTING_2("H5Ovisit_by_name on a file ID")
+            TESTING_2("H5Ovisit_by_name on a file ID");
 
             /*
              * XXX:
@@ -5479,7 +5486,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_dset)
         {
-            TESTING_2("H5Ovisit_by_name on a dataset ID")
+            TESTING_2("H5Ovisit_by_name on a dataset ID");
 
             if (H5Ovisit_by_name3(group_id, OBJECT_VISIT_TEST_DSET_NAME, H5_INDEX_NAME, H5_ITER_INC,
                                   object_visit_dset_callback, NULL, H5O_INFO_ALL, H5P_DEFAULT) < 0) {
@@ -5494,7 +5501,7 @@ test_object_visit(void)
 
         PART_BEGIN(H5Ovisit_by_name_dtype)
         {
-            TESTING_2("H5Ovisit_by_name on a committed datatype ID")
+            TESTING_2("H5Ovisit_by_name on a committed datatype ID");
 
             if (H5Ovisit_by_name3(group_id, OBJECT_VISIT_TEST_TYPE_NAME, H5_INDEX_NAME, H5_ITER_INC,
                                   object_visit_dtype_callback, NULL, H5O_INFO_ALL, H5P_DEFAULT) < 0) {
@@ -5509,7 +5516,7 @@ test_object_visit(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -5574,16 +5581,16 @@ test_object_visit_soft_link(void)
     TESTING_MULTIPART("object visiting with soft links");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags & H5VL_CAP_FLAG_SOFT_LINKS)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, soft link, iterate, or creation order "
                  "aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -5716,7 +5723,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_obj_name_increasing)
         {
-            TESTING_2("H5Ovisit by object name in increasing order")
+            TESTING_2("H5Ovisit by object name in increasing order");
 
             i = 0;
 
@@ -5739,7 +5746,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
-            TESTING_2("H5Ovisit by object name in decreasing order")
+            TESTING_2("H5Ovisit by object name in decreasing order");
 #ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5767,7 +5774,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_create_order_increasing)
         {
-            TESTING_2("H5Ovisit by creation order in increasing order")
+            TESTING_2("H5Ovisit by creation order in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5791,7 +5798,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_create_order_decreasing)
         {
-            TESTING_2("H5Ovisit by creation order in decreasing order")
+            TESTING_2("H5Ovisit by creation order in decreasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5815,7 +5822,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_by_name_obj_name_increasing)
         {
-            TESTING_2("H5Ovisit_by_name by object name in increasing order")
+            TESTING_2("H5Ovisit_by_name by object name in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 0;
@@ -5858,7 +5865,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
-            TESTING_2("H5Ovisit_by_name by object name in decreasing order")
+            TESTING_2("H5Ovisit_by_name by object name in decreasing order");
 #ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5905,7 +5912,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_by_name_create_order_increasing)
         {
-            TESTING_2("H5Ovisit_by_name by creation order in increasing order")
+            TESTING_2("H5Ovisit_by_name by creation order in increasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5948,7 +5955,7 @@ test_object_visit_soft_link(void)
 
         PART_BEGIN(H5Ovisit_by_name_create_order_decreasing)
         {
-            TESTING_2("H5Ovisit_by_name by creation order in decreasing order")
+            TESTING_2("H5Ovisit_by_name by creation order in decreasing order");
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
@@ -5991,7 +5998,7 @@ test_object_visit_soft_link(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(gcpl_id) < 0)
         TEST_ERROR;
@@ -6039,15 +6046,15 @@ test_object_visit_invalid_params(void)
     TESTING_MULTIPART("object visiting with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ITERATE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or iterate aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -6082,7 +6089,7 @@ test_object_visit_invalid_params(void)
     {
         PART_BEGIN(H5Ovisit_invalid_obj_id)
         {
-            TESTING_2("H5Ovisit with an invalid object ID")
+            TESTING_2("H5Ovisit with an invalid object ID");
 
             H5E_BEGIN_TRY
             {
@@ -6103,7 +6110,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_invalid_index_type)
         {
-            TESTING_2("H5Ovisit with an invalid index type")
+            TESTING_2("H5Ovisit with an invalid index type");
 
             H5E_BEGIN_TRY
             {
@@ -6137,7 +6144,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_invalid_iter_order)
         {
-            TESTING_2("H5Ovisit with an invalid iteration ordering")
+            TESTING_2("H5Ovisit with an invalid iteration ordering");
 
             H5E_BEGIN_TRY
             {
@@ -6171,7 +6178,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_by_name_invalid_loc_id)
         {
-            TESTING_2("H5Ovisit_by_name with an invalid location ID")
+            TESTING_2("H5Ovisit_by_name with an invalid location ID");
 
             H5E_BEGIN_TRY
             {
@@ -6192,7 +6199,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_by_name_invalid_obj_name)
         {
-            TESTING_2("H5Ovisit_by_name with an invalid object name")
+            TESTING_2("H5Ovisit_by_name with an invalid object name");
 
             H5E_BEGIN_TRY
             {
@@ -6226,7 +6233,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_by_name_invalid_index_type)
         {
-            TESTING_2("H5Ovisit_by_name with an invalid index type")
+            TESTING_2("H5Ovisit_by_name with an invalid index type");
 
             H5E_BEGIN_TRY
             {
@@ -6260,7 +6267,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_by_name_invalid_iter_order)
         {
-            TESTING_2("H5Ovisit_by_name with an invalid iteration ordering")
+            TESTING_2("H5Ovisit_by_name with an invalid iteration ordering");
 
             H5E_BEGIN_TRY
             {
@@ -6294,7 +6301,7 @@ test_object_visit_invalid_params(void)
 
         PART_BEGIN(H5Ovisit_by_name_invalid_lapl)
         {
-            TESTING_2("H5Ovisit_by_name with an invalid LAPL")
+            TESTING_2("H5Ovisit_by_name with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -6315,7 +6322,7 @@ test_object_visit_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(group_id2) < 0)
         TEST_ERROR;
@@ -6360,16 +6367,17 @@ test_close_object(void)
     TESTING_MULTIPART("H5Oclose");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, attribute, or stored datatype "
                  "aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -6402,7 +6410,7 @@ test_close_object(void)
     {
         PART_BEGIN(H5Oclose_group)
         {
-            TESTING_2("H5Oclose on a group")
+            TESTING_2("H5Oclose on a group");
 
             if ((group_id2 = H5Gcreate2(group_id, OBJECT_CLOSE_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
                                         H5P_DEFAULT)) < 0) {
@@ -6435,7 +6443,7 @@ test_close_object(void)
 
         PART_BEGIN(H5Oclose_dset)
         {
-            TESTING_2("H5Oclose on a dataset")
+            TESTING_2("H5Oclose on a dataset");
 
             if ((dset_id = H5Dcreate2(group_id, OBJECT_CLOSE_TEST_DSET_NAME, dset_dtype, fspace_id,
                                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -6468,7 +6476,7 @@ test_close_object(void)
 
         PART_BEGIN(H5Oclose_dtype)
         {
-            TESTING_2("H5Oclose on a committed datatype")
+            TESTING_2("H5Oclose on a committed datatype");
 
             if ((dtype_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0) {
                 H5_FAILED();
@@ -6507,7 +6515,7 @@ test_close_object(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -6551,10 +6559,10 @@ test_close_object_invalid_params(void)
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
 
-    TESTING("H5Oclose with an invalid object ID")
+    TESTING("H5Oclose with an invalid object ID");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or object aren't supported with this connector\n");
         return 0;
@@ -6613,15 +6621,15 @@ test_close_invalid_objects(void)
     TESTING_MULTIPART("H5Oclose invalid objects");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_OBJECT_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, object, dataset, attribute, or stored datatype "
                  "aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
@@ -6662,7 +6670,7 @@ test_close_invalid_objects(void)
     {
         PART_BEGIN(H5Oclose_file)
         {
-            TESTING_2("H5Oclose with an invalid object - file")
+            TESTING_2("H5Oclose with an invalid object - file");
 
             H5E_BEGIN_TRY
             {
@@ -6682,7 +6690,7 @@ test_close_invalid_objects(void)
 
         PART_BEGIN(H5Oclose_plist)
         {
-            TESTING_2("H5Oclose with an invalid object - property list")
+            TESTING_2("H5Oclose with an invalid object - property list");
 
             H5E_BEGIN_TRY
             {
@@ -6702,7 +6710,7 @@ test_close_invalid_objects(void)
 
         PART_BEGIN(H5Oclose_dspace)
         {
-            TESTING_2("H5Oclose with an invalid object - data space")
+            TESTING_2("H5Oclose with an invalid object - data space");
 
             H5E_BEGIN_TRY
             {
@@ -6722,7 +6730,7 @@ test_close_invalid_objects(void)
 
         PART_BEGIN(H5Oclose_attribute)
         {
-            TESTING_2("H5Oclose with an invalid object - attribute")
+            TESTING_2("H5Oclose with an invalid object - attribute");
 
             H5E_BEGIN_TRY
             {
@@ -6742,7 +6750,7 @@ test_close_invalid_objects(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Tclose(attr_dtype) < 0)
         TEST_ERROR;
@@ -6785,7 +6793,7 @@ error:
 static int
 test_flush_object(void)
 {
-    TESTING("H5Oflush")
+    TESTING("H5Oflush");
 
     SKIPPED();
 
@@ -6799,7 +6807,7 @@ test_flush_object(void)
 static int
 test_flush_object_invalid_params(void)
 {
-    TESTING("H5Oflush with invalid parameters")
+    TESTING("H5Oflush with invalid parameters");
 
     SKIPPED();
 
@@ -6812,7 +6820,7 @@ test_flush_object_invalid_params(void)
 static int
 test_refresh_object(void)
 {
-    TESTING("H5Orefresh")
+    TESTING("H5Orefresh");
 
     SKIPPED();
 
@@ -6826,7 +6834,7 @@ test_refresh_object(void)
 static int
 test_refresh_object_invalid_params(void)
 {
-    TESTING("H5Orefresh with invalid parameters")
+    TESTING("H5Orefresh with invalid parameters");
 
     SKIPPED();
 

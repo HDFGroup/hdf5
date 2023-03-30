@@ -78,7 +78,7 @@ test_split_comm_access(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         if (MAINPROCESS) {
             puts("SKIPPED");
             printf("    API functions for basic file aren't supported with this connector\n");
@@ -796,7 +796,7 @@ test_file_properties(void)
     VRFY((mpi_ret >= 0), "MPI_Comm_rank succeeded");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         if (MAINPROCESS) {
             puts("SKIPPED");
             printf("    API functions for basic file aren't supported with this connector\n");

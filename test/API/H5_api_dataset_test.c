@@ -184,10 +184,10 @@ test_create_dataset_under_root(void)
     hid_t dset_dtype = H5I_INVALID_HID;
     hid_t fspace_id  = H5I_INVALID_HID;
 
-    TESTING("dataset creation under root group")
+    TESTING("dataset creation under root group");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or dataset aren't supported with this connector\n");
         return 0;
@@ -252,11 +252,11 @@ test_create_dataset_under_existing_group(void)
     hid_t dset_dtype = H5I_INVALID_HID;
     hid_t fspace_id  = H5I_INVALID_HID;
 
-    TESTING("dataset creation under an existing group")
+    TESTING("dataset creation under an existing group");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -344,15 +344,15 @@ test_create_dataset_invalid_params(void)
     TESTING_MULTIPART("H5Dcreate with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -386,7 +386,7 @@ test_create_dataset_invalid_params(void)
     {
         PART_BEGIN(H5Dcreate_invalid_loc_id)
         {
-            TESTING_2("H5Dcreate with an invalid loc_id")
+            TESTING_2("H5Dcreate with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -408,7 +408,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_dataset_name)
         {
-            TESTING_2("H5Dcreate with an invalid dataset name")
+            TESTING_2("H5Dcreate with an invalid dataset name");
 
             H5E_BEGIN_TRY
             {
@@ -444,7 +444,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_datatype)
         {
-            TESTING_2("H5Dcreate with an invalid datatype")
+            TESTING_2("H5Dcreate with an invalid datatype");
 
             H5E_BEGIN_TRY
             {
@@ -466,7 +466,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_dataspace)
         {
-            TESTING_2("H5Dcreate with an invalid dataspace")
+            TESTING_2("H5Dcreate with an invalid dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -488,7 +488,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_lcpl)
         {
-            TESTING_2("H5Dcreate with an invalid LCPL")
+            TESTING_2("H5Dcreate with an invalid LCPL");
 
             H5E_BEGIN_TRY
             {
@@ -510,7 +510,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_dcpl)
         {
-            TESTING_2("H5Dcreate with an invalid DCPL")
+            TESTING_2("H5Dcreate with an invalid DCPL");
 
             H5E_BEGIN_TRY
             {
@@ -532,7 +532,7 @@ test_create_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_invalid_dapl)
         {
-            TESTING_2("H5Dcreate with an invalid DAPL")
+            TESTING_2("H5Dcreate with an invalid DAPL");
 
             H5E_BEGIN_TRY
             {
@@ -554,7 +554,7 @@ test_create_dataset_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -598,11 +598,11 @@ test_create_anonymous_dataset(void)
     hid_t dset_dtype = H5I_INVALID_HID;
     hid_t fspace_id  = H5I_INVALID_HID;
 
-    TESTING("anonymous dataset creation")
+    TESTING("anonymous dataset creation");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -689,15 +689,15 @@ test_create_anonymous_dataset_invalid_params(void)
     TESTING_MULTIPART("anonymous dataset creation with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -732,7 +732,7 @@ test_create_anonymous_dataset_invalid_params(void)
     {
         PART_BEGIN(H5Dcreate_anon_invalid_loc_id)
         {
-            TESTING_2("H5Dcreate_anon with an invalid loc_id")
+            TESTING_2("H5Dcreate_anon with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -753,7 +753,7 @@ test_create_anonymous_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_anon_invalid_datatype)
         {
-            TESTING_2("H5Dcreate_anon with an invalid dataset datatype")
+            TESTING_2("H5Dcreate_anon with an invalid dataset datatype");
 
             H5E_BEGIN_TRY
             {
@@ -774,7 +774,7 @@ test_create_anonymous_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_anon_invalid_dataspace)
         {
-            TESTING_2("H5Dcreate_anon with an invalid dataset dataspace")
+            TESTING_2("H5Dcreate_anon with an invalid dataset dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -795,7 +795,7 @@ test_create_anonymous_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_anon_invalid_dcpl)
         {
-            TESTING_2("H5Dcreate_anon with an invalid DCPL")
+            TESTING_2("H5Dcreate_anon with an invalid DCPL");
 
             H5E_BEGIN_TRY
             {
@@ -816,7 +816,7 @@ test_create_anonymous_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dcreate_anon_invalid_dapl)
         {
-            TESTING_2("H5Dcreate_anon with an invalid DAPL")
+            TESTING_2("H5Dcreate_anon with an invalid DAPL");
 
             H5E_BEGIN_TRY
             {
@@ -837,7 +837,7 @@ test_create_anonymous_dataset_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -882,11 +882,11 @@ test_create_dataset_null_space(void)
     hid_t dset_dtype = H5I_INVALID_HID;
     hid_t fspace_id  = H5I_INVALID_HID;
 
-    TESTING("dataset creation with a NULL dataspace")
+    TESTING("dataset creation with a NULL dataspace");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -980,11 +980,11 @@ test_create_dataset_scalar_space(void)
     hid_t dset_dtype = H5I_INVALID_HID;
     hid_t fspace_id  = H5I_INVALID_HID;
 
-    TESTING("dataset creation with a SCALAR dataspace")
+    TESTING("dataset creation with a SCALAR dataspace");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1080,11 +1080,11 @@ test_create_zero_dim_dset(void)
     hid_t   fspace_id                           = H5I_INVALID_HID;
     int     data[1];
 
-    TESTING("creation of 0-sized dataset")
+    TESTING("creation of 0-sized dataset");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1182,11 +1182,11 @@ test_create_dataset_random_shapes(void)
     hid_t  dset_id = H5I_INVALID_HID, space_id = H5I_INVALID_HID;
     hid_t  dset_dtype = H5I_INVALID_HID;
 
-    TESTING("dataset creation with random dimension sizes")
+    TESTING("dataset creation with random dimension sizes");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1287,11 +1287,11 @@ test_create_dataset_predefined_types(void)
                                           H5T_STD_U64LE,  H5T_STD_U64BE,  H5T_STD_I64LE,  H5T_STD_I64BE,
                                           H5T_IEEE_F32LE, H5T_IEEE_F32BE, H5T_IEEE_F64LE, H5T_IEEE_F64BE};
 
-    TESTING("dataset creation with predefined datatypes")
+    TESTING("dataset creation with predefined datatypes");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1387,18 +1387,18 @@ test_create_dataset_string_types(void)
     hid_t type_id_fixed = H5I_INVALID_HID, type_id_variable = H5I_INVALID_HID;
     hid_t fspace_id = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("dataset creation with string types")
+    TESTING_MULTIPART("dataset creation with string types");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1440,7 +1440,7 @@ test_create_dataset_string_types(void)
     {
         PART_BEGIN(H5Dcreate_fixed_string_type)
         {
-            TESTING_2("creation of fixed-size string dataset")
+            TESTING_2("creation of fixed-size string dataset");
 
             if ((dset_id_fixed = H5Dcreate2(group_id, DATASET_STRING_TYPE_TEST_DSET_NAME1, type_id_fixed,
                                             fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -1471,7 +1471,7 @@ test_create_dataset_string_types(void)
 
         PART_BEGIN(H5Dcreate_variable_string_type)
         {
-            TESTING_2("creation of variable-length string dataset")
+            TESTING_2("creation of variable-length string dataset");
 
             if ((dset_id_variable =
                      H5Dcreate2(group_id, DATASET_STRING_TYPE_TEST_DSET_NAME2, type_id_variable, fspace_id,
@@ -1504,7 +1504,7 @@ test_create_dataset_string_types(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Tclose(type_id_fixed) < 0)
         TEST_ERROR;
@@ -1560,11 +1560,11 @@ test_create_dataset_compound_types(void)
     hid_t  type_pool[DATASET_COMPOUND_TYPE_TEST_MAX_SUBTYPES];
     int    num_passes;
 
-    TESTING("dataset creation with compound datatypes")
+    TESTING("dataset creation with compound datatypes");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1731,11 +1731,11 @@ test_create_dataset_enum_types(void)
     const char *enum_type_test_table[] = {"RED",    "GREEN",  "BLUE",   "BLACK", "WHITE",
                                           "PURPLE", "ORANGE", "YELLOW", "BROWN"};
 
-    TESTING("dataset creation with enum types")
+    TESTING("dataset creation with enum types");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -1879,11 +1879,11 @@ test_create_dataset_array_types(void)
           array_base_type_id3 = H5I_INVALID_HID;
     hid_t nested_type_id      = H5I_INVALID_HID;
 
-    TESTING("dataset creation with array types")
+    TESTING("dataset creation with array types");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -2077,19 +2077,20 @@ test_create_dataset_creation_properties(void)
     hid_t   dset_dtype = H5I_INVALID_HID, compact_dtype = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, compact_fspace_id = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("dataset creation properties")
+    TESTING_MULTIPART("dataset creation properties");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILTERS) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_TRACK_TIMES) || !(vol_cap_flags & H5VL_CAP_FLAG_FILTERS)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_TRACK_TIMES) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, creation order, track time, or filter "
                  "pipeline aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -2136,7 +2137,7 @@ test_create_dataset_creation_properties(void)
             H5D_alloc_time_t alloc_times[] = {H5D_ALLOC_TIME_DEFAULT, H5D_ALLOC_TIME_EARLY,
                                               H5D_ALLOC_TIME_INCR, H5D_ALLOC_TIME_LATE};
 
-            TESTING_2("dataset storage space allocation time property")
+            TESTING_2("dataset storage space allocation time property");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2206,7 +2207,7 @@ test_create_dataset_creation_properties(void)
             unsigned creation_orders[] = {H5P_CRT_ORDER_TRACKED,
                                           H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED};
 
-            TESTING_2("attribute creation order property for DCPL")
+            TESTING_2("attribute creation order property for DCPL");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2273,7 +2274,7 @@ test_create_dataset_creation_properties(void)
         /* Test the attribute phase change property */
         PART_BEGIN(DCPL_attr_phase_change_test)
         {
-            TESTING_2("attribute phase change property for DCPL")
+            TESTING_2("attribute phase change property for DCPL");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2339,7 +2340,7 @@ test_create_dataset_creation_properties(void)
         {
             H5D_fill_time_t fill_times[] = {H5D_FILL_TIME_IFSET, H5D_FILL_TIME_ALLOC, H5D_FILL_TIME_NEVER};
 
-            TESTING_2("dataset fill time property")
+            TESTING_2("dataset fill time property");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2408,7 +2409,7 @@ test_create_dataset_creation_properties(void)
         /* Test filters */
         PART_BEGIN(DCPL_filters_test)
         {
-            TESTING_2("dataset filters")
+            TESTING_2("dataset filters");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2504,7 +2505,7 @@ test_create_dataset_creation_properties(void)
         {
             H5D_layout_t layouts[] = {H5D_COMPACT, H5D_CONTIGUOUS, H5D_CHUNKED};
 
-            TESTING_2("dataset storage layouts")
+            TESTING_2("dataset storage layouts");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2588,7 +2589,7 @@ test_create_dataset_creation_properties(void)
         /* Test the "track object times" property */
         PART_BEGIN(DCPL_track_obj_times_test)
         {
-            TESTING_2("object time tracking property for DCPL")
+            TESTING_2("object time tracking property for DCPL");
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2690,7 +2691,7 @@ test_create_dataset_creation_properties(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(compact_fspace_id) < 0)
         TEST_ERROR;
@@ -2743,11 +2744,11 @@ test_create_many_dataset(void)
     unsigned char data;
     unsigned int  i;
 
-    TESTING("creating many datasets")
+    TESTING("creating many datasets");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -2839,7 +2840,7 @@ error:
 static int
 test_open_dataset(void)
 {
-    TESTING("H5Dopen")
+    TESTING("H5Dopen");
 
     SKIPPED();
 
@@ -2862,15 +2863,15 @@ test_open_dataset_invalid_params(void)
     TESTING_MULTIPART("H5Dopen with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -2914,7 +2915,7 @@ test_open_dataset_invalid_params(void)
     {
         PART_BEGIN(H5Dopen_invalid_loc_id)
         {
-            TESTING_2("H5Dopen with an invalid loc_id")
+            TESTING_2("H5Dopen with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -2935,7 +2936,7 @@ test_open_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dopen_invalid_dataset_name)
         {
-            TESTING_2("H5Dopen with an invalid dataset name")
+            TESTING_2("H5Dopen with an invalid dataset name");
 
             H5E_BEGIN_TRY
             {
@@ -2969,7 +2970,7 @@ test_open_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dopen_invalid_dapl)
         {
-            TESTING_2("H5Dopen with an invalid DAPL")
+            TESTING_2("H5Dopen with an invalid DAPL");
 
             H5E_BEGIN_TRY
             {
@@ -2990,7 +2991,7 @@ test_open_dataset_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
@@ -3032,10 +3033,10 @@ test_close_dataset_invalid_params(void)
     herr_t err_ret = -1;
     hid_t  file_id = H5I_INVALID_HID;
 
-    TESTING("H5Dclose with an invalid dataset ID")
+    TESTING("H5Dclose with an invalid dataset ID");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or dataset aren't supported with this connector\n");
         return 0;
@@ -3098,15 +3099,15 @@ test_get_dataset_space_and_type(void)
     TESTING_MULTIPART("retrieval of a dataset's dataspace and datatype");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3148,7 +3149,7 @@ test_get_dataset_space_and_type(void)
         /* Retrieve the dataset's datatype and dataspace and verify them */
         PART_BEGIN(H5Dget_type)
         {
-            TESTING_2("H5Dget_type")
+            TESTING_2("H5Dget_type");
 
             if ((tmp_type_id = H5Dget_type(dset_id)) < 0) {
                 H5_FAILED();
@@ -3178,7 +3179,7 @@ test_get_dataset_space_and_type(void)
 
         PART_BEGIN(H5Dget_space)
         {
-            TESTING_2("H5Dget_space")
+            TESTING_2("H5Dget_space");
 
             if ((tmp_space_id = H5Dget_space(dset_id)) < 0) {
                 H5_FAILED();
@@ -3237,7 +3238,7 @@ test_get_dataset_space_and_type(void)
 
         PART_BEGIN(H5Dget_type_reopened)
         {
-            TESTING_2("H5Dget_type after re-opening a dataset")
+            TESTING_2("H5Dget_type after re-opening a dataset");
 
             if ((dset_id = H5Dopen2(group_id, DATASET_GET_SPACE_TYPE_TEST_DSET_NAME, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -3282,7 +3283,7 @@ test_get_dataset_space_and_type(void)
 
         PART_BEGIN(H5Dget_space_reopened)
         {
-            TESTING_2("H5Dget_space after re-opening a dataset")
+            TESTING_2("H5Dget_space after re-opening a dataset");
 
             if ((dset_id = H5Dopen2(group_id, DATASET_GET_SPACE_TYPE_TEST_DSET_NAME, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -3329,7 +3330,7 @@ test_get_dataset_space_and_type(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(tmp_space_id) < 0)
         TEST_ERROR;
@@ -3387,15 +3388,15 @@ test_get_dataset_space_and_type_invalid_params(void)
     TESTING_MULTIPART("H5Dget_type/H5Dget_space with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3437,7 +3438,7 @@ test_get_dataset_space_and_type_invalid_params(void)
     {
         PART_BEGIN(H5Dget_type_invalid_dset_id)
         {
-            TESTING_2("H5Dget_type with an invalid dset_id")
+            TESTING_2("H5Dget_type with an invalid dset_id");
 
             H5E_BEGIN_TRY
             {
@@ -3457,7 +3458,7 @@ test_get_dataset_space_and_type_invalid_params(void)
 
         PART_BEGIN(H5Dget_space_invalid_dset_id)
         {
-            TESTING_2("H5Dget_space with an invalid dset_id")
+            TESTING_2("H5Dget_space with an invalid dset_id");
 
             H5E_BEGIN_TRY
             {
@@ -3477,7 +3478,7 @@ test_get_dataset_space_and_type_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(dset_space_id) < 0)
         TEST_ERROR;
@@ -3519,7 +3520,7 @@ error:
 static int
 test_get_dataset_space_status(void)
 {
-    TESTING("H5Dget_space_status")
+    TESTING("H5Dget_space_status");
 
     SKIPPED();
 
@@ -3534,7 +3535,7 @@ test_get_dataset_space_status(void)
 static int
 test_get_dataset_space_status_invalid_params(void)
 {
-    TESTING("H5Dget_space_status with invalid parameters")
+    TESTING("H5Dget_space_status with invalid parameters");
 
     SKIPPED();
 
@@ -3571,15 +3572,15 @@ test_dataset_property_lists(void)
     TESTING_MULTIPART("dataset property list operations");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -3657,7 +3658,7 @@ test_dataset_property_lists(void)
     {
         PART_BEGIN(H5Dget_create_plist)
         {
-            TESTING_2("H5Dget_create_plist")
+            TESTING_2("H5Dget_create_plist");
 
             /* Try to receive copies of the two property lists, one which has the property set and one which
              * does not */
@@ -3713,7 +3714,7 @@ test_dataset_property_lists(void)
 
         PART_BEGIN(H5Dget_access_plist)
         {
-            TESTING_2("H5Dget_access_plist")
+            TESTING_2("H5Dget_access_plist");
 
             if ((dapl_id1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
                 H5_FAILED();
@@ -3849,7 +3850,7 @@ test_dataset_property_lists(void)
 
         PART_BEGIN(H5Dget_create_plist_reopened)
         {
-            TESTING_2("H5Dget_create_plist after re-opening a dataset")
+            TESTING_2("H5Dget_create_plist after re-opening a dataset");
 
             if ((dset_id1 = H5Dopen2(group_id, DATASET_PROPERTY_LIST_TEST_DSET_NAME1, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -3915,7 +3916,7 @@ test_dataset_property_lists(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (tmp_prefix) {
         HDfree(tmp_prefix);
@@ -3992,7 +3993,7 @@ error:
 static int
 test_get_dataset_storage_size(void)
 {
-    TESTING("H5Dget_storage_size")
+    TESTING("H5Dget_storage_size");
 
     SKIPPED();
 
@@ -4007,7 +4008,7 @@ test_get_dataset_storage_size(void)
 static int
 test_get_dataset_storage_size_invalid_params(void)
 {
-    TESTING("H5Dget_storage_size with invalid parameters")
+    TESTING("H5Dget_storage_size with invalid parameters");
 
     SKIPPED();
 
@@ -4020,7 +4021,7 @@ test_get_dataset_storage_size_invalid_params(void)
 static int
 test_get_dataset_chunk_storage_size(void)
 {
-    TESTING("H5Dget_chunk_storage_size")
+    TESTING("H5Dget_chunk_storage_size");
 
     SKIPPED();
 
@@ -4035,7 +4036,7 @@ test_get_dataset_chunk_storage_size(void)
 static int
 test_get_dataset_chunk_storage_size_invalid_params(void)
 {
-    TESTING("H5Dget_chunk_storage_size with invalid parameters")
+    TESTING("H5Dget_chunk_storage_size with invalid parameters");
 
     SKIPPED();
 
@@ -4048,7 +4049,7 @@ test_get_dataset_chunk_storage_size_invalid_params(void)
 static int
 test_get_dataset_offset(void)
 {
-    TESTING("H5Dget_offset")
+    TESTING("H5Dget_offset");
 
     SKIPPED();
 
@@ -4063,7 +4064,7 @@ test_get_dataset_offset(void)
 static int
 test_get_dataset_offset_invalid_params(void)
 {
-    TESTING("H5Dget_offset with invalid parameters")
+    TESTING("H5Dget_offset with invalid parameters");
 
     SKIPPED();
 
@@ -4085,11 +4086,11 @@ test_read_dataset_small_all(void)
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *read_buf  = NULL;
 
-    TESTING("small read from dataset with H5S_ALL")
+    TESTING("small read from dataset with H5S_ALL");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4195,11 +4196,11 @@ test_read_dataset_small_hyperslab(void)
     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
     void   *read_buf = NULL;
 
-    TESTING("small read from dataset with a hyperslab selection")
+    TESTING("small read from dataset with a hyperslab selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4323,11 +4324,11 @@ test_read_dataset_small_point_selection(void)
     hid_t   mspace_id = H5I_INVALID_HID;
     void   *data      = NULL;
 
-    TESTING("small read from dataset with a point selection")
+    TESTING("small read from dataset with a point selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4478,11 +4479,11 @@ test_dataset_io_point_selections(void)
     hbool_t do_chunk;
     int     i, j;
 
-    TESTING("point selection I/O with all selection in memory and points in file")
+    TESTING("point selection I/O with all selection in memory and points in file");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -4519,7 +4520,7 @@ test_dataset_io_point_selections(void)
     /* Perform with and without chunking */
     for (do_chunk = FALSE;; do_chunk = TRUE) {
         if (do_chunk) {
-            TESTING("point selection I/O with all selection in memory and points in file with chunking")
+            TESTING("point selection I/O with all selection in memory and points in file with chunking");
 
             /* Create chunked dataset */
             if ((dset_id = H5Dcreate2(group_id, DATASET_IO_POINT_DSET_NAME_CHUNK, H5T_NATIVE_INT, fspace_id,
@@ -4539,7 +4540,7 @@ test_dataset_io_point_selections(void)
 
         /* Write data */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to write entire dataset")
+            FAIL_PUTS_ERROR("Failed to write entire dataset");
 
         /* Update file_state */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
@@ -4558,12 +4559,12 @@ test_dataset_io_point_selections(void)
 
         /* Read points to "all" memory buffer */
         if (H5Dread(dset_id, H5T_NATIVE_INT, mspace_id_all, fspace_id, H5P_DEFAULT, buf_point) < 0)
-            FAIL_PUTS_ERROR("Failed to read points from dataset to all memory buffer")
+            FAIL_PUTS_ERROR("Failed to read points from dataset to all memory buffer");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
             if (buf_point[i] != file_state[points[2 * i]][points[2 * i + 1]])
-                FAIL_PUTS_ERROR("Incorrect data read from points to all memory buffer")
+                FAIL_PUTS_ERROR("Incorrect data read from points to all memory buffer");
 
         /* Generate points to write */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4578,7 +4579,7 @@ test_dataset_io_point_selections(void)
 
         /* Write points from "all" memory buffer */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id_all, fspace_id, H5P_DEFAULT, buf_point) < 0)
-            FAIL_PUTS_ERROR("Failed to write points to dataset from all memory buffer")
+            FAIL_PUTS_ERROR("Failed to write points to dataset from all memory buffer");
 
         /* Update file state */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
@@ -4589,20 +4590,20 @@ test_dataset_io_point_selections(void)
 
         /* Read entire dataset */
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read entire dataset")
+            FAIL_PUTS_ERROR("Failed to read entire dataset");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
-                    FAIL_PUTS_ERROR("Incorrect data found after writing from all memory buffer to points")
+                    FAIL_PUTS_ERROR("Incorrect data found after writing from all memory buffer to points");
 
-        PASSED()
+        PASSED();
 
         if (do_chunk)
-            TESTING("point selection I/O with points in memory and file (same shape) with chunking")
+            TESTING("point selection I/O with points in memory and file (same shape) with chunking");
         else
-            TESTING("point selection I/O with points in memory and file (same shape)")
+            TESTING("point selection I/O with points in memory and file (same shape)");
 
         /* Generate points to read */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4621,13 +4622,13 @@ test_dataset_io_point_selections(void)
 
         /* Read data points->points */
         if (H5Dread(dset_id, H5T_NATIVE_INT, fspace_id, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read points from dataset to points in memory buffer")
+            FAIL_PUTS_ERROR("Failed to read points from dataset to points in memory buffer");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != erbuf[i][j])
-                    FAIL_PUTS_ERROR("Incorrect data found read from points in file to points in memory")
+                    FAIL_PUTS_ERROR("Incorrect data found read from points in file to points in memory");
 
         /* Generate points to write */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4643,7 +4644,7 @@ test_dataset_io_point_selections(void)
 
         /* Write data points->points */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, fspace_id, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to write from in memory to points in dataset")
+            FAIL_PUTS_ERROR("Failed to write from in memory to points in dataset");
 
         /* Update file_state */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
@@ -4654,21 +4655,21 @@ test_dataset_io_point_selections(void)
 
         /* Read entire dataset */
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read entire dataset")
+            FAIL_PUTS_ERROR("Failed to read entire dataset");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from points in memory to points in dataset")
+                        "Incorrect data found after writing from points in memory to points in dataset");
 
-        PASSED()
+        PASSED();
 
         if (do_chunk)
-            TESTING("point selection I/O with points in memory and file (different shape) with chunking")
+            TESTING("point selection I/O with points in memory and file (different shape) with chunking");
         else
-            TESTING("point selection I/O with points in memory and file (different shape)")
+            TESTING("point selection I/O with points in memory and file (different shape)");
 
         /* Generate points to read */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4690,14 +4691,14 @@ test_dataset_io_point_selections(void)
 
         /* Read data points->points */
         if (H5Dread(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read points from dataset to points in memory buffer")
+            FAIL_PUTS_ERROR("Failed to read points from dataset to points in memory buffer");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != erbuf[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after reading from points in file to points in memory")
+                        "Incorrect data found after reading from points in file to points in memory");
 
         /* Generate points to write */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4716,7 +4717,7 @@ test_dataset_io_point_selections(void)
 
         /* Write data points->points */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to write from points in memory to points in dataset")
+            FAIL_PUTS_ERROR("Failed to write from points in memory to points in dataset");
 
         /* Update file_state */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
@@ -4727,21 +4728,21 @@ test_dataset_io_point_selections(void)
 
         /* Read entire dataset */
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read entire dataset")
+            FAIL_PUTS_ERROR("Failed to read entire dataset");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from points in memory to points in dataset")
+                        "Incorrect data found after writing from points in memory to points in dataset");
 
-        PASSED()
+        PASSED();
 
         if (do_chunk)
-            TESTING("point selection I/O with hyperslab in memory and points in file with chunking")
+            TESTING("point selection I/O with hyperslab in memory and points in file with chunking");
         else
-            TESTING("point selection I/O with hyperslab in memory and points in file")
+            TESTING("point selection I/O with hyperslab in memory and points in file");
 
         /* Generate points to read */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4765,14 +4766,14 @@ test_dataset_io_point_selections(void)
 
         /* Read data points->hslab */
         if (H5Dread(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read points from dataset to hyperslab in memory buffer")
+            FAIL_PUTS_ERROR("Failed to read points from dataset to hyperslab in memory buffer");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != erbuf[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after reading from points in file to hyperslab in memory")
+                        "Incorrect data found after reading from points in file to hyperslab in memory");
 
         /* Generate points to write */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4788,7 +4789,7 @@ test_dataset_io_point_selections(void)
 
         /* Write data hlsab->points */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to write from hyperslab in memory to points in dataset")
+            FAIL_PUTS_ERROR("Failed to write from hyperslab in memory to points in dataset");
 
         /* Update file_state */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
@@ -4800,21 +4801,21 @@ test_dataset_io_point_selections(void)
 
         /* Read entire dataset */
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read entire dataset")
+            FAIL_PUTS_ERROR("Failed to read entire dataset");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from hyperslab in memory to points in dataset")
+                        "Incorrect data found after writing from hyperslab in memory to points in dataset");
 
-        PASSED()
+        PASSED();
 
         if (do_chunk)
-            TESTING("point selection I/O with points in memory and hyperslab in file with chunking")
+            TESTING("point selection I/O with points in memory and hyperslab in file with chunking");
         else
-            TESTING("point selection I/O with points in memory and hyperslab in file")
+            TESTING("point selection I/O with points in memory and hyperslab in file");
 
         /* Generate points to read */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4839,14 +4840,14 @@ test_dataset_io_point_selections(void)
 
         /* Read data hslab->points */
         if (H5Dread(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read hyperslab from dataset to points in memory buffer")
+            FAIL_PUTS_ERROR("Failed to read hyperslab from dataset to points in memory buffer");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != erbuf[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after reading from hyperslab in file to points in memory")
+                        "Incorrect data found after reading from hyperslab in file to points in memory");
 
         /* Generate points to write */
         DATASET_IO_POINT_GEN_POINTS(points, i, j);
@@ -4862,7 +4863,7 @@ test_dataset_io_point_selections(void)
 
         /* Write data points->hslab */
         if (H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id_full, fspace_id, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to write from points in memory to hyperslab in dataset")
+            FAIL_PUTS_ERROR("Failed to write from points in memory to hyperslab in dataset");
 
         /* Update file_state */
         for (i = 0; i < DATASET_IO_POINT_NPOINTS; i++)
@@ -4874,17 +4875,17 @@ test_dataset_io_point_selections(void)
 
         /* Read entire dataset */
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_all) < 0)
-            FAIL_PUTS_ERROR("Failed to read entire dataset")
+            FAIL_PUTS_ERROR("Failed to read entire dataset");
 
         /* Verify data */
         for (i = 0; i < DATASET_IO_POINT_DIM_0; i++)
             for (j = 0; j < DATASET_IO_POINT_DIM_1; j++)
                 if (buf_all[i][j] != file_state[i][j])
                     FAIL_PUTS_ERROR(
-                        "Incorrect data found after writing from points in memory to hyperslab in dataset")
+                        "Incorrect data found after writing from points in memory to hyperslab in dataset");
 
         if (!do_chunk)
-            PASSED()
+            PASSED();
 
         /* Close dataset */
         if (H5Dclose(dset_id) < 0)
@@ -4911,7 +4912,7 @@ test_dataset_io_point_selections(void)
     if (H5Sclose(fspace_id) < 0)
         TEST_ERROR;
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -4948,11 +4949,11 @@ test_read_dataset_large_all(void)
     hid_t   fspace_id = H5I_INVALID_HID;
     void   *read_buf  = NULL;
 
-    TESTING("large read from dataset with H5S_ALL")
+    TESTING("large read from dataset with H5S_ALL");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5058,11 +5059,11 @@ test_read_dataset_large_hyperslab(void)
     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
     void   *read_buf = NULL;
 
-    TESTING("large read from dataset with a hyperslab selection")
+    TESTING("large read from dataset with a hyperslab selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5181,11 +5182,11 @@ test_read_dataset_large_point_selection(void)
     hid_t    fspace_id = H5I_INVALID_HID;
     void    *data      = NULL;
 
-    TESTING("large read from dataset with a point selection")
+    TESTING("large read from dataset with a point selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5317,15 +5318,15 @@ test_read_dataset_invalid_params(void)
     TESTING_MULTIPART("H5Dread with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -5371,7 +5372,7 @@ test_read_dataset_invalid_params(void)
     {
         PART_BEGIN(H5Dread_invalid_dset_id)
         {
-            TESTING_2("H5Dread with an invalid dataset ID")
+            TESTING_2("H5Dread with an invalid dataset ID");
 
             H5E_BEGIN_TRY
             {
@@ -5392,7 +5393,7 @@ test_read_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dread_invalid_datatype)
         {
-            TESTING_2("H5Dread with an invalid memory datatype")
+            TESTING_2("H5Dread with an invalid memory datatype");
 
             H5E_BEGIN_TRY
             {
@@ -5412,7 +5413,7 @@ test_read_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dread_invalid_mem_dataspace)
         {
-            TESTING_2("H5Dread with an invalid memory dataspace")
+            TESTING_2("H5Dread with an invalid memory dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -5433,7 +5434,7 @@ test_read_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dread_invalid_file_dataspace)
         {
-            TESTING_2("H5Dread with an invalid file dataspace")
+            TESTING_2("H5Dread with an invalid file dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -5454,7 +5455,7 @@ test_read_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dread_invalid_dxpl)
         {
-            TESTING_2("H5Dread with an invalid DXPL")
+            TESTING_2("H5Dread with an invalid DXPL");
 
             H5E_BEGIN_TRY
             {
@@ -5475,7 +5476,7 @@ test_read_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dread_invalid_data_buf)
         {
-            TESTING_2("H5Dread with an invalid data buffer")
+            TESTING_2("H5Dread with an invalid data buffer");
 
             H5E_BEGIN_TRY
             {
@@ -5496,7 +5497,7 @@ test_read_dataset_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (read_buf) {
         HDfree(read_buf);
@@ -5550,11 +5551,11 @@ test_write_dataset_small_all(void)
     hid_t    fspace_id = H5I_INVALID_HID;
     void    *data      = NULL;
 
-    TESTING("small write to dataset with H5S_ALL")
+    TESTING("small write to dataset with H5S_ALL");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5682,11 +5683,11 @@ test_write_dataset_small_hyperslab(void)
     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
     void   *data = NULL;
 
-    TESTING("small write to dataset with a hyperslab selection")
+    TESTING("small write to dataset with a hyperslab selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5814,11 +5815,11 @@ test_write_dataset_small_point_selection(void)
     hid_t   mspace_id = H5I_INVALID_HID;
     void   *data      = NULL;
 
-    TESTING("small write to dataset with a point selection")
+    TESTING("small write to dataset with a point selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -5945,11 +5946,11 @@ test_write_dataset_large_all(void)
     hid_t    fspace_id = H5I_INVALID_HID;
     void    *data      = NULL;
 
-    TESTING("large write to dataset with H5S_ALL")
+    TESTING("large write to dataset with H5S_ALL");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
@@ -6075,11 +6076,11 @@ test_write_dataset_large_hyperslab(void)
     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
     void   *data = NULL;
 
-    TESTING("large write to dataset with a hyperslab selection")
+    TESTING("large write to dataset with a hyperslab selection");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
@@ -6192,7 +6193,7 @@ error:
 static int
 test_write_dataset_large_point_selection(void)
 {
-    TESTING("large write to dataset with a point selection")
+    TESTING("large write to dataset with a point selection");
 
     SKIPPED();
 
@@ -6231,15 +6232,15 @@ test_write_dataset_data_verification(void)
     TESTING_MULTIPART("verification of dataset data using H5Dwrite then H5Dread");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -6287,7 +6288,7 @@ test_write_dataset_data_verification(void)
     {
         PART_BEGIN(H5Dwrite_all_read)
         {
-            TESTING_2("H5Dwrite using H5S_ALL then H5Dread")
+            TESTING_2("H5Dwrite using H5S_ALL then H5Dread");
 
             if (H5Dwrite(dset_id, DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                          data) < 0) {
@@ -6368,7 +6369,7 @@ test_write_dataset_data_verification(void)
 
         PART_BEGIN(H5Dwrite_hyperslab_read)
         {
-            TESTING_2("H5Dwrite using hyperslab selection then H5Dread")
+            TESTING_2("H5Dwrite using hyperslab selection then H5Dread");
 
             data_size = dims[1] * 2 * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
@@ -6520,7 +6521,7 @@ test_write_dataset_data_verification(void)
 
         PART_BEGIN(H5Dwrite_point_sel_read)
         {
-            TESTING_2("H5Dwrite using point selection then H5Dread")
+            TESTING_2("H5Dwrite using point selection then H5Dread");
 
             data_size =
                 DATASET_DATA_VERIFY_WRITE_TEST_NUM_POINTS * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
@@ -6665,7 +6666,7 @@ test_write_dataset_data_verification(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (data) {
         HDfree(data);
@@ -6738,15 +6739,15 @@ test_write_dataset_invalid_params(void)
     TESTING_MULTIPART("H5Dwrite with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -6797,7 +6798,7 @@ test_write_dataset_invalid_params(void)
     {
         PART_BEGIN(H5Dwrite_invalid_dset_id)
         {
-            TESTING_2("H5Dwrite with an invalid dataset ID")
+            TESTING_2("H5Dwrite with an invalid dataset ID");
 
             H5E_BEGIN_TRY
             {
@@ -6818,7 +6819,7 @@ test_write_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dwrite_invalid_datatype)
         {
-            TESTING_2("H5Dwrite with an invalid memory datatype")
+            TESTING_2("H5Dwrite with an invalid memory datatype");
 
             H5E_BEGIN_TRY
             {
@@ -6838,7 +6839,7 @@ test_write_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dwrite_invalid_mem_dataspace)
         {
-            TESTING_2("H5Dwrite with an invalid memory dataspace")
+            TESTING_2("H5Dwrite with an invalid memory dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -6859,7 +6860,7 @@ test_write_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dwrite_invalid_file_dataspace)
         {
-            TESTING_2("H5Dwrite with an invalid file dataspace")
+            TESTING_2("H5Dwrite with an invalid file dataspace");
 
             H5E_BEGIN_TRY
             {
@@ -6880,7 +6881,7 @@ test_write_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dwrite_invalid_dxpl)
         {
-            TESTING_2("H5Dwrite with an invalid DXPL")
+            TESTING_2("H5Dwrite with an invalid DXPL");
 
             H5E_BEGIN_TRY
             {
@@ -6901,7 +6902,7 @@ test_write_dataset_invalid_params(void)
 
         PART_BEGIN(H5Dwrite_invalid_data_buf)
         {
-            TESTING_2("H5Dwrite with an invalid data buffer")
+            TESTING_2("H5Dwrite with an invalid data buffer");
 
             H5E_BEGIN_TRY
             {
@@ -6922,7 +6923,7 @@ test_write_dataset_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (data) {
         HDfree(data);
@@ -6991,15 +6992,15 @@ test_dataset_builtin_type_conversion(void)
         "verification of dataset data using H5Dwrite then H5Dread with type conversion of builtin types");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((native_order = H5Tget_order(DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPE)) < 0) {
         H5_FAILED();
@@ -7056,7 +7057,7 @@ test_dataset_builtin_type_conversion(void)
     {
         PART_BEGIN(H5Dwrite_all_read)
         {
-            TESTING_2("H5Dwrite then H5Dread with H5S_ALL selection")
+            TESTING_2("H5Dwrite then H5Dread with H5S_ALL selection");
 
             if (H5Dwrite(dset_id, DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPE, H5S_ALL, H5S_ALL,
                          H5P_DEFAULT, data) < 0) {
@@ -7140,7 +7141,7 @@ test_dataset_builtin_type_conversion(void)
 
         PART_BEGIN(H5Dwrite_hyperslab_read)
         {
-            TESTING_2("H5Dwrite using hyperslab selection then H5Dread")
+            TESTING_2("H5Dwrite using hyperslab selection then H5Dread");
 
             data_size = dims[1] * 2 * DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
@@ -7296,7 +7297,7 @@ test_dataset_builtin_type_conversion(void)
 
         PART_BEGIN(H5Dwrite_point_sel_read)
         {
-            TESTING_2("H5Dwrite using point selection then H5Dread")
+            TESTING_2("H5Dwrite using point selection then H5Dread");
 
             data_size = DATASET_DATA_BUILTIN_CONVERSION_TEST_NUM_POINTS *
                         DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
@@ -7445,7 +7446,7 @@ test_dataset_builtin_type_conversion(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (data) {
         HDfree(data);
@@ -7528,15 +7529,15 @@ test_dataset_compound_partial_io(void)
         "verification of dataset data using H5Dwrite then H5Dread with partial element compound type I/O");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -7591,7 +7592,7 @@ test_dataset_compound_partial_io(void)
     {
         PART_BEGIN(write_full_read_full)
         {
-            TESTING_2("H5Dwrite then H5Dread with all compound members")
+            TESTING_2("H5Dwrite then H5Dread with all compound members");
 
             /* Initialize wbuf */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
@@ -7601,7 +7602,7 @@ test_dataset_compound_partial_io(void)
 
             /* Write data */
             if (H5Dwrite(dset_id, full_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-                PART_TEST_ERROR(write_full_read_full)
+                PART_TEST_ERROR(write_full_read_full);
 
             /* Update fbuf to match file state */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
@@ -7624,14 +7625,14 @@ test_dataset_compound_partial_io(void)
 
             /* Read data */
             if (H5Dread(dset_id, full_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-                PART_TEST_ERROR(write_full_read_full)
+                PART_TEST_ERROR(write_full_read_full);
 
             /* Verify data */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
                 if (rbuf[i].a != erbuf[i].a)
-                    PART_TEST_ERROR(write_full_read_full)
+                    PART_TEST_ERROR(write_full_read_full);
                 if (rbuf[i].b != erbuf[i].b)
-                    PART_TEST_ERROR(write_full_read_full)
+                    PART_TEST_ERROR(write_full_read_full);
             }
 
             PASSED();
@@ -7640,7 +7641,7 @@ test_dataset_compound_partial_io(void)
 
         PART_BEGIN(read_a)
         {
-            TESTING_2("H5Dread with compound member a")
+            TESTING_2("H5Dread with compound member a");
 
             /* Initialize rbuf to -1 */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
@@ -7657,14 +7658,14 @@ test_dataset_compound_partial_io(void)
 
             /* Read data */
             if (H5Dread(dset_id, a_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-                PART_TEST_ERROR(read_a)
+                PART_TEST_ERROR(read_a);
 
             /* Verify data */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
                 if (rbuf[i].a != erbuf[i].a)
-                    PART_TEST_ERROR(read_a)
+                    PART_TEST_ERROR(read_a);
                 if (rbuf[i].b != erbuf[i].b)
-                    PART_TEST_ERROR(read_a)
+                    PART_TEST_ERROR(read_a);
             }
 
             PASSED();
@@ -7673,7 +7674,7 @@ test_dataset_compound_partial_io(void)
 
         PART_BEGIN(write_b_read_full)
         {
-            TESTING_2("H5Dwrite with compound member b then H5Dread with all compound members")
+            TESTING_2("H5Dwrite with compound member b then H5Dread with all compound members");
 
             /* Initialize wbuf */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
@@ -7683,7 +7684,7 @@ test_dataset_compound_partial_io(void)
 
             /* Write data */
             if (H5Dwrite(dset_id, b_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-                PART_TEST_ERROR(write_full_read_full)
+                PART_TEST_ERROR(write_full_read_full);
 
             /* Update fbuf to match file state - only element b was updated */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
@@ -7705,14 +7706,14 @@ test_dataset_compound_partial_io(void)
 
             /* Read data */
             if (H5Dread(dset_id, full_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-                PART_TEST_ERROR(write_b_read_full)
+                PART_TEST_ERROR(write_b_read_full);
 
             /* Verify data */
             for (i = 0; i < DATASET_COMPOUND_PARTIAL_IO_DSET_DIMS; i++) {
                 if (rbuf[i].a != erbuf[i].a)
-                    PART_TEST_ERROR(write_b_read_full)
+                    PART_TEST_ERROR(write_b_read_full);
                 if (rbuf[i].b != erbuf[i].b)
-                    PART_TEST_ERROR(write_b_read_full)
+                    PART_TEST_ERROR(write_b_read_full);
             }
 
             PASSED();
@@ -7721,7 +7722,7 @@ test_dataset_compound_partial_io(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
@@ -7782,11 +7783,11 @@ test_dataset_set_extent_chunked_unlimited(void)
     hid_t   dcpl_id    = H5I_INVALID_HID;
     hid_t   fspace_id  = H5I_INVALID_HID;
 
-    TESTING("H5Dset_extent on chunked dataset with unlimited dimensions")
+    TESTING("H5Dset_extent on chunked dataset with unlimited dimensions");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
@@ -8015,11 +8016,11 @@ test_dataset_set_extent_chunked_fixed(void)
     hid_t   dcpl_id    = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, fspace_id2 = H5I_INVALID_HID;
 
-    TESTING("H5Dset_extent on chunked dataset with fixed dimensions")
+    TESTING("H5Dset_extent on chunked dataset with fixed dimensions");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
@@ -8309,15 +8310,15 @@ test_dataset_set_extent_data(void)
     TESTING_MULTIPART("H5Dset_extent on data correctness");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -8380,7 +8381,7 @@ test_dataset_set_extent_data(void)
     {
         PART_BEGIN(H5Dset_extent_data_expand)
         {
-            TESTING_2("H5Dset_extent for data expansion")
+            TESTING_2("H5Dset_extent for data expansion");
 
             /* Expand the dataset.  The extended space should be initialized with the
              * the default value (0)
@@ -8433,7 +8434,7 @@ test_dataset_set_extent_data(void)
 
         PART_BEGIN(H5Dset_extent_data_shrink)
         {
-            TESTING_2("H5Dset_extent for data shrinking")
+            TESTING_2("H5Dset_extent for data shrinking");
 
             /* Shrink the dataset.
              * X X X X X
@@ -8466,7 +8467,7 @@ test_dataset_set_extent_data(void)
 
         PART_BEGIN(H5Dset_extent_data_expand_to_origin)
         {
-            TESTING_2("H5Dset_extent for data back to the original size")
+            TESTING_2("H5Dset_extent for data back to the original size");
 #ifndef NO_CLEAR_ON_SHRINK
             /* Expand the dataset back to the original size. The data should look like this:
              * X X X X X 0 0 0
@@ -8516,7 +8517,7 @@ test_dataset_set_extent_data(void)
 
         PART_BEGIN(H5Dset_extent_data_shrink_to_zero)
         {
-            TESTING_2("H5Dset_extent for data shrink to zero size")
+            TESTING_2("H5Dset_extent for data shrink to zero size");
 
             /* Shrink the dimensions to 0 and verify it */
             dims_shrink[0] = dims_shrink[1] = 0;
@@ -8550,7 +8551,7 @@ test_dataset_set_extent_data(void)
 
         PART_BEGIN(H5Dset_extent_data_expand_to_origin_again)
         {
-            TESTING_2("H5Dset_extent for data expansion back to the original again")
+            TESTING_2("H5Dset_extent for data expansion back to the original again");
 #ifndef NO_CLEAR_ON_SHRINK
             /* Expand the dataset back to the original size. The data should look like this:
              * 0 0 0 0 0 0 0 0
@@ -8589,7 +8590,7 @@ test_dataset_set_extent_data(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
@@ -8651,13 +8652,13 @@ test_dataset_set_extent_double_handles(void)
     int     i;
 #endif
 
-    TESTING("H5Dset_extent on double dataset handles")
+    TESTING("H5Dset_extent on double dataset handles");
 
 #ifndef NO_DOUBLE_OBJECT_OPENS
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
@@ -8799,15 +8800,15 @@ test_dataset_set_extent_invalid_params(void)
     TESTING_MULTIPART("H5Dset_extent with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -8918,7 +8919,7 @@ test_dataset_set_extent_invalid_params(void)
     {
         PART_BEGIN(H5Dset_extent_invalid_layout_compact)
         {
-            TESTING_2("H5Dset_extent with an invalid dataset layout (compact)")
+            TESTING_2("H5Dset_extent with an invalid dataset layout (compact)");
 
             H5E_BEGIN_TRY
             {
@@ -8938,7 +8939,7 @@ test_dataset_set_extent_invalid_params(void)
 
         PART_BEGIN(H5Dset_extent_invalid_layout_contiguous)
         {
-            TESTING_2("H5Dset_extent with an invalid dataset layout (contiguous)")
+            TESTING_2("H5Dset_extent with an invalid dataset layout (contiguous)");
 
             H5E_BEGIN_TRY
             {
@@ -8958,7 +8959,7 @@ test_dataset_set_extent_invalid_params(void)
 
         PART_BEGIN(H5Dset_extent_invalid_dset_id)
         {
-            TESTING_2("H5Dset_extent with an invalid dataset ID")
+            TESTING_2("H5Dset_extent with an invalid dataset ID");
 
             H5E_BEGIN_TRY
             {
@@ -8978,7 +8979,7 @@ test_dataset_set_extent_invalid_params(void)
 
         PART_BEGIN(H5Dset_extent_null_dim_pointer)
         {
-            TESTING_2("H5Dset_extent with NULL dimension pointer")
+            TESTING_2("H5Dset_extent with NULL dimension pointer");
 
             H5E_BEGIN_TRY
             {
@@ -8998,7 +8999,7 @@ test_dataset_set_extent_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(chunked_dcpl_id) < 0)
         TEST_ERROR;
@@ -9056,7 +9057,7 @@ error:
 static int
 test_flush_dataset(void)
 {
-    TESTING("H5Dflush")
+    TESTING("H5Dflush");
 
     SKIPPED();
 
@@ -9070,7 +9071,7 @@ test_flush_dataset(void)
 static int
 test_flush_dataset_invalid_params(void)
 {
-    TESTING("H5Dflush with invalid parameters")
+    TESTING("H5Dflush with invalid parameters");
 
     SKIPPED();
 
@@ -9083,7 +9084,7 @@ test_flush_dataset_invalid_params(void)
 static int
 test_refresh_dataset(void)
 {
-    TESTING("H5Drefresh")
+    TESTING("H5Drefresh");
 
     SKIPPED();
 
@@ -9097,7 +9098,7 @@ test_refresh_dataset(void)
 static int
 test_refresh_dataset_invalid_params(void)
 {
-    TESTING("H5Drefresh")
+    TESTING("H5Drefresh");
 
     SKIPPED();
 
@@ -9120,11 +9121,11 @@ test_create_single_chunk_dataset(void)
     hid_t   dcpl_id    = H5I_INVALID_HID;
     hid_t   fspace_id  = H5I_INVALID_HID;
 
-    TESTING("creation of dataset with single chunk")
+    TESTING("creation of dataset with single chunk");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -9300,12 +9301,12 @@ test_write_single_chunk_dataset(void)
     void    *write_buf = NULL;
     void    *read_buf  = NULL;
 
-    TESTING("write to dataset with single chunk")
+    TESTING("write to dataset with single chunk");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -9520,11 +9521,11 @@ test_create_multi_chunk_dataset(void)
     hid_t   dcpl_id    = H5I_INVALID_HID;
     hid_t   fspace_id  = H5I_INVALID_HID;
 
-    TESTING("creation of dataset with multiple chunks")
+    TESTING("creation of dataset with multiple chunks");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -9705,12 +9706,12 @@ test_write_multi_chunk_dataset_same_shape_read(void)
     void   *write_buf = NULL;
     int     read_buf[10][10];
 
-    TESTING("write to dataset with multiple chunks using same shaped dataspaces")
+    TESTING("write to dataset with multiple chunks using same shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -10033,11 +10034,11 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     void   *write_buf = NULL;
     void   *read_buf  = NULL;
 
-    TESTING("write to dataset with multiple chunks using differently shaped dataspaces")
+    TESTING("write to dataset with multiple chunks using differently shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -10372,11 +10373,11 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
     void   *write_buf = NULL;
     int     read_buf[10][10];
 
-    TESTING("several overwrites to dataset with multiple chunks using same shaped dataspaces")
+    TESTING("several overwrites to dataset with multiple chunks using same shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -10707,11 +10708,11 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
     void   *write_buf = NULL;
     void   *read_buf  = NULL;
 
-    TESTING("several overwrites to dataset with multiple chunks using differently shaped dataspaces")
+    TESTING("several overwrites to dataset with multiple chunks using differently shaped dataspaces");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -11052,11 +11053,11 @@ test_read_partial_chunk_all_selection(void)
     hid_t   dcpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
 
-    TESTING("reading a partial chunk using H5S_ALL for file dataspace")
+    TESTING("reading a partial chunk using H5S_ALL for file dataspace");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -11239,11 +11240,11 @@ test_read_partial_chunk_hyperslab_selection(void)
     hid_t   mspace_id = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID;
 
-    TESTING("reading a partial chunk using a hyperslab selection in file dataspace")
+    TESTING("reading a partial chunk using a hyperslab selection in file dataspace");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or get property list aren't supported "
                  "with this connector\n");
@@ -11517,7 +11518,7 @@ error:
 static int
 test_read_partial_chunk_point_selection(void)
 {
-    TESTING("reading a partial chunk using a point selection in file dataspace")
+    TESTING("reading a partial chunk using a point selection in file dataspace");
     SKIPPED();
 
     return 1;
@@ -11543,11 +11544,11 @@ test_get_vlen_buf_size(void)
     hsize_t  size; /* Number of bytes which will be used */
     unsigned i, j;
 
-    TESTING("H5Dvlen_get_buf_size")
+    TESTING("H5Dvlen_get_buf_size");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags & H5VL_CAP_FLAG_DATASET_MORE)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, or more aren't supported with this "
                  "connector\n");

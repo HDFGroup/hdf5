@@ -65,10 +65,10 @@ test_create_group_under_root(void)
     hid_t file_id    = H5I_INVALID_HID;
     hid_t parent_gid = H5I_INVALID_HID;
 
-    TESTING("creation of group under the root group")
+    TESTING("creation of group under the root group");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -119,10 +119,10 @@ test_create_group_under_existing_group(void)
     hid_t parent_group_id = H5I_INVALID_HID, child_group_id = H5I_INVALID_HID,
           grandchild_group_id = H5I_INVALID_HID;
 
-    TESTING("creation of group under existing group using a relative path")
+    TESTING("creation of group under existing group using a relative path");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -197,10 +197,10 @@ test_create_many_groups(void)
     char     group_name[NAME_BUF_SIZE];
     unsigned i;
 
-    TESTING("H5Gcreate many groups")
+    TESTING("H5Gcreate many groups");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -275,10 +275,10 @@ test_create_deep_groups(void)
     hid_t container_group = H5I_INVALID_HID;
     hid_t group_id        = H5I_INVALID_HID;
 
-    TESTING("H5Gcreate groups of great depths")
+    TESTING("H5Gcreate groups of great depths");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -384,10 +384,10 @@ test_create_intermediate_group(void)
     hid_t group_id          = H5I_INVALID_HID;
     hid_t crt_intmd_lcpl_id = H5I_INVALID_HID;
 
-    TESTING("H5Gcreate group with intermediate group creation")
+    TESTING("H5Gcreate group with intermediate group creation");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -534,13 +534,13 @@ test_create_group_invalid_params(void)
     TESTING_MULTIPART("H5Gcreate with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -554,7 +554,7 @@ test_create_group_invalid_params(void)
     {
         PART_BEGIN(H5Gcreate_invalid_loc_id)
         {
-            TESTING_2("H5Gcreate with an invalid loc_id")
+            TESTING_2("H5Gcreate with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -576,7 +576,7 @@ test_create_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_invalid_grp_name)
         {
-            TESTING_2("H5Gcreate with an invalid group name")
+            TESTING_2("H5Gcreate with an invalid group name");
 
             H5E_BEGIN_TRY
             {
@@ -610,7 +610,7 @@ test_create_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_invalid_lcpl)
         {
-            TESTING_2("H5Gcreate with an invalid LCPL")
+            TESTING_2("H5Gcreate with an invalid LCPL");
 
             H5E_BEGIN_TRY
             {
@@ -632,7 +632,7 @@ test_create_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_invalid_gcpl)
         {
-            TESTING_2("H5Gcreate with an invalid GCPL")
+            TESTING_2("H5Gcreate with an invalid GCPL");
 
             H5E_BEGIN_TRY
             {
@@ -654,7 +654,7 @@ test_create_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_invalid_gapl)
         {
-            TESTING_2("H5Gcreate with an invalid GAPL")
+            TESTING_2("H5Gcreate with an invalid GAPL");
 
             H5E_BEGIN_TRY
             {
@@ -676,7 +676,7 @@ test_create_group_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
@@ -706,10 +706,10 @@ test_create_anonymous_group(void)
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, new_group_id = H5I_INVALID_HID;
 
-    TESTING("creation of anonymous group")
+    TESTING("creation of anonymous group");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -769,13 +769,13 @@ test_create_anonymous_group_invalid_params(void)
     TESTING_MULTIPART("H5Gcreate_anon with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -795,7 +795,7 @@ test_create_anonymous_group_invalid_params(void)
     {
         PART_BEGIN(H5Gcreate_anon_invalid_loc_id)
         {
-            TESTING_2("H5Gcreate_anon with an invalid loc_id")
+            TESTING_2("H5Gcreate_anon with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -816,7 +816,7 @@ test_create_anonymous_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_anon_invalid_gcpl)
         {
-            TESTING_2("H5Gcreate_anon with an invalid GCPL")
+            TESTING_2("H5Gcreate_anon with an invalid GCPL");
 
             H5E_BEGIN_TRY
             {
@@ -837,7 +837,7 @@ test_create_anonymous_group_invalid_params(void)
 
         PART_BEGIN(H5Gcreate_anon_invalid_gapl)
         {
-            TESTING_2("H5Gcreate_anon with an invalid GAPL")
+            TESTING_2("H5Gcreate_anon with an invalid GAPL");
 
             H5E_BEGIN_TRY
             {
@@ -858,7 +858,7 @@ test_create_anonymous_group_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Gclose(container_group) < 0)
         TEST_ERROR;
@@ -891,10 +891,10 @@ test_open_nonexistent_group(void)
     hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
 
-    TESTING("for invalid opening of a nonexistent group")
+    TESTING("for invalid opening of a nonexistent group");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
@@ -949,13 +949,13 @@ test_open_group_invalid_params(void)
     TESTING_MULTIPART("H5Gopen with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -969,7 +969,7 @@ test_open_group_invalid_params(void)
     {
         PART_BEGIN(H5Gopen_invalid_loc_id)
         {
-            TESTING_2("H5Gopen with an invalid loc_id")
+            TESTING_2("H5Gopen with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -990,7 +990,7 @@ test_open_group_invalid_params(void)
 
         PART_BEGIN(H5Gopen_invalid_grp_name)
         {
-            TESTING_2("H5Gopen with an invalid group name")
+            TESTING_2("H5Gopen with an invalid group name");
 
             H5E_BEGIN_TRY
             {
@@ -1024,7 +1024,7 @@ test_open_group_invalid_params(void)
 
         PART_BEGIN(H5Gopen_invalid_gapl)
         {
-            TESTING_2("H5Gopen with an invalid GAPL")
+            TESTING_2("H5Gopen with an invalid GAPL");
 
             H5E_BEGIN_TRY
             {
@@ -1045,7 +1045,7 @@ test_open_group_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
@@ -1074,10 +1074,10 @@ test_close_group_invalid_id(void)
 {
     herr_t err_ret = -1;
 
-    TESTING("H5Gclose with an invalid group ID")
+    TESTING("H5Gclose with an invalid group ID");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic group aren't supported with this connector\n");
         return 0;
@@ -1117,18 +1117,18 @@ test_group_property_lists(void)
     hid_t    group_id1 = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID;
     hid_t    gcpl_id1 = H5I_INVALID_HID, gcpl_id2 = H5I_INVALID_HID;
 
-    TESTING_MULTIPART("group property list operations")
+    TESTING_MULTIPART("group property list operations");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GET_PLIST) || !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, property list, creation order aren't supported "
                  "with this connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1179,7 +1179,7 @@ test_group_property_lists(void)
     {
         PART_BEGIN(H5Gget_create_plist)
         {
-            TESTING_2("H5Gget_create_plist")
+            TESTING_2("H5Gget_create_plist");
 
             /* Try to retrieve copies of the two property lists, one which has the property set and one which
              * does not */
@@ -1273,7 +1273,7 @@ test_group_property_lists(void)
 
         PART_BEGIN(H5Gget_create_plist_reopened)
         {
-            TESTING_2("H5Gget_create_plist after re-opening a group")
+            TESTING_2("H5Gget_create_plist after re-opening a group");
 
             if ((group_id1 = H5Gopen2(container_group, GROUP_PROPERTY_LIST_TEST_GROUP_NAME1, H5P_DEFAULT)) <
                 0) {
@@ -1341,7 +1341,7 @@ test_group_property_lists(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(gcpl_id1) < 0)
         TEST_ERROR;
@@ -1392,15 +1392,15 @@ test_get_group_info(void)
     TESTING_MULTIPART("retrieval of group info");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file or group, creation order aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1455,7 +1455,7 @@ test_get_group_info(void)
     {
         PART_BEGIN(H5Gget_info)
         {
-            TESTING_2("retrieval of group info with H5Gget_info")
+            TESTING_2("retrieval of group info with H5Gget_info");
 
             memset(&group_info, 0, sizeof(group_info));
 
@@ -1507,7 +1507,7 @@ test_get_group_info(void)
 
         PART_BEGIN(H5Gget_info_by_name)
         {
-            TESTING_2("retrieval of group info with H5Gget_info_by_name")
+            TESTING_2("retrieval of group info with H5Gget_info_by_name");
 
             memset(&group_info, 0, sizeof(group_info));
 
@@ -1560,7 +1560,7 @@ test_get_group_info(void)
 
         PART_BEGIN(H5Gget_info_by_idx_crt_order_increasing)
         {
-            TESTING_2("H5Gget_info_by_idx by creation order in increasing order")
+            TESTING_2("H5Gget_info_by_idx by creation order in increasing order");
 
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
@@ -1611,7 +1611,7 @@ test_get_group_info(void)
 
         PART_BEGIN(H5Gget_info_by_idx_crt_order_decreasing)
         {
-            TESTING_2("H5Gget_info_by_idx by creation order in decreasing order")
+            TESTING_2("H5Gget_info_by_idx by creation order in decreasing order");
 
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
@@ -1662,7 +1662,7 @@ test_get_group_info(void)
 
         PART_BEGIN(H5Gget_info_by_idx_name_order_increasing)
         {
-            TESTING_2("H5Gget_info_by_idx by alphabetical order in increasing order")
+            TESTING_2("H5Gget_info_by_idx by alphabetical order in increasing order");
 
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
@@ -1713,7 +1713,7 @@ test_get_group_info(void)
 
         PART_BEGIN(H5Gget_info_by_idx_name_order_decreasing)
         {
-            TESTING_2("H5Gget_info_by_idx by alphabetical order in decreasing order")
+            TESTING_2("H5Gget_info_by_idx by alphabetical order in decreasing order");
 #ifndef NO_DECREASING_ALPHA_ITER_ORDER
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
@@ -1768,7 +1768,7 @@ test_get_group_info(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Pclose(gcpl_id) < 0)
         TEST_ERROR;
@@ -1811,15 +1811,15 @@ test_get_group_info_invalid_params(void)
     TESTING_MULTIPART("retrieval of group info with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_MORE) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_CREATION_ORDER)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
                  "connector\n");
         return 0;
     }
 
-    TESTING_2("test setup")
+    TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -1833,7 +1833,7 @@ test_get_group_info_invalid_params(void)
     {
         PART_BEGIN(H5Gget_info_invalid_loc_id)
         {
-            TESTING_2("H5Gget_info with an invalid loc_id")
+            TESTING_2("H5Gget_info with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -1853,7 +1853,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_invalid_grp_info_pointer)
         {
-            TESTING_2("H5Gget_info with an invalid group info pointer")
+            TESTING_2("H5Gget_info with an invalid group info pointer");
 
             H5E_BEGIN_TRY
             {
@@ -1873,7 +1873,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_name_invalid_loc_id)
         {
-            TESTING_2("H5Gget_info_by_name with an invalid loc_id")
+            TESTING_2("H5Gget_info_by_name with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -1893,7 +1893,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_name_invalid_grp_name)
         {
-            TESTING_2("H5Gget_info_by_name with an invalid group name")
+            TESTING_2("H5Gget_info_by_name with an invalid group name");
 
             H5E_BEGIN_TRY
             {
@@ -1926,7 +1926,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_name_invalid_grp_info_pointer)
         {
-            TESTING_2("H5Gget_info_by_name with an invalid group info pointer")
+            TESTING_2("H5Gget_info_by_name with an invalid group info pointer");
 
             H5E_BEGIN_TRY
             {
@@ -1947,7 +1947,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_name_invalid_lapl)
         {
-            TESTING_2("H5Gget_info_by_name with an invalid LAPL")
+            TESTING_2("H5Gget_info_by_name with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -1967,7 +1967,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_loc_id)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid loc_id")
+            TESTING_2("H5Gget_info_by_idx with an invalid loc_id");
 
             H5E_BEGIN_TRY
             {
@@ -1988,7 +1988,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_grp_name)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid group name")
+            TESTING_2("H5Gget_info_by_idx with an invalid group name");
 
             H5E_BEGIN_TRY
             {
@@ -2023,7 +2023,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_index_type)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid index type")
+            TESTING_2("H5Gget_info_by_idx with an invalid index type");
 
             H5E_BEGIN_TRY
             {
@@ -2059,7 +2059,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_iter_order)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid iteration order")
+            TESTING_2("H5Gget_info_by_idx with an invalid iteration order");
 
             H5E_BEGIN_TRY
             {
@@ -2095,7 +2095,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_grp_info_pointer)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid group info pointer")
+            TESTING_2("H5Gget_info_by_idx with an invalid group info pointer");
 
             H5E_BEGIN_TRY
             {
@@ -2116,7 +2116,7 @@ test_get_group_info_invalid_params(void)
 
         PART_BEGIN(H5Gget_info_by_idx_invalid_lapl)
         {
-            TESTING_2("H5Gget_info_by_idx with an invalid LAPL")
+            TESTING_2("H5Gget_info_by_idx with an invalid LAPL");
 
             H5E_BEGIN_TRY
             {
@@ -2137,7 +2137,7 @@ test_get_group_info_invalid_params(void)
     }
     END_MULTIPART;
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
@@ -2166,11 +2166,11 @@ test_flush_group(void)
     hid_t container_group = H5I_INVALID_HID;
     hid_t group_id        = H5I_INVALID_HID;
 
-    TESTING("H5Gflush")
+    TESTING("H5Gflush");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
         HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
                  "connector\n");
@@ -2235,10 +2235,10 @@ test_flush_group_invalid_params(void)
 {
     herr_t status;
 
-    TESTING("H5Gflush with invalid parameters")
+    TESTING("H5Gflush with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
         HDprintf("    API functions for group flush aren't supported with this connector\n");
         return 0;
@@ -2274,11 +2274,11 @@ test_refresh_group(void)
     hid_t container_group = H5I_INVALID_HID;
     hid_t group_id        = H5I_INVALID_HID;
 
-    TESTING("H5Grefresh")
+    TESTING("H5Grefresh");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or refresh aren't supported with this connector\n");
@@ -2343,10 +2343,10 @@ test_refresh_group_invalid_params(void)
 {
     herr_t status;
 
-    TESTING("H5Grefresh with invalid parameters")
+    TESTING("H5Grefresh with invalid parameters");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
         HDprintf("    API functions for group refresh aren't supported with this connector\n");
         return 0;

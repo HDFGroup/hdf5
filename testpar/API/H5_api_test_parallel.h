@@ -14,9 +14,10 @@
 #define H5_API_TEST_PARALLEL_H
 
 #include <mpi.h>
-#include "H5_api_test.h"
 
 #include "testpar.h"
+
+#include "H5_api_test.h"
 
 /* Define H5VL_VERSION if not already defined */
 #ifndef H5VL_VERSION
@@ -181,7 +182,7 @@ extern char H5_api_test_parallel_filename[];
 hid_t create_mpi_fapl(MPI_Comm comm, MPI_Info info, hbool_t coll_md_read);
 int   generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out);
 
-extern int      mpi_size, mpi_rank;
-extern uint64_t vol_cap_flags;
+extern int mpi_size;
+extern int mpi_rank;
 
 #endif
