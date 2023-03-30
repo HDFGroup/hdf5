@@ -79,7 +79,7 @@ char H5_api_test_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 enum H5_api_test_type { H5_API_TESTS };
 #undef X
 #define X(a, b, c, d) b,
-static char *const H5_api_test_name[] = {H5_API_TESTS};
+static const char *const H5_api_test_name[] = {H5_API_TESTS};
 #undef X
 #define X(a, b, c, d) c,
 static int (*H5_api_test_func[])(void) = {H5_API_TESTS};
@@ -165,8 +165,8 @@ error:
 int
 main(int argc, char **argv)
 {
-    char   *vol_connector_name;
-    hbool_t err_occurred = FALSE;
+    const char *vol_connector_name;
+    hbool_t     err_occurred = FALSE;
 
     /* Simple argument checking, TODO can improve that later */
     if (argc > 1) {
@@ -231,15 +231,12 @@ main(int argc, char **argv)
     HDprintf("Cleaning up testing files\n");
     H5Fdelete(H5_api_test_filename, H5P_DEFAULT);
 
-    HDprintf("%ld/%ld (%.2f%%) API tests passed with VOL connector '%s'\n", (long)n_tests_passed_g,
-             (long)n_tests_run_g, ((float)n_tests_passed_g / (float)n_tests_run_g * 100.0),
-             vol_connector_name);
-    HDprintf("%ld/%ld (%.2f%%) API tests did not pass with VOL connector '%s'\n", (long)n_tests_failed_g,
-             (long)n_tests_run_g, ((float)n_tests_failed_g / (float)n_tests_run_g * 100.0),
-             vol_connector_name);
-    HDprintf("%ld/%ld (%.2f%%) API tests were skipped with VOL connector '%s'\n", (long)n_tests_skipped_g,
-             (long)n_tests_run_g, ((float)n_tests_skipped_g / (float)n_tests_run_g * 100.0),
-             vol_connector_name);
+    HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g, n_tests_run_g,
+             ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+    HDprintf("%zu/%zu (%.2f%%) API tests did not pass with VOL connector '%s'\n", n_tests_failed_g,
+             n_tests_run_g, ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+    HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
+             n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
 done:
     H5close();

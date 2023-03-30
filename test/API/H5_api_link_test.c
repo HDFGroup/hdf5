@@ -13960,6 +13960,13 @@ test_get_link_val_invalid_params(void)
         goto error;
     }
 
+    link_val_buf_size = 100;
+    if (NULL == (link_val_buf = (char *)HDmalloc(link_val_buf_size))) {
+        H5_FAILED();
+        HDprintf("    couldn't allocate buffer for storing link value\n");
+        goto error;
+    }
+
     PASSED();
 
     BEGIN_MULTIPART
@@ -13969,13 +13976,6 @@ test_get_link_val_invalid_params(void)
             TESTING_2("H5Lget_val with an invalid location ID");
 
             HDmemset(&link_info, 0, sizeof(link_info));
-
-            link_val_buf_size = link_info.u.val_size;
-            if (NULL == (link_val_buf = (char *)HDmalloc(link_val_buf_size))) {
-                H5_FAILED();
-                HDprintf("    couldn't allocate buffer for storing link value\n");
-                PART_ERROR(H5Lget_val_invalid_loc_id);
-            }
 
             H5E_BEGIN_TRY
             {
@@ -14052,20 +14052,6 @@ test_get_link_val_invalid_params(void)
             TESTING_2("H5Lget_val_by_idx with an invalid location ID");
 
             HDmemset(&link_info, 0, sizeof(link_info));
-
-            while (link_info.u.val_size > link_val_buf_size) {
-                char *tmp_realloc;
-
-                link_val_buf_size *= 2;
-
-                if (NULL == (tmp_realloc = (char *)HDrealloc(link_val_buf, link_val_buf_size))) {
-                    H5_FAILED();
-                    HDprintf("    couldn't reallocate buffer for storing link value\n");
-                    PART_ERROR(H5Lget_val_by_idx_invalid_loc_id);
-                }
-
-                link_val_buf = tmp_realloc;
-            }
 
             H5E_BEGIN_TRY
             {

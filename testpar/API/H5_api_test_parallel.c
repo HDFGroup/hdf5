@@ -72,7 +72,7 @@ int mpi_rank;
 enum H5_api_test_type { H5_API_PARALLEL_TESTS };
 #undef X
 #define X(a, b, c, d) b,
-static char *const H5_api_test_name[] = {H5_API_PARALLEL_TESTS};
+static const char *const H5_api_test_name[] = {H5_API_PARALLEL_TESTS};
 #undef X
 #define X(a, b, c, d) c,
 static int (*H5_api_test_func[])(void) = {H5_API_PARALLEL_TESTS};
@@ -221,7 +221,7 @@ error:
 int
 main(int argc, char **argv)
 {
-    char *vol_connector_name;
+    const char *vol_connector_name;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -308,9 +308,9 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS)
-        HDprintf("%s%ld/%ld (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
-                 n_tests_passed_g > 0 ? "At least " : "", (long)n_tests_passed_g, (long)n_tests_run_g,
-                 ((float)n_tests_passed_g / (float)n_tests_run_g * 100.0), vol_connector_name);
+        HDprintf("%s%zu/%zu (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
+                 n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
+                 ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
     if (MPI_SUCCESS !=
         MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
@@ -320,12 +320,12 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS) {
-        HDprintf("%s%ld/%ld (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
-                 n_tests_failed_g > 0 ? "At least " : "", (long)n_tests_failed_g, (long)n_tests_run_g,
-                 ((float)n_tests_failed_g / (float)n_tests_run_g * 100.0), vol_connector_name);
+        HDprintf("%s%zu/%zu (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
+                 n_tests_failed_g > 0 ? "At least " : "", n_tests_failed_g, n_tests_run_g,
+                 ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
-        HDprintf("%ld/%ld (%.2f%%) API tests were skipped with VOL connector '%s'\n", (long)n_tests_skipped_g,
-                 (long)n_tests_run_g, ((float)n_tests_skipped_g / (float)n_tests_run_g * 100.0),
+        HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
+                 n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
                  vol_connector_name);
     }
 
