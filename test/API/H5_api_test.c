@@ -166,6 +166,7 @@ int
 main(int argc, char **argv)
 {
     const char *vol_connector_name;
+    unsigned    seed;
     hbool_t     err_occurred = FALSE;
 
     /* Simple argument checking, TODO can improve that later */
@@ -194,7 +195,8 @@ main(int argc, char **argv)
     n_tests_failed_g  = 0;
     n_tests_skipped_g = 0;
 
-    srand((unsigned)HDtime(NULL));
+    seed = (unsigned)HDtime(NULL);
+    srand(seed);
 
     HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", TEST_FILE_NAME);
 
@@ -206,6 +208,7 @@ main(int argc, char **argv)
     HDprintf("Running API tests with VOL connector '%s'\n\n", vol_connector_name);
     HDprintf("Test parameters:\n");
     HDprintf("  - Test file name: '%s'\n", H5_api_test_filename);
+    HDprintf("  - Test seed: %u\n", seed);
     HDprintf("\n\n");
 
     /*

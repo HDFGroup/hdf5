@@ -222,6 +222,7 @@ int
 main(int argc, char **argv)
 {
     const char *vol_connector_name;
+    unsigned    seed;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -249,7 +250,19 @@ main(int argc, char **argv)
     n_tests_failed_g  = 0;
     n_tests_skipped_g = 0;
 
-    srand((unsigned)HDtime(NULL));
+    if (MAINPROCESS) {
+        seed = (unsigned)HDtime(NULL);
+    }
+
+    if (mpi_size > 1) {
+        if (MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD)) {
+            if (MAINPROCESS)
+                HDprintf("Couldn't broadcast test seed\n");
+            goto error;
+        }
+    }
+
+    srand(seed);
 
     HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", PARALLEL_TEST_FILE_NAME);
 
@@ -264,6 +277,7 @@ main(int argc, char **argv)
         HDprintf("Test parameters:\n");
         HDprintf("  - Test file name: '%s'\n", H5_api_test_parallel_filename);
         HDprintf("  - Number of MPI ranks: %d\n", mpi_size);
+        HDprintf("  - Test seed: %u\n", seed);
         HDprintf("\n\n");
     }
 
