@@ -611,9 +611,15 @@ option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
 mark_as_advanced (HDF5_ENABLE_TRACE)
-if (${HDF_CFG_NAME} MATCHES "Debug")
+if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
   # Enable instrumenting of the library's internal operations
   option (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF)
+
+  # Instrumenting is enabled by default for parallel debug builds
+  if (HDF5_ENABLE_PARALLEL)
+    set (HDF5_ENABLE_INSTRUMENT ON CACHE BOOL "Instrument The library" FORCE)
+  endif ()
+
   if (HDF5_ENABLE_INSTRUMENT)
     set (H5_HAVE_INSTRUMENTED_LIBRARY 1)
   endif ()
