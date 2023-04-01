@@ -1553,7 +1553,7 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
 /*-------------------------------------------------------------------------
  * Function:    h5_verify_cached_stabs
  *
- * Purpose:     Verify that all groups in every file in base_name have
+ * Purpose:     Verifies that all groups in every file in base_name have
  *              their symbol table information cached (if present, and if
  *              the parent group also uses a symbol table).  Does not
  *              check that the root group's symbol table information is
