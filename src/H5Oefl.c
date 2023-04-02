@@ -96,19 +96,19 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version (1 byte) */
-    if (p + 1 - 1 > p_end)
+    if ((p + 1 - 1) > p_end)
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
     version = *p++;
     if (version != H5O_EFL_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for external file list message")
 
     /* Reserved (3 bytes) */
-    if (p + 3 - 1 > p_end)
+    if ((p + 3 - 1) > p_end)
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
     p += 3;
 
     /* Number of slots (2x 2 bytes) */
-    if (p + 4 - 1 > p_end)
+    if ((p + 4 - 1) > p_end)
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
     UINT16DECODE(p, mesg->nalloc);
     if (mesg->nalloc <= 0)
@@ -118,7 +118,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad number of in-use slots when parsing efl msg")
 
     /* Heap address */
-    if (p + H5F_SIZEOF_ADDR(f) - 1 > p_end)
+    if ((p + H5F_SIZEOF_ADDR(f) - 1) > p_end)
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
     if (H5F_addr_defined(mesg->heap_addr) == FALSE)
@@ -143,7 +143,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
 
     for (size_t u = 0; u < mesg->nused; u++) {
         /* Name */
-        if (p + H5F_SIZEOF_SIZE(f) - 1 > p_end)
+        if ((p + H5F_SIZEOF_SIZE(f) - 1) > p_end)
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].name_offset);
 
@@ -156,12 +156,12 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "string duplication failed")
 
         /* File offset */
-        if (p + H5F_SIZEOF_SIZE(f) - 1 > p_end)
+        if ((p + H5F_SIZEOF_SIZE(f) - 1) > p_end)
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].offset);
 
         /* Size */
-        if (p + H5F_SIZEOF_SIZE(f) - 1 > p_end)
+        if ((p + H5F_SIZEOF_SIZE(f) - 1) > p_end)
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].size);
     }
