@@ -158,8 +158,14 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
 
 done:
     if (ret_value == NULL)
-        if (mesg != NULL)
+        if (mesg != NULL) {
+            if (mesg->slot != NULL) {
+                for (size_t u = 0; u < mesg->nused; u++)
+                    H5MM_xfree(mesg->slot[u].name);
+                H5MM_xfree(mesg->slot);
+            }
             H5MM_xfree(mesg);
+        }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__efl_decode() */
