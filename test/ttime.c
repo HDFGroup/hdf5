@@ -227,5 +227,9 @@ test_time(void)
 void
 cleanup_time(void)
 {
-    HDremove(DATAFILE);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(DATAFILE, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }
