@@ -106,7 +106,7 @@ static herr_t  H5D__contig_io_term(H5D_io_info_t *io_info, H5D_dset_io_info_t *d
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsize_t offset,
                                     size_t size);
-static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+static herr_t H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                             H5D_io_op_type_t op_type);
 
 /*********************/
@@ -586,7 +586,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
-    htri_t use_selection_io = FALSE;   /* Whether to use selection I/O */
     herr_t ret_value        = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -676,11 +675,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
-    if (io_info->use_select_io) {
-        if ((use_selection_io = H5D__contig_may_use_select_io(io_info, dinfo, io_info->op_type)) < 0)
+    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF)
+        if (H5D__contig_may_use_select_io(io_info, dinfo, io_info->op_type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-        io_info->use_select_io = (hbool_t)use_selection_io;
-    }
 
 done:
     if (ret_value < 0) {
@@ -740,12 +737,12 @@ H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+static herr_t
+H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                               H5D_io_op_type_t op_type)
 {
     const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
-    htri_t       ret_value = FAIL; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -757,12 +754,14 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_in
 
     dataset = dset_info->dset;
 
+    /* None of the reasons this function might disable selection I/O are relevant to parallel, so no need to update no_selection_io_cause since we're only keeping track of the reason for no selection I/O in parallel (for now) */
+
     /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
      * buffer exists (write) or is dirty (read) */
     if (dset_info->layout_ops.readvv != H5D__contig_readvv ||
         (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
-        ret_value = FALSE;
+        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
     else {
         hbool_t page_buf_enabled;
 
@@ -772,9 +771,7 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_in
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled)
-            ret_value = FALSE;
-        else
-            ret_value = TRUE;
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
     } /* end else */
 
 done:
@@ -807,7 +804,7 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->mem_space);
     HDassert(dinfo->file_space);
 
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         /* Only perform I/O if not performing multi dataset I/O or type conversion,
          * otherwise the higher level will handle it after all datasets
          * have been processed */
@@ -884,7 +881,7 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->mem_space);
     HDassert(dinfo->file_space);
 
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         /* Only perform I/O if not performing multi dataset I/O or type conversion,
          * otherwise the higher level will handle it after all datasets
          * have been processed */

@@ -46,10 +46,11 @@
 static herr_t H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
 static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
-static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info);
+static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 #endif /* H5_HAVE_PARALLEL */
+static herr_t H5D__typeinfo_init_phase3(H5D_io_info_t *io_info);
+static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_term(H5D_io_info_t *io_info, size_t type_info_init);
 
 /*********************/
@@ -293,14 +294,18 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         HGOTO_DONE(SUCCEED)
 
 #ifdef H5_HAVE_PARALLEL
-    /* Adjust I/O info for any parallel I/O */
-    if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
-#endif /*H5_HAVE_PARALLEL*/
-
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Adjust I/O info for any parallel or selection I/O */
+    if (H5D__ioinfo_adjust(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel or selection I/O")
+
+    /* Perform third phase of type info initialization */
+    if (H5D__typeinfo_init_phase3(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
 
     /* If multi dataset I/O callback is not provided, perform read IO via
      * single-dset path with looping */
@@ -694,14 +699,18 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     HDassert(io_op_init == count);
 
 #ifdef H5_HAVE_PARALLEL
-    /* Adjust I/O info for any parallel I/O */
-    if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
-#endif /*H5_HAVE_PARALLEL*/
-
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Adjust I/O info for any parallel or selection I/O */
+    if (H5D__ioinfo_adjust(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel or selection I/O")
+
+    /* Perform third phase of type info initialization */
+    if (H5D__typeinfo_init_phase3(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
 
     /* If multi dataset I/O callback is not provided, perform write IO via
      * single-dset path with looping */
@@ -807,8 +816,13 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
             /* Only report the collective I/O mode if we're actually performing collective I/O */
-            if (xfer_mode == H5FD_MPIO_COLLECTIVE)
+            if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
                 H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
+
+                /* If we did selection I/O, report that we used "link chunk" mode, since that's the most analogous to what selection I/O does */
+                if (io_info.use_select_io == H5D_SELECTION_IO_MODE_ON)
+                    H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
+            }
         }
 #endif /* H5_HAVE_PARALLEL */
     }
@@ -904,12 +918,15 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     /* Use provided dset_info */
     io_info->dsets_info = dset_info;
 
-    /* Start with default selection I/O mode. If enabled, layout callback will
-     * turn it off if appropriate */
+    /* Start with selection I/O mode from property list.  If enabled, layout callback will turn it off if it is not supported by the layout.  Handling of H5D_SELECTION_IO_MODE_AUTO occurs in H5D__ioinfo_adjust. */
     H5CX_get_selection_io_mode(&selection_io_mode);
-    io_info->use_select_io = (selection_io_mode == H5D_SELECTION_IO_MODE_ON);
+    io_info->use_select_io = selection_io_mode;
 
 #ifdef H5_HAVE_PARALLEL
+    /* Record no selection I/O cause if it was disabled by the API */
+    if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF)
+        io_info->no_selection_io_cause = H5D_MPIO_SELECTION_IO_DISABLED;
+
     /* Determine if the file was opened with an MPI VFD */
     if (count > 0)
         io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset_info[0].dset->oloc.file, H5FD_FEAT_HAS_MPI);
@@ -1085,12 +1102,16 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__typeinfo_init() */
 
+#ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init_phase2
  *
- * Purpose:     Finish initializing type info for all datasets after
- *              calculating the max type size across all datasets.  And
- *              after H5D__ioinfo_adjust().
+ * Purpose:     Continue initializing type info for all datasets after
+ *              calculating the max type size across all datasets, and
+ *              before final determination of collective/independent in
+ *              H5D__ioinfo_adjust().  Currently just checks to see if
+ *              selection I/O can be used with type conversion, and sets
+ *              no_collective_cause flags related to selection I/O.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1109,18 +1130,15 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_tconv_type_size) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
-        size_t           i;         /* Local index variable */
 
         /* Get the original state of parallel I/O transfer mode */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
         /* Check if we're doing collective I/O */
-        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-            size_t tconv_buf_size = 0; /* Size of shared type conversion buffer */
-
-            /* Only implemented for selection I/O */
-            HDassert(io_info->use_select_io);
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE && io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
+            size_t max_temp_buf; /* Maximum temporary buffer size */
+            size_t           i;         /* Local index variable */
 
             /* Collective I/O, conversion buffer must be large enough for entire I/O (for now).
              * Stick with individual background buffers */
@@ -1130,25 +1148,249 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
                 H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
                 /* Check if type conversion buffer is needed for this dataset */
-                if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
+                if (!type_info->is_conv_noop || !type_info->is_xform_noop)
                     /* Calculate location and size of this dataset's portion of the global type
                      * conversion buffer */
-                    tconv_buf_size += io_info->dsets_info[i].nelmts *
+                    io_info->tconv_buf_size += io_info->dsets_info[i].nelmts *
                                       MAX(type_info->src_type_size, type_info->dst_type_size);
+            }
 
-                    /* Allocate background buffer, if necessary */
-                    if (type_info->need_bkg) {
-                        if (NULL ==
-                            (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, io_info->dsets_info[i].nelmts *
-                                                                                 type_info->dst_type_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                                        "memory allocation failed for type conversion")
-                        type_info->bkg_buf_allocated = TRUE;
+            /* Get max temp buffer size from API context */
+            if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
 
-                        /* Check if we need to fill the background buffer with the destination contents */
-                        if (type_info->need_bkg == H5T_BKG_YES)
-                            io_info->must_fill_bkg = TRUE;
+            /* Check if the needed type conversion size is too big */
+            if (io_info->tconv_buf_size > max_temp_buf) {
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                io_info->tconv_buf_size = 0;
+                io_info->no_selection_io_cause |= H5D_MPIO_TCONV_BUF_TOO_SMALL;
+            }
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__typeinfo_init_phase2() */
+#endif /* H5_HAVE_PARALLEL */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__ioinfo_adjust
+ *
+ * Purpose:     Adjust operation's I/O info for any parallel I/O, also
+ *              handle decision on selection I/O even in serial case
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__ioinfo_adjust(H5D_io_info_t *io_info)
+{
+    H5D_t *dset0;               /* only the first dset , also for single dsets case */
+    herr_t ret_value = SUCCEED; /* Return value	*/
+
+#ifdef H5_HAVE_PARALLEL
+    FUNC_ENTER_PACKAGE
+#else
+    FUNC_ENTER_PACKAGE_NOERR
+#endif /* H5_HAVE_PARALLEL */
+
+    /* check args */
+    HDassert(io_info);
+
+    /* check the first dset, should exist either single or multi dset cases */
+    HDassert(io_info->dsets_info[0].dset);
+    dset0 = io_info->dsets_info[0].dset;
+    HDassert(dset0->oloc.file);
+
+#ifdef H5_HAVE_PARALLEL
+    /* Reset the actual io mode properties to the default values in case
+     * the DXPL (if it's non-default) was previously used in a collective
+     * I/O operation.
+     */
+    if (!H5CX_is_def_dxpl()) {
+        H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_NO_CHUNK_OPTIMIZATION);
+        H5CX_set_mpio_actual_io_mode(H5D_MPIO_NO_COLLECTIVE);
+    } /* end if */
+
+    /* Make any parallel I/O adjustments */
+    if (io_info->using_mpi_vfd) {
+        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+        htri_t           opt;       /* Flag whether a selection is optimizable */
+
+        /* Get the original state of parallel I/O transfer mode */
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+
+        /* Get MPI communicator */
+        if (MPI_COMM_NULL == (io_info->comm = H5F_mpi_get_comm(dset0->oloc.file)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+
+        /* Check if we can set direct MPI-IO read/write functions */
+        if ((opt = H5D__mpio_opt_possible(io_info)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
+
+        /* Check if we can use the optimized parallel I/O routines */
+        if (opt == TRUE) {
+            /* Override the I/O op pointers to the MPI-specific routines, unless
+             * selection I/O is to be used - in this case the file driver will
+             * handle collective I/O */
+            /* Check for selection/vector support in file driver? -NAF */
+            if (io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) {
+                io_info->md_io_ops.multi_read_md   = H5D__collective_read;
+                io_info->md_io_ops.multi_write_md  = H5D__collective_write;
+                io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
+                io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
+            } /* end if */
+        }     /* end if */
+        else {
+            /* Fail when file sync is required, since it requires collective write */
+            if (io_info->op_type == H5D_IO_OP_WRITE) {
+                hbool_t mpi_file_sync_required = FALSE;
+                if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
+
+                if (mpi_file_sync_required)
+                    HGOTO_ERROR(
+                        H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
+                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
+            }
+
+            /* Check if there are any filters in the pipeline. If there are,
+             * we cannot break to independent I/O if this is a write operation
+             * with multiple ranks involved; otherwise, there will be metadata
+             * inconsistencies in the file.
+             */
+            if (io_info->op_type == H5D_IO_OP_WRITE) {
+                size_t i;
+
+                /* Check all datasets for filters */
+                for (i = 0; i < io_info->count; i++)
+                    if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0)
+                        break;
+
+                /* If the above loop didn't complete at least one dataset has a filter */
+                if (i < io_info->count) {
+                    int comm_size = 0;
+
+                    /* Retrieve size of MPI communicator used for file */
+                    if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
+
+                    if (comm_size > 1) {
+                        char local_no_coll_cause_string[512];
+                        char global_no_coll_cause_string[512];
+
+                        if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
+                                                                global_no_coll_cause_string, 512) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                        "can't get reasons for breaking collective I/O")
+
+                        HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
+                                    "Can't perform independent write with filters in pipeline.\n"
+                                    "    The following caused a break from collective I/O:\n"
+                                    "        Local causes: %s\n"
+                                    "        Global causes: %s",
+                                    local_no_coll_cause_string, global_no_coll_cause_string);
                     }
+                }
+            }
+
+            /* If we won't be doing collective I/O, but the user asked for
+             * collective I/O, change the request to use independent I/O
+             */
+            if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+                /* Change the xfer_mode to independent for handling the I/O */
+                if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
+            } /* end if */
+        }     /* end else */
+    }         /* end if */
+    else
+#endif /* H5_HAVE_PARALLEL */
+        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if the VFD has a vector or selection I/O callback */
+        if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
+            if (H5F_has_vector_select_io(dset0->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
+            else
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+        }
+
+#ifdef H5_HAVE_PARALLEL
+done:
+#endif /* H5_HAVE_PARALLEL */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__ioinfo_adjust() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__typeinfo_init_phase3
+ *
+ * Purpose:     Finish initializing type info for all datasets after
+ *              calculating the max type size across all datasets.  And
+ *              after final collective/independent determination in
+ *              H5D__ioinfo_adjust().
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* check args */
+    HDassert(io_info);
+
+    /* Check if we need to allocate a shared type conversion buffer */
+    if (io_info->max_tconv_type_size) {
+        void  *tconv_buf;    /* Temporary conversion buffer pointer */
+        void  *bkgr_buf;     /* Background conversion buffer pointer */
+
+        /* Get provided buffers from API context */
+        if (H5CX_get_tconv_buf(&tconv_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
+        if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                        "can't retrieve background conversion buffer pointer")
+
+#ifdef H5_HAVE_PARALLEL
+        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+
+        /* Get the original state of parallel I/O transfer mode */
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+
+        /* Check if we're doing collective I/O */
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+            size_t           i;         /* Local index variable */
+
+            /* Only implemented for selection I/O */
+            HDassert(io_info->use_select_io == H5D_SELECTION_IO_MODE_ON);
+
+            /* Collective I/O, conversion buffer must be large enough for entire I/O (for now).
+             * Stick with individual background buffers */
+
+            /* Calculate size of buffers */
+            for (i = 0; i < io_info->count; i++) {
+                H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
+
+                /* Allocate background buffer, if necessary */
+                if (type_info->need_bkg) {
+                    HDassert(!type_info->is_conv_noop || !type_info->is_xform_noop);
+
+                    if (NULL ==
+                        (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, io_info->dsets_info[i].nelmts *
+                                                                             type_info->dst_type_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                    "memory allocation failed for type conversion")
+                    type_info->bkg_buf_allocated = TRUE;
+
+                    /* Check if we need to fill the background buffer with the destination contents */
+                    if (type_info->need_bkg == H5T_BKG_YES)
+                        io_info->must_fill_bkg = TRUE;
                 }
             }
 
@@ -1157,33 +1399,29 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             /* Allocating large buffers here will blow out all other type conversion buffers
              * on the free list.  Should we change this to a regular malloc?  Would require
              * keeping track of which version of free() to call. -NAF */
-            if (tconv_buf_size > 0) {
-                if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, tconv_buf_size)))
+            if (io_info->tconv_buf_size > 0) {
+                if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, io_info->tconv_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                 "memory allocation failed for type conversion")
                 io_info->tconv_buf_allocated = TRUE;
             }
         }
-        else {
+        else
+#endif /* H5_HAVE_PARALLEL */
+        {
             /* No collective I/O, only need to make sure it's big enough for one element */
-            void  *tconv_buf;    /* Temporary conversion buffer pointer */
-            void  *bkgr_buf;     /* Background conversion buffer pointer */
             size_t max_temp_buf; /* Maximum temporary buffer size */
             size_t target_size;  /* Desired buffer size	*/
+            size_t i;
 
             /* Disable selection I/O (for now) since the selection I/O type conversion code path
              * assumes the tconv buf is large enough to hold all data in the I/O, and we don't want
              * to impose this when there's no benefit */
-            io_info->use_select_io = FALSE;
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
 
-            /* Get info from API context */
+            /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
-            if (H5CX_get_tconv_buf(&tconv_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
-            if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                            "can't retrieve background conversion buffer pointer")
 
             /* Set up datatype conversion/background buffers */
             target_size = max_temp_buf;
@@ -1260,144 +1498,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__typeinfo_init_phase2() */
-
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__ioinfo_adjust
- *
- * Purpose:	Adjust operation's I/O info for any parallel I/O
- *
- *          This was derived from H5D__ioinfo_adjust for multi-dset work.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__ioinfo_adjust(H5D_io_info_t *io_info)
-{
-    H5D_t *dset0;               /* only the first dset , also for single dsets case */
-    herr_t ret_value = SUCCEED; /* Return value	*/
-
-    FUNC_ENTER_PACKAGE
-
-    /* check args */
-    HDassert(io_info);
-
-    /* check the first dset, should exist either single or multi dset cases */
-    HDassert(io_info->dsets_info[0].dset);
-    dset0 = io_info->dsets_info[0].dset;
-    HDassert(dset0->oloc.file);
-
-    /* Reset the actual io mode properties to the default values in case
-     * the DXPL (if it's non-default) was previously used in a collective
-     * I/O operation.
-     */
-    if (!H5CX_is_def_dxpl()) {
-        H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_NO_CHUNK_OPTIMIZATION);
-        H5CX_set_mpio_actual_io_mode(H5D_MPIO_NO_COLLECTIVE);
-    } /* end if */
-
-    /* Make any parallel I/O adjustments */
-    if (io_info->using_mpi_vfd) {
-        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
-        htri_t           opt;       /* Flag whether a selection is optimizable */
-
-        /* Get the original state of parallel I/O transfer mode */
-        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
-
-        /* Get MPI communicator */
-        if (MPI_COMM_NULL == (io_info->comm = H5F_mpi_get_comm(dset0->oloc.file)))
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
-
-        /* Check if we can set direct MPI-IO read/write functions */
-        if ((opt = H5D__mpio_opt_possible(io_info)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
-
-        /* Check if we can use the optimized parallel I/O routines */
-        if (opt == TRUE) {
-            /* Override the I/O op pointers to the MPI-specific routines, unless
-             * selection I/O is to be used - in this case the file driver will
-             * handle collective I/O */
-            /* Check for selection/vector support in file driver? -NAF */
-            if (!io_info->use_select_io) {
-                io_info->md_io_ops.multi_read_md   = H5D__collective_read;
-                io_info->md_io_ops.multi_write_md  = H5D__collective_write;
-                io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
-                io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
-            } /* end if */
-        }     /* end if */
-        else {
-            /* Fail when file sync is required, since it requires collective write */
-            if (io_info->op_type == H5D_IO_OP_WRITE) {
-                hbool_t mpi_file_sync_required = FALSE;
-                if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
-
-                if (mpi_file_sync_required)
-                    HGOTO_ERROR(
-                        H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
-                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
-            }
-
-            /* Check if there are any filters in the pipeline. If there are,
-             * we cannot break to independent I/O if this is a write operation
-             * with multiple ranks involved; otherwise, there will be metadata
-             * inconsistencies in the file.
-             */
-            if (io_info->op_type == H5D_IO_OP_WRITE) {
-                size_t i;
-
-                /* Check all datasets for filters */
-                for (i = 0; i < io_info->count; i++)
-                    if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0)
-                        break;
-
-                /* If the above loop didn't complete at least one dataset has a filter */
-                if (i < io_info->count) {
-                    int comm_size = 0;
-
-                    /* Retrieve size of MPI communicator used for file */
-                    if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
-
-                    if (comm_size > 1) {
-                        char local_no_coll_cause_string[512];
-                        char global_no_coll_cause_string[512];
-
-                        if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
-                                                                global_no_coll_cause_string, 512) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                        "can't get reasons for breaking collective I/O")
-
-                        HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
-                                    "Can't perform independent write with filters in pipeline.\n"
-                                    "    The following caused a break from collective I/O:\n"
-                                    "        Local causes: %s\n"
-                                    "        Global causes: %s",
-                                    local_no_coll_cause_string, global_no_coll_cause_string);
-                    }
-                }
-            }
-
-            /* If we won't be doing collective I/O, but the user asked for
-             * collective I/O, change the request to use independent I/O
-             */
-            if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-                /* Change the xfer_mode to independent for handling the I/O */
-                if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
-            } /* end if */
-        }     /* end else */
-    }         /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__ioinfo_adjust() */
-#endif /* H5_HAVE_PARALLEL */
+} /* end H5D__typeinfo_init_phase3() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_term

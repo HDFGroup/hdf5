@@ -71,7 +71,7 @@
 
 /* Macro to determine if the layout I/O callback should perform I/O */
 #define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
-    (!(IO_INFO)->use_select_io || ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
+    (((IO_INFO)->use_select_io == H5D_SELECTION_IO_MODE_OFF) || ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
 
 /****************************/
 /* Package Private Typedefs */
@@ -267,15 +267,17 @@ typedef struct H5D_io_info_t {
     const void            **wbufs;               /* Array of write buffers */
     haddr_t                 store_faddr;         /* lowest file addr for read/write */
     H5_flexible_const_ptr_t base_maddr;          /* starting mem address */
-    hbool_t                 use_select_io;       /* Whether to use selection I/O */
+    H5D_selection_io_mode_t use_select_io;       /* Whether to use selection I/O */
     uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
     size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
                                    conversion */
+    size_t tconv_buf_size; /* Size of type conversion buffer */
     hbool_t
         must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_io_mode_t actual_io_mode; /* Actual type of collective or independent I/O */
+    unsigned no_selection_io_cause; /* "No collective cause" flags related to selection I/O */
 #endif                                        /* H5_HAVE_PARALLEL */
 } H5D_io_info_t;
 

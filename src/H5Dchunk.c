@@ -303,7 +303,7 @@ static herr_t  H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims,
                                   void *_opdata);
 static herr_t  H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
                                  void *_opdata);
-static htri_t H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
+static herr_t H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
 static herr_t   H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t   H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush);
@@ -1062,7 +1062,6 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     htri_t           file_space_normalized = FALSE; /* File dataspace was normalized */
     unsigned         f_ndims;                       /* The number of dimensions of the file's dataspace */
     int              sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
-    htri_t           use_selection_io = FALSE; /* Whether to use selection I/O */
     unsigned         u;                        /* Local index variable */
     herr_t           ret_value = SUCCEED;      /* Return value        */
 
@@ -1114,11 +1113,9 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Check if we're performing selection I/O and save the result if it hasn't
      * been disabled already */
-    if (io_info->use_select_io) {
-        if ((use_selection_io = H5D__chunk_may_use_select_io(io_info, dinfo)) < 0)
+    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF)
+        if (H5D__chunk_may_use_select_io(io_info, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-        io_info->use_select_io = (hbool_t)use_selection_io;
-    }
 
 done:
     if (file_space_normalized == TRUE)
@@ -2547,11 +2544,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
+static herr_t
+H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
     const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
-    htri_t       ret_value = FAIL; /* Return value */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2563,8 +2560,12 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
     HDassert(dataset);
 
     /* Don't use selection I/O if there are filters on the dataset (for now) */
-    if (dataset->shared->dcpl_cache.pline.nused > 0)
-        ret_value = FALSE;
+    if (dataset->shared->dcpl_cache.pline.nused > 0) {
+#ifdef H5_HAVE_PARALLEL
+        io_info->no_selection_io_cause |= H5D_MPIO_SELECTION_IO_FILTER;
+#endif /* H5_HAVE_PARALLEL */
+        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+    }
     else {
         hbool_t page_buf_enabled;
 
@@ -2572,7 +2573,8 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled)
-            ret_value = FALSE;
+            /* No need to update no_selection_io_cause because the page buffer is disabled in parallel and we're only keeping track of the reason for no selection I/O in parallel (for now) */
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
         else {
             /* Check if chunks in this dataset may be cached, if so don't use
              * selection I/O (for now).  Note that chunks temporarily cached for
@@ -2583,16 +2585,16 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
              * must bypass the chunk-cache scheme because other MPI processes
              * could be writing to other elements in the same chunk.
              */
-            if (io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_INTENT(dataset->oloc.file)))
-                ret_value = TRUE;
-            else {
+            if (!(io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_INTENT(dataset->oloc.file)))) {
 #endif /* H5_HAVE_PARALLEL */
                 /* Check if the chunk is too large to keep in the cache */
                 H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, uint32_t, size_t);
-                if ((size_t)dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes_max)
-                    ret_value = TRUE;
-                else
-                    ret_value = FALSE;
+                if ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max) {
+#ifdef H5_HAVE_PARALLEL
+                    io_info->no_selection_io_cause |= H5D_MPIO_SELECTION_IO_FILTER;
+#endif /* H5_HAVE_PARALLEL */
+                    io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                }
 #ifdef H5_HAVE_PARALLEL
             } /* end else */
 #endif        /* H5_HAVE_PARALLEL */
@@ -2665,7 +2667,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     }
 
     /* Different blocks depending on whether we're using selection I/O */
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         size_t num_chunks;
         size_t element_sizes[2] = {dset_info->type_info.src_type_size, 0};
         void  *bufs[2]          = {dset_info->buf.vp, NULL};
@@ -2986,7 +2988,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     cpt_store.compact.dirty = &cpt_dirty;
 
     /* Different blocks depending on whether we're using selection I/O */
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         size_t      num_chunks;
         size_t      element_sizes[2] = {dset_info->type_info.dst_type_size, 0};
         const void *bufs[2]          = {dset_info->buf.cvp, NULL};
