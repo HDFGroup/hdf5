@@ -3261,5 +3261,9 @@ test_vltypes(void)
 void
 cleanup_vltypes(void)
 {
-    HDremove(FILENAME);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILENAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }
