@@ -626,7 +626,8 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if (!H5FD_mpi_opt_types_g)
             local_cause[0] |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
-        /* Datatype conversions and transformations are allowed with selection I/O.  If the selection I/O mode is auto (default), disable collective for now and re-enable later if we can */
+        /* Datatype conversions and transformations are allowed with selection I/O.  If the selection I/O mode
+         * is auto (default), disable collective for now and re-enable later if we can */
         if (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) {
             /* Don't allow collective operations if datatype conversions need to happen */
             if (!type_info->is_conv_noop)
@@ -665,8 +666,11 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
             local_cause[0] |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
 #endif
 
-        /* Check if we would be able to perform collective if we could use selection I/O.  If so add reasons for not using selectio I/O to local_cause[0] */
-        if ((io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) && local_cause[0] && !(local_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)))
+        /* Check if we would be able to perform collective if we could use selection I/O.  If so add reasons
+         * for not using selectio I/O to local_cause[0] */
+        if ((io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) && local_cause[0] &&
+            !(local_cause[0] &
+              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)))
             local_cause[0] |= io_info->no_selection_io_cause;
 
         /* Check if we are able to do a MPI_Bcast of the data from one rank
@@ -731,11 +735,16 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
 
     /* If the selection I/O mode is default (auto), decide here whether it should be on or off */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
-        /* If the only reason(s) we've disabled collective are type conversions and/or transforms, enable selection I/O and re-enable collective I/O since it's supported by selection I/O */
-        if (global_cause[0] && !(global_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)) && (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT)) {
-            HDassert(!(local_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
-            local_cause[0] = 0;
-            global_cause[0] = 0;
+        /* If the only reason(s) we've disabled collective are type conversions and/or transforms, enable
+         * selection I/O and re-enable collective I/O since it's supported by selection I/O */
+        if (global_cause[0] &&
+            !(global_cause[0] &
+              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)) &&
+            (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT)) {
+            HDassert(!(local_cause[0] &
+                       ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
+            local_cause[0]         = 0;
+            global_cause[0]        = 0;
             io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
         }
         else
@@ -849,16 +858,20 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
                 cause_str = "an error occurred while checking if collective I/O was possible";
                 break;
             case H5D_MPIO_SELECTION_IO_DISABLED:
-                cause_str = "collective I/O may be supported by selection or vector I/O but that feature was disabled by the API";
+                cause_str = "collective I/O may be supported by selection or vector I/O but that feature was "
+                            "disabled by the API";
                 break;
             case H5D_MPIO_TCONV_BUF_TOO_SMALL:
-                cause_str = "collective I/O would be supported by selection or vector I/O but the type conversion buffer is too small";
+                cause_str = "collective I/O would be supported by selection or vector I/O but the type "
+                            "conversion buffer is too small";
                 break;
             case H5D_MPIO_SELECTION_IO_FILTER:
-                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector I/O is not compatible with data filters";
+                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector "
+                            "I/O is not compatible with data filters";
                 break;
             case H5D_MPIO_SELECTION_IO_CHUNK_CACHE:
-                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector I/O is not compatible with the chunk cache";
+                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector "
+                            "I/O is not compatible with the chunk cache";
                 break;
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:

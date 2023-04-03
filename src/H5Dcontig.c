@@ -586,7 +586,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
-    herr_t ret_value        = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -741,7 +741,7 @@ static herr_t
 H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                               H5D_io_op_type_t op_type)
 {
-    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    const H5D_t *dataset   = NULL;    /* Local pointer to dataset info */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -754,7 +754,9 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
 
     dataset = dset_info->dset;
 
-    /* None of the reasons this function might disable selection I/O are relevant to parallel, so no need to update no_selection_io_cause since we're only keeping track of the reason for no selection I/O in parallel (for now) */
+    /* None of the reasons this function might disable selection I/O are relevant to parallel, so no need to
+     * update no_selection_io_cause since we're only keeping track of the reason for no selection I/O in
+     * parallel (for now) */
 
     /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
      * buffer exists (write) or is dirty (read) */

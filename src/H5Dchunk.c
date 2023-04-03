@@ -289,21 +289,21 @@ static ssize_t H5D__nonexistent_readvv(const H5D_io_info_t *io_info, const H5D_d
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
-static herr_t  H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
-                                        const hsize_t *max_dims);
-static herr_t  H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
-static herr_t  H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
-static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
-static herr_t  H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_mem_map_1d(const H5D_dset_io_info_t *di);
-static herr_t  H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *di);
-static herr_t  H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
+static herr_t   H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
+                                         const hsize_t *max_dims);
+static herr_t   H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
+static herr_t   H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
+static hbool_t  H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
+static herr_t   H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_mem_map_1d(const H5D_dset_io_info_t *di);
+static herr_t   H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *di);
+static herr_t   H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
+                                   void *_opdata);
+static herr_t   H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
                                   void *_opdata);
-static herr_t  H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
-                                 void *_opdata);
-static herr_t H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
+static herr_t   H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
 static herr_t   H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t   H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush);
@@ -1062,8 +1062,8 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     htri_t           file_space_normalized = FALSE; /* File dataspace was normalized */
     unsigned         f_ndims;                       /* The number of dimensions of the file's dataspace */
     int              sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
-    unsigned         u;                        /* Local index variable */
-    herr_t           ret_value = SUCCEED;      /* Return value        */
+    unsigned         u;        /* Local index variable */
+    herr_t           ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -2547,7 +2547,7 @@ done:
 static herr_t
 H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
-    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    const H5D_t *dataset   = NULL;    /* Local pointer to dataset info */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2573,7 +2573,8 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled)
-            /* No need to update no_selection_io_cause because the page buffer is disabled in parallel and we're only keeping track of the reason for no selection I/O in parallel (for now) */
+            /* No need to update no_selection_io_cause because the page buffer is disabled in parallel and
+             * we're only keeping track of the reason for no selection I/O in parallel (for now) */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
         else {
             /* Check if chunks in this dataset may be cached, if so don't use
