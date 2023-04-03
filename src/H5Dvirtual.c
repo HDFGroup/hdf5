@@ -2384,7 +2384,7 @@ H5D__virtual_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t H5_ATTR_UNUSED *
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Disable selection I/O */
-    io_info->use_select_io = FALSE;
+    io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__virtual_io_init() */

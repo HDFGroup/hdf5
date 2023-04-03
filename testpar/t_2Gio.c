@@ -3973,22 +3973,24 @@ test_no_collective_cause_mode(int selection_mode)
      */
     if (selection_mode & TEST_DATATYPE_CONVERSION) {
         test_name = "Broken Collective I/O - Datatype Conversion";
-        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION;
-        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION;
+        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_SELECTION_IO_DISABLED;
         /* set different sign to trigger type conversion */
         data_type = H5T_NATIVE_UINT;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
         test_name = "Broken Collective I/O - DATA Transforms";
-        no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS;
-        no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS;
+        no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_SELECTION_IO_DISABLED;
     }
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
         test_name = "Broken Collective I/O - No Simple or Scalar DataSpace";
         no_collective_cause_local_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
         no_collective_cause_global_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
     }
 
     if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT ||
@@ -3996,6 +3998,8 @@ test_no_collective_cause_mode(int selection_mode)
         test_name = "Broken Collective I/O - No CONTI or CHUNKED Dataset";
         no_collective_cause_local_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
         no_collective_cause_global_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
     }
 
     if (selection_mode & TEST_COLLECTIVE) {
@@ -4008,6 +4012,8 @@ test_no_collective_cause_mode(int selection_mode)
         test_name                           = "Broken Collective I/O - Independent";
         no_collective_cause_local_expected  = H5D_MPIO_SET_INDEPENDENT;
         no_collective_cause_global_expected = H5D_MPIO_SET_INDEPENDENT;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
         /* switch to independent io */
         is_independent = 1;
     }
@@ -4050,6 +4056,14 @@ test_no_collective_cause_mode(int selection_mode)
         /* Set Collective I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    }
+
+    /* Disable selection I/O if we're using datatype conversion or transforms since those are supported in
+     * collective with selection I/O */
+    if ((selection_mode & TEST_DATA_TRANSFORMS) || (selection_mode & TEST_DATATYPE_CONVERSION)) {
+        /* Disable selection I/O */
+        ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
+        VRFY((ret >= 0), "H5Pset_selection_io succeeded");
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
