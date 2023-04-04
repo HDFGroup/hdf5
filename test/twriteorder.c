@@ -305,12 +305,12 @@ int
 read_wo_file(void)
 {
     int               read_fd;
-    int               blkaddr           = 0;
-    h5_posix_io_ret_t bytes_read        = -1; /* # of bytes actually read */
+    int               blkaddr    = 0;
+    h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
 #ifdef DEBUG
-    int               linkedblocks_read = 0;
+    int linkedblocks_read = 0;
 #endif
-    char              buffer[BLOCKSIZE_DFT];
+    char buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
     if ((read_fd = HDopen(DATAFILE, O_RDONLY)) < 0) {
