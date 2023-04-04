@@ -150,7 +150,7 @@ trav_token_visited(hid_t loc_id, trav_addr_t *visited, H5O_token_t *token)
         if (H5Otoken_cmp(loc_id, &visited->objs[u].token, token, &token_cmp) < 0)
             return NULL;
         if (!token_cmp)
-            return (visited->objs[u].token);
+            return (visited->objs[u].path);
     }
 
     /* Didn't find object token */
