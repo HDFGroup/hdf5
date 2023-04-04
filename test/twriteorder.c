@@ -408,9 +408,6 @@ main(int argc, char *argv[])
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-#ifdef DEBUG
-    HDprintf("%d: continue as the writer process\n", mypid);
-#endif
     if (write_wo_file() < 0) {
         HDfprintf(stderr, "write_wo_file encountered error\n");
         Hgoto_error(1);
