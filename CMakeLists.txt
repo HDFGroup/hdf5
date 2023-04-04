@@ -963,7 +963,7 @@ if (BUILD_TESTING)
 
     # Enable HDF5 Async API tests
     option (HDF5_TEST_API_ENABLE_ASYNC "Enable HDF5 Async API tests" OFF)
-    mark_as_advanced (HDF5_TEST_API_ENABLE_DRIVER)
+    mark_as_advanced (HDF5_TEST_API_ENABLE_ASYNC)
 
     # Build and use HDF5 test driver program for API tests
     option (HDF5_TEST_API_ENABLE_DRIVER "Enable HDF5 API test driver program" OFF)
