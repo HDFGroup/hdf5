@@ -166,6 +166,20 @@ Bug Fixes since HDF5-1.14.0 release
 
       (JTH - 2023/03/15)
 
+    - Fixed a memory corruption issue that can occur when reading
+      from a dataset using a hyperslab selection in the file
+      dataspace and a point selection in the memory dataspace
+
+      When reading from a dataset using a hyperslab selection in
+      the dataset's file dataspace and a point selection in the
+      dataset's memory dataspace where the file dataspace's "rank"
+      is greater than the memory dataspace's "rank", memory corruption
+      could occur due to an incorrect number of selection points
+      being copied when projecting the point selection onto the
+      hyperslab selection's dataspace.
+
+      (JTH - 2023/03/23)
+
     - Fixed an issue with collective metadata writes of global heap data
 
       New test failures in parallel netCDF started occurring with debug
