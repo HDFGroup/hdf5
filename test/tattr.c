@@ -7103,13 +7103,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate2");
     } /* end if */
     else {
-        unsigned nvisit = 0; /* # of links visited */
-
         HDassert(order == H5_ITER_NATIVE);
-        for (v = 0; v < max_attrs; v++)
-            if (iter_info->visited[v] == TRUE)
-                nvisit++;
-
         VERIFY(skip, (max_attrs / 2), "H5Aiterate2");
     } /* end else */
 
@@ -7134,13 +7128,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate_by_name");
     } /* end if */
     else {
-        unsigned nvisit = 0; /* # of links visited */
-
         HDassert(order == H5_ITER_NATIVE);
-        for (v = 0; v < max_attrs; v++)
-            if (iter_info->visited[v] == TRUE)
-                nvisit++;
-
         VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
     } /* end else */
 
@@ -7165,13 +7153,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate_by_name");
     } /* end if */
     else {
-        unsigned nvisit = 0; /* # of links visited */
-
         HDassert(order == H5_ITER_NATIVE);
-        for (v = 0; v < max_attrs; v++)
-            if (iter_info->visited[v] == TRUE)
-                nvisit++;
-
         VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
     } /* end else */
 
@@ -7197,13 +7179,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate1");
     } /* end if */
     else {
-        unsigned nvisit = 0; /* # of links visited */
-
         HDassert(order == H5_ITER_NATIVE);
-        for (v = 0; v < max_attrs; v++)
-            if (iter_info->visited[v] == TRUE)
-                nvisit++;
-
         VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
     }  /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
