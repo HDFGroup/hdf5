@@ -144,13 +144,13 @@ trav_token_visited(hid_t loc_id, trav_addr_t *visited, H5O_token_t *token)
     size_t u; /* Local index variable */
     int    token_cmp;
 
-    /* Look for address */
+    /* Look for path associated with token */
     for (u = 0; u < visited->nused; u++) {
-        /* Check for address already in array */
+        /* Check for token already in array */
         if (H5Otoken_cmp(loc_id, &visited->objs[u].token, token, &token_cmp) < 0)
             return NULL;
         if (!token_cmp)
-            return (visited->objs[u].path);
+            return (visited->objs[u].token);
     }
 
     /* Didn't find object token */
@@ -281,13 +281,13 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start, hbool_t recur
             /* Visit all links in group, recursively */
             if (H5Lvisit_by_name2(file_id, grp_name, trav_index_by, trav_index_order, traverse_cb, &udata,
                                   H5P_DEFAULT) < 0)
-                H5TOOLS_GOTO_ERROR((-1), "H5Lvisit_by_name failed");
+                H5TOOLS_ERROR((-1), "H5Lvisit_by_name failed");
         } /* end if */
         else {
             /* Iterate over links in group */
             if (H5Literate_by_name2(file_id, grp_name, trav_index_by, trav_index_order, NULL, traverse_cb,
                                     &udata, H5P_DEFAULT) < 0)
-                H5TOOLS_GOTO_ERROR((-1), "H5Literate_by_name failed");
+                H5TOOLS_ERROR((-1), "H5Literate_by_name failed");
         } /* end else */
 
         /* Free visited addresses table */
