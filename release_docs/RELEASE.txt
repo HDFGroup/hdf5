@@ -146,6 +146,26 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
+      or SELECT_IOC_TOTAL I/O concentrator selection strategies
+
+      Multiple bugs involving these I/O concentrator selection strategies
+      were fixed, including:
+
+        * A bug that caused the selection strategy to be altered when
+          criteria for the strategy was specified in the
+          H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variable as
+          a single value, rather than in the old and undocumented
+          'integer:integer' format
+        * Two bugs which caused a request for 'N' I/O concentrators to
+          result in 'N - 1' I/O concentrators being assigned, which also
+          lead to issues if only 1 I/O concentrator was requested
+
+      Also added a regression test for these two I/O concentrator selection
+      strategies to prevent future issues. 
+
+      (JTH - 2023/03/15)
+
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
       dataspace and a point selection in the memory dataspace
@@ -194,6 +214,19 @@ Bug Fixes since HDF5-1.14.0 release
       library. 
 
       (JTH - 2023/02/16, GH #2433)
+
+    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
+
+      Check for overflow when calculating on-disk attribute data size.
+
+      A bogus hdf5 file may contain dataspace messages with sizes
+      which lead to the on-disk data sizes to exceed what is addressable.
+      When calculating the size, make sure, the multiplication does not
+      overflow.
+      The test case was crafted in a way that the overflow caused the
+      size to be 0.
+
+      (EFE - 2023/02/11 GH-2458)
 
 
     Java Library
