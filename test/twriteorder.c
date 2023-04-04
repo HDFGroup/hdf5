@@ -307,9 +307,6 @@ read_wo_file(void)
     int               read_fd;
     int               blkaddr    = 0;
     h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
-#ifdef DEBUG
-    int linkedblocks_read = 0;
-#endif
     char buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
@@ -326,34 +323,19 @@ read_wo_file(void)
             return -1;
         }
     }
-#ifdef DEBUG
-    linkedblocks_read++;
-#endif
 
     /* got a non-zero blkaddr. Proceed down the linked blocks. */
-#ifdef DEBUG
-    HDprintf("got initial block address=%d\n", blkaddr);
-#endif
     while (blkaddr != 0) {
         HDlseek(read_fd, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_read = HDread(read_fd, buffer, (size_t)blocksize_g)) != blocksize_g) {
             HDprintf("blkaddr read failed in partition %d\n", 0);
             return -1;
         }
-#ifdef DEBUG
-        linkedblocks_read++;
-#endif
 
         /* retrieve the block address in byte 0-3 */
         HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
-#ifdef DEBUG
-        HDprintf("got next block address=%d\n", blkaddr);
-#endif
     }
 
-#ifdef DEBUG
-    HDprintf("read %d blocks\n", linkedblocks_read);
-#endif
     return 0;
 }
 

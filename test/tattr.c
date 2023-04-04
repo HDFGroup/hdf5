@@ -7103,8 +7103,14 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate2");
     } /* end if */
     else {
+        unsigned nvisit = 0; /* # of links visited */
+
         HDassert(order == H5_ITER_NATIVE);
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate2");
+        for (v = 0; v < max_attrs; v++)
+            if (iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(nvisit, max_attrs, "H5Aiterate2");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7128,8 +7134,14 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate_by_name");
     } /* end if */
     else {
+        unsigned nvisit = 0; /* # of links visited */
+
         HDassert(order == H5_ITER_NATIVE);
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        for (v = 0; v < max_attrs; v++)
+            if (iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7153,8 +7165,14 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate_by_name");
     } /* end if */
     else {
+        unsigned nvisit = 0; /* # of links visited */
+
         HDassert(order == H5_ITER_NATIVE);
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        for (v = 0; v < max_attrs; v++)
+            if (iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -7179,8 +7197,14 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             VERIFY(iter_info->visited[v], TRUE, "H5Aiterate1");
     } /* end if */
     else {
+        unsigned nvisit = 0; /* # of links visited */
+
         HDassert(order == H5_ITER_NATIVE);
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
+        for (v = 0; v < max_attrs; v++)
+            if (iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(nvisit, max_attrs, "H5Aiterate1");
     }  /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
