@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5JAM C)
 # --------------------------------------------------------------------
 # Add the h5jam executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5jam ${HDF5_TOOLS_SRC_H5JAM_SOURCE_DIR}/h5jam.c)
   target_include_directories (h5jam PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5jam STATIC)
@@ -50,7 +50,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5JAM_SRC_FORMAT h5jam)
     clang_format (HDF5_H5UNJAM_SRC_FORMAT h5unjam)
   else ()

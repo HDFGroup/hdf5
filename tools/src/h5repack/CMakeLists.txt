@@ -15,7 +15,7 @@ set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack.h
 )
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5repack ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR}/h5repack_main.c)
   target_include_directories (h5repack PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5repack PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -43,7 +43,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5REPACK_SRC_FORMAT h5repack)
   else ()
     clang_format (HDF5_H5REPACK_SRC_FORMAT h5repack-shared)
