@@ -273,9 +273,6 @@ write_wo_file(void)
         HDmemset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
-#ifdef DEBUG
-        HDprintf("writing block at %d\n", blkaddr);
-#endif
         HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_wrote = HDwrite(write_fd_g, buffer, (size_t)blocksize_g)) != blocksize_g) {
             HDprintf("blkaddr write failed in partition %d\n", i);
@@ -295,9 +292,6 @@ write_wo_file(void)
     }
 
     /* all writes done. return success. */
-#ifdef DEBUG
-    HDprintf("wrote %d blocks\n", nlinkedblock_g);
-#endif
     return 0;
 }
 
