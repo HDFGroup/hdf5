@@ -906,7 +906,7 @@ can be used to obtain information about the selection.</li>
 The dataset with the region references was read by #H5Dread with the #H5T_STD_REF_DSETREG datatype specified.
 
 The read reference can be used to obtain the dataset identifier by calling #H5Rdereference or by obtaining
-obtain spacial information (dataspace and selection) with the call to #H5Rget_region.
+obtain spatial information (dataspace and selection) with the call to #H5Rget_region.
 
 The reference to the dataset region has information for both the dataset itself and its selection. In both functions:
 \li The first parameter is an identifier of the dataset with the region references.

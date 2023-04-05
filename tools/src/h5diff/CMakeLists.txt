@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5DIFF C)
 # --------------------------------------------------------------------
 # Add the h5diff executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5diff
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
@@ -41,7 +41,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff)
   else ()
     clang_format (HDF5_H5DIFF_SRC_FORMAT h5diff-shared)
@@ -49,7 +49,7 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 if (H5_HAVE_PARALLEL)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     add_executable (ph5diff
         ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
         ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/ph5diff_main.c

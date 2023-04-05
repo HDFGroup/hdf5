@@ -205,83 +205,187 @@ test_reference_params(void)
     CHECK(ret, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Test parameters to H5Rcreate_object */
-    ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_object ref");
-    ret = H5Rcreate_object(H5I_INVALID_HID, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_object(H5I_INVALID_HID, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_object loc_id");
-    ret = H5Rcreate_object(fid1, NULL, H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_object(fid1, NULL, H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_object name");
-    ret = H5Rcreate_object(fid1, "", H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_object(fid1, "", H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_object null name");
 
     /* Test parameters to H5Rcreate_region */
-    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_region ref");
-    ret = H5Rcreate_region(H5I_INVALID_HID, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_region(H5I_INVALID_HID, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_region loc_id");
-    ret = H5Rcreate_region(fid1, NULL, sid1, H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_region(fid1, NULL, sid1, H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_region name");
-    ret = H5Rcreate_region(fid1, "/Group1/Dataset1", H5I_INVALID_HID, H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_region(fid1, "/Group1/Dataset1", H5I_INVALID_HID, H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_region dataspace");
 
     /* Test parameters to H5Rcreate_attr */
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr", H5P_DEFAULT, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", "Attr", H5P_DEFAULT, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_attr ref");
-    ret = H5Rcreate_attr(H5I_INVALID_HID, "/Group1/Dataset2", "Attr", H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_attr(H5I_INVALID_HID, "/Group1/Dataset2", "Attr", H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_attr loc_id");
-    ret = H5Rcreate_attr(fid1, NULL, "Attr", H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_attr(fid1, NULL, "Attr", H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_attr name");
-    ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", NULL, H5P_DEFAULT, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcreate_attr(fid1, "/Group1/Dataset2", NULL, H5P_DEFAULT, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcreate_attr attr_name");
 
     /* Test parameters to H5Rdestroy */
-    ret = H5Rdestroy(NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rdestroy(NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rdestroy");
 
     /* Test parameters to H5Rget_type */
-    type = H5Rget_type(NULL);
+    H5E_BEGIN_TRY
+    {
+        type = H5Rget_type(NULL);
+    }
+    H5E_END_TRY;
     VERIFY(type, H5R_BADTYPE, "H5Rget_type ref");
 
     /* Test parameters to H5Requal */
-    ret = H5Requal(NULL, &rbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Requal(NULL, &rbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Requal ref1");
-    ret = H5Requal(&rbuf[0], NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Requal(&rbuf[0], NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Requal ref2");
 
     /* Test parameters to H5Rcopy */
-    ret = H5Rcopy(NULL, &wbuf[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcopy(NULL, &wbuf[0]);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcopy src_ref");
-    ret = H5Rcopy(&rbuf[0], NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rcopy(&rbuf[0], NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rcopy dest_ref");
 
     /* Test parameters to H5Ropen_object */
-    dset2 = H5Ropen_object(&rbuf[0], H5I_INVALID_HID, H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Ropen_object(&rbuf[0], H5I_INVALID_HID, H5I_INVALID_HID);
+    }
+    H5E_END_TRY;
     VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object oapl_id");
-    dset2 = H5Ropen_object(NULL, H5P_DEFAULT, dapl_id);
+    H5E_BEGIN_TRY
+    {
+        dset2 = H5Ropen_object(NULL, H5P_DEFAULT, dapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(dset2, H5I_INVALID_HID, "H5Ropen_object ref");
 
     /* Test parameters to H5Ropen_region */
-    ret_id = H5Ropen_region(NULL, H5I_INVALID_HID, H5I_INVALID_HID);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Ropen_region(NULL, H5I_INVALID_HID, H5I_INVALID_HID);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, H5I_INVALID_HID, "H5Ropen_region ref");
 
     /* Test parameters to H5Ropen_attr */
-    ret_id = H5Ropen_attr(NULL, H5P_DEFAULT, aapl_id);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Ropen_attr(NULL, H5P_DEFAULT, aapl_id);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, H5I_INVALID_HID, "H5Ropen_attr ref");
 
     /* Test parameters to H5Rget_obj_type3 */
-    ret = H5Rget_obj_type3(NULL, H5P_DEFAULT, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Rget_obj_type3(NULL, H5P_DEFAULT, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Rget_obj_type3 ref");
 
     /* Test parameters to H5Rget_file_name */
-    name_size = H5Rget_file_name(NULL, NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_file_name(NULL, NULL, 0);
+    }
+    H5E_END_TRY;
     VERIFY(name_size, (-1), "H5Rget_file_name ref");
 
     /* Test parameters to H5Rget_obj_name */
-    name_size = H5Rget_obj_name(NULL, H5P_DEFAULT, NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_obj_name(NULL, H5P_DEFAULT, NULL, 0);
+    }
+    H5E_END_TRY;
     VERIFY(name_size, (-1), "H5Rget_obj_name ref");
 
     /* Test parameters to H5Rget_attr_name */
-    name_size = H5Rget_attr_name(NULL, NULL, 0);
+    H5E_BEGIN_TRY
+    {
+        name_size = H5Rget_attr_name(NULL, NULL, 0);
+    }
+    H5E_END_TRY;
     VERIFY(name_size, (-1), "H5Rget_attr_name ref");
 
     /* Close disk dataspace */
@@ -1920,6 +2024,8 @@ test_reference_obj_deleted(void)
     H5O_type_t obj_type; /* Object type              */
     herr_t     ret;      /* Generic return value     */
 
+    MESSAGE(5, ("Testing References to Deleted Objects\n"));
+
     /* Create file */
     fid1 = H5Fcreate(FILE_REF_OBJ_DEL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, H5I_INVALID_HID, "H5Fcreate");
@@ -3512,16 +3618,20 @@ test_reference(void)
 void
 cleanup_reference(void)
 {
-    HDremove(FILE_REF_PARAM);
-    HDremove(FILE_REF_OBJ);
-    HDremove(FILE_REF_VL_OBJ);
-    HDremove(FILE_REF_CMPND_OBJ);
-    HDremove(FILE_REF_REG);
-    HDremove(FILE_REF_REG_1D);
-    HDremove(FILE_REF_OBJ_DEL);
-    HDremove(FILE_REF_GRP);
-    HDremove(FILE_REF_ATTR);
-    HDremove(FILE_REF_EXT1);
-    HDremove(FILE_REF_EXT2);
-    HDremove(FILE_REF_COMPAT);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILE_REF_PARAM, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_OBJ, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_VL_OBJ, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_CMPND_OBJ, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_REG, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_REG_1D, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_OBJ_DEL, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_GRP, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_ATTR, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_EXT1, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_EXT2, H5P_DEFAULT);
+        H5Fdelete(FILE_REF_COMPAT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

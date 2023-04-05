@@ -4331,7 +4331,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
      * must run the marker maintenance code, whether we run the size
      * reduction code or not.  We do this in two places -- here we
      * insert a new marker if the number of active epoch markers is
-     * is less than the the current epochs before eviction, and after
+     * is less than the current epochs before eviction, and after
      * the ageout call, we cycle the markers.
      *
      * However, we can't call the ageout code or cycle the markers
@@ -5027,7 +5027,7 @@ done:
  *
  * Purpose:     Remove epoch markers from the end of the LRU list and
  *        mark them as inactive until the number of active markers
- *        equals the the current value of
+ *        equals the current value of
  *        (cache_ptr->resize_ctl).epochs_before_eviction.
  *
  * Return:      SUCCEED on success/FAIL on failure.
@@ -8861,7 +8861,7 @@ H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry
     HDassert(!entry_ptr->flush_in_progress);
     HDassert(entry_ptr->type);
 
-    /* Set entry_ptr->flush_in_progress to TRUE so the the target entry
+    /* Set entry_ptr->flush_in_progress to TRUE so the target entry
      * will not be evicted out from under us.  Must set it back to FALSE
      * when we are done.
      */
