@@ -2431,6 +2431,11 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
 
+/* Check if a read of size bytes starting at ptr would overflow past
+ * the last valid byte, pointed to by buffer_end .
+ */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size) - 1) > (buffer_end))
+
 /* Private typedefs */
 
 /* Union for const/non-const pointer for use by functions that manipulate
@@ -2576,8 +2581,3 @@ H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const
                              size_t buf_offset, size_t buf_size);
 
 #endif /* H5private_H */
-
-/* Check if a read of size bytes starting at ptr would overflow past
- * the last valid byte, pointed to by buffer_end .
- */
-#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size) - 1) > (buffer_end))
