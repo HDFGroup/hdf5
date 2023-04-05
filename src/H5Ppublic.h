@@ -343,7 +343,8 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_SET_INDEPENDENT = 0x01,
     /**< Collective I/O was not performed because independent I/O was requested */
     H5D_MPIO_DATATYPE_CONVERSION = 0x02,
-    /**< Collective I/O was not performed because datatype conversions were required */
+    /**< Collective I/O was not performed because datatype conversions were required and selection I/O was not
+       possible (see below) */
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
@@ -356,7 +357,19 @@ typedef enum H5D_mpio_no_collective_cause_t {
     /**< Collective I/O was not performed because parallel filtered writes are disabled */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
     /**< Error */
-    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x100
+    H5D_MPIO_SELECTION_IO_DISABLED = 0x100,
+    /**< Collective I/O may be supported by selection or vector I/O but that feature was disabled by the API
+     */
+    H5D_MPIO_TCONV_BUF_TOO_SMALL = 0x200,
+    /**< Collective I/O would be supported by selection or vector I/O but the type conversion buffer is too
+       small */
+    H5D_MPIO_SELECTION_IO_FILTER = 0x400,
+    /**< Collective I/O may be supported by selection or vector I/O but selection/vector I/O is not compatible
+       with data filters */
+    H5D_MPIO_SELECTION_IO_CHUNK_CACHE = 0x800,
+    /**< Collective I/O may be supported by selection or vector I/O but selection/vector I/O is not compatible
+       with the chunk cache */
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x1000
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->

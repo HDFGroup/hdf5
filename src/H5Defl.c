@@ -213,7 +213,7 @@ H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     H5MM_memcpy(&dinfo->store->efl, &(dinfo->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
     /* Disable selection I/O */
-    io_info->use_select_io = FALSE;
+    io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__efl_io_init() */
