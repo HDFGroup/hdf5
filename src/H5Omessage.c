@@ -499,11 +499,6 @@ H5O_msg_read_oh(H5F_t *f, H5O_t *oh, unsigned type_id, void *mesg)
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
     HDassert(type);
 
-    if ((oh->nmesgs * sizeof(H5O_mesg_t)) > oh->cache_info.size) {
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "buffer is too small for messages")
-    }
-
-
     /* Scan through the messages looking for the right one */
     for (idx = 0; idx < oh->nmesgs; idx++)
         if (type == oh->mesg[idx].type)
