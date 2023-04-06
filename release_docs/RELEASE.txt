@@ -107,7 +107,7 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.10.9 release
+Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
