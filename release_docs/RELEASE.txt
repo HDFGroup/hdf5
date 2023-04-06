@@ -151,6 +151,14 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed potential buffer overrun issues in some object header decode routines
+
+      Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
+      ensure that memory buffers don't get overrun when decoding buffers read from
+      a (possibly corrupted) HDF5 file.
+
+      (JTH - 2023/04/05)
+
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
       dataspace and a point selection in the memory dataspace
