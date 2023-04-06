@@ -350,7 +350,7 @@ public class TestH5 {
     @Test
     public void testH5check_version()
     {
-        int majnum = 1, minnum = 10, relnum = 10;
+        int majnum = 1, minnum = 10, relnum = 11;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);
