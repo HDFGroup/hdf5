@@ -41,6 +41,8 @@
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists			*/
 
+#include <stdio.h>
+
 /****************/
 /* Local Macros */
 /****************/
@@ -517,6 +519,10 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL,
                         "can't allocate space for root group symbol table entry")
 
+	printf("\nlen is %lu\n", len);
+	printf("image: %p\n", image);
+	printf("_image: %p\n\n", _image);
+	HDassert((size_t)(image + 136 - (const uint8_t *)_image) <= len);
         /* decode the root group symbol table entry */
         if (H5G_ent_decode(udata->f, (const uint8_t **)&image, sblock->root_ent) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL, "can't decode root group symbol table entry")
