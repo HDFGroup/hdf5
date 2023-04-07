@@ -338,7 +338,17 @@ done:
 static herr_t
 H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 {
+    int    mpi_finalized;
+    int    mpi_code;
+    herr_t ret_value = SUCCEED;
+
     HDassert(sf_context);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
+        /* Assume MPI is finalized or worse, and try to clean up what we can */
+        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+        mpi_finalized = 1;
+    }
 
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
@@ -352,28 +362,38 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     sf_context->sf_base_addr            = -1;
 
     if (sf_context->sf_msg_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_msg_comm) < 0)
-            return FAIL;
+        if (!mpi_finalized) {
+            if (H5_mpi_comm_free(&sf_context->sf_msg_comm) < 0)
+                return FAIL;
+        }
         sf_context->sf_msg_comm = MPI_COMM_NULL;
     }
     if (sf_context->sf_data_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_data_comm) < 0)
-            return FAIL;
+        if (!mpi_finalized) {
+            if (H5_mpi_comm_free(&sf_context->sf_data_comm) < 0)
+                return FAIL;
+        }
         sf_context->sf_data_comm = MPI_COMM_NULL;
     }
     if (sf_context->sf_eof_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_eof_comm) < 0)
-            return FAIL;
+        if (!mpi_finalized) {
+            if (H5_mpi_comm_free(&sf_context->sf_eof_comm) < 0)
+                return FAIL;
+        }
         sf_context->sf_eof_comm = MPI_COMM_NULL;
     }
     if (sf_context->sf_node_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_node_comm) < 0)
-            return FAIL;
+        if (!mpi_finalized) {
+            if (H5_mpi_comm_free(&sf_context->sf_node_comm) < 0)
+                return FAIL;
+        }
         sf_context->sf_node_comm = MPI_COMM_NULL;
     }
     if (sf_context->sf_group_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
-            return FAIL;
+        if (!mpi_finalized) {
+            if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
+                return FAIL;
+        }
         sf_context->sf_group_comm = MPI_COMM_NULL;
     }
 
@@ -402,15 +422,23 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 
     HDfree(sf_context);
 
-    return SUCCEED;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 static herr_t
 H5_free_subfiling_topology(sf_topology_t *topology)
 {
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     HDassert(topology);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
+        /* Assume MPI is finalized or worse, but clean up what we can */
+        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+        mpi_finalized = 1;
+    }
 
 #ifndef NDEBUG
     {
@@ -442,8 +470,9 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     HDfree(topology->io_concentrators);
     topology->io_concentrators = NULL;
 
-    if (H5_mpi_comm_free(&topology->app_comm) < 0)
-        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+    if (!mpi_finalized)
+        if (H5_mpi_comm_free(&topology->app_comm) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
 
     HDfree(topology);
 

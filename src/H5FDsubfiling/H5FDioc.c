@@ -887,16 +887,20 @@ done:
 static herr_t
 H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
 {
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     HDassert(file_ptr);
 
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+
     if (file_ptr->context_id >= 0) {
         subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
-        int                  mpi_code;
 
         /* Don't allow IOC threads to be finalized until everyone gets here */
-        if (file_ptr->mpi_size > 1)
+        if (!mpi_finalized && (file_ptr->mpi_size > 1))
             if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
@@ -911,10 +915,12 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         file_ptr->context_id = -1;
     }
 
-    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
-    if (H5_mpi_info_free(&file_ptr->info) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    if (!mpi_finalized) {
+        if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+        if (H5_mpi_info_free(&file_ptr->info) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    }
 
 done:
     HDfree(file_ptr->file_path);
