@@ -151,6 +151,14 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed potential heap buffer overrun in group info header decoding from malformed file
+
+      H5O__ginfo_decode could sometimes read past allocated memory when parsing a group info message from the header of a malformed file.
+  
+      It now checks buffer size before each read to properly throw an error in these cases.
+  
+      (ML - 2023/4/6, #2601)   
+
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
       dataspace and a point selection in the memory dataspace
