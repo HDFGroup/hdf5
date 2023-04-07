@@ -99,7 +99,7 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     /* check args */
     HDassert(p);
-    
+
     if (p_size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_ARGS, NULL, "size of given ginfo was zero")
 
