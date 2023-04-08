@@ -1,4 +1,4 @@
-HDF5 version 1.10.10-2 currently under development
+HDF5 version 1.10.11-1 currently under development
 ================================================================================
 
 
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.10.9
+- Bug Fixes since HDF5-1.10.10
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
@@ -58,80 +58,6 @@ New Features
       CMake has been updated to match this behavior.
 
       (JTH - 2023/03/29)
-
-    - Removal of dmalloc support
-
-      The ability to build with dmalloc support has been removed along with
-      the following configure options:
-
-      Autotools:
-          --with-dmalloc=
-
-      CMake:
-          HDF5_ENABLE_USING_DMALLOC
-
-      (DER - 2023/03/17)
-      
-    - Allow parallel and threadsafe to be built
-
-      In the past, we required --enable-unsupported (Autotools) or
-      ALLOW_UNSUPPORTED (CMake) in order to build the parallel library with
-      thread-safety support. The parallel, thread-safe library can now be
-      built without these options.
-
-      (DER - 2023/03/17)
-
-    - Added new option to build libaec and zlib inline with CMake.
-
-      Using the CMake FetchContent module, the external filters can populate
-      content at configure time via any method supported by the ExternalProject
-      module. Whereas ExternalProject_Add() downloads at build time, the
-      FetchContent module makes content available immediately, allowing the
-      configure step to use the content in commands like add_subdirectory(),
-      include() or file() operations.
-
-      The HDF options (and defaults) for using this are:
-          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
-          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
-          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
-          ZLIB_USE_LOCALCONTENT:BOOL=OFF
-
-      The CMake variables to control the path and file names:
-          LIBAEC_TGZ_ORIGPATH:STRING
-          LIBAEC_TGZ_ORIGNAME:STRING
-          ZLIB_TGZ_ORIGPATH:STRING
-          ZLIB_TGZ_ORIGNAME:STRING
-
-      See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
-
-      (ADB - 2023/02/21)
-
-    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
-
-      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
-      directory variables by including the CMake module, GNUInstallDirs(see CMake
-      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
-      sets various PATH variables for use during the build, test and install processes.
-      By default, the historical settings for these variables will be used.
-
-      (ADB - 2022/10/21, GH-2175, GH-1716)
-
-    - Correct the usage of CMAKE_Fortran_MODULE_DIRECTORY and where to
-      install Fortran mod files.
-
-      The Fortran modules files, ending in .mod are files describing a
-      Fortran 90 (and above) module API and ABI. These are not like C
-      header files describing an API, they are compiler dependent and
-      arch dependent, and not easily readable by a human being. They are
-      nevertheless searched for in the includes directories by gfortran
-      (in directories specified with -I).
-
-      Autotools configure uses the -fmoddir option to specify the folder.
-      CMake will use "mod" folder by default unless overridden by the CMake
-      variable; HDF5_INSTALL_MODULE_DIR.
-
-      (ADB - 2022/07/21)
-
 
     Library:
     --------
@@ -155,78 +81,12 @@ New Features
 
     Java Library:
     -------------
-    - HDF5GroupInfo class has been deprecated.
-
-      This class assumes that an object can contain four values which uniquely identify an
-      object among those HDF5 files which are open. This is no longer valid in future
-      HDF5 releases.
-
-      (ADB - 2023/03/27)
-
-    - Added version of H5Rget_name to return the name as a Java string.
-
-      Other functions that get_name process the get_size then get the name
-      within the JNI implementation. Now H5Rget_name has a H5Rget_name_string.
-
-      (ADB - 2022/07/12)
-
-    - Added reference support to H5A and H5D read write vlen JNI functions.
-
-      Added the implementation to handle VL references as an Array of Lists
-      of byte arrays.
-
-      The JNI wrappers translate the Array of Lists to/from the hvl_t vlen
-      structures. The wrappers use the specified datatype arguments for the
-      List type translation, it is expected that the Java type is correct.
-
-      (ADB - 2022/07/11, HDFFV-11318)
-
-    - H5A and H5D read write vlen JNI functions were incorrect.
-
-      Corrected the vlen function implementations for the basic primitive types.
-      The VLStrings functions now correctly use the implementation that had been
-      the VL functions. (VLStrings functions did not have an implementation.)
-      The new VL functions implementation now expect an Array of Lists between
-      Java and the JNI wrapper. 
-
-      The JNI wrappers translate the Array of Lists to/from the hvl_t vlen
-      structures. The wrappers use the specified datatype arguments for the
-      List type translation, it is expected that the Java type is correct.
-
-      (ADB - 2022/07/07, HDFFV-11310)
-
-    - H5A and H5D read write JNI functions had flawed vlen datatype check.
-
-      Adapted tools function for JNI utils file. This reduced multiple calls
-      to a single check and variable. The variable can then be used to call 
-      the H5Treclaim function. Adjusted existing test and added new test.
-
-      (ADB - 2022/06/22)
+    -
 
 
     Tools:
     ------
-    - Building h5perf/h5perf_serial in "standalone mode" has been removed
-
-      Building h5perf separately from the library was added circa 2008
-      in HDF5 1.6.8. It's unclear what purpose this serves and the current
-      implementation is currently broken. The existing files require
-      H5private.h and the symbols we use to determine how the copied
-      platform-independence scheme should be used come from H5pubconf.h,
-      which may not match the compiler being used to build standalone h5perf.
-
-      Due to the maintenance overhead and lack of a clear use case, support
-      for building h5perf and h5perf_serial separately from the HDF5 library
-      has been removed.
-
-      (DER - 2023/03/20)
-
-    - The perf tool has been removed
-
-      The small `perf` tool didn't really do anything special and the name
-      conflicts with gnu's perf tool.
-
-      (DER - 2023/03/20, GitHub #1787)
+    -
 
 
     High-Level APIs:
@@ -254,96 +114,11 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.10.9 release
+Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
-    - Fixed a memory corruption issue that can occur when reading
-      from a dataset using a hyperslab selection in the file
-      dataspace and a point selection in the memory dataspace
-
-      When reading from a dataset using a hyperslab selection in
-      the dataset's file dataspace and a point selection in the
-      dataset's memory dataspace where the file dataspace's "rank"
-      is greater than the memory dataspace's "rank", memory corruption
-      could occur due to an incorrect number of selection points
-      being copied when projecting the point selection onto the
-      hyperslab selection's dataspace.
-
-      (JTH - 2023/03/23)
-
-    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
-
-      Check for overflow when calculating on-disk attribute data size.
-
-      A bogus hdf5 file may contain dataspace messages with sizes
-      which lead to the on-disk data sizes to exceed what is addressable.
-      When calculating the size, make sure, the multiplication does not
-      overflow.
-      The test case was crafted in a way that the overflow caused the
-      size to be 0.
-
-      (EFE - 2023/02/11 GH-2458)
-
-    - Fixed an issue with variable length attributes
-
-      Previously, if a variable length attribute was held open while its file
-      was opened through another handle, the same attribute was opened through
-      the second file handle, and the second file and attribute handles were
-      closed, attempting to write to the attribute through the first handle
-      would cause an error.
-
-      (NAF - 2022/10/24)
-
-    - Fixed an issue with hyperslab selections
-
-      Previously, when combining hyperslab selections, it was possible for the
-      library to produce an incorrect combined selection.
-
-      (NAF - 2022/09/25)
-
-    - Fixed an issue with attribute type conversion with compound datatypes
-
-      Previously, when performing type conversion for attribute I/O with a
-      compound datatype, the library would not fill the background buffer with
-      the contents of the destination, potentially causing data to be lost when
-      only writing to a subset of the compound fields.
-
-      (NAF - 2022/08/22, GitHub #2016)
-
-    - Modified H5Fstart_swmr_write() to preserve DAPL properties
-
-      Internally, H5Fstart_swmr_write() closes and reopens the file in question
-      as part of its process for making the file SWMR-safe.  Previously, when
-      the library reopened the file it would simply use the default access
-      properties.  Modified the library to instead save these properties and use
-      them when reopening the file.
-
-      (NAF - 2022/07/18, HDFFV-11308)
-
-    - Converted an assertion on (possibly corrupt) file contents to a normal
-      error check
-
-      Previously, the library contained an assertion check that a read superblock
-      doesn't contain a superblock extension message when the superblock
-      version < 2. When a corrupt HDF5 file is read, this assertion can be triggered
-      in debug builds of HDF5. In production builds, this situation could cause
-      either a library error or a crash, depending on the platform.
-
-      (JTH - 2022/07/08, HDFFV-11316, HDFFV-11317)
-
-    - Memory leak 
-    
-      A memory leak was observed with variable-length fill value in 
-      H5O_fill_convert() function in H5Ofill.c. The leak is
-      manifested by running valgrind on test/set_extent.c.
-
-      Previously, fill->buf is used for datatype conversion 
-      if it is large enough and the variable-length information 
-      is therefore lost.  A buffer is now allocated regardless 
-      so that the element in fill->buf can later be reclaimed.
-
-      (VC - 2022/10/10, HDFFV-10840)
+    -
  
 
     Java Library
@@ -353,62 +128,12 @@ Bug Fixes since HDF5-1.10.9 release
 
     Configuration
     -------------
-    - Correct the CMake generated pkg-config file
-
-      The pkg-config file generated by CMake had the order and placement of the
-      libraries wrong. Also added support for debug library names.
-
-      Changed the order of Libs.private libraries so that dependencies come after
-      dependents. Did not move the compression libraries into Requires.private
-      because there was not a way to determine if the compression libraries had
-      supported pkconfig files. Still recommend that the CMake config file method
-      be used for building projects with CMake.
-
-      (ADB - 2023/02/16 GH-1546,GH-2259)
-
-    - Remove Javadoc generation
-
-      The use of doxygen now supersedes the requirement to build javadocs. We do not
-      have the resources to continue to support two documentation methods and have
-      chosen doxygen as our standard.
-
-      (ADB - 2022/12/19)
-
-    - Change the default for building the high-level tools
-
-      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
-      in a future release. The default build setting for them have been changed from enabled
-      to disabled. A user can enable the build of these tools if needed.
-          autotools:   --enable-hlgiftools
-          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
-
-      (ADB - 2022/12/16)
-
-    - Change the settings of the *pc files to use the correct format
-
-      The pkg-config files generated by CMake uses incorrect syntax for the 'Requires'
-      settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
-      fixes the issue
-
-      (ADB - 2022/12/06 HDFFV-11355)
-
-    - Move MPI libraries link from PRIVATE to PUBLIC
-
-      The install dependencies were not including the need for MPI libraries when
-      an application or library was built with the C library. Also updated the
-      CMake target link command to use the newer style MPI::MPI_C link variable.
-
-      (ADB - 2022/20/27)
+    -
 
 
     Tools
     -----
-    - Fix h5repack to only print output when verbose option is selected
-
-      When timing option was added to h5repack, the check for verbose was
-      incorrectly implemented.
-
-      (ADB -  2022/12/02, GH #2270)
+    -
 
 
     Performance
@@ -433,9 +158,7 @@ Bug Fixes since HDF5-1.10.9 release
 
     Documentation
     -------------
-    - Doxygen updated with recent Fortran changes.
-
-      (ADB - 2022/09/09)
+    -
 
 
     F90 APIs
