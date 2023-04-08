@@ -5503,9 +5503,9 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     hsize_t  corder_count;            /* # of records in creation order index */
     unsigned reopen_file;             /* Whether to re-open the file before deleting group */
     char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned curr_dset;        /* Current dataset to work on */
-    unsigned u;                /* Local index variable */
-    herr_t   ret;              /* Generic return value        */
+    unsigned curr_dset;               /* Current dataset to work on */
+    unsigned u;                       /* Local index variable */
+    herr_t   ret;                     /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Object w/Dense Attribute Storage and Creation Order Info\n"));
@@ -5644,7 +5644,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Fclose");
         } /* end if */
 
-    }  /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
