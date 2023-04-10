@@ -236,7 +236,7 @@ parse_subset_params(const char *dset)
 {
     struct subset_t *s = NULL;
     char            *brace;
-    const char      *q_dset;
+    char            *q_dset;
 
     H5TOOLS_START_DEBUG(" - dset:%s", dset);
     /* if dset name is quoted wait till after second quote to look for subset brackets */
