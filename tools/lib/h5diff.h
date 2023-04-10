@@ -67,6 +67,7 @@ typedef struct {
     int                       not_cmp;            /* are the objects comparable */
     int                       contents;           /* equal contents */
     int                       do_nans;            /* consider Nans while diffing floats */
+    int                       disable_compact_subset; /* disable compact form of subset notation */
     int                       exclude_path;       /* exclude path to an object */
     int                       exclude_attr_path;  /* exclude path to an object */
     struct exclude_path_list *exclude;            /* keep exclude path list */
