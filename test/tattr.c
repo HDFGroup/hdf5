@@ -5503,13 +5503,9 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     hsize_t  corder_count;            /* # of records in creation order index */
     unsigned reopen_file;             /* Whether to re-open the file before deleting group */
     char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-#ifdef LATER
-    h5_stat_size_t empty_size; /* Size of empty file */
-    h5_stat_size_t file_size;  /* Size of file after operating on it */
-#endif                         /* LATER */
-    unsigned curr_dset;        /* Current dataset to work on */
-    unsigned u;                /* Local index variable */
-    herr_t   ret;              /* Generic return value        */
+    unsigned curr_dset;               /* Current dataset to work on */
+    unsigned u;                       /* Local index variable */
+    herr_t   ret;                     /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Object w/Dense Attribute Storage and Creation Order Info\n"));
@@ -5535,24 +5531,6 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     /* Query the attribute creation properties */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
-
-/* XXX: Try to find a way to resize dataset's object header so that the object
- *      header can have one chunk, then retrieve "empty" file size and check
- *      that size after everything is deleted -QAK
- */
-#ifdef LATER
-    /* Create empty file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
-
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
-
-    /* Get the size of an empty file */
-    empty_size = h5_get_file_size(FILENAME);
-    CHECK(empty_size, FAIL, "h5_get_file_size");
-#endif /* LATER */
 
     /* Loop to leave file open when deleting dataset, or to close & re-open file
      *  before deleting dataset */
@@ -5666,13 +5644,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Fclose");
         } /* end if */
 
-#ifdef LATER
-        /* Get the size of the file now */
-        file_size = h5_get_file_size(FILENAME);
-        CHECK(file_size, FAIL, "h5_get_file_size");
-        VERIFY(file_size, empty_size, "h5_get_file_size");
-#endif /* LATER */
-    }  /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);

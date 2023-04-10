@@ -49,12 +49,6 @@
 /* Local Prototypes */
 /********************/
 
-#ifdef LATER
-static herr_t H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end);
-static htri_t H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter);
-static herr_t H5S__select_iter_next_block(H5S_sel_iter_t *iter);
-#endif /* LATER */
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -1191,50 +1185,6 @@ H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hsize_t *coords)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_iter_coords() */
 
-#ifdef LATER
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__select_iter_block
- PURPOSE
-    Get the block of the current iterator position
- USAGE
-    herr_t H5S__select_iter_block(sel_iter,start,end)
-        const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
-        hsize_t *start;    OUT: Array to place iterator start block coordinates
-        hsize_t *end;      OUT: Array to place iterator end block coordinates
- RETURNS
-    Non-negative on success, negative on failure.
- DESCRIPTION
-    The current location of the iterator within the selection is placed in
-    the COORDS array.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    This routine participates in the "Inlining C function pointers"
-        pattern, don't call it directly, use the appropriate macro
-        defined in H5Sprivate.h.
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
-{
-    herr_t ret_value; /* return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    HDassert(iter);
-    HDassert(start);
-    HDassert(end);
-
-    /* Call iter_block routine for selection type */
-    ret_value = (*iter->type->iter_block)(iter, start, end);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__select_iter_block() */
-#endif /* LATER */
-
 /*--------------------------------------------------------------------------
  NAME
     H5S_select_iter_nelmts
@@ -1270,46 +1220,6 @@ H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_iter_nelmts() */
-
-#ifdef LATER
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__select_iter_has_next_block
- PURPOSE
-    Check if there is another block available in the selection iterator
- USAGE
-    htri_t H5S__select_iter_has_next_block(sel_iter)
-        const H5S_sel_iter_t *sel_iter; IN: Selection iterator to query
- RETURNS
-    Non-negative on success, negative on failure.
- DESCRIPTION
-    Check if there is another block available to advance to in the selection
-    iterator.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    This routine participates in the "Inlining C function pointers"
-        pattern, don't call it directly, use the appropriate macro
-        defined in H5Sprivate.h.
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static htri_t
-H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter)
-{
-    herr_t ret_value; /* return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    HDassert(iter);
-
-    /* Call iter_has_next_block routine for selection type */
-    ret_value = (*iter->type->iter_has_next_block)(iter);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__select_iter_has_next_block() */
-#endif /* LATER */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1352,48 +1262,6 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_select_iter_next() */
-
-#ifdef LATER
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__select_iter_next_block
- PURPOSE
-    Advance selection iterator to next block
- USAGE
-    herr_t H5S__select_iter_next_block(iter)
-        H5S_sel_iter_t *iter;   IN/OUT: Selection iterator to change
- RETURNS
-    Non-negative on success, negative on failure.
- DESCRIPTION
-    Move the current element for the selection iterator to the next
-    block in the selection.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    Doesn't maintain the 'elmt_left' field of the selection iterator.
-
-    This routine participates in the "Inlining C function pointers"
-        pattern, don't call it directly, use the appropriate macro
-        defined in H5Sprivate.h.
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5S__select_iter_next_block(H5S_sel_iter_t *iter)
-{
-    herr_t ret_value; /* return value */
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    HDassert(iter);
-
-    /* Call iter_next_block routine for selection type */
-    ret_value = (*iter->type->iter_next_block)(iter);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__select_iter_next_block() */
-#endif /* LATER */
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_select_iter_get_seq_list
