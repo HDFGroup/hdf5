@@ -192,26 +192,6 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceL
     }
 }
 
-#ifdef LATER
-/*
- * Function:    uncompress_buffer
- * Purpose:     Uncompress the buffer.
- * Returns:     Z_OK            - success
- *              Z_MEM_ERROR     - not enough memory
- *              Z_BUF_ERROR     - not enough room in the output buffer
- *              Z_DATA_ERROR    - the input data was corrupted
- * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
- */
-static int
-uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
-{
-    int rc = uncompress(dest, destLen, source, sourceLen);
-
-    return rc;
-}
-#endif /* LATER */
-
 /*
  * Function:    get_unique_name
  * Purpose:     Create a new file who's name doesn't conflict with

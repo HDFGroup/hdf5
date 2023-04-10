@@ -331,12 +331,6 @@ test_file_create(void)
     ret = H5Pclose(tmpl1);
     CHECK(ret, FAIL, "H5Pclose");
 
-#ifdef LATER
-    /* Double-check that the atom has been vaporized */
-    ret = H5Pclose(tmpl1);
-    VERIFY(ret, FAIL, "H5Pclose");
-#endif
-
     if (h5_using_default_driver(NULL)) {
 
         /* Create a new file with a non-standard file-creation template */

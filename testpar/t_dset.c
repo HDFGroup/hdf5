@@ -3427,9 +3427,6 @@ actual_io_mode_tests(void)
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-#ifdef LATER
-#define DSET_NOCOLCAUSE "nocolcause"
-#endif
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)
