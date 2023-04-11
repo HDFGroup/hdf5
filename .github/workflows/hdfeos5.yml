@@ -18,13 +18,12 @@ jobs:
           ./autogen.sh
           ./configure --prefix=/usr/local  --with-default-api-version=v16
           make
-          make check
           sudo make install
       - name: Install HDF-EOS5
         run: |
-          wget -O HDF-EOS5.1.16.tar.Z "https://git.earthdata.nasa.gov/rest/git-lfs/storage/DAS/hdfeos5/7054de24b90b6d9533329ef8dc89912c5227c83fb447792103279364e13dd452?response-content-disposition=attachment%3B%20filename%3D%22HDF-EOS5.1.16.tar.Z%22%3B%20filename*%3Dutf-8%27%27HDF-EOS5.1.16.tar.Z"
-          tar zxvf HDF-EOS5.1.16.tar.Z
-          cd hdfeos5
+          wget -O HDF-EOS5.2.0.tar.gz "https://git.earthdata.nasa.gov/projects/DAS/repos/hdfeos5/raw/hdf-eos5-2.0-src.tar.gz?at=refs%2Fheads%2FHDFEOS5_2.0"
+          tar zxvf HDF-EOS5.2.0.tar.gz
+          cd hdf-eos5-2.0
           ./configure CC=/usr/local/bin/h5cc --prefix=/usr/local/ --enable-install-include
           make
           make check
