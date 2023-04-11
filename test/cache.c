@@ -1089,8 +1089,7 @@ smoke_check_5(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.5
-    };
+        /* double      empty_reserve          = */ 0.5};
 
     if (paged)
         TESTING("smoke check #5P -- all clean, ins, prot, unprot, AR cache 1");
@@ -1317,8 +1316,7 @@ smoke_check_6(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05
-    };
+        /* double      empty_reserve          = */ 0.05};
 
     if (paged)
         TESTING("smoke check #6P -- ~1/2 dirty, ins, prot, unprot, AR cache 1");
@@ -1546,8 +1544,7 @@ smoke_check_7(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.1
-    };
+        /* double      empty_reserve          = */ 0.1};
 
     if (paged)
         TESTING("smoke check #7P -- all clean, ins, prot, unprot, AR cache 2");
@@ -1775,8 +1772,7 @@ smoke_check_8(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.1
-    };
+        /* double      empty_reserve          = */ 0.1};
 
     if (paged)
         TESTING("smoke check #8P -- ~1/2 dirty, ins, prot, unprot, AR cache 2");
@@ -24910,8 +24906,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.5
-    };
+        /* double      empty_reserve          = */ 0.5};
 
     if (paged)
         TESTING("automatic cache resize auxiliary functions (paged aggregation)");
