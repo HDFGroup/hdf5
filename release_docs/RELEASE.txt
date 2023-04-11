@@ -450,26 +450,6 @@ Platforms Tested
 Known Problems
 ==============
 
-       ************************************************************
-       *                                  _                       *
-       *                                 (_)                      *
-       *        __      ____ _ _ __ _ __  _ _ __   __ _           *
-       *        \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |          *
-       *         \ V  V / (_| | |  | | | | | | | | (_| |          *
-       *          \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |          *
-       *                                           __/ |          *
-       *                                          |___/           *
-       *                                                          *
-       *  Please refrain from running any program (including      *
-       *  HDF5 tests) which uses the subfiling VFD on Perlmutter  *
-       *  at the National Energy Research Scientific Computing    *
-       *  Center, NERSC.                                          *
-       *  Doing so may cause a system disruption due to subfiling *
-       *  crashing Lustre. The sytem's Lustre bug is expected     *
-       *  to be resolved by 2023.                                 *
-       *                                                          *
-       ************************************************************
-
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
