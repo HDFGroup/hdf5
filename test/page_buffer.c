@@ -554,21 +554,8 @@ error:
  * Programmer:  unknown
  *              ?? / ?? / ??
  *
- * Changes:     Added base_page_cnt field as supporting code.  This allows
- *              the test to adjust to the number of page buffer pages
- *              accessed during file open / create.
- *
- *              The test for the value of base_page_cnt just after file
- *              open exists detect changes in library behavior.  Assuming
- *              any such change is not indicative of other issues, these
- *              tests can be modified to reflect the change.
- *
- *                                                    JRM -- 2/23/17
- *
  *-------------------------------------------------------------------------
  */
-
-/* Changes due to file space page size has a minimum size of 512 */
 static unsigned
 test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -832,18 +819,6 @@ error:
  * Programmer:  unknown
  *              ?? / ?? / ??
  *
- * Changes:     Added base_page_cnt field as supporting code.  This allows
- *              the test to adjust to the number of page buffer pages
- *              accessed during file open / create.
- *
- *              The test for the value of base_page_cnt just after file
- *              open exists detect changes in library behavior.  Assuming
- *              any such change is not indicative of other issues, these
- *              tests can be modified to reflect the change.
- *
- *                                                    JRM -- 2/23/17
- *
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1085,19 +1060,6 @@ error:
  *
  * Programmer:  unknown
  *              ?? / ?? / ??
- *
- * Changes:     Added the base_raw_cnt and base_meta_cnt fields and
- *              supporting code.  This allows the test to adjust to the
- *              number of page buffer pages accessed during file open /
- *              create.
- *
- *              The tests for the values of base_raw_cnt and base_meta_cnt
- *              just after file open exist detect changes in library
- *              behavior.  Assuming any such change is not indicative of
- *              other issues, these tests can be modified to reflect the
- *              change.
- *
- *                                                    JRM -- 2/23/17
  *
  *-------------------------------------------------------------------------
  */
@@ -1721,19 +1683,6 @@ error:
  * Programmer:  unknown
  *              ?? / ?? / ??
  *
- * Changes:     Added the base_raw_cnt and base_meta_cnt fields and
- *              supporting code.  This allows the test to adjust to the
- *              number of page buffer pages accessed during file open /
- *              create.
- *
- *              The tests for the values of base_raw_cnt and base_meta_cnt
- *              just after file open exist detect changes in library
- *              behavior.  Assuming any such change is not indicative of
- *              other issues, these tests can be modified to reflect the
- *              change.
- *
- *                                                    JRM -- 2/23/17
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2023,8 +1972,6 @@ error:
  *
  * Programmer:  John Mainzer
  *              03/21/17
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */

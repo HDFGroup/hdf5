@@ -97,11 +97,6 @@ filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned 
  * Programmer:  Raymond Lu
  *              25 August 2010
  *
- * Modifications:
- *              Raymond Lu
- *              5 Oct 2010
- *              Test when the chunk cache is enable and disabled to make
- *              sure the library behaves properly.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -236,8 +231,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              25 August 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

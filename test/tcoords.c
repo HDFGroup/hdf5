@@ -713,8 +713,6 @@ test_coords(void)
  * Programmer:	Raymond Lu
  *              20 Dec. 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

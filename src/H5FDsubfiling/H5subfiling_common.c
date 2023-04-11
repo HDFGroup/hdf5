@@ -596,7 +596,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1709,7 +1708,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1898,7 +1896,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1960,8 +1957,6 @@ done:
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2038,8 +2033,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2090,8 +2083,6 @@ clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id)
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2653,7 +2644,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 /*-------------------------------------------------------------------------
@@ -2678,7 +2668,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2979,8 +2968,6 @@ done:
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */

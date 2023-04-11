@@ -220,8 +220,6 @@ test_time(void)
  * Programmer:    Quincey Koziol
  *              October 19, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

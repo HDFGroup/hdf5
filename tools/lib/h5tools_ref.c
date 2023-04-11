@@ -51,8 +51,6 @@ static int ref_path_table_put(const char *, const H5O_token_t *token);
  *
  * Programmer:  Quincey Koziol
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -160,8 +158,6 @@ init_ref_path_table(void)
  *
  * Programmer:  Quincey Koziol
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -186,8 +182,6 @@ term_ref_path_table(void)
  *              name.
  *
  * Programmer:  REMcG
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -236,8 +230,6 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
  * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  REMcG
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -321,8 +313,6 @@ ref_path_table_gen_fake(const char *path, H5O_token_t *token)
  * Return:      Return a path to the object, or NULL if not found.
  *
  * Programmer:  REMcG
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

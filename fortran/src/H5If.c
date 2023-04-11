@@ -273,7 +273,6 @@ done:
  *  Returns:     0 on success, -1 on failure
  *  Programmer:  Elena Pourmal
  *  Tuesday, August 24, 2004
- *  Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)

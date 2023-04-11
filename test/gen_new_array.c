@@ -50,8 +50,6 @@
  * Programmer:	Robb Matzke
  *              Monday, October 26, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int

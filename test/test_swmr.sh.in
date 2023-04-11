@@ -83,13 +83,6 @@ WAIT_MESSAGE() {
 ###############################################################################
 ## Main
 ##
-## Modifications:
-##   Vailin Choi; July 2013
-##     Add waiting of message file before launching the reader(s).
-##     Due to the implementation of file locking, coordination
-##     is needed in file opening for the writer/reader tests
-##     to proceed as expected.
-##
 ###############################################################################
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable

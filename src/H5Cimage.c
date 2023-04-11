@@ -452,10 +452,6 @@ done:
  *
  * Programmer:  John Mainzer, 8/10/15
  *
- * Changes:     Updated sanity checks for possibility that the slist
- *              is disabled.
- *                                            JRM -- 5/17/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1579,7 +1575,6 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
     /* The collective metadata write code is not currently compatible
      * with cache image.  Until this is fixed, suppress cache image silently
      * if there is more than one process.
-     *                                         JRM -- 11/8/16
      */
     if (cache_ptr->aux_ptr) {
         H5C_cache_image_ctl_t default_image_ctl = H5C__DEFAULT_CACHE_IMAGE_CTL;
@@ -2296,22 +2291,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C__prep_for_file_close__compute_fd_heights
  *
- * Purpose:     Recent modifications to flush dependency support in the
- *		metadata cache have removed the notion of flush dependency
- *		height.  This is a problem for the cache image feature,
- *		as flush dependency height is used to order entries in the
- *		cache image so that flush dependency parents appear before
- *		flush dependency children. (Recall that the flush dependency
- *		height of an entry in a flush dependency relationship is the
- *		length of the longest path from the entry to a leaf entry --
- *		that is an entry with flush dependency parents, but no
- *		flush dependency children.  With the introduction of the
- *		possibility of multiple flush dependency parents, we have
- *		a flush partial dependency latice, not a flush dependency
- *		tree.  But since the partial latice is acyclic, the concept
- *		of flush dependency height still makes sense.
- *
- *		The purpose of this function is to compute the flush
+ * Purpose:     The purpose of this function is to compute the flush
  *		dependency height of all entries that appear in the cache
  *		image.
  *
