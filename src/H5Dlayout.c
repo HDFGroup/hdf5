@@ -589,7 +589,7 @@ herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 {
     htri_t  msg_exists;                      /* Whether a particular type of message exists */
-    hbool_t dcpl_cache_pline_copied = FALSE; /* Flag to indicate that dcpl_cache.pline's message was copied */
+    hbool_t pline_copied = FALSE; /* Flag to indicate that dcpl_cache.pline's message was copied */
     hbool_t layout_copied           = FALSE; /* Flag to indicate that layout message was copied */
     hbool_t efl_copied              = FALSE; /* Flag to indicate that the EFL message was copied */
     herr_t  ret_value               = SUCCEED; /* Return value */
@@ -607,7 +607,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         /* Retrieve the I/O pipeline message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
-        dcpl_cache_pline_copied = TRUE;
+        pline_copied = TRUE;
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline")
@@ -663,7 +663,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 
 done:
     if (ret_value < 0) {
-        if (dcpl_cache_pline_copied)
+        if (pline_copied)
             if (H5O_msg_reset(H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info")
         if (layout_copied)
