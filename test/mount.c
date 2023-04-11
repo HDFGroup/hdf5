@@ -41,8 +41,6 @@ int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -116,8 +114,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -171,8 +167,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -461,8 +455,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -561,8 +553,6 @@ error:
  * Programmer:	Robb Matzke
  *              Tuesday, October 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -650,8 +640,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -719,8 +707,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -790,8 +776,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -858,8 +842,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -933,8 +915,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1088,8 +1068,6 @@ error:
  * Programmer:	Robb Matzke
  *              Tuesday, October 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1150,8 +1128,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1273,8 +1249,6 @@ error:
  * Programmer:	Robb Matzke
  *              Wednesday, October 14, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1351,8 +1325,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1441,8 +1413,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, May  4, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1676,8 +1646,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Monday, June  6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1946,8 +1914,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Thursday, June 30, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2098,8 +2064,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, July  5, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2227,8 +2191,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, July 14, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2384,8 +2346,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, July 19, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2528,8 +2488,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, July 19, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2671,8 +2629,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Tuesday, July 19, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2812,8 +2768,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, July 19, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3016,8 +2970,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3240,8 +3192,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3453,8 +3403,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3623,8 +3571,6 @@ error:
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4016,8 +3962,6 @@ error:
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4181,8 +4125,6 @@ error:
  * Programmer:	Neil Fortner
  *              Friday, August 1, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4286,8 +4228,6 @@ error:
  *
  * Programmer:	Neil Fortner
  *              Friday, August 6, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4446,8 +4386,6 @@ error:
  * Programmer:	Neil Fortner
  *              Friday, November 14, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4599,8 +4537,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Wednesday, October  7, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

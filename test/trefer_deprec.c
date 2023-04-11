@@ -1853,8 +1853,6 @@ test_reference_deprec(void)
  * Programmer:    Quincey Koziol
  *              September 8, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -63,8 +63,6 @@ const char *FILENAME[] = {"ntypes", NULL};
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -313,8 +311,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -644,8 +640,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -856,8 +850,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1098,8 +1090,6 @@ error:
  * Programmer:    Quincey Koziol
  *        January 31, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1325,8 +1315,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1483,8 +1471,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1672,8 +1658,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1823,8 +1807,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2030,8 +2012,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2170,8 +2150,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2291,8 +2269,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2464,8 +2440,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2679,8 +2653,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2778,11 +2750,6 @@ error:
  * Programmer:    Raymond Lu
  *        October 15, 2002
  *
- * Modifications:
- *              Raymond Lu
- *              1 December 2009
- *              I added the support for bitfield and changed the test to
- *              compare the data being read back.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2936,8 +2903,6 @@ error:
  *
  * Programmer: Pedro Vicente
  *  September 3, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3144,8 +3109,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *        October 15, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
