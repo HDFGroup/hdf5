@@ -2799,7 +2799,6 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char *hw = NULL;    /*ptr to hardware-conv'd*/
     int            underflow;    /*underflow occurred    */
     int            overflow = 0; /*overflow occurred    */
-    int            uflow    = 0; /*underflow debug counters*/
     size_t         j, k;         /*counters        */
     int            sendian;      /* source type endianness */
     int            dendian;      /* Destination type endianness */
@@ -3088,9 +3087,6 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 hw    = (unsigned char *)&hw_ld;
             }
 #endif
-        }
-        if (underflow) {
-            uflow++;
         }
 
         /* For Intel machines, the size of "long double" is 12 bytes, precision
