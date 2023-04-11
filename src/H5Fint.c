@@ -39,8 +39,6 @@
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
-#include <stdio.h>
-
 /****************/
 /* Local Macros */
 /****************/
@@ -2888,8 +2886,6 @@ H5F_addr_decode_len(size_t addr_len, const uint8_t **pp /*in,out*/, haddr_t *add
         uint8_t c; /* Local decoded byte */
 
         /* Get decoded byte (and advance pointer) */
-	printf("this is *pp ptr: %p\n", *pp);
-	printf("this is addr_len: %lu\n\n", addr_len);
         c = *(*pp)++;
 
         /* Check for non-undefined address byte value */

@@ -41,8 +41,6 @@
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists			*/
 
-#include <stdio.h>
-
 /****************/
 /* Local Macros */
 /****************/
