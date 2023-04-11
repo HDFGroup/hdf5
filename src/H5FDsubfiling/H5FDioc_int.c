@@ -91,7 +91,6 @@ cast_to_void(const void *data)
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -263,7 +262,6 @@ done:
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 herr_t

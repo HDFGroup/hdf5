@@ -1105,10 +1105,6 @@ done:
  *
  * Return:   Number of differences found
  *
- * Modifications: Compare the graph and make h5diff return 1 for difference if
- *           1) the number of objects in file1 is not the same as in file2
- *           2) the graph does not match, i.e same names (absolute path)
- *           3) objects with the same name are not of the same type
  *-------------------------------------------------------------------------
  */
 hsize_t

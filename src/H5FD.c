@@ -1501,8 +1501,6 @@ done:
  *
  * Programmer:  JRM -- 6/10/20
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1580,8 +1578,6 @@ done:
  *                          One or more of the writes failed.
  *
  * Programmer:  JRM -- 6/10/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1677,8 +1673,6 @@ done:
  *                          The contents of supplied buffers are undefined.
  *
  * Programmer:  NAF -- 5/19/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1778,8 +1772,6 @@ done:
  *                          One or more of the writes failed.
  *
  * Programmer:  NAF -- 5/14/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */

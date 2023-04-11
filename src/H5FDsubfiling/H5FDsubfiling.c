@@ -429,8 +429,6 @@ done:
  * Programmer:  John Mainzer
  *              9/10/17
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -945,8 +943,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1028,8 +1024,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1071,8 +1065,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              9/8/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2055,8 +2047,6 @@ done:
  *
  * Programmer:  RAW -- ??/??/21
  *
- * Changes:     None.
- *
  * Notes:       Thus function doesn't actually implement vector read.
  *              Instead, it comverts the vector read call into a series
  *              of scalar read calls.  Fix this when time permits.
@@ -2218,8 +2208,6 @@ done:
  *                          subfiling writes have failed for some reason.
  *
  * Programmer:  RAW -- ??/??/21
- *
- * Changes:     None.
  *
  * Notes:       Thus function doesn't actually implement vector write.
  *              Instead, it comverts the vector write call into a series

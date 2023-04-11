@@ -341,8 +341,6 @@ END SUBROUTINE test_h5s_encode
 ! Programmer:  M. Scot Breitenfeld
 !              Decemeber 11, 2010
 !
-! Modifications:
-!
 !-------------------------------------------------------------------------
 !
 

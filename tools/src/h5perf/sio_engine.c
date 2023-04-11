@@ -282,7 +282,6 @@ done:
  *              USER or LOGIN are specified in the environment.
  * Return:      Pointer to filename or NULL
  * Programmer:  Bill Wendling, 21. November 2001
- * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
 static char *
 sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size, parameters *param)
@@ -403,7 +402,6 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Purpose:         Write the required amount of data to the file.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
@@ -618,7 +616,6 @@ done:
  * Purpose:         Write buffer into the dataset.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 static herr_t
 dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
@@ -701,7 +698,6 @@ done:
  * Purpose:         Write buffer into the POSIX file considering contiguity.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 
 static herr_t
@@ -762,7 +758,6 @@ done:
  * Purpose:         Read the required amount of data to the file.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
@@ -940,7 +935,6 @@ done:
  * Purpose:         Read buffer into the dataset.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 
 static herr_t
@@ -1002,7 +996,6 @@ done:
  * Purpose:         Read buffer into the POSIX file considering contiguity.
  * Return:          SUCCESS or FAIL
  * Programmer:      Christian Chilan, April, 2008
- * Modifications:
  */
 
 static herr_t
@@ -1057,7 +1050,6 @@ done:
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
  * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications: Support for file drivers, Christian Chilan, April, 2008
  */
 static herr_t
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
@@ -1223,7 +1215,6 @@ set_vfd(parameters *param)
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
  * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
  */
 static herr_t
 do_fclose(iotype iot, file_descr *fd /*out*/)

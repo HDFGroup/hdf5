@@ -403,8 +403,6 @@ static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mp
  * Programmer:    Robb Matzke
  *              Monday, July  6, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -429,8 +427,6 @@ fpe_handler(int H5_ATTR_UNUSED signo)
  *
  * Programmer:    Robb Matzke
  *              Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -471,8 +467,6 @@ reset_hdf5(void)
  *
  * Programmer:    Raymond Lu
  *              April 19, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -517,8 +511,6 @@ except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *
  * Programmer:  Raymond Lu
  *              Friday, Sept 2, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -581,8 +573,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *              Sept 7, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -802,8 +792,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              Thursday, Jan 6, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1254,8 +1242,6 @@ error:
  * Programmer:  Raymond Lu
  *              Saturday, Jan 29, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1574,8 +1560,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Monday, November 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2628,8 +2612,6 @@ error:
  * Programmer:    Robb Matzke
  *              Friday, April 30, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2679,8 +2661,6 @@ test_conv_int_2(void)
  *
  * Programmer:    Robb Matzke
  *              Monday, July  6, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2756,8 +2736,6 @@ my_isnan(dtype_t type, void *val)
  * Programmer:    Raymond Lu
  *              Monday, June 20, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2795,13 +2773,6 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
  *
  * Programmer:    Robb Matzke
  *              Tuesday, June 23, 1998
- *
- * Modifications:
- *         Albert Cheng, Apr 16, 2004
- *         Check for underflow condition. If the src number is
- *         smaller than the dst MIN float number, consider it okay
- *         if the converted sw and hw dst are both less than or
- *         equal to the dst MIN float number.
  *
  *-------------------------------------------------------------------------
  */
@@ -3403,8 +3374,6 @@ error:
  *
  * Programmer:    Raymond Lu
  *              Thursday, November 6, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4606,8 +4575,6 @@ error:
  * Programmer:    Raymond Lu
  *              Monday, Nov 17, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -4691,8 +4658,6 @@ done:
  *
  * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -4854,8 +4819,6 @@ run_integer_tests(const char *name)
  * Programmer:    Raymond Lu
  *              Tuesday, March 22, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4938,8 +4901,6 @@ done:
  *
  * Programmer:    Raymond Lu
  *              Monday, November 10, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5046,8 +5007,6 @@ run_int_fp_conv(const char *name)
  *
  * Programmer:    Raymond Lu
  *              Monday, November 10, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5194,12 +5153,6 @@ run_fp_int_conv(const char *name)
  *
  * Programmer:  Robb Matzke
  *              Tuesday, December 9, 1997
- *
- * Modifications:
- *              Raymond Lu
- *              Monday, April 4, 2005
- *              These tests were split from dtypes.c because dtypes.c
- *              has grown too big.
  *
  *-------------------------------------------------------------------------
  */

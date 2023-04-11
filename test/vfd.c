@@ -4043,10 +4043,6 @@ error:
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4148,10 +4144,6 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
  *
  * Programmer:  John Mainzer
  *              3/10/21
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4286,10 +4278,6 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4341,10 +4329,6 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4393,8 +4377,6 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
  *
  * Programmer:  John Mainzer
  *              6/21/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4464,8 +4446,6 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
  *
  * Programmer:  John Mainzer
  *              6/21/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4540,8 +4520,6 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
  *
  * Programmer:  John Mainzer
  *              6/20/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4983,8 +4961,6 @@ error:
  * Programmer:  Neil Fortner
  *              7/1/21
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 /* Array dimensions, used for all selection I/O tests.  Currently both must be
@@ -5029,8 +5005,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              7/1/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -5105,8 +5079,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              7/1/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
