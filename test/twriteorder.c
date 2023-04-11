@@ -273,9 +273,6 @@ write_wo_file(void)
         HDmemset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
-#ifdef DEBUG
-        HDprintf("writing block at %d\n", blkaddr);
-#endif
         HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_wrote = HDwrite(write_fd_g, buffer, (size_t)blocksize_g)) != blocksize_g) {
             HDprintf("blkaddr write failed in partition %d\n", i);
@@ -295,9 +292,6 @@ write_wo_file(void)
     }
 
     /* all writes done. return success. */
-#ifdef DEBUG
-    HDprintf("wrote %d blocks\n", nlinkedblock_g);
-#endif
     return 0;
 }
 
@@ -305,9 +299,8 @@ int
 read_wo_file(void)
 {
     int               read_fd;
-    int               blkaddr           = 0;
-    h5_posix_io_ret_t bytes_read        = -1; /* # of bytes actually read */
-    int               linkedblocks_read = 0;
+    int               blkaddr    = 0;
+    h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
     char              buffer[BLOCKSIZE_DFT];
 
     /* Open the data file */
@@ -324,30 +317,19 @@ read_wo_file(void)
             return -1;
         }
     }
-    linkedblocks_read++;
 
     /* got a non-zero blkaddr. Proceed down the linked blocks. */
-#ifdef DEBUG
-    HDprintf("got initial block address=%d\n", blkaddr);
-#endif
     while (blkaddr != 0) {
         HDlseek(read_fd, (HDoff_t)blkaddr, SEEK_SET);
         if ((bytes_read = HDread(read_fd, buffer, (size_t)blocksize_g)) != blocksize_g) {
             HDprintf("blkaddr read failed in partition %d\n", 0);
             return -1;
         }
-        linkedblocks_read++;
 
         /* retrieve the block address in byte 0-3 */
         HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
-#ifdef DEBUG
-        HDprintf("got next block address=%d\n", blkaddr);
-#endif
     }
 
-#ifdef DEBUG
-    HDprintf("read %d blocks\n", linkedblocks_read);
-#endif
     return 0;
 }
 
@@ -426,9 +408,6 @@ main(int argc, char *argv[])
     /* launch writer */
     /* ============= */
     /* this process continues to launch the writer */
-#ifdef DEBUG
-    HDprintf("%d: continue as the writer process\n", mypid);
-#endif
     if (write_wo_file() < 0) {
         HDfprintf(stderr, "write_wo_file encountered error\n");
         Hgoto_error(1);
