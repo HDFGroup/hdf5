@@ -356,10 +356,14 @@ Bug Fixes since HDF5-1.14.0 release
       special argument, --no-compact-subset, on the h5dump command line.
 
 <<<<<<< Upstream, based on branch 'develop-no-subsets' of https://github.com/byrnHDF/hdf5.git
+<<<<<<< Upstream, based on branch 'develop-no-subsets' of https://github.com/byrnHDF/hdf5.git
       h5diff did not have this option and now it has been added.
 =======
       h5diff did not have this option and now has been added.
 >>>>>>> c557dd9 Add release note and usage text
+=======
+      h5diff did not have this option and now it has been added.
+>>>>>>> 30b87dd Sentence syntax
 
       (ADB - 2023/04/08 GH-2598)
 
