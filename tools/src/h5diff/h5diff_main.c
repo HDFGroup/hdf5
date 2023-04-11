@@ -30,36 +30,6 @@
  *
  * Comments:
  *
- * Modifications: July 2004
- *  Introduced the four modes:
- *   Normal mode: print the number of differences found and where they occurred
- *   Report mode: print the above plus the differences
- *   Verbose mode: print the above plus a list of objects and warnings
- *   Quiet mode: do not print output
- *
- * November 2004: Leon Arber (larber@uiuc.edu)
- *     Additions that allow h5diff to be run in parallel
- *
- * February 2005: Leon Arber (larber@uiuc.edu)
- *   h5diff and ph5diff split into two files, one that is used
- *   to build a serial h5diff and one used to build a parallel h5diff
- *   Common functions have been moved to h5diff_common.c
- *
- * October 2005
- *  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
- *  if some objects are not comparable and prints the message
- *  "Some objects are not comparable"
- *
- * February 2007
- *  Added comparison for dataset regions.
- *  Added support for reading and comparing by hyperslabs for large files.
- *  Inclusion of a relative error formula to compare floating
- *   point numbers in order to deal with floating point uncertainty.
- *  Printing of dataset dimensions along with dataset name
- *
- *  November 19, 2007
- *    adopted the syntax h5diff  [OPTIONS]  file1 file2  [obj1[obj2]]
- *
  *-------------------------------------------------------------------------
  */
 
@@ -146,8 +116,6 @@ main(int argc, char *argv[])
  * Date: Feb 6, 2005
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

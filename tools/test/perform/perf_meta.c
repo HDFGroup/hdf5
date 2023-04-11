@@ -68,12 +68,10 @@ void   print_perf(p_time, p_time, p_time);
 /*-------------------------------------------------------------------------
  * Function:	parse_options
  *
-  Purpose:	Parse command line options
+ * Purpose:	Parse command line options
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -188,12 +186,10 @@ parse_options(int argc, char **argv)
 /*-------------------------------------------------------------------------
  * Function:	usage
  *
-  Purpose:	Prints help page
+ * Purpose:	Prints help page
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -248,8 +244,6 @@ usage(void)
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -287,8 +281,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -329,8 +321,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -435,8 +425,6 @@ error:
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -537,8 +525,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -644,8 +630,6 @@ error:
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 double
@@ -673,8 +657,6 @@ retrieve_time(void)
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -728,8 +710,6 @@ perf(p_time *perf_t, double start_t, double end_t)
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -755,8 +735,6 @@ print_perf(p_time open_t, p_time close_t, p_time attr_t)
  *
  * Programmer:	Raymond Lu
  *		Friday, Oct 3, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

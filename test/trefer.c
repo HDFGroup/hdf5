@@ -3611,8 +3611,6 @@ test_reference(void)
  * Programmer:    Quincey Koziol
  *              September 8, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
