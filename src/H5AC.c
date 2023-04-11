@@ -413,14 +413,6 @@ done:
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
- * Changes:
- *
- *             In the parallel case, added code to setup the MDC slist
- *             before the call to H5AC__flush_entries() and take it down
- *             afterwards.
- *
- *                                            JRM -- 7/29/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1191,13 +1183,12 @@ done:
  *
  * Function:    H5AC_prep_for_file_flush
  *
- * Purpose:     This function should be called just prior to the first
+ * Purpose:     Handle any setup required prior to metadata cache flush.
+ *
+ *              This function should be called just prior to the first
  *              call to H5AC_flush() during a file flush.
  *
- *              Its purpose is to handly any setup required prior to
- *              metadata cache flush.
- *
- *              Initially, this means setting up the slist prior to the
+ *              Initially, this means setting up the skip list prior to the
  *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
@@ -1208,8 +1199,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/5/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1242,9 +1231,6 @@ done:
  * Purpose:     This function should be called just after the last
  *              call to H5AC_flush() during a file flush.
  *
- *              Its purpose is to perform any necessary cleanup after the
- *              metadata cache flush.
- *
  *              The objective of the call is to allow the metadata cache
  *              to do any necessary necessary cleanup work after a cache
  *              flush.
@@ -1260,8 +1246,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/5/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1474,24 +1458,6 @@ H5AC_resize_entry(void *thing, size_t new_size)
      *    amounts of dirty metadata creation in other areas -- which will
      *    cause aux_ptr->dirty_bytes to be incremented.
      *
-     *    The bottom line is that this code is probably OK, but the above
-     *    points should be kept in mind.
-     *
-     * One final observation:  This comment is occasioned by a bug caused
-     * by moving the call to H5AC__log_dirtied_entry() after the call to
-     * H5C_resize_entry(), and then only calling H5AC__log_dirtied_entry()
-     * if entry_ptr->is_dirty was false.
-     *
-     * Since H5C_resize_entry() marks the target entry dirty unless there
-     * is not change in size, this had the effect of not calling
-     * H5AC__log_dirtied_entry() when it should be, and corrupting
-     * the cleaned and dirtied lists used by rank 0 in the parallel
-     * version of the metadata cache.
-     *
-     * The point here is that you should be very careful when working with
-     * this code, and not modify it unless you fully understand it.
-     *
-     *                                          JRM -- 2/28/22
      */
 
     if ((!entry_ptr->is_dirty) && (entry_ptr->size != new_size)) {

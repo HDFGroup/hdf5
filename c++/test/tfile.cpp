@@ -65,13 +65,6 @@ const H5std_string FILE4("tfile4.h5");
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2001
  *
- * Modifications:
- *        January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *                     cases.  Since there are no operator<< for 'long long'
- *                     or int64 in VS C++ ostream, I casted the hsize_t values
- *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specifically handled
- *                     with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -274,13 +267,6 @@ test_file_create()
  * Programmer   Binh-Minh Ribler (use C version)
  *              January, 2001
  *
- * Modifications:
- *        January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *                     cases.  Since there are no operator<< for 'long long'
- *                     or int64 in VS C++ ostream, I casted the hsize_t values
- *                     passed to verify_val to 'long' as well.  If problems
- *                     arises later, this will have to be specifically handled
- *                     with a special routine.
  *-------------------------------------------------------------------------
  */
 static void

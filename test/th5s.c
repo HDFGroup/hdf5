@@ -3507,8 +3507,6 @@ test_h5s(void)
  * Programmer:    Albert Cheng
  *              July 2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

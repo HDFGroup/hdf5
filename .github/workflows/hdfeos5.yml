@@ -1,0 +1,30 @@
+name: hdfeos5
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build hdfeos5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+          sudo apt update
+          sudo apt install automake autoconf libtool libtool-bin
+      - name: Install HDF5
+        run: |
+          ./autogen.sh
+          ./configure --prefix=/usr/local  --with-default-api-version=v16
+          make
+          sudo make install
+      - name: Install HDF-EOS5
+        run: |
+          wget -O HDF-EOS5.2.0.tar.gz "https://git.earthdata.nasa.gov/projects/DAS/repos/hdfeos5/raw/hdf-eos5-2.0-src.tar.gz?at=refs%2Fheads%2FHDFEOS5_2.0"
+          tar zxvf HDF-EOS5.2.0.tar.gz
+          cd hdf-eos5-2.0
+          ./configure CC=/usr/local/bin/h5cc --prefix=/usr/local/ --enable-install-include
+          make
+          make check
+          sudo make install
