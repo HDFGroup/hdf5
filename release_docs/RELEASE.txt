@@ -151,9 +151,13 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    - Fixed memory leaks that could occur when reading a dataset from a malformed file
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
 
-      When attempting to read layout, pline, and efl information for a dataset, memory leaks could occur if attempting to read pline/efl information threw an error, which is due to the memory that was allocated for pline and efl not being properly cleaned up on error.  
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information threw an error, which is due to the memory that was 
+      allocated for pline and efl not being properly cleaned up on error.  
 
       (GS - 2023/4/11 GH#2602)
 
