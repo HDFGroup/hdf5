@@ -2188,8 +2188,6 @@ test_genprop(void)
  * Programmer:    Quincey Koziol
  *              June 8, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

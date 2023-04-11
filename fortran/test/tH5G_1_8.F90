@@ -749,8 +749,6 @@ END SUBROUTINE group_info
 ! * Programmer:	Adapted from C test by:
 ! *             M.S. Breitenfeld
 ! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -841,8 +839,6 @@ END SUBROUTINE group_info
 ! *
 ! * Programmer:  M.S. Breitenfeld
 ! *              March 3, 2008
-! *
-! * Modifications:
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1189,8 +1185,6 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 ! *
 ! * Programmer:	M.S. Breitenfeld
 ! *             April 14, 2008
-! *
-! * Modifications: Modified original C code
 ! *
 ! *-------------------------------------------------------------------------
 !
@@ -1600,8 +1594,6 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 ! *              Modified C routine
 ! *              March 12, 2008
 ! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -1969,8 +1961,6 @@ END SUBROUTINE objcopy
 ! *
 ! * Programmer:  James Laird
 ! *              Tuesday, June 6, 2006
-! *
-! * Modifications:
 ! *
 ! *-------------------------------------------------------------------------
 !

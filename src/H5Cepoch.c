@@ -45,7 +45,7 @@
  *
  * As a strategy for automatic cache size reduction, the cache may insert
  * marker entries in the LRU list at the end of each epoch.  These markers
- * are then used to identify entries that have not been accessed for n
+ * are then used to identify entries that have not been accessed for 'n'
  * epochs so that they can be evicted from the cache.
  *
  ****************************************************************************/
@@ -98,7 +98,6 @@ const H5AC_class_t H5AC_EPOCH_MARKER[1] = {
  *
  * None of these functions should ever be called, so there is no point in
  * documenting them separately.
- *                                                     JRM - 11/16/04
  *
  ***************************************************************************/
 

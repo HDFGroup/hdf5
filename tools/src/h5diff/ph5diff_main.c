@@ -116,10 +116,6 @@ main(int argc, char *argv[])
  * Programmer: Leon Arber
  * Date: January 2005
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -285,10 +281,6 @@ print_manager_output(void)
  *
  * Programmer: Albert Cheng
  * Date: Feb 6, 2005
- *
- * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

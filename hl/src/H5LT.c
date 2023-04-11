@@ -559,9 +559,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 
@@ -585,9 +582,6 @@ H5LTmake_dataset(hid_t loc_id, const char *dset_name, int rank, const hsize_t *d
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 
@@ -609,9 +603,6 @@ H5LTmake_dataset_char(hid_t loc_id, const char *dset_name, int rank, const hsize
  * Date: September 14, 2001
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -635,9 +626,6 @@ H5LTmake_dataset_short(hid_t loc_id, const char *dset_name, int rank, const hsiz
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 
@@ -659,9 +647,6 @@ H5LTmake_dataset_int(hid_t loc_id, const char *dset_name, int rank, const hsize_
  * Date: September 14, 2001
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -685,9 +670,6 @@ H5LTmake_dataset_long(hid_t loc_id, const char *dset_name, int rank, const hsize
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 
@@ -709,9 +691,6 @@ H5LTmake_dataset_float(hid_t loc_id, const char *dset_name, int rank, const hsiz
  * Date: September 14, 2001
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -735,9 +714,6 @@ H5LTmake_dataset_double(hid_t loc_id, const char *dset_name, int rank, const hsi
  * Date: October 05, 2004
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -1293,8 +1269,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1379,8 +1353,6 @@ H5_GCC_CLANG_DIAG_ON("cast-qual")
  * Date: July 23, 2001
  *
  * Comments: If the attribute already exists, it is overwritten
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2034,8 +2006,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2082,8 +2052,6 @@ out:
  * Programmer:  Raymond Lu
  *
  * Date:        29 September 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2155,8 +2123,6 @@ out:
  *
  * Date:        December 6, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static char *
@@ -2188,8 +2154,6 @@ out:
  * Return:      Success: 0, Failure: -1
  *
  * Programmer:  Raymond Lu
- *
- * Modifications:
  *
  *-----------------------------------------------------------------------*/
 static char *
@@ -2323,8 +2287,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2373,8 +2335,6 @@ out:
  * Date:        December 20, 2005
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2984,8 +2944,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3031,8 +2989,6 @@ H5LTget_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3057,8 +3013,6 @@ H5LTget_attribute_char(hid_t loc_id, const char *obj_name, const char *attr_name
  * Date: March 8, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3085,8 +3039,6 @@ H5LTget_attribute_uchar(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3111,8 +3063,6 @@ H5LTget_attribute_short(hid_t loc_id, const char *obj_name, const char *attr_nam
  * Date: March 8, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3139,8 +3089,6 @@ H5LTget_attribute_ushort(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3165,8 +3113,6 @@ H5LTget_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name,
  * Date: March 8, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3193,8 +3139,6 @@ H5LTget_attribute_uint(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3219,8 +3163,6 @@ H5LTget_attribute_long(hid_t loc_id, const char *obj_name, const char *attr_name
  * Date: June 17, 2005
  *
  * Comments: This function was added to support INTEGER*8 Fortran types
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3247,8 +3189,6 @@ H5LTget_attribute_long_long(hid_t loc_id, const char *obj_name, const char *attr
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3274,8 +3214,6 @@ H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3300,8 +3238,6 @@ H5LTget_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_na
  * Date: September 19, 2002
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3329,8 +3265,6 @@ H5LTget_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3356,8 +3290,6 @@ H5LTget_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  * Date: September 19, 2002
  *
  * Comments: Private function
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3389,8 +3321,6 @@ H5LTget_attribute(hid_t loc_id, const char *obj_name, const char *attr_name, hid
  * Date: September 19, 2002
  *
  * Comments: Private function
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3451,8 +3381,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3499,8 +3427,6 @@ out:
  * Date: January 04, 2005
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

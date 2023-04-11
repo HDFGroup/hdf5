@@ -25,9 +25,6 @@
  *
  * Programmer: Unknown
  *
- * Modifications:  pvn
- *   Use the HDF5 IMAGE API to write the HDF5 image and palette
- *
  * Date: January, 31, 2006
  *
  *-------------------------------------------------------------------------

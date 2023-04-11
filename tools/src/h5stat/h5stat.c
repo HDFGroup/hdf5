@@ -335,18 +335,6 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
  * Programmer: Quincey Koziol
  *             Tuesday, August 16, 2005
  *
- * Modifications: Refactored code from the walk_function
- *                EIP, Wednesday, August 16, 2006
- *
- *      Vailin Choi 12 July 2007
- *      1. Gathered storage info for btree and heap
- *         (groups and attributes)
- *      2. Gathered info for attributes
- *
- *      Vailin Choi 14 July 2007
- *      Cast "num_objs" and "num_attrs" to size_t
- *      Due to the -Mbounds problem for the pgi-32 bit compiler on indexing
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1103,8 +1091,6 @@ iter_free(iter_t *iter)
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1189,11 +1175,6 @@ print_file_metadata(const iter_t *iter)
  *
  * Programmer: Elena Pourmal
  *             Saturday, August 12, 2006
- *
- * Modifications:
- *  bug #1253; Oct 6th 2008; Vailin Choi
- *  Fixed segmentation fault: print iter->group_bins[0] when
- *  there is iter->group_nbins
  *
  *-------------------------------------------------------------------------
  */
@@ -1636,8 +1617,6 @@ print_file_statistics(const iter_t *iter)
  * Programmer: Elena Pourmal
  *             Thursday, August 17, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1658,8 +1637,6 @@ print_object_statistics(const char *name)
  * Programmer: Elena Pourmal
  *             Thursday, August 17, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1673,10 +1650,6 @@ print_statistics(const char *name, const iter_t *iter)
 
 /*-------------------------------------------------------------------------
  * Function: main
- *
- * Modifications:
- *      2/2010; Vailin Choi
- *      Get the size of user block
  *
  *-------------------------------------------------------------------------
  */

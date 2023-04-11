@@ -232,24 +232,7 @@ h5tools_dump_init(void)
  *         Failure:    FAIL
  * Programmer:
  *      Robb Matzke, Monday, April 26, 1999
- * Modifications:
- *  Robb Matzke, 1999-06-04
- * The `container' argument is the optional dataset for reference types.
  *
- *  Robb Matzke, 1999-09-29
- * Understands the `per_line' property which indicates that every Nth
- * element should begin a new line.
- *
- *      Robb Matzke, LLNL, 2003-06-05
- *      Do not dereference the memory for a variable-length string here.
- *      Deref in h5tools_str_sprint() instead so recursive types are
- *      handled correctly.
- *
- *      Pedro Vicente Nunes, The HDF Group, 2005-10-19
- *        pass to the prefix in h5tools_simple_prefix the total position
- *        instead of the current stripmine position i; this is necessary
- *        to print the array indices
- *        new field sm_pos in h5tools_context_t, the current stripmine element position
  *-------------------------------------------------------------------------
  */
 int

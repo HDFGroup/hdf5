@@ -62,8 +62,6 @@ typedef struct {
  * Programmer:  Raymond Lu
  *              Monday, Jan 26, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -158,8 +156,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Thursday, October  1, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -403,10 +399,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Thursday, October  1, 1998
- *
- * Modifications:
- *        Many new cases have been added to this test since
- *        the fill value design has been modified.
  *
  *-------------------------------------------------------------------------
  */
@@ -866,10 +858,6 @@ error:
  * Programmer:    Robb Matzke
  *              Thursday, October  1, 1998
  *
- * Modifications:
- *         This function is called by test_rdwr to write and read
- *        dataset for different cases.
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1206,10 +1194,6 @@ error:
  *
  * Programmer:  Robb Matzke
  *              Thursday, October  1, 1998
- *
- * Modifications:
- *        Many new cases have been added to this test since the
- *        fill value design is modified.
  *
  *-------------------------------------------------------------------------
  */
@@ -2060,8 +2044,6 @@ error:
  * Programmer:    Robb Matzke
  *              Monday, October  5, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2224,8 +2206,6 @@ skip:
  * Programmer:  Raymond Lu
  *              Feb 27, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2378,11 +2358,6 @@ error:
  *
  * Programmer:    Joel Plutchak
  *              April 15, 2013
- *
- * Modifications:
- *         This function is called by test_rdwr to write and read
- *        dataset for different cases of chunked datasets with
- *              unallocated chunks.
  *
  *-------------------------------------------------------------------------
  */

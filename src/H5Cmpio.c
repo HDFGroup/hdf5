@@ -402,21 +402,10 @@ done:
  *              shouldn't be used elsewhere.
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
  *
  * Programmer:  John Mainzer
  *              3/17/10
- *
- * Changes:     With the slist optimization, the slist is not maintained
- *              unless a flush is in progress.  Thus we can not longer use
- *              cache_ptr->slist_size to determine the total size of
- *              the entries we must insert in the candidate list.
- *
- *              To address this, we now use cache_ptr->dirty_index_size
- *              instead.
- *
- *                                              JRM -- 7/27/20
  *
  *-------------------------------------------------------------------------
  */
@@ -440,15 +429,14 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
 
     HDassert((!cache_ptr->slist_enabled) || (space_needed == cache_ptr->slist_size));
 
-    /* Recall that while we shouldn't have any protected entries at this
-     * point, it is possible that some dirty entries may reside on the
-     * pinned list at this point.
+    /* We shouldn't have any protected entries at this point, but it is
+     * possible that some dirty entries may reside on the pinned list.
      */
     HDassert(cache_ptr->dirty_index_size <= (cache_ptr->dLRU_list_size + cache_ptr->pel_size));
     HDassert((!cache_ptr->slist_enabled) ||
              (cache_ptr->slist_len <= (cache_ptr->dLRU_list_len + cache_ptr->pel_len)));
 
-    if (space_needed > 0) { /* we have work to do */
+    if (space_needed > 0) {
 
         H5C_cache_entry_t *entry_ptr;
         unsigned           nominated_entries_count = 0;
@@ -544,12 +532,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/17/10
- *
- * Changes:     With the slist optimization, the slist is not maintained
- *              unless a flush is in progress.  Updated sanity checks to
- *              reflect this.
- *
- *                                              JRM -- 7/27/20
  *
  *-------------------------------------------------------------------------
  */
@@ -785,14 +767,8 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
      * resizes, or removals of other entries can occur as
      * a side effect of the flush.  Hence, there is no need
      * for the checks for entry removal / status change
-     * that I ported to H5C_apply_candidate_list().
+     * that are in H5C_apply_candidate_list().
      *
-     * However, if (in addition to allowing such operations
-     * in the parallel case), we allow such operations outside
-     * of the pre_serialize / serialize routines, this may
-     * cease to be the case -- requiring a review of this
-     * point.
-     *                                  JRM -- 4/7/15
      */
     entries_cleared  = 0;
     entries_examined = 0;
@@ -1085,8 +1061,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              2/10/17
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1464,12 +1438,8 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     cache_ptr->entries_removed_counter = 0;
                     cache_ptr->last_entry_removed_ptr  = NULL;
 
-                    /* Add this entry to the list of entries to collectively write
-                     *
-                     * This comment is misleading -- the entry will be added to the
-                     * collective write list only if said list exists.
-                     *
-                     *                                    JRM -- 2/9/17
+                    /* Add this entry to the list of entries to collectively
+                     * write, if the list exists.
                      */
                     if (H5C__flush_single_entry(f, op_ptr, op_flags) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush entry")
@@ -1491,12 +1461,6 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                  entry_ptr->is_protected || !entry_ptr->is_pinned)) {
                 /* Something has happened to the pinned entry list -- start
                  * over from the head.
-                 *
-                 * Recall that this code should be un-reachable at present,
-                 * as all the operations by entries on flush that could cause
-                 * it to be reachable are disallowed in the parallel case at
-                 * present.  Hence the following assertion which should be
-                 * removed if the above changes.
                  */
 
                 HDassert(!restart_scan);
@@ -1505,7 +1469,13 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                 HDassert(!entry_ptr->is_protected);
                 HDassert(entry_ptr->is_pinned);
 
-                HDassert(FALSE); /* see comment above */
+                /* This code should be un-reachable at present,
+                 * as all the operations by entries on flush that could cause
+                 * it to be reachable are disallowed in the parallel case at
+                 * present.  Hence the following assertion which should be
+                 * removed if the above changes.
+                 */
+                HDassert(FALSE);
 
                 restart_scan = FALSE;
 

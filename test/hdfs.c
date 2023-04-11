@@ -404,8 +404,6 @@ static H5FD_hdfs_fapl_t default_fa = {
  * Programmer:  Jacob Smith
  *              2018-04-25
  *
- * Changes:     None.
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -613,8 +611,6 @@ error:
  *
  * Programmer:  Jacob Smith
  *              2018-04-25
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1383,10 +1379,6 @@ error:
  * Programmer: Jacob Smith
  *             2017-11-06
  *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1528,10 +1520,6 @@ test_cmp(void)
  *
  * Programmer: Jacob Smith
  *             2017-11-07
- *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
  *
  *---------------------------------------------------------------------------
  */
