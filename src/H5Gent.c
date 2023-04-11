@@ -93,7 +93,7 @@ H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5
     for (u = 0; u < n; u++) {
         if (*pp > p_end)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "ran off the end of the image buffer")
-        if (H5G_ent_decode(f, pp, ent + u) < 0)
+        if (H5G_ent_decode(f, pp, ent + u, p_end) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode")
     }
 
@@ -117,7 +117,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
+H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent,
+	       const uint8_t *p_end)
 {
     const uint8_t *p_ret = *pp;
     uint32_t       tmp;
@@ -130,11 +131,22 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     HDassert(pp);
     HDassert(ent);
 
+    if (*pp + ent->name_off >= p_end)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+
     /* decode header */
     H5F_DECODE_LENGTH(f, *pp, ent->name_off);
+
+    if (*pp + H5F_SIZEOF_ADDR(f) + 4 >= p_end)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+
     H5F_addr_decode(f, pp, &(ent->header));
     UINT32DECODE(*pp, tmp);
     *pp += 4; /*reserved*/
+
+    if (*pp >= p_end)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+
     ent->type = (H5G_cache_type_t)tmp;
 
     /* decode scratch-pad */
@@ -144,11 +156,15 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 
         case H5G_CACHED_STAB:
             HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+	    if (*pp + H5F_SIZEOF_ADDR(f) * 2 >= p_end)
+		HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
             H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
             H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
             break;
 
         case H5G_CACHED_SLINK:
+	    if (*pp + 4 >= p_end)
+		HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
             UINT32DECODE(*pp, ent->cache.slink.lval_offset);
             break;
 
@@ -159,6 +175,9 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     } /* end switch */
 
     *pp = p_ret + H5G_SIZEOF_ENTRY_FILE(f);
+
+    if (*pp >= p_end)
+        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
