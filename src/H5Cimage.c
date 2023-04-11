@@ -2915,14 +2915,14 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     HDassert(num_entries_in_image <= num_entries_tentatively_in_image);
 
 #ifndef NDEBUG
-{
-    unsigned j = 0;
-    for (int i = H5C_MAX_RING_IN_IMAGE + 1; i <= H5C_RING_SB; i++)
-        j += cache_ptr->index_ring_len[i];
+    {
+        unsigned j = 0;
+        for (int i = H5C_MAX_RING_IN_IMAGE + 1; i <= H5C_RING_SB; i++)
+            j += cache_ptr->index_ring_len[i];
 
-    /* This will change */
-    HDassert(entries_visited == (num_entries_tentatively_in_image + j));
-}
+        /* This will change */
+        HDassert(entries_visited == (num_entries_tentatively_in_image + j));
+    }
 #endif
 
     cache_ptr->num_entries_in_image = num_entries_in_image;

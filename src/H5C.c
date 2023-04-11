@@ -1855,7 +1855,7 @@ H5C_resize_entry(void *thing, size_t new_size)
         if (entry_ptr->coll_access)
             H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->coll_list_len), (cache_ptr->coll_list_size),
                                             (entry_ptr->size), (new_size))
-#endif    /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
         /* update statistics just before changing the entry size */
         H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size);
@@ -2517,7 +2517,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
      * following:
      */
     cache_ptr->resize_enabled = cache_ptr->size_increase_possible || cache_ptr->size_decrease_possible;
-    cache_ptr->resize_ctl = *config_ptr;
+    cache_ptr->resize_ctl     = *config_ptr;
 
     /* Resize the cache to the supplied initial value if requested, or as
      * necessary to force it within the bounds of the current automatic
@@ -4661,7 +4661,7 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
                     HDassert((cache_ptr->max_cache_size - cache_ptr->index_size) < space_needed);
                     space_needed -= cache_ptr->max_cache_size - cache_ptr->index_size;
                 }
-                space_needed = (size_t)(((double)space_needed) * cache_ptr->resize_ctl.flash_multiple);
+                space_needed       = (size_t)(((double)space_needed) * cache_ptr->resize_ctl.flash_multiple);
                 new_max_cache_size = cache_ptr->max_cache_size + space_needed;
                 break;
 
@@ -5816,7 +5816,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
 #ifdef H5_HAVE_PARALLEL
             }
-#endif /* H5_HAVE_PARALLEL */
+#endif    /* H5_HAVE_PARALLEL */
         } /* end if */
 
         /* if the entry has a notify callback, notify it that we have
