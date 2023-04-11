@@ -1694,8 +1694,6 @@ main(int argc, char *argv[])
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_NORETURN void

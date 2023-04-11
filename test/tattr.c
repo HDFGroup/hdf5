@@ -11655,8 +11655,6 @@ test_attr(void)
  * Programmer:    Albert Cheng
  *              July 2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -33,8 +33,6 @@ typedef enum { E1_RED, E1_GREEN, E1_BLUE, E1_WHITE, E1_BLACK } c_e1;
  * Programmer:	Robb Matzke
  *              Wednesday, December 23, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -315,8 +313,6 @@ error:
  * Programmer:	Robb Matzke
  *              Monday, January  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -418,8 +414,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, January  5, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -530,8 +524,6 @@ error:
  * Programmer:	Elena Pourmal
  *              Wednesday, June 7, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -621,8 +613,6 @@ error:
  *
  * Programmer:	Raymond Lu
  *              Tuesday, April 4, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -756,8 +746,6 @@ error:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, December 22, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

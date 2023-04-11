@@ -192,8 +192,6 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  * Programmer:    Christian Chilan
  *              Tuesday, May 15, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

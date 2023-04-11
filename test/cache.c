@@ -1969,10 +1969,6 @@ smoke_check_8(int express_test, unsigned paged)
  * Programmer:    John Mainzer
  *              8/1/07
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2287,10 +2283,6 @@ smoke_check_9(int express_test, unsigned paged)
  * Programmer:    John Mainzer
  *              8/1/07
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2600,8 +2592,6 @@ smoke_check_10(int express_test, unsigned paged)
  * Programmer:    John Mainzer
  *              6/24/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2811,12 +2801,6 @@ write_permitted_check(int
  *
  * Programmer:  John Mainzer
  *              8/10/06
- *
- * Modifications:
- *
- *              Updated tests to accommodate the case in which the
- *              slist is disabled.
- *                                           JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -3093,8 +3077,6 @@ check_insert_entry(unsigned paged)
  * Programmer:    John Mainzer
  *              1/10/05
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3183,14 +3165,6 @@ check_flush_cache(unsigned paged)
  * Programmer:  John Mainzer
  *              1/12/05
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3251,11 +3225,6 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
  *
  * Programmer:    John Mainzer
  *              1/14/05
- *
- * Modifications:
- *
- *         JRM -- 4/5/06
- *         Added pinned entry tests.
  *
  *-------------------------------------------------------------------------
  */
@@ -4452,14 +4421,6 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
  * Programmer:  John Mainzer
  *              1/13/05
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4636,14 +4597,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
  *
  * Programmer:  John Mainzer
  *              4/5/06
- *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -4834,8 +4787,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
  *
  * Programmer:    John Mainzer
  *              9/3/06
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -8202,14 +8153,6 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
  * Programmer:  John Mainzer
  *              9/3/06
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                           JRM -- 5/16/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -8591,19 +8534,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
  *
  * Programmer:  John Mainzer
  *              10/3/06
- *
- * Modifications:
- *
- *              Updated test for minor changes in the behaviour
- *              of H5C__flush_single_entry().
- *
- *                                          JRM -- 2/16/15
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -9854,15 +9784,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
  * Programmer:    John Mainzer
  *              1/12/05
  *
- * Modifications:
- *
- *         JRM -- 3/29/06
- *         Added tests for pinned entries.
- *
- *         JRM -- 5/17/06
- *         Complete rewrite of pinned entry tests to accommodate
- *         the new H5C_mark_entry_dirty() call.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -11047,14 +10968,6 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
  * Programmer:  John Mainzer
  *              1/12/05
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -11185,21 +11098,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
  *
  * Programmer:  John Mainzer
  *              3/28/06
- *
- * Modifications:
- *
- *              JRM -- 5/17/06
- *              Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
- *              flags and supporting code to allow us to test the
- *              H5C_mark_entry_dirty() call.  Use the
- *              call to mark the entry dirty while the entry is protected
- *              if pop_mark_dirty_prot is TRUE, and to mark the entry
- *              dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
- *
- *              JRM -- 5/14/20
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
  *
  *-------------------------------------------------------------------------
  */
@@ -11360,8 +11258,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
  *
  * Programmer:    John Mainzer
  *              4/28/06
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -11580,9 +11476,6 @@ check_get_entry_status(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              7/5/06
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -11862,10 +11755,6 @@ check_expunge_entry(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              4/1/07
- *
- * Modifications:
- *
- *         None.
  *
  *-------------------------------------------------------------------------
  */
@@ -12353,10 +12242,6 @@ check_move_entry(unsigned paged)
  * Programmer:  John Mainzer
  *              4/27/06
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -12509,8 +12394,6 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
  * Programmer:    John Mainzer
  *              4/28/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -12611,12 +12494,6 @@ check_pin_protected_entry(unsigned paged)
  *
  * Programmer:  John Mainzer
  *              7/7/06
- *
- * Modifications:
- *
- *              Updated function to allow for disabling of the slist.
- *
- *                                             JRM -- 5/18/20
  *
  *-------------------------------------------------------------------------
  */
@@ -13480,12 +13357,6 @@ check_resize_entry(unsigned paged)
  * Programmer:  John Mainzer
  *              8/2/07
  *
- * Modifications:
- *
- *              Updated function to allow for disabling of the slist.
- *
- *                                             JRM -- 5/18/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14130,13 +14001,6 @@ check_evictions_enabled(unsigned paged)
  * Programmer:  John Mainzer
  *              6/24/04
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().
- *
- *                                          JRM -- 5/14/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14229,9 +14093,6 @@ check_flush_protected_err(unsigned paged)
  * Programmer:    John Mainzer
  *              4/7/06
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14315,8 +14176,6 @@ check_destroy_pinned_err(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              6/24/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -14412,8 +14271,6 @@ check_destroy_protected_err(unsigned paged)
  * Programmer:    John Mainzer
  *              6/24/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -14493,10 +14350,6 @@ check_duplicate_insert_err(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              4/24/06
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -14582,10 +14435,6 @@ check_double_pin_err(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              4/24/06
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -14680,10 +14529,6 @@ check_double_unpin_err(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              4/24/06
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -15034,10 +14879,6 @@ check_mark_entry_dirty_errs(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              7/6/06
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -15490,10 +15331,6 @@ check_unprotect_ro_dirty_err(unsigned paged)
  * Programmer:    John Mainzer
  *              4/9/07
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -15705,10 +15542,6 @@ check_protect_retries(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              8/3/07
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -19710,12 +19543,6 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
  * Programmer:    John Mainzer
  *              12/16/04
  *
- * Modifications:
- *
- *              Added code to include the flash cache size increment
- *              code in this test.
- *                                                      JRM -- 1/10/08
- *
  *-------------------------------------------------------------------------
  */
 
@@ -22312,8 +22139,6 @@ check_auto_cache_resize_disable(unsigned paged)
  * Programmer:    John Mainzer
  *              12/16/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -22998,13 +22823,6 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
  *
  * Programmer:    John Mainzer
  *              10/29/04
- *
- * Modifications:
- *
- *         Added code to verify that errors in the flash cache size
- *              increment related fields are caught as well.
- *
- *                                              JRM -- 1/17/08
  *
  *-------------------------------------------------------------------------
  */
@@ -25236,8 +25054,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
  * Programmer:    John Mainzer
  *              11/4/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -25737,8 +25553,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  *
  * Programmer:    Mike McGreevy
  *              12/16/08
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -28649,14 +28463,6 @@ done:
  *
  * Programmer:  Quincey Koziol
  *              3/17/09
- *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -32207,10 +32013,6 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
  * Programmer:    John Mainzer
  *              4/3/15
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -32303,14 +32105,6 @@ check_entry_deletions_during_scans(unsigned paged)
  *
  * Programmer:  John Mainzer
  *              4/4/15
- *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -32543,14 +32337,6 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
  *
  * Programmer:  John Mainzer
  *              4/4/15
- *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -32905,14 +32691,6 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
  *
  * Programmer:  John Mainzer
  *              4/4/15
- *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -33366,14 +33144,6 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
  * Programmer:  John Mainzer
  *              4/9/15
  *
- * Modifications:
- *
- *              Added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -33673,8 +33443,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
  * Programmer:    John Mainzer
  *              4/12/15
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -33754,18 +33522,6 @@ check_stats(unsigned paged)
  *
  * Programmer:  John Mainzer
  *              4/22/15
- *
- * Modifications:
- *
- *              Modified slist stats checks to allow for the case that
- *              the slist is disabled.
- *
- *              Also added code to setup and take down the skip list before
- *              and after calls to H5C_flush_cache().  Do this via the
- *              H5C_FLUSH_CACHE macro.
- *
- *                                          JRM -- 5/14/20
- *
  *
  *-------------------------------------------------------------------------
  */

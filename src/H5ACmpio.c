@@ -1860,8 +1860,6 @@ done:
  * Programmer:  John Mainzer
  *              April 28, 2010
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

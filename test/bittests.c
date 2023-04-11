@@ -37,8 +37,6 @@
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,8 +151,6 @@ failed:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -279,8 +275,6 @@ failed:
  *
  * Programmer:	Raymond Lu
  *              Monday, April 12, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -419,8 +413,6 @@ failed:
  * Programmer:	Raymond Lu
  *              Monday, April 12, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -510,8 +502,6 @@ failed:
  * Programmer:	Raymond Lu
  *              Monday, April 12, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -583,8 +573,6 @@ failed:
  *
  * Programmer:	Raymond Lu
  *              Monday, April 12, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -687,8 +675,6 @@ failed:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -807,8 +793,6 @@ failed:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
