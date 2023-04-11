@@ -398,6 +398,11 @@
 /* Raise an integer to a power of 2 */
 #define H5_EXP2(n) (1 << (n))
 
+/* Check if a read of size bytes starting at ptr would overflow past
+ * the last valid byte, pointed to by buffer_end.
+ */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+
 /*
  * HDF Boolean type.
  */
