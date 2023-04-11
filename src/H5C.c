@@ -185,82 +185,6 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
  * Programmer:  John Mainzer
  *              6/2/04
  *
- * Modifications:
- *
- *              JRM -- 7/20/04
- *              Updated for the addition of the hash table.
- *
- *              JRM -- 10/5/04
- *              Added call to H5C_reset_cache_hit_rate_stats().  Also
- *              added initialization for cache_is_full flag and for
- *              resize_ctl.
- *
- *              JRM -- 11/12/04
- *              Added initialization for the new size_decreased field.
- *
- *              JRM -- 11/17/04
- *              Added/updated initialization for the automatic cache
- *              size control data structures.
- *
- *              JRM -- 6/24/05
- *              Added support for the new write_permitted field of
- *              the H5C_t structure.
- *
- *              JRM -- 7/5/05
- *              Added the new log_flush parameter and supporting code.
- *
- *              JRM -- 9/21/05
- *              Added the new aux_ptr parameter and supporting code.
- *
- *              JRM -- 1/20/06
- *              Added initialization of the new prefix field in H5C_t.
- *
- *              JRM -- 3/16/06
- *              Added initialization for the pinned entry related fields.
- *
- *              JRM -- 5/31/06
- *              Added initialization for the trace_file_ptr field.
- *
- *              JRM -- 8/19/06
- *              Added initialization for the flush_in_progress field.
- *
- *              JRM -- 8/25/06
- *              Added initialization for the slist_len_increase and
- *              slist_size_increase fields.  These fields are used
- *              for sanity checking in the flush process, and are not
- *              compiled in unless H5C_DO_SANITY_CHECKS is TRUE.
- *
- *              JRM -- 3/28/07
- *              Added initialization for the new is_read_only and
- *              ro_ref_count fields.
- *
- *              JRM -- 7/27/07
- *              Added initialization for the new evictions_enabled
- *              field of H5C_t.
- *
- *              JRM -- 12/31/07
- *              Added initialization for the new flash cache size increase
- *              related fields of H5C_t.
- *
- *              JRM -- 11/5/08
- *              Added initialization for the new clean_index_size and
- *              dirty_index_size fields of H5C_t.
- *
- *
- *              Missing entries?
- *
- *
- *              JRM -- 4/20/20
- *              Added initialization for the slist_enabled field.  Recall
- *              that the slist is used to flush metadata cache entries
- *              in (roughly) increasing address order.  While this is
- *              needed at flush and close, it is not used elsewhere.
- *              The slist_enabled field exists to allow us to construct
- *              the slist when needed, and leave it empty otherwise -- thus
- *              avoiding the overhead of maintaining it.
- *
- *                                               JRM -- 4/29/20
- *
  *-------------------------------------------------------------------------
  */
 H5C_t *
@@ -691,10 +615,7 @@ H5C_prep_for_file_close(H5F_t *f)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* For now at least, it is possible to receive the
-     * close warning more than once -- the following
-     * if statement handles this.
-     */
+    /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
         HGOTO_DONE(SUCCEED)
     cache_ptr->close_warning_received = TRUE;
@@ -759,26 +680,12 @@ done:
  *              This function fails if any object are protected since the
  *              resulting file might not be consistent.
  *
- *        Note that *cache_ptr has been freed upon successful return.
+ * Note:        *cache_ptr has been freed upon successful return.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *        6/2/04
- *
- * Modifications:
- *
- *              JRM -- 5/15/20
- *
- *              Updated the function to enable the slist prior to the
- *              call to H5C__flush_invalidate_cache().
- *
- *              Arguably, it shouldn't be necessary to re-enable the
- *              slist after the call to H5C__flush_invalidate_cache(), as
- *              the metadata cache should be discarded.  However, in the
- *              test code, we make multiple calls to H5C_dest().  Thus
- *              we re-enable the slist on failure if it and the cache
- *              still exist.
  *
  *-------------------------------------------------------------------------
  */
@@ -859,9 +766,12 @@ H5C_dest(H5F_t *f)
 done:
 
     if ((ret_value < 0) && (cache_ptr) && (cache_ptr->slist_ptr)) {
-
-        /* need this for test code -- see change note for details */
-
+        /* Arguably, it shouldn't be necessary to re-enable the slist after
+         * the call to H5C__flush_invalidate_cache(), as the metadata cache
+         * should be discarded.  However, in the test code, we make multiple
+         * calls to H5C_dest().  Thus we re-enable the slist on failure if it
+         * and the cache still exist.  JRM -- 5/15/20
+         */
         if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
 
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed")
@@ -880,14 +790,6 @@ done:
  *
  * Programmer:  Vailin Choi
  *        Dec 2013
- *
- * Modifications:
- *
- *              JRM -- 5/5/20
- *
- *              Added code to enable the skip list prior to the call
- *              to H5C__flush_invalidate_cache(), and disable it
- *              afterwards.
  *
  *-------------------------------------------------------------------------
  */
@@ -923,9 +825,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C_expunge_entry
  *
- * Purpose:     Use this function to tell the cache to expunge an entry
- *              from the cache without writing it to disk even if it is
- *              dirty.  The entry may not be either pinned or protected.
+ * Purpose:     Expunge an entry from the cache without writing it to disk
+ *              even if it is dirty.  The entry may not be either pinned or
+ *              protected.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1007,38 +909,10 @@ done:
  *        function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
- *        a request to flush all items and something was protected.
+ *        a request to flush all items and an entry was protected.
  *
  * Programmer:  John Mainzer
  *        6/2/04
- *
- * Changes:    Modified function to test for slist chamges in
- *        pre_serialize and serialize callbacks, and re-start
- *        scans through the slist when such changes occur.
- *
- *        This has been a potential problem for some time,
- *        and there has been code in this function to deal
- *        with elements of this issue.  However the shift
- *        to the V3 cache in combination with the activities
- *        of some of the cache clients (in particular the
- *        free space manager and the fractal heap) have
- *        made this re-work necessary.
- *
- *                        JRM -- 12/13/14
- *
- *        Modified function to support rings.  Basic idea is that
- *        every entry in the cache is assigned to a ring.  Entries
- *        in the outermost ring are flushed first, followed by
- *        those in the next outermost ring, and so on until the
- *        innermost ring is flushed.  See header comment on
- *        H5C_ring_t in H5Cprivate.h for a more detailed
- *        discussion.
- *
- *                        JRM -- 8/30/15
- *
- *        Modified function to call the free space manager
- *        settling functions.
- *                        JRM -- 6/9/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1225,8 +1099,6 @@ done:
  * Purpose:     Adds the specified thing to the cache.  The thing need not
  *              exist on disk yet, but it must have an address and disk
  *              space reserved.
- *
- *        Observe that this function cannot occasion a read.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1443,9 +1315,6 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
          * oversized at the end of an unprotect.  As a result, it is
          * possible to have a vastly oversized cache with no protected
          * entries as long as all the protects precede the unprotects.
-         *
-         * Since items 1 and 2 are not changing any time soon, I see
-         * no point in worrying about the third.
          */
 
         if (H5C__make_space_in_cache(f, space_needed, write_permitted) < 0)
@@ -1530,12 +1399,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/15/06
- *
- *         JRM -- 11/5/08
- *         Added call to H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY() to
- *         update the new clean_index_size and dirty_index_size
- *         fields of H5C_t in the case that the entry was clean
- *         prior to this call, and is pinned and not protected.
  *
  *-------------------------------------------------------------------------
  */
@@ -2092,9 +1955,6 @@ done:
  * Programmer:  John Mainzer
  *              4/26/06
  *
- * Changes:    Added extreme sanity checks on entry and exit.
- *                                          JRM -- 4/26/14
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2242,14 +2102,14 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
         if (entry_ptr->type != type)
             HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "incorrect cache entry type")
 
-            /* if this is a collective metadata read, the entry is not
-               marked as collective, and is clean, it is possible that
-               other processes will not have it in its cache and will
-               expect a bcast of the entry from process 0. So process 0
-               will bcast the entry to all other ranks. Ranks that _do_ have
-               the entry in their cache still have to participate in the
-               bcast. */
 #ifdef H5_HAVE_PARALLEL
+        /* If this is a collective metadata read, the entry is not marked as
+         * collective, and is clean, it is possible that other processes will
+         * not have it in its cache and will expect a bcast of the entry from
+         * process 0. So process 0 will bcast the entry to all other ranks.
+         * Ranks that _do_ have the entry in their cache still have to
+         * participate in the bcast.
+         */
         if (coll_access) {
             if (!(entry_ptr->is_dirty) && !(entry_ptr->coll_access)) {
                 MPI_Comm comm;     /* File MPI Communicator */
@@ -2415,24 +2275,16 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
              * oversized at the end of an unprotect.  As a result, it is
              * possible to have a vastly oversized cache with no protected
              * entries as long as all the protects precede the unprotects.
-             *
-             * Since items 1, 2, and 3 are not changing any time soon, I
-             * see no point in worrying about the fourth.
              */
-
             if (H5C__make_space_in_cache(f, space_needed, write_permitted) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C__make_space_in_cache failed")
         } /* end if */
 
-        /* Insert the entry in the hash table.  It can't be dirty yet, so
-         * we don't even check to see if it should go in the skip list.
-         *
-         * This is no longer true -- due to a bug fix, we may modify
-         * data on load to repair a file.
+        /* Insert the entry in the hash table.
          *
          *   *******************************************
          *
-         * Set the flush_last field
+         * Set the flush_me_last field
          * of the newly loaded entry before inserting it into the
          * index.  Must do this, as the index tracked the number of
          * entries with the flush_last field set, but assumes that
@@ -2531,7 +2383,6 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
              * should also call H5C__make_space_in_cache() to bring us
              * into compliance.
              */
-
             if (cache_ptr->index_size >= cache_ptr->max_cache_size)
                 empty_space = 0;
             else
@@ -2689,7 +2540,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown incr_mode?!?!?")
     } /* end switch */
 
-    /* logically, this is were configuration for flash cache size increases
+    /* logically, this is where configuration for flash cache size increases
      * should go.  However, this configuration depends on max_cache_size, so
      * we wait until the end of the function, when this field is set.
      */
@@ -2842,8 +2693,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
 
     /* There is no fundamental reason why we should not permit
      * evictions to be disabled while automatic resize is enabled.
-     * However, I can't think of any good reason why one would
-     * want to, and allowing it would greatly complicate testing
+     * However, allowing it would greatly complicate testing
      * the feature.  Hence the following:
      */
     if ((evictions_enabled != TRUE) && ((cache_ptr->resize_ctl.incr_mode != H5C_incr__off) ||
@@ -2911,10 +2761,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/1/20
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3035,9 +2881,6 @@ done:
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Changes:     Added extreme sanity checks on entry and exit.
- *                                      JRM -- 4/26/14
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3097,81 +2940,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              6/2/04
- *
- * Modifications:
- *
- *              JRM -- 7/21/04
- *              Updated for the addition of the hash table.
- *
- *              JRM -- 10/28/04
- *              Added code to set cache_full to TRUE whenever we try to
- *              make space in the cache.
- *
- *              JRM -- 11/12/04
- *              Added code to call to H5C_make_space_in_cache() after the
- *              call to H5C__auto_adjust_cache_size() if that function
- *              sets the size_decreased flag is TRUE.
- *
- *              JRM -- 4/25/05
- *              The size_decreased flag can also be set to TRUE in
- *              H5C_set_cache_auto_resize_config() if a new configuration
- *              forces an immediate reduction in cache size.  Modified
- *              the code to deal with this eventuallity.
- *
- *              JRM -- 6/24/05
- *              Added support for the new write_permitted field of H5C_t.
- *
- *              JRM -- 10/22/05
- *              Hand optimizations.
- *
- *              JRM -- 5/3/06
- *              Added code to set the new dirtied field in
- *              H5C_cache_entry_t to FALSE prior to return.
- *
- *              JRM -- 6/23/06
- *              Modified code to allow dirty entries to be loaded from
- *              disk.  This is necessary as a bug fix in the object
- *              header code requires us to modify a header as it is read.
- *
- *              JRM -- 3/28/07
- *              Added the flags parameter and supporting code.  At least
- *              for now, this parameter is used to allow the entry to
- *              be protected read only, thus allowing multiple protects.
- *
- *              Also added code to allow multiple read only protects
- *              of cache entries.
- *
- *              JRM -- 7/27/07
- *              Added code supporting the new evictions_enabled field
- *              in H5C_t.
- *
- *              JRM -- 1/3/08
- *              Added to do a flash cache size increase if appropriate
- *              when a large entry is loaded.
- *
- *              JRM -- 11/13/08
- *              Modified function to call H5C_make_space_in_cache() when
- *              the min_clean_size is violated, not just when there isn't
- *              enough space for and entry that has just been loaded.
- *
- *              The purpose of this modification is to avoid "metadata
- *              blizzards" in the write only case.  In such instances,
- *              the cache was allowed to fill with dirty metadata.  When
- *              we finally needed to evict an entry to make space, we had
- *              to flush out a whole cache full of metadata -- which has
- *              interesting performance effects.  We hope to avoid (or
- *              perhaps more accurately hide) this effect by maintaining
- *              the min_clean_size, which should force us to start flushing
- *              entries long before we actually have to evict something
- *              to make space.
- *
- *
- *              Missing entries?
- *
- *
- *              JRM -- 5/8/20
- *              Updated for the possibility that the slist will be
- *              disabled.
  *
  *-------------------------------------------------------------------------
  */
@@ -3427,14 +3195,10 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             }
         } /* end if */
 
-        /* this implementation of the "deleted" option is a bit inefficient, as
+        /* This implementation of the "deleted" option is a bit inefficient, as
          * we re-insert the entry to be deleted into the replacement policy
          * data structures, only to remove them again.  Depending on how often
          * we do this, we may want to optimize a bit.
-         *
-         * On the other hand, this implementation is reasonably clean, and
-         * makes good use of existing code.
-         *                                             JRM - 5/19/04
          */
         if (deleted) {
 
@@ -3476,8 +3240,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
         } /* end if */
 #ifdef H5_HAVE_PARALLEL
         else if (clear_entry) {
-
-            /* verify that the target entry is in the cache. */
+            /* Verify that the target entry is in the cache. */
             H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
 
             if (test_entry_ptr == NULL)
@@ -4704,8 +4467,6 @@ done:
  *        will be re-calculated, and will be enforced the next time
  *        we have to make space in the cache.
  *
- *              Observe that this function cannot occasion a read.
- *
  * Return:      Non-negative on success/Negative on failure.
  *
  * Programmer:  John Mainzer, 11/22/04
@@ -5138,8 +4899,6 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
     if (((cache_ptr->index_size + space_needed) > cache_ptr->max_cache_size) &&
         (cache_ptr->max_cache_size < (cache_ptr->resize_ctl).max_size)) {
 
-        /* we have work to do */
-
         switch ((cache_ptr->resize_ctl).flash_incr_mode) {
             case H5C_flash_incr__off:
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,
@@ -5259,52 +5018,7 @@ done:
  *        a request to flush all items and something was protected.
  *
  * Programmer:  John Mainzer
- *        3/24/065
- *
- * Modifications:
- *
- *              To support the fractal heap, the cache must now deal with
- *              entries being dirtied, resized, and/or renamed inside
- *              flush callbacks.  Updated function to support this.
- *
- *                                                   -- JRM 8/27/06
- *
- *              Added code to detect and manage the case in which a
- *              flush callback changes the s-list out from under
- *              the function.  The only way I can think of in which this
- *              can happen is if a flush function loads an entry
- *              into the cache that isn't there already.  Quincey tells
- *              me that this will never happen, but I'm not sure I
- *              believe him.
- *
- *              Note that this is a pretty bad scenario if it ever
- *              happens.  The code I have added should allow us to
- *              handle the situation under all but the worst conditions,
- *              but one can argue that we should just scream and die if
- *              we ever detect the condition.
- *
- *                                                      -- JRM 10/13/07
- *
- *              Missing entries?
- *
- *
- *              Added support for the H5C__EVICT_ALLOW_LAST_PINS_FLAG.
- *              This flag is used to flush and evict all entries in
- *              the metadata cache that are not pinned -- typically,
- *              everything other than the superblock.
- *
- *                                           ??? -- ??/??/??
- *
- *              Added sanity checks to verify that the skip list is
- *              enabled on entry.  On the face of it, it would make
- *              sense to enable the slist on entry, and disable it
- *              on exit, as this function is not called repeatedly.
- *              However, since this function can be called from
- *              H5C_flush_cache(), this would create cases in the test
- *              code where we would have to check the flags to determine
- *              whether we must setup and take down the slist.
- *
- *                                           JRM -- 5/5/20
+ *        3/24/05
  *
  *-------------------------------------------------------------------------
  */
@@ -5472,20 +5186,6 @@ done:
  * Programmer:  John Mainzer
  *              9/1/15
  *
- * Changes:     Added support for the H5C__EVICT_ALLOW_LAST_PINS_FLAG.
- *              This flag is used to flush and evict all entries in
- *              the metadata cache that are not pinned -- typically,
- *              everything other than the superblock.
- *
- *                                           ??? -- ??/??/??
- *
- *              A recent optimization turns off the slist unless a flush
- *              is in progress.  This should not effect this function, as
- *              it is only called during a flush.  Added an assertion to
- *              verify this.
- *
- *                                           JRM -- 5/6/20
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5546,13 +5246,11 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
      * for some other cache entry), we can no longer promise to flush
      * the cache entries in increasing address order.
      *
-     * Instead, we just do the best we can -- making a pass through
+     * Instead, we make a pass through
      * the skip list, and then a pass through the "clean" entries, and
      * then repeating as needed.  Thus it is quite possible that an
      * entry will be evicted from the cache only to be re-loaded later
-     * in the flush process (From what Quincey tells me, the pin
-     * mechanism makes this impossible, but even it it is true now,
-     * we shouldn't count on it in the future.)
+     * in the flush process.
      *
      * The bottom line is that entries will probably be flushed in close
      * to increasing address order, but there are no guarantees.
@@ -5706,8 +5404,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                 (entry_ptr->flush_dep_nchildren == 0) && (entry_ptr->ring == ring)) {
 
                 if (entry_ptr->is_protected) {
-
-                    /* we have major problems -- but lets flush
+                    /* We have major problems -- but lets flush
                      * everything we can before we flag an error.
                      */
                     protected_entries++;
@@ -5792,7 +5489,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
          * Writes to disk are possible here.
          */
 
-        /* reset the counters so that we can detect insertions, loads,
+        /* Reset the counters so that we can detect insertions, loads,
          * and moves caused by the pre_serialize and serialize calls.
          */
         cache_ptr->entries_loaded_counter    = 0;
@@ -6000,14 +5697,6 @@ done:
  * Programmer:  John Mainzer
  *              9/1/15
  *
- * Changes:     A recent optimization turns off the slist unless a flush
- *              is in progress.  This should not effect this function, as
- *              it is only called during a flush.  Added an assertion to
- *              verify this.
- *
- *                                             JRM -- 5/6/20
- *
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6158,7 +5847,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
              * dirty, resize, or take ownership of other entries
              * in the cache.
              *
-             * To deal with this, I have inserted code to detect any
+             * To deal with this, there is code to detect any
              * change in the skip list not directly under the control
              * of this function.  If such modifications are detected,
              * we must re-start the scan of the skip list to avoid
@@ -6309,69 +5998,6 @@ done:
  *              an attempt to flush a protected item.
  *
  * Programmer:  John Mainzer, 5/5/04
- *
- * Modifications:
- *
- *              JRM -- 7/21/04
- *              Updated function for the addition of the hash table.
- *
- *              QAK -- 11/26/04
- *              Updated function for the switch from TBBTs to skip lists.
- *
- *              JRM -- 1/6/05
- *              Updated function to reset the flush_marker field.
- *              Also replace references to H5F_FLUSH_INVALIDATE and
- *              H5F_FLUSH_CLEAR_ONLY with references to
- *              H5C__FLUSH_INVALIDATE_FLAG and H5C__FLUSH_CLEAR_ONLY_FLAG
- *              respectively.
- *
- *              JRM -- 6/24/05
- *              Added code to remove dirty entries from the slist after
- *              they have been flushed.  Also added a sanity check that
- *              will scream if we attempt a write when writes are
- *              completely disabled.
- *
- *              JRM -- 7/5/05
- *              Added code to call the new log_flush callback whenever
- *              a dirty entry is written to disk.  Note that the callback
- *              is not called if the H5C__FLUSH_CLEAR_ONLY_FLAG is set,
- *              as there is no write to file in this case.
- *
- *              JRM -- 8/21/06
- *              Added code maintaining the flush_in_progress and
- *              destroy_in_progress fields in H5C_cache_entry_t.
- *
- *              Also added flush_flags parameter to the call to
- *              type_ptr->flush() so that the flush routine can report
- *              whether the entry has been resized or renamed.  Added
- *              code using the flush_flags variable to detect the case
- *              in which the target entry is resized during flush, and
- *              update the caches data structures accordingly.
- *
- *              JRM -- 3/29/07
- *              Added sanity checks on the new is_read_only and
- *              ro_ref_count fields.
- *
- *              QAK -- 2/07/08
- *              Separated "destroy entry" concept from "remove entry from
- *              cache" concept, by adding the 'take_ownership' flag and
- *              the "destroy_entry" variable.
- *
- *              JRM -- 11/5/08
- *              Added call to H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN() to
- *              maintain the new clean_index_size and clean_index_size
- *              fields of H5C_t.
- *
- *
- *              Missing entries??
- *
- *
- *              JRM -- 5/8/20
- *              Updated sanity checks for the possibility that the slist
- *              is disabled.
- *
- *              Also updated main comment to conform more closely with
- *              the current state of the code.
  *
  *-------------------------------------------------------------------------
  */
@@ -6741,8 +6367,6 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * A clear and a flush are the same from the point of
          * view of the replacement policy and the slist.
          * Hence no differentiation between them.
-         *
-         *                              JRM -- 7/7/07
          */
 
         H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
@@ -6942,9 +6566,8 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
             HDassert(take_ownership);
 
-            /* client is taking ownership of the entry.
-             * set bad magic here too so the cache will choke
-             * unless the entry is re-inserted properly
+            /* Client is taking ownership of the entry.  Set bad magic here too
+             * so the cache will choke unless the entry is re-inserted properly
              */
             entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
 
@@ -8002,15 +7625,6 @@ H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
  * Programmer:  Mike McGreevy
  *              November 3, 2010
  *
- * Changes:     Modified function to setup the slist before calling
- *              H%C_flush_cache(), and take it down afterwards.  Note
- *              that the slist need not be empty after the call to
- *              H5C_flush_cache() since we are only flushing marked
- *              entries.  Thus must set the clear_slist parameter
- *              of H5C_set_slist_enabled to TRUE.
- *
- *                                              JRM -- 5/6/20
- *
  *-------------------------------------------------------------------------
  */
 
@@ -8412,8 +8026,6 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry, const H5C_cache_en
  *        The initial need for this routine is to settle all entries
  *        in the cache prior to construction of the metadata cache
  *        image so that the size of the cache image can be calculated.
- *        However, I gather that other uses for the routine are
- *        under consideration.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *        a request to flush all items and something was protected.
@@ -8582,16 +8194,16 @@ done:
  *              If the cache contains protected entries in the specified
  *              ring, the function will fail, as protected entries cannot
  *              be serialized.  However all unprotected entries in the
- *        target ring should be serialized before the function
- *        returns failure.
+ *              target ring should be serialized before the function
+ *              returns failure.
  *
  *              If flush dependencies appear in the target ring, the
  *              function makes repeated passes through the index list
- *        serializing entries in flush dependency order.
+ *              serializing entries in flush dependency order.
  *
- *        All entries outside the H5C_RING_SBE are marked for
- *        inclusion in the cache image.  Entries in H5C_RING_SBE
- *        and below are marked for exclusion from the image.
+ *              All entries outside the H5C_RING_SBE are marked for
+ *              inclusion in the cache image.  Entries in H5C_RING_SBE
+ *              and below are marked for exclusion from the image.
  *
  * Return:      Non-negative on success/Negative on failure or if there was
  *              a request to flush all items and something was protected.
@@ -8910,10 +8522,6 @@ done:
  * Programmer:  Mohamad Chaarawi
  *              2/10/16
  *
- * Changes:     Updated sanity checks for the possibility that the skip
- *              list is disabled.
- *                                        JRM 5/16/20
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8975,13 +8583,6 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
          *     in the parallel case, it will not detect an
          *     entry that dirties, resizes, and/or moves
          *     other entries during its flush.
-         *
-         *     From what Quincey tells me, this test is
-         *     sufficient for now, as any flush routine that
-         *     does the latter will also do the former.
-         *
-         *     If that ceases to be the case, further
-         *     tests will be necessary.
          */
         if (cache_ptr->aux_ptr != NULL)
 

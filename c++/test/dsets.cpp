@@ -1375,14 +1375,6 @@ test_operator(H5File &file)
  *
  *              Failure: -1
  *
- * Modifications:
- *        Nov 12, 01:
- *              - moved h5_cleanup to outside of try block because
- *                dataset.h5 cannot be removed until "file" is out of
- *                scope and dataset.h5 is closed.
- *        Feb 20, 05:
- *              - cleanup_dsets took care of the cleanup now.
- *
  *-------------------------------------------------------------------------
  */
 extern "C" void
