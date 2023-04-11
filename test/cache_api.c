@@ -759,14 +759,6 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fget_mdc_hit_rate() returned unexpected hit rate.\n";
         }
-#if 0 /* this may be useful now and then -- keep it around */
-        else {
-
-            HDfprintf(stdout,
-                      "H5Fget_mdc_hit_rate() reports hit_rate = %lf:\n",
-                      hit_rate);
-        }
-#endif
     }
 
     if (pass) {
@@ -782,16 +774,6 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fget_mdc_size() returned unexpected value(s).\n";
         }
-#if 0 /* this may be useful now and then -- keep it around */
-        else {
-
-            HDfprintf(stdout, "H5Fget_mdc_size() reports:\n");
-            HDfprintf(stdout, "    max_size: %ld, min_clean_size: %ld\n",
-                      (long)max_size, (long)min_clean_size);
-        HDfprintf(stdout, "    cur_size: %ld, cur_num_entries: %d\n",
-                      (long)cur_size, cur_num_entries);
-        }
-#endif
     }
 
     /* close the file and delete it */
@@ -1254,27 +1236,13 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
                     if (data_chunk[k][l] != ((DSET_SIZE * DSET_SIZE * m) + (DSET_SIZE * (i + k)) + j + l)) {
 
                         valid_chunk = FALSE;
-#if 0 /* this will be useful from time to time -- lets keep it*/
-                         HDfprintf(stdout,
-                                   "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
-                                   k, l, data_chunk[k][l],
-                                   ((DSET_SIZE * DSET_SIZE * m) +
-                                    (DSET_SIZE * (i + k)) + j + l));
-                         HDfprintf(stdout,
-                                   "m = %d, i = %d, j = %d, k = %d, l = %d\n",
-                                   m, i, j, k, l);
-#endif
                     }
                 }
             }
 
             if (!valid_chunk) {
-#if 1
                 pass         = FALSE;
                 failure_mssg = "slab validation failed.";
-#else /* as above */
-                HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n", i, j, m);
-#endif
             }
         }
 
@@ -1366,12 +1334,6 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                         valid_chunk = FALSE;
                     }
-#if 0 /* this will be useful from time to time -- lets keep it */
-                  HDfprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
-                            k, l, data_chunk[k][l],
-                            ((DSET_SIZE * DSET_SIZE * m) +
-                             (DSET_SIZE * (i + k)) + j + l));
-#endif
                 }
             }
 
@@ -1379,10 +1341,6 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
 
                 pass         = FALSE;
                 failure_mssg = "slab validation failed.";
-#if 0 /* as above */
-                HDfprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
-                        i, j, m);
-#endif
             }
         }
 

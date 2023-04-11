@@ -151,14 +151,33 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed a heap buffer overflow that occurs when reading from
+      a dataset with a compact layout within a malformed HDF5 file
+
+      During opening of a dataset that has a compact layout, the
+      library allocates a buffer that stores the dataset's raw data.
+      The dataset's object header that gets written to the file
+      contains information about how large of a buffer the library
+      should allocate. If this object header is malformed such that
+      it causes the library to allocate a buffer that is too small
+      to hold the dataset's raw data, future I/O to the dataset can
+      result in heap buffer overflows. To fix this issue, an extra
+      check is now performed for compact datasets to ensure that
+      the size of the allocated buffer matches the expected size
+      of the dataset's raw data (as calculated from the dataset's
+      dataspace and datatype information). If the two sizes do not
+      match, opening of the dataset will fail.
+
+      (JTH - 2023/04/04, GH-2606)
+
     - Fixed potential heap buffer overrun in group info header decoding from malformed file
 
       H5O__ginfo_decode could sometimes read past allocated memory when parsing a group info message from the header of a malformed file.
   
       It now checks buffer size before each read to properly throw an error in these cases.
   
-      (ML - 2023/4/6, #2601)   
-
+      (ML - 2023/4/6, #2601)
+      
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
       dataspace and a point selection in the memory dataspace
@@ -245,7 +264,12 @@ Bug Fixes since HDF5-1.13.3 release
 
     Tools
     -----
-    -
+    - In the tools traverse function - an error in either visit call
+      will bypass the cleanup of the local data variables.
+
+      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
+
+      (ADB - 2023/04/06 GH-2598)
 
 
     Performance

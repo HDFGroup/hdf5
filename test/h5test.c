@@ -132,8 +132,6 @@ static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_su
  * Programmer:  Robb Matzke
  *    Wednesday, March  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -918,8 +916,6 @@ error:
  * Programmer:  Robb Matzke
  *              Friday, November 20, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -937,8 +933,6 @@ h5_no_hwconv(void)
  *
  * Programmer:  Albert Cheng
  *              2002/04/22
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1010,12 +1004,6 @@ h5_show_hostname(void)
  *              object.
  * Return:      0 if all is fine; otherwise non-zero.
  * Programmer:  Albert Cheng, 2002/05/21.
- * Modifications:
- *          Bill Wendling, 2002/05/31
- *          Modified so that the HDF5_MPI_INFO environment variable can
- *          be a semicolon separated list of "key=value" pairings. Most
- *          of the code is to remove any whitespaces which might be
- *          surrounding the "key=value" pairs.
  */
 int
 h5_set_info_object(void)
@@ -1109,7 +1097,6 @@ h5_set_info_object(void)
  * Purpose:     Display content of an MPI Info object
  * Return:      void
  * Programmer:  Albert Cheng 2002/05/21
- * Modifications:
  */
 void
 h5_dump_info_object(MPI_Info info)
@@ -1339,8 +1326,6 @@ print_func(const char *format, ...)
  *
  * Programmer:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1390,11 +1375,6 @@ h5_szip_can_encode(void)
  *
  * Programmer:  Leon Arber
  *              4/4/05
- *
- * Modifications:
- *    Use original getenv if MPI is not initialized. This happens
- *    one uses the PHDF5 library to build a serial nature code.
- *    Albert 2006/04/07
  *
  *-------------------------------------------------------------------------
  */
@@ -1565,8 +1545,6 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
  *
  * Programmer:  Neil Fortner
  *              Tuesday, April 12, 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -1336,22 +1336,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (i)
                         h5tools_str_append(str, "%s", OPT(info->vlen_sep, "," OPTIONAL_LINE_BREAK));
 
-#ifdef LATER
-                    /* Need to fix so VL data breaks at correct location on end of line -QAK */
-                    if (info->arr_linebreak && h5tools_str_len(str) >= info->line_ncols) {
-                        int x;
-
-                        h5tools_str_append(str, "%s", "\n");
-
-                        /* need to indent some more here */
-                        if (ctx->indent_level >= 0)
-                            h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
-
-                        for (x = 0; x < ctx->indent_level + 1; x++)
-                            h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-                    } /* end if */
-#endif                /* LATER */
-
                     ctx->indent_level++;
 
                     /* Dump the array element */

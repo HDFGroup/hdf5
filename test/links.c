@@ -7815,8 +7815,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Tuesday, July 26, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int

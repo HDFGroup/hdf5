@@ -57,7 +57,6 @@ sub_time(struct timeval *a, struct timeval *b)
  *              SYS_CLOCK for system time).
  * Return:      Pointer to io_time object
  * Programmer:  Bill Wendling, 01. October 2001
- * Modifications:
  */
 io_time_t *
 io_time_new(clock_type type)
@@ -78,7 +77,6 @@ io_time_new(clock_type type)
  *              function.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 01. October 2001
- * Modifications:
  */
 void
 io_time_destroy(io_time_t *pt)
@@ -97,7 +95,6 @@ io_time_destroy(io_time_t *pt)
  *              timer with the pio_timer_new function (shame!).
  * Return:      Nothing
  * Programmer:  Bill Wendling, 04. October 2001
- * Modifications:
  */
 void
 set_timer_type(io_time_t *pt, clock_type type)
@@ -110,7 +107,6 @@ set_timer_type(io_time_t *pt, clock_type type)
  * Purpose:     Get the type of the timer.
  * Return:      MPI_CLOCK or SYS_CLOCK.
  * Programmer:  Bill Wendling, 04. October 2001
- * Modifications:
  */
 clock_type
 get_timer_type(io_time_t *pt)
@@ -124,7 +120,6 @@ get_timer_type(io_time_t *pt)
  * Purpose:     Set the time in a ``io_time_t'' object.
  * Return:      Pointer to the passed in ``io_time_t'' object if SUCCEED; Null otherwise.
  * Programmer:  Bill Wendling, 01. October 2001
- * Modifications:
  */
 io_time_t *
 io_time_set(io_time_t *pt, timer_type t, int start_stop)
@@ -214,7 +209,6 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
  * Purpose:     Get the time from a ``io_time_t'' object.
  * Return:      The number of seconds as a DOUBLE.
  * Programmer:  Bill Wendling, 01. October 2001
- * Modifications:
  */
 H5_ATTR_PURE double
 io_time_get(io_time_t *pt, timer_type t)
