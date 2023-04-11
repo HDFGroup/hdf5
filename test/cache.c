@@ -1052,11 +1052,7 @@ smoke_check_5(int express_test, unsigned paged)
     H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
@@ -1284,11 +1280,7 @@ smoke_check_6(int express_test, unsigned paged)
     H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
@@ -1516,11 +1508,7 @@ smoke_check_7(int express_test, unsigned paged)
     H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
@@ -1749,11 +1737,7 @@ smoke_check_8(int express_test, unsigned paged)
     H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
@@ -4435,13 +4419,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
-#if 0  /* JRM */
-    /* This gets used a lot, so lets leave it in. */
-
-    HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
-              test_num);
-#endif /* JRM */
-
     if (cache_ptr == NULL) {
 
         pass = FALSE;
@@ -4516,19 +4493,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
         if ((entry_ptr->deserialized != spec[u].expected_deserialized) ||
             (entry_ptr->serialized != spec[u].expected_serialized) ||
             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
-
-#if 0 /* This is useful debugging code.  Lets keep it around. */
-
-            HDfprintf(stdout,
-              "deslzd = %d(%d), slzd = %d(%d), dest = %d(%d)\n",
-              (int)(entry_ptr->deserialized),
-              (int)(spec[u].expected_deserialized),
-              (int)(entry_ptr->serialized),
-              (int)(spec[u].expected_serialized),
-              (int)(entry_ptr->destroyed),
-              (int)(spec[u].expected_destroyed));
-
-#endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Bad status on entry %u after flush in multi entry test #%d.", u,
@@ -4613,13 +4577,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
-#if 0  /* JRM */
-    /* This is useful debugging code.  Leave it in for now. */
-
-    HDfprintf(stdout, "check_flush_cache__pe_multi_entry_test: test %d\n",
-        test_num);
-#endif /* JRM */
-
     if (cache_ptr == NULL) {
 
         pass = FALSE;
@@ -4701,19 +4658,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         if ((entry_ptr->deserialized != spec[u].expected_deserialized) ||
             (entry_ptr->serialized != spec[u].expected_serialized) ||
             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
-
-#if 0 /* This is useful debugging code.  Lets keep it around. */
-
-            HDfprintf(stdout,
-              "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-              (int)(entry_ptr->deserialized),
-              (int)(spec[u].expected_deserialized),
-              (int)(entry_ptr->serialized),
-              (int)(spec[u].expected_serialized),
-              (int)(entry_ptr->destroyed),
-              (int)(spec[u].expected_destroyed));
-
-#endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Bad status on entry %u after flush in pe multi entry test #%d.", u,
@@ -8170,11 +8114,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
-#if 0 /* This is useful debugging code -- lets keep it around. */
-    HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
-        test_num);
-#endif
-
     if (cache_ptr == NULL) {
 
         pass = FALSE;
@@ -8293,21 +8232,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
             (entry_ptr->serialized != spec[i].expected_serialized) ||
             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
 
-#if 0 /* This is useful debugging code.  Lets keep it around. */
-
-            HDfprintf(stdout,
-              "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-              (int)(entry_ptr->deserialized),
-              (int)(spec[i].expected_deserialized),
-              (int)(entry_ptr->serialized),
-              (int)(spec[i].expected_serialized),
-              (int)(entry_ptr->destroyed),
-              (int)(spec[i].expected_destroyed));
-
-        HDfprintf(stdout, "entry_ptr->header.is_dirty = %d\n",
-            (int)(entry_ptr->header.is_dirty));
-#endif
-
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Bad status on entry %d after flush op test #%d.", i, test_num);
             failure_mssg = msg;
@@ -8345,107 +8269,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
                 (entry_ptr->serialized != check[i].expected_serialized) ||
                 (entry_ptr->destroyed != check[i].expected_destroyed)) {
 
-#if 0 /* This is useful debugging code.  Lets keep it around for a while. */
-
-                if ( entry_ptr->size != check[i].expected_size ) {
-
-                    HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
-                              (int)(entry_ptr->size),
-                              (int)(check[i].expected_size));
-                }
-
-                if ( ( ! entry_ptr->header.destroy_in_progress ) &&
-                     ( check[i].in_cache ) &&
-                     ( entry_ptr->header.size != check[i].expected_size ) ) {
-
-                        HDfprintf(stdout,
-                              "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
-                              (int)(entry_ptr->header.size),
-                              (int)(check[i].expected_size));
-                }
-
-                if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
-
-                    HDfprintf(stdout,
-                              "(%d,%d) at main addr (expected) = %d (%d).\n",
-                              (int)(check[i].entry_type),
-                              (int)(check[i].entry_index),
-                              (int)(entry_ptr->at_main_addr),
-                              (int)(check[i].at_main_addr));
-                }
-
-                if ( entry_ptr->is_dirty != check[i].is_dirty ) {
-
-                    HDfprintf(stdout,
-                              "entry_ptr->is_dirty (expected) = %d (%d).\n",
-                              (int)(entry_ptr->is_dirty),
-                              (int)(check[i].is_dirty));
-                }
-
-                if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
-
-                    HDfprintf(stdout,
-                          "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
-                          (int)(entry_ptr->header.is_dirty),
-                          (int)(check[i].is_dirty));
-                }
-
-                if ( entry_ptr->is_protected != check[i].is_protected ) {
-
-                    HDfprintf(stdout,
-                              "entry_ptr->is_protected (expected) = %d (%d).\n",
-                              (int)(entry_ptr->is_protected),
-                              (int)(check[i].is_protected));
-                }
-
-                if ( entry_ptr->header.is_protected != check[i].is_protected ) {
-
-                     HDfprintf(stdout,
-                       "entry_ptr->header.is_protected (expected) = %d (%d).\n",
-                       (int)(entry_ptr->is_protected),
-                       (int)(check[i].is_protected));
-                }
-
-                if ( entry_ptr->is_pinned != check[i].is_pinned ) {
-
-                     HDfprintf(stdout,
-                              "entry_ptr->is_pinned (expected) = %d (%d).\n",
-                              (int)(entry_ptr->is_pinned),
-                              (int)(check[i].is_pinned));
-                }
-
-                if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
-
-                    HDfprintf(stdout,
-                          "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
-                          (int)(entry_ptr->header.is_pinned),
-                          (int)(check[i].is_pinned));
-                }
-
-                if ( entry_ptr->deserialized != check[i].expected_deserialized ) {
-
-                    HDfprintf(stdout,
-                              "entry_ptr->deserialized (expected) = %d (%d).\n",
-                              (int)(entry_ptr->deserialized),
-                              (int)(check[i].expected_deserialized));
-                }
-
-                if ( entry_ptr->serialized != check[i].expected_serialized ) {
-
-                    HDfprintf(stdout,
-                              "entry_ptr->serialized (expected) = %d (%d).\n",
-                              (int)(entry_ptr->serialized),
-                              (int)(check[i].expected_serialized));
-                }
-
-                if ( entry_ptr->destroyed != check[i].expected_destroyed ) {
-
-                    HDfprintf(stdout, \
-                              "entry_ptr->destroyed (expected) = %d (%d).\n",
-                              (int)(entry_ptr->destroyed),
-                              (int)(check[i].expected_destroyed));
-                }
-#endif
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i,
                            test_num);
@@ -11034,17 +10857,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
 
-#if 0 /* This is useful debugging code -- lets keep it for a while */
-
-            HDfprintf(stdout,
-              "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-              (int)(entry_ptr->deserialized),
-              (int)expected_deserialized,
-              (int)(entry_ptr->serialized),
-              (int)expected_serialized,
-              (int)(entry_ptr->destroyed),
-              (int)expected_destroyed);
-#endif
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected entry status after flush in single entry test #%d.",
                        test_num);
@@ -11178,16 +10990,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
 
-#if 0 /* this is useful debugging code -- keep it around */
-            HDfprintf(stdout,
-              "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
-              (int)(entry_ptr->deserialized),
-              (int)expected_deserialized,
-              (int)(entry_ptr->serialized),
-              (int)expected_serialized,
-              (int)(entry_ptr->destroyed),
-              (int)expected_destroyed);
-#endif
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                        "Unexpected entry status after flush in pinned single entry test #%d.", test_num);
@@ -25071,11 +24873,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
     uint32_t            cur_num_entries;
     H5C_auto_size_ctl_t auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (1 * 1024 * 1024),
 
