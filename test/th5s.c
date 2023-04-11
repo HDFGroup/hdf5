@@ -214,14 +214,22 @@ test_h5s_basic(void)
 
     /* Verify that incorrect dimensions don't work */
     dims1[0] = H5S_UNLIMITED;
-    sid1     = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    H5E_BEGIN_TRY
+    {
+        sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(sid1, FAIL, "H5Screate_simple");
 
     dims1[0] = H5S_UNLIMITED;
     sid1     = H5Screate(H5S_SIMPLE);
     CHECK(sid1, FAIL, "H5Screate");
 
-    ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sset_extent_simple");
 
     ret = H5Sclose(sid1);
@@ -1626,7 +1634,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 
         /* Allocate the buffer for encoding */
         buf = (char *)HDmalloc(buf_size);
-        CHECK_PTR(buf, "H5Dmalloc");
+        CHECK_PTR(buf, "HDmalloc");
 
         /* Encode according to the setting in in_fapl */
         ret = H5Sencode2(in_sid, buf, &buf_size, in_fapl);
@@ -3506,9 +3514,13 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    HDremove(DATAFILE);
-    HDremove(NULLFILE);
-    HDremove(BASICFILE);
-    HDremove(ZEROFILE);
-    HDremove(VERBFNAME);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(DATAFILE, H5P_DEFAULT);
+        H5Fdelete(NULLFILE, H5P_DEFAULT);
+        H5Fdelete(BASICFILE, H5P_DEFAULT);
+        H5Fdelete(ZEROFILE, H5P_DEFAULT);
+        H5Fdelete(VERBFNAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }
