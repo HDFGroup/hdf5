@@ -822,6 +822,9 @@ usage(void)
      */
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
     PRINTVALSTREAM(rawoutstream,
+                   "  --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
+    PRINTVALSTREAM(rawoutstream,
                    "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
     PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
     PRINTVALSTREAM(rawoutstream,
