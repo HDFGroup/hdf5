@@ -3673,7 +3673,7 @@ typedef struct H5C_tag_info_t {
  * cause a write.  If it does, the process will hang, as the write will
  * be collective and the other processes will not know to participate.
  *
- * To deal with this issue, the usual LRU policy has been mofified by adding
+ * To deal with this issue, the usual LRU policy has been modified by adding
  * clean and dirty LRU lists to the usual LRU list.  In general, these
  * lists only exist in parallel builds.
  *
