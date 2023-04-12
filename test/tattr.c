@@ -7082,7 +7082,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate2");
+        VERIFY(nvisit, max_attrs, "H5Aiterate2");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7113,7 +7113,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7144,7 +7144,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -7176,7 +7176,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
+        VERIFY(nvisit, max_attrs, "H5Aiterate1");
     }  /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
