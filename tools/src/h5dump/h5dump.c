@@ -823,11 +823,11 @@ parse_start:
 
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
-                        hand[i].func        = handle_datasets;
-                        hand[i].obj         = HDstrdup(opt_arg);
+                        hand[i].func = handle_datasets;
+                        hand[i].obj  = HDstrdup(opt_arg);
                         if (!dump_opts.disable_compact_subset)
                             hand[i].subset_info = parse_subset_params(hand[i].obj);
-                        last_dset           = &hand[i];
+                        last_dset = &hand[i];
                         break;
                     }
 
