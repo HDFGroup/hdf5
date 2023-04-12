@@ -359,6 +359,13 @@ Bug Fixes since HDF5-1.12.1 release
 
     Tools
     -----
+    - Names of objects with square brackets will have trouble without the
+      special argument, --no-compact-subset, on the h5dump command line.
+
+      h5diff did not have this option and now it has been added.
+
+      (ADB - 2023/04/08 GH-2598)
+
     - Fix h5repack to only print output when verbose option is selected
 
       When timing option was added to h5repack, the check for verbose was
