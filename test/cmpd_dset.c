@@ -127,13 +127,6 @@ typedef struct {
  * Programmer:    Robb Matzke
  *              Friday, January 23, 1998
  *
- * Modifications:
- *        Robb Matzke, 1999-06-23
- *        If the command line switch `--noopt' is present then the fast
- *        compound datatype conversion is turned off.
- *
- *              Raymond Lu, 15 June 2007
- *              Moved this part of code from MAIN to TEST_COMPOUND function.
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -820,7 +813,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static void
@@ -862,7 +854,6 @@ initialize_stype1(unsigned char *buf, size_t num)
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static void
@@ -908,7 +899,6 @@ initialize_stype2(unsigned char *buf, size_t num)
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static void
@@ -938,7 +928,6 @@ initialize_stype3(unsigned char *buf, size_t num)
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static void
@@ -990,7 +979,6 @@ initialize_stype4(unsigned char *buf, size_t num)
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1045,7 +1033,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1103,7 +1090,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1145,7 +1131,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -1206,7 +1191,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static int
@@ -1289,7 +1273,6 @@ error:
  * Programmer:    Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1496,7 +1479,6 @@ error:
  * Programmer:    Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1705,7 +1687,6 @@ error:
  * Programmer:    Neil Fortner
  *              Thursday, 22 January 2009
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1981,7 +1962,6 @@ error:
  * Programmer:    Neil Fortner
  *              Monday, 19 October 2009
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2222,7 +2202,6 @@ error:
  * Programmer:  Raymond Lu
  *              Friday, 15 June 2007
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 int

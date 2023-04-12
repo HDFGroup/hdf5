@@ -90,12 +90,11 @@ layer.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.8.23 | last HDF5 1.8 release |
-| 1.10.10 | CVE fixes, performance improvements, H5Dchunk\_iter() |
+| 1.10.11 | Last HDF5 1.10 release |
 | 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
-| 1.14.1 | selection I/O with datatype conversion |
+| 1.14.1 | Selection I/O with datatype conversion |
+| 1.14.2 | VFD SWMR (tentative) |
 | 2.0.0 | TBD |
-| TBD | VFD SWMR |
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.

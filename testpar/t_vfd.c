@@ -117,10 +117,6 @@ static unsigned vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size
  * Programmer:  John Mainzer
  *              3/25/26
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -199,10 +195,6 @@ alloc_and_init_file_images(int mpi_size)
  * Programmer:  John Mainzer
  *              1/25/17
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -260,10 +252,6 @@ free_file_images(void)
  *
  * Programmer:  John Mainzer
  *              3/25/26
- *
- * Modifications:
- *
- *              Updated for subfiling VFD                  9/29/30
  *
  *-------------------------------------------------------------------------
  */
@@ -535,10 +523,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
  * Programmer:  John Mainzer
  *              3/25/26
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -657,10 +641,6 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
  *
  * Programmer:  John Mainzer
  *              3/26/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -894,10 +874,6 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Programmer:  John Mainzer
  *              3/26/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1198,10 +1174,6 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Programmer:  John Mainzer
  *              3/26/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1558,10 +1530,6 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  *
  * Programmer:  John Mainzer
  *              3/26/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1994,10 +1962,6 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  * Programmer:  John Mainzer
  *              3/26/21
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2240,10 +2204,6 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
  * Programmer:  John Mainzer
  *              3/26/21
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2432,10 +2392,6 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Programmer:  John Mainzer
  *              3/28/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2688,10 +2644,6 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Programmer:  John Mainzer
  *              3/31/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2955,10 +2907,6 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Programmer:  John Mainzer
  *              3/31/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3260,10 +3208,6 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Programmer:  John Mainzer
  *              3/31/21
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3704,10 +3648,6 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  * Programmer:  John Mainzer
  *              3/26/21
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3965,10 +3905,6 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  * Programmer:  John Mainzer
  *              10/10/21
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4189,8 +4125,6 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
  *
  * Programmer:  John Mainzer
  *              3/2621/
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -615,8 +615,6 @@ CONTAINS
   !
   ! Comments:
   !
-  ! Modifications:
-  !
   !-------------------------------------------------------------------------
 
   SUBROUTINE h5ltmake_dataset_int_f_1 (loc_id,&
@@ -790,8 +788,6 @@ CONTAINS
   !
   ! Comments:
   !
-  ! Modifications:
-  !
   !-------------------------------------------------------------------------
 
   SUBROUTINE h5ltread_dataset_int_f_1(loc_id,&
@@ -953,8 +949,6 @@ CONTAINS
   !
   ! Comments:
   !
-  ! Modifications:
-  !
   !-------------------------------------------------------------------------
 
   SUBROUTINE h5ltmake_dataset_string_f(loc_id,&
@@ -1002,8 +996,6 @@ CONTAINS
   ! Date: September 22, 2004
   !
   ! Comments:
-  !
-  ! Modifications:
   !
   !-------------------------------------------------------------------------
 

@@ -37,8 +37,6 @@ herr_t H5IM_get_palette(hid_t loc_id, const char *image_name, int pal_number, hi
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -133,8 +131,6 @@ H5IMmake_image_8bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  * INTERLACE_PIXEL [height][width][pixel components]
  * INTERLACE_PLANE [pixel components][height][width]
  *
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -244,8 +240,6 @@ H5IMmake_image_24bitf(hid_t loc_id, const char *dset_name, hsize_t width, hsize_
  *  The memory datatype is H5T_NATIVE_INT. It is supposed to be called from
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -301,8 +295,6 @@ out:
  *  the FORTRAN interface where the image buffer is defined as type "integer"
  *
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -395,8 +387,6 @@ H5IMmake_palettef(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, i
  *
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -433,8 +423,6 @@ H5IMget_palettef(hid_t loc_id, const char *image_name, int pal_number, int_f *pa
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

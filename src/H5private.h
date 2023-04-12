@@ -325,6 +325,11 @@
 /* Raise an integer to a power of 2 */
 #define H5_EXP2(n) (1 << (n))
 
+/* Check if a read of size bytes starting at ptr would overflow past
+ * the last valid byte, pointed to by buffer_end.
+ */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
+
 /*
  * HDF Boolean type.
  */
@@ -2430,6 +2435,11 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
+
+/* Check if a read of size bytes starting at ptr would overflow past
+ * the last valid byte, pointed to by buffer_end .
+ */
+#define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
 
 /* Private typedefs */
 
