@@ -825,7 +825,8 @@ parse_start:
                     if (!hand[i].func) {
                         hand[i].func        = handle_datasets;
                         hand[i].obj         = HDstrdup(opt_arg);
-                        hand[i].subset_info = parse_subset_params(hand[i].obj);
+                        if (!dump_opts.disable_compact_subset)
+                            hand[i].subset_info = parse_subset_params(hand[i].obj);
                         last_dset           = &hand[i];
                         break;
                     }
