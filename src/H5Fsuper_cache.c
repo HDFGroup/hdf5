@@ -442,13 +442,17 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
         unsigned snode_btree_k; /* B-tree symbol table internal node 'K' value */
         unsigned chunk_btree_k; /* B-tree chunk internal node 'K' value */
 
+        /* Check whether the image pointer is out of bounds */
+        if (image >= image_end)
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
+
         /* Freespace version (hard-wired) */
         if (HDF5_FREESPACE_VERSION != *image++)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad free space version number")
 
         /* Check whether the image pointer is out of bounds */
         if (image >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Root group version number (hard-wired) */
         if (HDF5_OBJECTDIR_VERSION != *image++)
@@ -459,7 +463,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
         /* Check whether the image pointer is out of bounds */
         if (image >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Shared header version number (hard-wired) */
         if (HDF5_SHAREDHEADER_VERSION != *image++)
@@ -477,8 +481,8 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
         image++;
 
         /* Check whether the image pointer is out of bounds */
-        if (image + 2 >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+        if (image + sizeof(uint16_t) >= image_end)
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Various B-tree sizes */
         UINT16DECODE(image, sym_leaf_k);
@@ -517,7 +521,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
 		/* Check whether the image pointer is out of bounds */
 		if (image >= image_end)
-		    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+		    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 	    }
 	}                   /* end if */
         else
@@ -526,7 +530,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
 	/* Check whether the image pointer will be out of bounds */
 	if (image + H5F_SIZEOF_ADDR(udata->f) * 4 >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Remainder of "variable-sized" portion of superblock */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
@@ -573,7 +577,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
         /* Check whether the image pointer is out of bounds */
         if (image >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* File status flags (not really used yet) */
         sblock->status_flags = *image++;
@@ -582,7 +586,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
 	/* Check whether the image pointer will be out of bounds */
 	if (image + H5F_SIZEOF_ADDR(udata->f) * 4 >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Base, superblock extension, end of file & root group object header addresses */
         H5F_addr_decode(udata->f, (const uint8_t **)&image, &sblock->base_addr /*out*/);
@@ -593,8 +597,8 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
         /* checksum verification already done in verify_chksum cb */
 
 	/* Check whether the image pointer will be out of bounds */
-	if (image + 4 >= image_end)
-	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+	if (image + sizeof(uint32_t) >= image_end)
+	    HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
         /* Decode checksum */
         UINT32DECODE(image, read_chksum);
