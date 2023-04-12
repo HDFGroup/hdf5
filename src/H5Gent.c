@@ -177,7 +177,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent,
     *pp = p_ret + H5G_SIZEOF_ENTRY_FILE(f);
 
     if (*pp >= p_end)
-        HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL, "image pointer is out of bounds")
+        HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
