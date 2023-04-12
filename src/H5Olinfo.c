@@ -108,9 +108,9 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     const uint8_t *p_end = p + p_size - 1; /* End of the p buffer */
-    H5O_linfo_t  *linfo = NULL;     /* Link info */
-    unsigned char index_flags;      /* Flags for encoding link index info */
-    void         *ret_value = NULL; /* Return value */
+    H5O_linfo_t   *linfo = NULL;           /* Link info */
+    unsigned char  index_flags;            /* Flags for encoding link index info */
+    void          *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -150,7 +150,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         linfo->max_corder = 0;
 
     /* Check input buffer before decoding the next two addresses */
-    if (H5_IS_BUFFER_OVERFLOW(p, 8+8, p_end))
+    if (H5_IS_BUFFER_OVERFLOW(p, 8 + 8, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
     /* Address of fractal heap to store "dense" links */
