@@ -10,28 +10,6 @@
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-MODULE posix
-  USE, INTRINSIC :: iso_c_binding, ONLY: C_INT, C_INT32_T
-  IMPLICIT NONE
-
-  INTERFACE
-
-     ! sleep - suspend execution for second intervals
-     INTEGER(C_INT) FUNCTION c_sleep(seconds) BIND(C, name='sleep')
-       IMPORT :: C_INT
-       INTEGER(kind=C_INT), VALUE :: seconds
-     END FUNCTION c_sleep
-
-     ! usleep - suspend execution for microsecond intervals
-     INTEGER(C_INT) FUNCTION c_usleep(usec) bind(c, name='usleep')
-       IMPORT :: C_INT, C_INT32_T
-       INTEGER(KIND=C_INT32_T), VALUE :: usec
-     END FUNCTION c_usleep
-
-  END INTERFACE
-
-END MODULE posix
-
 MODULE test_async_APIs
 
   USE MPI
@@ -1248,7 +1226,6 @@ PROGRAM async_test
   USE MPI
   USE TH5_MISC
   USE TH5_MISC_GEN
-  USE POSIX
   USE test_async_APIs
 
   IMPLICIT NONE
