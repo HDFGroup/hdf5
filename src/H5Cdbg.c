@@ -291,49 +291,33 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
         i = 0;
 
         node_ptr = H5SL_first(cache_ptr->slist_ptr);
-
-        if (node_ptr != NULL) {
-
+        if (node_ptr != NULL)
             entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-        }
-        else {
-
+        else
             entry_ptr = NULL;
-        }
 
         while (entry_ptr != NULL) {
-
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
             HDfprintf(stdout, "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n", cache_ptr->prefix, i,
                       (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
                       (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
                       entry_ptr->type->name);
-
             HDfprintf(stdout, "		node_ptr = %p, item = %p\n", (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
-
             node_ptr = H5SL_next(node_ptr);
-
-            if (node_ptr != NULL) {
-
+            if (node_ptr != NULL)
                 entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-            }
-            else {
-
+            else
                 entry_ptr = NULL;
-            }
 
             i++;
-
         } /* end while */
     }     /* end if */
 
     HDfprintf(stdout, "\n\n");
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
 
