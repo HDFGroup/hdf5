@@ -4630,6 +4630,12 @@ H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_
 H5_DLL herr_t H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr);
 H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
+H5_DLL herr_t H5C__validate_lru_list(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__validate_pinned_entry_list(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__validate_protected_entry_list(H5C_t *cache_ptr);
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
 /* Testing functions */
 #ifdef H5C_TESTING
 H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status);

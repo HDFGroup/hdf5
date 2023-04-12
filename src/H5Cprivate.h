@@ -2270,12 +2270,6 @@ H5_DLL herr_t   H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_ad
 H5_DLL hbool_t H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
 #endif
 
-#ifdef H5C_DO_EXTREME_SANITY_CHECKS
-H5_DLL herr_t H5C_validate_lru_list(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_validate_pinned_entry_list(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_validate_protected_entry_list(H5C_t *cache_ptr);
-#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
-
 /* Logging functions */
 H5_DLL herr_t H5C_start_logging(H5C_t *cache);
 H5_DLL herr_t H5C_stop_logging(H5C_t *cache);
