@@ -212,7 +212,7 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
        (head_ptr) = (entry_ptr);                                             \
     }                                                                        \
     (len)++;                                                                 \
-    (Size) += entry_ptr->size;                                               \
+    (Size) += (entry_ptr)->size;                                             \
 } /* H5C__DLL_PREPEND() */
 
 #define H5C__DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
@@ -236,10 +236,10 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
        }                                                                    \
        else                                                                 \
           (entry_ptr)->next->prev = (entry_ptr)->prev;                      \
-       entry_ptr->next = NULL;                                              \
-       entry_ptr->prev = NULL;                                              \
+       (entry_ptr)->next = NULL;                                            \
+       (entry_ptr)->prev = NULL;                                            \
        (len)--;                                                             \
-       (Size) -= entry_ptr->size;                                           \
+       (Size) -= (entry_ptr)->size;                                         \
     }                                                                       \
 } /* H5C__DLL_REMOVE() */
 
@@ -525,61 +525,55 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
  ***********************************************************************/
 
 #define H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit) \
-        (cache_ptr->cache_accesses)++;                   \
-        if ( hit ) {                                     \
-            (cache_ptr->cache_hits)++;                   \
-        }                                                \
+    (cache_ptr)->cache_accesses++;                     \
+    if (hit)                                             \
+        (cache_ptr)->cache_hits++;
 
 #if H5C_COLLECT_CACHE_STATS
 
 #define H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
-            (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
-        if ( (cache_ptr)->clean_index_size >                               \
-                (cache_ptr)->max_clean_index_size )                        \
-            (cache_ptr)->max_clean_index_size =                            \
-                (cache_ptr)->clean_index_size;                             \
-        if ( (cache_ptr)->dirty_index_size >                               \
-                (cache_ptr)->max_dirty_index_size )                        \
-            (cache_ptr)->max_dirty_index_size =                            \
-                (cache_ptr)->dirty_index_size;
+    if ((cache_ptr)->index_size > (cache_ptr)->max_index_size)             \
+        (cache_ptr)->max_index_size = (cache_ptr)->index_size;             \
+    if ((cache_ptr)->clean_index_size > (cache_ptr)->max_clean_index_size) \
+        (cache_ptr)->max_clean_index_size = (cache_ptr)->clean_index_size; \
+    if ((cache_ptr)->dirty_index_size > (cache_ptr)->max_dirty_index_size) \
+        (cache_ptr)->max_dirty_index_size = (cache_ptr)->dirty_index_size;
 
 #define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) \
-    (((cache_ptr)->dirty_pins)[(entry_ptr)->type->id])++;
+    (cache_ptr)->dirty_pins[(entry_ptr)->type->id]++;
 
-#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)                   \
-        if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )   \
-        (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;     \
-        if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size ) \
-        (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;   \
-    if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )       \
-        (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;         \
-    if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size )     \
+#define H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)             \
+    if ((cache_ptr)->slist_len > (cache_ptr)->max_slist_len)   \
+        (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;   \
+    if ((cache_ptr)->slist_size > (cache_ptr)->max_slist_size) \
+        (cache_ptr)->max_slist_size = (cache_ptr)->slist_size; \
+    if ((cache_ptr)->pel_len > (cache_ptr)->max_pel_len)       \
+        (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;       \
+    if ((cache_ptr)->pel_size > (cache_ptr)->max_pel_size)     \
         (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;
 
-#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)               \
-    if ( cache_ptr->flush_in_progress )                            \
-            ((cache_ptr)->cache_flush_moves[(entry_ptr)->type->id])++; \
-        if ( entry_ptr->flush_in_progress )                            \
-            ((cache_ptr)->entry_flush_moves[(entry_ptr)->type->id])++; \
-    (((cache_ptr)->moves)[(entry_ptr)->type->id])++;               \
-        (cache_ptr)->entries_relocated_counter++;
+#define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)                \
+    if ((cache_ptr)->flush_in_progress)                                 \
+        (cache_ptr)->cache_flush_moves[(entry_ptr)->type->id]++;      \
+    if ((entry_ptr)->flush_in_progress)                                 \
+        (cache_ptr)->entry_flush_moves[(entry_ptr)->type->id]++;      \
+    (cache_ptr)->moves[(entry_ptr)->type->id]++;                      \
+    (cache_ptr)->entries_relocated_counter++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
-    if ( cache_ptr->flush_in_progress )                                    \
-            ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;  \
-        if ( entry_ptr->flush_in_progress )                                    \
-            ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;  \
-    if ( (entry_ptr)->size < (new_size) ) {                                \
-        ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
-            H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
-            if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )       \
-                (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
-            if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )             \
-                (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;               \
-    } else if ( (entry_ptr)->size > (new_size) ) {                         \
-        ((cache_ptr)->size_decreases[(entry_ptr)->type->id])++;            \
-    }
+    if ((cache_ptr)->flush_in_progress)                                    \
+        (cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id]++;  \
+    if ((entry_ptr)->flush_in_progress)                                    \
+        (cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id]++;  \
+    if ((entry_ptr)->size < (new_size)) {                                \
+        (cache_ptr)->size_increases[(entry_ptr)->type->id]++;            \
+        H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
+        if ((cache_ptr)->slist_size > (cache_ptr)->max_slist_size)       \
+            (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
+        if ((cache_ptr)->pl_size > (cache_ptr)->max_pl_size)             \
+            (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;               \
+    } else if ((entry_ptr)->size > (new_size))                          \
+        (cache_ptr)->size_decreases[(entry_ptr)->type->id]++;
 
 #define H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr) \
     (cache_ptr)->total_ht_insertions++;
@@ -588,7 +582,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     (cache_ptr)->total_ht_deletions++;
 
 #define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)  \
-    if ( success ) {                                            \
+    if (success) {                                              \
         (cache_ptr)->successful_ht_searches++;                  \
         (cache_ptr)->total_successful_ht_search_depth += depth; \
     } else {                                                    \
@@ -597,21 +591,19 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
     }
 
 #define H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr) \
-    ((cache_ptr)->unpins)[(entry_ptr)->type->id]++;
+    (cache_ptr)->unpins[(entry_ptr)->type->id]++;
 
 #define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr) \
-    ((cache_ptr)->slist_scan_restarts)++;
+    (cache_ptr)->slist_scan_restarts++;
 
 #define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr) \
-    ((cache_ptr)->LRU_scan_restarts)++;
+    (cache_ptr)->LRU_scan_restarts++;
 
 #define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr) \
-    ((cache_ptr)->index_scan_restarts)++;
+    (cache_ptr)->index_scan_restarts++;
 
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
-{                                                           \
-    (cache_ptr)->images_created++;                          \
-}
+    (cache_ptr)->images_created++;
 
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
 {                                                          \
@@ -631,14 +623,12 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty) \
 {                                                        \
     (cache_ptr)->prefetches++;                           \
-    if ( dirty )                                         \
+    if (dirty)                                           \
         (cache_ptr)->dirty_prefetches++;                 \
 }
 
 #define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) \
-{                                                     \
-    (cache_ptr)->prefetch_hits++;                     \
-}
+    (cache_ptr)->prefetch_hits++;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -652,113 +642,96 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)        \
 {                                                                \
-    (((cache_ptr)->clears)[(entry_ptr)->type->id])++;            \
+    (cache_ptr)->clears[(entry_ptr)->type->id]++;            \
     if((entry_ptr)->is_pinned)                                   \
-        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++; \
-    ((entry_ptr)->clears)++;                                     \
+        (cache_ptr)->pinned_clears[(entry_ptr)->type->id]++; \
+    (entry_ptr)->clears++;                                     \
 }
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \
 {                                                                 \
-    (((cache_ptr)->flushes)[(entry_ptr)->type->id])++;            \
+    (cache_ptr)->flushes[(entry_ptr)->type->id]++;            \
     if((entry_ptr)->is_pinned)                                    \
-        (((cache_ptr)->pinned_flushes)[(entry_ptr)->type->id])++; \
-    ((entry_ptr)->flushes)++;                                     \
+        (cache_ptr)->pinned_flushes[(entry_ptr)->type->id]++; \
+    (entry_ptr)->flushes++;                                     \
 }
 
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership) \
 {                                                                            \
-    if ( take_ownership )                                                    \
-        (((cache_ptr)->take_ownerships)[(entry_ptr)->type->id])++;           \
+    if (take_ownership)                                                    \
+        (cache_ptr)->take_ownerships[(entry_ptr)->type->id]++;           \
     else                                                                     \
-        (((cache_ptr)->evictions)[(entry_ptr)->type->id])++;                 \
-    if ( (entry_ptr)->accesses >                                         \
-            ((cache_ptr)->max_accesses)[(entry_ptr)->type->id] )         \
-        ((cache_ptr)->max_accesses)[(entry_ptr)->type->id] =             \
-            (entry_ptr)->accesses;                                       \
-    if ( (entry_ptr)->accesses <                                         \
-            ((cache_ptr)->min_accesses)[(entry_ptr)->type->id] )         \
-        ((cache_ptr)->min_accesses)[(entry_ptr)->type->id] =             \
-            (entry_ptr)->accesses;                                       \
-    if ( (entry_ptr)->clears >                                           \
-             ((cache_ptr)->max_clears)[(entry_ptr)->type->id] )          \
-            ((cache_ptr)->max_clears)[(entry_ptr)->type->id]             \
-                 = (entry_ptr)->clears;                                  \
-    if ( (entry_ptr)->flushes >                                          \
-            ((cache_ptr)->max_flushes)[(entry_ptr)->type->id] )          \
-        ((cache_ptr)->max_flushes)[(entry_ptr)->type->id]                \
-            = (entry_ptr)->flushes;                                      \
-    if ( (entry_ptr)->size >                                             \
-            ((cache_ptr)->max_size)[(entry_ptr)->type->id] )             \
-        ((cache_ptr)->max_size)[(entry_ptr)->type->id]                   \
-            = (entry_ptr)->size;                                         \
-    if ( (entry_ptr)->pins >                                             \
-            ((cache_ptr)->max_pins)[(entry_ptr)->type->id] )             \
-        ((cache_ptr)->max_pins)[(entry_ptr)->type->id]                   \
-            = (entry_ptr)->pins;                                         \
+        (cache_ptr)->evictions[(entry_ptr)->type->id]++;                 \
+    if ((entry_ptr)->accesses > (cache_ptr)->max_accesses[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_accesses[(entry_ptr)->type->id] = (entry_ptr)->accesses; \
+    if ((entry_ptr)->accesses < (cache_ptr)->min_accesses[(entry_ptr)->type->id]) \
+        (cache_ptr)->min_accesses[(entry_ptr)->type->id] = (entry_ptr)->accesses; \
+    if ((entry_ptr)->clears > (cache_ptr)->max_clears[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_clears[(entry_ptr)->type->id] = (entry_ptr)->clears; \
+    if ((entry_ptr)->flushes > (cache_ptr)->max_flushes[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_flushes[(entry_ptr)->type->id] = (entry_ptr)->flushes; \
+    if ((entry_ptr)->size > (cache_ptr)->max_size[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_size[(entry_ptr)->type->id] = (entry_ptr)->size; \
+    if ((entry_ptr)->pins > (cache_ptr)->max_pins[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_pins[(entry_ptr)->type->id] = (entry_ptr)->pins; \
 }
 
 #define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)        \
 {                                                                    \
-    (((cache_ptr)->insertions)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned ) {                                  \
-        (((cache_ptr)->pinned_insertions)[(entry_ptr)->type->id])++; \
-        ((cache_ptr)->pins)[(entry_ptr)->type->id]++;                \
+    (cache_ptr)->insertions[(entry_ptr)->type->id]++;            \
+    if ((entry_ptr)->is_pinned) {                                  \
+        (cache_ptr)->pinned_insertions[(entry_ptr)->type->id]++; \
+        (cache_ptr)->pins[(entry_ptr)->type->id]++;                \
         (entry_ptr)->pins++;                                         \
-        if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )       \
+        if ((cache_ptr)->pel_len > (cache_ptr)->max_pel_len)       \
             (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;         \
-        if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size )     \
+        if ((cache_ptr)->pel_size > (cache_ptr)->max_pel_size)     \
             (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;       \
     }                                                                \
-    if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )       \
+    if ((cache_ptr)->index_len > (cache_ptr)->max_index_len)       \
         (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
     H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                      \
-    if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
+    if ((cache_ptr)->slist_len > (cache_ptr)->max_slist_len)       \
         (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
-    if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
+    if ((cache_ptr)->slist_size > (cache_ptr)->max_slist_size)     \
         (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;       \
-    if ( (entry_ptr)->size >                                         \
-            ((cache_ptr)->max_size)[(entry_ptr)->type->id] )         \
-        ((cache_ptr)->max_size)[(entry_ptr)->type->id]               \
-             = (entry_ptr)->size;                                    \
-    cache_ptr->entries_inserted_counter++;                           \
+    if ((entry_ptr)->size > (cache_ptr)->max_size[(entry_ptr)->type->id]) \
+        (cache_ptr)->max_size[(entry_ptr)->type->id] = (entry_ptr)->size; \
+    (cache_ptr)->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
 {                                                                           \
-    if ( hit )                                                              \
-        ((cache_ptr)->hits)[(entry_ptr)->type->id]++;                       \
+    if (hit)                                                              \
+        (cache_ptr)->hits[(entry_ptr)->type->id]++;                       \
     else                                                                    \
-        ((cache_ptr)->misses)[(entry_ptr)->type->id]++;                     \
-    if ( ! ((entry_ptr)->is_read_only) ) {                                  \
-        ((cache_ptr)->write_protects)[(entry_ptr)->type->id]++;             \
-    } else {                                                                \
-        ((cache_ptr)->read_protects)[(entry_ptr)->type->id]++;              \
-        if ( ((entry_ptr)->ro_ref_count) >                                  \
-                ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] )   \
-            ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] =       \
-                    ((entry_ptr)->ro_ref_count);                            \
+        (cache_ptr)->misses[(entry_ptr)->type->id]++;                     \
+    if (!(entry_ptr)->is_read_only)                                   \
+        (cache_ptr)->write_protects[(entry_ptr)->type->id]++;             \
+    else {                                                                \
+        (cache_ptr)->read_protects[(entry_ptr)->type->id]++;              \
+        if ((entry_ptr)->ro_ref_count > (cache_ptr)->max_read_protects[(entry_ptr)->type->id])   \
+            (cache_ptr)->max_read_protects[(entry_ptr)->type->id] = (entry_ptr)->ro_ref_count;                            \
     }                                                                       \
-    if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )              \
+    if ((cache_ptr)->index_len > (cache_ptr)->max_index_len)              \
         (cache_ptr)->max_index_len = (cache_ptr)->index_len;                \
     H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                             \
-    if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                    \
+    if ((cache_ptr)->pl_len > (cache_ptr)->max_pl_len)                    \
         (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                      \
-    if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )                  \
+    if ((cache_ptr)->pl_size > (cache_ptr)->max_pl_size)                  \
         (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;                    \
-    if ( (entry_ptr)->size >                                                \
-            ((cache_ptr)->max_size)[(entry_ptr)->type->id] )                \
-        ((cache_ptr)->max_size)[(entry_ptr)->type->id] = (entry_ptr)->size; \
-    ((entry_ptr)->accesses)++;                                              \
+    if ((entry_ptr)->size > (cache_ptr)->max_size[(entry_ptr)->type->id])   \
+        (cache_ptr)->max_size[(entry_ptr)->type->id] = (entry_ptr)->size; \
+    (entry_ptr)->accesses++;                                              \
 }
 
 #define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)      \
 {                                                            \
-    ((cache_ptr)->pins)[(entry_ptr)->type->id]++;            \
+    (cache_ptr)->pins[(entry_ptr)->type->id]++;            \
     (entry_ptr)->pins++;                                     \
-    if ( (cache_ptr)->pel_len > (cache_ptr)->max_pel_len )   \
+    if ((cache_ptr)->pel_len > (cache_ptr)->max_pel_len)   \
         (cache_ptr)->max_pel_len = (cache_ptr)->pel_len;     \
-    if ( (cache_ptr)->pel_size > (cache_ptr)->max_pel_size ) \
+    if ((cache_ptr)->pel_size > (cache_ptr)->max_pel_size) \
         (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;   \
 }
 
@@ -768,24 +741,24 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)         \
 {                                                                 \
-    (((cache_ptr)->clears)[(entry_ptr)->type->id])++;             \
+    (cache_ptr)->clears[(entry_ptr)->type->id]++;             \
     if((entry_ptr)->is_pinned)                                    \
-        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
+        (cache_ptr)->pinned_clears[(entry_ptr)->type->id]++;  \
 }
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \
 {                                                                 \
-    (((cache_ptr)->flushes)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned )                                 \
-        (((cache_ptr)->pinned_flushes)[(entry_ptr)->type->id])++; \
+    (cache_ptr)->flushes[(entry_ptr)->type->id]++;            \
+    if ((entry_ptr)->is_pinned)                                 \
+        (cache_ptr)->pinned_flushes[(entry_ptr)->type->id]++; \
 }
 
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership) \
 {                                                                            \
-    if ( take_ownership )                                                    \
-        (((cache_ptr)->take_ownerships)[(entry_ptr)->type->id])++;           \
+    if (take_ownership)                                                    \
+        (cache_ptr)->take_ownerships[(entry_ptr)->type->id]++;           \
     else                                                                     \
-        (((cache_ptr)->evictions)[(entry_ptr)->type->id])++;                 \
+        (cache_ptr)->evictions[(entry_ptr)->type->id]++;                 \
 }
 
 #define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)        \
@@ -806,7 +779,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
         (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
     if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
         (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;       \
-    cache_ptr->entries_inserted_counter++;                           \
+    (cache_ptr)->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
@@ -855,7 +828,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_HT_SEARCH(cache_ptr, success, depth)
 #define H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
-#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
+#define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)                       {}
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership)
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
@@ -1238,16 +1211,16 @@ if ( ( (cache_ptr)->index_size !=                                           \
     ((cache_ptr)->index)[k] = (entry_ptr);                                   \
     (cache_ptr)->index_len++;                                                \
     (cache_ptr)->index_size += (entry_ptr)->size;                            \
-    ((cache_ptr)->index_ring_len[entry_ptr->ring])++;                        \
-    ((cache_ptr)->index_ring_size[entry_ptr->ring])                          \
+    ((cache_ptr)->index_ring_len[(entry_ptr)->ring])++;                        \
+    ((cache_ptr)->index_ring_size[(entry_ptr)->ring])                          \
             += (entry_ptr)->size;                                            \
     if((entry_ptr)->is_dirty) {                                              \
         (cache_ptr)->dirty_index_size += (entry_ptr)->size;                  \
-        ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])                \
+        ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                \
                 += (entry_ptr)->size;                                        \
     } else {                                                                 \
         (cache_ptr)->clean_index_size += (entry_ptr)->size;                  \
-        ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])                \
+        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])                \
                 += (entry_ptr)->size;                                        \
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
@@ -1276,16 +1249,16 @@ if ( ( (cache_ptr)->index_size !=                                           \
     (entry_ptr)->ht_prev = NULL;                                             \
     (cache_ptr)->index_len--;                                                \
     (cache_ptr)->index_size -= (entry_ptr)->size;                            \
-    ((cache_ptr)->index_ring_len[entry_ptr->ring])--;                        \
-    ((cache_ptr)->index_ring_size[entry_ptr->ring])                          \
+    ((cache_ptr)->index_ring_len[(entry_ptr)->ring])--;                        \
+    ((cache_ptr)->index_ring_size[(entry_ptr)->ring])                          \
             -= (entry_ptr)->size;                                            \
     if((entry_ptr)->is_dirty) {                                              \
         (cache_ptr)->dirty_index_size -= (entry_ptr)->size;                  \
-        ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])                \
+        ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])                \
                 -= (entry_ptr)->size;                                        \
     } else {                                                                 \
         (cache_ptr)->clean_index_size -= (entry_ptr)->size;                  \
-        ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])                \
+        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])                \
                 -= (entry_ptr)->size;                                        \
     }                                                                        \
     if((entry_ptr)->flush_me_last) {                                         \
@@ -1358,10 +1331,10 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                 \
     H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr);  \
     (cache_ptr)->dirty_index_size -= (entry_ptr)->size;           \
-    ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])         \
+    ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])         \
         -= (entry_ptr)->size;                                     \
     (cache_ptr)->clean_index_size += (entry_ptr)->size;           \
-    ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])         \
+    ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])         \
         += (entry_ptr)->size;                                     \
     H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr); \
 }
@@ -1370,10 +1343,10 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                 \
     H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr);  \
     (cache_ptr)->clean_index_size -= (entry_ptr)->size;           \
-    ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])         \
+    ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])         \
         -= (entry_ptr)->size;                                     \
     (cache_ptr)->dirty_index_size += (entry_ptr)->size;           \
-    ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])         \
+    ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])         \
         += (entry_ptr)->size;                                     \
     H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr); \
 }
@@ -1385,21 +1358,21 @@ if ( ( (cache_ptr)->index_size !=                                           \
                             entry_ptr, was_clean)                           \
     (cache_ptr)->index_size -= (old_size);                                  \
     (cache_ptr)->index_size += (new_size);                                  \
-    ((cache_ptr)->index_ring_size[entry_ptr->ring]) -= (old_size);          \
-    ((cache_ptr)->index_ring_size[entry_ptr->ring]) += (new_size);          \
+    ((cache_ptr)->index_ring_size[(entry_ptr)->ring]) -= (old_size);          \
+    ((cache_ptr)->index_ring_size[(entry_ptr)->ring]) += (new_size);          \
     if(was_clean) {                                                         \
         (cache_ptr)->clean_index_size -= (old_size);                        \
-        ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])-= (old_size); \
+        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])-= (old_size); \
     } else {                                                                \
     (cache_ptr)->dirty_index_size -= (old_size);                            \
-        ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])-= (old_size); \
+        ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])-= (old_size); \
     }                                                                       \
     if((entry_ptr)->is_dirty) {                                             \
         (cache_ptr)->dirty_index_size += (new_size);                        \
-        ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring])+= (new_size); \
+        ((cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring])+= (new_size); \
     } else {                                                                \
     (cache_ptr)->clean_index_size += (new_size);                            \
-        ((cache_ptr)->clean_index_ring_size[entry_ptr->ring])+= (new_size); \
+        ((cache_ptr)->clean_index_ring_size[(entry_ptr)->ring])+= (new_size); \
     }                                                                       \
     H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->il_len,                    \
                                     (cache_ptr)->il_size,                   \
@@ -1595,7 +1568,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+        HDassert( (cache_ptr)->slist_ring_size[((entry_ptr)->ring)] >=           \
                   (entry_ptr)->size );                                         \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         (cache_ptr)->slist_len_increase--;                                     \
@@ -1642,7 +1615,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );              \
         (cache_ptr)->slist_size -= (entry_ptr)->size;                          \
         ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                    \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=           \
+        HDassert( (cache_ptr)->slist_ring_size[((entry_ptr)->ring)] >=           \
                   (entry_ptr)->size );                                         \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size;\
         (entry_ptr)->in_slist = FALSE;                                         \
@@ -1696,7 +1669,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         (cache_ptr)->slist_size -= (old_size);                                \
         (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)]             \
+        HDassert( (cache_ptr)->slist_ring_size[((entry_ptr)->ring)]             \
                   >= (old_size) );                                            \
                                                                               \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
@@ -1741,7 +1714,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         (cache_ptr)->slist_size -= (old_size);                                \
         (cache_ptr)->slist_size += (new_size);                                \
                                                                               \
-        HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=          \
+        HDassert( (cache_ptr)->slist_ring_size[((entry_ptr)->ring)] >=          \
                   (old_size) );                                               \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (old_size);      \
         ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) += (new_size);      \
@@ -2153,7 +2126,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
          * appropriate.                                                    \
          */                                                                \
                                                                            \
-        if ( entry_ptr->is_dirty ) {                                       \
+        if ( (entry_ptr)->is_dirty ) {                                       \
             H5C__AUX_DLL_APPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,   \
                                 (cache_ptr)->dLRU_tail_ptr,                \
                                 (cache_ptr)->dLRU_list_len,                \
@@ -2259,7 +2232,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
          * appropriate.                                                    \
          */                                                                \
                                                                            \
-        if ( entry_ptr->is_dirty ) {                                       \
+        if ( (entry_ptr)->is_dirty ) {                                       \
             H5C__AUX_DLL_PREPEND((entry_ptr), (cache_ptr)->dLRU_head_ptr,  \
                                  (cache_ptr)->dLRU_tail_ptr,               \
                                  (cache_ptr)->dLRU_list_len,               \
@@ -2473,7 +2446,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) {\
+    if ( ! ( (entry_ptr)->is_pinned ) && ! ( ((entry_ptr)->is_protected ) ) ) {\
                                                                              \
         /* modified LRU specific code */                                     \
                                                                              \
@@ -2550,7 +2523,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) {\
+    if ( ! ( (entry_ptr)->is_pinned ) && ! ( ((entry_ptr)->is_protected ) ) ) {\
                                                                              \
         /* modified LRU specific code */                                     \
                                                                              \
@@ -3162,9 +3135,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
 {                                                                       \
-    HDassert( (cache_ptr) );                                            \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
-    HDassert( (entry_ptr) );                                            \
+    HDassert((cache_ptr));                                              \
+    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                   \
+    HDassert((entry_ptr));                                              \
                                                                         \
     /* Remove entry and insert at the head of the list. */              \
     H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \
