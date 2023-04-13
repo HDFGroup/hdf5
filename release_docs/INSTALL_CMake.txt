@@ -763,6 +763,8 @@ BUILD_SHARED_LIBS  "Build Shared Libraries"    ON
 BUILD_STATIC_LIBS  "Build Static Libraries"    ON
 BUILD_STATIC_EXECS "Build Static Executables"  OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   ON
+if (WINDOWS)
+  DISABLE_PDB_FILES "Do not install PDB files" OFF
 
 ---------------- HDF5 Build Options ---------------------
 HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
