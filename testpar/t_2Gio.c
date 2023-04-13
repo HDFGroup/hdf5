@@ -4058,7 +4058,8 @@ test_no_collective_cause_mode(int selection_mode)
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
     }
 
-    /* Disable selection I/O if we're using datatype conversion or transforms since those are supported in collective with selection I/O */
+    /* Disable selection I/O if we're using datatype conversion or transforms since those are supported in
+     * collective with selection I/O */
     if ((selection_mode & TEST_DATA_TRANSFORMS) || (selection_mode & TEST_DATATYPE_CONVERSION)) {
         /* Disable selection I/O */
         ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);

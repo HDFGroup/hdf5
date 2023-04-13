@@ -71,7 +71,8 @@
 
 /* Macro to determine if the layout I/O callback should perform I/O */
 #define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
-    (((IO_INFO)->use_select_io == H5D_SELECTION_IO_MODE_OFF) || ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
+    (((IO_INFO)->use_select_io == H5D_SELECTION_IO_MODE_OFF) ||                                              \
+     ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
 
 /****************************/
 /* Package Private Typedefs */
@@ -278,7 +279,7 @@ typedef struct H5D_io_info_t {
         must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_io_mode_t actual_io_mode; /* Actual type of collective or independent I/O */
-    unsigned no_selection_io_cause; /* "No collective cause" flags related to selection I/O */
+    unsigned no_selection_io_cause;           /* "No collective cause" flags related to selection I/O */
 #endif                                        /* H5_HAVE_PARALLEL */
 } H5D_io_info_t;
 

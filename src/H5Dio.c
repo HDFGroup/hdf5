@@ -298,7 +298,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel or selection I/O")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "unable to adjust I/O info for parallel or selection I/O")
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
@@ -700,7 +701,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel or selection I/O")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "unable to adjust I/O info for parallel or selection I/O")
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
@@ -813,7 +815,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
                 H5CX_set_mpio_actual_io_mode(io_info.actual_io_mode);
 
-                /* If we did selection I/O, report that we used "link chunk" mode, since that's the most analogous to what selection I/O does */
+                /* If we did selection I/O, report that we used "link chunk" mode, since that's the most
+                 * analogous to what selection I/O does */
                 if (io_info.use_select_io == H5D_SELECTION_IO_MODE_ON)
                     H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_LINK_CHUNK);
             }
@@ -912,7 +915,9 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     /* Use provided dset_info */
     io_info->dsets_info = dset_info;
 
-    /* Start with selection I/O mode from property list.  If enabled, layout callback will turn it off if it is not supported by the layout.  Handling of H5D_SELECTION_IO_MODE_AUTO occurs in H5D__ioinfo_adjust. */
+    /* Start with selection I/O mode from property list.  If enabled, layout callback will turn it off if it
+     * is not supported by the layout.  Handling of H5D_SELECTION_IO_MODE_AUTO occurs in H5D__ioinfo_adjust.
+     */
     H5CX_get_selection_io_mode(&selection_io_mode);
     io_info->use_select_io = selection_io_mode;
 
@@ -1132,7 +1137,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
         /* Check if we're doing collective I/O */
         if (xfer_mode == H5FD_MPIO_COLLECTIVE && io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
             size_t max_temp_buf; /* Maximum temporary buffer size */
-            size_t           i;         /* Local index variable */
+            size_t i;            /* Local index variable */
 
             /* Collective I/O, conversion buffer must be large enough for entire I/O (for now).
              * Stick with individual background buffers */
@@ -1145,7 +1150,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
                 if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
                     /* Add size of this dataset's type covnersion buffer to the global type conversion buffer size */
                     io_info->tconv_buf_size += io_info->dsets_info[i].nelmts *
-                                      MAX(type_info->src_type_size, type_info->dst_type_size);
+                                               MAX(type_info->src_type_size, type_info->dst_type_size);
 
                     /* Check for background buffer */
                     if (type_info->need_bkg) {
@@ -1166,7 +1171,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             /* Check if the needed type conversion size is too big */
             HDassert(io_info->bkg_buf_size <= io_info->tconv_buf_size);
             if (io_info->tconv_buf_size > max_temp_buf) {
-                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
                 io_info->tconv_buf_size = 0;
                 io_info->bkg_buf_size = 0;
                 io_info->must_fill_bkg = FALSE;
@@ -1315,7 +1320,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
     }         /* end if */
     else
 #endif /* H5_HAVE_PARALLEL */
-        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if the VFD has a vector or selection I/O callback */
+        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
+         * the VFD has a vector or selection I/O callback */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
             if (H5F_has_vector_select_io(dset0->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
@@ -1353,15 +1359,14 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
 
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_tconv_type_size) {
-        void  *tconv_buf;    /* Temporary conversion buffer pointer */
-        void  *bkgr_buf;     /* Background conversion buffer pointer */
+        void *tconv_buf; /* Temporary conversion buffer pointer */
+        void *bkgr_buf;  /* Background conversion buffer pointer */
 
         /* Get provided buffers from API context */
         if (H5CX_get_tconv_buf(&tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
         if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                        "can't retrieve background conversion buffer pointer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
 
 #ifdef H5_HAVE_PARALLEL
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
