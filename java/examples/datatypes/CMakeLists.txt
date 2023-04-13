@@ -111,9 +111,6 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_datatypes-${example}-clean-objects PROPERTIES
         DEPENDS JAVA_datatypes-${example}
     )
-    if (last_test)
-      set_tests_properties (JAVA_datatypes-${example}-clean-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
     set (last_test "JAVA_datatypes-${example}-clean-objects")
   endforeach ()
 endif ()

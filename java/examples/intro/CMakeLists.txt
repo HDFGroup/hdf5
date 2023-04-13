@@ -101,9 +101,6 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_intro-${example}-clean-objects PROPERTIES
         DEPENDS JAVA_intro-${example}
     )
-    if (last_test)
-      set_tests_properties (JAVA_intro-${example}-clean-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
     set (last_test "JAVA_intro-${example}-clean-objects")
   endforeach ()
 
