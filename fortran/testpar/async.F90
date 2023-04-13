@@ -9,11 +9,14 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+!
+! Tests async Fortran wrappers. It needs an async VOL. It will skip the tests if
+! HDF5_VOL_CONNECTOR is not set or is set to a non-supporting async VOL.
+!
 MODULE test_async_APIs
 
   USE MPI
-  USE HDF5 ! This module contains all necessary modules
+  USE HDF5
   USE TH5_MISC
   USE TH5_MISC_GEN
 
@@ -71,6 +74,7 @@ CONTAINS
     INTEGER(HID_T)  :: es_id
     INTEGER(SIZE_T)    :: count
     INTEGER(C_INT64_T) :: counter
+    INTEGER(SIZE_T) :: num_not_canceled
     INTEGER(SIZE_T) :: num_in_progress
     LOGICAL         :: err_occurred
 
@@ -87,6 +91,11 @@ CONTAINS
     CALL check("H5ESget_count_f", hdferror, nerrors)
     CALL VERIFY("H5ESget_count_f", count, 0_SIZE_T,total_error)
 
+    CALL H5EScancel_f(es_id, num_not_canceled, err_occurred, hdferror)
+    CALL check("H5EScancel_f", hdferror, nerrors)
+    CALL VERIFY("H5EScancel_f", num_not_canceled, 0_size_t, total_error)
+    CALL VERIFY("H5EScancel_f", err_occurred, .FALSE., total_error)
+
     CALL H5Fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, hdferror, access_prp = fapl_id)
     CALL check("h5fcreate_f", hdferror, nerrors)
 
@@ -96,7 +105,7 @@ CONTAINS
 
     CALL H5ESget_op_counter_f(es_id, counter, hdferror)
     CALL check("H5ESget_op_counter_f", hdferror, nerrors)
-    CALL VERIFY("H5ESget_op_counter_f", counter, 2_C_INT64_T, total_error) ! FIXME: I think this is wrong, it should be 3
+    CALL VERIFY("H5ESget_op_counter_f", counter, 2_C_INT64_T, total_error)
 
     CALL H5Pclose_f(fapl_id, hdferror)
     CALL check("h5pclose_f", hdferror, nerrors)
@@ -229,15 +238,14 @@ CONTAINS
 
     CALL H5Aopen_async_f(file_id, attr_name, attr_id0, es_id, hdferror)
     CALL check("H5Aopen_async_f", hdferror, total_error)
-#if 0
+
     f_ptr = C_LOC(attr_rdata0)
     CALL H5Aread_async_f(attr_id0, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
     CALL check("H5Aread_async_f", hdferror, total_error)
-#endif
+
     CALL H5Aclose_async_f(attr_id0, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
 
-#if 0
     CALL H5Aopen_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", attr_id1, es_id, hdferror)
     CALL check("H5Aopen_by_name_async_f", hdferror, total_error)
 
@@ -247,8 +255,7 @@ CONTAINS
 
     CALL H5Aclose_async_f(attr_id1, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
-#endif
-#if 0
+
     CALL H5Aopen_by_idx_async_f(file_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(2,HSIZE_T), attr_id2, es_id, hdferror)
     CALL check("H5Aopen_by_idx_async_f", hdferror, total_error)
 
@@ -258,21 +265,20 @@ CONTAINS
 
     CALL H5Aclose_async_f(attr_id2, es_id, hdferror)
     CALL check("H5Aclose_async_f",hdferror,total_error)
-#endif
-#if 0
+
     CALL H5Arename_async_f(file_id, TRIM(attr_name)//"00", TRIM(attr_name)//"05", es_id, hdferror)
     CALL check("H5Arename_async_f",hdferror,total_error)
 
     CALL H5Arename_by_name_async_f(file_id, ".", TRIM(attr_name)//"01", TRIM(attr_name)//"06", es_id, hdferror)
     CALL check("H5Arename_by_name_async_f",hdferror,total_error)
-#endif
+
     CALL H5Fclose_async_f(file_id, es_id, hdferror)
     CALL check("H5Fclose_async_f",hdferror,total_error)
 
     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
     CALL check("H5ESwait_f", hdferror, total_error)
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-#if 0
+
     CALL VERIFY("H5Aexists_async_f", LOGICAL(exists0), .TRUE., total_error)
     CALL VERIFY("H5Aexists_async_f", LOGICAL(exists1), .TRUE., total_error)
     CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists2), .TRUE., total_error)
@@ -303,7 +309,7 @@ CONTAINS
 
     CALL H5Fclose_f(file_id, hdferror)
     CALL check("H5Fclose_f",hdferror,total_error)
-#endif
+
     CALL H5Pclose_f(fapl_id, hdferror)
     CALL check(" H5Pclose_f",hdferror, total_error)
 
@@ -894,14 +900,8 @@ CONTAINS
     CALL H5Lexists_async_f(file_id, "hard_two", f_ptr, es_id, hdferror)
     CALL check("H5Lexists_async_f",hdferror,total_error)
 
-!    CALL H5Literate_async_f(, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op, void *op_data, hid_t es_id)
-
     CALL H5Ldelete_async_f(file_id, "hard_two", es_id, hdferror)
     CALL check("H5Ldelete_async_f",hdferror,total_error)
-
-!    CALL H5Ldelete_by_idx_async_f(file_id, ".", &
-!         H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), es_id, hdferror)
-!    CALL check("H5Ldelete_by_idx_async_f",hdferror,total_error)
 
     CALL H5Fclose_async_f(file_id, es_id, hdferror)
     CALL check("h5fclose_async_f",hdferror,total_error)
@@ -924,7 +924,6 @@ CONTAINS
     CALL H5Fclose_f(file_id, hdferror)
     CALL check("H5Fclose_f", hdferror,total_error)
 
-    !CALL H5ESget_count_f(es_id, count, hdferror)
     !  Loop over operating on different indices on link fields
     DO idx_type = H5_INDEX_NAME_F, H5_INDEX_CRT_ORDER_F
        !  Loop over operating in different orders
@@ -982,14 +981,8 @@ CONTAINS
              f1 = C_FUNLOC(liter_cb)
              f2 = C_LOC(info)
 
-             !CALL H5ESget_count_f(es_id, count, hdferror)
-             !PRINT*,"a",count
-
              CALL H5Literate_async_f(file_id, H5_INDEX_NAME_F, H5_ITER_INC_F, idx, f1, f2, ret_value, es_id, hdferror)
              CALL check("H5Literate_async_f", error, total_error)
-
-             !CALL H5ESget_count_f(es_id, count, hdferror)
-             !PRINT*,"b",count
 
              !  Close the group
              CALL H5Gclose_async_f(group_id, es_id, hdferror)

@@ -25,27 +25,6 @@ MODULE H5ES
   USE H5GLOBAL
   IMPLICIT NONE
 
-#if 0
-!> @brief H5ES_err_info_t derived type
-  TYPE :: H5ES_err_info_t
-
-    CHARACTER(KIND=C_CHAR, LEN=:), POINTER :: api_name !< Name of HDF5 API routine called
-    CHARACTER(KIND=C_CHAR, LEN=:), POINTER :: api_args !< "Argument string" for arguments to HDF5 API routine called
-
-    ! Application info
-    CHARACTER(KIND=C_CHAR, LEN=:), POINTER :: app_file_name !< Name of source file where the HDF5 API routine was called
-    CHARACTER(KIND=C_CHAR, LEN=:), POINTER :: app_func_name !< Name of function where the HDF5 API routine was called
-    INTEGER(C_INT)   :: app_line_num                        !< Line # of source file where the HDF5 API routine was called
-
-    ! Operation info
-    INTEGER(C_INT64_T) :: op_ins_count  !< Counter of operation's insertion into event set
-    INTEGER(C_INT64_T) :: op_ins_ts     !< Timestamp for when the operation was inserted into the event set
-    INTEGER(C_INT64_T) :: op_exec_ts    !< Timestamp for when the operation began execution
-    INTEGER(C_INT64_T) :: op_exec_time  !< Execution time for operation (in ns)
-
-  END TYPE H5ES_err_info_t
-#endif
-
 CONTAINS
 
 !>
@@ -285,33 +264,6 @@ CONTAINS
     hdferr = INT(H5ESget_err_count(es_id, num_errs))
 
   END SUBROUTINE H5ESget_err_count_f
-
-#if 0
-  SUBROUTINE H5ESget_err_info_f(es_id, num_err_info, err_info, num_cleared, hdferr)
-
-    IMPLICIT NONE
-
-    INTEGER(HID_T)       , INTENT(IN)  :: es_id
-    INTEGER(SIZE_T)      , INTENT(IN)  :: num_err_info
-    TYPE(H5ES_err_info_t), INTENT(OUT) :: err_info
-    INTEGER(SIZE_T)      , INTENT(OUT) :: err_cleared num_cleared
-    INTEGER              , INTENT(OUT) :: hdferr
-
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5ESget_err_info(es_id, num_err_info, err_info, num_cleared) BIND(C,NAME='H5ESget_err_info')
-         IMPORT :: C_INT
-         IMPORT :: HID_T, SIZE_T, H5ES_err_info_t
-         INTEGER(HID_T)       , VALUE :: es_id
-         INTEGER(SIZE_T)      , VALUE :: num_err_info
-         TYPE(H5ES_err_info_t)        :: err_info
-         INTEGER(SIZE_T)              :: err_cleared num_cleared
-       END FUNCTION H5ESget_err_info
-    END INTERFACE
-
-    hdferr = H5ESget_err_info(es_id, num_err_info, err_info, err_cleared)
-
-  END SUBROUTINE H5ESget_err_info_f
-#endif
 
 !>
 !! \ingroup FH5ES
