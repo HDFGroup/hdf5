@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Enabled instrumentation of the library by default in CMake for parallel
+      debug builds
+
+      HDF5 can be configured to instrument portions of the parallel library to
+      aid in debugging. Autotools builds of HDF5 turn this capability on by
+      default for parallel debug builds and off by default for other build types.
+      CMake has been updated to match this behavior.
+
+      (JTH - 2023/03/29)
+
     - Added new option to build libaec and zlib inline with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
