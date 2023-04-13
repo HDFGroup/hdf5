@@ -88,13 +88,13 @@ typedef struct H5D_type_info_t {
     hid_t        dst_type_id; /* Destination datatype ID */
 
     /* Computed/derived values */
-    size_t                   src_type_size;     /* Size of source type */
-    size_t                   dst_type_size;     /* Size of destination type */
-    hbool_t                  is_conv_noop;      /* Whether the type conversion is a NOOP */
-    hbool_t                  is_xform_noop;     /* Whether the data transform is a NOOP */
-    const H5T_subset_info_t *cmpd_subset;       /* Info related to the compound subset conversion functions */
-    H5T_bkg_t                need_bkg;          /* Type of background buf needed */
-    size_t                   request_nelmts;    /* Requested strip mine */
+    size_t                   src_type_size;  /* Size of source type */
+    size_t                   dst_type_size;  /* Size of destination type */
+    hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
+    hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
+    const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
+    H5T_bkg_t                need_bkg;       /* Type of background buf needed */
+    size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
 
 /* Forward declaration of structs used below */

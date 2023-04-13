@@ -542,7 +542,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
 
-        /* Various MPI based checks */
+            /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
         if (H5F_HAS_FEATURE(dset_info[i].dset->oloc.file, H5FD_FEAT_HAS_MPI)) {
             /* If MPI based VFD is used, no VL or region reference datatype support yet. */
@@ -1148,13 +1148,15 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
                 /* Check if type conversion buffer is needed for this dataset */
                 if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
-                    /* Add size of this dataset's type covnersion buffer to the global type conversion buffer size */
+                    /* Add size of this dataset's type covnersion buffer to the global type conversion buffer
+                     * size */
                     io_info->tconv_buf_size += io_info->dsets_info[i].nelmts *
                                                MAX(type_info->src_type_size, type_info->dst_type_size);
 
                     /* Check for background buffer */
                     if (type_info->need_bkg) {
-                        /* Add size of this dataset's background buffer to the global background buffer size */
+                        /* Add size of this dataset's background buffer to the global background buffer size
+                         */
                         io_info->bkg_buf_size += io_info->dsets_info[i].nelmts * type_info->dst_type_size;
 
                         /* Check if we need to fill the background buffer with the destination contents */
@@ -1173,8 +1175,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             if (io_info->tconv_buf_size > max_temp_buf) {
                 io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
                 io_info->tconv_buf_size = 0;
-                io_info->bkg_buf_size = 0;
-                io_info->must_fill_bkg = FALSE;
+                io_info->bkg_buf_size   = 0;
+                io_info->must_fill_bkg  = FALSE;
                 io_info->no_selection_io_cause |= H5D_MPIO_TCONV_BUF_TOO_SMALL;
             }
         }
@@ -1461,8 +1463,12 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                     target_size / MAX(type_info->src_type_size, type_info->dst_type_size);
 
                 /* Check if we need a background buffer and one hasn't been allocated yet */
-                if (type_info->need_bkg && (NULL == io_info->bkg_buf) && (NULL == (io_info->bkg_buf = (uint8_t *)bkgr_buf))) {
-                    /* Allocate background buffer with the same size as the type conversion buffer.  We can do this since the number of elements that fit in the type conversion buffer will never be larger than the number that could fit in a background buffer of equal size, since the tconv elemnt size is max(src, dst) and the bkg element size is dst */
+                if (type_info->need_bkg && (NULL == io_info->bkg_buf) &&
+                    (NULL == (io_info->bkg_buf = (uint8_t *)bkgr_buf))) {
+                    /* Allocate background buffer with the same size as the type conversion buffer.  We can do
+                     * this since the number of elements that fit in the type conversion buffer will never be
+                     * larger than the number that could fit in a background buffer of equal size, since the
+                     * tconv elemnt size is max(src, dst) and the bkg element size is dst */
                     if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                     "memory allocation failed for background conversion")

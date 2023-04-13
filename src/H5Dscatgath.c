@@ -672,8 +672,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         } /* end if */
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts,
-                                     io_info->bkg_buf /*out*/);
+                n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
@@ -738,13 +737,13 @@ done:
 herr_t
 H5D__scatgath_read_select(H5D_io_info_t *io_info)
 {
-    H5S_t             **tmp_mem_spaces = NULL;  /* Memory spaces to use for read from disk */
-    H5S_sel_iter_t     *mem_iter       = NULL;  /* Memory selection iteration info */
-    hbool_t             mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
-    void              **tmp_bufs       = NULL;  /* Buffers to use for read from disk */
-    size_t              buf_bytes_used = 0; /* Number of bytes used so far in conversion/background buffer */
-    size_t              i;                        /* Local index variable */
-    herr_t              ret_value = SUCCEED;      /* Return value		*/
+    H5S_t         **tmp_mem_spaces = NULL;  /* Memory spaces to use for read from disk */
+    H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
+    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
+    void          **tmp_bufs       = NULL;  /* Buffers to use for read from disk */
+    size_t          buf_bytes_used = 0;     /* Number of bytes used so far in conversion/background buffer */
+    size_t          i;                      /* Local index variable */
+    herr_t          ret_value = SUCCEED;    /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 
@@ -945,21 +944,21 @@ done:
 herr_t
 H5D__scatgath_write_select(H5D_io_info_t *io_info)
 {
-    H5S_t             **write_mem_spaces  = NULL;  /* Memory spaces to use for write to disk */
-    size_t              spaces_added      = 0;     /* Number of spaces added to write_mem_spaces */
-    H5S_sel_iter_t     *mem_iter          = NULL;  /* Memory selection iteration info */
-    hbool_t             mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
-    const void        **write_bufs        = NULL;  /* Buffers to use for write to disk */
-    size_t              tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
-    size_t              bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
-    H5S_t             **bkg_mem_spaces    = NULL;  /* Array of memory spaces for read to background buffer */
-    H5S_t             **bkg_file_spaces   = NULL;  /* Array of file spaces for read to background buffer */
-    haddr_t            *bkg_addrs         = NULL;  /* Array of file addresses for read to background buffer */
-    size_t             *bkg_element_sizes = NULL;  /* Array of element sizes for read to background buffer */
-    void              **bkg_bufs   = NULL; /* Array background buffers for read of existing file contents */
-    size_t              bkg_pieces = 0; /* Number of pieces that need to read the background data from disk */
-    size_t              i;              /* Local index variable */
-    herr_t              ret_value = SUCCEED; /* Return value		*/
+    H5S_t         **write_mem_spaces  = NULL;  /* Memory spaces to use for write to disk */
+    size_t          spaces_added      = 0;     /* Number of spaces added to write_mem_spaces */
+    H5S_sel_iter_t *mem_iter          = NULL;  /* Memory selection iteration info */
+    hbool_t         mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
+    const void    **write_bufs        = NULL;  /* Buffers to use for write to disk */
+    size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
+    size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
+    H5S_t         **bkg_mem_spaces    = NULL;  /* Array of memory spaces for read to background buffer */
+    H5S_t         **bkg_file_spaces   = NULL;  /* Array of file spaces for read to background buffer */
+    haddr_t        *bkg_addrs         = NULL;  /* Array of file addresses for read to background buffer */
+    size_t         *bkg_element_sizes = NULL;  /* Array of element sizes for read to background buffer */
+    void          **bkg_bufs   = NULL; /* Array background buffers for read of existing file contents */
+    size_t          bkg_pieces = 0;    /* Number of pieces that need to read the background data from disk */
+    size_t          i;                 /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 
