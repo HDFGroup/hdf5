@@ -175,9 +175,6 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
 
     *pp = p_ret + H5G_SIZEOF_ENTRY_FILE(f);
 
-    if (H5_IS_BUFFER_OVERFLOW(*pp, 1, p_end))
-        HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_ent_decode() */
