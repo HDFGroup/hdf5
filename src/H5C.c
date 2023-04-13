@@ -115,6 +115,8 @@ static void  *H5C__load_entry(H5F_t *f,
 
 static herr_t H5C__mark_flush_dep_dirty(H5C_cache_entry_t *entry);
 static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t *entry);
+static herr_t H5C__mark_flush_dep_serialized(H5C_cache_entry_t *entry);
+static herr_t H5C__mark_flush_dep_unserialized(H5C_cache_entry_t *entry);
 
 static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
 static herr_t H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
@@ -7353,7 +7355,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5C__mark_flush_dep_serialized(H5C_cache_entry_t *entry_ptr)
 {
     int    i;                   /* Local index variable */
@@ -7403,7 +7405,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5C__mark_flush_dep_unserialized(H5C_cache_entry_t *entry_ptr)
 {
     unsigned u;                   /* Local index variable */
