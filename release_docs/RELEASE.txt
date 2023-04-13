@@ -147,7 +147,7 @@ Support for new platforms, languages and compilers
 ==================================================
     -
     
-Bug Fixes since HDF5-1.13.3 release
+Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
@@ -162,6 +162,15 @@ Bug Fixes since HDF5-1.13.3 release
 
       (DER - 2023/04/13 GH-2605)
 
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      (BMR - 2023/04/12 GH-2603)
+
     - Memory leak
 
       Memory leak was detected when running h5dump with "pov".  The memory was allocated
@@ -174,7 +183,6 @@ Bug Fixes since HDF5-1.13.3 release
       cont_msg_info->msgs needs to be freed.
 
       (VC - 2023/04/11 GH-2599)
-
 
     - Fixed memory leaks that could occur when reading a dataset from a
       malformed file
