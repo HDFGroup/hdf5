@@ -59,12 +59,6 @@
 #define H5C_FLUSH_DEP_PARENT_INIT 8
 
 
-/* Set to TRUE to enable the slist optimization.  If this field is TRUE,
- * the slist is disabled whenever a flush is not in progress.
- */
-#define H5C__SLIST_OPT_ENABLED                  TRUE
-
-
 /****************************************************************************
  *
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
@@ -1417,12 +1411,12 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
 
-#define ENTRY_IN_SLIST(cache_ptr, entry_ptr) \
-    H5C_entry_in_skip_list((cache_ptr), (entry_ptr))
+#define H5C_ENTRY_IN_SLIST(cache_ptr, entry_ptr) \
+    H5C__entry_in_skip_list((cache_ptr), (entry_ptr))
 
 #else /* H5C_DO_SLIST_SANITY_CHECKS */
 
-#define ENTRY_IN_SLIST(cache_ptr, entry_ptr) FALSE
+#define H5C_ENTRY_IN_SLIST(cache_ptr, entry_ptr) FALSE
 
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
@@ -1440,7 +1434,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         HDassert( (entry_ptr)->size > 0 );                                     \
         HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
         HDassert( !((entry_ptr)->in_slist) );                                  \
-        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        HDassert( ! H5C_ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
         HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
         HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                       \
         HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=            \
@@ -1483,7 +1477,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
                                                                                \
         HDassert( (entry_ptr) );                                               \
         HDassert( (entry_ptr)->size > 0 );                                     \
-        HDassert( ! ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
+        HDassert( ! H5C_ENTRY_IN_SLIST((cache_ptr), (entry_ptr)) );                \
         HDassert( H5F_addr_defined((entry_ptr)->addr) );                       \
         HDassert( !((entry_ptr)->in_slist) );                                  \
         HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                    \
@@ -4617,8 +4611,6 @@ H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr,
     unsigned flags);
 H5_DLL herr_t H5C__generate_cache_image(H5F_t *f, H5C_t *cache_ptr);
 H5_DLL herr_t H5C__load_cache_image(H5F_t *f);
-H5_DLL herr_t H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr);
-H5_DLL herr_t H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry_ptr);
 H5_DLL herr_t H5C__make_space_in_cache(H5F_t * f, size_t space_needed,
     hbool_t write_permitted);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f);
@@ -4629,6 +4621,16 @@ H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_
 /* Routines for operating on entry tags */
 H5_DLL herr_t H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr);
 H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
+
+#ifdef H5C_DO_SLIST_SANITY_CHECKS
+H5_DLL hbool_t H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
+#endif
+
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
+H5_DLL herr_t H5C__validate_lru_list(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__validate_pinned_entry_list(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__validate_protected_entry_list(H5C_t *cache_ptr);
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 /* Testing functions */
 #ifdef H5C_TESTING
