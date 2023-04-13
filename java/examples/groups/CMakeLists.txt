@@ -66,6 +66,7 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
+  set (last_test "")
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")
       if (example STREQUAL "H5Ex_G_Compact")
@@ -87,6 +88,9 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
           NAME JAVA_groups-${example}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E echo "${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5 exists"
       )
+    endif ()
+    if (last_test)
+      set_tests_properties (JAVA_groups-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif ()
 
     add_test (
@@ -133,5 +137,9 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
           DEPENDS JAVA_groups-${example}
       )
     endif ()
+    if (last_test)
+      set_tests_properties (JAVA_groups-${example}-clean-objects PROPERTIES DEPENDS ${last_test})
+    endif ()
+    set (last_test "JAVA_groups-${example}-clean-objects")
   endforeach ()
 endif ()
