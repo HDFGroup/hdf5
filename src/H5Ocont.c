@@ -74,32 +74,29 @@ H5FL_DEFINE(H5O_cont_t);
  * Purpose:     Decode the raw header continuation message.
  *
  * Return:      Success:        Ptr to the new native message
- *
  *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                 unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_cont_t *cont      = NULL;
-    void       *ret_value = NULL; /* Return value */
+    H5O_cont_t    *cont      = NULL;
+    const uint8_t *p_end     = p + p_size - 1;
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
     /* Allocate space for the message */
     if (NULL == (cont = H5FL_MALLOC(H5O_cont_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(cont->addr));
     H5F_DECODE_LENGTH(f, p, cont->size);
     cont->chunkno = 0;
@@ -108,6 +105,8 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     ret_value = cont;
 
 done:
+    if (NULL == ret_value && NULL != cont)
+        H5FL_FREE(H5O_cont_t, cont);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cont_decode() */
 
