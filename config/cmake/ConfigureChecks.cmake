@@ -240,6 +240,7 @@ if (MINGW OR NOT WINDOWS)
     set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
 
     option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
+    mark_as_advanced (HDF_ENABLE_LARGE_FILE)
     if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
       set (msg "Performing TEST_LFS_WORKS")
       try_run (TEST_LFS_WORKS_RUN   TEST_LFS_WORKS_COMPILE
@@ -568,6 +569,7 @@ endif ()
 # Option for --enable-strict-format-checks
 #-----------------------------------------------------------------------------
 option (HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF)
+mark_as_advanced (HDF5_STRICT_FORMAT_CHECKS)
 if (HDF5_STRICT_FORMAT_CHECKS)
   set (${HDF_PREFIX}_STRICT_FORMAT_CHECKS 1)
 endif ()
@@ -580,6 +582,7 @@ MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 # support denormalized floating values) to maximize speed.
 #-----------------------------------------------------------------------------
 option (HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON)
+mark_as_advanced (HDF5_WANT_DATA_ACCURACY)
 if (HDF5_WANT_DATA_ACCURACY)
   set (${HDF_PREFIX}_WANT_DATA_ACCURACY 1)
 endif ()
@@ -592,6 +595,7 @@ MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
 # actually benefit little.
 #-----------------------------------------------------------------------------
 option (HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" ON)
+mark_as_advanced (HDF5_WANT_DCONV_EXCEPTION)
 if (HDF5_WANT_DCONV_EXCEPTION)
   set (${HDF_PREFIX}_WANT_DCONV_EXCEPTION 1)
 endif ()
@@ -601,6 +605,7 @@ MARK_AS_ADVANCED (HDF5_WANT_DCONV_EXCEPTION)
 # Check if they would like the function stack support compiled in
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF)
+mark_as_advanced (HDF5_ENABLE_CODESTACK)
 if (HDF5_ENABLE_CODESTACK)
   set (${HDF_PREFIX}_HAVE_CODESTACK 1)
 endif ()
@@ -610,6 +615,7 @@ MARK_AS_ADVANCED (HDF5_ENABLE_CODESTACK)
 # Check if they would like to use file locking by default
 #-----------------------------------------------------------------------------
 option (HDF5_USE_FILE_LOCKING "Use file locking by default (mainly for SWMR)" ON)
+mark_as_advanced (HDF5_USE_FILE_LOCKING)
 if (HDF5_USE_FILE_LOCKING)
   set (${HDF_PREFIX}_USE_FILE_LOCKING 1)
 endif ()
@@ -618,6 +624,7 @@ endif ()
 # Check if they would like to ignore file locks when disabled on a file system
 #-----------------------------------------------------------------------------
 option (HDF5_IGNORE_DISABLED_FILE_LOCKS "Ignore file locks when disabled on file system" ON)
+mark_as_advanced (HDF5_IGNORE_DISABLED_FILE_LOCKS)
 if (HDF5_IGNORE_DISABLED_FILE_LOCKS)
   set (${HDF_PREFIX}_IGNORE_DISABLED_FILE_LOCKS 1)
 endif ()
