@@ -1148,7 +1148,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
                 /* Check if type conversion buffer is needed for this dataset */
                 if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
-                    /* Add size of this dataset's type covnersion buffer to the global type conversion buffer
+                    /* Add size of this dataset's type conversion buffer to the global type conversion buffer
                      * size */
                     io_info->tconv_buf_size += io_info->dsets_info[i].nelmts *
                                                MAX(type_info->src_type_size, type_info->dst_type_size);
@@ -1468,7 +1468,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                     /* Allocate background buffer with the same size as the type conversion buffer.  We can do
                      * this since the number of elements that fit in the type conversion buffer will never be
                      * larger than the number that could fit in a background buffer of equal size, since the
-                     * tconv elemnt size is max(src, dst) and the bkg element size is dst */
+                     * tconv element size is max(src, dst) and the bkg element size is dst */
                     if (NULL == (io_info->bkg_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                     "memory allocation failed for background conversion")
