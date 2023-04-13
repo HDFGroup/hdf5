@@ -7050,7 +7050,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_entry_in_skip_list
+ * Function:    H5C__entry_in_skip_list
  *
  * Purpose:     Debugging function that scans skip list to see if it
  *        is in present.  We need this, as it is possible for
@@ -7065,11 +7065,15 @@ done:
  */
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
 hbool_t
-H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
+H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 {
     H5SL_node_t *node_ptr;
     hbool_t      in_slist;
+    hbool_t      ret_value;
 
+    FUNC_ENTER_PACKAGE
+
+    /* Assertions */
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
@@ -7092,8 +7096,12 @@ H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
             node_ptr = H5SL_next(node_ptr);
     }
 
-    return (in_slist);
-} /* H5C_entry_in_skip_list() */
+    /* Set return value */
+    ret_value = in_slist;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__entry_in_skip_list() */
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
 /*-------------------------------------------------------------------------
