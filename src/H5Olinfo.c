@@ -107,11 +107,11 @@ static void *
 H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    const uint8_t *p_end = p + p_size - 1; /* End of the p buffer */
-    H5O_linfo_t   *linfo = NULL;           /* Link info */
-    unsigned char  index_flags;            /* Flags for encoding link index info */
-    uint8_t        addr_size = H5F_SIZEOF_ADDR(f);  /* Temp var */
-    void          *ret_value = NULL;       /* Return value */
+    const uint8_t *p_end = p + p_size - 1;         /* End of the p buffer */
+    H5O_linfo_t   *linfo = NULL;                   /* Link info */
+    unsigned char  index_flags;                    /* Flags for encoding link index info */
+    uint8_t        addr_size = H5F_SIZEOF_ADDR(f); /* Temp var */
+    void          *ret_value = NULL;               /* Return value */
 
     FUNC_ENTER_PACKAGE
 
