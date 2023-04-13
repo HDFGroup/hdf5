@@ -136,7 +136,9 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
       set_tests_properties (JAVA_groups-${example}-clean-objects PROPERTIES
           DEPENDS JAVA_groups-${example}
       )
+      set (last_test "JAVA_groups-${example}-clean-objects")
+    else ()
+      set (last_test "JAVA_groups-${example}")
     endif ()
-    set (last_test "JAVA_groups-${example}-clean-objects")
   endforeach ()
 endif ()

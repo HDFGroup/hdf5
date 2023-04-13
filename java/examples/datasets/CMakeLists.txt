@@ -141,10 +141,10 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
           COMMAND ${CMAKE_COMMAND} -E remove
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
       )
+    endif ()
     set_tests_properties (JAVA_datasets-${example}-clean-objects PROPERTIES
         DEPENDS JAVA_datasets-${example}
     )
-    endif ()
     set (last_test "JAVA_datasets-${example}-clean-objects")
   endforeach ()
 endif ()
