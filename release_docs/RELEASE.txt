@@ -151,6 +151,16 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed memory leaks, aborts, and overflows in H5O EFL decode
+
+      The external file list code could call assert(), read past buffer
+      boundaries, and not properly clean up resources when parsing malformed
+      external data files messages.
+
+      This fix cleans up allocated memory, adds buffer bounds checks, and
+      converts asserts to HDF5 error checking.
+
+      (DER - 2023/04/13 GH-2605)
 
     - Memory leak
 
