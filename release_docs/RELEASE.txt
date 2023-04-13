@@ -270,7 +270,12 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
-    -
+    - In the tools traverse function - an error in either visit call
+      will bypass the cleanup of the local data variables.
+
+      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
+
+      (ADB - 2023/04/06 GH-2598)
 
 
     Performance
@@ -281,7 +286,6 @@ Bug Fixes since HDF5-1.14.0 release
     Fortran API
     -----------
     -
-
 
     High-Level Library
     ------------------
