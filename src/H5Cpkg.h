@@ -59,12 +59,6 @@
 #define H5C_FLUSH_DEP_PARENT_INIT 8
 
 
-/* Set to TRUE to enable the slist optimization.  If this field is TRUE,
- * the slist is disabled whenever a flush is not in progress.
- */
-#define H5C__SLIST_OPT_ENABLED                  TRUE
-
-
 /****************************************************************************
  *
  * We maintain doubly linked lists of instances of H5C_cache_entry_t for a
