@@ -261,7 +261,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->num_objs_corked = 0;
 
     /* slist field initializations */
-    cache_ptr->slist_enabled = !H5C__SLIST_OPT_ENABLED;
+    cache_ptr->slist_enabled = FALSE;
     cache_ptr->slist_changed = FALSE;
     cache_ptr->slist_len     = 0;
     cache_ptr->slist_size    = (size_t)0;
@@ -2708,8 +2708,6 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
     if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
 
-#if H5C__SLIST_OPT_ENABLED
-
     if (slist_enabled) {
         if (cache_ptr->slist_enabled)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already enabled?")
@@ -2762,12 +2760,6 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
         HDassert(0 == cache_ptr->slist_len);
         HDassert(0 == cache_ptr->slist_size);
     }
-
-#else /* H5C__SLIST_OPT_ENABLED is FALSE */
-
-    HDassert(cache_ptr->slist_enabled);
-
-#endif /* H5C__SLIST_OPT_ENABLED is FALSE */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
