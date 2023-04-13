@@ -291,6 +291,18 @@ Bug Fixes since HDF5-1.14.0 release
 
       (JTH - 2023/02/16, GH #2433)
 
+    - Fixed buffer overflow error in image decoding function.
+
+      The error occurred in the function for decoding address from the specified
+      buffer, which is called many times from the function responsible for image
+      decoding. The length of the buffer is known in the image decoding function,
+      but no checks are produced, so the buffer overflow can occur in many places,
+      including callee functions for address decoding. 
+
+      The error was fixed by inserting corresponding checks for buffer overflow.
+
+      (KE - 2023/02/07 GH #2432)
+
 
     Java Library
     ------------
