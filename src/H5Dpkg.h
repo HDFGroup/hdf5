@@ -88,15 +88,13 @@ typedef struct H5D_type_info_t {
     hid_t        dst_type_id; /* Destination datatype ID */
 
     /* Computed/derived values */
-    size_t                   src_type_size;     /* Size of source type */
-    size_t                   dst_type_size;     /* Size of destination type */
-    hbool_t                  is_conv_noop;      /* Whether the type conversion is a NOOP */
-    hbool_t                  is_xform_noop;     /* Whether the data transform is a NOOP */
-    const H5T_subset_info_t *cmpd_subset;       /* Info related to the compound subset conversion functions */
-    H5T_bkg_t                need_bkg;          /* Type of background buf needed */
-    size_t                   request_nelmts;    /* Requested strip mine */
-    uint8_t                 *bkg_buf;           /* Background buffer */
-    hbool_t                  bkg_buf_allocated; /* Whether the background buffer was allocated */
+    size_t                   src_type_size;  /* Size of source type */
+    size_t                   dst_type_size;  /* Size of destination type */
+    hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
+    hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
+    const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
+    H5T_bkg_t                need_bkg;       /* Type of background buf needed */
+    size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
 
 /* Forward declaration of structs used below */
@@ -271,9 +269,12 @@ typedef struct H5D_io_info_t {
     H5D_selection_io_mode_t use_select_io;       /* Whether to use selection I/O */
     uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
+    size_t                  tconv_buf_size;      /* Size of type conversion buffer */
+    uint8_t                *bkg_buf;             /* Background buffer */
+    hbool_t                 bkg_buf_allocated;   /* Whether the background buffer was allocated */
+    size_t                  bkg_buf_size;        /* Size of background buffer */
     size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
                                    conversion */
-    size_t tconv_buf_size;      /* Size of type conversion buffer */
     hbool_t
         must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 #ifdef H5_HAVE_PARALLEL
