@@ -529,7 +529,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
         } /* end if */
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, dset_info->type_info.bkg_buf /*out*/);
+                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
             } /* end if */
@@ -539,7 +539,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -673,7 +673,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
                 n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts,
-                                     dset_info->type_info.bkg_buf /*out*/);
+                                     io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
@@ -697,7 +697,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
@@ -743,7 +743,6 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     hbool_t             mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     void              **tmp_bufs       = NULL;  /* Buffers to use for read from disk */
     size_t              buf_bytes_used = 0; /* Number of bytes used so far in conversion/background buffer */
-    H5D_dset_io_info_t *last_bkg_buf_dset = NULL; /* Index of last dset that used a background buffer */
     size_t              i;                        /* Local index variable */
     herr_t              ret_value = SUCCEED;      /* Return value		*/
 
@@ -797,6 +796,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             tmp_bufs[i] = io_info->tconv_buf + buf_bytes_used;
             buf_bytes_used += io_info->sel_pieces[i]->piece_points *
                               MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+            HDassert(buf_bytes_used <= io_info->tconv_buf_size);
         }
     }
 
@@ -805,6 +805,9 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added, tmp_mem_spaces,
                                io_info->file_spaces, io_info->addrs, io_info->element_sizes, tmp_bufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
+
+    /* Reset buf_bytes_used so we can use it for the background buffer */
+    buf_bytes_used = 0;
 
     /* Perform type conversion and scatter data to memory buffers for datasets that need this */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -839,19 +842,13 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
 
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
-                    HDassert(dset_info->type_info.bkg_buf);
-
-                    /* Check if we moved to a new background buffer */
-                    if (dset_info != last_bkg_buf_dset) {
-                        /* Reset buf_bytes_used */
-                        buf_bytes_used    = 0;
-                        last_bkg_buf_dset = dset_info;
-                    }
+                    HDassert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
-                    tmp_bkg_buf = dset_info->type_info.bkg_buf + buf_bytes_used;
+                    tmp_bkg_buf = io_info->bkg_buf + buf_bytes_used;
                     buf_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(buf_bytes_used <= io_info->bkg_buf_size);
 
                     /* Gather data from read buffer to background buffer if necessary */
                     if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
@@ -955,7 +952,6 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     const void        **write_bufs        = NULL;  /* Buffers to use for write to disk */
     size_t              tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
     size_t              bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
-    H5D_dset_io_info_t *last_bkg_buf_dset = NULL;  /* Index of last dset that used a background buffer */
     H5S_t             **bkg_mem_spaces    = NULL;  /* Array of memory spaces for read to background buffer */
     H5S_t             **bkg_file_spaces   = NULL;  /* Array of file spaces for read to background buffer */
     haddr_t            *bkg_addrs         = NULL;  /* Array of file addresses for read to background buffer */
@@ -1029,6 +1025,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             write_bufs[i] = (const void *)tmp_write_buf;
             tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
                                 MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+            HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
 
             /* Gather data from application buffer into the datatype conversion buffer */
             if ((size_t)io_info->sel_pieces[i]->piece_points !=
@@ -1036,11 +1033,11 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                                 tmp_write_buf /*out*/))
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
-            /* If the source and destination are compound types and the destination is
-             * is a subset of the source and no conversion is needed, copy the data
-             * directly into user's buffer and bypass the rest of steps.  If the source
-             * is a subset of the destination, the optimization is done in conversion
-             * function H5T_conv_struct_opt to protect the background data.
+            /* If the source and destination are compound types and the destination is a subset of
+             * the source and no conversion is needed, copy the data directly into the type
+             * conversion buffer and bypass the rest of steps.  If the source is a subset of the
+             * destination, the optimization is done in conversion function H5T_conv_struct_opt to
+             * protect the background data.
              */
             if (dset_info->type_info.cmpd_subset &&
                 H5T_SUBSET_DST == dset_info->type_info.cmpd_subset->subset &&
@@ -1057,19 +1054,13 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
             else {
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
-                    HDassert(dset_info->type_info.bkg_buf);
-
-                    /* Check if we moved to a new background buffer */
-                    if (dset_info != last_bkg_buf_dset) {
-                        /* Reset bkg_bytes_used */
-                        bkg_bytes_used    = 0;
-                        last_bkg_buf_dset = dset_info;
-                    }
+                    HDassert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
-                    tmp_bkg_buf = dset_info->type_info.bkg_buf + bkg_bytes_used;
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
                     bkg_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
                 }
 
                 /* Set up background buffer read operation if necessary */
