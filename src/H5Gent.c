@@ -117,8 +117,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent,
-	       const uint8_t *p_end)
+H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8_t *p_end)
 {
     const uint8_t *p_ret = *pp;
     uint32_t       tmp;
@@ -156,15 +155,15 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent,
 
         case H5G_CACHED_STAB:
             HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
-	    if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) * 2, p_end))
-		HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
+            if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) * 2, p_end))
+                HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
             H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
             H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
             break;
 
         case H5G_CACHED_SLINK:
-	    if (H5_IS_BUFFER_OVERFLOW(*pp, sizeof(uint32_t), p_end))
-		HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
+            if (H5_IS_BUFFER_OVERFLOW(*pp, sizeof(uint32_t), p_end))
+                HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
             UINT32DECODE(*pp, ent->cache.slink.lval_offset);
             break;
 
