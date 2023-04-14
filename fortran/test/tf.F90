@@ -36,7 +36,7 @@ MODULE TH5_MISC
   INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
-  INTEGER, PARAMETER :: TAB_SPACE = 88 ! Tab spacking for printing results
+  INTEGER, PARAMETER :: TAB_SPACE = 88 ! Tab spacing for printing results
 
   ! generic compound datatype
   TYPE :: comp_datatype
