@@ -89,6 +89,7 @@
  *
  ***********************************************************************/
 #if H5C_COLLECT_CACHE_STATS
+/* clang-format off */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
     (cache_ptr)->images_created++;
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
@@ -112,6 +113,7 @@
 }
 #define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) \
     (cache_ptr)->prefetch_hits++;
+/* clang-format on */
 #else /* H5C_COLLECT_CACHE_STATS */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
