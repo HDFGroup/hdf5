@@ -98,7 +98,11 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(cont->addr));
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, cont->size);
+
     cont->chunkno = 0;
 
     /* Set return value */
