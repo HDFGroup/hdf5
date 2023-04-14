@@ -122,7 +122,6 @@
 #define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-
 /******************/
 /* Local Typedefs */
 /******************/
