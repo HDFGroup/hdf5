@@ -23,6 +23,9 @@ MODULE test_async_APIs
   INTEGER(C_INT), PARAMETER :: op_data_type = 200
   INTEGER(C_INT), PARAMETER :: op_data_command = 99
 
+  LOGICAL :: async_enabled = .TRUE.
+  LOGICAL :: mpi_thread_mult = .TRUE.
+
   ! Custom group iteration callback data
   TYPE, bind(c) ::  iter_info
      CHARACTER(KIND=C_CHAR), DIMENSION(1:12) :: name !  The name of the object
@@ -101,21 +104,32 @@ CONTAINS
 
     CALL H5ESget_count_f(es_id, count, hdferror)
     CALL check("H5ESget_count_f", hdferror, nerrors)
-    CALL VERIFY("H5ESget_count_f", count, 2_SIZE_T,total_error)
+    IF(async_enabled)THEN
+       CALL VERIFY("H5ESget_count_f", count, 2_SIZE_T,total_error)
+    ELSE
+       CALL VERIFY("H5ESget_count_f", count, 0_SIZE_T,total_error)
+    ENDIF
 
     CALL H5ESget_op_counter_f(es_id, counter, hdferror)
     CALL check("H5ESget_op_counter_f", hdferror, nerrors)
-    CALL VERIFY("H5ESget_op_counter_f", counter, 2_C_INT64_T, total_error)
+    IF(async_enabled)THEN
+       CALL VERIFY("H5ESget_op_counter_f", counter, 2_C_INT64_T, total_error)
+    ELSE
+       CALL VERIFY("H5ESget_op_counter_f", counter, 0_C_INT64_T, total_error)
+    ENDIF
 
     CALL H5Pclose_f(fapl_id, hdferror)
     CALL check("h5pclose_f", hdferror, nerrors)
 
     CALL H5Fclose_async_f(file_id, es_id, hdferror)
     CALL check("h5fclose_f", hdferror, nerrors)
-
     CALL H5ESget_count_f(es_id, count, hdferror)
     CALL check("H5ESget_count_f", hdferror, nerrors)
-    CALL VERIFY("H5ESget_count_f", count, 3_SIZE_T,total_error)
+    IF(async_enabled)THEN
+       CALL VERIFY("H5ESget_count_f", count, 3_SIZE_T,total_error)
+    ELSE
+       CALL VERIFY("H5ESget_count_f", count, 0_SIZE_T,total_error)
+    ENDIF
 
     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
     CALL check("H5ESwait_f", hdferror, nerrors)
@@ -1248,11 +1262,9 @@ PROGRAM async_test
      nerrors = nerrors + 1
   ENDIF
   IF (provided .NE. required) THEN
-     total_error = -1 ! skip test
-     IF(mpi_rank==0) CALL write_test_status(total_error, &
-          "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE", total_error)
-     STOP
+     mpi_thread_mult = .FALSE.
   ENDIF
+
   CALL mpi_comm_rank( MPI_COMM_WORLD, mpi_rank, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_COMM_RANK  *FAILED* Process = ", mpi_rank
@@ -1271,10 +1283,13 @@ PROGRAM async_test
      CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
   ENDIF
 
+  IF(mpi_rank==0) CALL write_test_header("ASYNC FORTRAN TESTING")
+
   !
   ! Initialize the HDF5 fortran interface
   !
   CALL h5open_f(hdferror)
+
 
   ! CHECK ASYNC VOLS AVAILABILITY
   !
@@ -1289,8 +1304,8 @@ PROGRAM async_test
      CALL check("H5VLis_connector_registered_by_name_f", hdferror, total_error)
 
      IF(.NOT.registered)THEN
-        ! No async compatible VOL found, skipping test
-        total_error = -1
+        ! No async compatible VOL found
+        async_enabled = .FALSE.
      ELSE
         CALL H5Vlregister_connector_by_name_f("daos", vol_id, hdferror)
         CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
@@ -1301,11 +1316,20 @@ PROGRAM async_test
      CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
   ENDIF
 
-  IF(total_error.LT.0)THEN
+  IF ( (async_enabled .EQV. .TRUE.) .AND. (mpi_thread_mult .EQV. .FALSE.) ) THEN
+     total_error = -1 ! Skip test
      IF(mpi_rank==0) CALL write_test_status(total_error, &
-          'Testing async APIs', total_error)
+          "No MPI_Init_thread support for MPI_THREAD_MULTIPLE", total_error)
+     CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
+     CALL MPI_Finalize(mpierror)
      STOP
   ENDIF
+
+!  IF(total_error.LT.0)THEN
+!     IF(mpi_rank==0) CALL write_test_status(total_error, &
+!          'Testing async APIs', total_error)
+!     STOP
+!  ENDIF
 
   ! H5ES API TESTING
   ret_total_error = 0
@@ -1349,8 +1373,10 @@ PROGRAM async_test
   IF(mpi_rank==0) CALL write_test_status(ret_total_error, &
        'H5O async API tests', total_error)
 
-  CALL H5VLclose_f(vol_id, hdferror)
-  CALL check("H5VLclose_f", hdferror, total_error)
+  IF(async_enabled)THEN
+     CALL H5VLclose_f(vol_id, hdferror)
+     CALL check("H5VLclose_f", hdferror, total_error)
+  ENDIF
 
   !
   ! close HDF5 interface
@@ -1358,6 +1384,8 @@ PROGRAM async_test
   CALL h5close_f(hdferror)
 
   CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
+
+  IF(mpi_rank==0) CALL write_test_footer()
 
   !
   ! close MPI
