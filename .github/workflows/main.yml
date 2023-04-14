@@ -434,12 +434,12 @@ jobs:
       #
 
       - name: Autotools Build
-        run: make
+        run: make -j3
         working-directory: ${{ runner.workspace }}/build
         if: matrix.generator == 'autogen'
 
       - name: CMake Build
-        run: cmake --build . --config ${{ matrix.build_mode.cmake }}
+        run: cmake --build . --parallel 3 --config ${{ matrix.build_mode.cmake }}
         working-directory: ${{ runner.workspace }}/build
         if: matrix.generator != 'autogen'
 
@@ -448,12 +448,12 @@ jobs:
       #
 
       - name: Autotools Run Tests
-        run: make check
+        run: make check -j2
         working-directory: ${{ runner.workspace }}/build
         if: (matrix.generator == 'autogen') && (matrix.run_tests)
 
       - name: CMake Run Tests
-        run: ctest --build . -C ${{ matrix.build_mode.cmake }} -V
+        run: ctest --build . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
         if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
