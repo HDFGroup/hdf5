@@ -80,6 +80,48 @@
 /* Maximum ring allowed in image */
 #define H5C_MAX_RING_IN_IMAGE H5C_RING_MDFSM
 
+/***********************************************************************
+ *
+ * Stats collection macros
+ *
+ * The following macros must handle stats collection when collection
+ * is enabled, and evaluate to the empty string when it is not.
+ *
+ ***********************************************************************/
+#if H5C_COLLECT_CACHE_STATS
+/* clang-format off */
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
+    (cache_ptr)->images_created++;
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
+{                                                          \
+    /* make sure image len is still good */                \
+    HDassert((cache_ptr)->image_len > 0);                  \
+    (cache_ptr)->images_read++;                            \
+}
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
+{                                                          \
+    /* make sure image len is still good */                \
+    HDassert((cache_ptr)->image_len > 0);                  \
+    (cache_ptr)->images_loaded++;                          \
+    (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
+}
+#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty) \
+{                                                        \
+    (cache_ptr)->prefetches++;                           \
+    if (dirty)                                           \
+        (cache_ptr)->dirty_prefetches++;                 \
+}
+#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) \
+    (cache_ptr)->prefetch_hits++;
+/* clang-format on */
+#else /* H5C_COLLECT_CACHE_STATS */
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)
+#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty)
+#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
+#endif /* H5C_COLLECT_CACHE_STATS */
+
 /******************/
 /* Local Typedefs */
 /******************/
