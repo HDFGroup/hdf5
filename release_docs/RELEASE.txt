@@ -147,10 +147,29 @@ Support for new platforms, languages and compilers
 ==================================================
     -
     
-Bug Fixes since HDF5-1.13.3 release
+Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed memory leaks, aborts, and overflows in H5O EFL decode
+
+      The external file list code could call assert(), read past buffer
+      boundaries, and not properly clean up resources when parsing malformed
+      external data files messages.
+
+      This fix cleans up allocated memory, adds buffer bounds checks, and
+      converts asserts to HDF5 error checking.
+
+      (DER - 2023/04/13 GH-2605)
+
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      (BMR - 2023/04/12 GH-2603)
 
     - Memory leak
 
@@ -164,7 +183,6 @@ Bug Fixes since HDF5-1.13.3 release
       cont_msg_info->msgs needs to be freed.
 
       (VC - 2023/04/11 GH-2599)
-
 
     - Fixed memory leaks that could occur when reading a dataset from a
       malformed file
@@ -272,6 +290,18 @@ Bug Fixes since HDF5-1.13.3 release
       library. 
 
       (JTH - 2023/02/16, GH #2433)
+
+    - Fixed buffer overflow error in image decoding function.
+
+      The error occurred in the function for decoding address from the specified
+      buffer, which is called many times from the function responsible for image
+      decoding. The length of the buffer is known in the image decoding function,
+      but no checks are produced, so the buffer overflow can occur in many places,
+      including callee functions for address decoding. 
+
+      The error was fixed by inserting corresponding checks for buffer overflow.
+
+      (KE - 2023/02/07 GH #2432)
 
 
     Java Library
