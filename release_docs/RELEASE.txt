@@ -184,6 +184,38 @@ Bug Fixes since HDF5-1.14.0 release
 
       (JTH - 2023/03/15)
 
+    - Memory leak
+
+      Memory leak was detected when running h5dump with "pov".  The memory was allocated
+      via H5FL__malloc() in hdf5/src/H5FL.c
+
+      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
+      When deserializing the object header chunks for the file, memory is allocated for the
+      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
+      As error is encountered in loading the illegal message, the memory allocated for
+      cont_msg_info->msgs needs to be freed.
+
+      (VC - 2023/04/11 GH-2599)
+
+    - Fixed a heap buffer overflow that occurs when reading from
+      a dataset with a compact layout within a malformed HDF5 file
+
+      During opening of a dataset that has a compact layout, the
+      library allocates a buffer that stores the dataset's raw data.
+      The dataset's object header that gets written to the file
+      contains information about how large of a buffer the library
+      should allocate. If this object header is malformed such that
+      it causes the library to allocate a buffer that is too small
+      to hold the dataset's raw data, future I/O to the dataset can
+      result in heap buffer overflows. To fix this issue, an extra
+      check is now performed for compact datasets to ensure that
+      the size of the allocated buffer matches the expected size
+      of the dataset's raw data (as calculated from the dataset's
+      dataspace and datatype information). If the two sizes do not
+      match, opening of the dataset will fail.
+
+      (JTH - 2023/04/04, GH-2606)
+
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
       dataspace and a point selection in the memory dataspace
