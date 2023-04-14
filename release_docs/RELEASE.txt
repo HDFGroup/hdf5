@@ -151,6 +151,18 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed memory leaks when processing malformed object header continuation messages
+
+      Malformed object header continuation messages can result in a too-small
+      buffer being passed to the decode function, which could lead to reading
+      past the end of the buffer. Additionally, errors in processing these
+      malformed messages can lead to allocated memory not being cleaned up.
+
+      This fix adds bounds checking and cleanup code to the object header
+      continuation message processing.
+
+      (DER - 2023/04/13 GH-2604)
+
     - Fixed memory leaks, aborts, and overflows in H5O EFL decode
 
       The external file list code could call assert(), read past buffer
@@ -196,7 +208,8 @@ Bug Fixes since HDF5-1.14.0 release
 
     - Fixed potential heap buffer overrun in group info header decoding from malformed file
 
-      H5O__ginfo_decode could sometimes read past allocated memory when parsing a group info message from the header of a malformed file.
+      H5O__ginfo_decode could sometimes read past allocated memory when parsing a
+      group info message from the header of a malformed file.
   
       It now checks buffer size before each read to properly throw an error in these cases.
   
