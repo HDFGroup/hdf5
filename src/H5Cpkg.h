@@ -596,34 +596,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr) \
     (cache_ptr)->index_scan_restarts++;
 
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
-    (cache_ptr)->images_created++;
-
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
-{                                                          \
-    /* make sure image len is still good */                \
-    HDassert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_read++;                            \
-}
-
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
-{                                                          \
-    /* make sure image len is still good */                \
-    HDassert((cache_ptr)->image_len > 0);                  \
-    (cache_ptr)->images_loaded++;                          \
-    (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
-}
-
-#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty) \
-{                                                        \
-    (cache_ptr)->prefetches++;                           \
-    if (dirty)                                           \
-        (cache_ptr)->dirty_prefetches++;                 \
-}
-
-#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) \
-    (cache_ptr)->prefetch_hits++;
-
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
 #define H5C__RESET_CACHE_ENTRY_STATS(entry_ptr) \
@@ -831,11 +803,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)
-#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty)
-#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_STATS */
 
