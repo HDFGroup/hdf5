@@ -1847,13 +1847,16 @@ H5C_resize_entry(void *thing, size_t new_size)
 
         /* update the pinned and/or protected entry list */
         if (entry_ptr->is_pinned)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pel_len, cache_ptr->pel_size, entry_ptr->size, new_size, FAIL)
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pel_len, cache_ptr->pel_size, entry_ptr->size,
+                                            new_size, FAIL)
         if (entry_ptr->is_protected)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pl_len, cache_ptr->pl_size, entry_ptr->size, new_size, FAIL)
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pl_len, cache_ptr->pl_size, entry_ptr->size, new_size,
+                                            FAIL)
 
 #ifdef H5_HAVE_PARALLEL
         if (entry_ptr->coll_access)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->coll_list_len, cache_ptr->coll_list_size, entry_ptr->size, new_size, FAIL)
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->coll_list_len, cache_ptr->coll_list_size,
+                                            entry_ptr->size, new_size, FAIL)
 #endif /* H5_HAVE_PARALLEL */
 
         /* update statistics just before changing the entry size */
@@ -8080,7 +8083,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
             H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_len);
 
             /* Update the hash table for the size change */
-            H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_len, entry_ptr, !entry_ptr->is_dirty, FAIL);
+            H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_len, entry_ptr,
+                                              !entry_ptr->is_dirty, FAIL);
 
             /* The entry can't be protected since we are in the process of
              * flushing it.  Thus we must update the replacement policy data
