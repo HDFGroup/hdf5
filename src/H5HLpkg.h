@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol
- *             Wednesday, July 9, 2003
- *
  * Purpose:     This file contains declarations which are visible
  *              only within the H5HL package. Source files outside the
  *              H5HL package should include H5HLprivate.h instead.

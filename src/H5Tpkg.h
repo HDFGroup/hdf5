@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5T package.  Source files outside the H5T package should
- *		include H5Tprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5T package.  Source files outside the H5T package should
+ *          include H5Tprivate.h instead.
  */
 #if !(defined H5T_FRIEND || defined H5T_MODULE)
 #error "Do not include this file outside the H5T package!"
