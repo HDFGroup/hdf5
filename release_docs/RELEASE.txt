@@ -223,6 +223,16 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
+    - Fix for CVE-2019-8396
+
+      Malformed HDF5 files may have truncated content which does not match
+      the expected size. When H5O__pline_decode() attempts to decode these it
+      may read past the end of the allocated space leading to heap overflows
+      as bounds checking is incomplete.
+
+      The fix ensures each element is within bounds before reading.
+
+      (2023/04/13 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
 
     - Memory leak
 
