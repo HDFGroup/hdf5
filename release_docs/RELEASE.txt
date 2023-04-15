@@ -231,6 +231,25 @@ Bug Fixes since HDF5-1.12.1 release
 
       (JTH - 2023/04/05)
 
+    - Fixed a heap buffer overflow that occurs when reading from
+      a dataset with a compact layout within a malformed HDF5 file
+
+      During opening of a dataset that has a compact layout, the
+      library allocates a buffer that stores the dataset's raw data.
+      The dataset's object header that gets written to the file
+      contains information about how large of a buffer the library
+      should allocate. If this object header is malformed such that
+      it causes the library to allocate a buffer that is too small
+      to hold the dataset's raw data, future I/O to the dataset can
+      result in heap buffer overflows. To fix this issue, an extra
+      check is now performed for compact datasets to ensure that
+      the size of the allocated buffer matches the expected size
+      of the dataset's raw data (as calculated from the dataset's
+      dataspace and datatype information). If the two sizes do not
+      match, opening of the dataset will fail.
+
+      (JTH - 2023/04/04, GH-2606)
+
     - Fix for CVE-2019-8396
 
       Malformed HDF5 files may have truncated content which does not match
