@@ -145,6 +145,8 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
        symbolic links are compared.).
 
  Subsetting options:
+  --no-compact-subset  Disable compact form of subsetting and allow the use
+                          of "[" in dataset names.
   Subsetting is available by using the fcompact form of subsetting, as follows:
     obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]
   It is not required to use all parameters, but until the last parameter value used,
