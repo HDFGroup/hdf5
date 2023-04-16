@@ -365,7 +365,7 @@ Bug Fixes since HDF5-1.14.0 release
       h5diff did not have this option and now it has been added.
 >>>>>>> 30b87dd Sentence syntax
 
-      (ADB - 2023/04/08 GH-2598)
+      Fixes GitHub issue #2682
 
     - In the tools traverse function - an error in either visit call
       will bypass the cleanup of the local data variables.
