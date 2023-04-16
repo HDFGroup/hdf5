@@ -122,7 +122,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S__point_iter_init,
 }};
 
-/* Format version bounds for dataspace hyperslab selection */
+/* Format version bounds for dataspace point selection */
 const unsigned H5O_sds_point_ver_bounds[] = {
     H5S_POINT_VERSION_1, /* H5F_LIBVER_EARLIEST */
     H5S_POINT_VERSION_1, /* H5F_LIBVER_V18 */
