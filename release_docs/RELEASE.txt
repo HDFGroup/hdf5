@@ -201,10 +201,19 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.12.1 release
+Bug Fixes since HDF5-1.12.2 release
 ===================================
     Library
     -------
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      (GH-2603 - 2023/04/16)
+
     - Fixed potential buffer overrun issues in some object header decode routines
 
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
