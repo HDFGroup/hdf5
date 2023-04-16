@@ -55,8 +55,6 @@ New Features
       default for parallel debug builds and off by default for other build types.
       CMake has been updated to match this behavior.
 
-      (JTH - 2023/03/29)
-
     - Added new option to build libaec and zlib inline with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
@@ -80,8 +78,6 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
-      (ADB - 2023/02/21)
-
 
     Library:
     --------
@@ -94,8 +90,6 @@ New Features
       for cases where the application wishes to write subfiles to a
       machine's node-local storage while placing the subfiling configuration
       file on a file system readable by all machine nodes.
-
-      (JTH - 2023/02/22)
 
 
     Parallel Library:
@@ -144,8 +138,6 @@ New Features
 
       Added new dox file, VOLConnGuide.dox.
 
-      (ADB - 2022/12/20)
-
 
 Support for new platforms, languages and compilers
 ==================================================
@@ -161,8 +153,6 @@ Bug Fixes since HDF5-1.14.0 release
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
       ensure that memory buffers don't get overrun when decoding buffers read from
       a (possibly corrupted) HDF5 file.
-
-      (JTH - 2023/04/05)
 
     - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
       or SELECT_IOC_TOTAL I/O concentrator selection strategies
@@ -182,8 +172,6 @@ Bug Fixes since HDF5-1.14.0 release
       Also added a regression test for these two I/O concentrator selection
       strategies to prevent future issues. 
 
-      (JTH - 2023/03/15)
-
     - Memory leak
 
       Memory leak was detected when running h5dump with "pov".  The memory was allocated
@@ -195,7 +183,7 @@ Bug Fixes since HDF5-1.14.0 release
       As error is encountered in loading the illegal message, the memory allocated for
       cont_msg_info->msgs needs to be freed.
 
-      (VC - 2023/04/11 GH-2599)
+      Fixes GitHub issue #2599
 
     - Fixed a heap buffer overflow that occurs when reading from
       a dataset with a compact layout within a malformed HDF5 file
@@ -214,7 +202,7 @@ Bug Fixes since HDF5-1.14.0 release
       dataspace and datatype information). If the two sizes do not
       match, opening of the dataset will fail.
 
-      (JTH - 2023/04/04, GH-2606)
+      Fixes GitHub issue #2606
 
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
@@ -227,8 +215,6 @@ Bug Fixes since HDF5-1.14.0 release
       could occur due to an incorrect number of selection points
       being copied when projecting the point selection onto the
       hyperslab selection's dataspace.
-
-      (JTH - 2023/03/23)
 
     - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
       or SELECT_IOC_TOTAL I/O concentrator selection strategies
@@ -248,8 +234,6 @@ Bug Fixes since HDF5-1.14.0 release
       Also added a regression test for these two I/O concentrator selection
       strategies to prevent future issues. 
 
-      (JTH - 2023/03/15)
-
     - Fixed an issue with collective metadata writes of global heap data
 
       New test failures in parallel netCDF started occurring with debug
@@ -263,7 +247,7 @@ Bug Fixes since HDF5-1.14.0 release
       to treat global heap metadata as raw data, as done elsewhere in the
       library. 
 
-      (JTH - 2023/02/16, GH #2433)
+      Fixes GitHub issue #2433
 
     - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
 
@@ -276,7 +260,7 @@ Bug Fixes since HDF5-1.14.0 release
       The test case was crafted in a way that the overflow caused the
       size to be 0.
 
-      (EFE - 2023/02/11 GH-2458)
+      Fixes GitHub issue #2458
 
 
     Java Library
@@ -302,7 +286,7 @@ Bug Fixes since HDF5-1.14.0 release
       that use HDF5 and try to use or parse information out of these files after
       deleting temporary HDF5 build directories.
 
-      (JTH - 2023/04/05 GH-2422, GH-2621)
+      Fixes GitHub issues #2422 and #2621
 
     - Correct the CMake generated pkg-config file
 
@@ -315,7 +299,7 @@ Bug Fixes since HDF5-1.14.0 release
       supported pkconfig files. Still recommend that the CMake config file method
       be used for building projects with CMake.
 
-      (ADB - 2023/02/16 GH-1546,GH-2259)
+      Fixes GitHub issues #1546 and #2259
 
 
     Tools
@@ -325,7 +309,7 @@ Bug Fixes since HDF5-1.14.0 release
 
       Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
 
-      (ADB - 2023/04/06 GH-2598)
+      Fixes GitHub issue #2598
 
 
     Performance
