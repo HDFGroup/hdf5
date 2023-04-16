@@ -64,12 +64,12 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
  * Purpose:     Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_btreek_t struct.
  *
- * Return:      Success:    Pointer to new message in native struct.
+ * Return:      Success:    Pointer to new message in native struct
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__btreek_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+H5O__btreek_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     const uint8_t *p_end     = p + p_size - 1; /* End of input buffer */
