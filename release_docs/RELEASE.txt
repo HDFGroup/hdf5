@@ -55,8 +55,6 @@ New Features
       default for parallel debug builds and off by default for other build types.
       CMake has been updated to match this behavior.
 
-      (JTH - 2023/03/29)
-
     - Added new option to build libaec and zlib inline with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
@@ -80,8 +78,6 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
-      (ADB - 2023/02/21)
-
     - Add new CMake configuration variable HDF5_USE_GNU_DIRS
 
       HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
@@ -89,8 +85,6 @@ New Features
       documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
       sets various PATH variables for use during the build, test and install processes.
       By default, the historical settings for these variables will be used.
-
-      (ADB - 2022/10/21, GH-2175, GH-1716)
 
     - Correct the usage of CMAKE_Fortran_MODULE_DIRECTORY and where to
       install Fortran mod files.
@@ -105,8 +99,6 @@ New Features
       Autotools configure uses the -fmoddir option to specify the folder.
       CMake will use "mod" folder by default unless overridden by the CMake
       variable; HDF5_INSTALL_MODULE_DIR.
-
-      (ADB - 2022/07/21)
 
 
     Library:
@@ -137,14 +129,10 @@ New Features
       object among those HDF5 files which are open. This is no longer valid in future
       HDF5 releases.
 
-      (ADB - 2023/03/27)
-
     - Added version of H5Rget_name to return the name as a Java string.
 
       Other functions that get_name process the get_size then get the name
       within the JNI implementation. Now H5Rget_name has a H5Rget_name_string.
-
-      (ADB - 2022/07/12)
 
     - Added reference support to H5A and H5D read write vlen JNI functions.
 
@@ -155,7 +143,7 @@ New Features
       structures. The wrappers use the specified datatype arguments for the
       List type translation, it is expected that the Java type is correct.
 
-      (ADB - 2022/07/11, HDFFV-11318)
+      Fixes Jira issue HDFFV-11318
 
     - H5A and H5D read write vlen JNI functions were incorrect.
 
@@ -169,15 +157,13 @@ New Features
       structures. The wrappers use the specified datatype arguments for the
       List type translation, it is expected that the Java type is correct.
 
-      (ADB - 2022/07/07, HDFFV-11310)
+      Fixes Jira issue HDFFV-11310
 
     - H5A and H5D read write JNI functions had flawed vlen datatype check.
 
       Adapted tools function for JNI utils file. This reduced multiple calls
       to a single check and variable. The variable can then be used to call 
       the H5Treclaim function. Adjusted existing test and added new test.
-
-      (ADB - 2022/06/22)
 
 
     Tools:
@@ -186,8 +172,6 @@ New Features
 
       Ported 1.10 tools display function to provide ability to inspect and
       display 1.10 reference data. 
-
-      (ADB - 2022/06/22)
 
 
     High-Level APIs:
@@ -211,8 +195,6 @@ New Features
       The resulting documentation files will be in the share/html subdirectory
       of the HDF5 install directory.
 
-        (ADB - 2022/08/09)
-
 
 Support for new platforms, languages and compilers
 ==================================================
@@ -228,8 +210,6 @@ Bug Fixes since HDF5-1.12.1 release
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
       ensure that memory buffers don't get overrun when decoding buffers read from
       a (possibly corrupted) HDF5 file.
-
-      (JTH - 2023/04/05)
 
     - Fixed a heap buffer overflow that occurs when reading from
       a dataset with a compact layout within a malformed HDF5 file
@@ -248,7 +228,7 @@ Bug Fixes since HDF5-1.12.1 release
       dataspace and datatype information). If the two sizes do not
       match, opening of the dataset will fail.
 
-      (JTH - 2023/04/04, GH-2606)
+      Fixes GitHub issue #2606
 
     - Fix for CVE-2019-8396
 
@@ -259,7 +239,7 @@ Bug Fixes since HDF5-1.12.1 release
 
       The fix ensures each element is within bounds before reading.
 
-      (2023/04/13 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
+      Fixes Jira issue HDFFV-10712, CVE-2019-8396, GitHub issue #2209
 
     - Memory leak
 
@@ -272,7 +252,7 @@ Bug Fixes since HDF5-1.12.1 release
       As error is encountered in loading the illegal message, the memory allocated for
       cont_msg_info->msgs needs to be freed.
 
-      (VC - 2023/04/11 GH-2599)
+      Fixes GitHub issue #2599
 
     - Fixed a memory corruption issue that can occur when reading
       from a dataset using a hyperslab selection in the file
@@ -286,8 +266,6 @@ Bug Fixes since HDF5-1.12.1 release
       being copied when projecting the point selection onto the
       hyperslab selection's dataspace.
 
-      (JTH - 2023/03/23)
-      
       - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
 
       Check for overflow when calculating on-disk attribute data size.
@@ -299,7 +277,7 @@ Bug Fixes since HDF5-1.12.1 release
       The test case was crafted in a way that the overflow caused the
       size to be 0.
 
-      (EFE - 2023/02/11 GH-2458)
+      Fixes GitHub issue #2458
 
     - Seg fault on file close
 
@@ -318,7 +296,7 @@ Bug Fixes since HDF5-1.12.1 release
       It will be freed later in H5VL__native_file_close() when the
       library exits and terminates the file package.
 
-      (VC - 2022/12/14, HDFFV-11052, CVE-2020-10812)
+      Fixes Jira issue HDFFV-11052, CVE-2020-10812
 
     - Fixed an issue with variable length attributes
 
@@ -328,14 +306,10 @@ Bug Fixes since HDF5-1.12.1 release
       closed, attempting to write to the attribute through the first handle
       would cause an error.
 
-      (NAF - 2022/10/24)
-
     - Fixed an issue with hyperslab selections
 
       Previously, when combining hyperslab selections, it was possible for the
       library to produce an incorrect combined selection.
-
-      (NAF - 2022/09/25)
 
     - Fixed an issue with attribute type conversion with compound datatypes
 
@@ -344,7 +318,7 @@ Bug Fixes since HDF5-1.12.1 release
       the contents of the destination, potentially causing data to be lost when
       only writing to a subset of the compound fields.
 
-      (NAF - 2022/08/22, GitHub #2016)
+      Fixes GitHub issue #2016
 
     - Modified H5Fstart_swmr_write() to preserve DAPL properties
 
@@ -354,7 +328,7 @@ Bug Fixes since HDF5-1.12.1 release
       properties.  Modified the library to instead save these properties and use
       them when reopening the file.
 
-      (NAF - 2022/07/18, HDFFV-11308)
+      Fixes Jira issue HDFFV-11308
 
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
@@ -365,7 +339,7 @@ Bug Fixes since HDF5-1.12.1 release
       in debug builds of HDF5. In production builds, this situation could cause
       either a library error or a crash, depending on the platform.
 
-      (JTH - 2022/07/08, HDFFV-11316, HDFFV-11317)
+      Fixes Jira issues HDFFV-11316 & HDFFV-11317
 
     - Memory leak 
     
@@ -378,7 +352,7 @@ Bug Fixes since HDF5-1.12.1 release
       is therefore lost.  A buffer is now allocated regardless 
       so that the element in fill->buf can later be reclaimed.
 
-      (VC - 2022/10/10, HDFFV-10840)
+      Fixes Jira issue HDFFV-10840
  
 
     Java Library
@@ -399,7 +373,7 @@ Bug Fixes since HDF5-1.12.1 release
       supported pkconfig files. Still recommend that the CMake config file method
       be used for building projects with CMake.
 
-      (ADB - 2023/02/16 GH-1546,GH-2259)
+      Fixes GitHub issues #1546 & #2259
 
     - Change the settings of the *pc files to use the correct format
 
@@ -407,15 +381,13 @@ Bug Fixes since HDF5-1.12.1 release
       settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
       fixes the issue
 
-      (ADB - 2022/12/06 HDFFV-11355)
+      Fixes Jira issue HDFFV-11355
 
     - Move MPI libraries link from PRIVATE to PUBLIC
 
       The install dependencies were not including the need for MPI libraries when
       an application or library was built with the C library. Also updated the
       CMake target link command to use the newer style MPI::MPI_C link variable.
-
-      (ADB - 2022/20/27)
 
 
     Tools
@@ -425,14 +397,14 @@ Bug Fixes since HDF5-1.12.1 release
 
       Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
 
-      (ADB - 2023/04/06 GH-2598)
+      Fixes GitHub issue #2598
 
     - Fix h5repack to only print output when verbose option is selected
 
       When timing option was added to h5repack, the check for verbose was
       incorrectly implemented.
 
-      (ADB -  2022/12/02, GH #2270)
+      Fixes GitHub issue #2270
 
 
     Performance
