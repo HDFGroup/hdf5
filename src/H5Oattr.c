@@ -121,7 +121,7 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
 {
     H5A_t         *attr   = NULL;
     const uint8_t *p_end  = p + p_size - 1; /* End of input buffer */
-    size_t         delta  = 0;              /* Amount to move p in next field */  
+    size_t         delta  = 0;              /* Amount to move p in next field */
     H5S_extent_t  *extent = NULL;           /* Extent dimensionality information */
     size_t         name_len;                /* Attribute name length */
     size_t         dt_size;                 /* Datatype size */
