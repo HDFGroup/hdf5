@@ -57,7 +57,6 @@ New Features
       default for parallel debug builds and off by default for other build types.
       CMake has been updated to match this behavior.
 
-      (JTH - 2023/03/29)
 
     Library:
     --------
@@ -124,8 +123,6 @@ Bug Fixes since HDF5-1.10.10 release
       ensure that memory buffers don't get overrun when decoding buffers read from
       a (possibly corrupted) HDF5 file.
 
-      (JTH - 2023/04/05)
-
     - Fixed a heap buffer overflow that occurs when reading from
       a dataset with a compact layout within a malformed HDF5 file
 
@@ -143,7 +140,7 @@ Bug Fixes since HDF5-1.10.10 release
       dataspace and datatype information). If the two sizes do not
       match, opening of the dataset will fail.
 
-      (JTH - 2023/04/13, GH-2606)
+      Fixes GitHub issue #2606
       
     - Fix for CVE-2019-8396
 
@@ -154,7 +151,7 @@ Bug Fixes since HDF5-1.10.10 release
 
       The fix ensures each element is within bounds before reading.
 
-      (2023/04/13 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
+      Fix for Jira issue HDFFV-10712, CVE-2019-8396, GitHub issue #2209
 
     - Memory leak
 
@@ -167,7 +164,7 @@ Bug Fixes since HDF5-1.10.10 release
       As error is encountered in loading the illegal message, the memory allocated for
       cont_msg_info->msgs needs to be freed.
 
-      (VC - 2023/04/11 GH-2599)
+      Fix for GitHub issue #2599
 
 
     Java Library
