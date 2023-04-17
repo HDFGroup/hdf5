@@ -24,31 +24,53 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char         *s_opts   = "hVrv*qn:d:p:NcelxE:A:CS*";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"version", no_arg, 'V'},
-                                       {"report", no_arg, 'r'},
-                                       {"verbose", optional_arg, 'v'},
-                                       {"quiet", no_arg, 'q'},
-                                       {"count", require_arg, 'n'},
-                                       {"delta", require_arg, 'd'},
-                                       {"relative", require_arg, 'p'},
-                                       {"nan", no_arg, 'N'},
-                                       {"compare", no_arg, 'c'},
-                                       {"use-system-epsilon", no_arg, 'e'},
-                                       {"follow-symlinks", no_arg, 'l'},
-                                       {"no-dangling-links", no_arg, 'x'},
-                                       {"exclude-path", require_arg, 'E'},
-                                       {"exclude-attribute", require_arg, 'A'},
-                                       {"no-compact-subset", no_arg, 'C'},
-                                       {"enable-error-stack", optional_arg, 'S'},
-                                       {"vol-value-1", require_arg, '1'},
-                                       {"vol-name-1", require_arg, '2'},
-                                       {"vol-info-1", require_arg, '3'},
-                                       {"vol-value-2", require_arg, '4'},
-                                       {"vol-name-2", require_arg, '5'},
-                                       {"vol-info-2", require_arg, '6'},
-                                       {NULL, 0, '\0'}};
+static const char            *s_opts   = "cd:ehln:p:qrv*xA:CE:NS*V";
+static struct h5_long_options l_opts[] = {{"compare", no_arg, 'c'},
+                                          {"delta", require_arg, 'd'},
+                                          {"use-system-epsilon", no_arg, 'e'},
+                                          {"help", no_arg, 'h'},
+                                          {"follow-symlinks", no_arg, 'l'},
+                                          {"count", require_arg, 'n'},
+                                          {"relative", require_arg, 'p'},
+                                          {"quiet", no_arg, 'q'},
+                                          {"report", no_arg, 'r'},
+                                          {"verbose", optional_arg, 'v'},
+                                          {"no-dangling-links", no_arg, 'x'},
+                                          {"exclude-attribute", require_arg, 'A'},
+                                          {"no-compact-subset", no_arg, 'C'},
+                                          {"exclude-path", require_arg, 'E'},
+                                          {"nan", no_arg, 'N'},
+                                          {"enable-error-stack", optional_arg, 'S'},
+                                          {"version", no_arg, 'V'},
+                                          {"vol-value-1", require_arg, '1'},
+                                          {"vol-name-1", require_arg, '2'},
+                                          {"vol-info-1", require_arg, '3'},
+                                          {"vol-value-2", require_arg, '4'},
+                                          {"vol-name-2", require_arg, '5'},
+                                          {"vol-info-2", require_arg, '6'},
+                                          {NULL, 0, '\0'}};
+
+static H5FD_onion_fapl_info_t onion_fa_g_1 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                  /* force_write_open               */
+    0,                  /* creation_flags                 */
+    "first input file", /* comment                        */
+};
+
+static H5FD_onion_fapl_info_t onion_fa_g_2 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                   /* force_write_open               */
+    0,                   /* creation_flags                 */
+    "second input file", /* comment                        */
+};
 
 /*-------------------------------------------------------------------------
  * Function: check_options
