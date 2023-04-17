@@ -587,9 +587,9 @@ herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 {
     htri_t  msg_exists;              /* Whether a particular type of message exists */
-    hbool_t pline_copied = FALSE;    /* Flag to indicate that pline's message was copied */
+    hbool_t pline_copied  = FALSE;   /* Flag to indicate that pline's message was copied */
     hbool_t layout_copied = FALSE;   /* Flag to indicate that layout message was copied */
-    hbool_t efl_copied = FALSE;      /* Flag to indicate that efl message was copied */ 
+    hbool_t efl_copied    = FALSE;   /* Flag to indicate that efl message was copied */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -605,7 +605,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         /* Retrieve the I/O pipeline message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
-	pline_copied = TRUE;
+        pline_copied = TRUE;
 
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
@@ -629,7 +629,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         /* Retrieve the EFL  message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
-	efl_copied = TRUE;
+        efl_copied = TRUE;
 
         /* Set the EFL info in the property list */
         if (H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->dcpl_cache.efl) < 0)
@@ -662,15 +662,15 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
 
 done:
     if (ret_value < 0) {
-	if (pline_copied)
-	    if (H5O_msg_reset(H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline) < 0)
-	        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info")	    
-	if (layout_copied) 
+        if (pline_copied)
+            if (H5O_msg_reset(H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset pipeline info")
+        if (layout_copied)
             if (H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset layout info")
         if (efl_copied)
-	    if (H5O_msg_reset(H5O_EFL_ID, &dataset->shared->dcpl_cache.efl) < 0)
-		HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset efl message")
+            if (H5O_msg_reset(H5O_EFL_ID, &dataset->shared->dcpl_cache.efl) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset efl message")
     }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
