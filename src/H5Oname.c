@@ -70,8 +70,9 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__name_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
+H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                 const uint8_t *p)
 {
     H5O_name_t *mesg      = NULL;
     void       *ret_value = NULL;
