@@ -148,6 +148,14 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed memory leaks that could occur when reading a dataset from a malformed
+      file
+
+      When attempting to read layout, pline, and efl information for a dataset, 
+      memory leaks could occur if attempting to read pline/efl information threw
+      an error, which is due to memory being allocated for pline and efl not being 
+      properly cleaned up on error.
+
     - Fixed potential buffer overrun issues in some object header decode routines
 
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
