@@ -55,8 +55,6 @@ New Features
       default for parallel debug builds and off by default for other build types.
       CMake has been updated to match this behavior.
 
-      (JTH - 2023/03/29)
-
     - Added new option to build libaec and zlib inline with CMake.
 
       Using the CMake FetchContent module, the external filters can populate
@@ -80,8 +78,6 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
-      (ADB - 2023/02/21)
-
 
     Library:
     --------
@@ -94,8 +90,6 @@ New Features
       for cases where the application wishes to write subfiles to a
       machine's node-local storage while placing the subfiling configuration
       file on a file system readable by all machine nodes.
-
-      (JTH - 2023/02/22)
 
 
     Parallel Library:
