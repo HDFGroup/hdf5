@@ -15,9 +15,9 @@ on:
       - '**.md'
 
 # Using concurrency to cancel any in-progress job or run
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+#concurrency:
+#  group: ${{ github.ref }}
+#  cancel-in-progress: true
 
 jobs:
   build:
