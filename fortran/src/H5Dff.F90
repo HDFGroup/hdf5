@@ -98,8 +98,6 @@ MODULE H5D
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   PRIVATE h5dfill_c_long_double
 #endif
-  PRIVATE CHR_MAX
-  INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
 
   INTERFACE h5dextend_f
      MODULE PROCEDURE h5dset_extent_f
@@ -313,27 +311,27 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: dcpl_id_default
     INTEGER(HID_T) :: dapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Dcreate_async(file, func, line, loc_id, name, type_id, &
             space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, es_id) &
             BIND(C,NAME='H5Dcreate_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
@@ -355,8 +353,8 @@ CONTAINS
     IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     IF(PRESENT(dcpl_id)) dcpl_id_default = dcpl_id
     IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     dset_id = h5dcreate_async(file_default, func_default, line_default, &
@@ -441,24 +439,24 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: dapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Dopen_async(file, func, line, loc_id, name, dapl_id_default, es_id) &
             BIND(C,NAME='H5Dopen_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
@@ -471,8 +469,8 @@ CONTAINS
 
     dapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     dset_id = H5Dopen_async(file_default, func_default, line_default, &
@@ -530,29 +528,29 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dclose_async(file, func, line, dset_id, es_id) BIND(C,NAME='H5Dclose_async')
-         IMPORT ::  C_CHAR, C_INT
+         IMPORT ::  C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: dset_id
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Dclose_async
     END INTERFACE
 
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = INT(H5Dclose_async(file_default, func_default, line_default, dset_id, es_id))
@@ -675,12 +673,12 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: fsize
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: csize
     INTEGER(HID_T) :: space_id
@@ -690,11 +688,11 @@ CONTAINS
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Dset_extent_async(file, func, line, dataset_id, size, es_id) &
             BIND(C,NAME='H5Dset_extent_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: dataset_id
          INTEGER(HSIZE_T), DIMENSION(*) :: size
@@ -702,8 +700,8 @@ CONTAINS
        END FUNCTION H5Dset_extent_async
     END INTERFACE
 
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     CALL H5Dget_space_f(dataset_id, space_id, hdferr)
@@ -1379,30 +1377,30 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: dataspace_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Dget_space_async(file, func, line, dataset_id, es_id) &
             BIND(C,NAME='H5Dget_space_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: dataset_id
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Dget_space_async
     END INTERFACE
 
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     dataspace_id = H5Dget_space_async(file_default, func_default, line_default, &
@@ -1510,12 +1508,12 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
@@ -1524,8 +1522,8 @@ CONTAINS
          IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: dset_id
          INTEGER(HID_T), VALUE :: mem_type_id
@@ -1537,8 +1535,8 @@ CONTAINS
        END FUNCTION H5Dread_async
     END INTERFACE
 
-    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
     IF (PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = H5Dread_async(file_default, func_default, line_default, &
@@ -1577,12 +1575,12 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
@@ -1591,8 +1589,8 @@ CONTAINS
          IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: dset_id
          INTEGER(HID_T), VALUE :: mem_type_id
@@ -1604,8 +1602,8 @@ CONTAINS
        END FUNCTION H5Dwrite_async
     END INTERFACE
 
-    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(file)) file_default = file
+    IF (PRESENT(func)) func_default = func
     IF (PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = H5Dwrite_async(file_default, func_default, line_default, &

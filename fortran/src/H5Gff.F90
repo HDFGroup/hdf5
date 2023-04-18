@@ -40,8 +40,6 @@ MODULE H5G
   USE H5GLOBAL
   USE H5P, ONLY : H5Pcreate_f, H5Pset_local_heap_size_hint_f, H5Pclose_f
 
-  PRIVATE CHR_MAX
-  INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
 
 !
 ! @brief Fortran2003 Derived Type for @ref H5G_info_t
@@ -86,8 +84,8 @@ MODULE H5G
           BIND(C,NAME='H5Gget_info_async')
        IMPORT :: C_CHAR, C_INT, C_PTR
        IMPORT :: HID_T
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+       TYPE(C_PTR), VALUE :: file
+       TYPE(C_PTR), VALUE :: func
        INTEGER(C_INT), VALUE :: line
        INTEGER(HID_T), VALUE :: loc_id
        TYPE(C_PTR)   , VALUE :: ginfo
@@ -116,8 +114,8 @@ MODULE H5G
           BIND(C,NAME='H5Gget_info_by_idx_async')
        IMPORT :: C_CHAR, C_INT, C_PTR
        IMPORT :: HID_T, HSIZE_T
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+       TYPE(C_PTR), VALUE :: file
+       TYPE(C_PTR), VALUE :: func
        INTEGER(C_INT), VALUE :: line
        INTEGER(HID_T), VALUE :: loc_id
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
@@ -147,8 +145,8 @@ MODULE H5G
           BIND(C,NAME='H5Gget_info_by_name_async')
        IMPORT :: C_CHAR, C_INT, C_PTR
        IMPORT :: HID_T
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+       TYPE(C_PTR), VALUE :: file
+       TYPE(C_PTR), VALUE :: func
        INTEGER(C_INT), VALUE :: line
        INTEGER(HID_T), VALUE :: loc_id
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
@@ -289,28 +287,28 @@ CONTAINS
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: gcpl_id
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: gapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: lcpl_id_default
     INTEGER(HID_T)  :: gcpl_id_default
     INTEGER(HID_T)  :: gapl_id_default
     INTEGER(SIZE_T) :: size_hint_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Gcreate_async(file, func, line, loc_id, name, &
             lcpl_id_default, gcpl_id_default, gapl_id_default, es_id) &
             BIND(C,NAME='H5Gcreate_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
@@ -333,8 +331,8 @@ CONTAINS
     IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     IF(PRESENT(gcpl_id)) gcpl_id_default = gcpl_id
     IF(PRESENT(gapl_id)) gapl_id_default = gapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
     !
     ! size_hint was introduced as an overload option for H5Gcreate1,
@@ -440,23 +438,23 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: gapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: gapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Gopen_async(file, func, line, loc_id, name, gapl_id_default, es_id) &
             BIND(C,NAME='H5Gopen_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
@@ -469,8 +467,8 @@ CONTAINS
 
     gapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(gapl_id)) gapl_id_default = gapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     grp_id = H5Gopen_async(file_default, func_default, line_default, &
@@ -524,29 +522,29 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: grp_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Gclose_async(file, func, line, grp_id, es_id) &
             BIND(C,NAME='H5Gclose_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: grp_id
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Gclose_async
     END INTERFACE
 
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = INT(H5Gclose_async(file_default, func_default, line_default, grp_id, es_id))
@@ -1094,17 +1092,17 @@ CONTAINS
     TYPE(H5G_info_t), INTENT(OUT), TARGET  :: ginfo
     INTEGER(HID_T)  , INTENT(IN)           :: es_id
     INTEGER         , INTENT(OUT)          :: hdferr
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: ptr
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
     ptr = C_LOC(ginfo)
 
@@ -1258,23 +1256,23 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
     TYPE(C_PTR) :: ptr
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     c_group_name  = TRIM(group_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     ptr = C_LOC(ginfo)
@@ -1432,15 +1430,15 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
-    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
-    INTEGER         , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL :: file
+    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     TYPE(C_PTR) :: ptr
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
-    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
 
     c_name = TRIM(name)//C_NULL_CHAR
@@ -1448,8 +1446,8 @@ CONTAINS
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = INT(h5gget_info_by_name_async(file_default, func_default, line_default, &

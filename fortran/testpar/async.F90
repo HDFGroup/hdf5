@@ -33,6 +33,10 @@ MODULE test_async_APIs
      INTEGER(c_int) :: command ! The TYPE of RETURN value
   END TYPE iter_info
 
+  CHARACTER(LEN=10), TARGET :: app_file = "async.F90"//C_NULL_CHAR
+  CHARACTER(LEN=10), TARGET :: app_func = "func_name"//C_NULL_CHAR
+  INTEGER :: app_line = 42
+
 CONTAINS
 
   INTEGER(KIND=C_INT) FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
@@ -171,7 +175,7 @@ CONTAINS
     INTEGER(HID_T) :: attr_id0, attr_id1, attr_id2
     LOGICAL :: exists
     LOGICAL(C_BOOL), TARGET :: exists0 = .FALSE., exists1 = .FALSE., exists2 = .FALSE., exists3 = .FALSE.
-    TYPE(C_PTR) :: f_ptr
+    TYPE(C_PTR) :: f_ptr, f_ptr1, f_ptr2
 
     CALL H5EScreate_f(es_id, hdferror)
     CALL check("H5EScreate_f", hdferror, total_error)
@@ -190,7 +194,10 @@ CONTAINS
     CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
     CALL check("H5Screate_f", hdferror, total_error)
 
-    CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id0, es_id, hdferror)
+    f_ptr1 = C_LOC(app_file)
+    f_ptr2 = C_LOC(app_func)
+    CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id0, es_id, hdferror, &
+         file=f_ptr1, func=f_ptr2, line=app_line)
     CALL check("h5acreate_f",hdferror,total_error)
 
     f_ptr = C_LOC(attr_data0)
