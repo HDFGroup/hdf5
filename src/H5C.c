@@ -1415,7 +1415,7 @@ H5C_mark_entry_dirty(void *thing)
 
         /* Modify cache data structures */
         if (was_clean)
-            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
+            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
         if (!entry_ptr->in_slist)
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
 
@@ -1498,7 +1498,7 @@ H5C_mark_entry_clean(void *_thing)
 
         /* Modify cache data structures */
         if (was_dirty)
-            H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr)
+            H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL)
         if (entry_ptr->in_slist)
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
 
@@ -1847,23 +1847,23 @@ H5C_resize_entry(void *thing, size_t new_size)
 
         /* update the pinned and/or protected entry list */
         if (entry_ptr->is_pinned)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), (cache_ptr->pel_size), (entry_ptr->size),
-                                            (new_size))
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pel_len, cache_ptr->pel_size, entry_ptr->size,
+                                            new_size, FAIL)
         if (entry_ptr->is_protected)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), (cache_ptr->pl_size), (entry_ptr->size),
-                                            (new_size))
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->pl_len, cache_ptr->pl_size, entry_ptr->size, new_size,
+                                            FAIL)
 
 #ifdef H5_HAVE_PARALLEL
         if (entry_ptr->coll_access)
-            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->coll_list_len), (cache_ptr->coll_list_size),
-                                            (entry_ptr->size), (new_size))
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE(cache_ptr->coll_list_len, cache_ptr->coll_list_size,
+                                            entry_ptr->size, new_size, FAIL)
 #endif /* H5_HAVE_PARALLEL */
 
         /* update statistics just before changing the entry size */
         H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size);
 
         /* update the hash table */
-        H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_size, entry_ptr, was_clean);
+        H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_size, entry_ptr, was_clean, FAIL);
 
         /* if the entry is in the skip list, update that too */
         if (entry_ptr->in_slist)
@@ -2983,7 +2983,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
         /* Check for newly dirtied entry */
         if (was_clean && entry_ptr->is_dirty) {
             /* Update index for newly dirtied entry */
-            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
+            H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
 
             /* If the entry's type has a 'notify' callback send a
              * 'entry dirtied' notice now that the entry is fully
@@ -5924,7 +5924,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          */
         entry_ptr->is_dirty = FALSE;
 
-        H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr);
+        H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL);
 
         /* Check for entry changing status and do notifications, etc. */
         if (was_dirty) {
@@ -8084,14 +8084,14 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
             /* Update the hash table for the size change */
             H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_len, entry_ptr,
-                                              !(entry_ptr->is_dirty));
+                                              !entry_ptr->is_dirty, FAIL);
 
             /* The entry can't be protected since we are in the process of
              * flushing it.  Thus we must update the replacement policy data
              * structures for the size change.  The macro deals with the pinned
              * case.
              */
-            H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_len);
+            H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_len, FAIL);
 
             /* As we haven't updated the cache data structures for
              * for the flush or flush destroy yet, the entry should
