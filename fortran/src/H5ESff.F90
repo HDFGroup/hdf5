@@ -37,7 +37,7 @@ CONTAINS
 !!
 !! See C API: @ref H5EScreate()
 !!
-  SUBROUTINE H5EScreate_f(es_id, hdferr)
+  SUBROUTINE h5escreate_f(es_id, hdferr)
     IMPLICIT NONE
 
     INTEGER(HID_T), INTENT(OUT) :: es_id
@@ -54,7 +54,7 @@ CONTAINS
     hdferr = 0
     IF(es_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5EScreate_f
+  END SUBROUTINE h5escreate_f
 !>
 !! \ingroup FH5ES
 !!
@@ -66,7 +66,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESget_count()
 !!
-  SUBROUTINE H5ESget_count_f(es_id, count, hdferr)
+  SUBROUTINE h5esget_count_f(es_id, count, hdferr)
     IMPLICIT NONE
 
     INTEGER(hid_t),  INTENT(IN)  :: es_id
@@ -84,7 +84,7 @@ CONTAINS
 
     hdferr = INT(H5ESget_count(es_id, count))
 
-  END SUBROUTINE H5ESget_count_f
+  END SUBROUTINE h5esget_count_f
 !>
 !! \ingroup FH5ES
 !!
@@ -96,7 +96,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESget_op_counter()
 !!
-  SUBROUTINE H5ESget_op_counter_f(es_id, counter, hdferr)
+  SUBROUTINE h5esget_op_counter_f(es_id, counter, hdferr)
 
     IMPLICIT NONE
 
@@ -115,7 +115,7 @@ CONTAINS
 
     hdferr = INT(H5ESget_op_counter(es_id, counter))
 
-  END SUBROUTINE H5ESget_op_counter_f
+  END SUBROUTINE h5esget_op_counter_f
 !>
 !! \ingroup FH5ES
 !!
@@ -129,7 +129,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESwait()
 !!
-  SUBROUTINE H5ESwait_f(es_id, timeout, num_in_progress, err_occurred, hdferr)
+  SUBROUTINE h5eswait_f(es_id, timeout, num_in_progress, err_occurred, hdferr)
 
     IMPLICIT NONE
 
@@ -157,7 +157,7 @@ CONTAINS
     ! Transfer value of C c_bool type to Fortran LOGICAL
     err_occurred = err_occurred_c
 
-  END SUBROUTINE H5ESwait_f
+  END SUBROUTINE h5eswait_f
 !>
 !! \ingroup FH5ES
 !!
@@ -170,7 +170,7 @@ CONTAINS
 !!
 !! See C API: @ref H5EScancel()
 !!
-  SUBROUTINE H5EScancel_f(es_id, num_not_canceled, err_occurred, hdferr)
+  SUBROUTINE h5escancel_f(es_id, num_not_canceled, err_occurred, hdferr)
 
     IMPLICIT NONE
 
@@ -196,7 +196,7 @@ CONTAINS
     ! Transfer value of C c_bool type to Fortran LOGICAL
     err_occurred = err_occurred_c
 
-  END SUBROUTINE H5EScancel_f
+  END SUBROUTINE h5escancel_f
 !>
 !! \ingroup FH5ES
 !!
@@ -208,7 +208,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESget_err_status()
 !!
-  SUBROUTINE H5ESget_err_status_f(es_id, err_occurred, hdferr)
+  SUBROUTINE h5esget_err_status_f(es_id, err_occurred, hdferr)
 
     IMPLICIT NONE
 
@@ -232,7 +232,7 @@ CONTAINS
     ! Transfer value of C c_bool type to Fortran LOGICAL
     err_occurred = err_occurred_c
 
-  END SUBROUTINE H5ESget_err_status_f
+  END SUBROUTINE h5esget_err_status_f
 !>
 !! \ingroup FH5ES
 !!
@@ -244,7 +244,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESget_err_count()
 !!
-  SUBROUTINE H5ESget_err_count_f(es_id, num_errs, hdferr)
+  SUBROUTINE h5esget_err_count_f(es_id, num_errs, hdferr)
 
     IMPLICIT NONE
 
@@ -263,7 +263,7 @@ CONTAINS
 
     hdferr = INT(H5ESget_err_count(es_id, num_errs))
 
-  END SUBROUTINE H5ESget_err_count_f
+  END SUBROUTINE h5esget_err_count_f
 
 !>
 !! \ingroup FH5ES
@@ -275,7 +275,7 @@ CONTAINS
 !!
 !! See C API: @ref H5ESclose()
 !!
-  SUBROUTINE H5ESclose_f(es_id, hdferr)
+  SUBROUTINE h5esclose_f(es_id, hdferr)
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: es_id
@@ -291,6 +291,6 @@ CONTAINS
 
     hdferr = INT(H5ESclose(es_id))
 
-  END SUBROUTINE H5ESclose_f
+  END SUBROUTINE h5esclose_f
 
 END MODULE H5ES

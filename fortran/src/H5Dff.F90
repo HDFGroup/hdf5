@@ -706,7 +706,7 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    CALL H5Dget_space_async_f(dataset_id, space_id, es_id, hdferr)
+    CALL H5Dget_space_f(dataset_id, space_id, hdferr)
     IF(hdferr.LT.0) RETURN
 
     CALL H5Sget_simple_extent_ndims_f(space_id, rank, hdferr)
