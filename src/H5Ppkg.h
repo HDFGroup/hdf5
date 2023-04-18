@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Friday, November 16, 2001
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5P package.  Source files outside the H5P package should
- *		include H5Pprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5P package.  Source files outside the H5P package should
+ *          include H5Pprivate.h instead.
  */
 #if !(defined H5P_FRIEND || defined H5P_MODULE)
 #error "Do not include this file outside the H5P package!"

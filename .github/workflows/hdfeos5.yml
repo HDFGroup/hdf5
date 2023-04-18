@@ -16,7 +16,7 @@ on:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: ${{ github.ref }}
+  group: hdfeos5-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

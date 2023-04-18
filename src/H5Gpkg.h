@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke
- *             Thursday, September 18, 1997
- *
  * Purpose:     This file contains declarations which are visible
  *              only within the H5G package. Source files outside the
  *              H5G package should include H5Gprivate.h instead.
