@@ -11,7 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:         The object modification time message.
+ * Purpose:         The object modification time message
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
@@ -107,8 +107,9 @@ H5FL_DEFINE(time_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mtime_new_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                      unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
+H5O__mtime_new_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                      const uint8_t *p)
 {
     const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
     time_t        *mesg  = NULL;
@@ -164,8 +165,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mtime_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
+H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                  const uint8_t *p)
 {
     const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
     time_t        *mesg  = NULL;
