@@ -11,18 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: John Mainzer -- 4/19/06
+ * Purpose: This file contains declarations which are normally visible
+ *          only within the H5AC package (just H5AC.c at present).
  *
- * Purpose:     This file contains declarations which are normally visible
- *              only within the H5AC package (just H5AC.c at present).
+ *          Source files outside the H5AC package should include
+ *          H5ACprivate.h instead.
  *
- *		Source files outside the H5AC package should include
- *		H5ACprivate.h instead.
- *
- *		The one exception to this rule is testpar/t_cache.c.  The
- *		test code is easier to write if it can look at H5AC_aux_t.
- *		Indeed, this is the main reason why this file was created.
- *
+ *          The one exception to this rule is testpar/t_cache.c.  The
+ *          test code is easier to write if it can look at H5AC_aux_t.
+ *          Indeed, this is the main reason why this file was created.
  */
 
 #if !(defined H5AC_FRIEND || defined H5AC_MODULE)
