@@ -312,6 +312,13 @@ Bug Fixes since HDF5-1.14.0 release
 
     Tools
     -----
+    - Names of objects with square brackets will have trouble without the
+      special argument, --no-compact-subset, on the h5dump command line.
+
+      h5diff did not have this option and now it has been added.
+
+      Fixes GitHub issue #2682
+
     - In the tools traverse function - an error in either visit call
       will bypass the cleanup of the local data variables.
 
