@@ -104,18 +104,22 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name,
-                       hid_t H5_ATTR_UNUSED aapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const char *attr_name, hid_t aapl_id,
+                       hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5G_loc_t loc;         /* Object location */
-    H5A_t    *attr = NULL; /* Attribute opened */
-    void     *ret_value;
+    H5P_genplist_t *plist;
+    H5G_loc_t       loc;         /* Object location */
+    H5A_t          *attr = NULL; /* Attribute opened */
+    void           *ret_value;
 
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
     if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
+
+    if (NULL == (plist = H5P_object_verify(aapl_id, H5P_ATTRIBUTE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "AAPL is not an attribute access property list")
 
     if (loc_params->type == H5VL_OBJECT_BY_SELF) {
         /* H5Aopen */
