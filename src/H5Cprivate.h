@@ -42,8 +42,6 @@
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
  * object sizes, so it probably doesn't matter if it is a bit big.
- *
- *                    JRM - 5/17/04
  */
 #define H5C_MAX_ENTRY_SIZE ((size_t)(32 * 1024 * 1024))
 
@@ -978,8 +976,6 @@ typedef int H5C_ring_t;
  *
  * The fields of this structure are discussed individually below:
  *
- *                        JRM - 4/26/04
- *
  * magic:    Unsigned 32 bit integer that must always be set to
  *              H5C__H5C_CACHE_ENTRY_T_MAGIC when the entry is valid.
  *              The field must be set to H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC
@@ -1100,15 +1096,9 @@ typedef int H5C_ring_t;
  *           be unpinned (and possibly unprotected) during the
  *           flush.
  *
- *                               JRM -- 3/16/06
- *
  * in_slist:    Boolean flag indicating whether the entry is in the skip list
- *        As a general rule, entries are placed in the list when they
- *              are marked dirty.  However they may remain in the list after
- *              being flushed.
- *
- *              Update: Dirty entries are now removed from the skip list
- *            when they are flushed.
+ *        As a general rule, entries are placed in the list when they are
+ *        marked dirty.
  *
  * flush_marker:  Boolean flag indicating that the entry is to be flushed
  *        the next time H5C_flush_cache() is called with the
@@ -1116,24 +1106,13 @@ typedef int H5C_ring_t;
  *        the entry is flushed for whatever reason.
  *
  * flush_me_last:  Boolean flag indicating that this entry should not be
- *        flushed from the cache until all other entries without
- *              the flush_me_last flag set have been flushed.
+ *        flushed from the cache until all other entries without the
+ *        flush_me_last flag set have been flushed.
  *
- *        Note:
- *
- *        At this time, the flush_me_last
- *              flag will only be applied to one entry, the superblock,
- *              and the code utilizing these flags is protected with HDasserts
- *              to enforce this. This restraint can certainly be relaxed in
- *              the future if the need for multiple entries getting flushed
- *              last or collectively arises, though the code allowing for that
- *              will need to be expanded and tested appropriately if that
- *              functionality is desired.
- *
- *        Update: There are now two possible last entries
- *                       (superblock and file driver info message).  This
- *                       number will probably increase as we add superblock
- *                       messages.   JRM -- 11/18/14
+ *        Note: At this time, the flush_me_last flag will only be applied to
+ *              two types of entries: the superblock and the file driver info
+ *              message.  The code utilizing these flags is protected with
+ *              HDasserts to enforce this.
  *
  * clear_on_unprotect:  Boolean flag used only in PHDF5.  When H5C is used
  *        to implement the metadata cache In the parallel case, only
@@ -1227,8 +1206,6 @@ typedef int H5C_ring_t;
  * Entries in the cache are indexed by a more or less conventional hash table.
  * If there are multiple entries in any hash bin, they are stored in a doubly
  * linked list.
- *
- * Addendum:  JRM -- 10/14/15
  *
  * We have come to scan all entries in the cache frequently enough that
  * the cost of doing so by scanning the hash table has become unacceptable.
@@ -1691,8 +1668,6 @@ typedef struct H5C_cache_entry_t {
  *
  * The fields of this structure are discussed individually below:
  *
- *                        JRM - 8/5/15
- *
  * magic:    Unsigned 32 bit integer that must always be set to
  *              H5C_IMAGE_ENTRY_T_MAGIC when the entry is valid.
  *              The field must be set to H5C_IMAGE_ENTRY_T_BAD_MAGIC
@@ -1855,7 +1830,7 @@ typedef struct H5C_image_entry_t {
  *    H5C_auto_size_ctl_t passed to the cache must have a known
  *    version number, or an error will be flagged.
  *
- * report_fcn:  Pointer to the function that is to be called to report
+ * rpt_fcn:  Pointer to the function that is to be called to report
  *    activities each time the auto cache resize code is executed.  If the
  *    field is NULL, no call is made.
  *
@@ -1978,10 +1953,6 @@ typedef struct H5C_image_entry_t {
  *      performance, however the above flash increment algorithm will not be
  *      triggered.
  *
- *      Hopefully, the add space algorithm detailed above will be sufficient
- *      for the performance problems encountered to date.  However, we should
- *      expect to revisit the issue.
- *
  * flash_multiple: Double containing the multiple described above in the
  *      H5C_flash_incr__add_space section of the discussion of the
  *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
@@ -2048,8 +2019,8 @@ typedef struct H5C_image_entry_t {
  *    The field is a double containing the multiplier used to derive the
  *    new cache size from the old if a cache size decrement is triggered.
  *    The decrement must be in the range 0.0 (in which case the cache will
- *      try to contract to its minimum size) to 1.0 (in which case the
- *      cache will never shrink).
+ *    try to contract to its minimum size) to 1.0 (in which case the
+ *    cache will never shrink).
  *
  * apply_max_decrement:  Boolean flag used to determine whether decrements
  *    in cache size are to be limited by the max_decrement field.
@@ -2294,16 +2265,6 @@ H5_DLL herr_t   H5C_remove_entry(void *thing);
 H5_DLL herr_t   H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *write_ci_ptr);
 H5_DLL hbool_t  H5C_cache_image_pending(const H5C_t *cache_ptr);
 H5_DLL herr_t   H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len);
-
-#ifdef H5C_DO_SLIST_SANITY_CHECKS
-H5_DLL hbool_t H5C_entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
-#endif
-
-#ifdef H5C_DO_EXTREME_SANITY_CHECKS
-H5_DLL herr_t H5C_validate_lru_list(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_validate_pinned_entry_list(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_validate_protected_entry_list(H5C_t *cache_ptr);
-#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 /* Logging functions */
 H5_DLL herr_t H5C_start_logging(H5C_t *cache);

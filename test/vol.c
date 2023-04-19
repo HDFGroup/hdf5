@@ -174,6 +174,9 @@ static const H5VL_class_t reg_opt_vol_g = {
 };
 
 static herr_t fake_get_cap_flags(const void *info, uint64_t *cap_flags);
+static herr_t fake_vol_info_to_str(const void *info, char **str);
+static herr_t fake_vol_str_to_info(const char *str, void **info);
+static herr_t fake_vol_free_info(void *info);
 
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
@@ -193,12 +196,12 @@ static const H5VL_class_t fake_vol_g = {
     NULL,                /* terminate    */
     {
         /* info_cls */
-        (size_t)0, /* size    */
-        NULL,      /* copy    */
-        NULL,      /* compare */
-        NULL,      /* free    */
-        NULL,      /* to_str  */
-        NULL,      /* from_str */
+        (size_t)0,            /* size    */
+        NULL,                 /* copy    */
+        NULL,                 /* compare */
+        fake_vol_free_info,   /* free    */
+        fake_vol_info_to_str, /* to_str  */
+        fake_vol_str_to_info, /* from_str */
     },
     {
         /* wrap_cls */
@@ -557,6 +560,77 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 
     return ret_value;
 } /* end reg_opt_datatype_get() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_info_to_str
+ *
+ * Purpose:     Convert the fake VOL info to a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_info_to_str(const void *info, char **str)
+{
+    herr_t    ret_value = SUCCEED; /* Return value */
+    const int val       = *(const int *)info;
+    const int str_size  = 16; /* The size of the string */
+
+    /* Verify the info is correct before continuing */
+    if (val != INT_MAX) {
+        HDprintf("The value of info (%d) is incorrect\n", val);
+        return FAIL;
+    }
+
+    /* Allocate the string long enough for the info */
+    *str = (char *)malloc(str_size);
+
+    HDsnprintf(*str, str_size, "%d", *((const int *)info));
+
+    return ret_value;
+} /* end fake_vol_info_to_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_str_to_info
+ *
+ * Purpose:     Convert a string to a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_str_to_info(const char *str, void **info /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    *((int **)info) = (int *)malloc(sizeof(int));
+
+    **((int **)info) = atoi(str);
+
+    return ret_value;
+} /* end fake_vol_str_to_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_free_info
+ *
+ * Purpose:     Free the memory of a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_free_info(void *info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    if (info)
+        HDfree(info);
+
+    return ret_value;
+} /* end fake_vol_free_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    fake_get_cap_flags
@@ -2365,6 +2439,77 @@ error:
 } /* end test_wrap_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_info_to_str()
+ *
+ * Purpose:     Tests the conversion between a VOL info and a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_info_to_str(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t vol_id   = H5I_INVALID_HID;
+    int   info     = INT_MAX;
+    char *ret_str  = NULL;
+    int  *ret_info = NULL;
+
+    TESTING("conversion between a VOL info and a string");
+
+    /* Register a fake VOL */
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_vol(fapl_id, vol_id, NULL) < 0)
+        TEST_ERROR;
+
+    /* Serialize the VOL info into a string */
+    if (H5VLconnector_info_to_str(&info, vol_id, &ret_str) < 0)
+        TEST_ERROR;
+
+    /* Parse the string and construct it into a VOL info */
+    if (H5VLconnector_str_to_info(ret_str, vol_id, (void **)(&ret_info)) < 0)
+        TEST_ERROR;
+
+    if (*ret_info != info)
+        FAIL_PUTS_ERROR("the returned VOL info doesn't match the original info");
+
+    /* Free the VOL info being returned */
+    if (H5VLfree_connector_info(vol_id, ret_info) < 0)
+        TEST_ERROR;
+
+    /* Free the string being returned */
+    if (ret_str)
+        HDfree(ret_str);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Unregister the fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_info_to_str() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_query_optional
  *
  * Purpose:     Tests the bug fix (HDFFV-11208) that a committed datatype
@@ -2481,6 +2626,7 @@ main(void)
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
     nerrors += test_wrap_register() < 0 ? 1 : 0;
+    nerrors += test_info_to_str() < 0 ? 1 : 0;
     nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {

@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Robb Matzke
- *	       Tuesday, November 25, 1997
- */
-
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -64,33 +59,26 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
 /*-------------------------------------------------------------------------
  * Function:    H5O__efl_decode
  *
- * Purpose:	Decode an external file list message and return a pointer to
- *          the message (and some other data).
+ * Purpose:	    Decode an external file list message and return a pointer to
+ *              the message (and some other data).
  *
- * Return:  Success:    Ptr to a new message struct.
- *
- *          Failure:    NULL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, November 25, 1997
- *
- * Modification:
- *              Raymond Lu
- *              11 April 2011
  *              We allow zero dimension size starting from the 1.8.7 release.
  *              The dataset size of external storage can be zero.
+ *
+ * Return:      Success:    Pointer to a new message struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_efl_t  *mesg = NULL;
-    int         version;
-    const char *s = NULL;
-    H5HL_t     *heap;
-    size_t      u;                /* Local index variable */
-    void       *ret_value = NULL; /* Return value */
+    H5O_efl_t     *mesg = NULL;
+    int            version;
+    const uint8_t *p_end     = p + p_size - 1; /* pointer to last byte in p */
+    const char    *s         = NULL;
+    H5HL_t        *heap      = NULL;
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -99,76 +87,102 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     HDassert(p);
 
     if (NULL == (mesg = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Version */
+    /* Version (1 byte) */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     version = *p++;
     if (version != H5O_EFL_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for external file list message")
 
-    /* Reserved */
+    /* Reserved (3 bytes) */
+    if (H5_IS_BUFFER_OVERFLOW(p, 3, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     p += 3;
 
-    /* Number of slots */
+    /* Number of slots (2x 2 bytes) */
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, mesg->nalloc);
-    HDassert(mesg->nalloc > 0);
+    if (mesg->nalloc <= 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad number of allocated slots when parsing efl msg")
+
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, mesg->nused);
-    HDassert(mesg->nused <= mesg->nalloc);
+    if (mesg->nused > mesg->nalloc)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad number of in-use slots when parsing efl msg")
 
     /* Heap address */
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
-
-#ifndef NDEBUG
-    HDassert(H5F_addr_defined(mesg->heap_addr));
-
-    if (NULL == (heap = H5HL_protect(f, mesg->heap_addr, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
-
-    s = (const char *)H5HL_offset_into(heap, 0);
-
-    HDassert(s && !*s);
-
-    if (H5HL_unprotect(heap) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
-    heap = NULL;
-#endif
+    if (H5F_addr_defined(mesg->heap_addr) == FALSE)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad local heap address when parsing efl msg")
 
     /* Decode the file list */
     mesg->slot = (H5O_efl_entry_t *)H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
     if (NULL == mesg->slot)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if (NULL == (heap = H5HL_protect(f, mesg->heap_addr, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
-    for (u = 0; u < mesg->nused; u++) {
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to protect local heap")
+
+#ifdef H5O_DEBUG
+    /* Verify that the name at offset 0 in the local heap is the empty string */
+    s = (const char *)H5HL_offset_into(heap, 0);
+    if (s == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "could not obtain pointer into local heap")
+    if (*s != '\0')
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "entry at offset 0 in local heap not an empty string")
+#endif
+
+    for (size_t u = 0; u < mesg->nused; u++) {
         /* Name */
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].name_offset);
 
         if ((s = (const char *)H5HL_offset_into(heap, mesg->slot[u].name_offset)) == NULL)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get external file name")
-        if (*s == (char)'\0')
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "invalid external file name")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get external file name")
+        if (*s == '\0')
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "invalid external file name")
         mesg->slot[u].name = H5MM_xstrdup(s);
-        HDassert(mesg->slot[u].name);
+        if (mesg->slot[u].name == NULL)
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "string duplication failed")
 
         /* File offset */
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].offset);
 
         /* Size */
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, mesg->slot[u].size);
-    } /* end for */
+    }
 
     if (H5HL_unprotect(heap) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
-    heap = NULL;
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap")
 
     /* Set return value */
     ret_value = mesg;
 
 done:
-    if (ret_value == NULL)
-        if (mesg != NULL)
+    if (ret_value == NULL) {
+        if (mesg != NULL) {
+            if (mesg->slot != NULL) {
+                for (size_t u = 0; u < mesg->nused; u++)
+                    H5MM_xfree(mesg->slot[u].name);
+                H5MM_xfree(mesg->slot);
+            }
             H5MM_xfree(mesg);
+        }
+        if (heap != NULL)
+            if (H5HL_unprotect(heap) < 0)
+                HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect local heap")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__efl_decode() */

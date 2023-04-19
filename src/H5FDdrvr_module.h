@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5FD driver package.  Including this header means that the source file
- *		is part of the H5FD driver package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5FD driver package.  Including this header means that the source file
+ *          is part of the H5FD driver package.
  */
 #ifndef H5FDdrvr_module_H
 #define H5FDdrvr_module_H

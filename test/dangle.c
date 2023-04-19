@@ -39,8 +39,6 @@ const char *FILENAME[] = {"dangle", NULL};
  * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -138,8 +136,6 @@ error:
  * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -232,8 +228,6 @@ error:
  *
  * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -331,8 +325,6 @@ error:
  * Programmer:    Quincey Koziol
  *              Thursday, August 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -417,8 +409,6 @@ error:
  *
  * Programmer:    Quincey Koziol
  *              Wednesday, June 18, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -651,8 +641,6 @@ error:
  *
  * Programmer:    Quincey Koziol
  *              Tuesday, May 13, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

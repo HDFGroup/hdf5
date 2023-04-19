@@ -62,8 +62,6 @@ typedef enum fill_t { FILL_ALL, FILL_FORWARD, FILL_REVERSE, FILL_INWARD, FILL_OU
  * Programmer:  Robb Matzke
  *              Wednesday, September 30, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -111,8 +109,6 @@ usage(const char *prog)
  * Programmer:  Robb Matzke
  *              Thursday, June  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -134,8 +130,6 @@ cleanup(void)
  *
  * Programmer:  Robb Matzke
  *    Wednesday, March  4, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -159,8 +153,6 @@ display_error_cb(hid_t estack, void H5_ATTR_UNUSED *client_data)
  *
  * Programmer:  Robb Matzke
  *              Wednesday, September 30, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -332,8 +324,6 @@ error:
  *
  * Programmer:  Robb Matzke
  *              Monday, September 28, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

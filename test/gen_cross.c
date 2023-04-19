@@ -88,8 +88,6 @@ int create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid);
  * Programmer:  Raymond Lu
  *              Some time ago
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -194,8 +192,6 @@ error:
  * Programmer:  Neil Fortner
  *              27 January 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -284,8 +280,6 @@ error:
  * Programmer:  Raymond Lu
  *              21 January 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -373,8 +367,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              27 January 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -472,8 +464,6 @@ error:
  * Programmer:  Neil Fortner
  *              27 January 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -569,8 +559,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              21 January 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -669,8 +657,6 @@ error:
  * Programmer:  Neil Fortner
  *              27 January 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -767,8 +753,6 @@ error:
  * Programmer:  Raymond Lu
  *              29 March 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -856,8 +840,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              29 March 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -958,8 +940,6 @@ error:
  * Programmer:  Raymond Lu
  *              29 March 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1049,8 +1029,6 @@ error:
  * Programmer:  Raymond Lu
  *              29 March 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1138,8 +1116,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              29 March 2011
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

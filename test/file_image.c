@@ -699,10 +699,6 @@ error:
  * Programmer:  John Mainzer
  *              Tuesday, November 15, 2011
  *
- * Modifications:
- *      Vailin Choi; July 2013
- *      Add the creation of user block to the file as indicated by the parameter "user".
- *
  ******************************************************************************
  */
 /* Disable warning for "format not a string literal" here -QAK */
@@ -1343,10 +1339,6 @@ error:
     return 1;
 } /* test_get_file_image_error_rejection() */
 
-/*
- * Modifications:
- *     Add testing for file image with or without user block in the file.
- */
 int
 main(void)
 {

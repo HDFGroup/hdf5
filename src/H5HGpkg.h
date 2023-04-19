@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Quincey Koziol
- *             Wednesday, July 9, 2003
- *
  * Purpose:     This file contains declarations which are visible
  *              only within the H5HG package. Source files outside the
  *              H5HG package should include H5HGprivate.h instead.

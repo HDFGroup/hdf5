@@ -1718,6 +1718,33 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
 
+    /*
+     * Now that we've read the dataset's datatype, dataspace and
+     * layout information, perform a quick check for compact datasets
+     * to ensure that the size of the internal buffer that was
+     * allocated for the dataset's raw data matches the size of
+     * the data. A corrupted file can cause a mismatch between the
+     * two, which might result in buffer overflows during future
+     * I/O to the dataset.
+     */
+    if (H5D_COMPACT == dataset->shared->layout.type) {
+        hssize_t dset_nelemts   = 0;
+        size_t   dset_type_size = H5T_GET_SIZE(dataset->shared->type);
+        size_t   dset_data_size = 0;
+
+        HDassert(H5D_COMPACT == dataset->shared->layout.storage.type);
+
+        if ((dset_nelemts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of elements in dataset's dataspace")
+
+        dset_data_size = (size_t)dset_nelemts * dset_type_size;
+
+        if (dataset->shared->layout.storage.u.compact.size != dset_data_size)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL,
+                        "bad value from dataset header - size of compact dataset's data buffer doesn't match "
+                        "size of dataset data");
+    }
+
     /* Set up flush append property */
     if (H5D__append_flush_setup(dataset, dapl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set up flush append property")

@@ -77,8 +77,6 @@ static char *test_argv0 = NULL;
  * Programmer:  Richard Warren
  *              10/1/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -482,8 +480,6 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
  *
  * Programmer:  Richard Warren
  *              10/1/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

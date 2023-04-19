@@ -30,8 +30,6 @@
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
 
-#define SUBFILING_TEST_DIR H5FD_SUBFILING_NAME
-
 /* The smallest Subfiling stripe size used for testing */
 #define SUBFILING_MIN_STRIPE_SIZE 128
 
@@ -897,6 +895,7 @@ test_selection_strategies(void)
 
                     case SELECT_IOC_ONE_PER_NODE:
                     case SELECT_IOC_WITH_CONFIG:
+                    case ioc_selection_options:
                     default:
                         HDprintf("invalid IOC selection strategy\n");
                         MPI_Abort(comm_g, -1);
@@ -1718,16 +1717,20 @@ test_subfiling_write_many_read_few(void)
 static void
 test_subfiling_h5fuse(void)
 {
-    hsize_t start[1];
-    hsize_t count[1];
-    hsize_t dset_dims[1];
-    size_t  target_size;
-    hid_t   file_id   = H5I_INVALID_HID;
-    hid_t   fapl_id   = H5I_INVALID_HID;
-    hid_t   dset_id   = H5I_INVALID_HID;
-    hid_t   fspace_id = H5I_INVALID_HID;
-    void   *buf       = NULL;
-    int     skip_test = 0;
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+    h5_stat_t file_info;
+    uint64_t  file_inode;
+    hsize_t   start[1];
+    hsize_t   count[1];
+    hsize_t   dset_dims[1];
+    size_t    target_size;
+    hid_t     file_id   = H5I_INVALID_HID;
+    hid_t     fapl_id   = H5I_INVALID_HID;
+    hid_t     dset_id   = H5I_INVALID_HID;
+    hid_t     fspace_id = H5I_INVALID_HID;
+    void     *buf       = NULL;
+    int       skip_test = 0;
+#endif
 
     curr_nerrors = nerrors;
 
@@ -1768,6 +1771,22 @@ test_subfiling_h5fuse(void)
     /* Create file on all ranks */
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    /*
+     * Retrieve the HDF5 file's inode number before operating on
+     * it, since it might change after fusing
+     */
+    HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
+    if (MAINPROCESS) {
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        file_inode = (uint64_t)file_info.st_ino;
+    }
+
+    if (mpi_size > 1) {
+        mpi_code_g = MPI_Bcast(&file_inode, 1, MPI_UINT64_T, 0, comm_g);
+        VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+    }
 
     /* Calculate target size for dataset to stripe it across available IOCs */
     target_size = (stripe_size_g > 0) ? (size_t)stripe_size_g : H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
@@ -1818,10 +1837,9 @@ test_subfiling_h5fuse(void)
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     if (MAINPROCESS) {
-        h5_stat_t file_info;
-        pid_t     pid = 0;
-        pid_t     tmppid;
-        int       status;
+        pid_t pid = 0;
+        pid_t tmppid;
+        int   status;
 
         pid = HDfork();
         VRFY(pid >= 0, "HDfork succeeded");
@@ -1833,11 +1851,9 @@ test_subfiling_h5fuse(void)
             tmp_filename = HDmalloc(PATH_MAX);
             VRFY(tmp_filename, "HDmalloc succeeded");
 
-            VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
-
             /* Generate name for configuration file */
             HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
-                       SUBF_FILENAME, (uint64_t)file_info.st_ino);
+                       SUBF_FILENAME, file_inode);
 
             args[0] = HDstrdup("env");
             args[1] = HDstrdup("sh");
@@ -1904,13 +1920,58 @@ test_subfiling_h5fuse(void)
     mpi_code_g = MPI_Barrier(comm_g);
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
-    H5E_BEGIN_TRY
-    {
-        H5Fdelete(SUBF_FILENAME, fapl_id);
+    /*
+     * Since we've now fused the file back together, the Subfiling
+     * VFD will no longer be able to work with it. The main HDF5
+     * file should be able to be deleted using the sec2 VFD, but we
+     * have to delete the extra files manually.
+     */
+    if (MAINPROCESS) {
+        char *filename_buf;
+        int   num_subfiles = num_iocs_g;
+        int   num_digits   = (int)(HDlog10(num_subfiles) + 1);
+
+        /* Delete the regular HDF5 file */
+        H5Pset_fapl_sec2(fapl_id);
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(SUBF_FILENAME, fapl_id);
+        }
+        H5E_END_TRY;
+
+        filename_buf = HDmalloc(PATH_MAX);
+        VRFY(filename_buf, "HDmalloc succeeded");
+
+        /* Generate name for configuration file */
+        HDsnprintf(filename_buf, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
+                   SUBF_FILENAME, file_inode);
+
+        /* Delete the configuration file */
+        if (HDremove(filename_buf) < 0) {
+            HDprintf("couldn't remove Subfiling VFD configuration file '%s'\n", filename_buf);
+            nerrors++;
+        }
+
+        for (int i = 0; i < num_subfiles; i++) {
+            /* Generate name for each subfile */
+            HDsnprintf(filename_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME, file_inode,
+                       num_digits, i + 1, num_subfiles);
+
+            /* Delete the subfile */
+            if (HDremove(filename_buf) < 0) {
+                HDprintf("couldn't remove subfile '%s'\n", filename_buf);
+                nerrors++;
+            }
+        }
+
+        HDfree(filename_buf);
     }
-    H5E_END_TRY;
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
     CHECK_PASSED();
 #else
@@ -1971,9 +2032,13 @@ int
 main(int argc, char **argv)
 {
     unsigned seed;
-    char    *env_value = NULL;
-    int      required  = MPI_THREAD_MULTIPLE;
-    int      provided  = 0;
+    hbool_t  must_unset_stripe_size_env      = FALSE;
+    hbool_t  must_unset_ioc_per_node_env     = FALSE;
+    hbool_t  must_unset_ioc_thread_count_env = FALSE;
+    hbool_t  must_unset_config_dir_env       = FALSE;
+    char    *env_value                       = NULL;
+    int      required                        = MPI_THREAD_MULTIPLE;
+    int      provided                        = 0;
 
     HDcompile_assert(SUBFILING_MIN_STRIPE_SIZE <= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
 
@@ -2169,6 +2234,8 @@ main(int argc, char **argv)
             nerrors++;
             goto exit;
         }
+
+        must_unset_stripe_size_env = TRUE;
     }
     if (ioc_per_node_g < 0) {
         const char *ioc_per_node_str;
@@ -2184,6 +2251,8 @@ main(int argc, char **argv)
             nerrors++;
             goto exit;
         }
+
+        must_unset_ioc_per_node_env = TRUE;
     }
     if (ioc_thread_pool_size_g < 0) {
         if (HDsetenv(H5FD_IOC_THREAD_POOL_SIZE, "2", 1) < 0) {
@@ -2192,6 +2261,8 @@ main(int argc, char **argv)
             nerrors++;
             goto exit;
         }
+
+        must_unset_ioc_thread_count_env = TRUE;
     }
 
     if (!(env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
@@ -2243,6 +2314,8 @@ main(int argc, char **argv)
                 goto exit;
             }
         }
+
+        must_unset_config_dir_env = TRUE;
     }
 
     /* Grab values from environment variables */
@@ -2282,6 +2355,15 @@ main(int argc, char **argv)
         HDputs("All Subfiling VFD tests passed\n");
 
 exit:
+    if (must_unset_stripe_size_env)
+        HDunsetenv(H5FD_SUBFILING_STRIPE_SIZE);
+    if (must_unset_ioc_per_node_env)
+        HDunsetenv(H5FD_SUBFILING_IOC_PER_NODE);
+    if (must_unset_ioc_thread_count_env)
+        HDunsetenv(H5FD_IOC_THREAD_POOL_SIZE);
+    if (must_unset_config_dir_env)
+        HDunsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+
     if (MAINPROCESS) {
         if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
             HDprintf("couldn't remove temporary testing directory\n");

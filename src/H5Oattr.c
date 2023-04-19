@@ -112,95 +112,125 @@ H5FL_EXTERN(H5S_extent_t);
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
         This function decodes the "raw" disk form of a attribute message
-    into a struct in memory native format.  The struct is allocated within this
-    function using malloc() and is returned to the caller.
+        into a struct in memory native format.  The struct is allocated within this
+        function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
 H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags,
                  size_t p_size, const uint8_t *p)
 {
-    H5A_t        *attr = NULL;
-    H5S_extent_t *extent;           /*extent dimensionality information  */
-    size_t        name_len;         /*attribute name length */
-    size_t        dt_size;          /* Datatype size */
-    hssize_t      sds_size;         /* Signed Dataspace size */
-    hsize_t       ds_size;          /* Dataspace size */
-    unsigned      flags     = 0;    /* Attribute flags */
-    H5A_t        *ret_value = NULL; /* Return value */
+    H5A_t         *attr   = NULL;
+    const uint8_t *p_end  = p + p_size - 1; /* End of input buffer */
+    size_t         delta  = 0;              /* Amount to move p in next field */
+    H5S_extent_t  *extent = NULL;           /* Extent dimensionality information */
+    size_t         name_len;                /* Attribute name length */
+    size_t         dt_size;                 /* Datatype size */
+    hssize_t       sds_size;                /* Signed Dataspace size */
+    hsize_t        ds_size;                 /* Dataspace size */
+    unsigned       flags     = 0;           /* Attribute flags */
+    H5A_t         *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
     if (NULL == (attr = H5FL_CALLOC(H5A_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
     if (NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared attr structure")
 
     /* Version number */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     attr->shared->version = *p++;
     if (attr->shared->version < H5O_ATTR_VERSION_1 || attr->shared->version > H5O_ATTR_VERSION_LATEST)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
 
     /* Get the flags byte if we have a later version of the attribute */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (attr->shared->version >= H5O_ATTR_VERSION_2) {
         flags = *p++;
 
         /* Check for unknown flag */
         if (flags & (unsigned)~H5O_ATTR_FLAG_ALL)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unknown flag for attribute message")
-    } /* end if */
+    }
     else
-        p++; /* Byte is unused when version<2 */
+        p++; /* Byte is unused when version < 2 */
 
-    /*
-     * Decode the sizes of the parts of the attribute.  The sizes stored in
+    /* Decode the sizes of the parts of the attribute.  The sizes stored in
      * the file are exact but the parts are aligned on 8-byte boundaries.
      */
-    UINT16DECODE(p, name_len); /*including null*/
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    UINT16DECODE(p, name_len); /* Including null */
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, attr->shared->dt_size);
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, attr->shared->ds_size);
 
-    /*
-     * Decode the character encoding for the name for versions 3 or later,
+    /* Decode the character encoding for the name for versions 3 or later,
      * as well as some reserved bytes.
      */
-    if (attr->shared->version >= H5O_ATTR_VERSION_3)
+    if (attr->shared->version >= H5O_ATTR_VERSION_3) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         attr->shared->encoding = (H5T_cset_t)*p++;
+    }
 
-    /* Decode and store the name */
-    if (NULL == (attr->shared->name = H5MM_strdup((const char *)p)))
+    /* Decode and store the name
+     *
+     * NOTE: If the buffer overflow error message changes, test_corrupted_attnamelen()
+     *       in titerate.c will fail since it looks for it explicitly.
+     */
+    if (H5_IS_BUFFER_OVERFLOW(p, name_len, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    if (NULL == (attr->shared->name = H5MM_strndup((const char *)p, name_len - 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make an attempt to detect corrupted name or name length - HDFFV-10588 */
-    if (name_len != (HDstrlen(attr->shared->name) + 1))
+    if (name_len != (HDstrnlen(attr->shared->name, name_len) + 1))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "attribute name has different length than stored length")
 
+    /* Determine pointer movement and check if it's valid */
     if (attr->shared->version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN_OLD(name_len); /* advance the memory pointer */
+        delta = H5O_ALIGN_OLD(name_len);
     else
-        p += name_len; /* advance the memory pointer */
+        delta = name_len;
+    if (H5_IS_BUFFER_OVERFLOW(p, delta, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    p += delta;
 
     /* Decode the attribute's datatype */
+    if (H5_IS_BUFFER_OVERFLOW(p, attr->shared->dt_size, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (NULL == (attr->shared->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(
                      f, open_oh, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags,
                      attr->shared->dt_size, p)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
-    if (attr->shared->version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN_OLD(attr->shared->dt_size);
-    else
-        p += attr->shared->dt_size;
 
-    /* decode the attribute dataspace.  It can be shared in versions >= 3
+    /* Determine pointer movement and check if it's valid */
+    if (attr->shared->version < H5O_ATTR_VERSION_2)
+        delta = H5O_ALIGN_OLD(attr->shared->dt_size);
+    else
+        delta = attr->shared->dt_size;
+    if (H5_IS_BUFFER_OVERFLOW(p, delta, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    p += delta;
+
+    /* Decode the attribute dataspace.  It can be shared in versions >= 3
      * What's actually shared, though, is only the extent.
      */
     if (NULL == (attr->shared->ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Decode attribute's dataspace extent */
+    if (H5_IS_BUFFER_OVERFLOW(p, attr->shared->ds_size, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if ((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(
              f, open_oh, ((flags & H5O_ATTR_FLAG_SPACE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags,
              attr->shared->ds_size, p)) == NULL)
@@ -216,10 +246,14 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     if (H5S_select_all(attr->shared->ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
+    /* Determine pointer movement and check if it's valid */
     if (attr->shared->version < H5O_ATTR_VERSION_2)
-        p += H5O_ALIGN_OLD(attr->shared->ds_size);
+        delta = H5O_ALIGN_OLD(attr->shared->ds_size);
     else
-        p += attr->shared->ds_size;
+        delta = attr->shared->ds_size;
+    if (H5_IS_BUFFER_OVERFLOW(p, delta, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    p += delta;
 
     /* Get the datatype & dataspace sizes */
     if (0 == (dt_size = H5T_get_size(attr->shared->dt)))
@@ -234,17 +268,18 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     if ((attr->shared->data_size / dt_size) != ds_size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds addressable range")
 
-    /* Go get the data */
+    /* Get the data */
     if (attr->shared->data_size) {
         /* Ensure that data size doesn't exceed buffer size, in case of
-           it's being corrupted in the file */
-        if (attr->shared->data_size > p_size)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_OVERFLOW, NULL, "data size exceeds buffer size")
+         * it's being corrupted in the file
+         */
+        if (H5_IS_BUFFER_OVERFLOW(p, attr->shared->data_size, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
         if (NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, attr->shared->data_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         H5MM_memcpy(attr->shared->data, p, attr->shared->data_size);
-    } /* end if */
+    }
 
     /* Increment the reference count for this object header message in cache(compact
        storage) or for the object from dense storage. */
@@ -254,15 +289,16 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     ret_value = attr;
 
 done:
-    if (NULL == ret_value)
+    if (NULL == ret_value) {
         if (attr) {
-            /* Free any dynamically allocated items */
             if (attr->shared)
                 if (H5A__shared_free(attr) < 0)
                     HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release attribute info")
-
             attr = H5FL_FREE(H5A_t, attr);
-        } /* end if */
+        }
+        if (extent)
+            extent = H5FL_FREE(H5S_extent_t, extent);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_decode() */

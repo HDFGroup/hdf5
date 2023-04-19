@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Quincey Koziol
- *        Thursday, May 15, 2003
- *
- * Purpose:    This file contains declarations which are visible only within
- *        the H5B package.  Source files outside the H5B package should
- *        include H5Bprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5B package.  Source files outside the H5B package should
+ *          include H5Bprivate.h instead.
  */
 #if !(defined H5B_FRIEND || defined H5B_MODULE)
 #error "Do not include this file outside the H5B package!"

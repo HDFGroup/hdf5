@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, April  6, 2020
- *
  * Purpose:     This file contains declarations which define macros for the
  *              H5ES package.  Including this header means that the source file
  *              is part of the H5ES package.
