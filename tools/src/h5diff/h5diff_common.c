@@ -24,23 +24,24 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char         *s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"version", no_arg, 'V'},
+static const char         *s_opts   = "cd:ehln:p:qrv*xA:CE:NS*V";
+static struct long_options l_opts[] = {{"compare", no_arg, 'c'},
+                                       {"delta", require_arg, 'd'},
+                                       {"use-system-epsilon", no_arg, 'e'},
+                                       {"help", no_arg, 'h'},
+                                       {"follow-symlinks", no_arg, 'l'},
+                                       {"count", require_arg, 'n'},
+                                       {"relative", require_arg, 'p'},
+                                       {"quiet", no_arg, 'q'},
                                        {"report", no_arg, 'r'},
                                        {"verbose", optional_arg, 'v'},
-                                       {"quiet", no_arg, 'q'},
-                                       {"count", require_arg, 'n'},
-                                       {"delta", require_arg, 'd'},
-                                       {"relative", require_arg, 'p'},
-                                       {"nan", no_arg, 'N'},
-                                       {"compare", no_arg, 'c'},
-                                       {"use-system-epsilon", no_arg, 'e'},
-                                       {"follow-symlinks", no_arg, 'l'},
                                        {"no-dangling-links", no_arg, 'x'},
-                                       {"exclude-path", require_arg, 'E'},
                                        {"exclude-attribute", require_arg, 'A'},
+                                       {"no-compact-subset", no_arg, 'C'},
+                                       {"exclude-path", require_arg, 'E'},
+                                       {"nan", no_arg, 'N'},
                                        {"enable-error-stack", optional_arg, 'S'},
+                                       {"version", no_arg, 'V'},
                                        {"vol-value-1", require_arg, '1'},
                                        {"vol-name-1", require_arg, '2'},
                                        {"vol-info-1", require_arg, '3'},
@@ -73,122 +74,6 @@ check_options(diff_opt_t *opts)
                  PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
     }
-}
-
-/*-------------------------------------------------------------------------
- * Function:    parse_hsize_list
- *
- * Purpose:     Parse a list of comma or space separated integers and return
- *              them in a list. The string being passed into this function
- *              should be at the start of the list you want to parse. You are
- *              responsible for freeing the array returned from here.
- *
- *              Lists in the so-called "terse" syntax are separated by
- *              semicolons (;). The lists themselves can be separated by
- *              either commas (,) or white spaces.
- *
- * Return:      <none>
- *-------------------------------------------------------------------------
- */
-static void
-parse_hsize_list(const char *h_list, subset_d *d)
-{
-    hsize_t     *p_list;
-    const char  *ptr;
-    unsigned int size_count = 0;
-    unsigned int i          = 0;
-    unsigned int last_digit = 0;
-
-    if (!h_list || !*h_list || *h_list == ';')
-        return;
-
-    H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
-    /* count how many integers do we have */
-    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
-            if (!last_digit)
-                /* the last read character wasn't a digit */
-                size_count++;
-
-            last_digit = 1;
-        }
-        else
-            last_digit = 0;
-
-    if (size_count == 0) {
-        /* there aren't any integers to read */
-        H5TOOLS_ENDDEBUG("No integers to read");
-        return;
-    }
-    H5TOOLS_DEBUG("Number integers to read=%ld", size_count);
-
-    /* allocate an array for the integers in the list */
-    if ((p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t))) == NULL)
-        H5TOOLS_INFO("Unable to allocate space for subset data");
-
-    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
-            /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
-
-            while (HDisdigit(*ptr))
-                /* scroll to end of integer */
-                ptr++;
-        }
-    d->data = p_list;
-    d->len  = size_count;
-    H5TOOLS_ENDDEBUG(" ");
-}
-
-/*-------------------------------------------------------------------------
- * Function:    parse_subset_params
- *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
- *
- * Return:      Success:    struct subset_t object
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-static struct subset_t *
-parse_subset_params(const char *dset)
-{
-    struct subset_t *s = NULL;
-    char            *brace;
-
-    H5TOOLS_START_DEBUG(" - dset:%s", dset);
-    if ((brace = HDstrrchr(dset, '[')) != NULL) {
-        *brace++ = '\0';
-
-        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
-        parse_hsize_list(brace, &s->start);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->stride);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->count);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->block);
-    }
-    H5TOOLS_ENDDEBUG(" ");
-
-    return s;
 }
 
 /*-------------------------------------------------------------------------
@@ -325,6 +210,10 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     exclude_node->next = NULL;
                     exclude_prev->next = exclude_node;
                 }
+                break;
+
+            case 'C':
+                opts->disable_compact_subset = TRUE;
                 break;
 
             case 'A':
@@ -476,13 +365,10 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     }
     H5TOOLS_DEBUG("objname2 = %s", *objname2);
 
-    /*
-     * TRILABS_227 is complete except for an issue with printing indices
-     * the following calls will enable subsetting
-     */
-    opts->sset[0] = parse_subset_params(*objname1);
-
-    opts->sset[1] = parse_subset_params(*objname2);
+    if (!opts->disable_compact_subset) {
+        opts->sset[0] = parse_subset_params(*objname1);
+        opts->sset[1] = parse_subset_params(*objname2);
+    }
 
     H5TOOLS_ENDDEBUG(" ");
 }
@@ -823,6 +709,9 @@ usage(void)
      * the following will be needed for subsetting
      */
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
     PRINTVALSTREAM(rawoutstream,
                    "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
     PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
