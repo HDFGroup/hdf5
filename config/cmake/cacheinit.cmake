@@ -25,6 +25,8 @@ set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
 
+set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
+
 set (HDF5_INSTALL_MOD_FORTRAN "NO" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" FORCE)
 set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
 
@@ -44,9 +46,8 @@ set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
 
-set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
-
 
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
@@ -54,11 +55,8 @@ set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.2.13
 set (ZLIB_TGZ_ORIGNAME "zlib-1.2.13.tar.gz" CACHE STRING "Use ZLIB from original compressed file" FORCE)
 set (ZLIB_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
 
-set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
-set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
-set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
 set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original location" FORCE)
 set (LIBAEC_TGZ_ORIGNAME "libaec-v1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
 set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)

@@ -142,7 +142,7 @@ install (
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)
   configure_file (
-      ${HDF_RESOURCES_DIR}/HDF5_Examples.cmake.in
+      ${HDF_RESOURCES_DIR}/examples/HDF5_Examples.cmake.in
       ${HDF5_BINARY_DIR}/HDF5_Examples.cmake @ONLY
   )
   install (
@@ -169,13 +169,13 @@ if (HDF5_PACK_EXAMPLES)
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/CTestScript.cmake
+          ${HDF_RESOURCES_DIR}/examples/CTestScript.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/HDF5_Examples_options.cmake
+          ${HDF_RESOURCES_DIR}/examples/HDF5_Examples_options.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
