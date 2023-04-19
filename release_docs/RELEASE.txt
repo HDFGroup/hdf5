@@ -103,9 +103,6 @@ New Features
 
       H5A, H5D, H5ES, H5G, H5F, H5L and H5O async APIs were added.
 
-      (MSB - 2023/04/13)
-
-
     C++ Library:
     ------------
     -
