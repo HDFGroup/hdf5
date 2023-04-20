@@ -233,10 +233,11 @@ for i in "${subfiles[@]}"; do
                   if [ "$quiet" == "false" ]; then
                       echo -e "$GRN $EXEC $NC"
                   fi
-                  err="$( $EXEC > /dev/null 2>&1 $bckgrd)"
-                  if [ "$verbose" == "true" ]; then
-                      echo -e "$CYN" $err "$NC"
-                  fi
+                  dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc > /dev/null 2>&1
+                  #err="$( $EXEC > /dev/null 2>&1)"
+                  #if [ "$verbose" == "true" ]; then
+                  #    echo -e "$CYN" $err "$NC"
+                  #fi
                   records_left=$((records_left-stripe_size))
                   skip=$((skip+1))
                   seek=$((seek_cnt+skip*nsubfiles))
@@ -257,7 +258,7 @@ done; wait
 
 END=$(( $(date +%s%N) - START ))
 DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
-#if [ "$quiet" == "false" ]; then
+if [ "$quiet" == "false" ]; then
     echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
-#fi
+fi
 
