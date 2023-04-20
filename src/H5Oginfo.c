@@ -89,7 +89,7 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  */
 static void *
 H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     H5O_ginfo_t  *ginfo = NULL;     /* Pointer to group information message */
     unsigned char flags;            /* Flags for encoding group info */
@@ -100,7 +100,15 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     /* check args */
     HDassert(p);
 
+    if (p_size == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_ARGS, NULL, "size of given ginfo was zero")
+
+    /* Points at last valid byte in buffer */
+    const uint8_t *p_end = p + p_size - 1;
+
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     if (*p++ != H5O_GINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -109,6 +117,9 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Get the flags for the group */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+
     flags = *p++;
     if (flags & ~H5O_GINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
@@ -117,6 +128,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     if (ginfo->store_link_phase_change) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, ginfo->max_compact)
         UINT16DECODE(p, ginfo->min_dense)
     } /* end if */
@@ -127,6 +140,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     /* Get the estimated # of entries & name lengths */
     if (ginfo->store_est_entry_info) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, ginfo->est_num_entries)
         UINT16DECODE(p, ginfo->est_name_len)
     } /* end if */

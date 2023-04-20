@@ -666,7 +666,7 @@ test_misc4(void)
     herr_t      ret;
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing fileno working in H5O_info_t\n"));
+    MESSAGE(5, ("Testing fileno working in H5O_info2_t\n"));
 
     file1 = H5Fcreate(MISC4_FILE_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");
@@ -1412,7 +1412,11 @@ test_misc8(void)
 
     /* Create a contiguous dataset, with space allocation late */
     /* Should fail */
-    did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Set the space allocation time to incremental */
@@ -1421,7 +1425,11 @@ test_misc8(void)
 
     /* Create a contiguous dataset, with space allocation incremental */
     /* Should fail */
-    did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Set the space allocation time to early */
@@ -1762,7 +1770,11 @@ test_misc9(void)
     ret = H5Pset_fapl_core(fapl, (size_t)1024, 0);
     CHECK(ret, FAIL, "H5Pset_fapl_core");
 
-    fid = H5Fopen(MISC9_FILE, H5F_ACC_RDWR, fapl);
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(MISC9_FILE, H5F_ACC_RDWR, fapl);
+    }
+    H5E_END_TRY;
     VERIFY(fid, FAIL, "H5Fopen");
 
     ret = H5Pclose(fapl);
@@ -6175,42 +6187,46 @@ test_misc(void)
 void
 cleanup_misc(void)
 {
-    HDremove(MISC1_FILE);
-    HDremove(MISC2_FILE_1);
-    HDremove(MISC2_FILE_2);
-    HDremove(MISC3_FILE);
-    HDremove(MISC4_FILE_1);
-    HDremove(MISC4_FILE_2);
-    HDremove(MISC5_FILE);
-    HDremove(MISC6_FILE);
-    HDremove(MISC7_FILE);
-    HDremove(MISC8_FILE);
-    HDremove(MISC9_FILE);
-    HDremove(MISC10_FILE_NEW);
-    HDremove(MISC11_FILE);
-    HDremove(MISC12_FILE);
-    HDremove(MISC13_FILE_1);
-    HDremove(MISC13_FILE_2);
-    HDremove(MISC14_FILE);
-    HDremove(MISC15_FILE);
-    HDremove(MISC16_FILE);
-    HDremove(MISC17_FILE);
-    HDremove(MISC18_FILE);
-    HDremove(MISC19_FILE);
-    HDremove(MISC20_FILE);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(MISC1_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC2_FILE_1, H5P_DEFAULT);
+        H5Fdelete(MISC2_FILE_2, H5P_DEFAULT);
+        H5Fdelete(MISC3_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC4_FILE_1, H5P_DEFAULT);
+        H5Fdelete(MISC4_FILE_2, H5P_DEFAULT);
+        H5Fdelete(MISC5_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC6_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC7_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC8_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC9_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC10_FILE_NEW, H5P_DEFAULT);
+        H5Fdelete(MISC11_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC12_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC13_FILE_1, H5P_DEFAULT);
+        H5Fdelete(MISC13_FILE_2, H5P_DEFAULT);
+        H5Fdelete(MISC14_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC15_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC16_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC17_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC18_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC19_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC20_FILE, H5P_DEFAULT);
 #ifdef H5_HAVE_FILTER_SZIP
-    HDremove(MISC21_FILE);
-    HDremove(MISC22_FILE);
+        H5Fdelete(MISC21_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC22_FILE, H5P_DEFAULT);
 #endif /* H5_HAVE_FILTER_SZIP */
-    HDremove(MISC23_FILE);
-    HDremove(MISC24_FILE);
-    HDremove(MISC25A_FILE);
-    HDremove(MISC25C_FILE);
-    HDremove(MISC26_FILE);
-    HDremove(MISC28_FILE);
-    HDremove(MISC29_COPY_FILE);
-    HDremove(MISC30_FILE);
+        H5Fdelete(MISC23_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC24_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC25A_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC25C_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC26_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC28_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC29_COPY_FILE, H5P_DEFAULT);
+        H5Fdelete(MISC30_FILE, H5P_DEFAULT);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    HDremove(MISC31_FILE);
+        H5Fdelete(MISC31_FILE, H5P_DEFAULT);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+    }
+    H5E_END_TRY;
 } /* end cleanup_misc() */

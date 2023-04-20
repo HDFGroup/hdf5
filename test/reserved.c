@@ -30,8 +30,6 @@ const char *FILENAME[] = {"rsrv_heap", "rsrv_ohdr", "rsrv_vlen", NULL};
  *              Nat Furrer
  *              Friday, May 28, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -164,8 +162,6 @@ error:
  * Programmer:    James Laird
  *              Nat Furrer
  *              Friday, May 28, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -308,8 +304,6 @@ error:
  * Programmer:    James Laird
  *        Nat Furrer
  *              Thursday, July 1, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -470,8 +464,6 @@ error:
  *
  * Programmer:    Nat Furrer and James Laird
  *              Thursday, July 1, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

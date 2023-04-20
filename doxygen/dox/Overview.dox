@@ -37,10 +37,6 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
 \par Offline reading
      You can <a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
 
-\par History
-     A snapshot (~April 2017) of the pre-Doxygen HDF5 documentation can be found
-     <a href="https://docs.hdfgroup.org/archive/support/HDF5/doc/index.html">here</a>.
-
 \par ToDo List
      There is plenty of <a href="./todo.html">unfinished business</a>.
 

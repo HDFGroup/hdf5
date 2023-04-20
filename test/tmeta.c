@@ -121,8 +121,6 @@ test_metadata(void)
  * Programmer:	Albert Cheng
  *              July 2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

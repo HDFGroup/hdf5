@@ -11,10 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the sec2 driver.
+ * Purpose:	The public header file for the C stdio driver
  */
 #ifndef H5FDstdio_H
 #define H5FDstdio_H

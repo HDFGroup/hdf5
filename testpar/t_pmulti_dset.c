@@ -17,10 +17,6 @@
  * Purpose:     Test H5Dwrite_multi() and H5Dread_multi using randomized
  *              parameters in parallel.  Also tests H5Dwrite() and H5Dread()
  *              using a similar method.
- *
- *              Note that this test currently relies on all processes generating
- *              the same sequence of random numbers after using a shared seed
- *              value, therefore it may not work across multiple machines.
  */
 
 #include "h5test.h"

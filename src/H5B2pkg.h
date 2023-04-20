@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Monday, January 31, 2005
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5B2 package.  Source files outside the H5B2 package should
- *		include H5B2private.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5B2 package.  Source files outside the H5B2 package should
+ *          include H5B2private.h instead.
  */
 #if !(defined H5B2_FRIEND || defined H5B2_MODULE)
 #error "Do not include this file outside the H5B2 package!"

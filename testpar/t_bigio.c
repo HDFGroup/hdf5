@@ -26,7 +26,7 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 #define DATASET4             "DSET4"
 #define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT       (1 < 29)
+#define DXFER_BIGCOUNT       (1 << 29)
 
 #define HYPER 1
 #define POINT 2
@@ -1165,9 +1165,16 @@ single_rank_independent_io(void)
 
         free(data);
         H5Sclose(fspace_id);
-        H5Pclose(fapl_id);
         H5Dclose(dset_id);
         H5Fclose(file_id);
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME[1], fapl_id);
+        }
+        H5E_END_TRY;
+
+        H5Pclose(fapl_id);
     }
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -1288,8 +1295,6 @@ coll_chunk1(void)
  *
  * Programmer:    Unknown
  *        July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1858,7 +1863,7 @@ main(int argc, char **argv)
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
      * that we try to ensure that our bigio handling is actually
-     * envoked and tested.
+     * invoked and tested.
      */
     if (newsize != oldsize)
         bigcount = newsize * 2;

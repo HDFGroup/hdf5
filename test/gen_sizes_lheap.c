@@ -36,8 +36,6 @@
  * Programmer:  Neil Fortner
  *              Thursday, July  15, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int

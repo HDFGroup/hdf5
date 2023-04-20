@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              Wednesday, 20 September 2006
- *
  * Purpose:	The public header file for the direct driver.
  */
 #ifndef H5FDdirect_H
