@@ -1475,7 +1475,7 @@ CONTAINS
 
     hdferr = H5Dvlen_reclaim_c(type_id, space_id, plist_id, buf)
 
-  END SUBROUTINE H5Dvlen_reclaim_f
+  END SUBROUTINE h5dvlen_reclaim_f
 
 !>
 !! \ingroup FH5D
@@ -2280,7 +2280,7 @@ CONTAINS
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
-  SUBROUTINE H5Dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
+  SUBROUTINE h5dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
     INTEGER(SIZE_T),      INTENT(IN)               :: count
@@ -2316,7 +2316,7 @@ CONTAINS
 
     hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
-  END SUBROUTINE H5Dread_multi_f
+  END SUBROUTINE h5dread_multi_f
 !>
 !! \ingroup FH5D
 !!
@@ -2331,7 +2331,7 @@ CONTAINS
 !! \param hdferr        \fortran_error
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
-  SUBROUTINE H5Dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
+  SUBROUTINE h5dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
     INTEGER(SIZE_T),      INTENT(IN)               :: count
@@ -2367,7 +2367,7 @@ CONTAINS
 
     hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
-  END SUBROUTINE H5Dwrite_multi_f
+  END SUBROUTINE h5dwrite_multi_f
 
 #endif
 
