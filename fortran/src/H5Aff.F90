@@ -323,7 +323,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_idx()
 !!
-  SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
+  SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     INTEGER, INTENT(IN) :: index
@@ -344,7 +344,7 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_idx_f
+  END SUBROUTINE h5aopen_idx_f
 #endif
 
 !>
@@ -358,7 +358,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_space()
 !!
-  SUBROUTINE H5Aget_space_f(attr_id, space_id, hdferr)
+  SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(OUT) :: space_id
@@ -376,7 +376,7 @@ CONTAINS
     hdferr = 0
     IF(space_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_space_f
+  END SUBROUTINE h5aget_space_f
 !>
 !! \ingroup FH5A
 !!
@@ -388,7 +388,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_type()
 !!
-  SUBROUTINE H5Aget_type_f(attr_id, type_id, hdferr)
+  SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(OUT) :: type_id
@@ -406,7 +406,7 @@ CONTAINS
     hdferr = 0
     IF(type_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_type_f
+  END SUBROUTINE h5aget_type_f
 !>
 !! \ingroup FH5A
 !!
@@ -555,7 +555,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Adelete()
 !!
-  SUBROUTINE H5Adelete_f(obj_id, name, hdferr)
+  SUBROUTINE h5adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -575,7 +575,7 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = H5Adelete_c(obj_id, name, namelen)
-  END SUBROUTINE H5Adelete_f
+  END SUBROUTINE h5adelete_f
 
 !>
 !! \ingroup FH5A
@@ -587,7 +587,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aclose()
 !!
-  SUBROUTINE H5Aclose_f(attr_id, hdferr)
+  SUBROUTINE h5aclose_f(attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -601,7 +601,7 @@ CONTAINS
     END INTERFACE
 
     hdferr = INT(H5Aclose(attr_id))
-  END SUBROUTINE H5Aclose_f
+  END SUBROUTINE h5aclose_f
 
 !>
 !! \ingroup FH5A
@@ -617,7 +617,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aclose_async()
 !!
-  SUBROUTINE H5Aclose_async_f(attr_id, es_id, hdferr, file, func, line)
+  SUBROUTINE h5aclose_async_f(attr_id, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: es_id
@@ -649,7 +649,7 @@ CONTAINS
 
     hdferr = H5Aclose_async(file_default, func_default, line_default, attr_id, es_id)
 
-  END SUBROUTINE H5Aclose_async_f
+  END SUBROUTINE h5aclose_async_f
 
 !>
 !! \ingroup FH5A
@@ -662,7 +662,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_storage_size()
 !!
-  SUBROUTINE H5Aget_storage_size_f(attr_id, size, hdferr)
+  SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HSIZE_T), INTENT(OUT) :: size
@@ -681,7 +681,7 @@ CONTAINS
     hdferr = 0
     IF(size.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_storage_size_f
+  END SUBROUTINE h5aget_storage_size_f
 
 !>
 !! \ingroup FH5A
@@ -694,7 +694,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_create_plist()
 !!
-  SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
+  SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(OUT) :: creation_prop_id
@@ -712,14 +712,14 @@ CONTAINS
     hdferr = 0
     IF(creation_prop_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aget_create_plist_f
+  END SUBROUTINE h5aget_create_plist_f
 
 !>
 !! \ingroup FH5A
 !!
 !! \brief Renames an attribute
 !!
-!! \param loc_id        Location or object identifier; may be dataset or group
+!! \param loc_id        Location or object identifier; may be dataset or group or named datatype
 !! \param obj_name      Name of object, relative to location, whose attribute is to be renamed
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
@@ -728,7 +728,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Arename_by_name()
 !!
-  SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
+  SUBROUTINE h5arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -769,13 +769,13 @@ CONTAINS
     hdferr = 0
     hdferr = H5Arename_by_name(loc_id, c_obj_name, c_old_attr_name, c_new_attr_name, lapl_id_default)
 
-  END SUBROUTINE H5Arename_by_name_f
+  END SUBROUTINE h5arename_by_name_f
 !>
 !! \ingroup FH5A
 !!
 !! \brief Asynchronously renames an attribute
 !!
-!! \param loc_id        Location or object identifier; may be dataset or group
+!! \param loc_id        Location or object identifier; may be dataset or group or named datatype
 !! \param obj_name      Name of object, relative to location, whose attribute is to be renamed
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
@@ -787,7 +787,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Arename_by_name()
 !!
-  SUBROUTINE H5Arename_by_name_async_f(loc_id, obj_name, old_attr_name, new_attr_name, es_id, &
+  SUBROUTINE h5arename_by_name_async_f(loc_id, obj_name, old_attr_name, new_attr_name, es_id, &
        hdferr, lapl_id, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -844,7 +844,7 @@ CONTAINS
     hdferr = H5Arename_by_name_async(file_default, func_default, line_default, &
          loc_id, c_obj_name, c_old_attr_name, c_new_attr_name, lapl_id_default, es_id)
 
-  END SUBROUTINE H5Arename_by_name_async_f
+  END SUBROUTINE h5arename_by_name_async_f
 
 !>
 !! \ingroup FH5A
@@ -860,7 +860,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen()
 !!
-  SUBROUTINE H5Aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
+  SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(IN) :: attr_name
@@ -881,7 +881,7 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_f
+  END SUBROUTINE h5aopen_f
 
 !>
 !! \ingroup FH5A
@@ -900,7 +900,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_async()
 !!
-  SUBROUTINE H5Aopen_async_f(obj_id, attr_name, attr_id, es_id, hdferr, aapl_id, file, func, line)
+  SUBROUTINE h5aopen_async_f(obj_id, attr_name, attr_id, es_id, hdferr, aapl_id, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(IN) :: attr_name
@@ -948,14 +948,14 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_async_f
+  END SUBROUTINE h5aopen_async_f
 
 !>
 !! \ingroup FH5A
 !!
 !! \brief Deletes an attribute from an object according to index order
 !!
-!! \param loc_id   Location or object identifier; may be dataset or group
+!! \param loc_id   Location or object identifier; may be dataset or group or named datatype
 !! \param obj_name Name of object, relative to location, from which attribute is to be removed
 !! \param idx_type Type of index; Possible values are:
 !!                 \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
@@ -976,7 +976,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Adelete_by_idx()
 !!
-  SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
+  SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -1010,7 +1010,7 @@ CONTAINS
     obj_namelen = LEN(obj_name)
     hdferr = H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
 
-  END SUBROUTINE H5Adelete_by_idx_f
+  END SUBROUTINE h5adelete_by_idx_f
 
 !>
 !! \ingroup FH5A
@@ -1060,7 +1060,7 @@ CONTAINS
 
     hdferr = H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
 
-  END SUBROUTINE H5Adelete_by_name_f
+  END SUBROUTINE h5adelete_by_name_f
 
 !>
 !! \ingroup FH5A
@@ -1089,7 +1089,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_by_idx()
 !!
-  SUBROUTINE H5Aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
+  SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -1132,7 +1132,7 @@ CONTAINS
     attr_id = INT(H5Aopen_by_idx(loc_id, c_obj_name, INT(idx_type, C_INT), INT(order, C_INT), n, &
          aapl_id_default, lapl_id_default), HID_T)
 
-  END SUBROUTINE H5Aopen_by_idx_f
+  END SUBROUTINE h5aopen_by_idx_f
 
 !>
 !! \ingroup FH5A
@@ -1165,7 +1165,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_by_idx_async()
 !!
-  SUBROUTINE H5Aopen_by_idx_async_f(loc_id, obj_name, idx_type, order, n, attr_id, es_id, hdferr, &
+  SUBROUTINE h5aopen_by_idx_async_f(loc_id, obj_name, idx_type, order, n, attr_id, es_id, hdferr, &
        aapl_id, lapl_id, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1227,7 +1227,7 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_by_idx_async_f
+  END SUBROUTINE h5aopen_by_idx_async_f
 
 !>
 !! \ingroup FH5A
@@ -1244,7 +1244,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_info()
 !!
-  SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
+  SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     LOGICAL, INTENT(OUT) :: f_corder_valid
@@ -1273,12 +1273,12 @@ CONTAINS
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
 
-  END SUBROUTINE H5Aget_info_f
+  END SUBROUTINE h5aget_info_f
 
 !>
 !! \ingroup FH5A
 !!
-!! \brief Retrieves attribute information, by attribute index position
+!! \brief Retrieves attribute information by attribute index position
 !!
 !! \param loc_id         Location of object to which attribute is attached
 !! \param obj_name       Name of object to which attribute is attached, relative to location
@@ -1294,7 +1294,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_info_by_idx()
 !!
-  SUBROUTINE H5Aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
+  SUBROUTINE h5aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1348,7 +1348,7 @@ CONTAINS
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE H5Aget_info_by_idx_f
+  END SUBROUTINE h5aget_info_by_idx_f
 
 !>
 !! \ingroup FH5A
@@ -1367,7 +1367,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aget_info_by_name()
 !!
-  SUBROUTINE H5Aget_info_by_name_f(loc_id, obj_name, attr_name, &
+  SUBROUTINE h5aget_info_by_name_f(loc_id, obj_name, attr_name, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1418,7 +1418,7 @@ CONTAINS
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE H5Aget_info_by_name_f
+  END SUBROUTINE h5aget_info_by_name_f
 
 !>
 !! \ingroup FH5A
@@ -1438,7 +1438,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Acreate_by_name()
 !!
-  SUBROUTINE H5Acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
+  SUBROUTINE h5acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
        acpl_id, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T),   INTENT(IN)  :: loc_id
@@ -1494,7 +1494,7 @@ CONTAINS
     hdferr = 0
     IF(attr.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Acreate_by_name_f
+  END SUBROUTINE h5acreate_by_name_f
 
 !>
 !! \ingroup FH5A
@@ -1518,7 +1518,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Acreate_by_name_async()
 !!
-  SUBROUTINE H5Acreate_by_name_async_f(loc_id, obj_name, attr_name, type_id, space_id, attr, es_id, hdferr, &
+  SUBROUTINE h5acreate_by_name_async_f(loc_id, obj_name, attr_name, type_id, space_id, attr, es_id, hdferr, &
        acpl_id, aapl_id, lapl_id, file, func, line)
 
     IMPLICIT NONE
@@ -1591,7 +1591,7 @@ CONTAINS
     hdferr = 0
     IF(attr.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Acreate_by_name_async_f
+  END SUBROUTINE h5acreate_by_name_async_f
 
 !>
 !! \ingroup FH5A
@@ -1605,7 +1605,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aexists()
 !!
-  SUBROUTINE H5Aexists_f(obj_id, attr_name, attr_exists, hdferr)
+  SUBROUTINE h5aexists_f(obj_id, attr_name, attr_exists, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T),   INTENT(IN) :: obj_id
     CHARACTER(LEN=*), INTENT(IN) :: attr_name
@@ -1635,7 +1635,7 @@ CONTAINS
     hdferr = 0
     IF(attr_exists_c.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aexists_f
+  END SUBROUTINE h5aexists_f
 
 !>
 !! \ingroup FH5A
@@ -1653,7 +1653,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aexists_async()
 !!
-  SUBROUTINE H5Aexists_async_f(obj_id, attr_name, attr_exists, es_id, hdferr, file, func, line)
+  SUBROUTINE h5aexists_async_f(obj_id, attr_name, attr_exists, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: obj_id
     CHARACTER(LEN=*), INTENT(IN)  :: attr_name
@@ -1692,7 +1692,7 @@ CONTAINS
 
     hdferr = INT(H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists, es_id))
 
-  END SUBROUTINE H5Aexists_async_f
+  END SUBROUTINE h5aexists_async_f
 
 !>
 !! \ingroup FH5A
@@ -1708,7 +1708,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aexists_by_name()
 !!
-  SUBROUTINE H5Aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
+  SUBROUTINE h5aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -1749,7 +1749,7 @@ CONTAINS
     hdferr = 0
     IF(attr_exists_c.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aexists_by_name_f
+  END SUBROUTINE h5aexists_by_name_f
 
 !>
 !! \ingroup FH5A
@@ -1769,7 +1769,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aexists_by_name_async()
 !!
-  SUBROUTINE H5Aexists_by_name_async_f(loc_id, obj_name, attr_name, attr_exists, es_id, hdferr, lapl_id, file, func, line)
+  SUBROUTINE h5aexists_by_name_async_f(loc_id, obj_name, attr_name, attr_exists, es_id, hdferr, lapl_id, file, func, line)
     IMPLICIT NONE
     INTEGER  (HID_T), INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: obj_name
@@ -1820,7 +1820,7 @@ CONTAINS
     hdferr = INT(H5Aexists_by_name_async(file_default, func_default, line_default, &
          loc_id, c_obj_name, c_attr_name, attr_exists, lapl_id_default, es_id))
 
-  END SUBROUTINE H5Aexists_by_name_async_f
+  END SUBROUTINE h5aexists_by_name_async_f
 
 !>
 !! \ingroup FH5A
@@ -1837,7 +1837,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_by_name()
 !!
-  SUBROUTINE H5Aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
+  SUBROUTINE h5aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -1879,7 +1879,7 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_by_name_f
+  END SUBROUTINE h5aopen_by_name_f
 
 !>
 !! \ingroup FH5A
@@ -1900,7 +1900,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Aopen_by_name_async()
 !!
-  SUBROUTINE H5Aopen_by_name_async_f(loc_id, obj_name, attr_name, attr_id, es_id, hdferr, &
+  SUBROUTINE h5aopen_by_name_async_f(loc_id, obj_name, attr_name, attr_id, es_id, hdferr, &
        aapl_id, lapl_id, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1959,7 +1959,7 @@ CONTAINS
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Aopen_by_name_async_f
+  END SUBROUTINE h5aopen_by_name_async_f
 
 !>
 !! \ingroup FH5A
@@ -1973,7 +1973,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Arename()
 !!
-  SUBROUTINE H5Arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
+  SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
@@ -2000,7 +2000,7 @@ CONTAINS
 
     hdferr = H5Arename(loc_id, c_old_attr_name, c_new_attr_name)
 
-  END SUBROUTINE H5Arename_f
+  END SUBROUTINE h5arename_f
 
 !>
 !! \ingroup FH5A
@@ -2018,7 +2018,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Arename_async()
 !!
-  SUBROUTINE H5Arename_async_f(loc_id, old_attr_name, new_attr_name, es_id, hdferr, &
+  SUBROUTINE h5arename_async_f(loc_id, old_attr_name, new_attr_name, es_id, hdferr, &
        file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -2063,7 +2063,7 @@ CONTAINS
     hdferr = H5Arename_async(file_default, func_default, line_default, &
          loc_id, c_old_attr_name, c_new_attr_name, es_id)
 
-  END SUBROUTINE H5Arename_async_f
+  END SUBROUTINE h5arename_async_f
 
 !>
 !! \ingroup FH5A
@@ -2082,7 +2082,7 @@ CONTAINS
 !! See C API: @ref H5Aread_async()
 !!
 
-  SUBROUTINE H5Aread_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
+  SUBROUTINE h5aread_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: attr_id
     INTEGER(HID_T), INTENT(IN)    :: mem_type_id
@@ -2119,7 +2119,7 @@ CONTAINS
 
     hdferr = H5Aread_async(file_default, func_default, line_default, attr_id, mem_type_id, buf, es_id)
 
-  END SUBROUTINE H5Aread_async_f
+  END SUBROUTINE h5aread_async_f
 
 !>
 !! \ingroup FH5A
@@ -2138,7 +2138,7 @@ CONTAINS
 !! See C API: @ref H5Awrite_async()
 !!
 
-  SUBROUTINE H5Awrite_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
+  SUBROUTINE h5awrite_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: attr_id
     INTEGER(HID_T), INTENT(IN)    :: mem_type_id
@@ -2175,7 +2175,7 @@ CONTAINS
 
     hdferr = H5Awrite_async(file_default, func_default, line_default, attr_id, mem_type_id, buf, es_id)
 
-  END SUBROUTINE H5Awrite_async_f
+  END SUBROUTINE h5awrite_async_f
 
 #ifdef H5_DOXYGEN
 
@@ -2271,7 +2271,7 @@ CONTAINS
 
 #else
 
-  SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+  SUBROUTINE h5awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2281,9 +2281,9 @@ CONTAINS
 
     CALL H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), dims, hdferr)
 
-  END SUBROUTINE H5Awrite_char_scalar
+  END SUBROUTINE h5awrite_char_scalar
 
-  SUBROUTINE H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
+  SUBROUTINE h5awrite_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2297,9 +2297,9 @@ CONTAINS
 
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
 
-  END SUBROUTINE H5Awrite_char_scalar_fix
+  END SUBROUTINE h5awrite_char_scalar_fix
 
-  SUBROUTINE H5Awrite_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5awrite_ptr(attr_id, mem_type_id, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2308,9 +2308,9 @@ CONTAINS
 
     hdferr = H5Awrite_f_c(attr_id, mem_type_id, buf)
 
-  END SUBROUTINE H5Awrite_ptr
+  END SUBROUTINE h5awrite_ptr
 
-  SUBROUTINE H5Aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+  SUBROUTINE h5aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: memtype_id
@@ -2335,9 +2335,9 @@ CONTAINS
 
     hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
 
-  END SUBROUTINE H5Aread_char_scalar_fix
+  END SUBROUTINE h5aread_char_scalar_fix
 
-  SUBROUTINE H5Aread_ptr(attr_id, mem_type_id, buf, hdferr)
+  SUBROUTINE h5aread_ptr(attr_id, mem_type_id, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2346,7 +2346,7 @@ CONTAINS
 
     hdferr = H5Aread_f_c(attr_id, mem_type_id, buf)
 
-  END SUBROUTINE H5Aread_ptr
+  END SUBROUTINE h5aread_ptr
 
 #endif
 
