@@ -1040,7 +1040,7 @@ CONTAINS
 !! \attention  \fortran_approved
 !!
 !! \param loc_id Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
-!! \param ginfo  Derived type in which group information is returned
+!! \param ginfo  Derived type in which group information is returned.
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5Gget_info()
@@ -1075,7 +1075,7 @@ CONTAINS
 !! \brief Asynchronously retrieves information about a group
 !!
 !! \param loc_id Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
-!! \param ginfo  Derived type in which group information is returned
+!! \param ginfo  Derived type in which group information is returned.
 !! \param es_id  \es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
@@ -1180,7 +1180,7 @@ CONTAINS
 !! \param idx_type   Index type.
 !! \param order      Order of the count in the index.
 !! \param n          Position in the index of the group for which information is retrieved.
-!! \param ginfo      Derived type in which group information is returned
+!! \param ginfo      Derived type in which group information is returned.
 !! \param hdferr     \fortran_error
 !! \param lapl_id    Link access property list.
 !!
@@ -1233,7 +1233,7 @@ CONTAINS
 !! \param idx_type   Index type.
 !! \param order      Order of the count in the index.
 !! \param n          Position in the index of the group for which information is retrieved.
-!! \param ginfo      Derived type in which group information is returned
+!! \param ginfo      Derived type in which group information is returned.
 !! \param es_id      \es_id
 !! \param hdferr     \fortran_error
 !! \param lapl_id    Link access property list.
@@ -1366,9 +1366,9 @@ CONTAINS
 !!
 !! \attention  \fortran_approved
 !!
-!! \param loc_id  File or group identifier
-!! \param name    Name of group containing group for which information is to be retrieved
-!! \param ginfo   Derived type in which group information is returned
+!! \param loc_id  File or group identifier.
+!! \param name    Name of group containing group for which information is to be retrieved.
+!! \param ginfo   Derived type in which group information is returned.
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list.
 !!
@@ -1411,9 +1411,9 @@ CONTAINS
 !!
 !! \brief Asynchronously retrieves information about a group by its name.
 !!
-!! \param loc_id  File or group identifier
-!! \param name    Name of group containing group for which information is to be retrieved
-!! \param ginfo   Derived type in which group information is returned
+!! \param loc_id  File or group identifier.
+!! \param name    Name of group containing group for which information is to be retrieved.
+!! \param ginfo   Derived type in which group information is returned.
 !! \param es_id   \es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list.
