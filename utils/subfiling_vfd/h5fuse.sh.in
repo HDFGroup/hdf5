@@ -90,6 +90,7 @@ while getopts "rihqvpf:" option; do
       p) # HDF5 fused file
          parallel="true";;
      \?) # Invalid option
+         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
          usage
          exit 1;;
      * ) usage
