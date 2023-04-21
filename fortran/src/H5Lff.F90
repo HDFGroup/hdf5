@@ -719,7 +719,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Lexists()
 !!
-  SUBROUTINE H5Lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
+  SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -756,7 +756,7 @@ CONTAINS
     hdferr = 0
     IF(link_exists_c.LT.0) hdferr = -1
 
-  END SUBROUTINE H5Lexists_f
+  END SUBROUTINE h5lexists_f
 
 !>
 !! \ingroup FH5L
@@ -957,8 +957,6 @@ CONTAINS
     INTEGER(SIZE_T)  :: group_namelen
     INTEGER(HID_T) :: lapl_id_default
 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
             link_type, corder_valid, corder, cset, token, val_size, lapl_id_default) &
@@ -1059,8 +1057,8 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
-            dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lmove_c')
+       INTEGER FUNCTION H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
+            dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='H5Lmove_c')
          IMPORT :: c_char
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
@@ -1075,7 +1073,7 @@ CONTAINS
          INTEGER(HID_T) :: lcpl_id_default
          INTEGER(HID_T) :: lapl_id_default
 
-       END FUNCTION h5lmove_c
+       END FUNCTION H5Lmove_c
     END INTERFACE
 
     lcpl_id_default = H5P_DEFAULT_F
@@ -1134,8 +1132,8 @@ CONTAINS
     INTEGER(SIZE_T) :: size_default
 
     INTERFACE
-       INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-             size_default, name, lapl_id_default) BIND(C,NAME='h5lget_name_by_idx_c')
+       INTEGER FUNCTION H5Lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
+             size_default, name, lapl_id_default) BIND(C,NAME='H5Lget_name_by_idx_c')
          IMPORT :: c_char
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
@@ -1149,7 +1147,7 @@ CONTAINS
          INTEGER(SIZE_T) :: size_default
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION h5lget_name_by_idx_c
+       END FUNCTION H5Lget_name_by_idx_c
     END INTERFACE
 
     group_namelen = LEN(group_name)
@@ -1159,7 +1157,7 @@ CONTAINS
 
     size_default = LEN(name)
 
-    hdferr = h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
+    hdferr = H5Lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
              size_default, name, lapl_id_default)
 
     IF(PRESENT(size)) size = size_default
@@ -1478,8 +1476,8 @@ CONTAINS
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5literate_by_name_c(loc_id, name, namelen, index_type, order,&
-            idx, op, op_data, lapl_id_default) BIND(C, NAME='h5literate_by_name_c')
+       INTEGER FUNCTION H5Literate_by_name_c(loc_id, name, namelen, index_type, order,&
+            idx, op, op_data, lapl_id_default) BIND(C, NAME='H5Literate_by_name_c')
          IMPORT :: c_char, c_ptr, c_funptr
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
@@ -1499,7 +1497,7 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    return_value = h5literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
+    return_value = H5Literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
