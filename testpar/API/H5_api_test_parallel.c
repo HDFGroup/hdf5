@@ -315,37 +315,39 @@ main(int argc, char **argv)
     /* Run all the tests that are enabled */
     H5_api_test_run();
 
-    if (MAINPROCESS)
-        HDprintf("The below statistics are minimum values due to the possibility of some ranks failing a "
-                 "test while others pass:\n");
-
-    if (MPI_SUCCESS !=
-        MPI_Allreduce(MPI_IN_PLACE, &n_tests_passed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
+    if (n_tests_run_g > 0) {
         if (MAINPROCESS)
-            HDprintf("    failed to collect consensus about the minimum number of tests that passed -- "
-                     "reporting rank 0's (possibly inaccurate) value\n");
-    }
+            HDprintf("The below statistics are minimum values due to the possibility of some ranks failing a "
+                     "test while others pass:\n");
 
-    if (MAINPROCESS)
-        HDprintf("%s%zu/%zu (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
-                 n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
-                 ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+        if (MPI_SUCCESS !=
+            MPI_Allreduce(MPI_IN_PLACE, &n_tests_passed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
+            if (MAINPROCESS)
+                HDprintf("    failed to collect consensus about the minimum number of tests that passed -- "
+                         "reporting rank 0's (possibly inaccurate) value\n");
+        }
 
-    if (MPI_SUCCESS !=
-        MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
         if (MAINPROCESS)
-            HDprintf("    failed to collect consensus about the minimum number of tests that failed -- "
-                     "reporting rank 0's (possibly inaccurate) value\n");
-    }
+            HDprintf("%s%zu/%zu (%.2f%%) API tests passed across all ranks with VOL connector '%s'\n",
+                     n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
+                     ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
-    if (MAINPROCESS) {
-        HDprintf("%s%zu/%zu (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
-                 n_tests_failed_g > 0 ? "At least " : "", n_tests_failed_g, n_tests_run_g,
-                 ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+        if (MPI_SUCCESS !=
+            MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
+            if (MAINPROCESS)
+                HDprintf("    failed to collect consensus about the minimum number of tests that failed -- "
+                         "reporting rank 0's (possibly inaccurate) value\n");
+        }
 
-        HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
-                 n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
-                 vol_connector_name);
+        if (MAINPROCESS) {
+            HDprintf("%s%zu/%zu (%.2f%%) API tests did not pass across all ranks with VOL connector '%s'\n",
+                     n_tests_failed_g > 0 ? "At least " : "", n_tests_failed_g, n_tests_run_g,
+                     ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+
+            HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
+                     n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
+                     vol_connector_name);
+        }
     }
 
     H5close();

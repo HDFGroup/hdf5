@@ -239,12 +239,14 @@ main(int argc, char **argv)
     HDprintf("Cleaning up testing files\n");
     H5Fdelete(H5_api_test_filename, H5P_DEFAULT);
 
-    HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g, n_tests_run_g,
-             ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
-    HDprintf("%zu/%zu (%.2f%%) API tests did not pass with VOL connector '%s'\n", n_tests_failed_g,
-             n_tests_run_g, ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
-    HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
-             n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+    if (n_tests_run_g > 0) {
+        HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g, n_tests_run_g,
+                 ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+        HDprintf("%zu/%zu (%.2f%%) API tests did not pass with VOL connector '%s'\n", n_tests_failed_g,
+                 n_tests_run_g, ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+        HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
+                 n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+    }
 
 done:
     H5close();
