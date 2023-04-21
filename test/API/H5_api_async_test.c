@@ -2657,12 +2657,12 @@ error:
 static void
 cleanup_files(void)
 {
-    char file_name[32];
+    char file_name[64];
     int  i;
 
     H5Fdelete(ASYNC_API_TEST_FILE, H5P_DEFAULT);
     for (i = 0; i <= max_printf_file; i++) {
-        sprintf(file_name, ASYNC_API_TEST_FILE_PRINTF, i);
+        HDsnprintf(file_name, 64, ASYNC_API_TEST_FILE_PRINTF, i);
         H5Fdelete(file_name, H5P_DEFAULT);
     } /* end for */
 }

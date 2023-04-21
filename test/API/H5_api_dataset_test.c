@@ -11540,6 +11540,7 @@ test_get_vlen_buf_size(void)
     hid_t    dataset         = H5I_INVALID_HID;
     hid_t    dspace_id       = H5I_INVALID_HID;
     hid_t    dtype_id        = H5I_INVALID_HID;
+    hbool_t  freed_wdata     = FALSE;
     hsize_t  dims1[]         = {DATASET_GET_VLEN_BUF_SIZE_DSET_SPACE_DIM};
     hsize_t  size; /* Number of bytes which will be used */
     unsigned i, j;
@@ -11617,6 +11618,10 @@ test_get_vlen_buf_size(void)
         goto error;
     }
 
+    if (H5Treclaim(dtype_id, dspace_id, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+    freed_wdata = TRUE;
+
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
@@ -11642,6 +11647,8 @@ test_get_vlen_buf_size(void)
 error:
     H5E_BEGIN_TRY
     {
+        if (!freed_wdata)
+            H5Treclaim(dtype_id, dspace_id, H5P_DEFAULT, wdata);
         H5Sclose(dspace_id);
         H5Tclose(dtype_id);
         H5Dclose(dataset);
