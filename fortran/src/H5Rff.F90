@@ -497,7 +497,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 
@@ -533,7 +533,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T) :: size_default
@@ -580,7 +580,7 @@ CONTAINS
     TYPE(C_PTR), INTENT(IN) :: ref
     CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     INTEGER(SIZE_T) :: size_default
     INTEGER(SIZE_T) :: name_len
 
@@ -601,21 +601,20 @@ CONTAINS
 !!
 !! \brief Retrieves the type of object that an object reference points to.
 !!
-!!  loc_id   - Identifier for the dataset containing the reference or for the group that dataset is in.
-!!  ref_type - Type of reference to query.
-!!  ref      - Reference to query.
-!!  obj_type - Type of referenced object:
-!!             \li H5G_UNKNOWN_F
-!!             \li H H5G_GROUP_F
-!!             \li H H5G_DATASET_F
-!!             \li H H5G_TYPE_F
-!!  hdferr   - \fortran_error
+!! \param loc_id   Identifier for the dataset containing the reference or for the group that dataset is in.
+!! \param ref_type Type of reference to query.
+!! \param ref      Reference to query.
+!! \param obj_type Type of referenced object:
+!!                   \li H5G_UNKNOWN_F
+!!                   \li H5G_GROUP_F
+!!                   \li H5G_DATASET_F
+!!                   \li H5G_TYPE_F
+!! \param hdferr   \fortran_error
 !!
 !! See C API: @ref H5Rget_obj_type3()
 !!
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
 
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type
