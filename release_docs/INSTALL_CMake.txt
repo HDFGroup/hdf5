@@ -834,9 +834,6 @@ HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
                                 FALSE to build according to BUILD_SHARED_LIBS"                   FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                              OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                    OFF
-HDF_TEST_EXPRESS               "Control testing framework (0-3)"                                 "3"
-HDF5_TEST_VFD                  "Execute tests with different VFDs"                               OFF
-HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"         OFF
 DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114)"                 "v114"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
@@ -848,8 +845,6 @@ if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     HDF5_ENABLE_INSTRUMENT     "Instrument The library"                      OFF
-if (HDF5_TEST_VFD)
-    HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 if (HDF5_BUILD_FORTRAN)
     HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" SHARED
     if (BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)         default HDF5_INSTALL_MOD_FORTRAN is SHARED
@@ -860,8 +855,26 @@ HDF5_BUILD_DOC                 "Build documentation"                            
 HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                      OFF
 HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
 HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
-TEST_SHELL_SCRIPTS             "Enable shell script tests"                          ON
 HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF
+
+---------------- HDF5 Advanced Test Options ---------------------
+if (BUILD_TESTING)
+    HDF5_TEST_SERIAL               "Execute non-parallel tests"                                   ON
+    HDF5_TEST_TOOLS                "Execute tools tests"                                          ON
+    HDF5_TEST_EXAMPLES             "Execute tests on examples"                                    ON
+    HDF5_TEST_SWMR                 "Execute SWMR tests"                                           ON
+    HDF5_TEST_PARALLEL             "Execute parallel tests"                                       ON
+    HDF5_TEST_FORTRAN              "Execute fortran tests"                                        ON
+    HDF5_TEST_CPP                  "Execute cpp tests"                                            ON
+    HDF5_TEST_JAVA                 "Execute java tests"                                           ON
+    HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "3"
+    HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
+    if (HDF5_TEST_PASSTHROUGH_VOL)
+        HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON
+    HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
+    if (HDF5_TEST_VFD)
+        HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"                       ON
+    TEST_SHELL_SCRIPTS             "Enable shell script tests"                                    ON
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
