@@ -364,16 +364,16 @@ done:
  * PURPOSE
  *  Calls H5Ovisit_by_name
  * INPUTS
- *  object_id - Identifier specifying subject group
- *  index_type - Type of index which determines the order
- *  order - Order within index
- *  idx - Iteration position at which to start
- *  op - Callback function passing data regarding the link to the calling application
- *  op_data - User-defined pointer to data required by the application for its processing of the link
+ *  object_id - Identifier specifying subject group.
+ *  index_type - Type of index which determines the order.
+ *  order - Order within index.
+ *  idx - Iteration position at which to start.
+ *  op - Callback function passing data regarding the link to the calling application.
+ *  op_data - User-defined pointer to data required by the application for its processing of the link.
  *  fields - Flags specifying the fields to include in object_info.
  *
  * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted
+ *  idx - Position at which an interrupted iteration may be restarted.
  *
  * RETURNS
  *  >0 on success, 0< on failure
