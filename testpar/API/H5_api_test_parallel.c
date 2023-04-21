@@ -315,6 +315,10 @@ main(int argc, char **argv)
     /* Run all the tests that are enabled */
     H5_api_test_run();
 
+    if (MAINPROCESS)
+        HDprintf("Cleaning up testing files\n");
+    H5Fdelete(H5_api_test_parallel_filename, H5P_DEFAULT);
+
     if (n_tests_run_g > 0) {
         if (MAINPROCESS)
             HDprintf("The below statistics are minimum values due to the possibility of some ranks failing a "
