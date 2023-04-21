@@ -21,11 +21,13 @@
 #include "H5_api_link_test_parallel.h"
 #include "H5_api_misc_test_parallel.h"
 #include "H5_api_object_test_parallel.h"
-#ifdef H5_API_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAVE_ASYNC
 #include "H5_api_async_test_parallel.h"
 #endif
 
 char H5_api_test_parallel_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+
+const char *test_path_prefix;
 
 size_t n_tests_run_g;
 size_t n_tests_passed_g;
@@ -41,7 +43,7 @@ int mpi_rank;
  * - test function
  * - enabled by default
  */
-#ifdef H5_API_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAVE_ASYNC
 #define H5_API_PARALLEL_TESTS                                                                                \
     X(H5_API_TEST_NULL, "", NULL, 0)                                                                         \
     X(H5_API_TEST_FILE, "file", H5_api_file_test_parallel, 1)                                                \
@@ -264,7 +266,10 @@ main(int argc, char **argv)
 
     srand(seed);
 
-    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", PARALLEL_TEST_FILE_NAME);
+    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+        test_path_prefix = "";
+
+    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, PARALLEL_TEST_FILE_NAME);
 
     if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)

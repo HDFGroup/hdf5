@@ -15,9 +15,7 @@
 
 #include "hdf5.h"
 
-#cmakedefine H5_API_TEST_HAS_ASYNC 
-
-#cmakedefine H5_API_TEST_NO_FILTERS
+#cmakedefine H5_API_TEST_HAVE_ASYNC
 
 #ifdef H5_HAVE_PARALLEL
 #cmakedefine MPIEXEC_EXECUTABLE "@MPIEXEC_EXECUTABLE@"

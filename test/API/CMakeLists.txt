@@ -30,7 +30,7 @@ if (HDF5_TEST_PARALLEL)
   set (HDF5_TEST_API_HAVE_PARALLEL 1)
 endif ()
 if (HDF5_TEST_API_ENABLE_ASYNC)
-  set (HDF5_TEST_API_HAVE_ASYNC 1)
+  set (H5_API_TEST_HAVE_ASYNC 1)
 endif ()
 
 configure_file(

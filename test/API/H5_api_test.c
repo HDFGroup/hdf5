@@ -36,11 +36,13 @@
 #include "H5_api_misc_test.h"
 #include "H5_api_object_test.h"
 #include "H5_api_test_util.h"
-#ifdef H5_API_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAVE_ASYNC
 #include "H5_api_async_test.h"
 #endif
 
 char H5_api_test_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+
+const char *test_path_prefix;
 
 /* X-macro to define the following for each test:
  * - enum type
@@ -48,7 +50,7 @@ char H5_api_test_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
  * - test function
  * - enabled by default
  */
-#ifdef H5_API_TEST_HAS_ASYNC
+#ifdef H5_API_TEST_HAVE_ASYNC
 #define H5_API_TESTS                                                                                         \
     X(H5_API_TEST_NULL, "", NULL, 0)                                                                         \
     X(H5_API_TEST_FILE, "file", H5_api_file_test, 1)                                                         \
@@ -198,7 +200,10 @@ main(int argc, char **argv)
     seed = (unsigned)HDtime(NULL);
     srand(seed);
 
-    HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", TEST_FILE_NAME);
+    if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
+        test_path_prefix = "";
+
+    HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, TEST_FILE_NAME);
 
     if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
         HDprintf("No VOL connector selected; using native VOL connector\n");

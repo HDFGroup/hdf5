@@ -737,3 +737,81 @@ error:
 
     return -1;
 }
+
+/*
+ * Add a prefix to the given filename. The caller
+ * is responsible for freeing the returned filename
+ * pointer with HDfree().
+ */
+herr_t
+prefix_filename(const char *prefix, const char *filename, char **filename_out)
+{
+    char  *out_buf   = NULL;
+    herr_t ret_value = SUCCEED;
+
+    if (!prefix) {
+        HDprintf("    invalid file prefix\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (!filename || (*filename == '\0')) {
+        HDprintf("    invalid filename\n");
+        ret_value = FAIL;
+        goto done;
+    }
+    if (!filename_out) {
+        HDprintf("    invalid filename_out buffer\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (NULL == (out_buf = HDmalloc(H5_API_TEST_FILENAME_MAX_LENGTH))) {
+        HDprintf("    couldn't allocated filename buffer\n");
+        ret_value = FAIL;
+        goto done;
+    }
+
+    HDsnprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s",
+               prefix, filename);
+
+    *filename_out = out_buf;
+
+done:
+    return ret_value;
+}
+
+/*
+ * Calls H5Fdelete on the given filename. If a prefix string
+ * is given, adds that prefix string to the filename before
+ * calling H5Fdelete
+ */
+herr_t
+remove_test_file(const char *prefix, const char *filename)
+{
+    const char *test_file;
+    char       *prefixed_filename = NULL;
+    herr_t      ret_value         = SUCCEED;
+
+    if (prefix) {
+        if (prefix_filename(prefix, filename, &prefixed_filename) < 0) {
+            HDprintf("    couldn't prefix filename\n");
+            ret_value = FAIL;
+            goto done;
+        }
+
+        test_file = prefixed_filename;
+    }
+    else
+        test_file = filename;
+
+    if (H5Fdelete(test_file, H5P_DEFAULT) < 0) {
+        HDprintf("    couldn't remove file '%s'\n", test_file);
+        ret_value = FAIL;
+        goto done;
+    }
+
+done:
+    HDfree(prefixed_filename);
+
+    return ret_value;
+}
