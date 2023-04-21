@@ -1057,8 +1057,8 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
-            dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='H5Lmove_c')
+       INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
+            dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lmove_c')
          IMPORT :: c_char
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
@@ -1073,7 +1073,7 @@ CONTAINS
          INTEGER(HID_T) :: lcpl_id_default
          INTEGER(HID_T) :: lapl_id_default
 
-       END FUNCTION H5Lmove_c
+       END FUNCTION h5lmove_c
     END INTERFACE
 
     lcpl_id_default = H5P_DEFAULT_F
@@ -1084,7 +1084,7 @@ CONTAINS
     src_namelen = LEN(src_name)
     dest_namelen = LEN(dest_name)
 
-    hdferr = H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
+    hdferr = h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
          dest_name, dest_namelen, lcpl_id_default, lapl_id_default)
 
   END SUBROUTINE h5lmove_f
@@ -1132,8 +1132,8 @@ CONTAINS
     INTEGER(SIZE_T) :: size_default
 
     INTERFACE
-       INTEGER FUNCTION H5Lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-             size_default, name, lapl_id_default) BIND(C,NAME='H5Lget_name_by_idx_c')
+       INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
+             size_default, name, lapl_id_default) BIND(C,NAME='h5lget_name_by_idx_c')
          IMPORT :: c_char
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
@@ -1147,7 +1147,7 @@ CONTAINS
          INTEGER(SIZE_T) :: size_default
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION H5Lget_name_by_idx_c
+       END FUNCTION h5lget_name_by_idx_c
     END INTERFACE
 
     group_namelen = LEN(group_name)
@@ -1157,7 +1157,7 @@ CONTAINS
 
     size_default = LEN(name)
 
-    hdferr = H5Lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
+    hdferr = h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
              size_default, name, lapl_id_default)
 
     IF(PRESENT(size)) size = size_default
@@ -1476,8 +1476,8 @@ CONTAINS
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION H5Literate_by_name_c(loc_id, name, namelen, index_type, order,&
-            idx, op, op_data, lapl_id_default) BIND(C, NAME='H5Literate_by_name_c')
+       INTEGER FUNCTION h5literate_by_name_c(loc_id, name, namelen, index_type, order,&
+            idx, op, op_data, lapl_id_default) BIND(C, NAME='h5literate_by_name_c')
          IMPORT :: c_char, c_ptr, c_funptr
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
@@ -1497,7 +1497,7 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    return_value = H5Literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
+    return_value = h5literate_by_name_c(loc_id, group_name, namelen, index_type, order, idx, op, op_data, lapl_id_default)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
