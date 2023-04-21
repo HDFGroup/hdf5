@@ -21,7 +21,7 @@ I. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
-      web site. The HDF5 1.15.x product requires a minimum CMake version
+      web site. The HDF5 1.14.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum version is 3.21.
 
    2. You have installed the HDF5 library built with CMake, by executing

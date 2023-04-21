@@ -51,7 +51,6 @@ H5_USE_18_API_DEFAULT=`grep '#define H5_USE_18_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_110_API_DEFAULT=`grep '#define H5_USE_110_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_112_API_DEFAULT=`grep '#define H5_USE_112_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_114_API_DEFAULT=`grep '#define H5_USE_114_API_DEFAULT ' ../src/H5pubconf.h`
-H5_USE_116_API_DEFAULT=`grep '#define H5_USE_116_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`

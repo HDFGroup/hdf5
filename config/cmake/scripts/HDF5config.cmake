@@ -43,9 +43,9 @@ set (CTEST_SOURCE_VERSEXT "-1")
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.15.x root folder
+#INSTALLDIR - HDF5-1.14.x root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.15.x
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.14.x
 #MODEL - CDash group name
 #HPC - run alternate configurations for HPC machines; sbatch, bsub, raybsub, qsub
 #MPI - enable MPI

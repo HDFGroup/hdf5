@@ -3747,7 +3747,7 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114|v116)],
+            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114)],
                             [Specify default release version of public symbols
                              [default=v116]])],,
             [withval=v116])
