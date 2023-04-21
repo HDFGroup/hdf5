@@ -269,7 +269,8 @@ main(int argc, char **argv)
     if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
-    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, PARALLEL_TEST_FILE_NAME);
+    HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+               PARALLEL_TEST_FILE_NAME);
 
     if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
@@ -286,21 +287,6 @@ main(int argc, char **argv)
         HDprintf("\n\n");
     }
 
-    /*
-     * Create the file that will be used for all of the tests,
-     * except for those which test file creation.
-     */
-    BEGIN_INDEPENDENT_OP(create_test_container)
-    {
-        if (MAINPROCESS) {
-            if (create_test_container(H5_api_test_parallel_filename) < 0) {
-                HDprintf("    failed to create testing container file '%s'\n", H5_api_test_parallel_filename);
-                INDEPENDENT_OP_ERROR(create_test_container);
-            }
-        }
-    }
-    END_INDEPENDENT_OP(create_test_container);
-
     /* Retrieve the VOL cap flags */
     BEGIN_INDEPENDENT_OP(get_capability_flags)
     {
@@ -311,6 +297,21 @@ main(int argc, char **argv)
         }
     }
     END_INDEPENDENT_OP(get_capability_flags);
+
+    /*
+     * Create the file that will be used for all of the tests,
+     * except for those which test file creation.
+     */
+    BEGIN_INDEPENDENT_OP(create_test_container)
+    {
+        if (MAINPROCESS) {
+            if (create_test_container(H5_api_test_parallel_filename, vol_cap_flags_g) < 0) {
+                HDprintf("    failed to create testing container file '%s'\n", H5_api_test_parallel_filename);
+                INDEPENDENT_OP_ERROR(create_test_container);
+            }
+        }
+    }
+    END_INDEPENDENT_OP(create_test_container);
 
     /* Run all the tests that are enabled */
     H5_api_test_run();
@@ -324,8 +325,8 @@ main(int argc, char **argv)
             HDprintf("The below statistics are minimum values due to the possibility of some ranks failing a "
                      "test while others pass:\n");
 
-        if (MPI_SUCCESS !=
-            MPI_Allreduce(MPI_IN_PLACE, &n_tests_passed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
+        if (MPI_SUCCESS != MPI_Allreduce(MPI_IN_PLACE, &n_tests_passed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN,
+                                         MPI_COMM_WORLD)) {
             if (MAINPROCESS)
                 HDprintf("    failed to collect consensus about the minimum number of tests that passed -- "
                          "reporting rank 0's (possibly inaccurate) value\n");
@@ -336,8 +337,8 @@ main(int argc, char **argv)
                      n_tests_passed_g > 0 ? "At least " : "", n_tests_passed_g, n_tests_run_g,
                      ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
 
-        if (MPI_SUCCESS !=
-            MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN, MPI_COMM_WORLD)) {
+        if (MPI_SUCCESS != MPI_Allreduce(MPI_IN_PLACE, &n_tests_failed_g, 1, MPI_UNSIGNED_LONG_LONG, MPI_MIN,
+                                         MPI_COMM_WORLD)) {
             if (MAINPROCESS)
                 HDprintf("    failed to collect consensus about the minimum number of tests that failed -- "
                          "reporting rank 0's (possibly inaccurate) value\n");

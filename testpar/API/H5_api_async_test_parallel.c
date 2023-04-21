@@ -84,7 +84,8 @@ test_one_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+            HDprintf(
+                "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
         return 0;
@@ -448,7 +449,8 @@ test_multi_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+            HDprintf(
+                "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
         return 0;
@@ -773,7 +775,8 @@ test_multi_file_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+            HDprintf(
+                "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
         return 0;
@@ -1195,7 +1198,8 @@ test_multi_file_grp_dset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
+            HDprintf(
+                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         }
 
         return 0;
@@ -1615,7 +1619,8 @@ test_set_extent(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, dataset, dataset more, or flush aren't supported "
+                     "with this connector\n");
         }
 
         return 0;
@@ -1947,7 +1952,8 @@ test_attribute_exists(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                     "supported with this connector\n");
         }
 
         return 0;
@@ -2099,7 +2105,8 @@ test_attribute_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                     "supported with this connector\n");
         }
 
         return 0;
@@ -2305,7 +2312,8 @@ test_attribute_io_tconv(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, attribute, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, attribute, or flush aren't supported with this "
+                     "connector\n");
         }
 
         return 0;
@@ -2508,7 +2516,8 @@ test_attribute_io_compound(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                     "supported with this connector\n");
         }
 
         return 0;
@@ -2908,7 +2917,8 @@ test_group(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, group more, creation order, or flush aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, group, group more, creation order, or flush aren't "
+                     "supported with this connector\n");
         }
 
         return 0;
@@ -3079,10 +3089,12 @@ test_link(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, link, hard link, soft link, flush, or creation order aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
+                     "aren't supported with this connector\n");
         }
 
         return 0;
@@ -3336,7 +3348,8 @@ test_ocopy_orefresh(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, dataset, object more, flush, or refresh aren't supported with this connector\n");
+            HDprintf("    API functions for basic file, group, dataset, object more, flush, or refresh "
+                     "aren't supported with this connector\n");
         }
 
         return 0;

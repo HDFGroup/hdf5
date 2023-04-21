@@ -194,8 +194,7 @@ test_create_file_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                file_id =
-                    H5Fcreate(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT, H5P_DEFAULT);
+                file_id = H5Fcreate(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -208,8 +207,7 @@ test_create_file_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                file_id =
-                    H5Fcreate(prefixed_filename, H5F_ACC_CREAT, H5P_DEFAULT, H5P_DEFAULT);
+                file_id = H5Fcreate(prefixed_filename, H5F_ACC_CREAT, H5P_DEFAULT, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -222,8 +220,7 @@ test_create_file_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                file_id = H5Fcreate(prefixed_filename, H5F_ACC_SWMR_READ, H5P_DEFAULT,
-                                    H5P_DEFAULT);
+                file_id = H5Fcreate(prefixed_filename, H5F_ACC_SWMR_READ, H5P_DEFAULT, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -244,8 +241,7 @@ test_create_file_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                file_id = H5Fcreate(prefixed_filename, H5F_ACC_TRUNC, H5I_INVALID_HID,
-                                    H5P_DEFAULT);
+                file_id = H5Fcreate(prefixed_filename, H5F_ACC_TRUNC, H5I_INVALID_HID, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -780,7 +776,7 @@ test_file_permission(void)
             H5E_BEGIN_TRY
             {
                 h5_ret = H5Tcommit2(file_id, FILE_PERMISSION_TEST_NAMED_DTYPE, dtype_id, H5P_DEFAULT,
-                                 H5P_DEFAULT, H5P_DEFAULT);
+                                    H5P_DEFAULT, H5P_DEFAULT);
             }
             H5E_END_TRY;
 

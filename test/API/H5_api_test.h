@@ -70,10 +70,4 @@ extern const char *test_path_prefix;
  * of a dataspace/datatype. */
 #define MAX_DIM_SIZE 16
 
-/*
- * TODO: Set of compatibility macros that should be replaced once
- * the VOL connector feature support situation is resolved.
- */
-#define GROUP_CREATION_IS_SUPPORTED
-
 #endif

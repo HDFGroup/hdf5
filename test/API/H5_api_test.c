@@ -203,7 +203,8 @@ main(int argc, char **argv)
     if (NULL == (test_path_prefix = HDgetenv(HDF5_API_TEST_PATH_PREFIX)))
         test_path_prefix = "";
 
-    HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix, TEST_FILE_NAME);
+    HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
+               TEST_FILE_NAME);
 
     if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
         HDprintf("No VOL connector selected; using native VOL connector\n");
@@ -216,19 +217,19 @@ main(int argc, char **argv)
     HDprintf("  - Test seed: %u\n", seed);
     HDprintf("\n\n");
 
-    /*
-     * Create the file that will be used for all of the tests,
-     * except for those which test file creation.
-     */
-    if (create_test_container(H5_api_test_filename) < 0) {
-        HDfprintf(stderr, "Unable to create testing container file '%s'\n", H5_api_test_filename);
+    /* Retrieve the VOL cap flags */
+    if (get_vol_cap_flags(vol_connector_name) < 0) {
+        HDfprintf(stderr, "Unable to get VOL capability flags\n");
         err_occurred = TRUE;
         goto done;
     }
 
-    /* Retrieve the VOL cap flags */
-    if (get_vol_cap_flags(vol_connector_name) < 0) {
-        HDfprintf(stderr, "Unable to get VOL capability flags\n");
+    /*
+     * Create the file that will be used for all of the tests,
+     * except for those which test file creation.
+     */
+    if (create_test_container(H5_api_test_filename, vol_cap_flags_g) < 0) {
+        HDfprintf(stderr, "Unable to create testing container file '%s'\n", H5_api_test_filename);
         err_occurred = TRUE;
         goto done;
     }
@@ -240,12 +241,15 @@ main(int argc, char **argv)
     H5Fdelete(H5_api_test_filename, H5P_DEFAULT);
 
     if (n_tests_run_g > 0) {
-        HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g, n_tests_run_g,
-                 ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+        HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g,
+                 n_tests_run_g, ((double)n_tests_passed_g / (double)n_tests_run_g * 100.0),
+                 vol_connector_name);
         HDprintf("%zu/%zu (%.2f%%) API tests did not pass with VOL connector '%s'\n", n_tests_failed_g,
-                 n_tests_run_g, ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+                 n_tests_run_g, ((double)n_tests_failed_g / (double)n_tests_run_g * 100.0),
+                 vol_connector_name);
         HDprintf("%zu/%zu (%.2f%%) API tests were skipped with VOL connector '%s'\n", n_tests_skipped_g,
-                 n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0), vol_connector_name);
+                 n_tests_run_g, ((double)n_tests_skipped_g / (double)n_tests_run_g * 100.0),
+                 vol_connector_name);
     }
 
 done:

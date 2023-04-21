@@ -661,62 +661,67 @@ error:
 }
 
 int
-create_test_container(char *filename)
+create_test_container(char *filename, uint64_t vol_cap_flags)
 {
-    hid_t file_id = H5I_INVALID_HID;
-#ifdef GROUP_CREATION_IS_SUPPORTED
+    hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
-#endif
+
+    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC)) {
+        HDprintf("   VOL connector doesn't support file creation\n");
+        goto error;
+    }
 
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         HDprintf("    couldn't create testing container file '%s'\n", filename);
         goto error;
     }
 
-#ifdef GROUP_CREATION_IS_SUPPORTED
-    /* Create container groups for each of the test interfaces
-     * (group, attribute, dataset, etc.).
-     */
-    if ((group_id = H5Gcreate2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-        HDprintf("    created container group for Group tests\n");
-        H5Gclose(group_id);
-    }
+    if (vol_cap_flags & H5VL_CAP_FLAG_GROUP_BASIC) {
+        /* Create container groups for each of the test interfaces
+         * (group, attribute, dataset, etc.).
+         */
+        if ((group_id = H5Gcreate2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
+            0) {
+            HDprintf("    created container group for Group tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, ATTRIBUTE_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
-        0) {
-        HDprintf("    created container group for Attribute tests\n");
-        H5Gclose(group_id);
-    }
+        if ((group_id = H5Gcreate2(file_id, ATTRIBUTE_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT,
+                                   H5P_DEFAULT)) >= 0) {
+            HDprintf("    created container group for Attribute tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
-        0) {
-        HDprintf("    created container group for Dataset tests\n");
-        H5Gclose(group_id);
-    }
+        if ((group_id =
+                 H5Gcreate2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+            HDprintf("    created container group for Dataset tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, DATATYPE_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
-        0) {
-        HDprintf("    created container group for Datatype tests\n");
-        H5Gclose(group_id);
-    }
+        if ((group_id =
+                 H5Gcreate2(file_id, DATATYPE_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+            HDprintf("    created container group for Datatype tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, LINK_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-        HDprintf("    created container group for Link tests\n");
-        H5Gclose(group_id);
-    }
+        if ((group_id = H5Gcreate2(file_id, LINK_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
+            0) {
+            HDprintf("    created container group for Link tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, OBJECT_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
-        0) {
-        HDprintf("    created container group for Object tests\n");
-        H5Gclose(group_id);
-    }
+        if ((group_id = H5Gcreate2(file_id, OBJECT_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >=
+            0) {
+            HDprintf("    created container group for Object tests\n");
+            H5Gclose(group_id);
+        }
 
-    if ((group_id = H5Gcreate2(file_id, MISCELLANEOUS_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT,
-                               H5P_DEFAULT)) >= 0) {
-        HDprintf("    created container group for Miscellaneous tests\n");
-        H5Gclose(group_id);
+        if ((group_id = H5Gcreate2(file_id, MISCELLANEOUS_TEST_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT,
+                                   H5P_DEFAULT)) >= 0) {
+            HDprintf("    created container group for Miscellaneous tests\n");
+            H5Gclose(group_id);
+        }
     }
-#endif
 
     if (H5Fclose(file_id) < 0) {
         HDprintf("    failed to close testing container\n");
@@ -728,9 +733,7 @@ create_test_container(char *filename)
 error:
     H5E_BEGIN_TRY
     {
-#ifdef GROUP_CREATION_IS_SUPPORTED
         H5Gclose(group_id);
-#endif
         H5Fclose(file_id);
     }
     H5E_END_TRY;
@@ -771,8 +774,7 @@ prefix_filename(const char *prefix, const char *filename, char **filename_out)
         goto done;
     }
 
-    HDsnprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s",
-               prefix, filename);
+    HDsnprintf(out_buf, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", prefix, filename);
 
     *filename_out = out_buf;
 

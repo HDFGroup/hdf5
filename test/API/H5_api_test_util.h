@@ -17,7 +17,7 @@
 
 hid_t  generate_random_datatype(H5T_class_t parent_class, hbool_t is_compact);
 hid_t  generate_random_dataspace(int rank, const hsize_t *max_dims, hsize_t *dims_out, hbool_t is_compact);
-int    create_test_container(char *filename);
+int    create_test_container(char *filename, uint64_t vol_cap_flags);
 herr_t prefix_filename(const char *prefix, const char *filename, char **filename_out);
 herr_t remove_test_file(const char *prefix, const char *filename);
 
