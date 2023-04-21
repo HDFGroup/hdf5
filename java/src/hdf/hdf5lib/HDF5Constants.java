@@ -2050,8 +2050,6 @@ public class HDF5Constants {
 
     private static native final int H5F_LIBVER_V114();
 
-    private static native final int H5F_LIBVER_V116();
-
     private static native final int H5F_LIBVER_NBOUNDS();
 
     private static native final int H5F_LIBVER_LATEST();
