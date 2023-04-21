@@ -27,13 +27,13 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-r] [-p]"
+   echo "usage: h5fuse.sh [-f filename] [-h] [-p] [-q] [-r] [-v] "
+   echo "-f filename  Subfile configuration file."
    echo "-h           Print this help."
-   echo "-v           Verbose output. [no]"
    echo "-q           Quiet all output. [no]"
    echo "-p           Split processing the subfiles among the ranks. [no]"
    echo "-r           Remove subfiles after being processed. [no]"
-   echo "-f filename  Subfile configuration file."
+   echo "-v           Verbose output. [no]"
    echo ""
 }
 
@@ -72,23 +72,21 @@ quiet="false"
 ignore="false"
 rm_subf="false"
 parallel="false"
-while getopts "rihqvpf:" option; do
+while getopts "hpqrvf:" option; do
    case $option in
+      f) # subfiling configuration file
+         file_config=$OPTARG;;
       h) # display Help
          usage
          exit;;
-      f) # subfiling configuration dir
-         file_config=$OPTARG;;
+      p) # HDF5 fused file
+         parallel="true";;
       q) # quiet all output
          quiet="true";;
       r) # remove completed subfiles
          rm_subf="true";;
-      i) # ignore missing subfiles
-         ignore="true";;
       v) # verbose output
          verbose="true";;
-      p) # HDF5 fused file
-         parallel="true";;
      \?) # Invalid option
          echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
          usage
