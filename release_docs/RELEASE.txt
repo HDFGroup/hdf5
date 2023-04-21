@@ -151,6 +151,18 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
+
+      H5Ocopy was missing a check to determine whether the new object's
+      object header version is greater than version 1. Without this check,
+      copying of objects with object headers that are smaller than a
+      certain size would cause H5Ocopy to create an object header for the
+      new object that has a gap in the header data. According to the
+      HDF5 File Format Specification, this is not allowed for version
+      1 of the object header format.
+
+      Fixes GitHub issue #2653
+
     - Fixed H5Pget_vol_cap_flags and H5Pget_vol_id to accept H5P_DEFAULT
 
       H5Pget_vol_cap_flags and H5Pget_vol_id were updated to correctly
