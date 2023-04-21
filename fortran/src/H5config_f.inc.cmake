@@ -76,3 +76,9 @@
 
 ! Fortran compiler id
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
+
+! Define if deprecated public API symbols are disabled
+#cmakedefine01 H5_NO_DEPRECATED_SYMBOLS
+#if H5_NO_DEPRECATED_SYMBOLS == 0
+#undef H5_NO_DEPRECATED_SYMBOLS
+#endif

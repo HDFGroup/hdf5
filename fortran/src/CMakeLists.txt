@@ -13,6 +13,9 @@ if (WIN32)
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
       endif ()
+      if (NOT H5_NO_DEPRECATED_SYMBOLS)
+        set (H5_NO_DEPRECATED_SYMBOLS ";")
+      endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif ()
   endif ()
@@ -274,6 +277,7 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff.F90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5ESff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Gff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Iff.F90
