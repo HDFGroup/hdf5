@@ -29,15 +29,17 @@ function usage() {
    echo ""
    echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-r] [-p]"
    echo "-h           Print this help."
-   echo "-v           Verbose output."
-   echo "-q           Quiet all output."
-   echo "-p           Run in parallel, requires MPI program 'h5fuse_p_opt' in the current directory."
-   echo "-r           Remove fused subfiles."
+   echo "-v           Verbose output. [no]"
+   echo "-q           Quiet all output. [no]"
+   echo "-p           Split processing the subfiles among the ranks. [no]"
+   echo "-r           Remove subfiles after being processed. [no]"
    echo "-f filename  Subfile configuration file."
    echo ""
 }
 
 function gen_mpi() {
+
+# Program to determine MPI rank and size if being run in parallel (-p).
 
 echo "#include <mpi.h>" > ${c_src}
 echo "#include <stdio.h>" >> ${c_src}
@@ -95,8 +97,6 @@ while getopts "rihqvpf:" option; do
    esac
 done
 
-#echo "PMI_RANK $PMI_RANK $OMPI_COMM_WORLD_LOCAL_SIZE"
-
 FAILED=1
 ############################################################
 # Configure file checks                                    #
@@ -152,9 +152,6 @@ fi
 
 # For bash 4.4+
 mapfile -t subfiles < <( sed -e '1,/subfile_dir=/d' "$file_config" )
-#for i in "${subfiles[@]}"; do
-#      echo "$i"
-#done
 if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED
@@ -191,7 +188,7 @@ if [ "$parallel" == "true" ]; then
     c_exec="h5fuse_"${hex}
     c_src=${c_exec}.c
 
-    # Generate an MPI program to get MPI rank and size
+    # Generate and compile an MPI program to get MPI rank and size
     if [ ! -f "${c_src}" ]; then
         gen_mpi
         CC=@CC@
@@ -202,9 +199,6 @@ if [ "$parallel" == "true" ]; then
     read -r mpi_rank mpi_size <<<"$rank_size"
 
     rm -f ${c_src} ${c_exec}
-
-    #nstart=$(( mpi_rank*nsubfiles/mpi_size ))
-    #nend=$(( (mpi_rank+1)*nsubfiles/mpi_size ))
 
     # Divide the subfiles among the ranks
     iwork1=$(( nsubfiles / mpi_size ))
@@ -217,14 +211,13 @@ if [ "$parallel" == "true" ]; then
     fi
 fi
 
-## COMBINE SUBFILES INTO AN HDF5 FILE ##
-
+############################################################
+# COMBINE SUBFILES INTO AN HDF5 FILE                       #
+############################################################
 icnt=1
 skip=0
 seek=0
 seek_cnt=0
-bckgrd="" # run dd in the background, don't do that if running as a parallel job
-#bckgrd="&"
 for i in "${subfiles[@]}"; do
 
     subfile="${subfile_dir}/${i}"
@@ -251,14 +244,15 @@ for i in "${subfiles[@]}"; do
           while [ "$status" -gt 0 ]; do
               if [ $((skip*stripe_size)) -le "$fsize"  ] && [ "$records_left" -gt 0 ]; then
                   EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc"
-                  if [ "$quiet" == "false" ]; then
+                  if [ "$verbose" == "true" ]; then
                       echo -e "$GRN $EXEC $NC"
                   fi
-                  dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc > /dev/null 2>&1
-                  #err="$( $EXEC > /dev/null 2>&1)"
-                  #if [ "$verbose" == "true" ]; then
-                  #    echo -e "$CYN" $err "$NC"
-                  #fi
+                  err=$( $EXEC 2>&1 1>/dev/null )
+                  if [ $? -ne 0 ]; then
+                     echo -e "$CYN ERR: dd Utility Failed $NC"
+                     echo -e "$CYN MSG: $err $NC"
+                     exit $FAILED
+                  fi
                   records_left=$((records_left-stripe_size))
                   skip=$((skip+1))
                   seek=$((seek_cnt+skip*nsubfiles))
