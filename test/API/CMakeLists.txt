@@ -253,6 +253,7 @@ if (HDF5_TEST_SERIAL)
       )
     endif ()
 
+    set(last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_${api_test}"
@@ -262,6 +263,10 @@ if (HDF5_TEST_SERIAL)
         --serial
         ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
+
+      set_tests_properties("h5_api_test_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+
+      set(last_api_test "h5_api_test_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_TESTS_EXTRA})
@@ -287,11 +292,16 @@ if (HDF5_TEST_SERIAL)
       )
     endforeach ()
   else ()
+    set(last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_${api_test}"
         COMMAND $<TARGET_FILE:h5_api_test> "${api_test}"
       )
+
+      set_tests_properties("h5_api_test_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+
+      set(last_api_test "h5_api_test_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_TESTS_EXTRA})

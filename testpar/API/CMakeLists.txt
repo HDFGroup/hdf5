@@ -214,6 +214,7 @@ if (HDF5_TEST_PARALLEL)
       )
     endif ()
 
+    set(last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_parallel_${api_test}"
@@ -223,6 +224,10 @@ if (HDF5_TEST_PARALLEL)
         --serial
         ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
+
+      set_tests_properties("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+
+      set(last_api_test "h5_api_test_parallel_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
@@ -248,6 +253,7 @@ if (HDF5_TEST_PARALLEL)
       )
     endforeach ()
   else ()
+    set(last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_parallel_${api_test}"
@@ -255,6 +261,10 @@ if (HDF5_TEST_PARALLEL)
           ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5_api_test_parallel> "${api_test}"
           ${MPIEXEC_POSTFLAGS}
       )
+
+      set_tests_properties("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+
+      set(last_api_test "h5_api_test_parallel_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
