@@ -27,15 +27,31 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-r] [-p]"
+   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-r] [-p]"
    echo "-h           Print this help."
    echo "-v           Verbose output."
    echo "-q           Quiet all output."
    echo "-p           Run in parallel, requires MPI program 'h5fuse_p_opt' in the current directory."
    echo "-r           Remove fused subfiles."
-   echo "-i           Ignore missing subfiles. Useful for node local storage."
    echo "-f filename  Subfile configuration file."
    echo ""
+}
+
+function gen_mpi() {
+
+echo "#include <mpi.h>" > ${c_src}
+echo "#include <stdio.h>" >> ${c_src}
+echo "int main() {" >> ${c_src}
+echo "    MPI_Init(NULL, NULL);" >> ${c_src}
+echo "    int world_size;" >> ${c_src}
+echo "    MPI_Comm_size(MPI_COMM_WORLD, &world_size);" >> ${c_src}
+echo "    int world_rank;" >> ${c_src}
+echo "    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);" >> ${c_src}
+echo "    printf(\"%d %d \", world_rank, world_size);" >> ${c_src}
+echo "    MPI_Barrier(MPI_COMM_WORLD);" >> ${c_src}
+echo "    MPI_Finalize();" >> ${c_src}
+echo "}" >> ${c_src}
+
 }
 
 ############################################################
@@ -88,15 +104,6 @@ FAILED=1
 #
 SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-.}"
 WRKDIR=$PWD
-
-#if running script in parallel, make sure h5fuse mpi is accessible
-if [ "$parallel" == "true" ]; then
-  if [ ! -f "h5fuse_p_opt" ]; then
-    echo -e "$RED running h5fuse in parallel requires h5fuse_p_opt in the same directory. "
-    echo -e " h5fuse_p_opt does not exist. $NC"
-    exit $FAILED
-  fi
-fi
 
 # cd to the subfile configuration location
 if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
@@ -177,13 +184,28 @@ mpi_rank=0
 mpi_size=1
 nstart=1
 nend=$nsubfiles
+
+#if running script in parallel, make sure h5fuse mpi is accessible if neeed.
 if [ "$parallel" == "true" ]; then
-    rank_size=$(./h5fuse_p_opt)
+
+    hex=$(hexdump -n 16 -v -e '/1 "%02X"' /dev/urandom)
+    c_exec="h5fuse_"${hex}
+    c_src=${c_exec}.c
+
+    # Generate an MPI program to get MPI rank and size
+    if [ ! -f "${c_src}" ]; then
+        gen_mpi
+        CC=@CC@
+        ${CC} ${c_src} -o ${c_exec}
+    fi
+    wait
+    rank_size=$(./${c_exec})
     read -r mpi_rank mpi_size <<<"$rank_size"
+
+    rm -f ${c_src} ${c_exec}
 
     #nstart=$(( mpi_rank*nsubfiles/mpi_size ))
     #nend=$(( (mpi_rank+1)*nsubfiles/mpi_size ))
-
 
     # Divide the subfiles among the ranks
     iwork1=$(( nsubfiles / mpi_size ))
@@ -202,7 +224,7 @@ icnt=1
 skip=0
 seek=0
 seek_cnt=0
-bckgrd="" # run dd in the backgroud, don't do that if running as a parallel job
+bckgrd="" # run dd in the background, don't do that if running as a parallel job
 #bckgrd="&"
 for i in "${subfiles[@]}"; do
 
