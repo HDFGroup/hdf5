@@ -102,11 +102,11 @@ PROGRAM FC_AVAIL_KINDS
       ENDDO
 
       DO k = 1, num_ikinds
-         WRITE(stderr,'(I0)', ADVANCE='NO') list_ikinds(k)
+         WRITE(stdout,'(I0)', ADVANCE='NO') list_ikinds(k)
          IF(k.NE.num_ikinds)THEN
-            WRITE(stderr,'(A)',ADVANCE='NO') ','
+            WRITE(stdout,'(A)',ADVANCE='NO') ','
          ELSE
-            WRITE(stderr,'()')
+            WRITE(stdout,'()')
          ENDIF
       ENDDO
 
@@ -139,17 +139,17 @@ PROGRAM FC_AVAIL_KINDS
       ENDDO prec
 
       DO k = 1, num_rkinds
-         WRITE(stderr,'(I0)', ADVANCE='NO') list_rkinds(k)
+         WRITE(stdout,'(I0)', ADVANCE='NO') list_rkinds(k)
          IF(k.NE.num_rkinds)THEN
-            WRITE(stderr,'(A)',ADVANCE='NO') ','
+            WRITE(stdout,'(A)',ADVANCE='NO') ','
          ELSE
-            WRITE(stderr,'()')
+            WRITE(stdout,'()')
          ENDIF
       ENDDO
 
-     WRITE(stderr,'(I0)') max_decimal_prec
-     WRITE(stderr,'(I0)') num_ikinds
-     WRITE(stderr,'(I0)') num_rkinds
+     WRITE(stdout,'(I0)') max_decimal_prec
+     WRITE(stdout,'(I0)') num_ikinds
+     WRITE(stdout,'(I0)') num_rkinds
 END PROGRAM FC_AVAIL_KINDS
 !---- END ----- Determine the available KINDs for REALs and INTEGERs
 
