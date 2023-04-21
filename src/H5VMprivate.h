@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Robb Matzke
- *             Friday, October 10, 1997
- */
 #ifndef H5VMprivate_H
 #define H5VMprivate_H
 
@@ -133,13 +129,8 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst, size_t dst_max_nseq, size_t *dst_curr_s
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        Product of elements
- *
- *              Failure:        1 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    Product of elements
+ *              Failure:    1 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline hsize_t H5_ATTR_UNUSED
@@ -168,14 +159,8 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        TRUE if all elements are zero,
- *                              FALSE otherwise
- *
- *              Failure:        TRUE if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    TRUE if all elements are zero,
+ *              Failure:    TRUE if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
@@ -205,14 +190,9 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        TRUE if all elements are zero,
- *                              FALSE otherwise
- *
- *              Failure:        TRUE if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ * Return:      Success:    TRUE if all elements are zero,
+ *                          FALSE otherwise
+ *              Failure:    TRUE if N is zero
  *-------------------------------------------------------------------------
  */
 static inline htri_t H5_ATTR_UNUSED
@@ -243,15 +223,11 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        -1 if V1 is less than V2
- *                              0 if they are equal
- *                              1 if V1 is greater than V2
+ * Return:      Success:    -1 if V1 is less than V2
+ *                          0 if they are equal
+ *                          1 if V1 is greater than V2
  *
- *              Failure:        0 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
- *
+ *              Failure:    0 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline int H5_ATTR_UNUSED
@@ -291,15 +267,11 @@ done:
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      Success:        -1 if V1 is less than V2
- *                              0 if they are equal
- *                              1 if V1 is greater than V2
+ * Return:      Success:    -1 if V1 is less than V2
+ *                          0 if they are equal
+ *                          1 if V1 is greater than V2
  *
- *              Failure:        0 if N is zero
- *
- * Programmer:  Robb Matzke
- *              Wednesday, April  8, 1998
- *
+ *              Failure:    0 if N is zero
  *-------------------------------------------------------------------------
  */
 static inline int H5_ATTR_UNUSED
@@ -339,10 +311,6 @@ done:
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Monday, October 13, 1997
- *
  *-------------------------------------------------------------------------
  */
 static inline void H5_ATTR_UNUSED
@@ -383,10 +351,6 @@ static const unsigned char LogTable256[] = {
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      log2(n) (always - no failure condition)
- *
- * Programmer:  Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static inline unsigned H5_ATTR_UNUSED
@@ -432,10 +396,6 @@ static const unsigned MultiplyDeBruijnBitPosition[32] = {0,  1,  28, 2,  29, 14,
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      log2(n) (always - no failure condition)
- *
- * Programmer:  Quincey Koziol
- *              Monday, February 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static inline H5_ATTR_PURE unsigned
@@ -450,16 +410,13 @@ H5VM_log2_of2(uint32_t n)
 /*-------------------------------------------------------------------------
  * Function:    H5VM_power2up
  *
- * Purpose:    Round up a number to the next power of 2
+ * Purpose:     Round up a number to the next power of 2
  *
  * Note:        Although this routine is 'static' in this file, that's intended
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:    Return the number which is a power of 2
- *
- * Programmer:    Vailin Choi; Nov 2014
- *
+ * Return:      Return the number which is a power of 2
  *-------------------------------------------------------------------------
  */
 static inline H5_ATTR_CONST hsize_t
@@ -488,10 +445,6 @@ H5VM_power2up(hsize_t n)
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      Number of bytes needed
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March 13, 2008
- *
  *-------------------------------------------------------------------------
  */
 static inline unsigned H5_ATTR_UNUSED
@@ -520,10 +473,6 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *              reflects its inclusion in a "private" header file.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 25, 2008
- *
  *-------------------------------------------------------------------------
  */
 static inline hbool_t H5_ATTR_UNUSED
@@ -549,11 +498,7 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *              only as an optimization and the naming (with a single underscore)
  *              reflects its inclusion in a "private" header file.
  *
- * Return:      None
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 25, 2008
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 static inline void H5_ATTR_UNUSED

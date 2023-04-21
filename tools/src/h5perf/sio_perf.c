@@ -182,7 +182,6 @@ static void report_parameters(struct options *opts);
  * Purpose:     Start things up.
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
  * Programmer:  Bill Wendling, 30. October 2001
- * Modifications:
  */
 int
 main(int argc, char *argv[])
@@ -237,8 +236,6 @@ finish:
  *
  * Return:      Nothing
  * Programmer:  Bill Wendling, 30. October 2001
- * Modifications:
- *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static void
 run_test_loop(struct options *opts)
@@ -292,7 +289,6 @@ run_test_loop(struct options *opts)
  * Purpose:     Inner loop call to actually run the I/O test.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 18. December 2001
- * Modifications:
  */
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
@@ -524,7 +520,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
  * Purpose:
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. January 2002
- * Modifications:
  */
 static void
 output_all_info(minmax *mm, int count, int indent_level)
@@ -546,8 +541,6 @@ output_all_info(minmax *mm, int count, int indent_level)
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 21. December 2001
- * Modifications:
- *    Use MPI_Allreduce to do it. -akc, 2002/01/11
  */
 
 static void
@@ -564,8 +557,6 @@ get_minmax(minmax *mm, double val)
  *              across all processes.
  * Return:      TOTAL_MM - the total of all of these.
  * Programmer:  Bill Wendling, 21. December 2001
- * Modifications:
- *              Changed to use seconds instead of MB/s - QAK, 5/9/02
  */
 static void
 accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
@@ -596,7 +587,6 @@ accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
  *                  minmax & # of iterations.
  * Return:      Nothing
  * Programmer:  Quincey Koziol, 9. May 2002
- * Modifications:
  */
 static void
 output_results(const struct options *opts, const char *name, minmax *table, int table_size, off_t data_size)
@@ -637,7 +627,6 @@ output_results(const struct options *opts, const char *name, minmax *table, int 
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 19. December 2001
- * Modifications:
  */
 static void
 output_report(const char *fmt, ...)
@@ -812,8 +801,6 @@ report_parameters(struct options *opts)
  *              structure which will need to be freed by the calling function.
  * Return:      Pointer to an OPTIONS structure
  * Programmer:  Bill Wendling, 31. October 2001
- * Modifications:
- *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
 parse_command_line(int argc, const char *const *argv)
@@ -1180,7 +1167,6 @@ parse_command_line(int argc, const char *const *argv)
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
  * Programmer:  Bill Wendling, 18. December 2001
- * Modifications:
  */
 
 static hsize_t
@@ -1225,7 +1211,6 @@ parse_size_directive(const char *size)
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 31. October 2001
- * Modifications:
  */
 static void
 usage(const char *prog)

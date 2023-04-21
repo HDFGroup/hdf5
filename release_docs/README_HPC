@@ -154,10 +154,10 @@ If using ctest is undesirable, one can create a build directory and run the cmak
 configure command, for example
 
 "/projects/Mutrino/hpcsoft/cle6.0/common/cmake/3.18/bin/cmake"
--C "<working directory>/hdf5-1.13.3/config/cmake/cacheinit.cmake"
+-C "<working directory>/hdf5-1.15.x/config/cmake/cacheinit.cmake"
 -DCMAKE_BUILD_TYPE:STRING=Release -DHDF5_BUILD_FORTRAN:BOOL=ON
 -DHDF5_BUILD_JAVA:BOOL=OFF
--DCMAKE_INSTALL_PREFIX:PATH=<working directory>/HDF_Group/HDF5/1.13.3
+-DCMAKE_INSTALL_PREFIX:PATH=<working directory>/HDF_Group/HDF5/1.15.x
 -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
 -DHDF5_ENABLE_PARALLEL:BOOL=ON -DHDF5_BUILD_CPP_LIB:BOOL=OFF
 -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_ENABLE_THREADSAFE:BOOL=OFF
@@ -168,7 +168,7 @@ configure command, for example
 -DLOCAL_BATCH_SCRIPT_NAME:STRING=knl_ctestS.sl
 -DLOCAL_BATCH_SCRIPT_PARALLEL_NAME:STRING=knl_ctestP.sl -DSITE:STRING=mutrino
 -DBUILDNAME:STRING=par-knl_GCC493-SHARED-Linux-4.4.156-94.61.1.16335.0.PTF.1107299-default-x86_64
-"-GUnix Makefiles" "" "<working directory>/hdf5-1.13.3"
+"-GUnix Makefiles" "" "<working directory>/hdf5-1.15.x"
 
 followed by make and batch jobs to run tests.
 

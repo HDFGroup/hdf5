@@ -42,11 +42,13 @@
 
 /* Format version bounds for layout */
 const unsigned H5O_layout_ver_bounds[] = {
-    H5O_LAYOUT_VERSION_1,                      /* H5F_LIBVER_EARLIEST */
-    H5O_LAYOUT_VERSION_3, /* H5F_LIBVER_V18 */ /* H5O_LAYOUT_VERSION_DEFAULT */
-    H5O_LAYOUT_VERSION_4,                      /* H5F_LIBVER_V110 */
-    H5O_LAYOUT_VERSION_4,                      /* H5F_LIBVER_V112 */
-    H5O_LAYOUT_VERSION_LATEST                  /* H5F_LIBVER_LATEST */
+    H5O_LAYOUT_VERSION_1, /* H5F_LIBVER_EARLIEST */
+    H5O_LAYOUT_VERSION_3,
+    /* H5F_LIBVER_V18 */      /* H5O_LAYOUT_VERSION_DEFAULT */
+    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V110 */
+    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V112 */
+    H5O_LAYOUT_VERSION_4,     /* H5F_LIBVER_V114 */
+    H5O_LAYOUT_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
 /*****************************/
@@ -589,7 +591,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     htri_t  msg_exists;              /* Whether a particular type of message exists */
     hbool_t pline_copied  = FALSE;   /* Flag to indicate that pline's message was copied */
     hbool_t layout_copied = FALSE;   /* Flag to indicate that layout message was copied */
-    hbool_t efl_copied    = FALSE;   /* Flag to indicate that efl message was copied */
+    hbool_t efl_copied    = FALSE;   /* Flag to indicate that the EFL message was copied */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -606,7 +608,6 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_PLINE_ID, &dataset->shared->dcpl_cache.pline))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
         pline_copied = TRUE;
-
         /* Set the I/O pipeline info in the property list */
         if (H5P_set(plist, H5O_CRT_PIPELINE_NAME, &dataset->shared->dcpl_cache.pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set pipeline")

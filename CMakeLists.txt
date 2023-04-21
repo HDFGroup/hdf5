@@ -646,7 +646,7 @@ else ()
 endif ()
 
 include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
-set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${HDF_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
+set (CMAKE_MODULE_PATH ${HDF_RESOURCES_DIR} ${CMAKE_MODULE_PATH})
 
 #-----------------------------------------------------------------------------
 # Option to Enable HDFS
@@ -818,6 +818,17 @@ endif ()
 set (H5_USE_114_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v114")
   set (H5_USE_114_API_DEFAULT 1)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to use 1.16.x API
+#-----------------------------------------------------------------------------
+if (NOT DEFAULT_API_VERSION)
+  set (DEFAULT_API_VERSION "v116")
+endif ()
+set (H5_USE_116_API_DEFAULT 0)
+if (DEFAULT_API_VERSION MATCHES "v116")
+  set (H5_USE_116_API_DEFAULT 1)
 endif ()
 
 #-----------------------------------------------------------------------------

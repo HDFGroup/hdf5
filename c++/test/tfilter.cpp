@@ -96,8 +96,6 @@ filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values
  * Programmer   Binh-Minh Ribler (use C version, from dsets.c/test_filters)
  *              January, 2007
  *
- * Modifications:
- *              Note: H5Z interface is not implemented yet.
  *-------------------------------------------------------------------------
  */
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
@@ -145,8 +143,6 @@ test_null_filter()
  * Programmer   Binh-Minh Ribler (partly from dsets.c/test_filters)
  *              January, 2007
  *
- * Modifications:
- *              Note: H5Z interface is not implemented yet.
  *-------------------------------------------------------------------------
  */
 const H5std_string DSET_SZIP_NAME("szipped dataset");

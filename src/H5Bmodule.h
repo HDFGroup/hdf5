@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5B package.  Including this header means that the source file
- *		is part of the H5B package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5B package.  Including this header means that the source file
+ *          is part of the H5B package.
  */
 #ifndef H5Bmodule_H
 #define H5Bmodule_H

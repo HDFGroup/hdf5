@@ -22,8 +22,6 @@
  *
  * Programmer: Albert Cheng
  *             September 20, 2009
- * Modifications:
- *   Added abort signal intercept. AKC - 2009/10/16 -
  */
 
 #include "h5test.h"

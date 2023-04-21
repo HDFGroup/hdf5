@@ -491,7 +491,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     if ((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0)
         TestErrPrintf("Attribute iteration function didn't return zero correctly!\n");
 
-    /* Test all attributes on dataset, when callback always returns 1 */
+    /* Test all attributes on dataset, when callback always returns 2 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
     i            = 0;
@@ -1011,8 +1011,11 @@ test_corrupted_attnamelen(void)
     hbool_t        driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
-    const char *err_message = "attribute name has different length than stored length";
-    /* the error message produced when the failure occurs */
+    /* The error message produced when the failure occurs
+     *
+     * FIXME: This is incredibly fragile!
+     */
+    const char *err_message = "ran off end of input buffer while decoding";
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));
@@ -1203,12 +1206,14 @@ test_iterate(void)
  * Programmer:    Quincey Koziol
  *              April 5, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 cleanup_iterate(void)
 {
-    HDremove(DATAFILE);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(DATAFILE, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

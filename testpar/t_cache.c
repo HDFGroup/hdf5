@@ -475,10 +475,6 @@ static hbool_t trace_file_check(int metadata_write_strategy);
  *
  * Programmer:  JRM -- 4/17/06
  *
- * Modifications:
- *
- *              None.
- *
  *****************************************************************************/
 
 static void
@@ -506,10 +502,6 @@ print_stats(void)
  * Return:    void
  *
  * Programmer:    JRM -- 4/17/06
- *
- * Modifications:
- *
- *        None.
  *
  *****************************************************************************/
 
@@ -546,10 +538,6 @@ reset_stats(void)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 11/16/05
- *
- * Modifications:
- *
- *        None.
  *
  *****************************************************************************/
 
@@ -964,10 +952,6 @@ get_max_nerrors(void)
  *
  * Programmer:    JRM -- 12/22/05
  *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Added mssg_tag_offset parameter and supporting code.
  *
  *****************************************************************************/
 
@@ -1042,11 +1026,6 @@ recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 12/22/05
- *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Added the add_req_to_tag parameter and supporting code.
  *
  *****************************************************************************/
 static hbool_t
@@ -1299,11 +1278,6 @@ reset_server_counters(void)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 12/22/05
- *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Updated for sync message.
  *
  *****************************************************************************/
 static hbool_t
@@ -2876,13 +2850,6 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
  * Programmer:  John Mainzer
  *              01/04/06
  *
- * Modifications:
- *
- *              JRM -- 8/11/06
- *              Updated code to reflect the fact that entries can now be
- *              inserted pinned.  Note that since all inserts are dirty,
- *              any pins must be global pins.
- *
  *****************************************************************************/
 static void
 insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
@@ -3244,12 +3211,6 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
  *
  * Programmer:  John Mainzer
  *              1/4/06
- *
- * Modifications:
- *
- *         JRM -- 7/11/06
- *         Modified asserts to handle the new local_len field in
- *         datum.
  *
  *****************************************************************************/
 static void
@@ -4089,11 +4050,6 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
  *
  * Programmer:    JRM -- 1/12/06
  *
- * Modifications:
- *
- *        JRM -- 5/9/06
- *        Modified function to facilitate setting predefined seeds.
- *
  *****************************************************************************/
 static void
 setup_rand(void)
@@ -4617,11 +4573,6 @@ verify_total_writes(unsigned expected_total_writes)
  * Programmer:  John Mainzer
  *              1/4/06
  *
- * Modifications:
- *
- *         7/11/06
- *         Updated for the new local_len field in datum.
- *
  *****************************************************************************/
 static void
 unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
@@ -4691,11 +4642,6 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
  *
  * Programmer:  John Mainzer
  *              4/12/06
- *
- * Modifications:
- *
- *         JRM -- 8/15/06
- *         Added assertion that entry is pinned on entry.
  *
  *****************************************************************************/
 static void

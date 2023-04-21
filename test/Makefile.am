@@ -35,9 +35,9 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_vds_swmr.sh: vds_swmr*
 #       test_use_cases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
-	test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
-	test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
-	test_use_cases.sh
+    test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
+    test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
+    test_use_cases.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -241,8 +241,11 @@ use_append_mchunks_SOURCES=use_append_mchunks.c use_common.c
 use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh \
-    testabort_fail.sh test_vol_plugin.sh test_mirror.sh
+DISTCLEANFILES=test_abort_fail.sh test_check_version.sh test_error.sh test_external_env.sh \
+    test_flush_refresh.sh test_libinfo.sh test_links_env.sh test_plugin.sh \
+    test_swmr.sh test_use_cases.sh test_vds_env.sh test_vds_swmr.sh
+if MIRROR_VFD_CONDITIONAL
+  DISTCLEANFILES+= test_mirror.sh
+endif
 
 include $(top_srcdir)/config/conclude.am

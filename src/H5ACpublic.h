@@ -466,7 +466,7 @@ typedef struct H5AC_cache_config_t {
     /* general configuration fields: */
     //! <!-- [H5AC_cache_config_t_general_snip] -->
     int version;
-    /**< Integer field indicating the the version of the H5AC_cache_config_t
+    /**< Integer field indicating the version of the H5AC_cache_config_t
      * in use. This field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION
      * (defined in H5ACpublic.h). */
 

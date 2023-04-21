@@ -341,11 +341,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Saturday, August 30, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              8 December 2009
- *              I added a field of VL string in the compound type to test
- *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -1347,11 +1342,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Tuesday, December 18, 2001
  *
- * Modifications:
- *              The size of compound datatype can be expanded now.
- *              Raymond Lu
- *              Wednesday, September 10, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1496,11 +1486,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *              Raymond Lu
- *              27 June 2008
- *              Added verification of compound type size for H5Tpack and
- *              test for array of nested compound type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -2019,8 +2004,6 @@ error:
  * Programmer:  Raymond Lu
  *              Tuesday, June 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2232,8 +2215,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 7, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2516,8 +2497,6 @@ error:
  * Programmer:  Raymond Lu
  *              Wednesday, September 29, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2737,9 +2716,9 @@ error:
  * Function:    test_compound_14
  *
  * Purpose:     Tests compound type conversions where a vlen string will
-                be misaligned in the conversion buffer and the file.  The
-                two compound types are meant to trigger two different
-                conversion routines.
+ *              be misaligned in the conversion buffer and the file.  The
+ *              two compound types are meant to trigger two different
+ *              conversion routines.
  *
  * Return:      Success:        0
  *
@@ -2747,8 +2726,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Monday, August 25, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3204,8 +3181,6 @@ error:
  * Programmer:  Neil Fortner
  *              Friday, September 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3379,8 +3354,6 @@ error:
  * Programmer:  Ray Lu
  *              14 July 2022
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3507,8 +3480,6 @@ error:
  * Programmer:  Neil Fortner
  *              Friday, October 3, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3620,8 +3591,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Tuesday, January 13, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3927,11 +3896,6 @@ error:
  * Programmer:  Raymond Lu
  *              Thursday, April 4, 2002
  *
- * Modifications:
- *              Raymond Lu
- *              Wednesday, February 9, 2005
- *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
- *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
 static int
@@ -4174,8 +4138,6 @@ error:
  * Programmer:    Robb Matzke
  *              Thursday, June  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4330,8 +4292,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Monday, June  1, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5285,8 +5245,6 @@ error:
  * Programmer:    Robb Matzke
  *              Tuesday, January  5, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6014,13 +5972,6 @@ error:
  * Programmer:  Raymond Lu
  *              July 14, 2004
  *
- * Modifications: Raymond Lu
- *              July 13, 2009
- *              Added the test for VL string types.
- *
- *              Raymond Lu
- *              17 February 2011
- *              I added the test of reference count for decoded datatypes.
  *-------------------------------------------------------------------------
  */
 static int
@@ -6809,8 +6760,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *              floats and I can't think of a particularly good way to
  *              make it portable to other architectures, but further
  *              input and changes are welcome.  -QAK
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -8695,9 +8644,9 @@ test_versionbounds(void)
     H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
     hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
     int          low, high;                     /* Indices for iterating over versions */
-    H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112,
-                               H5F_LIBVER_V114};
-    int          versions_count = 5; /* Number of version bounds in the array */
+    H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
+                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
+    int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */
     herr_t       ret = 0;            /* Generic return value */

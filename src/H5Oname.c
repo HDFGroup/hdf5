@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Oname.c
- *                      Aug 12 1997
- *                      Robb Matzke
  *
- * Purpose:             Object name message.
+ * Purpose:             Object name (comment) message
  *
  *-------------------------------------------------------------------------
  */
@@ -67,41 +65,37 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  * Purpose:     Decode a name message and return a pointer to a new
  *              native message struct.
  *
- * Return:      Success:        Ptr to new message in native struct.
- *
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug 12 1997
- *
+ * Return:      Success:    Ptr to new message in native struct.
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__name_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__name_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                 const uint8_t *p)
 {
-    H5O_name_t *mesg;
-    void       *ret_value = NULL; /* Return value */
+    H5O_name_t *mesg      = NULL;
+    void       *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
     if (NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if (NULL == (mesg->s = (char *)H5MM_strdup((const char *)p)))
+
+    if (NULL == (mesg->s = (char *)H5MM_strndup((const char *)p, p_size - 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Set return value */
     ret_value = mesg;
 
 done:
     if (NULL == ret_value)
-        if (mesg)
-            mesg = (H5O_name_t *)H5MM_xfree(mesg);
+        if (mesg) {
+            H5MM_xfree(mesg->s);
+            H5MM_xfree(mesg);
+        }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__name_decode() */

@@ -105,8 +105,6 @@ static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_r
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -264,8 +262,6 @@ finalize_ioc_threads(void *_sf_context)
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 static HG_THREAD_RETURN_TYPE
@@ -339,7 +335,6 @@ ioc_thread_main(void *arg)
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
 static int
@@ -493,8 +488,6 @@ translate_opcode(io_op_t op)
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 static HG_THREAD_RETURN_TYPE
@@ -591,8 +584,6 @@ handle_work_request(void *arg)
  * Programmer:  Richard Warren
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -611,8 +602,6 @@ H5FD_ioc_begin_thread_exclusive(void)
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */
@@ -678,8 +667,6 @@ from the thread pool threads...
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */
@@ -869,8 +856,6 @@ done:
  *
  * Programmer:  Richard Warren
  *              7/17/2020
- *
- * Changes:     Initial Version/None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1217,8 +1202,6 @@ done:
  * Programmer:  John Mainzer
  *              7/17/2020
  *
- * Changes:     Initial Version/None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1283,8 +1266,6 @@ done:
  *
  * Programmer:  JRM -- 11/6/21
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static ioc_io_queue_entry_t *
@@ -1337,8 +1318,6 @@ ioc_io_queue_alloc_entry(void)
  * Return:      void.
  *
  * Programmer:  JRM -- 11/7/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1460,8 +1439,6 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  * Return:      void.
  *
  * Programmer:  JRM -- 11/7/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1629,8 +1606,6 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
  *
  * Programmer:  JRM -- 11/7/21
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1714,8 +1689,6 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
  * Return:      void.
  *
  * Programmer:  JRM -- 11/6/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */

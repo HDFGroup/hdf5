@@ -99,8 +99,9 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added Fortran async APIs
 
+      H5A, H5D, H5ES, H5G, H5F, H5L and H5O async APIs were added.
 
     C++ Library:
     ------------
@@ -148,14 +149,70 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
-    - Fixed memory leaks that could occur when reading a dataset from a malformed
-      file
+    - Fixed memory leaks when processing malformed object header continuation messages
 
-      When attempting to read layout, pline, and efl information for a dataset, 
-      memory leaks could occur if attempting to read pline/efl information threw
-      an error, which is due to memory being allocated for pline and efl not being 
-      properly cleaned up on error.
+      Malformed object header continuation messages can result in a too-small
+      buffer being passed to the decode function, which could lead to reading
+      past the end of the buffer. Additionally, errors in processing these
+      malformed messages can lead to allocated memory not being cleaned up.
 
+      This fix adds bounds checking and cleanup code to the object header
+      continuation message processing.
+
+      Fixes GitHub issue #2604
+
+    - Fixed memory leaks, aborts, and overflows in H5O EFL decode
+
+      The external file list code could call assert(), read past buffer
+      boundaries, and not properly clean up resources when parsing malformed
+      external data files messages.
+
+      This fix cleans up allocated memory, adds buffer bounds checks, and
+      converts asserts to HDF5 error checking.
+
+      Fixes GitHub issue #2605
+
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      Fixes GitHub issue #2603
+
+    - Memory leak
+
+      Memory leak was detected when running h5dump with "pov".  The memory was allocated
+      via H5FL__malloc() in hdf5/src/H5FL.c
+
+      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
+      When deserializing the object header chunks for the file, memory is allocated for the
+      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
+      As error is encountered in loading the illegal message, the memory allocated for
+      cont_msg_info->msgs needs to be freed.
+
+      Fixes GitHub issue #2599
+
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
+
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information threw an error, which is due to the memory that was 
+      allocated for pline and efl not being properly cleaned up on error.  
+
+      Fixes GitHub issue #2602
+
+    - Fixed potential heap buffer overrun in group info header decoding from malformed file
+
+      H5O__ginfo_decode could sometimes read past allocated memory when parsing a
+      group info message from the header of a malformed file.
+  
+      It now checks buffer size before each read to properly throw an error in these cases.
+  
+      Fixes GitHub issue #2601
+      
     - Fixed potential buffer overrun issues in some object header decode routines
 
       Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
@@ -179,19 +236,6 @@ Bug Fixes since HDF5-1.14.0 release
 
       Also added a regression test for these two I/O concentrator selection
       strategies to prevent future issues. 
-
-    - Memory leak
-
-      Memory leak was detected when running h5dump with "pov".  The memory was allocated
-      via H5FL__malloc() in hdf5/src/H5FL.c
-
-      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
-      When deserializing the object header chunks for the file, memory is allocated for the
-      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
-      As error is encountered in loading the illegal message, the memory allocated for
-      cont_msg_info->msgs needs to be freed.
-
-      Fixes GitHub issue #2599
 
     - Fixed a heap buffer overflow that occurs when reading from
       a dataset with a compact layout within a malformed HDF5 file
@@ -224,24 +268,6 @@ Bug Fixes since HDF5-1.14.0 release
       being copied when projecting the point selection onto the
       hyperslab selection's dataspace.
 
-    - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
-      or SELECT_IOC_TOTAL I/O concentrator selection strategies
-
-      Multiple bugs involving these I/O concentrator selection strategies
-      were fixed, including:
-
-        * A bug that caused the selection strategy to be altered when
-          criteria for the strategy was specified in the
-          H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variable as
-          a single value, rather than in the old and undocumented
-          'integer:integer' format
-        * Two bugs which caused a request for 'N' I/O concentrators to
-          result in 'N - 1' I/O concentrators being assigned, which also
-          lead to issues if only 1 I/O concentrator was requested
-
-      Also added a regression test for these two I/O concentrator selection
-      strategies to prevent future issues. 
-
     - Fixed an issue with collective metadata writes of global heap data
 
       New test failures in parallel netCDF started occurring with debug
@@ -269,6 +295,18 @@ Bug Fixes since HDF5-1.14.0 release
       size to be 0.
 
       Fixes GitHub issue #2458
+
+    - Fixed buffer overflow error in image decoding function.
+
+      The error occurred in the function for decoding address from the specified
+      buffer, which is called many times from the function responsible for image
+      decoding. The length of the buffer is known in the image decoding function,
+      but no checks are produced, so the buffer overflow can occur in many places,
+      including callee functions for address decoding. 
+
+      The error was fixed by inserting corresponding checks for buffer overflow.
+
+      Fixes GitHub issue #2432
 
 
     Java Library
@@ -494,26 +532,6 @@ Platforms Tested
 
 Known Problems
 ==============
-
-       ************************************************************
-       *                                  _                       *
-       *                                 (_)                      *
-       *        __      ____ _ _ __ _ __  _ _ __   __ _           *
-       *        \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |          *
-       *         \ V  V / (_| | |  | | | | | | | | (_| |          *
-       *          \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |          *
-       *                                           __/ |          *
-       *                                          |___/           *
-       *                                                          *
-       *  Please refrain from running any program (including      *
-       *  HDF5 tests) which uses the subfiling VFD on Perlmutter  *
-       *  at the National Energy Research Scientific Computing    *
-       *  Center, NERSC.                                          *
-       *  Doing so may cause a system disruption due to subfiling *
-       *  crashing Lustre. The sytem's Lustre bug is expected     *
-       *  to be resolved by 2023.                                 *
-       *                                                          *
-       ************************************************************
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

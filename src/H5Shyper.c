@@ -243,6 +243,7 @@ const unsigned H5O_sds_hyper_ver_bounds[] = {
     H5S_HYPER_VERSION_1, /* H5F_LIBVER_V18 */
     H5S_HYPER_VERSION_2, /* H5F_LIBVER_V110 */
     H5S_HYPER_VERSION_3, /* H5F_LIBVER_V112 */
+    H5S_HYPER_VERSION_3, /* H5F_LIBVER_V114 */
     H5S_HYPER_VERSION_3  /* H5F_LIBVER_LATEST */
 };
 
@@ -9229,7 +9230,7 @@ done:
                                      owned by the result. If not, the 2nd span list
                                      has to be copied.
         hbool_t *span2_owned;  OUT: Indicates if the 2nd span list is actually owned
-        H5S_t **result;  OUT: The dataspace containing the the new selection. It
+        H5S_t **result;  OUT: The dataspace containing the new selection. It
                               could be same with the 1st dataspace.
  RETURNS
     Non-negative on success, negative on failure

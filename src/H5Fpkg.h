@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, September 28, 2000
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5F package.  Source files outside the H5F package should
- *		include H5Fprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5F package.  Source files outside the H5F package should
+ *          include H5Fprivate.h instead.
  */
 #if !(defined H5F_FRIEND || defined H5F_MODULE)
 #error "Do not include this file outside the H5F package!"
