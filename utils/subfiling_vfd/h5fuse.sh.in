@@ -185,7 +185,6 @@ mpi_size=1
 nstart=1
 nend=$nsubfiles
 
-#if running script in parallel, make sure h5fuse mpi is accessible if neeed.
 if [ "$parallel" == "true" ]; then
 
     hex=$(hexdump -n 16 -v -e '/1 "%02X"' /dev/urandom)
