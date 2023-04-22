@@ -464,8 +464,6 @@ elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
     echo "H5_USE_112_API_DEFAULT is defined."
 elif [ -n "$H5_USE_114_API_DEFAULT" ]; then
     echo "H5_USE_114_API_DEFAULT is defined."
-elif [ -n "$H5_USE_116_API_DEFAULT" ]; then
-    echo "H5_USE_116_API_DEFAULT is defined."
 else
     echo "No H5 API_DEFAULT is defined."
 fi

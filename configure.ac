@@ -3749,8 +3749,8 @@ AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
             [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114)],
                             [Specify default release version of public symbols
-                             [default=v116]])],,
-            [withval=v116])
+                             [default=v114]])],,
+            [withval=v114])
 
 ## Allowing "default" allows the GitHub CI to check that we didn't forget
 ## to change the defaults when creating a new major version
@@ -3774,16 +3774,11 @@ elif test "X$withval" = "Xv112"; then
     DEFAULT_API_VERSION=v112
     AC_DEFINE([USE_112_API_DEFAULT], [1],
               [Define using v1.12 public API symbols by default])
-elif test "X$withval" = "Xv114"; then
+elif test "X$withval" = "Xv114" -o "X$withval" = "Xdefault"; then
     AC_MSG_RESULT([v114])
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv116" -o "X$withval" = "Xdefault"; then
-    AC_MSG_RESULT([v116])
-    DEFAULT_API_VERSION=v116
-    AC_DEFINE([USE_116_API_DEFAULT], [1],
-              [Define using v1.16 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
@@ -3793,7 +3788,7 @@ fi
 ## if the user insists on doing this via the --enable-unsupported configure
 ## flag, we'll let them.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${DEFAULT_API_VERSION}" != "Xv116" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  if test "X${DEFAULT_API_VERSION}" != "Xv114" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
     AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols. Use --enable-unsupported to override this error.])
   fi
 fi
