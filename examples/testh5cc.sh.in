@@ -81,7 +81,7 @@ applib=libapp${H5TOOL}.a
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
 # by other test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
-temp_SRC="$hdf5main $v16main $v18main $v110main $v112main $v114main $appmain $prog1 $prog2"
+temp_SRC="$hdf5main $v16main $v18main $v110main $v112main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out $applib"
 
