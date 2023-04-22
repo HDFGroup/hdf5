@@ -203,7 +203,7 @@ typedef herr_t (*H5E_auto2_t)(hid_t estack, void *client_data);
  * \param[in] cls_name Name of the error class
  * \param[in] lib_name Name of the client library or application to which the error class belongs
  * \param[in] version Version of the client library or application to which the
-              error class belongs. Can be \c NULL.
+              error class belongs. It can be \c NULL.
  * \return Returns a class identifier on success; otherwise returns H5I_INVALID_ID.
  *
  * \details H5Eregister_class() registers a client library or application
@@ -341,12 +341,12 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
  *
  * \param[in] class_id Error class identifier
  * \param[out] name Buffer for the error class name
- * \param[in] size The maximum number of characters the class name to be returned
- *            by this function in\p name.
+ * \param[in] size The maximum number of characters of the class name to be returned
+ *            by this function in \p name.
  * \return Returns non-negative value as on success; otherwise returns negative value.
  *
  * \details H5Eget_class_name() retrieves the name of the error class specified
- *          by the class identifier. If non-NULL pointer is passed in for \p
+ *          by the class identifier. If a non-NULL pointer is passed in for \p
  *          name and \p size is greater than zero, the class name of \p size
  *          long is returned. The length of the error class name is also
  *          returned. If NULL is passed in as \p name, only the length of class
@@ -817,7 +817,7 @@ H5_DLL herr_t H5Epush1(const char *file, const char *func, unsigned line, H5E_ma
  * \deprecated 1.8.0 Function H5Eprint() renamed to H5Eprint1() and
  *                   deprecated in this release.
  *
- * \details H5Eprint1() prints prints the error stack for the current thread
+ * \details H5Eprint1() prints the error stack for the current thread
  *          on the specified stream, \p stream. Even if the error stack is empty, a
  *          one-line message of the following form will be printed:
  *          \code{.unparsed}

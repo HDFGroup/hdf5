@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5SM package.  Including this header means that the source file
- *		is part of the H5SM package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5SM package.  Including this header means that the source file
+ *          is part of the H5SM package.
  */
 #ifndef H5SMmodule_H
 #define H5SMmodule_H

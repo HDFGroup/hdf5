@@ -346,9 +346,6 @@ gtoken(char *s)
  *
  * Programmer:  pkmat
  *
- * Modifications: pvn
- *  7/23/2007. Added support for STR type, extra parameter FILE_ID
- *
  *-------------------------------------------------------------------------
  */
 

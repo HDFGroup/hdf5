@@ -58,13 +58,6 @@ static herr_t H5PT_get_index(htbl_t *table_id, hsize_t *pt_index);
  *           currently.  Fill data is not necessary because the
  *           table is initially of size 0.
  *
- * Modifications:
- *	Mar 1, 2016
- *		This function is added to replace H5PTcreate_fl and it differs
- *		from H5PTcreate_fl only because its last argument is plist_id
- *		instead of compression; this is to allow flexible compression.
- *		-BMR
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -183,8 +176,6 @@ error:
  *           currently.  Fill data is not necessary because the
  *           table is initially of size 0.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -296,13 +287,6 @@ error:
  * Date: March 10, 2004
  *
  * Comments:
- *
- * Modifications:
- *
- * 		John Mainzer -- 4/23/08
- * 		Added error check on malloc of table, initialized fields
- * 		in table to keep lower level code from choking on bogus
- * 		data in error cases.
  *
  *-------------------------------------------------------------------------
  */
@@ -422,8 +406,6 @@ H5PT_free_id(void *id, void H5_ATTR_UNUSED **_ctx)
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -469,8 +451,6 @@ error:
  * Date: April 21, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -524,8 +504,6 @@ error:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -574,9 +552,6 @@ error:
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -617,9 +592,6 @@ error:
  * Date: March 12, 2004
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -666,8 +638,6 @@ error:
  * Date: March 12, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -719,8 +689,6 @@ H5PT_get_index(htbl_t *table, hsize_t *pt_index)
  * Date: April 23, 2004
  *
  * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -781,9 +749,6 @@ H5PTget_index(hid_t table_id, hsize_t *pt_index)
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -818,9 +783,6 @@ error:
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -847,9 +809,6 @@ H5PTis_valid(hid_t table_id)
  * Date: April 14, 2004
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -897,9 +856,6 @@ error:
  * Date: April 12, 2004
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -956,9 +912,6 @@ error:
  *
  * Comments:
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -990,9 +943,6 @@ error:
  * Date: Feb 10, 2016
  *
  * Comments:
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */

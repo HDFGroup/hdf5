@@ -191,7 +191,6 @@ error:
  *
  * Programmer:  Robb Matzke 2002-03-28
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static int
@@ -1404,8 +1403,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

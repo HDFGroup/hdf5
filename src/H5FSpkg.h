@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, May  2, 2006
- *
  * Purpose:     This file contains declarations which are visible only within
  *              the H5FS package.  Source files outside the H5FS package should
  *              include H5FSprivate.h instead.

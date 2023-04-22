@@ -517,7 +517,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     HDassert(H5F_addr_defined(oh->chunk[chunkno].addr));
 
     /* Test to see if the specified chunk ends with a null messages.
-     * If successful, set the index of the the null message in extend_msg.
+     * If successful, set the index of the null message in extend_msg.
      */
     for (u = 0; u < oh->nmesgs; u++) {
         /* Check for null message at end of proper chunk */

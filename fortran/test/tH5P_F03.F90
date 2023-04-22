@@ -85,8 +85,6 @@ CONTAINS
 ! * Programmer:	M. Scot Breitenfeld
 ! *             June 24, 2008
 ! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 

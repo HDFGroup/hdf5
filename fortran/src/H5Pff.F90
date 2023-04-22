@@ -188,7 +188,7 @@ MODULE H5P
 
   !> @brief H5FD_subfiling_params_t derived type used in the subfiling VFD.
   TYPE, BIND(C) :: H5FD_subfiling_params_t
-    INTEGER(ENUM_T)    :: ioc_selection !< Method to select I/O concentrators
+    INTEGER(C_INT)    :: ioc_selection !< Method to select I/O concentrators
     INTEGER(C_INT64_T) :: stripe_size   !< Size (in bytes) of data stripes in subfiles
     INTEGER(C_INT32_T) :: stripe_count  !< Target number of subfiles to use
   END TYPE H5FD_subfiling_params_t
@@ -524,15 +524,13 @@ CONTAINS
 !!
 !! See C API: @ref H5Pget_version()
 !!
-  SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
-       stab, shhdr, hdferr)
+  SUBROUTINE h5pget_version_f(prp_id, boot, freelist, stab, shhdr, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, DIMENSION(:), INTENT(OUT) :: boot
-    INTEGER, DIMENSION(:), INTENT(OUT) :: freelist
-
-    INTEGER, DIMENSION(:), INTENT(OUT) :: stab
-    INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr
+    INTEGER, DIMENSION(*), INTENT(OUT) :: boot
+    INTEGER, DIMENSION(*), INTENT(OUT) :: freelist
+    INTEGER, DIMENSION(*), INTENT(OUT) :: stab
+    INTEGER, DIMENSION(*), INTENT(OUT) :: shhdr
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
@@ -2698,7 +2696,8 @@ CONTAINS
 !! \param memb_map  Mapping array.
 !! \param memb_fapl Property list for each memory usage type.
 !! \param memb_name Names of member file.
-!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
+!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F,
+!!                  at which each type of data storage begins.
 !! \param relax     Flag.
 !! \param hdferr    \fortran_error
 !!
@@ -2781,7 +2780,8 @@ CONTAINS
 !! \param memb_map   Mapping array.
 !! \param memb_fapl  Property list for each memory usage type.
 !! \param memb_name  Names of member file.
-!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
+!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which
+!!                   each type of data storage begins.
 !! \param relax      Flag.
 !! \param hdferr     \fortran_error
 !! \param maxlen_out Maximum length for memb_name array element.
@@ -2793,7 +2793,7 @@ CONTAINS
     INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: memb_fapl
     CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: memb_name
     REAL, DIMENSION(*), INTENT(OUT) :: memb_addr
-    INTEGER, OPTIONAL, INTENT(OUT) :: maxlen_out
+    INTEGER, INTENT(OUT), OPTIONAL :: maxlen_out
     LOGICAL, INTENT(OUT) :: relax
     INTEGER, INTENT(OUT) :: hdferr
 
@@ -3201,7 +3201,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: low
     INTEGER, INTENT(OUT) :: high
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(ENUM_T) :: low_c, high_c
+    INTEGER(C_INT) :: low_c, high_c
     INTEGER(C_INT) :: hdferr_c
 !
 !  MS FORTRAN needs explicit interface for C functions called here.
@@ -3209,11 +3209,11 @@ CONTAINS
     INTERFACE
        INTEGER(C_INT) FUNCTION h5pget_libver_bounds(fapl_id, low, high) &
             BIND(C,NAME='H5Pget_libver_bounds')
-         IMPORT :: C_INT, HID_T, ENUM_T
+         IMPORT :: C_INT, HID_T
          IMPLICIT NONE
          INTEGER(HID_T) , INTENT(IN) , VALUE :: fapl_id
-         INTEGER(ENUM_T), INTENT(OUT) :: low
-         INTEGER(ENUM_T), INTENT(OUT) :: high
+         INTEGER(C_INT), INTENT(OUT) :: low
+         INTEGER(C_INT), INTENT(OUT) :: high
        END FUNCTION h5pget_libver_bounds
     END INTERFACE
 
@@ -3252,15 +3252,15 @@ CONTAINS
     INTERFACE
        INTEGER(C_INT) FUNCTION h5pset_libver_bounds(fapl_id, low, high) &
             BIND(C,NAME='H5Pset_libver_bounds')
-         IMPORT :: C_INT, HID_T, ENUM_T
+         IMPORT :: C_INT, HID_T
          IMPLICIT NONE
          INTEGER(HID_T),  INTENT(IN), VALUE :: fapl_id
-         INTEGER(ENUM_T), INTENT(IN), VALUE :: low
-         INTEGER(ENUM_T), INTENT(IN), VALUE :: high
+         INTEGER(C_INT), INTENT(IN), VALUE :: low
+         INTEGER(C_INT), INTENT(IN), VALUE :: high
        END FUNCTION h5pset_libver_bounds
     END INTERFACE
 
-    hdferr_c = h5pset_libver_bounds(fapl_id, INT(low, ENUM_T), INT(high, ENUM_T))
+    hdferr_c = h5pset_libver_bounds(fapl_id, INT(low, C_INT), INT(high, C_INT))
 
     hdferr = 0
     IF(hdferr_c.LT.0) hdferr = -1
@@ -5523,14 +5523,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
     INTERFACE
        INTEGER FUNCTION h5pset_virtual_view(dapl_id, view) BIND(C,NAME='H5Pset_virtual_view')
-         IMPORT :: HID_T, ENUM_T
+         IMPORT :: C_INT, HID_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
-         INTEGER(ENUM_T), INTENT(IN), VALUE :: view
+         INTEGER(C_INT), INTENT(IN), VALUE :: view
        END FUNCTION h5pset_virtual_view
     END INTERFACE
 
-    hdferr = INT( h5pset_virtual_view(dapl_id, INT(view,ENUM_T)) )
+    hdferr = INT( h5pset_virtual_view(dapl_id, INT(view,C_INT)) )
 
   END SUBROUTINE h5pset_virtual_view_f
 
@@ -5553,13 +5553,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(HID_T), INTENT(IN)  :: dapl_id
     INTEGER       , INTENT(INOUT) :: view
     INTEGER       , INTENT(OUT) :: hdferr
-    INTEGER(ENUM_T) :: view_enum
+    INTEGER(C_INT) :: view_enum
     INTERFACE
        INTEGER FUNCTION h5pget_virtual_view(dapl_id, view) BIND(C,NAME='H5Pget_virtual_view')
-         IMPORT :: HID_T, ENUM_T
+         IMPORT :: C_INT, HID_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
-         INTEGER(ENUM_T), INTENT(OUT) :: view
+         INTEGER(C_INT), INTENT(OUT) :: view
        END FUNCTION h5pget_virtual_view
     END INTERFACE
 
@@ -5636,8 +5636,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets the mapping between virtual and source datasets.
 !!
-!! \param dcpl_id       The identifier of the dataset creation property list that will be used when creating the virtual dataset.
-!! \param vspace_id     The dataspace identifier with the selection within the virtual dataset applied, possibly an unlimited selection.
+!! \param dcpl_id       The identifier of the dataset creation property list that will be used when creating the
+!!                      virtual dataset.
+!! \param vspace_id     The dataspace identifier with the selection within the virtual dataset applied, possibly an
+!!                      unlimited selection.
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
 !! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
@@ -6051,7 +6053,8 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pget_file_locking')
+       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+            BIND(C, NAME='H5Pget_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
@@ -6090,7 +6093,8 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pset_file_locking')
+       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+            BIND(C, NAME='H5Pset_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id

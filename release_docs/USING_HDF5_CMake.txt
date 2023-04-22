@@ -38,7 +38,7 @@ I. Preconditions
 ========================================================================
 
    1. We suggest you obtain the latest CMake for your platform from the Kitware
-      web site. The HDF5 1.13.x product requires a minimum CMake version
+      web site. The HDF5 1.14.x product requires a minimum CMake version
       of 3.18. If you are using VS2022, the minimum version is 3.21.
 
    2. You have installed the HDF5 library built with CMake, by executing
@@ -50,24 +50,24 @@ I. Preconditions
       or environment variable, set(ENV{HDF5_ROOT} "<install_path>")
       to the installed location of HDF5.
          On Windows:
-            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.13.x/
+            HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.14.x/
          On unix:
-            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.13.x/
+            HDF5_ROOT=<install root folder>/HDF_Group/HDF5/1.14.x/
 
       If you are using shared libraries, you may need to add to the path
       environment variable. Set the path environment variable to the
       installed location of the library files for HDF5.
          On Windows (*.dll):
-            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.13.x/bin
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.14.x/bin
          On unix (*.so):
-            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/1.13.x/lib
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/1.14.x/lib
 
       If you are using filter plugin libraries, you will need to set the
       HDF5_PLUGIN_PATH environment variable.
          On Windows:
-            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.13.x/lib/plugin
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.14.x/lib/plugin
          On unix:
-            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/1.13.x/lib/plugin
+            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/1.14.x/lib/plugin
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
@@ -125,6 +125,9 @@ These steps are described in more detail below.
             * Visual Studio 15 2017 Win64
             * Visual Studio 16 2019
             * ... in addition VS2019 will need to set the "-A" option,
+            * ... [Win32, x64, ARM, ARM64]
+            * Visual Studio 17 2022
+            * ... in addition VS2022 will need to set the "-A" option,
             * ... [Win32, x64, ARM, ARM64]
 
         <options> is:

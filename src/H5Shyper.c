@@ -9229,7 +9229,7 @@ done:
                                      owned by the result. If not, the 2nd span list
                                      has to be copied.
         hbool_t *span2_owned;  OUT: Indicates if the 2nd span list is actually owned
-        H5S_t **result;  OUT: The dataspace containing the the new selection. It
+        H5S_t **result;  OUT: The dataspace containing the new selection. It
                               could be same with the 1st dataspace.
  RETURNS
     Non-negative on success, negative on failure

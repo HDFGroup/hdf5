@@ -417,7 +417,7 @@ CONTENTS
 
 
 4.3.11. Backward compatibility
-        The 1.13 version of the HDF5 library can be configured to operate
+        The 1.14 version of the HDF5 library can be configured to operate
         identically to the v1.12 library with the
             --with-default-api-version=v112
         configure flag, or identically to the v1.10 library with the
@@ -427,7 +427,7 @@ CONTENTS
         configure flag, or identically to the v1.6 library with the
             --with-default-api-version=v16
         configure flag. This allows existing code to be compiled with the
-        v1.13 library without requiring immediate changes to the application
+        v1.14 library without requiring immediate changes to the application
         source code.  For additional configuration options and other details,
         see "API Compatibility Macros":
 
