@@ -11,10 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Wednesday, April 15, 1998
- *
- * Purpose:     Data filter pipeline message.
+ * Purpose:     Data filter pipeline message
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
@@ -103,12 +100,8 @@ H5FL_DEFINE(H5O_pline_t);
  *
  * Purpose:     Decodes a filter pipeline message.
  *
- * Return:      Success:    Ptr to the native message.
+ * Return:      Success:    Pointer to a new pipeline message
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Wednesday, April 15, 1998
- *
  *-------------------------------------------------------------------------
  */
 
@@ -121,11 +114,11 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     size_t             name_length;                /* Length of filter name */
     size_t             i;                          /* Local index variable */
     const uint8_t     *p_end     = p + p_size - 1; /* End of the p buffer */
-    void              *ret_value = NULL;           /* Return value */
+    void              *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    HDassert(f);
     HDassert(p);
 
     /* Allocate space for I/O pipeline message */
@@ -133,14 +126,15 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
-    if (p + 4 - 1 > p_end) /* 4 byte is minimum for all versions */
-        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off the end of the buffer: current p = %p, p_end = %p",
-                    (const void *)(p + 4), (const void *)p_end)
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     pline->version = *p++;
     if (pline->version < H5O_PLINE_VERSION_1 || pline->version > H5O_PLINE_VERSION_LATEST)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message")
 
     /* Number of filters */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     pline->nused = *p++;
     if (pline->nused > H5Z_MAX_NFILTERS) {
 
@@ -153,8 +147,11 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     }
 
     /* Reserved */
-    if (pline->version == H5O_PLINE_VERSION_1)
+    if (pline->version == H5O_PLINE_VERSION_1) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 6, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         p += 6;
+    }
 
     /* Allocate array for filters */
     pline->nalloc = pline->nused;
@@ -164,94 +161,94 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     /* Decode filters */
     for (i = 0, filter = &pline->filter[0]; i < pline->nused; i++, filter++) {
         /* Filter ID */
-        if (p + 6 - 1 > p_end) /* 6 bytes minimum */
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                        "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 6),
-                        (const void *)p_end)
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, filter->id);
 
         /* Length of filter name */
         if (pline->version > H5O_PLINE_VERSION_1 && filter->id < H5Z_FILTER_RESERVED)
             name_length = 0;
         else {
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT16DECODE(p, name_length);
             if (pline->version == H5O_PLINE_VERSION_1 && name_length % 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight")
-            if (p + 4 - 1 > p_end) /* with name_length 4 bytes to go */
-                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                            "ran off the end of the buffer: current p = %p, p_end = %p",
-                            (const void *)(p + 4), (const void *)p_end)
-        } /* end if */
+        }
 
         /* Filter flags */
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, filter->flags);
 
         /* Number of filter parameters ("client data elements") */
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, filter->cd_nelmts);
 
         /* Filter name, if there is one */
         if (name_length) {
-            size_t actual_name_length; /* Actual length of name */
-            size_t len = (size_t)(p_end - p + 1);
+            size_t actual_name_length;            /* Actual length of name */
+            size_t max = (size_t)(p_end - p + 1); /* Max possible name length */
+
             /* Determine actual name length (without padding, but with null terminator) */
-            actual_name_length = HDstrnlen((const char *)p, len);
-            if (actual_name_length == len)
+            actual_name_length = HDstrnlen((const char *)p, max);
+            if (actual_name_length == max)
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "filter name not null terminated")
             actual_name_length += 1; /* include \0 byte */
-            HDassert(actual_name_length <= name_length);
 
             /* Allocate space for the filter name, or use the internal buffer */
             if (actual_name_length > H5Z_COMMON_NAME_LEN) {
                 filter->name = (char *)H5MM_malloc(actual_name_length);
                 if (NULL == filter->name)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for filter name")
-            } /* end if */
+            }
             else
                 filter->name = filter->_name;
 
             HDstrncpy(filter->name, (const char *)p, actual_name_length);
+
+            if (H5_IS_BUFFER_OVERFLOW(p, name_length, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             p += name_length;
-        } /* end if */
+        }
 
         /* Filter parameters */
         if (filter->cd_nelmts) {
-            size_t j; /* Local index variable */
 
             /* Allocate space for the client data elements, or use the internal buffer */
             if (filter->cd_nelmts > H5Z_COMMON_CD_VALUES) {
                 filter->cd_values = (unsigned *)H5MM_malloc(filter->cd_nelmts * sizeof(unsigned));
                 if (NULL == filter->cd_values)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for client data")
-            } /* end if */
+            }
             else
                 filter->cd_values = filter->_cd_values;
 
-            /*
-             * Read the client data values and the padding
-             */
-            for (j = 0; j < filter->cd_nelmts; j++) {
-                if (p + 4 - 1 <= p_end)
-                    UINT32DECODE(p, filter->cd_values[j])
-                else
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                                "ran off the end of the buffer: current p = %p, p_size = %zu, p_end = %p",
-                                (const void *)p, p_size, (const void *)p_end)
+            /* Read the client data values and the padding */
+            for (size_t j = 0; j < filter->cd_nelmts; j++) {
+                if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                UINT32DECODE(p, filter->cd_values[j])
             }
 
             if (pline->version == H5O_PLINE_VERSION_1)
-                if (filter->cd_nelmts % 2)
-                    p += 4; /*padding*/
-        }                   /* end if */
-    }                       /* end for */
+                if (filter->cd_nelmts % 2) {
+                    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                    p += 4; /* padding */
+                }
+        }
+    }
 
     /* Set return value */
     ret_value = pline;
 
 done:
-    if (NULL == ret_value && pline) {
+    if (!ret_value && pline) {
         H5O__pline_reset(pline);
         H5O__pline_free(pline);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__pline_decode() */
