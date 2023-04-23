@@ -71,8 +71,8 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
  */
 static void *
 H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                    size_t p_size, const uint8_t *p)
+                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                    const uint8_t *p)
 {
     H5O_drvinfo_t *mesg      = NULL;           /* Native message */
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */

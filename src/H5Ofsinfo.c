@@ -137,7 +137,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
                 for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
                 }
                 break;
@@ -176,7 +177,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
+        H5F_DECODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section threshold */
 
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
@@ -184,7 +185,7 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
         if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        UINT16DECODE(p, fsinfo->pgend_meta_thres);  /* Page end metadata threshold */
+        UINT16DECODE(p, fsinfo->pgend_meta_thres); /* Page end metadata threshold */
 
         if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");

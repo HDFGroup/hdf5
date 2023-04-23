@@ -79,8 +79,8 @@ H5FL_DEFINE_STATIC(H5O_refcount_t);
  */
 static void *
 H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                     size_t p_size, const uint8_t *p)
+                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                     const uint8_t *p)
 {
     H5O_refcount_t *refcount  = NULL;           /* Reference count */
     const uint8_t  *p_end     = p + p_size - 1; /* End of the p buffer */

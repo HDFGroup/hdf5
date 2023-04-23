@@ -235,7 +235,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
             if (pline->version == H5O_PLINE_VERSION_1)
                 if (filter->cd_nelmts % 2) {
                     if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding")
                     p += 4; /* padding */
                 }
         }
