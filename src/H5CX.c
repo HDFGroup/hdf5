@@ -94,14 +94,12 @@
         H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
     } /* end if */
 
-#ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to retrieve possibly set properties from a property list */
 #define H5CX_RETRIEVE_PROP_VALID_SET(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                      \
     /* Check if the value has been retrieved already */                                                      \
     if (!((*head)->ctx.H5_GLUE(PROP_FIELD, _valid) || (*head)->ctx.H5_GLUE(PROP_FIELD, _set))) {             \
         H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
     }  /* end if */
-#endif /* H5_HAVE_PARALLEL */
 
 #if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to test and set properties for a property list */
@@ -127,7 +125,6 @@
     }
 #endif /* defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY) */
 
-#ifdef H5_HAVE_PARALLEL
 /* Macro for the duplicated code to test and set properties for a property list */
 #define H5CX_SET_PROP(PROP_NAME, PROP_FIELD)                                                                 \
     if ((*head)->ctx.H5_GLUE(PROP_FIELD, _set)) {                                                            \
@@ -138,7 +135,6 @@
         if (H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0)                             \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property")                  \
     }  /* end if */
-#endif /* H5_HAVE_PARALLEL */
 
 /******************/
 /* Local Typedefs */
@@ -254,6 +250,11 @@ typedef struct H5CX_t {
     hbool_t                 dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
+
+    uint32_t no_selection_io_cause;       /* Reason for not performing selection I/O
+                                                (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    hbool_t  no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
+    hbool_t  no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -382,6 +383,8 @@ typedef struct H5CX_dxpl_cache_t {
     H5T_vlen_alloc_info_t   vl_alloc_info;     /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
     H5T_conv_cb_t           dt_conv_cb;        /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
     H5D_selection_io_mode_t selection_io_mode; /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
+    uint32_t no_selection_io_cause;     /* Reasons for not performing selection I/O
+                                                 (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -571,6 +574,11 @@ H5CX_init(void)
 
     if (H5P_get(dx_plist, H5D_XFER_SELECTION_IO_MODE_NAME, &H5CX_def_dxpl_cache.selection_io_mode) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
+
+    /* Get the local & global reasons for breaking collective I/O values */
+    if (H5P_get(dx_plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME,
+                &H5CX_def_dxpl_cache.no_selection_io_cause) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve cause for no selection I/O")
 
     /* Reset the "default LCPL cache" information */
     HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
@@ -2606,6 +2614,44 @@ done:
 } /* end H5CX_get_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_no_selection_io_cause
+ *
+ * Purpose:     Retrieves the cause for not performing selection I/O 
+ *              for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              April 15, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(no_selection_io_cause);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME,
+                                 no_selection_io_cause)
+
+    /* Get the value */
+    *no_selection_io_cause = (*head)->ctx.no_selection_io_cause;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_no_selection_io_cause() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding
  *
  * Purpose:     Retrieves the character encoding for the current API call context.
@@ -3586,6 +3632,41 @@ done:
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_set_no_selecction_io_cause
+ *
+ * Purpose:     Sets the reason for not performing selection I/O for 
+ *              the current API call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Vailin Choi
+ *              April 15, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert((*head)->ctx.dxpl_id != H5P_DEFAULT);
+
+    /* If we're using the default DXPL, don't modify it */
+    if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
+        /* Cache the value for later, marking it to set in DXPL when context popped */
+        (*head)->ctx.no_selection_io_cause     = no_selection_io_cause;
+        (*head)->ctx.no_selection_io_cause_set = TRUE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_no_selectiion_io_cause() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_ohdr_flags
  *
  * Purpose:     Retrieves the object header flags for the current API call context.
@@ -3638,11 +3719,7 @@ H5CX__pop_common(hbool_t update_dxpl_props)
     H5CX_node_t **head      = NULL; /* Pointer to head of API context list */
     H5CX_node_t  *ret_value = NULL; /* Return value */
 
-#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_PACKAGE
-#else
-    FUNC_ENTER_PACKAGE_NOERR
-#endif
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3650,6 +3727,7 @@ H5CX__pop_common(hbool_t update_dxpl_props)
 
     /* Check for cached DXPL properties to return to application */
     if (update_dxpl_props) {
+        H5CX_SET_PROP(H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, no_selection_io_cause)
 #ifdef H5_HAVE_PARALLEL
         H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
         H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
@@ -3671,9 +3749,7 @@ H5CX__pop_common(hbool_t update_dxpl_props)
     ret_value = (*head);
     (*head)   = (*head)->next;
 
-#ifdef H5_HAVE_PARALLEL
 done:
-#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX__pop_common() */
 

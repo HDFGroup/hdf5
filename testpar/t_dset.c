@@ -3454,6 +3454,10 @@ test_no_collective_cause_mode(int selection_mode)
     uint32_t no_collective_cause_global_read     = 0;
     uint32_t no_collective_cause_global_expected = 0;
 
+    uint32_t no_selection_io_cause_write = 0;
+    uint32_t no_selection_io_cause_read = 0;
+    uint32_t no_selection_io_cause_expected = 0;
+
     const char *filename;
     const char *test_name;
     hbool_t     is_chunked     = 1;
@@ -3559,24 +3563,26 @@ test_no_collective_cause_mode(int selection_mode)
      */
     if (selection_mode & TEST_DATATYPE_CONVERSION) {
         test_name = "Broken Collective I/O - Datatype Conversion";
-        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_SELECTION_IO_DISABLED;
-        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
+        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
         /* set different sign to trigger type conversion */
         data_type = H5T_NATIVE_UINT;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
         test_name = "Broken Collective I/O - DATA Transforms";
-        no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_SELECTION_IO_DISABLED;
-        no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
+        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
     }
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
         test_name = "Broken Collective I/O - No Simple or Scalar DataSpace";
         no_collective_cause_local_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
         no_collective_cause_global_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
-        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
-        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
     }
 
     if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT ||
@@ -3584,8 +3590,8 @@ test_no_collective_cause_mode(int selection_mode)
         test_name = "Broken Collective I/O - No CONTI or CHUNKED Dataset";
         no_collective_cause_local_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
         no_collective_cause_global_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
-        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
-        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
     }
 
     if (selection_mode & TEST_COLLECTIVE) {
@@ -3598,8 +3604,8 @@ test_no_collective_cause_mode(int selection_mode)
         test_name                           = "Broken Collective I/O - Independent";
         no_collective_cause_local_expected  = H5D_MPIO_SET_INDEPENDENT;
         no_collective_cause_global_expected = H5D_MPIO_SET_INDEPENDENT;
-        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
-        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_SELECTION_IO_DISABLED;
+        no_collective_cause_local_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected &= ~(unsigned)H5D_MPIO_NO_SELECTION_IO;
         /* switch to independent io */
         is_independent = 1;
     }
@@ -3619,7 +3625,7 @@ test_no_collective_cause_mode(int selection_mode)
         mem_space = H5Screate_simple(RANK, dims, NULL);
         VRFY((mem_space >= 0), "mem_space created");
     }
-
+ 
     /* Get the number of elements in the selection */
     H5_CHECKED_ASSIGN(length, int, dims[0] * dims[1], uint64_t);
 
@@ -3650,6 +3656,8 @@ test_no_collective_cause_mode(int selection_mode)
         /* Disable selection I/O */
         ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
         VRFY((ret >= 0), "H5Pset_selection_io succeeded");
+        no_selection_io_cause_expected |= H5D_DISABLE_BY_API;
+
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
@@ -3672,6 +3680,20 @@ test_no_collective_cause_mode(int selection_mode)
                                           &no_collective_cause_global_write);
     VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
+    ret = H5Pget_no_selection_io_cause(dxpl_write, &no_selection_io_cause_write);
+    VRFY((ret >= 0), "retrieving no selection io cause succeeded");
+
+    if(no_collective_cause_local_write & H5D_MPIO_NO_SELECTION_IO) {
+        VRFY((no_selection_io_cause_write == no_selection_io_cause_expected),
+             "H5D_MPIO_NO_SELECTION_IO for write is as expected");
+    } 
+
+    if(no_collective_cause_global_write & H5D_MPIO_NO_SELECTION_IO) {
+
+        VRFY((no_selection_io_cause_write == no_selection_io_cause_expected),
+             "H5D_MPIO_NO_SELECTION_IO for write is as expected");
+    } 
+
     /*---------------------
      * Test Read access
      *---------------------*/
@@ -3691,6 +3713,21 @@ test_no_collective_cause_mode(int selection_mode)
     ret = H5Pget_mpio_no_collective_cause(dxpl_read, &no_collective_cause_local_read,
                                           &no_collective_cause_global_read);
     VRFY((ret >= 0), "retrieving no collective cause succeeded");
+
+    ret = H5Pget_no_selection_io_cause(dxpl_read, &no_selection_io_cause_read);
+    VRFY((ret >= 0), "retrieving no selection io cause succeeded");
+
+    if(no_collective_cause_local_read & H5D_MPIO_NO_SELECTION_IO) {
+
+        VRFY((no_selection_io_cause_read == no_selection_io_cause_expected),
+             "H5D_MPIO_NO_SELECTION_IO for read is as expected");
+    }
+
+    if(no_collective_cause_global_read & H5D_MPIO_NO_SELECTION_IO) {
+
+        VRFY((no_selection_io_cause_read == no_selection_io_cause_expected),
+             "H5D_MPIO_NO_SELECTION_IO for read is as expected");
+    }
 
     /* Check write vs read */
     VRFY((no_collective_cause_local_read == no_collective_cause_local_write),

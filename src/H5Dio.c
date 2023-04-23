@@ -305,6 +305,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
 
+    H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+
     /* If multi dataset I/O callback is not provided, perform read IO via
      * single-dset path with looping */
     if (io_info.md_io_ops.multi_read_md) {
@@ -708,6 +710,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (third phase)")
 
+    H5CX_set_no_selection_io_cause(io_info.no_selection_io_cause);
+
     /* If multi dataset I/O callback is not provided, perform write IO via
      * single-dset path with looping */
     if (io_info.md_io_ops.multi_write_md) {
@@ -921,10 +925,11 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     H5CX_get_selection_io_mode(&selection_io_mode);
     io_info->use_select_io = selection_io_mode;
 
-#ifdef H5_HAVE_PARALLEL
     /* Record no selection I/O cause if it was disabled by the API */
     if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF)
-        io_info->no_selection_io_cause = H5D_MPIO_SELECTION_IO_DISABLED;
+        io_info->no_selection_io_cause = H5D_DISABLE_BY_API;
+
+#ifdef H5_HAVE_PARALLEL
 
     /* Determine if the file was opened with an MPI VFD */
     if (count > 0)
@@ -1174,10 +1179,10 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             HDassert(io_info->bkg_buf_size <= io_info->tconv_buf_size);
             if (io_info->tconv_buf_size > max_temp_buf) {
                 io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
+                io_info->no_selection_io_cause |= H5D_TCONV_BUF_TOO_SMALL;
                 io_info->tconv_buf_size = 0;
                 io_info->bkg_buf_size   = 0;
                 io_info->must_fill_bkg  = FALSE;
-                io_info->no_selection_io_cause |= H5D_MPIO_TCONV_BUF_TOO_SMALL;
             }
         }
     }
@@ -1322,13 +1327,15 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
     }         /* end if */
     else
 #endif /* H5_HAVE_PARALLEL */
-        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
+    /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
          * the VFD has a vector or selection I/O callback */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
             if (H5F_has_vector_select_io(dset0->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
-            else
+            else {
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                io_info->no_selection_io_cause |= H5D_NO_VECTOR_OR_SELECTION_IO_CB;
+            }
         }
 
 #ifdef H5_HAVE_PARALLEL
@@ -1416,6 +1423,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
              * assumes the tconv buf is large enough to hold all data in the I/O, and we don't want
              * to impose this when there's no benefit */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_DATATYPE_CONVERSION;
 
             /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
