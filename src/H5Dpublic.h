@@ -423,6 +423,20 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  * \details H5Dget_space_status() determines whether space has been allocated
  *          for the dataset \p dset_id.
  *
+ * \note \Bold{BUG:} Prior to the HDF5 1.14.0, 1.12.2 and 1.10.9 releases,
+ *       H5Dget_space_status() may return incorrect space allocation status
+ *       values for datasets with filters applied to them.
+ *       H5Dget_space_status() calculated the space allocation status by
+ *       comparing the sum of the sizes of all the allocated chunks in the
+ *       dataset against the total data size of the dataset, as calculated by
+ *       the number of elements in the dataset's dataspace multiplied by the
+ *       dataset's datatype size. If the dataset had any compression filters
+ *       applied to it and the dataset chunks were successfully compressed,
+ *       the sum of the sizes of the allocated dataset chunks would generally
+ *       always be less than the total data size of the dataset, and
+ *       H5Dget_space_status() wouldn't ever return
+ *       `H5D_SPACE_STATUS_ALLOCATED`.
+ *
  * \since 1.6.0
  *
  */
