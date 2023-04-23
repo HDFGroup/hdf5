@@ -47,7 +47,7 @@ New Features
 
     Configuration:
     -------------
-    - Deprecate and remove old SZIP library in favor of LIBAEC library
+    - Deprecated and removed old SZIP library in favor of LIBAEC library
 
       LIBAEC library has been used in HDF5 binaries as the szip library of choice
       for a few years. We are removing the options for using the old SZIP library.
