@@ -36,6 +36,8 @@ MODULE TH5_MISC
   INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
+  INTEGER, PARAMETER :: TAB_SPACE = 88 ! Tab spacing for printing results
+
   ! generic compound datatype
   TYPE :: comp_datatype
     SEQUENCE
@@ -54,6 +56,84 @@ MODULE TH5_MISC
   END INTERFACE
 
 CONTAINS
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: write_test_header
+!DEC$endif
+  SUBROUTINE write_test_header(title_header)
+
+    ! Writes the test header
+
+    IMPLICIT NONE
+
+    CHARACTER(LEN=*), INTENT(IN) :: title_header ! test name
+    INTEGER, PARAMETER :: width = TAB_SPACE+10
+    CHARACTER(LEN=2*width) ::title_centered =" "
+    INTEGER :: len, i
+
+    len=LEN_TRIM(title_header)
+    title_centered(1:3) ="| |"
+    title_centered((width-len)/2:(width-len)/2+len) = TRIM(title_header)
+    title_centered(width-1:width+2) ="| |"
+
+    WRITE(*,'(1X)', ADVANCE="NO")
+    DO i = 1, width-1
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'()')
+    WRITE(*,'("|  ")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("  |")')
+
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'(1X)', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'(A)') title_centered
+
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'(1X)', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'("| |")', ADVANCE="NO")
+    DO i = 1, width-5
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("| |")')
+
+    WRITE(*,'("|")', ADVANCE="NO")
+    DO i = 1, width-1
+       WRITE(*,'("_")', ADVANCE="NO")
+    ENDDO
+    WRITE(*,'("|",/)')
+
+   END SUBROUTINE write_test_header
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: write_test_footer
+!DEC$endif
+   SUBROUTINE write_test_footer()
+
+     ! Writes the test footer
+
+     IMPLICIT NONE
+     INTEGER, PARAMETER :: width = TAB_SPACE+10
+     INTEGER :: i
+
+     DO i = 1, width
+        WRITE(*,'("_")', ADVANCE="NO")
+     ENDDO
+     WRITE(*,'(/)')
+
+   END SUBROUTINE write_test_footer
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
@@ -78,7 +158,7 @@ CONTAINS
     CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
     CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
     CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-
+    CHARACTER(LEN=10) :: FMT
 
     error_string = failure
     IF (test_result ==  0) THEN
@@ -86,8 +166,8 @@ CONTAINS
     ELSE IF (test_result == -1) THEN
        error_string = skip
     ENDIF
-
-    WRITE(*, fmt = '(A, T88, A)') test_title, error_string
+    WRITE(FMT,'("(A,T",I0,",A)")') TAB_SPACE
+    WRITE(*, fmt = FMT) test_title, error_string
 
     IF(test_result.GT.0) total_error = total_error + test_result
 

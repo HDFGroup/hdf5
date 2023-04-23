@@ -953,8 +953,6 @@ CONTAINS
 ! * Fortran Programmer:  M.S. Breitenfeld
 ! *                      September 9, 2008
 ! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 

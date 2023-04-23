@@ -5115,8 +5115,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param name
      *            IN: File name to check.
-     * @param file_id
-     *            IN: File identifier for a currently-open HDF5 file
+     * @param fapl_id
+     *            IN: File access property list identifier
      *
      * @return true if file is accessible, false if not.
      *
@@ -5125,7 +5125,7 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            name is null.
      **/
-    public synchronized static native boolean H5Fis_accessible(String name, long file_id)
+    public synchronized static native boolean H5Fis_accessible(String name, long fapl_id)
         throws HDF5LibraryException, NullPointerException;
 
     /**

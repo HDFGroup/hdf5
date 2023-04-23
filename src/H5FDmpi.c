@@ -40,16 +40,6 @@
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
  *
- * Changes:     Reworked function to use the ctl callback so we can get
- *              rid of H5FD_class_mpi_t.  Since there are no real limits
- *              on what the ctl callback can do, its file parameter can't
- *              be constant.  Thus, I had to remove the const qualifier
- *              on this functions file parameter as well.  Note also the
- *              circumlocution required to use the ctl callbacks output
- *              parameter to pass back the rank without introducing
- *              compiler warnings.
- *                                             JRM -- 8/13/21
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -91,16 +81,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Changes:     Reworked function to use the ctl callback so we can get
- *              rid of H5FD_class_mpi_t.  Since there are no real limits
- *              on what the ctl callback can do, its file parameter can't
- *              be constant.  Thus, I had to remove the const qualifier
- *              on this functions file parameter as well.  Note also the
- *              circumlocution required to use the ctl callbacks output
- *              parameter to pass back the rank without introducing
- *              compiler warnings.
- *                                             JRM -- 8/13/21
  *
  *-------------------------------------------------------------------------
  */
@@ -144,16 +124,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Changes:     Reworked function to use the ctl callback so we can get
- *              rid of H5FD_class_mpi_t.  Since there are no real limits
- *              on what the ctl callback can do, its file parameter can't
- *              be constant.  Thus, I had to remove the const qualifier
- *              on this functions file parameter as well.  Note also the
- *              circumlocution required to use the ctl callbacks output
- *              parameter to pass back the rank without introducing
- *              compiler warnings.
- *                                             JRM -- 8/13/21
  *
  *-------------------------------------------------------------------------
  */

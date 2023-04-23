@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5P package.  Including this header means that the source file
- *		is part of the H5P package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5P package.  Including this header means that the source file
+ *          is part of the H5P package.
  */
 #ifndef H5Pmodule_H
 #define H5Pmodule_H

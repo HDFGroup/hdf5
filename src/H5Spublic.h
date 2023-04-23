@@ -1006,7 +1006,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          The \p coord parameter is a pointer to a buffer containing a
  *          serialized 2-dimensional array of size \p num_elements by the
  *          rank of the dataspace. The array lists dataset elements in the
- *          point selection; that is, it’s a list of of zero-based values
+ *          point selection; that is, it’s a list of zero-based values
  *          specifying the coordinates in the dataset of the selected
  *          elements. The order of the element coordinates in the \p coord
  *          array specifies the order in which the array elements are
@@ -1048,7 +1048,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *
  *          In the 1D case, we will be selecting five points and a 1D
  *          dataspace has rank 1, so the selection will be described in a
- *          5-by-1 array. To select the 1st, 14th, 17th, 23rd, 8th elements
+ *          5-by-1 array. To select the 1st, 14th, 17th, 23rd and 8th elements
  *          of the dataset, the selection array would be as follows
  *          (remembering that point coordinates are zero-based):
  *          \n      0
@@ -1320,9 +1320,9 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  * \details H5Sset_extent_simple() sets or resets the size of an existing
  *          dataspace.
  *
- *          \p dims is an array of size \p rank which contains the new size
+ *          \p dims is an array of size \p rank that contains the new size
  *          of each dimension in the dataspace. \p max is an array of size
- *          \p rank which contains the maximum size of each dimension in
+ *          \p rank that contains the maximum size of each dimension in
  *          the dataspace.
  *
  *          Any previous extent is removed from the dataspace, the dataspace

@@ -10,14 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *    Friday, October 30, 1998
- *
- * Purpose:  This file is included by all HDF5 library source files to
- *    define common things which are not defined in the HDF5 API.
- *    The configuration constants like H5_HAVE_UNISTD_H etc. are
- *    defined in H5config.h which is included by H5public.h.
- *
+/*
+ * Purpose: This file is included by all HDF5 library source files to
+ *          define common things which are not defined in the HDF5 API.
+ *          The configuration constants like H5_HAVE_UNISTD_H etc. are
+ *          defined in H5config.h which is included by H5public.h.
  */
 
 #ifndef H5private_H
@@ -125,6 +122,7 @@
 #include <direct.h>   /* For _getcwd() */
 #include <io.h>       /* POSIX I/O */
 #include <winsock2.h> /* For GetUserName() */
+#include <shlwapi.h>  /* For StrStrIA */
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
@@ -1865,9 +1863,6 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *    use initializers that require special cleanup code to
  *    execute if FUNC_ENTER() fails since a failing FUNC_ENTER()
  *    returns immediately without branching to the `done' label.
- *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1936,7 +1931,7 @@ typedef struct H5_api_struct {
 #define H5_FIRST_THREAD_INIT pthread_once(&H5TS_first_init_g, H5TS_pthread_first_thread_init);
 #endif
 
-/* Macros for threadsafe HDF-5 Phase I locks */
+/* Macros for threadsafe HDF5 Phase I locks */
 #define H5_API_LOCK   H5TS_mutex_lock(&H5_g.init_lock);
 #define H5_API_UNLOCK H5TS_mutex_unlock(&H5_g.init_lock);
 
@@ -2293,11 +2288,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));
 
 /*-------------------------------------------------------------------------
- * Purpose:  Register function exit for code profiling.  This should be
- *    the last statement executed by a function.
- *
- * Programmer:  Quincey Koziol
- *
+ * Purpose: Register function exit for code profiling.  This should be
+ *          the last statement executed by a function.
  *-------------------------------------------------------------------------
  */
 /* Threadsafety termination code for API routines */

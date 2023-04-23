@@ -105,8 +105,6 @@ static hsize_t values_used[WRT_N];
  * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -153,8 +151,6 @@ randll(hsize_t limit, int current_index)
  * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -195,8 +191,6 @@ is_sparse(void)
  *
  * Programmer:    Raymond Lu
  *              Wednesday, April 18, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -266,8 +260,6 @@ error:
  * Programmer:    Robb Matzke
  *              Thursday, August  6, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* Disable warning for "format not a string literal" here -QAK */
@@ -331,10 +323,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  *
  * Programmer:    Robb Matzke
  *              Wednesday, April  8, 1998
- *
- * Modifications:
- *     Robb Matzke, 15 Jul 1998
- *     Addresses are written to the file DNAME instead of stdout.
  *
  *-------------------------------------------------------------------------
  */
@@ -485,8 +473,6 @@ error:
  * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -590,8 +576,6 @@ error:
  *
  * Programmer:    Albert Chent
  *              Mar 28, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -756,15 +740,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
- *
- * Modifications:
- *        Albert Cheng, 2002/03/28
- *        Added command option -fsize.
- *        Albert Cheng, 2002/04/19
- *        Added command option -c.
- *
- *              Raymond Lu, 2007/05/25
- *              Added similar tests for SEC2 and STDIO drivers.
  *
  *-------------------------------------------------------------------------
  */

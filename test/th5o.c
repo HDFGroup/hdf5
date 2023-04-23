@@ -49,6 +49,9 @@ test_h5o_open(void)
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Oopen\n"));
+
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create a new HDF5 file */
@@ -160,6 +163,9 @@ test_h5o_close(void)
     char    filename[1024];
     hsize_t dims[RANK];
     herr_t  ret; /* Value returned from API calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Oclose\n"));
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
@@ -413,6 +419,9 @@ test_h5o_open_by_token(void)
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Oopen_by_token\n"));
+
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create a new HDF5 file */
@@ -530,6 +539,9 @@ test_h5o_refcount(void)
     H5O_info2_t oinfo; /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret; /* Value returned from API calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing retrieval of object reference count with H5Oget_info\n"));
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
@@ -731,6 +743,9 @@ test_h5o_plist(void)
     unsigned def_max_compact, def_min_dense; /* Default phase change parameters */
     unsigned max_compact, min_dense;         /* Actual phase change parameters */
     herr_t   ret;                            /* Value returned from API calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Object creation properties\n"));
 
     /* Make a FAPL that uses the "use the latest version of the format" flag */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -934,6 +949,9 @@ test_h5o_link(void)
     int         *rdata;
     int          i, n;
     herr_t       ret; /* Value returned from API calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Olink\n"));
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
@@ -1422,6 +1440,9 @@ test_h5o_getinfo_same_file(void)
     H5O_info2_t oinfo1, oinfo2; /* Object info structs */
     herr_t      ret;            /* Value returned from API calls */
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing H5Oget_info on objects in same file\n"));
+
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create a new HDF5 file */
@@ -1719,6 +1740,9 @@ test_h5o_getinfo_visit(void)
     char        attrname[25];   /* Attribute name */
     int         j;              /* Local index variable */
     herr_t      ret;            /* Value returned from API calls */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing info returned by H5Oget_info vs H5Ovisit\n"));
 
     h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 

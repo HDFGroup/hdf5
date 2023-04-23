@@ -32,7 +32,7 @@ else
 endif
 
 # These are our main targets
-TEST_PROG_PARA=parallel_test subfiling_test
+TEST_PROG_PARA=parallel_test subfiling_test async_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
@@ -41,6 +41,7 @@ CHECK_CLEANFILES+=parf[12].h5 subf.h5*
 # Test source files
 parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90
 subfiling_test_SOURCES=subfiling.F90
+async_test_SOURCES=async.F90
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)

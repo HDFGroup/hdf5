@@ -206,7 +206,6 @@ static off_t squareo(off_t);
  *              function.
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
  * Programmer:  Bill Wendling, 30. October 2001
- * Modifications:
  */
 int
 main(int argc, char *argv[])
@@ -303,15 +302,13 @@ squareo(off_t x)
  *
  * Return:      Nothing
  * Programmer:  Bill Wendling, 30. October 2001
- * Modifications:
- *    Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static void
 run_test_loop(struct options *opts)
 {
     parameters parms;
     int        num_procs;
-    int        doing_pio; /* if this process is doing PIO */
+    int        doing_pio = 0; /* if this process is doing parallel IO */
 
     parms.num_files     = opts->num_files;
     parms.num_dsets     = opts->num_dsets;
@@ -399,7 +396,6 @@ run_test_loop(struct options *opts)
  * Purpose:     Inner loop call to actually run the I/O test.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 18. December 2001
- * Modifications:
  */
 static int
 run_test(iotype iot, parameters parms, struct options *opts)
@@ -715,7 +711,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
  * Purpose:
  * Return:      Nothing
  * Programmer:  Bill Wendling, 29. January 2002
- * Modifications:
  */
 static void
 output_all_info(minmax *mm, int count, int indent_level)
@@ -738,12 +733,6 @@ output_all_info(minmax *mm, int count, int indent_level)
  *              object.
  * Return:      0 if all is fine; otherwise non-zero.
  * Programmer:  Albert Cheng, 2002/05/21.
- * Modifications:
- *          Bill Wendling, 2002/05/31
- *          Modified so that the HDF5_MPI_INFO environment variable can
- *          be a semicolon separated list of "key=value" pairings. Most
- *          of the code is to remove any whitespaces which might be
- *          surrounding the "key=value" pairs.
  */
 int
 h5_set_info_object(void)
@@ -836,7 +825,6 @@ h5_set_info_object(void)
  * Purpose:     Display content of an MPI Info object
  * Return:      void
  * Programmer:  Albert Cheng 2002/05/21
- * Modifications:
  */
 void
 h5_dump_info_object(MPI_Info info)
@@ -866,8 +854,6 @@ h5_dump_info_object(MPI_Info info)
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 21. December 2001
- * Modifications:
- *    Use MPI_Allreduce to do it. -akc, 2002/01/11
  */
 static void
 get_minmax(minmax *mm, double val)
@@ -888,8 +874,6 @@ get_minmax(minmax *mm, double val)
  *              across all processes.
  * Return:      TOTAL_MM - the total of all of these.
  * Programmer:  Bill Wendling, 21. December 2001
- * Modifications:
- *              Changed to use seconds instead of MB/s - QAK, 5/9/02
  */
 static minmax
 accumulate_minmax_stuff(minmax *mm, int count)
@@ -924,7 +908,6 @@ accumulate_minmax_stuff(minmax *mm, int count)
  * Return:      SUCCESS on success.
  *              FAIL otherwise.
  * Programmer:  Bill Wendling, 19. December 2001
- * Modifications:
  */
 static int
 create_comm_world(int num_procs, int *doing_pio)
@@ -983,7 +966,6 @@ error_done:
  * Return:      SUCCESS on success.
  *              FAIL otherwise.
  * Programmer:  Bill Wendling, 19. December 2001
- * Modifications:
  */
 static int
 destroy_comm_world(void)
@@ -1003,7 +985,6 @@ destroy_comm_world(void)
  *                  minmax & # of iterations.
  * Return:      Nothing
  * Programmer:  Quincey Koziol, 9. May 2002
- * Modifications:
  */
 static void
 output_results(const struct options *opts, const char *name, minmax *table, int table_size, off_t data_size)
@@ -1067,7 +1048,6 @@ output_times(const struct options *opts, const char *name, minmax *table, int ta
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 19. December 2001
- * Modifications:
  */
 static void
 output_report(const char *fmt, ...)
@@ -1266,8 +1246,6 @@ report_parameters(struct options *opts)
  *              structure which will need to be freed by the calling function.
  * Return:      Pointer to an OPTIONS structure
  * Programmer:  Bill Wendling, 31. October 2001
- * Modifications:
- *    Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static struct options *
 parse_command_line(int argc, const char *const *argv)
@@ -1518,7 +1496,6 @@ parse_command_line(int argc, const char *const *argv)
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
  * Programmer:  Bill Wendling, 18. December 2001
- * Modifications:
  */
 static off_t
 parse_size_directive(const char *size)
@@ -1559,8 +1536,6 @@ parse_size_directive(const char *size)
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 31. October 2001
- * Modifications:
- *     Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static void
 usage(const char *prog)

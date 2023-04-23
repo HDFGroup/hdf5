@@ -131,6 +131,8 @@ CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
+  # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
+  set (LINK_LIBS ${LINK_LIBS} "shlwapi")
 endif ()
 
 ## Check for non-standard extension quadmath.h
@@ -154,10 +156,6 @@ if (MINGW OR NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  ${HDF_PREFIX}_HAVE_LIBWS2_32)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname ${HDF_PREFIX}_HAVE_LIBWSOCK32)
-endif ()
-
-if (WINDOWS)
-  CHECK_LIBRARY_EXISTS_CONCAT ("shlwapi" StrStrIA ${HDF_PREFIX}_HAVE_SHLWAPI)
 endif ()
 
 # UCB (BSD) compatibility library
@@ -828,7 +826,6 @@ if (HDF5_BUILD_FORTRAN)
             message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
         endif ()
     endmacro ()
-
     set (PROG_SRC
         "
 #include <float.h>\n\
