@@ -1178,7 +1178,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             /* Check if the needed type conversion size is too big */
             HDassert(io_info->bkg_buf_size <= io_info->tconv_buf_size);
             if (io_info->tconv_buf_size > max_temp_buf) {
-                io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
                 io_info->no_selection_io_cause |= H5D_TCONV_BUF_TOO_SMALL;
                 io_info->tconv_buf_size = 0;
                 io_info->bkg_buf_size   = 0;
@@ -1326,8 +1326,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
         }     /* end else */
     }         /* end if */
     else
-#endif /* H5_HAVE_PARALLEL */
-    /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
+#endif  /* H5_HAVE_PARALLEL */
+        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
          * the VFD has a vector or selection I/O callback */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
             if (H5F_has_vector_select_io(dset0->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))

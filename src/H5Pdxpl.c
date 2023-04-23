@@ -287,8 +287,8 @@ static const H5T_conv_cb_t H5D_def_conv_cb_g =
 static const void  *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
 static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
-static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g = H5D_XFER_SELECTION_IO_MODE_DEF;
-static const uint32_t H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
+static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
+static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -460,9 +460,9 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the cause of no selection I/O */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME,
-                           H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE, &H5D_def_no_selection_io_cause_g, NULL, NULL,
-                           NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
+                           &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

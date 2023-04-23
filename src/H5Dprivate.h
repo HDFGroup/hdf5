@@ -79,12 +79,12 @@
     "local_no_collective_cause" /* cause of broken collective I/O in each process */
 #define H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME                                                             \
     "global_no_collective_cause"                         /* cause of broken collective I/O in all processes */
-#define H5D_XFER_EDC_NAME               "err_detect"     /* EDC */
-#define H5D_XFER_FILTER_CB_NAME         "filter_cb"      /* Filter callback function */
-#define H5D_XFER_CONV_CB_NAME           "type_conv_cb"   /* Type conversion callback function */
-#define H5D_XFER_XFORM_NAME             "data_transform" /* Data transform */
-#define H5D_XFER_DSET_IO_SEL_NAME       "dset_io_selection" /* Dataset I/O selection */
-#define H5D_XFER_SELECTION_IO_MODE_NAME "selection_io_mode" /* Selection I/O mode */
+#define H5D_XFER_EDC_NAME                   "err_detect" /* EDC */
+#define H5D_XFER_FILTER_CB_NAME             "filter_cb"  /* Filter callback function */
+#define H5D_XFER_CONV_CB_NAME               "type_conv_cb"          /* Type conversion callback function */
+#define H5D_XFER_XFORM_NAME                 "data_transform"        /* Data transform */
+#define H5D_XFER_DSET_IO_SEL_NAME           "dset_io_selection"     /* Dataset I/O selection */
+#define H5D_XFER_SELECTION_IO_MODE_NAME     "selection_io_mode"     /* Selection I/O mode */
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_NAME "no_selection_io_cause" /* Cause for no selection I/O */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */

@@ -3868,8 +3868,8 @@ test_no_collective_cause_mode(int selection_mode)
     uint32_t no_collective_cause_global_expected = 0;
     // hsize_t coord[NELM][MAX_RANK];
 
-    uint32_t no_selection_io_cause_write = 0;
-    uint32_t no_selection_io_cause_read = 0;
+    uint32_t no_selection_io_cause_write    = 0;
+    uint32_t no_selection_io_cause_read     = 0;
     uint32_t no_selection_io_cause_expected = 0;
 
     const char *filename;
@@ -4093,16 +4093,15 @@ test_no_collective_cause_mode(int selection_mode)
                                           &no_collective_cause_global_write);
     VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
-
     ret = H5Pget_no_selection_io_cause(dxpl_write, &no_selection_io_cause_read);
     VRFY((ret >= 0), "retrieving no selection io cause succeeded");
 
-    if(no_collective_cause_local_write & H5D_MPIO_NO_SELECTION_IO) {
+    if (no_collective_cause_local_write & H5D_MPIO_NO_SELECTION_IO) {
         VRFY((no_selection_io_cause_write == no_selection_io_cause_expected),
              "H5D_MPIO_NO_SELECTION_IO for write is as expected");
     }
 
-    if(no_collective_cause_global_write & H5D_MPIO_NO_SELECTION_IO) {
+    if (no_collective_cause_global_write & H5D_MPIO_NO_SELECTION_IO) {
 
         VRFY((no_selection_io_cause_write == no_selection_io_cause_expected),
              "H5D_MPIO_NO_SELECTION_IO for write is as expected");
@@ -4128,22 +4127,20 @@ test_no_collective_cause_mode(int selection_mode)
                                           &no_collective_cause_global_read);
     VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
-
     ret = H5Pget_no_selection_io_cause(dxpl_read, &no_selection_io_cause_read);
     VRFY((ret >= 0), "retrieving no selection io cause succeeded");
 
-    if(no_collective_cause_local_read & H5D_MPIO_NO_SELECTION_IO) {
+    if (no_collective_cause_local_read & H5D_MPIO_NO_SELECTION_IO) {
 
         VRFY((no_selection_io_cause_read == no_selection_io_cause_expected),
              "H5D_MPIO_NO_SELECTION_IO for read is as expected");
     }
 
-    if(no_collective_cause_global_read & H5D_MPIO_NO_SELECTION_IO) {
+    if (no_collective_cause_global_read & H5D_MPIO_NO_SELECTION_IO) {
 
         VRFY((no_selection_io_cause_read == no_selection_io_cause_expected),
              "H5D_MPIO_NO_SELECTION_IO for read is as expected");
     }
-
 
     /* Check write vs read */
     VRFY((no_collective_cause_local_read == no_collective_cause_local_write),

@@ -2574,7 +2574,8 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
             /* Note that page buffer is disabled in parallel */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
             io_info->no_selection_io_cause |= H5D_PAGE_BUFFER;
-        } else {
+        }
+        else {
             /* Check if chunks in this dataset may be cached, if so don't use
              * selection I/O (for now).  Note that chunks temporarily cached for
              * the purpose of writing the fill value don't count, since they are

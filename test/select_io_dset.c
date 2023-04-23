@@ -116,14 +116,14 @@ typedef enum {
 #define SETTING_B 2
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
-#define TEST_DISABLE_BY_API                             0x001
-#define TEST_DATATYPE_CONVERSION                        0x002
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET          0x004
-#define TEST_CONTIGUOUS_SIEVE_BUFFER                    0x008
-#define TEST_NO_VECTOR_OR_SELECTION_IO_CB               0x010
-#define TEST_PAGE_BUFFER                                0x020
-#define TEST_DATASET_FILTER                             0x040
-#define TEST_CHUNK_CACHE                                0x080
+#define TEST_DISABLE_BY_API                    0x001
+#define TEST_DATATYPE_CONVERSION               0x002
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x004
+#define TEST_CONTIGUOUS_SIEVE_BUFFER           0x008
+#define TEST_NO_VECTOR_OR_SELECTION_IO_CB      0x010
+#define TEST_PAGE_BUFFER                       0x020
+#define TEST_DATASET_FILTER                    0x040
+#define TEST_CHUNK_CACHE                       0x080
 
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
@@ -2566,7 +2566,7 @@ error:
     return FAIL;
 } /* test_set_get_select_io_mode() */
 
-/* 
+/*
  * To test with various test_mode that no selelction I/O is performed
  *
  * Note: It's the responsiblity of the tester to feed proper combination
@@ -2575,23 +2575,23 @@ error:
 static herr_t
 test_no_selection_io_cause_mode(uint32_t test_mode)
 {
-    hid_t       dcpl        = H5I_INVALID_HID;
-    hid_t       dxpl        = H5I_INVALID_HID;
-    hid_t fid = H5I_INVALID_HID;
-    hid_t fcpl = H5I_INVALID_HID;
-    hid_t fapl = H5I_INVALID_HID;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hbool_t     is_chunked = FALSE;
-    hid_t       tid = H5T_NATIVE_INT;
-    uint32_t    no_selection_io_cause_write = 0;
-    uint32_t    no_selection_io_cause_read = 0;
-    uint32_t    no_selection_io_cause_expected = 0;
-    int         wbuf[DSET_SELECT_DIM];
-    int         rbuf[DSET_SELECT_DIM];
-    int         i;
+    hid_t    dcpl = H5I_INVALID_HID;
+    hid_t    dxpl = H5I_INVALID_HID;
+    hid_t    fid  = H5I_INVALID_HID;
+    hid_t    fcpl = H5I_INVALID_HID;
+    hid_t    fapl = H5I_INVALID_HID;
+    hid_t    did  = H5I_INVALID_HID;
+    hid_t    sid  = H5I_INVALID_HID;
+    hsize_t  dims[1];
+    hsize_t  cdims[1];
+    hbool_t  is_chunked                     = FALSE;
+    hid_t    tid                            = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write    = 0;
+    uint32_t no_selection_io_cause_read     = 0;
+    uint32_t no_selection_io_cause_expected = 0;
+    int      wbuf[DSET_SELECT_DIM];
+    int      rbuf[DSET_SELECT_DIM];
+    int      i;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
@@ -2613,7 +2613,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
 
     if ((fid = H5Fcreate("no_selection_io_cause.h5", H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
-        
+
     /* If default mode, 1st write will trigger cb, 2nd write will trigger sieve */
     /* If on mode, will trigger nothing because the on mode path is different */
     /* Need 2 writes */
@@ -2668,12 +2668,13 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
             FAIL_STACK_ERROR;
     }
 
-    if ((did = H5Dcreate2(fid, "no_selection_io_cause", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, "no_selection_io_cause", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                          H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR;
 
     /* Initialize data */
     for (i = 0; i < DSET_SELECT_DIM; i++)
-        wbuf[i]       = i;
+        wbuf[i] = i;
 
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
@@ -2681,23 +2682,22 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER) {
         if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
             FAIL_STACK_ERROR;
-    } 
+    }
 
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         TEST_ERROR;
 
     /* Verify causes of no selection I/O for write is as expected */
-    if(no_selection_io_cause_write != no_selection_io_cause_expected)
+    if (no_selection_io_cause_write != no_selection_io_cause_expected)
         TEST_ERROR;
 
     /* Flush to clear the sieve buf */
-    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || 
-        test_mode & TEST_DATATYPE_CONVERSION ||
+    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || test_mode & TEST_DATATYPE_CONVERSION ||
         test_mode & TEST_PAGE_BUFFER) {
 
         if (H5Dflush(did) < 0)
             FAIL_STACK_ERROR;
-    } 
+    }
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
@@ -2707,7 +2707,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         TEST_ERROR;
 
     /* Verify causes of no selection I/O for write and read are the same */
-    if(no_selection_io_cause_write != no_selection_io_cause_read)
+    if (no_selection_io_cause_write != no_selection_io_cause_read)
         TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -2727,7 +2727,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         FAIL_STACK_ERROR;
     if (H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
-    
+
     return SUCCEED;
 
 error:
@@ -2772,7 +2772,8 @@ test_get_no_selection_io_cause(void)
     if (errs) {
         HDprintf(" FAILED\n");
         return FAIL;
-    } else {
+    }
+    else {
         PASSED();
         return SUCCEED;
     }

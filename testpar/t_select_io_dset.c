@@ -148,10 +148,9 @@ typedef enum {
 #define SETTING_B 2
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
-#define TEST_DISABLE_BY_API                             0x001
-#define TEST_DATATYPE_CONVERSION                        0x002
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET          0x004
-
+#define TEST_DISABLE_BY_API                    0x001
+#define TEST_DATATYPE_CONVERSION               0x002
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x004
 
 /*
  * Helper routine to set dxpl
@@ -3176,32 +3175,32 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 
 } /* test_multi_dsets_all() */
 
-/* 
+/*
  * Test with various test_mode that no selection I/O is performed
  *
- * Note:  It is the responsibility of the tester to 
+ * Note:  It is the responsibility of the tester to
  *        understand and feed proper combination of test_mode
  *        as needed.
  */
 static void
 test_no_selection_io_cause_mode(uint32_t test_mode)
 {
-    hid_t       dcpl        = H5I_INVALID_HID;
-    hid_t       dxpl        = H5I_INVALID_HID;
-    hid_t fid = H5I_INVALID_HID;
-    hid_t fapl = H5I_INVALID_HID;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hbool_t     is_chunked = FALSE;
-    hid_t       tid = H5T_NATIVE_INT;
-    uint32_t    no_selection_io_cause_write = 0;
-    uint32_t    no_selection_io_cause_read = 0;
-    uint32_t    no_selection_io_cause_expected = 0;
-    int         wbuf[DSET_SELECT_DIM];
-    int         rbuf[DSET_SELECT_DIM];
-    int         i;
+    hid_t    dcpl = H5I_INVALID_HID;
+    hid_t    dxpl = H5I_INVALID_HID;
+    hid_t    fid  = H5I_INVALID_HID;
+    hid_t    fapl = H5I_INVALID_HID;
+    hid_t    did  = H5I_INVALID_HID;
+    hid_t    sid  = H5I_INVALID_HID;
+    hsize_t  dims[1];
+    hsize_t  cdims[1];
+    hbool_t  is_chunked                     = FALSE;
+    hid_t    tid                            = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write    = 0;
+    uint32_t no_selection_io_cause_read     = 0;
+    uint32_t no_selection_io_cause_expected = 0;
+    int      wbuf[DSET_SELECT_DIM];
+    int      rbuf[DSET_SELECT_DIM];
+    int      i;
 
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         P_TEST_ERROR;
@@ -3217,7 +3216,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
 
     if ((fid = H5Fcreate("no_selection_io_cause.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
-        
+
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             P_TEST_ERROR;
@@ -3248,12 +3247,13 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
             P_TEST_ERROR;
     }
 
-    if ((did = H5Dcreate2(fid, "no_selection_io_cause", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, "no_selection_io_cause", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl,
+                          H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     /* Initialize data */
     for (i = 0; i < DSET_SELECT_DIM; i++)
-        wbuf[i]       = i;
+        wbuf[i] = i;
 
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         P_TEST_ERROR;
@@ -3262,7 +3262,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         P_TEST_ERROR;
 
     /* Verify causes of no selection I/O for write is as expected */
-    if(no_selection_io_cause_write != no_selection_io_cause_expected)
+    if (no_selection_io_cause_write != no_selection_io_cause_expected)
         P_TEST_ERROR;
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
@@ -3273,7 +3273,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         P_TEST_ERROR;
 
     /* Verify causes of no selection I/O for write and read are the same */
-    if(no_selection_io_cause_write != no_selection_io_cause_read)
+    if (no_selection_io_cause_write != no_selection_io_cause_read)
         P_TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -3293,7 +3293,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
 
     if (H5Pclose(fapl) < 0)
         P_TEST_ERROR;
-    
+
     return;
 
 } /* test_no_selection_io_cause_mode() */

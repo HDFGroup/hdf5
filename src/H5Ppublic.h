@@ -358,41 +358,51 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
     /**< Error */
     H5D_MPIO_NO_SELECTION_IO = 0x100,
-    /**< Collective I/O would be supported by selection or vector I/O but that feature was disabled 
+    /**< Collective I/O would be supported by selection or vector I/O but that feature was disabled
        (see causes via H5Pget_no_selection_io_cause()) */
     H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x200
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
 
-
 /**
  * Causes for H5Pget_no_selection_io_cause() property
  */
-#define H5D_DISABLE_BY_API                      (0x0001u) /**< Selection I/O was not performed because 
-                                                             the feature was disabled by the API */
-#define H5D_DATATYPE_CONVERSION                 (0x0002u) /**< Selection I/O was not performed because of
-                                                             datatype conversion */
-#define H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET   (0x0004u) /**< Selection I/O was not performed because the 
-                                                             dataset was neither contiguous nor chunked */
-#define H5D_CONTIGUOUS_SIEVE_BUFFER             (0x0008u) /**< Selection I/O was not performed because of 
-                                                             sieve buffer for contiguous dataset */
-#define H5D_NO_VECTOR_OR_SELECTION_IO_CB        (0x0010u) /**< Selection I/O was not performed because the VFD
-                                                             does not have vector or selection I/O callback */
-#define H5D_PAGE_BUFFER                         (0x0020u) /**< Selection I/O was not performed because of 
-                                                             page buffer */
-#define H5D_DATASET_FILTER                      (0x0040u) /**< Selection I/O was not performed because of 
-                                                             dataset filters */
-#define H5D_CHUNK_CACHE                         (0x0080u) /**< Selection I/O was not performed because of 
-                                                             chunk cache */
-#define H5D_TCONV_BUF_TOO_SMALL                 (0x0100u) /**< Selection I/O was not performed because the 
-                                                             type conversion buffer is too small 
-                                                             (for collective I/O) */
-#define H5D_NO_BENEFIT_BY_MPIO                  (0x0200u) /**< Selection I/O was not performed because there 
-                                                               is no benefit (for MPIO) */
+#define H5D_DISABLE_BY_API                                                                                   \
+    (0x0001u) /**< Selection I/O was not performed because                                                   \
+                 the feature was disabled by the API */
+#define H5D_DATATYPE_CONVERSION                                                                              \
+    (0x0002u) /**< Selection I/O was not performed because of                                                \
+                 datatype conversion */
+#define H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET                                                                \
+    (0x0004u) /**< Selection I/O was not performed because the                                               \
+                 dataset was neither contiguous nor chunked */
+#define H5D_CONTIGUOUS_SIEVE_BUFFER                                                                          \
+    (0x0008u) /**< Selection I/O was not performed because of                                                \
+                 sieve buffer for contiguous dataset */
+#define H5D_NO_VECTOR_OR_SELECTION_IO_CB                                                                     \
+    (0x0010u) /**< Selection I/O was not performed because the VFD                                           \
+                 does not have vector or selection I/O callback */
+#define H5D_PAGE_BUFFER                                                                                      \
+    (0x0020u) /**< Selection I/O was not performed because of                                                \
+                 page buffer */
+#define H5D_DATASET_FILTER                                                                                   \
+    (0x0040u) /**< Selection I/O was not performed because of                                                \
+                 dataset filters */
+#define H5D_CHUNK_CACHE                                                                                      \
+    (0x0080u) /**< Selection I/O was not performed because of                                                \
+                 chunk cache */
+#define H5D_TCONV_BUF_TOO_SMALL                                                                              \
+    (0x0100u) /**< Selection I/O was not performed because the                                               \
+                 type conversion buffer is too small                                                         \
+                 (for collective I/O) */
+#define H5D_NO_BENEFIT_BY_MPIO                                                                               \
+    (0x0200u) /**< Selection I/O was not performed because there                                             \
+                   is no benefit (for MPIO) */
 
 /* Causes for H5D_MPIO_NO_SELECTION_IO */
-#define H5D_MPIO_NO_SELECTION_IO_CAUSES    (H5D_DISABLE_BY_API|H5D_TCONV_BUF_TOO_SMALL|H5D_DATASET_FILTER|H5D_CHUNK_CACHE)
+#define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
+    (H5D_DISABLE_BY_API | H5D_TCONV_BUF_TOO_SMALL | H5D_DATASET_FILTER | H5D_CHUNK_CACHE)
 
 //! <!--[H5D_selection_io_mode_t_snip] -->
 /**
@@ -8305,7 +8315,7 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
 H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode);
 
 /**
- * \ingroup DXPL  
+ * \ingroup DXPL
  *
  * \brief Retrieves the cause for not performing selection I/O
  *
@@ -8315,27 +8325,27 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
  * \return \herr_t
  *
  * \par Motivation:
- *      A user can request selection I/O to be performed via a data transfer 
+ *      A user can request selection I/O to be performed via a data transfer
  *      property list (DXPL).  However, there are
  *      conditions that can cause HDF5 to forgo selection I/O and perform
  *      legacy (scalar) or vector I/O instead.
  *
  * \details H5Pget_no_selection_io_cause() can be used to determine whether
- *          selection I/O was applied for the last preceding I/O call. 
+ *          selection I/O was applied for the last preceding I/O call.
  *          If selection I/O was not used, this function retrieves the
  *          cause(s) that prevent selection I/O to be performed on that I/O call.
  *          The properties retrieved by this function are set before
  *          I/O takes place and are retained even when I/O fails.
  *
  *          Valid values returned in \p no_selection_io_cause are listed
- *          as follows. If there are multiple causes, it is a bitwise OR of 
+ *          as follows. If there are multiple causes, it is a bitwise OR of
  *          the relevant causes.
  *
  *          - #H5D_DISABLE_BY_API
  *          Selection I/O was not performed because the feature was disabled by the API
- *          - #H5D_DATATYPE_CONVERSION                 
+ *          - #H5D_DATATYPE_CONVERSION
  *          Selection I/O was not performed because of datatype conversion
- *          - #H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET   
+ *          - #H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET
  *          Selection I/O was not performed because the dataset was neither contiguous nor chunked
  *          - #H5D_CONTIGUOUS_SIEVE_BUFFER
  *          Selection I/O was not performed because of sieve buffer for contiguous dataset
@@ -8343,14 +8353,14 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
  *          Selection I/O was not performed because the VFD does not have vector or selection I/O callback
  *          - #H5D_PAGE_BUFFER
  *          Selection I/O was not performed because of page buffer
- *          - #H5D_DATASET_FILTER                      
+ *          - #H5D_DATASET_FILTER
  *          Selection I/O was not performed because of dataset filters
- *          - #H5D_CHUNK_CACHE                         
+ *          - #H5D_CHUNK_CACHE
  *          Selection I/O was not performed because of chunk cache
- *          - #H5D_TCONV_BUF_TOO_SMALL                 
+ *          - #H5D_TCONV_BUF_TOO_SMALL
  *          Selection I/O was not performed because the type conversion buffer is too small
  *          (for collective I/O)
- *          - #H5D_NO_BENEFIT_BY_MPIO                  
+ *          - #H5D_NO_BENEFIT_BY_MPIO
  *          Selection I/O was not performed because there is no benefit (for MPIO)
  *
  * \since 1.14.3

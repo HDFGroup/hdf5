@@ -99,7 +99,7 @@
     /* Check if the value has been retrieved already */                                                      \
     if (!((*head)->ctx.H5_GLUE(PROP_FIELD, _valid) || (*head)->ctx.H5_GLUE(PROP_FIELD, _set))) {             \
         H5CX_RETRIEVE_PROP_COMMON(PL, DEF_PL, PROP_NAME, PROP_FIELD)                                         \
-    }  /* end if */
+    } /* end if */
 
 #if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_INSTRUMENTED_LIBRARY)
 /* Macro for the duplicated code to test and set properties for a property list */
@@ -134,7 +134,7 @@
         /* Set the property */                                                                               \
         if (H5P_set((*head)->ctx.dxpl, PROP_NAME, &(*head)->ctx.PROP_FIELD) < 0)                             \
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, NULL, "error setting data xfer property")                  \
-    }  /* end if */
+    } /* end if */
 
 /******************/
 /* Local Typedefs */
@@ -251,10 +251,10 @@ typedef struct H5CX_t {
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
 
-    uint32_t no_selection_io_cause;       /* Reason for not performing selection I/O
-                                                (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    hbool_t  no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
-    hbool_t  no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
+    uint32_t no_selection_io_cause;      /* Reason for not performing selection I/O
+                                               (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
+    hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -379,12 +379,12 @@ typedef struct H5CX_dxpl_cache_t {
 #endif                                  /* H5_HAVE_PARALLEL */
     H5Z_EDC_t               err_detect; /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t                filter_cb;  /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
-    H5Z_data_xform_t       *data_transform;    /* Data transform info (H5D_XFER_XFORM_NAME) */
-    H5T_vlen_alloc_info_t   vl_alloc_info;     /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
-    H5T_conv_cb_t           dt_conv_cb;        /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
-    H5D_selection_io_mode_t selection_io_mode; /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
-    uint32_t no_selection_io_cause;     /* Reasons for not performing selection I/O
-                                                 (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    H5Z_data_xform_t       *data_transform;        /* Data transform info (H5D_XFER_XFORM_NAME) */
+    H5T_vlen_alloc_info_t   vl_alloc_info;         /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
+    H5T_conv_cb_t           dt_conv_cb;            /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
+    H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
+    uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
+                                                            (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -576,8 +576,8 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
 
     /* Get the local & global reasons for breaking collective I/O values */
-    if (H5P_get(dx_plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME,
-                &H5CX_def_dxpl_cache.no_selection_io_cause) < 0)
+    if (H5P_get(dx_plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, &H5CX_def_dxpl_cache.no_selection_io_cause) <
+        0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve cause for no selection I/O")
 
     /* Reset the "default LCPL cache" information */
@@ -2616,7 +2616,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_no_selection_io_cause
  *
- * Purpose:     Retrieves the cause for not performing selection I/O 
+ * Purpose:     Retrieves the cause for not performing selection I/O
  *              for the current API call context.
  *
  * Return:      Non-negative on success / Negative on failure
@@ -2649,7 +2649,6 @@ H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_no_selection_io_cause() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding
@@ -3634,7 +3633,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5CX_set_no_selecction_io_cause
  *
- * Purpose:     Sets the reason for not performing selection I/O for 
+ * Purpose:     Sets the reason for not performing selection I/O for
  *              the current API call context.
  *
  * Return:      <none>

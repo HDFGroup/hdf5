@@ -765,7 +765,8 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
         io_info->no_selection_io_cause |= H5D_CONTIGUOUS_SIEVE_BUFFER;
-    } else {
+    }
+    else {
         hbool_t page_buf_enabled;
 
         HDassert(dset_info->layout_ops.writevv == H5D__contig_writevv);
