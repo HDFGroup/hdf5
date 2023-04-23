@@ -746,7 +746,7 @@ to do this via a script. These are normally named `test_<thing>.sh.in`. The
 step. In the past, we have tried to stick to POSIX Bourne shell scripts, but
 many scripts now require bash.
 
-If you write a new test script, it is important to also add a Powershell
+If you write a new test script, it is important to also add a PowerShell
 equivalent for testing on Windows.
 
 It's helpful to run any new shell scripts through `shellcheck`
