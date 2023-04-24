@@ -31,7 +31,7 @@ function usage() {
    echo "-f filename  Subfile configuration file."
    echo "-h           Print this help."
    echo "-q           Quiet all output. [no]"
-   echo "-p           Split processing the subfiles among the ranks. [no]"
+   echo "-p           h5fuse.sh is being run in parallel. [no]"
    echo "-r           Remove subfiles after being processed. [no]"
    echo "-v           Verbose output. [no]"
    echo ""
@@ -41,18 +41,20 @@ function gen_mpi() {
 
 # Program to determine MPI rank and size if being run in parallel (-p).
 
-echo "#include <mpi.h>" > ${c_src}
-echo "#include <stdio.h>" >> ${c_src}
-echo "int main() {" >> ${c_src}
-echo "    MPI_Init(NULL, NULL);" >> ${c_src}
-echo "    int world_size;" >> ${c_src}
-echo "    MPI_Comm_size(MPI_COMM_WORLD, &world_size);" >> ${c_src}
-echo "    int world_rank;" >> ${c_src}
-echo "    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);" >> ${c_src}
-echo "    printf(\"%d %d \", world_rank, world_size);" >> ${c_src}
-echo "    MPI_Barrier(MPI_COMM_WORLD);" >> ${c_src}
-echo "    MPI_Finalize();" >> ${c_src}
-echo "}" >> ${c_src}
+cat > "${c_src}" << EOL
+#include <mpi.h>
+#include <stdio.h>
+int main() {
+    MPI_Init(NULL, NULL);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    printf("%d %d", world_rank, world_size);
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Finalize();
+}
+EOL
 
 }
 
@@ -69,7 +71,6 @@ echo "}" >> ${c_src}
 file_config=""
 verbose="false"
 quiet="false"
-ignore="false"
 rm_subf="false"
 parallel="false"
 while getopts "hpqrvf:" option; do
@@ -102,11 +103,10 @@ FAILED=1
 ############################################################
 #
 SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-.}"
-WRKDIR=$PWD
 
 # cd to the subfile configuration location
 if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
-   cd "$SUBF_CONFDIR"
+   cd "$SUBF_CONFDIR" || exit
 fi
 
 # Try to find the config file
@@ -163,18 +163,14 @@ subfiles_size=()
 for i in "${subfiles[@]}"; do
     subfile="${subfile_dir}/${i}"
     if [ -f "${subfile}" ]; then
-        subfiles_loc+=($subfile)
+        subfiles_loc+=("$subfile")
         subfiles_size+=($(wc -c "${subfile}" | awk '{print $1}'))
     else
         subfiles_size+=(0)
     fi
 done
 
-nsubfiles_loc=${#subfiles_loc[@]}
-
 START="$(date +%s%N)"
-
-subfile_exists="true"
 
 mpi_rank=0
 mpi_size=1
@@ -191,13 +187,13 @@ if [ "$parallel" == "true" ]; then
     if [ ! -f "${c_src}" ]; then
         gen_mpi
         CC=@CC@
-        ${CC} ${c_src} -o ${c_exec}
+        ${CC} "${c_src}" -o "${c_exec}"
     fi
     wait
-    rank_size=$(./${c_exec})
+    rank_size=$(./"${c_exec}")
     read -r mpi_rank mpi_size <<<"$rank_size"
 
-    rm -f ${c_src} ${c_exec}
+    rm -f "${c_src}" "${c_exec}"
 
     # Divide the subfiles among the ranks
     iwork1=$(( nsubfiles / mpi_size ))
@@ -275,4 +271,3 @@ DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
 if [ "$quiet" == "false" ]; then
     echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
 fi
-
