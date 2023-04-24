@@ -43,7 +43,7 @@
 /********************/
 
 /* Setup/teardown routines */
-static herr_t H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info);
+static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
 static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
 #ifdef H5_HAVE_PARALLEL
@@ -107,9 +107,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
-    if (H5D__ioinfo_init(count, dset_info, &io_info) < 0)
+    if (H5D__ioinfo_init(count, H5D_IO_OP_READ, dset_info, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    io_info.op_type = H5D_IO_OP_READ;
 
     /* Allocate store buffer if necessary */
     if (count > 1)
@@ -360,7 +359,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (NULL == (io_info.rbufs = H5MM_malloc(io_info.piece_count * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for read buffer list")
-            if (io_info.tconv_buf)
+            if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -388,7 +387,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
          * (if using selection I/O and either multi dataset or type conversion) */
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info)) {
             /* Check for type conversion */
-            if (io_info.tconv_buf) {
+            if (io_info.max_tconv_type_size > 0) {
                 /* Type conversion pathway */
                 if (H5D__scatgath_read_select(&io_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "type conversion selection read failed")
@@ -505,9 +504,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
-    if (H5D__ioinfo_init(count, dset_info, &io_info) < 0)
+    if (H5D__ioinfo_init(count, H5D_IO_OP_WRITE, dset_info, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-    io_info.op_type = H5D_IO_OP_WRITE;
 
     /* Allocate store buffer if necessary */
     if (count > 1)
@@ -765,7 +763,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             if (NULL == (io_info.wbufs = H5MM_malloc(io_info.piece_count * sizeof(const void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for write buffer list")
-            if (io_info.tconv_buf)
+            if (io_info.max_tconv_type_size > 0)
                 if (NULL ==
                     (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -791,7 +789,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
          * (if using selection I/O and either multi dataset or type conversion) */
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info)) {
             /* Check for type conversion */
-            if (io_info.tconv_buf) {
+            if (io_info.max_tconv_type_size > 0) {
                 /* Type conversion pathway */
                 if (H5D__scatgath_write_select(&io_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "type conversion selection write failed")
@@ -894,7 +892,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info)
+H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info)
 {
     H5D_selection_io_mode_t selection_io_mode;
 
@@ -910,6 +908,7 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     HDmemset(io_info, 0, sizeof(*io_info));
 
     /* Set up simple fields */
+    io_info->op_type = op_type;
     io_info->f_sh  = count > 0 ? H5F_SHARED(dset_info[0].dset->oloc.file) : NULL;
     io_info->count = count;
 
@@ -927,7 +926,7 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
 
     /* Record no selection I/O cause if it was disabled by the API */
     if (selection_io_mode == H5D_SELECTION_IO_MODE_OFF)
-        io_info->no_selection_io_cause = H5D_DISABLE_BY_API;
+        io_info->no_selection_io_cause = H5D_SEL_IO_DISABLE_BY_API;
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -935,6 +934,9 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     if (count > 0)
         io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset_info[0].dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Check if we could potentially use in-place type conversion.  For now just check if it's a read op */
+    io_info->may_use_in_place_tconv = (op_type == H5D_IO_OP_READ);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__ioinfo_init() */
@@ -1144,30 +1146,21 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             size_t max_temp_buf; /* Maximum temporary buffer size */
             size_t i;            /* Local index variable */
 
-            /* Collective I/O, conversion buffer must be large enough for entire I/O (for now).
-             * Stick with individual background buffers */
+            /* Collective I/O, conversion buffer must be large enough for entire I/O (for now) */
 
-            /* Calculate size of buffers */
+            /* Calculate size of background buffer (tconv buf size was calculated in layout io_init callbacks) */
             for (i = 0; i < io_info->count; i++) {
                 H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
-                /* Check if type conversion buffer is needed for this dataset */
-                if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
-                    /* Add size of this dataset's type conversion buffer to the global type conversion buffer
-                     * size */
-                    io_info->tconv_buf_size += io_info->dsets_info[i].nelmts *
-                                               MAX(type_info->src_type_size, type_info->dst_type_size);
+                /* Check for background buffer */
+                if (type_info->need_bkg) {
+                    /* Add size of this dataset's background buffer to the global background buffer size
+                     */
+                    io_info->bkg_buf_size += io_info->dsets_info[i].nelmts * type_info->dst_type_size;
 
-                    /* Check for background buffer */
-                    if (type_info->need_bkg) {
-                        /* Add size of this dataset's background buffer to the global background buffer size
-                         */
-                        io_info->bkg_buf_size += io_info->dsets_info[i].nelmts * type_info->dst_type_size;
-
-                        /* Check if we need to fill the background buffer with the destination contents */
-                        if (type_info->need_bkg == H5T_BKG_YES)
-                            io_info->must_fill_bkg = TRUE;
-                    }
+                    /* Check if we need to fill the background buffer with the destination contents */
+                    if (type_info->need_bkg == H5T_BKG_YES)
+                        io_info->must_fill_bkg = TRUE;
                 }
             }
 
@@ -1175,11 +1168,17 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
 
-            /* Check if the needed type conversion size is too big */
-            HDassert(io_info->bkg_buf_size <= io_info->tconv_buf_size);
+            /* Check if the needed type conversion or background buffer size is too big */
             if (io_info->tconv_buf_size > max_temp_buf) {
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                io_info->no_selection_io_cause |= H5D_TCONV_BUF_TOO_SMALL;
+                io_info->no_selection_io_cause |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+                io_info->tconv_buf_size = 0;
+                io_info->bkg_buf_size   = 0;
+                io_info->must_fill_bkg  = FALSE;
+            }
+            if (io_info->bkg_buf_size > max_temp_buf) {
+                io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
+                io_info->no_selection_io_cause |= H5D_SEL_IO_BKG_BUF_TOO_SMALL;
                 io_info->tconv_buf_size = 0;
                 io_info->bkg_buf_size   = 0;
                 io_info->must_fill_bkg  = FALSE;
@@ -1334,7 +1333,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
             else {
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                io_info->no_selection_io_cause |= H5D_NO_VECTOR_OR_SELECTION_IO_CB;
+                io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
             }
         }
 
@@ -1423,7 +1422,7 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
              * assumes the tconv buf is large enough to hold all data in the I/O, and we don't want
              * to impose this when there's no benefit */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_DATATYPE_CONVERSION;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_DATATYPE_CONVERSION;
 
             /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)

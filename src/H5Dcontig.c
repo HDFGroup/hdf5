@@ -665,6 +665,14 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* get dset file address for piece */
         new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
+        /* Initialize in-place type conversion info. Start with it disabled. */
+        new_piece_info->in_place_tconv = FALSE;
+        new_piece_info->buf_off = 0;
+
+        /* Calculate type conversion buffer size and check for in-place conversion if necessary */
+        if (!(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop))
+            H5D_INIT_PIECE_TCONV(io_info, dinfo, new_piece_info)
+
         /* Save piece to dataset info struct so it is freed at the end of the
          * operation */
         dinfo->layout_io_info.contig_piece_info = new_piece_info;
@@ -760,11 +768,14 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
 
     /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
      * buffer exists (write) or is dirty (read) */
-    if (dset_info->layout_ops.readvv != H5D__contig_readvv ||
-        (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
+    if (dset_info->layout_ops.readvv != H5D__contig_readvv) {
+        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+        io_info->no_selection_io_cause |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    }
+    else if ((op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-        io_info->no_selection_io_cause |= H5D_CONTIGUOUS_SIEVE_BUFFER;
+        io_info->no_selection_io_cause |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
     }
     else {
         hbool_t page_buf_enabled;
@@ -776,7 +787,7 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
         if (page_buf_enabled) {
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_PAGE_BUFFER;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_PAGE_BUFFER;
         }
     } /* end else */
 

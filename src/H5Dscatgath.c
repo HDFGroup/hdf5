@@ -31,6 +31,12 @@
 /* Local Macros */
 /****************/
 
+/* Macro to determine if we're using H5D__compound_opt_read() */
+#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, PIECE_INFO) \
+    ((DSET_INFO)->type_info.cmpd_subset && \
+    H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
+    !(PIECE_INFO)->in_place_tconv)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -741,7 +747,9 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     void          **tmp_bufs       = NULL;  /* Buffers to use for read from disk */
-    size_t          buf_bytes_used = 0;     /* Number of bytes used so far in conversion/background buffer */
+    void           *tmp_bkg_buf = NULL;     /* Temporary background buffer pointer */
+    size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
+    size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
     size_t          i;                      /* Local index variable */
     herr_t          ret_value = SUCCEED;    /* Return value		*/
 
@@ -791,11 +799,54 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
             }
 
-            /* Set buffer to point into type conversion buffer */
-            tmp_bufs[i] = io_info->tconv_buf + buf_bytes_used;
-            buf_bytes_used += io_info->sel_pieces[i]->piece_points *
-                              MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
-            HDassert(buf_bytes_used <= io_info->tconv_buf_size);
+            /* Check for in-place type conversion */
+            if (io_info->sel_pieces[i]->in_place_tconv)
+                /* Set buffer to point to read buffer + offset */
+                tmp_bufs[i] = (uint8_t *)(io_info->rbufs[i]) + io_info->sel_pieces[i]->buf_off;
+            else {
+                /* Set buffer to point into type conversion buffer */
+                tmp_bufs[i] = io_info->tconv_buf + tconv_bytes_used;
+                tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
+                                  MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+            }
+
+            /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before the read so the read buffer doesn't get wiped out if we're using in-place type conversion */
+            if (!H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
+                /* Check for background buffer */
+                if (dset_info->type_info.need_bkg) {
+                    HDassert(io_info->bkg_buf);
+
+                    /* Calculate background buffer position */
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
+                    bkg_bytes_used +=
+                        io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+
+                    /* Gather data from read buffer to background buffer if necessary */
+                    if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                        /* Initialize memory iterator */
+                        HDassert(!mem_iter_init);
+                        if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
+                                                 0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to initialize memory selection information")
+                        mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+
+                        if ((size_t)io_info->sel_pieces[i]->piece_points !=
+                            H5D__gather_mem(io_info->rbufs[i], mem_iter,
+                                            (size_t)io_info->sel_pieces[i]->piece_points,
+                                            tmp_bkg_buf /*out*/))
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
+
+                        /* Reset selection iterator */
+                        HDassert(mem_iter_init);
+                        if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+                        mem_iter_init = FALSE;
+                    }
+                }
+            }
         }
     }
 
@@ -805,8 +856,8 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                                io_info->file_spaces, io_info->addrs, io_info->element_sizes, tmp_bufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
 
-    /* Reset buf_bytes_used so we can use it for the background buffer */
-    buf_bytes_used = 0;
+    /* Reset bkg_bytes_used */
+    bkg_bytes_used = 0;
 
     /* Perform type conversion and scatter data to memory buffers for datasets that need this */
     for (i = 0; i < io_info->pieces_added; i++) {
@@ -830,45 +881,21 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
              * and no conversion is needed, copy the data directly into user's buffer and
              * bypass the rest of steps.
              */
-            if (dset_info->type_info.cmpd_subset &&
-                H5T_SUBSET_FALSE != dset_info->type_info.cmpd_subset->subset) {
+            if (H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
                 if (H5D__compound_opt_read((size_t)io_info->sel_pieces[i]->piece_points, mem_iter,
                                            &dset_info->type_info, tmp_bufs[i], io_info->rbufs[i] /*out*/) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
             }
             else {
-                void *tmp_bkg_buf = NULL;
-
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
                     HDassert(io_info->bkg_buf);
 
                     /* Calculate background buffer position */
-                    tmp_bkg_buf = io_info->bkg_buf + buf_bytes_used;
-                    buf_bytes_used +=
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
+                    bkg_bytes_used +=
                         io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
-                    HDassert(buf_bytes_used <= io_info->bkg_buf_size);
-
-                    /* Gather data from read buffer to background buffer if necessary */
-                    if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                        if ((size_t)io_info->sel_pieces[i]->piece_points !=
-                            H5D__gather_mem(io_info->rbufs[i], mem_iter,
-                                            (size_t)io_info->sel_pieces[i]->piece_points,
-                                            tmp_bkg_buf /*out*/))
-                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
-
-                        /* Reset selection iterator */
-                        HDassert(mem_iter_init);
-                        if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
-                        mem_iter_init = FALSE;
-
-                        if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
-                                                 dset_info->type_info.dst_type_size, 0) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                                        "unable to initialize memory selection information")
-                        mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
-                    }
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
                 }
 
                 /*
@@ -894,10 +921,11 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
                 }
 
-                /* Scatter the data into memory */
-                if (H5D__scatter_mem(tmp_bufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
-                                     io_info->rbufs[i] /*out*/) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
+                /* Scatter the data into memory if this was not an in-place conversion */
+                if (!io_info->sel_pieces[i]->in_place_tconv)
+                    if (H5D__scatter_mem(tmp_bufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
+                                         io_info->rbufs[i] /*out*/) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
             }
 
             /* Release selection iterator */
@@ -1019,18 +1047,31 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
             spaces_added++;
 
-            /* Set buffer to point into type conversion buffer */
-            tmp_write_buf = io_info->tconv_buf + tconv_bytes_used;
-            write_bufs[i] = (const void *)tmp_write_buf;
-            tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
-                                MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
-            HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+            /* Check for in-place type conversion */
+            if (io_info->sel_pieces[i]->in_place_tconv) {
+                H5_flexible_const_ptr_t flex_buf;
 
-            /* Gather data from application buffer into the datatype conversion buffer */
-            if ((size_t)io_info->sel_pieces[i]->piece_points !=
-                H5D__gather_mem(io_info->wbufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
-                                tmp_write_buf /*out*/))
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
+                /* Set buffer to point to write buffer + offset */
+                /* Use cast to union to twiddle away const.  OK because if we're doing this it means the user explicitly allowed us to modify this buffer via H5Pset_modfy_write_buf(). */
+                flex_buf.cvp = io_info->wbufs[i];
+                tmp_write_buf = (uint8_t *)flex_buf.vp + io_info->sel_pieces[i]->buf_off;
+            }
+            else {
+                /* Set buffer to point into type conversion buffer */
+                tmp_write_buf = io_info->tconv_buf + tconv_bytes_used;
+                tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
+                                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+
+                /* Gather data from application buffer into the datatype conversion buffer */
+                if ((size_t)io_info->sel_pieces[i]->piece_points !=
+                    H5D__gather_mem(io_info->wbufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
+                                    tmp_write_buf /*out*/))
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
+            }
+
+            /* Set buffer for writing to disk (from type conversion buffer) */
+            write_bufs[i] = (const void *)tmp_write_buf;
 
             /* If the source and destination are compound types and the destination is a subset of
              * the source and no conversion is needed, copy the data directly into the type
@@ -1040,7 +1081,8 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
              */
             if (dset_info->type_info.cmpd_subset &&
                 H5T_SUBSET_DST == dset_info->type_info.cmpd_subset->subset &&
-                dset_info->type_info.dst_type_size == dset_info->type_info.cmpd_subset->copy_size) {
+                dset_info->type_info.dst_type_size == dset_info->type_info.cmpd_subset->copy_size &&
+                !io_info->sel_pieces[i]->in_place_tconv) {
                 if (H5D__compound_opt_write((size_t)io_info->sel_pieces[i]->piece_points,
                                             &dset_info->type_info, tmp_write_buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
