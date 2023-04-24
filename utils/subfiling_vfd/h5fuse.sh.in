@@ -24,7 +24,7 @@ function usage() {
    echo ""
    # Display usage
    echo "Purpose: Combine subfiles into a single HDF5 file. Requires the subfiling
-         configuration file either as a command-line argument, or the script will
+         configuration file either as a command-line argument or the script will
          search for the *.config file in the current directory."
    echo ""
    echo "usage: h5fuse.sh [-f filename] [-h] [-p] [-q] [-r] [-v] "
