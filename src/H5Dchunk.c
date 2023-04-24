@@ -1117,6 +1117,26 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         if (H5D__chunk_may_use_select_io(io_info, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
 
+    /* Calculate type conversion buffer size if necessary */
+    if (!(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
+        H5SL_node_t *chunk_node; /* Current node in chunk skip list */
+
+        /* Iterate through nodes in chunk skip list */
+        chunk_node = H5D_CHUNK_GET_FIRST_NODE(dinfo);
+        while (chunk_node) {
+            H5D_piece_info_t *piece_info; /* Chunk information */
+
+            /* Get the actual chunk information from the skip list node */
+            piece_info = H5D_CHUNK_GET_NODE_INFO(dinfo, chunk_node);
+
+            /* Handle type conversion buffer */
+            H5D_INIT_PIECE_TCONV(io_info, dinfo, piece_info)
+
+            /* Advance to next chunk in list */
+            chunk_node = H5D_CHUNK_GET_NEXT_NODE(dinfo, chunk_node);
+        }
+    }
+
 done:
     if (file_space_normalized == TRUE)
         if (H5S_hyper_denormalize_offset(dinfo->file_space, old_offset) < 0)
@@ -1568,6 +1588,10 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     /* Indicate that the chunk's memory dataspace is shared */
     piece_info->mspace_shared = TRUE;
 
+    /* Initialize in-place type conversion info. Start with it disabled. */
+    piece_info->in_place_tconv = FALSE;
+    piece_info->buf_off        = 0;
+
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
 
@@ -1696,6 +1720,10 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
         /* make connection to related dset info from this piece_info */
         new_piece_info->dset_info = di;
+
+        /* Initialize in-place type conversion info. Start with it disabled. */
+        new_piece_info->in_place_tconv = FALSE;
+        new_piece_info->buf_off        = 0;
 
         /* Insert the new chunk into the skip list */
         if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
@@ -1892,6 +1920,10 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
             /* make connection to related dset info from this piece_info */
             new_piece_info->dset_info = dinfo;
+
+            /* Initialize in-place type conversion info. Start with it disabled. */
+            new_piece_info->in_place_tconv = FALSE;
+            new_piece_info->buf_off        = 0;
 
             /* Add piece to global piece_count */
             io_info->piece_count++;
@@ -2268,6 +2300,10 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             H5MM_memcpy(piece_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             piece_info->scaled[fm->f_ndims] = 0;
 
+            /* Initialize in-place type conversion info. Start with it disabled. */
+            piece_info->in_place_tconv = FALSE;
+            piece_info->buf_off        = 0;
+
             /* Make connection to related dset info from this piece_info */
             piece_info->dset_info = dinfo;
 
@@ -2562,7 +2598,7 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
     /* Don't use selection I/O if there are filters on the dataset (for now) */
     if (dataset->shared->dcpl_cache.pline.nused > 0) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-        io_info->no_selection_io_cause |= H5D_DATASET_FILTER;
+        io_info->no_selection_io_cause |= H5D_SEL_IO_DATASET_FILTER;
     }
     else {
         hbool_t page_buf_enabled;
@@ -2573,7 +2609,7 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
         if (page_buf_enabled) {
             /* Note that page buffer is disabled in parallel */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_PAGE_BUFFER;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_PAGE_BUFFER;
         }
         else {
             /* Check if chunks in this dataset may be cached, if so don't use
@@ -2591,7 +2627,7 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
                 H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, uint32_t, size_t);
                 if ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max) {
                     io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                    io_info->no_selection_io_cause |= H5D_CHUNK_CACHE;
+                    io_info->no_selection_io_cause |= H5D_SEL_IO_CHUNK_CACHE;
                 }
 #ifdef H5_HAVE_PARALLEL
             } /* end else */

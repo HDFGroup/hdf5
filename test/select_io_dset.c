@@ -2569,7 +2569,7 @@ error:
 /*
  * To test with various test_mode that no selelction I/O is performed
  *
- * Note: It's the responsiblity of the tester to feed proper combination
+ * Note: It's the responsibility of the tester to feed proper combination
  *       of test_mode as needed.
  */
 static herr_t
@@ -2618,44 +2618,44 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     /* If on mode, will trigger nothing because the on mode path is different */
     /* Need 2 writes */
     if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER)
-        no_selection_io_cause_expected |= H5D_CONTIGUOUS_SIEVE_BUFFER;
+        no_selection_io_cause_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
 
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             FAIL_STACK_ERROR;
-        no_selection_io_cause_expected |= H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
     if (test_mode == TEST_DATASET_FILTER) {
         if (H5Pset_deflate(dcpl, 9) < 0)
             FAIL_STACK_ERROR;
         is_chunked = TRUE;
-        no_selection_io_cause_expected |= H5D_DATASET_FILTER;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DATASET_FILTER;
     }
 
     if (test_mode == TEST_CHUNK_CACHE) {
         is_chunked = TRUE;
-        no_selection_io_cause_expected |= H5D_CHUNK_CACHE;
+        no_selection_io_cause_expected |= H5D_SEL_IO_CHUNK_CACHE;
     }
 
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             FAIL_STACK_ERROR;
-        no_selection_io_cause_expected |= H5D_DISABLE_BY_API;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB)
-        no_selection_io_cause_expected |= H5D_NO_VECTOR_OR_SELECTION_IO_CB;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DEFAULT_OFF;
 
     if (test_mode & TEST_DATATYPE_CONVERSION) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             FAIL_STACK_ERROR;
         tid = H5T_NATIVE_UINT;
-        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
     }
 
     if (test_mode & TEST_PAGE_BUFFER)
-        no_selection_io_cause_expected |= H5D_PAGE_BUFFER;
+        no_selection_io_cause_expected |= H5D_SEL_IO_PAGE_BUFFER;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;

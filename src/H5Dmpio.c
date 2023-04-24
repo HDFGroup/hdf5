@@ -739,10 +739,8 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
         /* If the only reason(s) we've disabled collective are type conversions and/or transforms, enable
          * selection I/O and re-enable collective I/O since it's supported by selection I/O */
-        if (global_cause[0] &&
-            !(global_cause[0] &
-              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)) &&
-            (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT)) {
+        if (global_cause[0] && !(global_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION |
+                                                     (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
             HDassert(!(local_cause[0] &
                        ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
             local_cause[0]         = 0;
@@ -752,7 +750,7 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         else {
             /* Otherwise, there's currently no benefit to selection I/O, so leave it off */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_NO_BENEFIT_BY_MPIO;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
         }
     }
 
