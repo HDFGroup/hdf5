@@ -279,8 +279,8 @@ typedef struct H5D_io_info_t {
         must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_io_mode_t actual_io_mode; /* Actual type of collective or independent I/O */
-    unsigned no_selection_io_cause;           /* "No collective cause" flags related to selection I/O */
 #endif                                        /* H5_HAVE_PARALLEL */
+    unsigned no_selection_io_cause;           /* "No selection I/O cause" flags */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */

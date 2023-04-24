@@ -2561,10 +2561,8 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
 
     /* Don't use selection I/O if there are filters on the dataset (for now) */
     if (dataset->shared->dcpl_cache.pline.nused > 0) {
-#ifdef H5_HAVE_PARALLEL
-        io_info->no_selection_io_cause |= H5D_MPIO_SELECTION_IO_FILTER;
-#endif /* H5_HAVE_PARALLEL */
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+        io_info->no_selection_io_cause |= H5D_DATASET_FILTER;
     }
     else {
         hbool_t page_buf_enabled;
@@ -2572,10 +2570,11 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
-        if (page_buf_enabled)
-            /* No need to update no_selection_io_cause because the page buffer is disabled in parallel and
-             * we're only keeping track of the reason for no selection I/O in parallel (for now) */
+        if (page_buf_enabled) {
+            /* Note that page buffer is disabled in parallel */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_PAGE_BUFFER;
+        }
         else {
             /* Check if chunks in this dataset may be cached, if so don't use
              * selection I/O (for now).  Note that chunks temporarily cached for
@@ -2591,10 +2590,8 @@ H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *d
                 /* Check if the chunk is too large to keep in the cache */
                 H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, uint32_t, size_t);
                 if ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max) {
-#ifdef H5_HAVE_PARALLEL
-                    io_info->no_selection_io_cause |= H5D_MPIO_SELECTION_IO_FILTER;
-#endif /* H5_HAVE_PARALLEL */
                     io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                    io_info->no_selection_io_cause |= H5D_CHUNK_CACHE;
                 }
 #ifdef H5_HAVE_PARALLEL
             } /* end else */

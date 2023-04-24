@@ -667,11 +667,13 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
 #endif
 
         /* Check if we would be able to perform collective if we could use selection I/O.  If so add reasons
-         * for not using selectio I/O to local_cause[0] */
+         * for not using selection I/O to local_cause[0] */
         if ((io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) && local_cause[0] &&
             !(local_cause[0] &
-              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)))
-            local_cause[0] |= io_info->no_selection_io_cause;
+              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
+            HDassert(io_info->no_selection_io_cause & H5D_MPIO_NO_SELECTION_IO_CAUSES);
+            local_cause[0] |= H5D_MPIO_NO_SELECTION_IO;
+        }
 
         /* Check if we are able to do a MPI_Bcast of the data from one rank
          * instead of having all the processes involved in the collective I/O call.
@@ -747,9 +749,11 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
             global_cause[0]        = 0;
             io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
         }
-        else
+        else {
             /* Otherwise, there's currently no benefit to selection I/O, so leave it off */
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_NO_BENEFIT_BY_MPIO;
+        }
     }
 
     /* Set the local & global values of no-collective-cause in the API context */
@@ -804,7 +808,7 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
      * Use compile-time assertion so this routine is updated
      * when any new "no collective cause" values are added
      */
-    HDcompile_assert(H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE == (H5D_mpio_no_collective_cause_t)0x1000);
+    HDcompile_assert(H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE == (H5D_mpio_no_collective_cause_t)0x200);
 
     /* Initialize output buffers */
     if (local_cause)
@@ -857,22 +861,11 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
             case H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE:
                 cause_str = "an error occurred while checking if collective I/O was possible";
                 break;
-            case H5D_MPIO_SELECTION_IO_DISABLED:
+            case H5D_MPIO_NO_SELECTION_IO:
                 cause_str = "collective I/O may be supported by selection or vector I/O but that feature was "
-                            "disabled by the API";
+                            "not possible (see causes via H5Pget_no_selection_io_cause())";
                 break;
-            case H5D_MPIO_TCONV_BUF_TOO_SMALL:
-                cause_str = "collective I/O would be supported by selection or vector I/O but the type "
-                            "conversion buffer is too small";
-                break;
-            case H5D_MPIO_SELECTION_IO_FILTER:
-                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector "
-                            "I/O is not compatible with data filters";
-                break;
-            case H5D_MPIO_SELECTION_IO_CHUNK_CACHE:
-                cause_str = "collective I/O may be supported by selection or vector I/O but selection/vector "
-                            "I/O is not compatible with the chunk cache";
-                break;
+
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:
             default:

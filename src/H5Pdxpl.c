@@ -173,6 +173,9 @@
 #define H5D_XFER_SELECTION_IO_MODE_DEF  H5D_SELECTION_IO_MODE_DEFAULT
 #define H5D_XFER_SELECTION_IO_MODE_ENC  H5P__dxfr_selection_io_mode_enc
 #define H5D_XFER_SELECTION_IO_MODE_DEC  H5P__dxfr_selection_io_mode_dec
+/* Definitions for cause of no selection I/O property */
+#define H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE sizeof(uint32_t)
+#define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
 
 /******************/
 /* Local Typedefs */
@@ -284,7 +287,8 @@ static const H5T_conv_cb_t H5D_def_conv_cb_g =
 static const void  *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
 static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
-static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g = H5D_XFER_SELECTION_IO_MODE_DEF;
+static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
+static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -452,6 +456,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_SELECTION_IO_MODE_NAME, H5D_XFER_SELECTION_IO_MODE_SIZE,
                            &H5D_def_selection_io_mode_g, NULL, NULL, NULL, H5D_XFER_SELECTION_IO_MODE_ENC,
                            H5D_XFER_SELECTION_IO_MODE_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the cause of no selection I/O */
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
+                           &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2551,3 +2562,35 @@ H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_selection_io() */
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpio_no_collective_cause
+ *
+ * Purpose:	    Retrieves causes for not performing selection I/O
+ *
+ * Return:	    Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              April 17, 2023
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*out*/)
+{
+    H5P_genplist_t *plist;
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ixx", plist_id, no_selection_io_cause);
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if (no_selection_io_cause)
+        if (H5P_get(plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, no_selection_io_cause) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get no_selection_io_cause value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_no_selection_io_cause() */
