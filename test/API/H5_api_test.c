@@ -111,57 +111,6 @@ H5_api_test_run(void)
             (void)H5_api_test_func[i]();
 }
 
-static int
-get_vol_cap_flags(const char *connector_name)
-{
-    hid_t connector_id = H5I_INVALID_HID;
-    hid_t fapl_id      = H5I_INVALID_HID;
-
-    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't get the connector ID with name\n");
-        goto error;
-    }
-
-    if ((connector_id = H5VLregister_connector_by_name(connector_name, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't get the connector ID with name\n");
-        goto error;
-    }
-
-    if (H5Pset_vol(fapl_id, connector_id, NULL) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't get the connector ID with name\n");
-        goto error;
-    }
-
-    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
-
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't H5VLget_cap_flags\n");
-        goto error;
-    }
-
-    if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-
-    if (H5VLclose(connector_id) < 0)
-        TEST_ERROR;
-
-    return 0;
-
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl_id);
-        H5VLclose(connector_id);
-    }
-    H5E_END_TRY;
-
-    return -1;
-}
-
 /******************************************************************************/
 
 int
@@ -218,8 +167,9 @@ main(int argc, char **argv)
     HDprintf("\n\n");
 
     /* Retrieve the VOL cap flags */
-    if (get_vol_cap_flags(vol_connector_name) < 0) {
-        HDfprintf(stderr, "Unable to get VOL capability flags\n");
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0) {
+        HDfprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
         err_occurred = TRUE;
         goto done;
     }
