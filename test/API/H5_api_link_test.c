@@ -626,7 +626,8 @@ test_create_hard_link_same_loc(void)
             TESTING_2("usage of H5L_SAME_LOC for first parameter of H5Lcreate_hard");
 
             /* Library functionality for this part of the test is broken */
-            if (H5Lcreate_hard(H5L_SAME_LOC, ".", group_id, H5L_SAME_LOC_TEST_LINK_NAME1, H5P_DEFAULT, H5P_DEFAULT) < 0) {
+            if (H5Lcreate_hard(H5L_SAME_LOC, ".", group_id, H5L_SAME_LOC_TEST_LINK_NAME1, H5P_DEFAULT,
+                               H5P_DEFAULT) < 0) {
                 H5_FAILED();
                 HDprintf("    couldn't create first link '%s'\n", H5L_SAME_LOC_TEST_LINK_NAME1);
                 PART_ERROR(H5L_SAME_LOC_first_param);
