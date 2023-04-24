@@ -2569,7 +2569,7 @@ error:
 /*
  * To test with various test_mode that no selelction I/O is performed
  *
- * Note: It's the responsiblity of the tester to feed proper combination
+ * Note: It's the responsibility of the tester to feed proper combination
  *       of test_mode as needed.
  */
 static herr_t
