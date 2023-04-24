@@ -24,6 +24,15 @@
 #include "H5Tpkg.h"      /* Datatypes            */
 #include "H5VMprivate.h" /* Vectors and arrays   */
 
+/* Variant boundary-checking macro, used here since H5Tdecode() doesn't take a
+ * size parameter so we need to ignore the bounds checks.
+ *
+ * This is a separate macro since we don't want to inflict that behavior on
+ * the rest of the library.
+ */
+#define H5_DTYPE_IS_BUFFER_OVERFLOW(skip, ptr, size, buffer_end) \
+    (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5O__dtype_encode(H5F_t *f, uint8_t *p, const void *mesg);
 static void  *H5O__dtype_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
@@ -119,7 +128,8 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, const uint8_t *p_end)
+H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, 
+        hbool_t skip, const uint8_t *p_end)
 {
     unsigned flags;
     unsigned version;
@@ -130,7 +140,23 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
     HDassert(pp && *pp);
     HDassert(dt && dt->shared);
 
+    /* XXX NOTE!
+     *
+     * H5Tencode() does not take a buffer size, so normal bounds checking in
+     * that case is impossible.
+     *
+     * Instead of using our normal H5_IS_BUFFER_OVERFLOW macro, use
+     * H5_DTYPE_IS_BUFFER_OVERFLOW, which will skip the check when the
+     * we're decoding a buffer from H5Tconvert().
+     *
+     * Even if this is fixed at some point in the future, as long as we
+     * support the old, size-less API call, we will need to use the modified
+     * macros.
+     */
+
     /* Version, class & flags */
+    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     UINT32DECODE(*pp, flags);
     version = (flags >> 4) & 0x0f;
     if (version < H5O_DTYPE_VERSION_1 || version > H5O_DTYPE_VERSION_LATEST)
@@ -140,6 +166,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
     flags >>= 8;
 
     /* Size */
+    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     UINT32DECODE(*pp, dt->shared->size);
 
     /* Check for invalid datatype size */
@@ -155,6 +183,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             dt->shared->u.atomic.lsb_pad  = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
             dt->shared->u.atomic.msb_pad  = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
             dt->shared->u.atomic.u.i.sign = (flags & 0x8) ? H5T_SGN_2 : H5T_SGN_NONE;
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 2 + 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(*pp, dt->shared->u.atomic.offset);
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
             break;
@@ -193,14 +223,28 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown floating-point normalization")
             }
             dt->shared->u.atomic.u.f.sign = (flags >> 8) & 0xff;
+
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 2 + 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(*pp, dt->shared->u.atomic.offset);
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
+
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 1 + 1, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             dt->shared->u.atomic.u.f.epos  = *(*pp)++;
             dt->shared->u.atomic.u.f.esize = *(*pp)++;
-            HDassert(dt->shared->u.atomic.u.f.esize > 0);
+            if (dt->shared->u.atomic.u.f.esize == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "exponent size can't be zero")
+
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 1 + 1, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             dt->shared->u.atomic.u.f.mpos  = *(*pp)++;
             dt->shared->u.atomic.u.f.msize = *(*pp)++;
-            HDassert(dt->shared->u.atomic.u.f.msize > 0);
+            if (dt->shared->u.atomic.u.f.msize == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "mantissa size can't be zero")
+
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT32DECODE(*pp, dt->shared->u.atomic.u.f.ebias);
             break;
 
@@ -209,6 +253,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
              * Time datatypes...
              */
             dt->shared->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
             break;
 
@@ -233,6 +279,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             dt->shared->u.atomic.order   = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
             dt->shared->u.atomic.lsb_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
             dt->shared->u.atomic.msb_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 2 + 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(*pp, dt->shared->u.atomic.offset);
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
             break;
@@ -253,6 +301,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (NULL == (dt->shared->u.opaque.tag = (char *)H5MM_malloc(z + 1)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
+                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, z, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 H5MM_memcpy(dt->shared->u.opaque.tag, *pp, z);
                 dt->shared->u.opaque.tag[z] = '\0';
 
@@ -281,15 +331,26 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
             dt->shared->u.compnd.nalloc = nmembs;
 
-            HDassert(dt->shared->u.compnd.memb_size == 0);
+            if (dt->shared->u.compnd.memb_size != 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "member size not initialized to zero")
 
             for (dt->shared->u.compnd.nmembs = 0; dt->shared->u.compnd.nmembs < nmembs;
                  dt->shared->u.compnd.nmembs++) {
-                unsigned ndims = 0;             /* Number of dimensions of the array field */
-                htri_t   can_upgrade;           /* Whether we can upgrade this type's version */
-                hsize_t  dim[H5O_LAYOUT_NDIMS]; /* Dimensions of the array */
-                H5T_t   *array_dt;              /* Temporary pointer to the array datatype */
-                H5T_t   *temp_type;             /* Temporary pointer to the field's datatype */
+
+                size_t actual_name_length;                  /* Actual length of name */
+                size_t max     = (size_t)(p_end - *pp + 1); /* Max possible name length */
+                unsigned ndims = 0;                         /* Number of dimensions of the array field */
+                htri_t   can_upgrade;                       /* Whether we can upgrade this type's version */
+                hsize_t  dim[H5O_LAYOUT_NDIMS];             /* Dimensions of the array */
+                H5T_t   *array_dt;                          /* Temporary pointer to the array datatype */
+                H5T_t   *temp_type;                         /* Temporary pointer to the field's datatype */
+
+                /* Get the length of the field name */
+                actual_name_length = HDstrnlen((const char *)*pp, max);
+                if (actual_name_length == max)
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "field name not null terminated")
+                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
 
                 /* Decode the field name */
                 if (NULL == (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
@@ -298,26 +359,40 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                                 "can't duplicate compound member name string")
 
                 /* Version 3 of the datatype message eliminated the padding to multiple of 8 bytes */
-                if (version >= H5O_DTYPE_VERSION_3)
+                if (version >= H5O_DTYPE_VERSION_3) {
                     /* Advance past name, including null terminator */
-                    *pp += HDstrlen((const char *)*pp) + 1;
-                else
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length + 1, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                    *pp += actual_name_length + 1;
+                }
+                else {
                     /* Advance multiple of 8 w/ null terminator */
-                    *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, ((actual_name_length + 8) / 8) * 8, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                    *pp += ((actual_name_length + 8) / 8) * 8;
+                }
 
                 /* Decode the field offset */
                 /* (starting with version 3 of the datatype message, use the minimum # of bytes required) */
-                if (version >= H5O_DTYPE_VERSION_3)
+                if (version >= H5O_DTYPE_VERSION_3) {
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, offset_nbytes, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset,
                                      offset_nbytes)
-                else
+                }
+                else {
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     UINT32DECODE(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset)
+                }
 
                 /* Older versions of the library allowed a field to have
                  * intrinsic 'arrayness'.  Newer versions of the library
                  * use the separate array datatypes. */
                 if (version == H5O_DTYPE_VERSION_1) {
                     /* Decode the number of dimensions */
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 1, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     ndims = *(*pp)++;
 
                     /* Check that ndims is valid */
@@ -327,15 +402,24 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid number of dimensions for array")
                     }
 
-                    *pp += 3; /* Reserved bytes */
+                    /* Skip reserved bytes */
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 3, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                    *pp += 3;
 
                     /* Skip dimension permutation */
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     *pp += 4;
 
                     /* Skip reserved bytes */
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     *pp += 4;
 
                     /* Decode array dimension sizes */
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, (4 * 4), p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                     for (int i = 0; i < 4; i++)
                         UINT32DECODE(*pp, dim[i]);
                 }
@@ -348,14 +432,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 }
 
                 /* Decode the field's datatype information */
-                if ((can_upgrade = H5O__dtype_decode_helper(ioflags, pp, temp_type, p_end)) < 0) {
+                if ((can_upgrade = H5O__dtype_decode_helper(ioflags, pp, temp_type, skip, p_end)) < 0) {
                     dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
                         H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                     if (H5T_close_real(temp_type) < 0)
                         HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
                 }
-                HDassert(temp_type->shared->size > 0);
+                if (temp_type->shared->size == 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "type size can't be zero")
 
                 /* Upgrade the version if we can and it is necessary */
                 if (can_upgrade && temp_type->shared->version > version) {
@@ -511,7 +596,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             nmembs = flags & 0xffff;
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate parent datatype")
-            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, p_end) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, skip, p_end) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype")
             if (dt->shared->parent->shared->size != dt->shared->size)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "ENUM datatype size does not match parent")
@@ -530,21 +615,40 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             /* Names */
             for (dt->shared->u.enumer.nmembs = 0; dt->shared->u.enumer.nmembs < nmembs;
                  dt->shared->u.enumer.nmembs++) {
+                
+                size_t actual_name_length;              /* Actual length of name */
+                size_t max = (size_t)(p_end - *pp + 1); /* Max possible name length */
+
+                actual_name_length = HDstrnlen((const char *)*pp, max);
+                if (actual_name_length == max)
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "enum name not null terminated")
+
+                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 if (NULL == (dt->shared->u.enumer.name[dt->shared->u.enumer.nmembs] =
                                  H5MM_xstrdup((const char *)*pp)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "can't duplicate enum name string")
 
                 /* Version 3 of the datatype message eliminated the padding to multiple of 8 bytes */
-                if (version >= H5O_DTYPE_VERSION_3)
+                if (version >= H5O_DTYPE_VERSION_3) {
                     /* Advance past name, including null terminator */
-                    *pp += HDstrlen((const char *)*pp) + 1;
-                else
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length + 1, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                    *pp += actual_name_length + 1;
+                }
+                else {
                     /* Advance multiple of 8 w/ null terminator */
-                    *pp += ((HDstrlen((const char *)*pp) + 8) / 8) * 8;
+                    if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, ((actual_name_length + 8) / 8) * 8, p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                    *pp += ((actual_name_length + 8) / 8) * 8;
+                }
             }
-            HDassert(dt->shared->u.enumer.nmembs == nmembs);
+            if (dt->shared->u.enumer.nmembs != nmembs)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "incorrect number of enum members decoded");
 
             /* Values */
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, nmembs * dt->shared->parent->shared->size, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             H5MM_memcpy(dt->shared->u.enumer.value, *pp, nmembs * dt->shared->parent->shared->size);
             *pp += nmembs * dt->shared->parent->shared->size;
         } break;
@@ -563,7 +667,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             /* Decode base type of VL information */
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, p_end) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, skip, p_end) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type")
 
             /* Check if the parent of this vlen has a version greater than the
@@ -583,6 +687,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
              * Array datatypes...
              */
             /* Decode the number of dimensions */
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 1, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             dt->shared->u.array.ndims = *(*pp)++;
 
             /* Double-check the number of dimensions */
@@ -590,24 +696,32 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "too many dimensions for array datatype")
 
             /* Skip reserved bytes, if version has them */
-            if (version < H5O_DTYPE_VERSION_3)
+            if (version < H5O_DTYPE_VERSION_3) {
+                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 3, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 *pp += 3;
+            }
 
             /* Decode array dimension sizes & compute number of elements */
             dt->shared->u.array.nelem = 1;
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, (dt->shared->u.array.ndims * 4), p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             for (unsigned u = 0; u < dt->shared->u.array.ndims; u++) {
                 UINT32DECODE(*pp, dt->shared->u.array.dim[u]);
                 dt->shared->u.array.nelem *= dt->shared->u.array.dim[u];
             }
 
             /* Skip array dimension permutations, if version has them */
-            if (version < H5O_DTYPE_VERSION_3)
+            if (version < H5O_DTYPE_VERSION_3) {
+                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, (dt->shared->u.array.ndims * 4), p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 *pp += dt->shared->u.array.ndims * 4;
+            }
 
             /* Decode base type of array */
             if (NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, p_end) < 0)
+            if (H5O__dtype_decode_helper(ioflags, pp, dt->shared->parent, skip, p_end) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type")
 
             /* Check if the parent of this array has a version greater than the
@@ -1173,6 +1287,7 @@ static void *
 H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned *ioflags /*in,out*/, size_t p_size, const uint8_t *p)
 {
+    hbool_t        skip;
     H5T_t         *dt        = NULL;
     const uint8_t *p_end     = p + p_size - 1;
     void          *ret_value = NULL;
@@ -1186,8 +1301,15 @@ H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     if (NULL == (dt = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* If we are decoding a buffer from H5Tdecode(), we won't have the size
+     * of the buffer and bounds checking will be impossible. In this case,
+     * the library will have set p_size to SIZE_MAX and we can use that
+     * as a signal to skip bounds checking.
+     */
+    skip = (p_size == SIZE_MAX ? TRUE : FALSE);
+
     /* Perform actual decode of message */
-    if (H5O__dtype_decode_helper(ioflags, &p, dt, p_end) < 0)
+    if (H5O__dtype_decode_helper(ioflags, &p, dt, skip, p_end) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type")
 
     /* Set return value */
