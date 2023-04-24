@@ -31,7 +31,7 @@ function usage() {
    echo "-f filename  Subfile configuration file."
    echo "-h           Print this help."
    echo "-q           Quiet all output. [no]"
-   echo "-p           h5fuse.sh is being run in parallel. [no]"
+   echo "-p           h5fuse.sh is being run in parallel, with more then one rank. [no]"
    echo "-r           Remove subfiles after being processed. [no]"
    echo "-v           Verbose output. [no]"
    echo ""
