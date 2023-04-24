@@ -34,9 +34,7 @@ int H5_api_link_test(void);
 #define HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE 1024
 
 #define H5L_SAME_LOC_TEST_GROUP_NAME "h5l_same_loc_test_group"
-#if 0
 #define H5L_SAME_LOC_TEST_LINK_NAME1 "h5l_same_loc_test_link1"
-#endif
 #define H5L_SAME_LOC_TEST_LINK_NAME2 "h5l_same_loc_test_link2"
 
 #define HARD_LINK_INVALID_PARAMS_TEST_GROUP_NAME "hard_link_creation_invalid_params_test"
