@@ -3979,7 +3979,7 @@ test_no_collective_cause_mode(int selection_mode)
         test_name = "Broken Collective I/O - Datatype Conversion";
         no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
         no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
-        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
         /* set different sign to trigger type conversion */
         data_type = H5T_NATIVE_UINT;
     }
@@ -3988,7 +3988,7 @@ test_no_collective_cause_mode(int selection_mode)
         test_name = "Broken Collective I/O - DATA Transforms";
         no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
         no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
-        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
     }
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
@@ -4070,7 +4070,7 @@ test_no_collective_cause_mode(int selection_mode)
         /* Disable selection I/O */
         ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
         VRFY((ret >= 0), "H5Pset_selection_io succeeded");
-        no_selection_io_cause_expected |= H5D_DISABLE_BY_API;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {

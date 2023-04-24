@@ -72,7 +72,47 @@
 /* Macro to determine if the layout I/O callback should perform I/O */
 #define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
     (((IO_INFO)->use_select_io == H5D_SELECTION_IO_MODE_OFF) ||                                              \
-     ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
+     ((IO_INFO)->count == 1 && (IO_INFO)->max_tconv_type_size == 0))
+
+/* Macro to check if in-place type conversion will be used for a piece and add it to the global type
+ * conversion size if it won't be used */
+#define H5D_INIT_PIECE_TCONV(IO_INFO, DINFO, PIECE_INFO)                                                     \
+    {                                                                                                        \
+        /* Check for potential in-place conversion */                                                        \
+        if ((IO_INFO)->may_use_in_place_tconv) {                                                             \
+            size_t mem_type_size  = ((IO_INFO)->op_type == H5D_IO_OP_READ)                                   \
+                                        ? (DINFO)->type_info.dst_type_size                                   \
+                                        : (DINFO)->type_info.src_type_size;                                  \
+            size_t file_type_size = ((IO_INFO)->op_type == H5D_IO_OP_READ)                                   \
+                                        ? (DINFO)->type_info.src_type_size                                   \
+                                        : (DINFO)->type_info.dst_type_size;                                  \
+                                                                                                             \
+            /* Make sure the memory type is not smaller than the file type, otherwise the memory buffer      \
+             * won't be big enough tp serve as the type conversion buffer */                                 \
+            if (mem_type_size >= file_type_size) {                                                           \
+                hbool_t is_contig;                                                                           \
+                hsize_t sel_off;                                                                             \
+                                                                                                             \
+                /* Check if the space is contiguous */                                                       \
+                if (H5S_select_contig_block((PIECE_INFO)->mspace, &is_contig, &sel_off, NULL) < 0)           \
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't check if dataspace is contiguous")   \
+                                                                                                             \
+                /* If the first sequence includes all the elements selected in this piece, it it contiguous  \
+                 */                                                                                          \
+                if (is_contig) {                                                                             \
+                    H5_CHECK_OVERFLOW(sel_off, hsize_t, size_t);                                             \
+                    (PIECE_INFO)->in_place_tconv = TRUE;                                                     \
+                    (PIECE_INFO)->buf_off        = (size_t)sel_off * mem_type_size;                          \
+                }                                                                                            \
+            }                                                                                                \
+        }                                                                                                    \
+                                                                                                             \
+        /* If we're not using in-place type conversion, add this piece to global type conversion buffer      \
+         * size.  This will only be used if we must allocate a type conversion buffer for the entire I/O. */ \
+        if (!(PIECE_INFO)->in_place_tconv)                                                                   \
+            (IO_INFO)->tconv_buf_size += (PIECE_INFO)->piece_points * MAX((DINFO)->type_info.src_type_size,  \
+                                                                          (DINFO)->type_info.dst_type_size); \
+    }
 
 /****************************/
 /* Package Private Typedefs */
@@ -212,9 +252,11 @@ typedef struct H5D_piece_info_t {
     hsize_t  piece_points;             /* Number of elements selected in piece */
     hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
     H5S_t   *fspace;                   /* Dataspace describing chunk & selection in it */
-    unsigned fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    H5S_t   *mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    unsigned fspace_shared;  /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    H5S_t   *mspace;         /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;  /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    hbool_t  in_place_tconv; /* Whether to perform type conversion in-place */
+    size_t   buf_off;        /* Buffer offset for in-place type conversion */
     struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
@@ -277,6 +319,8 @@ typedef struct H5D_io_info_t {
                                    conversion */
     hbool_t
         must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
+    hbool_t may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
+                                       conversion if the type sizes are compatible with it */
 #ifdef H5_HAVE_PARALLEL
     H5D_mpio_actual_io_mode_t actual_io_mode; /* Actual type of collective or independent I/O */
 #endif                                        /* H5_HAVE_PARALLEL */

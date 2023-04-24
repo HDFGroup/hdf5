@@ -887,6 +887,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     check_io_mode(dxpl, chunked);
 
     /* Read all the data from the dataset */
+    HDmemset(s1_rbuf, 0, sizeof(s1_t) * DSET_SELECT_DIM);
     if (H5Dread(did, s1_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
@@ -926,7 +927,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Read the whole compound back */
-    if (H5Dread(did, ss_ac_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
+    HDmemset(s1_rbuf, 0, sizeof(s1_t) * DSET_SELECT_DIM);
+    if (H5Dread(did, s1_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
     /* Verify the compound fields have the correct (old or new) values */
@@ -1007,6 +1009,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Read it back */
+    HDmemset(s2_rbuf, 0, sizeof(s2_t) * DSET_SELECT_DIM);
     if (H5Dread(did, s2_tid, mspace_id, fspace_id, dxpl, s2_rbuf) < 0)
         P_TEST_ERROR;
 
@@ -3220,20 +3223,20 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_DISABLE_BY_API;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (test_mode & TEST_DATATYPE_CONVERSION) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             P_TEST_ERROR;
         tid = H5T_NATIVE_UINT;
-        no_selection_io_cause_expected |= H5D_DATATYPE_CONVERSION;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
     }
 
     /* Create 1d data space */

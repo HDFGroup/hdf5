@@ -864,9 +864,9 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *
  * \space_id{sel_iter_id}
  * \param[in]  maxseq   Maximum number of sequences to retrieve
- * \param[in]  maxbytes Maximum number of bytes to retrieve in sequences
+ * \param[in]  maxelmts Maximum number of elements to retrieve in sequences
  * \param[out] nseq     Number of sequences retrieved
- * \param[out] nbytes   Number of bytes retrieved, in all sequences
+ * \param[out] nelmts   Number of elements retrieved, in all sequences
  * \param[out] off      Array of sequence offsets
  * \param[out] len      Array of sequence lengths
  *
@@ -883,9 +883,9 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *          #H5S_SEL_ITER_GET_SEQ_LIST_SORTED flag is passed to
  *          H5Ssel_iter_create() for a point selection.
  *
- *          \p maxseq and \p maxbytes specify the most sequences or bytes
+ *          \p maxseq and \p maxelmts specify the most sequences or elements
  *          possible to place into the \p off and \p len arrays. \p nseq and
- *          \p nbytes return the actual number of sequences and bytes put
+ *          \p nelmts return the actual number of sequences and elements put
  *          into the arrays.
  *
  *          Each call to H5Ssel_iter_get_seq_list() will retrieve the next
@@ -897,13 +897,13 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *          the iterator was created from (which can be retrieved with
  *          H5Sget_select_npoints().  When there are no further sequences of
  *          elements to retrieve, calls to this routine will set \p nseq
- *          and \p nbytes to zero.
+ *          and \p nelmts to zero.
  *
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size_t *nseq,
-                                       size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size_t *nseq,
+                                       size_t *nelmts, hsize_t *off, size_t *len);
 /**
  * \ingroup H5S
  *
