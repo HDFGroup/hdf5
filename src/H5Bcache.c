@@ -163,7 +163,7 @@ H5B__cache_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_
     image += H5_SIZEOF_MAGIC;
 
     /* Node type and level */
-    if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+    if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))
         HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*image++ != (uint8_t)udata->type->id)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type")
