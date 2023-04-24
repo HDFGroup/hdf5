@@ -225,6 +225,7 @@ main(int argc, char **argv)
 {
     const char *vol_connector_name;
     unsigned    seed;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -316,9 +317,15 @@ main(int argc, char **argv)
     /* Run all the tests that are enabled */
     H5_api_test_run();
 
-    if (MAINPROCESS)
-        HDprintf("Cleaning up testing files\n");
-    H5Fdelete(H5_api_test_parallel_filename, H5P_DEFAULT);
+    if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
+        if (MAINPROCESS)
+            HDfprintf(stderr, "    failed to create MPI FAPL\n");
+    }
+    else {
+        if (MAINPROCESS)
+            HDprintf("Cleaning up testing files\n");
+        H5Fdelete(H5_api_test_parallel_filename, fapl_id);
+    }
 
     if (n_tests_run_g > 0) {
         if (MAINPROCESS)
@@ -355,6 +362,11 @@ main(int argc, char **argv)
         }
     }
 
+    if (fapl_id >= 0 && H5Pclose(fapl_id) < 0) {
+        if (MAINPROCESS)
+            HDprintf("    failed to close MPI FAPL\n");
+    }
+
     H5close();
 
     MPI_Finalize();
@@ -362,6 +374,12 @@ main(int argc, char **argv)
     HDexit(EXIT_SUCCESS);
 
 error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
     MPI_Finalize();
 
     HDexit(EXIT_FAILURE);
