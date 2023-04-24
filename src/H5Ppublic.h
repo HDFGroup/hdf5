@@ -405,7 +405,8 @@ typedef enum H5D_mpio_no_collective_cause_t {
 
 /* Causes for H5D_MPIO_NO_SELECTION_IO */
 #define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
-    (H5D_SEL_IO_DISABLE_BY_API | H5D_SEL_IO_TCONV_BUF_TOO_SMALL | H5D_SEL_IO_BKG_BUF_TOO_SMALL| H5D_SEL_IO_DATASET_FILTER | H5D_SEL_IO_CHUNK_CACHE)
+    (H5D_SEL_IO_DISABLE_BY_API | H5D_SEL_IO_TCONV_BUF_TOO_SMALL | H5D_SEL_IO_BKG_BUF_TOO_SMALL |             \
+     H5D_SEL_IO_DATASET_FILTER | H5D_SEL_IO_CHUNK_CACHE)
 
 //! <!--[H5D_selection_io_mode_t_snip] -->
 /**

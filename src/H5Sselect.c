@@ -3098,13 +3098,13 @@ done:
 herr_t
 H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *len)
 {
-    H5S_sel_iter_t *iter = NULL; /* Selection iterator */
-    hbool_t         iter_init  = FALSE; /* Selection iteration info has been initialized */
-    size_t  nseq_tmp;
-    size_t  nelem_tmp;
-    hsize_t sel_off;
-    size_t  sel_len;
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5S_sel_iter_t *iter      = NULL;  /* Selection iterator */
+    hbool_t         iter_init = FALSE; /* Selection iteration info has been initialized */
+    size_t          nseq_tmp;
+    size_t          nelem_tmp;
+    hsize_t         sel_off;
+    size_t          sel_len;
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3115,12 +3115,12 @@ H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *
     if (NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate iterator")
     if (H5S_select_iter_init(iter, space, 1, 0) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
-                    "unable to initialize memory selection information")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     iter_init = TRUE;
 
     /* Get list of sequences for selection, to check if it is contiguous */
-    if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, (size_t)1, (size_t)-1, &nseq_tmp, &nelem_tmp, &sel_off, &sel_len) < 0)
+    if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, (size_t)1, (size_t)-1, &nseq_tmp, &nelem_tmp, &sel_off, &sel_len) <
+        0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "sequence length generation failed")
 
     /* If the first sequence includes all the elements selected in this piece, it it contiguous */
@@ -3133,9 +3133,8 @@ H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *
         if (len)
             *len = sel_len;
     }
-    else
-        if (is_contig)
-            *is_contig = FALSE;
+    else if (is_contig)
+        *is_contig = FALSE;
 
 done:
     if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)

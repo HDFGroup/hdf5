@@ -43,7 +43,8 @@
 /********************/
 
 /* Setup/teardown routines */
-static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info);
+static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info,
+                               H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
 static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
 #ifdef H5_HAVE_PARALLEL
@@ -892,7 +893,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info)
+H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dset_info,
+                 H5D_io_info_t *io_info)
 {
     H5D_selection_io_mode_t selection_io_mode;
 
@@ -909,8 +911,8 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
 
     /* Set up simple fields */
     io_info->op_type = op_type;
-    io_info->f_sh  = count > 0 ? H5F_SHARED(dset_info[0].dset->oloc.file) : NULL;
-    io_info->count = count;
+    io_info->f_sh    = count > 0 ? H5F_SHARED(dset_info[0].dset->oloc.file) : NULL;
+    io_info->count   = count;
 
     /* Start without multi-dataset I/O ops. If we're not using the collective
      * I/O path then we will call the single dataset callbacks in a loop. */
@@ -1148,7 +1150,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
             /* Collective I/O, conversion buffer must be large enough for entire I/O (for now) */
 
-            /* Calculate size of background buffer (tconv buf size was calculated in layout io_init callbacks) */
+            /* Calculate size of background buffer (tconv buf size was calculated in layout io_init callbacks)
+             */
             for (i = 0; i < io_info->count; i++) {
                 H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
@@ -1177,7 +1180,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
                 io_info->must_fill_bkg  = FALSE;
             }
             if (io_info->bkg_buf_size > max_temp_buf) {
-                io_info->use_select_io  = H5D_SELECTION_IO_MODE_OFF;
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
                 io_info->no_selection_io_cause |= H5D_SEL_IO_BKG_BUF_TOO_SMALL;
                 io_info->tconv_buf_size = 0;
                 io_info->bkg_buf_size   = 0;

@@ -1119,12 +1119,12 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Calculate type conversion buffer size if necessary */
     if (!(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
-        H5SL_node_t       *chunk_node;                /* Current node in chunk skip list */
+        H5SL_node_t *chunk_node; /* Current node in chunk skip list */
 
         /* Iterate through nodes in chunk skip list */
         chunk_node = H5D_CHUNK_GET_FIRST_NODE(dinfo);
         while (chunk_node) {
-            H5D_piece_info_t  *piece_info; /* Chunk information */
+            H5D_piece_info_t *piece_info; /* Chunk information */
 
             /* Get the actual chunk information from the skip list node */
             piece_info = H5D_CHUNK_GET_NODE_INFO(dinfo, chunk_node);
@@ -1590,7 +1590,7 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
     /* Initialize in-place type conversion info. Start with it disabled. */
     piece_info->in_place_tconv = FALSE;
-    piece_info->buf_off = 0;
+    piece_info->buf_off        = 0;
 
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
@@ -1723,7 +1723,7 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
         /* Initialize in-place type conversion info. Start with it disabled. */
         new_piece_info->in_place_tconv = FALSE;
-        new_piece_info->buf_off = 0;
+        new_piece_info->buf_off        = 0;
 
         /* Insert the new chunk into the skip list */
         if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
@@ -1923,7 +1923,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
             /* Initialize in-place type conversion info. Start with it disabled. */
             new_piece_info->in_place_tconv = FALSE;
-            new_piece_info->buf_off = 0;
+            new_piece_info->buf_off        = 0;
 
             /* Add piece to global piece_count */
             io_info->piece_count++;
@@ -2302,7 +2302,7 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
 
             /* Initialize in-place type conversion info. Start with it disabled. */
             piece_info->in_place_tconv = FALSE;
-            piece_info->buf_off = 0;
+            piece_info->buf_off        = 0;
 
             /* Make connection to related dset info from this piece_info */
             piece_info->dset_info = dinfo;

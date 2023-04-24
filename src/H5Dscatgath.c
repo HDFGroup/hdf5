@@ -32,10 +32,9 @@
 /****************/
 
 /* Macro to determine if we're using H5D__compound_opt_read() */
-#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, PIECE_INFO) \
-    ((DSET_INFO)->type_info.cmpd_subset && \
-    H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
-    !(PIECE_INFO)->in_place_tconv)
+#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, PIECE_INFO)                                               \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
+     !(PIECE_INFO)->in_place_tconv)
 
 /******************/
 /* Local Typedefs */
@@ -743,15 +742,15 @@ done:
 herr_t
 H5D__scatgath_read_select(H5D_io_info_t *io_info)
 {
-    H5S_t         **tmp_mem_spaces = NULL;  /* Memory spaces to use for read from disk */
-    H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
-    hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
-    void          **tmp_bufs       = NULL;  /* Buffers to use for read from disk */
-    void           *tmp_bkg_buf = NULL;     /* Temporary background buffer pointer */
-    size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
-    size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
-    size_t          i;                      /* Local index variable */
-    herr_t          ret_value = SUCCEED;    /* Return value		*/
+    H5S_t         **tmp_mem_spaces   = NULL;  /* Memory spaces to use for read from disk */
+    H5S_sel_iter_t *mem_iter         = NULL;  /* Memory selection iteration info */
+    hbool_t         mem_iter_init    = FALSE; /* Memory selection iteration info has been initialized */
+    void          **tmp_bufs         = NULL;  /* Buffers to use for read from disk */
+    void           *tmp_bkg_buf      = NULL;  /* Temporary background buffer pointer */
+    size_t          tconv_bytes_used = 0;     /* Number of bytes used so far in conversion buffer */
+    size_t          bkg_bytes_used   = 0;     /* Number of bytes used so far in background buffer */
+    size_t          i;                        /* Local index variable */
+    herr_t          ret_value = SUCCEED;      /* Return value		*/
 
     FUNC_ENTER_PACKAGE
 
@@ -806,12 +805,14 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
             else {
                 /* Set buffer to point into type conversion buffer */
                 tmp_bufs[i] = io_info->tconv_buf + tconv_bytes_used;
-                tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
-                                  MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                tconv_bytes_used +=
+                    io_info->sel_pieces[i]->piece_points *
+                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
                 HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
             }
 
-            /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before the read so the read buffer doesn't get wiped out if we're using in-place type conversion */
+            /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before
+             * the read so the read buffer doesn't get wiped out if we're using in-place type conversion */
             if (!H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
                 /* Check for background buffer */
                 if (dset_info->type_info.need_bkg) {
@@ -827,8 +828,8 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
                     if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
                         /* Initialize memory iterator */
                         HDassert(!mem_iter_init);
-                        if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
-                                                 0) < 0)
+                        if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
+                                                 dset_info->type_info.dst_type_size, 0) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                         "unable to initialize memory selection information")
                         mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
@@ -1052,15 +1053,17 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 H5_flexible_const_ptr_t flex_buf;
 
                 /* Set buffer to point to write buffer + offset */
-                /* Use cast to union to twiddle away const.  OK because if we're doing this it means the user explicitly allowed us to modify this buffer via H5Pset_modfy_write_buf(). */
-                flex_buf.cvp = io_info->wbufs[i];
+                /* Use cast to union to twiddle away const.  OK because if we're doing this it means the user
+                 * explicitly allowed us to modify this buffer via H5Pset_modfy_write_buf(). */
+                flex_buf.cvp  = io_info->wbufs[i];
                 tmp_write_buf = (uint8_t *)flex_buf.vp + io_info->sel_pieces[i]->buf_off;
             }
             else {
                 /* Set buffer to point into type conversion buffer */
                 tmp_write_buf = io_info->tconv_buf + tconv_bytes_used;
-                tconv_bytes_used += io_info->sel_pieces[i]->piece_points *
-                                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                tconv_bytes_used +=
+                    io_info->sel_pieces[i]->piece_points *
+                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
                 HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
 
                 /* Gather data from application buffer into the datatype conversion buffer */

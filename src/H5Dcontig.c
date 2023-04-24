@@ -667,7 +667,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
         /* Initialize in-place type conversion info. Start with it disabled. */
         new_piece_info->in_place_tconv = FALSE;
-        new_piece_info->buf_off = 0;
+        new_piece_info->buf_off        = 0;
 
         /* Calculate type conversion buffer size and check for in-place conversion if necessary */
         if (!(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop))
@@ -773,7 +773,7 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
         io_info->no_selection_io_cause |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
     else if ((op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
-        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
+             (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
         io_info->no_selection_io_cause |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
     }
