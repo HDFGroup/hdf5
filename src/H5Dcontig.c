@@ -762,8 +762,10 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
      * buffer exists (write) or is dirty (read) */
     if (dset_info->layout_ops.readvv != H5D__contig_readvv ||
         (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
-        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
+        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
         io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+        io_info->no_selection_io_cause |= H5D_CONTIGUOUS_SIEVE_BUFFER;
+    }
     else {
         hbool_t page_buf_enabled;
 
@@ -772,8 +774,10 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
-        if (page_buf_enabled)
+        if (page_buf_enabled) {
             io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_PAGE_BUFFER;
+        }
     } /* end else */
 
 done:
