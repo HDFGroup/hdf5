@@ -2651,8 +2651,8 @@ main(int argc, char *argv[])
     hid_t              fapl_id         = H5P_DEFAULT;
     hbool_t            custom_vol_fapl = FALSE;
     hbool_t            custom_vfd_fapl = FALSE;
-    h5tools_vol_info_t vol_info;
-    h5tools_vfd_info_t vfd_info;
+    h5tools_vol_info_t vol_info        = {0};
+    h5tools_vfd_info_t vfd_info        = {0};
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
@@ -2763,7 +2763,6 @@ main(int argc, char *argv[])
         else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
             vfd_info.type   = VFD_BY_NAME;
             vfd_info.u.name = argv[argno] + 6;
-            vfd_info.info   = NULL;
             custom_vfd_fapl = TRUE;
         }
         else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
@@ -2980,6 +2979,19 @@ main(int argc, char *argv[])
 
     /* Setup a custom fapl for file accesses */
     if (custom_vol_fapl || custom_vfd_fapl) {
+#ifdef H5_HAVE_ROS3_VFD
+        if (custom_vfd_fapl && (0 == HDstrcmp(vfd_info.u.name, drivernames[ROS3_VFD_IDX]))) {
+            if (!vfd_info.info)
+                vfd_info.info = &ros3_fa;
+        }
+#endif
+#ifdef H5_HAVE_LIBHDFS
+        if (custom_vfd_fapl && (0 == HDstrcmp(vfd_info.u.name, drivernames[HDFS_VFD_IDX]))) {
+            if (!vfd_info.info)
+                vfd_info.info = &hdfs_fa;
+        }
+#endif
+
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, custom_vol_fapl ? &vol_info : NULL,
                                         custom_vfd_fapl ? &vfd_info : NULL)) < 0) {
             error_msg("failed to setup file access property list (fapl) for file\n");
