@@ -30,7 +30,7 @@
  * This is a separate macro since we don't want to inflict that behavior on
  * the rest of the library.
  */
-#define H5_DTYPE_IS_BUFFER_OVERFLOW(skip, ptr, size, buffer_end) \
+#define H5_DTYPE_IS_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
     (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
 
 /* PRIVATE PROTOTYPES */
@@ -128,8 +128,8 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, 
-        hbool_t skip, const uint8_t *p_end)
+H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, hbool_t skip,
+                         const uint8_t *p_end)
 {
     unsigned flags;
     unsigned version;
@@ -249,7 +249,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             break;
 
         case H5T_TIME:
-            /* 
+            /*
              * Time datatypes...
              */
             dt->shared->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
@@ -285,30 +285,29 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             UINT16DECODE(*pp, dt->shared->u.atomic.prec);
             break;
 
-        case H5T_OPAQUE:
-            {
-                size_t z;
+        case H5T_OPAQUE: {
+            size_t z;
 
-                /*
-                 * Opaque types...
-                 */
+            /*
+             * Opaque types...
+             */
 
-                /* The opaque tag flag field must be aligned */
-                z = flags & (H5T_OPAQUE_TAG_MAX - 1);
-                if (0 != (z & 0x7))
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "opaque flag field must be aligned")
+            /* The opaque tag flag field must be aligned */
+            z = flags & (H5T_OPAQUE_TAG_MAX - 1);
+            if (0 != (z & 0x7))
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "opaque flag field must be aligned")
 
-                if (NULL == (dt->shared->u.opaque.tag = (char *)H5MM_malloc(z + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            if (NULL == (dt->shared->u.opaque.tag = (char *)H5MM_malloc(z + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-                if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, z, p_end))
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-                H5MM_memcpy(dt->shared->u.opaque.tag, *pp, z);
-                dt->shared->u.opaque.tag[z] = '\0';
+            if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, z, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+            H5MM_memcpy(dt->shared->u.opaque.tag, *pp, z);
+            dt->shared->u.opaque.tag[z] = '\0';
 
-                *pp += z;
-                break;
-            }
+            *pp += z;
+            break;
+        }
 
         case H5T_COMPOUND: {
             unsigned nmembs;           /* Number of compound members */
@@ -337,8 +336,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             for (dt->shared->u.compnd.nmembs = 0; dt->shared->u.compnd.nmembs < nmembs;
                  dt->shared->u.compnd.nmembs++) {
 
-                size_t actual_name_length;                  /* Actual length of name */
-                size_t max     = (size_t)(p_end - *pp + 1); /* Max possible name length */
+                size_t   actual_name_length;                /* Actual length of name */
+                size_t   max   = (size_t)(p_end - *pp + 1); /* Max possible name length */
                 unsigned ndims = 0;                         /* Number of dimensions of the array field */
                 htri_t   can_upgrade;                       /* Whether we can upgrade this type's version */
                 hsize_t  dim[H5O_LAYOUT_NDIMS];             /* Dimensions of the array */
@@ -362,13 +361,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (version >= H5O_DTYPE_VERSION_3) {
                     /* Advance past name, including null terminator */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length + 1, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += actual_name_length + 1;
                 }
                 else {
                     /* Advance multiple of 8 w/ null terminator */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, ((actual_name_length + 8) / 8) * 8, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += ((actual_name_length + 8) / 8) * 8;
                 }
 
@@ -376,13 +377,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 /* (starting with version 3 of the datatype message, use the minimum # of bytes required) */
                 if (version >= H5O_DTYPE_VERSION_3) {
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, offset_nbytes, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset,
                                      offset_nbytes)
                 }
                 else {
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     UINT32DECODE(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset)
                 }
 
@@ -392,7 +395,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (version == H5O_DTYPE_VERSION_1) {
                     /* Decode the number of dimensions */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 1, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     ndims = *(*pp)++;
 
                     /* Check that ndims is valid */
@@ -404,22 +408,26 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                     /* Skip reserved bytes */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 3, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += 3;
 
                     /* Skip dimension permutation */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += 4;
 
                     /* Skip reserved bytes */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += 4;
 
                     /* Decode array dimension sizes */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, (4 * 4), p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     for (int i = 0; i < 4; i++)
                         UINT32DECODE(*pp, dim[i]);
                 }
@@ -551,7 +559,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
         } break;
 
         case H5T_REFERENCE:
-            /* 
+            /*
              * Reference datatypes...
              */
             dt->shared->u.atomic.order   = H5T_ORDER_NONE;
@@ -615,7 +623,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             /* Names */
             for (dt->shared->u.enumer.nmembs = 0; dt->shared->u.enumer.nmembs < nmembs;
                  dt->shared->u.enumer.nmembs++) {
-                
+
                 size_t actual_name_length;              /* Actual length of name */
                 size_t max = (size_t)(p_end - *pp + 1); /* Max possible name length */
 
@@ -633,13 +641,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 if (version >= H5O_DTYPE_VERSION_3) {
                     /* Advance past name, including null terminator */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length + 1, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += actual_name_length + 1;
                 }
                 else {
                     /* Advance multiple of 8 w/ null terminator */
                     if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, ((actual_name_length + 8) / 8) * 8, p_end))
-                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
+                                    "ran off end of input buffer while decoding");
                     *pp += ((actual_name_length + 8) / 8) * 8;
                 }
             }
