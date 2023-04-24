@@ -11,7 +11,8 @@
 #
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2022, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
+### BUILD_GENERATOR required:                                                             ###
+### [MinGW, Unix, VS2022, VS202264, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
@@ -24,9 +25,9 @@ cmake_minimum_required (VERSION 3.18)
 #            MinGW     * MinGW Makefiles
 #            Unix      * Unix Makefiles
 #            VS2022    * Visual Studio 17 2022
-#            VS202264  * Visual Studio 17 2022
+#            VS202264  * Visual Studio 17 2022 Win64
 #            VS2019    * Visual Studio 16 2019
-#            VS201964  * Visual Studio 16 2019
+#            VS201964  * Visual Studio 16 2019 Win64
 #            VS2017    * Visual Studio 15 2017
 #            VS201764  * Visual Studio 15 2017 Win64
 #            VS2015    * Visual Studio 14 2015
