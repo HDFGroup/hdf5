@@ -14,6 +14,7 @@ Section VI:   CMake option defaults for HDF5
 Section VII:  User Defined Options for HDF5 Libraries with CMake
 Section VIII: User Defined Compile Flags for HDF5 Libraries with CMake
 Section IX:   Considerations for cross-compiling
+Section X:    Using CMakePresets.json for compiling
 
 ************************************************************************
 
@@ -1041,6 +1042,99 @@ indicated in the error log (see above) are the variables that need to match the 
 The HDF5 CMake variables;
     HDF5_USE_PREGEN: set this to true
     HDF5_USE_PREGEN_DIR: set this path to the preset H5Tinit.c file
+
+
+========================================================================
+X:    Using CMakePresets.json for compiling
+========================================================================
+
+One problem that CMake users often face is sharing settings with other people for common
+ways to configure a project. This may be done to support CI builds, or for users who
+frequently use the same build. CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+that allow users to specify common configure options and share them with others. CMake also supports
+files included with the include field.
+
+CMakePresets.json and CMakeUserPresets.json live in the project's root directory. They
+both have exactly the same format, and both are optional (though at least one must be
+present if --preset is specified). CMakePresets.json is meant to specify project-wide build
+details, while CMakeUserPresets.json is meant for developers to specify their own local build details.
+
+See CMake documentation for details: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+
+HDF provided CMakePresets.json
+-------------------------------
+The CMakePresets.json provided by HDF requires CMake version 3.25, which supports package
+and workflow presets, and ninja build system. The top-level configuration group is intended to be
+a standard set of options to produce a package of shared and staic libraries and tools. Other configurations
+used for inheriting settings are in the included json file in "config/cmake-presets/hidden-presets.json".
+
+Available configurations presets can be displayed by executing:
+    cmake -S <path-to-source> --list-presets
+
+Using individual command presets (where <compiler-type> is  GNUC or MSVC or Clang):
+    change directory to the hdf5 source folder
+    cmake --presets=ci-StdShar-<compiler-type>
+    cmake --build --presets=ci-StdShar-<compiler-type>
+    ctest --presets=ci-StdShar-<compiler-type>
+    cpack --presets=ci-StdShar-<compiler-type>
+
+
+Using the workflow preset to configure, build, test and package the standard configuration is:
+    change directory to the hdf5 source folder
+    execute "cmake --workflow --presets=ci-StdShar-<compiler-type> --fresh"
+          where <compiler-type> is  GNUC or MSVC or Clang
+
+Creating your own configurations
+--------------------------------
+The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
+edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
+configurePresets inherits only for those that you have provided alternates for
+different options. Then change the configurePreset entries in buildPresets,
+testPresets, packagePresets to your my-StdShar-<compiler-type>, And finally the
+names settings in the workflowPresets steps will also need the ci-* to my-* change.
+
+For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
+......
+    {
+      "name": "my-base-tgz",
+      "hidden": true,
+      "inherits": "ci-base",
+      "cacheVariables": {
+        "HDF5_ALLOW_EXTERNAL_SUPPORT": {"type": "STRING", "value": "TGZ"},
+        "TGZPATH": {"type": "STRING", "value": "${sourceParentDir}/temp"}
+      }
+    },
+    {
+      "name": "my-StdCompression",
+      "hidden": true,
+      "inherits": "my-base-tgz",
+      "cacheVariables": {
+......
+   {
+      "name": "my-StdShar",
+      "hidden": true,
+      "inherits": "my-StdCompression",
+      "cacheVariables": {
+......
+    {
+      "name": "my-StdShar-GNUC",
+      "description": "GNUC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "my-StdShar",
+        "my-StdExamples"
+      ]
+    }
+......
+
+
+Then you can change or add options for your specific case.
+
+
+
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org
