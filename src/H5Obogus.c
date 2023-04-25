@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Obogus.c
- *                      Jan 21 2003
- *                      Quincey Koziol
  *
  * Purpose:             "bogus" message.  This message is guaranteed to never
  *                      be found in a valid HDF5 file and is only used to
@@ -95,25 +93,20 @@ const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1] = {{
  * Purpose:     Decode a "bogus" message and return a pointer to a new
  *              native message struct.
  *
- * Return:      Success:        Ptr to new message in native struct.
- *
+ * Return:      Success:        Pointer to new message in native struct
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Jan 21 2003
- *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_NDEBUG_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_bogus_t *mesg = NULL;
-    void        *ret_value; /* Return value */
+    const uint8_t *p_end = p + p_size - 1;
+    H5O_bogus_t   *mesg  = NULL;
+    void          *ret_value;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
@@ -121,7 +114,8 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (NULL == (mesg = (H5O_bogus_t *)H5MM_calloc(sizeof(H5O_bogus_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT32DECODE(p, mesg->u);
 
     /* Validate the bogus info */
