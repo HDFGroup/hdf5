@@ -118,6 +118,7 @@ main(int argc, char **argv)
 {
     const char *vol_connector_name;
     unsigned    seed;
+    hid_t       fapl_id      = H5I_INVALID_HID;
     hbool_t     err_occurred = FALSE;
 
     /* Simple argument checking, TODO can improve that later */
@@ -166,9 +167,17 @@ main(int argc, char **argv)
     HDprintf("  - Test seed: %u\n", seed);
     HDprintf("\n\n");
 
-    /* Retrieve the VOL cap flags */
+    /* Retrieve the VOL cap flags - work around an HDF5
+     * library issue by creating a FAPL
+     */
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        HDfprintf(stderr, "Unable to create FAPL\n");
+        err_occurred = TRUE;
+        goto done;
+    }
+
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0) {
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
         HDfprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
         err_occurred = TRUE;
         goto done;
@@ -188,7 +197,7 @@ main(int argc, char **argv)
     H5_api_test_run();
 
     HDprintf("Cleaning up testing files\n");
-    H5Fdelete(H5_api_test_filename, H5P_DEFAULT);
+    H5Fdelete(H5_api_test_filename, fapl_id);
 
     if (n_tests_run_g > 0) {
         HDprintf("%zu/%zu (%.2f%%) API tests passed with VOL connector '%s'\n", n_tests_passed_g,
@@ -203,6 +212,11 @@ main(int argc, char **argv)
     }
 
 done:
+    if (fapl_id >= 0 && H5Pclose(fapl_id) < 0) {
+        HDfprintf(stderr, "Unable to close FAPL\n");
+        err_occurred = TRUE;
+    }
+
     H5close();
 
 #ifdef H5_HAVE_PARALLEL

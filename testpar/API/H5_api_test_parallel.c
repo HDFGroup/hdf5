@@ -237,11 +237,19 @@ main(int argc, char **argv)
         HDprintf("\n\n");
     }
 
-    /* Retrieve the VOL cap flags */
+    /* Retrieve the VOL cap flags - work around an HDF5
+     * library issue by creating a FAPL
+     */
     BEGIN_INDEPENDENT_OP(get_capability_flags)
     {
+        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
+            if (MAINPROCESS)
+                HDfprintf(stderr, "Unable to create FAPL\n");
+            INDEPENDENT_OP_ERROR(get_capability_flags);
+        }
+
         vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
-        if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0) {
+        if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
             if (MAINPROCESS)
                 HDfprintf(stderr, "Unable to retrieve VOL connector capability flags\n");
             INDEPENDENT_OP_ERROR(get_capability_flags);
@@ -267,15 +275,9 @@ main(int argc, char **argv)
     /* Run all the tests that are enabled */
     H5_api_test_run();
 
-    if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
-        if (MAINPROCESS)
-            HDfprintf(stderr, "    failed to create MPI FAPL\n");
-    }
-    else {
-        if (MAINPROCESS)
-            HDprintf("Cleaning up testing files\n");
-        H5Fdelete(H5_api_test_parallel_filename, fapl_id);
-    }
+    if (MAINPROCESS)
+        HDprintf("Cleaning up testing files\n");
+    H5Fdelete(H5_api_test_parallel_filename, fapl_id);
 
     if (n_tests_run_g > 0) {
         if (MAINPROCESS)
