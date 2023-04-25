@@ -44,21 +44,21 @@
 /* The B-tree node as stored in memory...  */
 typedef struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions */
-                            /* _must_ be first field in structure */
-    H5UC_t  *rc_shared;     /*ref-counted shared info         */
-    unsigned level;         /*node level                 */
-    unsigned nchildren;     /*number of child pointers         */
-    haddr_t  left;          /*address of left sibling         */
-    haddr_t  right;         /*address of right sibling         */
-    uint8_t *native;        /*array of keys in native format     */
-    haddr_t *child;         /*2k child pointers             */
+                            /* MUST be first field in structure */
+    H5UC_t  *rc_shared;     /* Ref-counted shared info */
+    unsigned level;         /* Node level */
+    unsigned nchildren;     /* Number of child pointers */
+    haddr_t  left;          /* Address of left sibling */
+    haddr_t  right;         /* Address of right sibling */
+    uint8_t *native;        /* Array of keys in native format */
+    haddr_t *child;         /* 2k child pointers */
 } H5B_t;
 
 /* Callback info for loading a B-tree node into the cache */
 typedef struct H5B_cache_ud_t {
-    H5F_t                    *f;         /* File that B-tree node is within   */
-    const struct H5B_class_t *type;      /* Type of tree                 */
-    H5UC_t                   *rc_shared; /* Ref-counted shared info         */
+    H5F_t                    *f;         /* File that B-tree node is within */
+    const struct H5B_class_t *type;      /* Type of tree */
+    H5UC_t                   *rc_shared; /* Ref-counted shared info */
 } H5B_cache_ud_t;
 
 /*****************************/
