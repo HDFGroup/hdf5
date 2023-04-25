@@ -117,13 +117,12 @@ typedef enum {
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
-#define TEST_DATATYPE_CONVERSION               0x002
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x004
-#define TEST_CONTIGUOUS_SIEVE_BUFFER           0x008
-#define TEST_NO_VECTOR_OR_SELECTION_IO_CB      0x010
-#define TEST_PAGE_BUFFER                       0x020
-#define TEST_DATASET_FILTER                    0x040
-#define TEST_CHUNK_CACHE                       0x080
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x002
+#define TEST_CONTIGUOUS_SIEVE_BUFFER           0x004
+#define TEST_NO_VECTOR_OR_SELECTION_IO_CB      0x008
+#define TEST_PAGE_BUFFER                       0x010
+#define TEST_DATASET_FILTER                    0x020
+#define TEST_CHUNK_CACHE                       0x040
 
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
@@ -2647,13 +2646,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB)
         no_selection_io_cause_expected |= H5D_SEL_IO_DEFAULT_OFF;
 
-    if (test_mode & TEST_DATATYPE_CONVERSION) {
-        if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
-            FAIL_STACK_ERROR;
-        tid = H5T_NATIVE_UINT;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
-    }
-
     if (test_mode & TEST_PAGE_BUFFER)
         no_selection_io_cause_expected |= H5D_SEL_IO_PAGE_BUFFER;
 
@@ -2692,8 +2684,7 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         TEST_ERROR;
 
     /* Flush to clear the sieve buf */
-    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || test_mode & TEST_DATATYPE_CONVERSION ||
-        test_mode & TEST_PAGE_BUFFER) {
+    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || test_mode & TEST_PAGE_BUFFER) {
 
         if (H5Dflush(did) < 0)
             FAIL_STACK_ERROR;
@@ -2764,7 +2755,6 @@ test_get_no_selection_io_cause(void)
     errs += test_no_selection_io_cause_mode(TEST_DATASET_FILTER);
     errs += test_no_selection_io_cause_mode(TEST_CHUNK_CACHE);
     errs += test_no_selection_io_cause_mode(TEST_NO_VECTOR_OR_SELECTION_IO_CB);
-    errs += test_no_selection_io_cause_mode(TEST_DATATYPE_CONVERSION);
 #ifndef H5_HAVE_PARALLEL
     errs += test_no_selection_io_cause_mode(TEST_PAGE_BUFFER);
 #endif

@@ -149,8 +149,7 @@ typedef enum {
 
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
-#define TEST_DATATYPE_CONVERSION               0x002
-#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x004
+#define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x002
 
 /*
  * Helper routine to set dxpl
@@ -3232,13 +3231,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
-    if (test_mode & TEST_DATATYPE_CONVERSION) {
-        if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
-            P_TEST_ERROR;
-        tid = H5T_NATIVE_UINT;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
-    }
-
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
@@ -3309,7 +3301,6 @@ test_get_no_selection_io_cause(void)
 {
     test_no_selection_io_cause_mode(TEST_DISABLE_BY_API);
     test_no_selection_io_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
-    test_no_selection_io_cause_mode(TEST_DATATYPE_CONVERSION);
 
     CHECK_PASSED();
 

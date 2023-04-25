@@ -47,11 +47,11 @@ static herr_t H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_
                                H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
 static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
-#ifdef H5_HAVE_PARALLEL
 static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
-#endif /* H5_HAVE_PARALLEL */
 static herr_t H5D__typeinfo_init_phase3(H5D_io_info_t *io_info);
+#ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info);
+#endif /* H5_HAVE_PARALLEL */
 static herr_t H5D__typeinfo_term(H5D_io_info_t *io_info);
 
 /*********************/
@@ -1110,7 +1110,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__typeinfo_init() */
 
-#ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init_phase2
  *
@@ -1135,6 +1134,22 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
     /* check args */
     HDassert(io_info);
 
+    /* If selection I/O mode is default (auto), enable it here if the VFD supports it (it will be turned off
+     * later if something else conflicts), otherwise disable it.  If we're using the MPIO VFD, the automatic
+     * selection will happen in H5D__mpio_opt_possible() inside H5D__ioinfo_adjust(). */
+#ifdef H5_HAVE_PARALLEL
+    if (!io_info->using_mpi_vfd)
+#endif /* H5_HAVE_PARALLEL */
+        if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
+            if (H5F_has_vector_select_io(io_info->dsets_info[0].dset->oloc.file,
+                                         io_info->op_type == H5D_IO_OP_WRITE))
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
+            else {
+                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
+            }
+        }
+
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_tconv_type_size) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
@@ -1143,8 +1158,9 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
-        /* Check if we're doing collective I/O */
-        if (xfer_mode == H5FD_MPIO_COLLECTIVE && io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
+        /* If we might be doing selection I/O, check if the buffers are large enough to handle the whole I/O
+         */
+        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
             size_t max_temp_buf; /* Maximum temporary buffer size */
             size_t i;            /* Local index variable */
 
@@ -1192,8 +1208,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__typeinfo_init_phase2() */
-#endif /* H5_HAVE_PARALLEL */
 
+#ifdef H5_HAVE_PARALLEL
 /*-------------------------------------------------------------------------
  * Function:    H5D__ioinfo_adjust
  *
@@ -1210,11 +1226,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
     H5D_t *dset0;               /* only the first dset , also for single dsets case */
     herr_t ret_value = SUCCEED; /* Return value	*/
 
-#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_PACKAGE
-#else
-    FUNC_ENTER_PACKAGE_NOERR
-#endif /* H5_HAVE_PARALLEL */
 
     /* check args */
     HDassert(io_info);
@@ -1224,7 +1236,6 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
     dset0 = io_info->dsets_info[0].dset;
     HDassert(dset0->oloc.file);
 
-#ifdef H5_HAVE_PARALLEL
     /* Reset the actual io mode properties to the default values in case
      * the DXPL (if it's non-default) was previously used in a collective
      * I/O operation.
@@ -1327,24 +1338,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
             } /* end if */
         }     /* end else */
     }         /* end if */
-    else
-#endif /* H5_HAVE_PARALLEL */
-        /* Not using the MPIO VFD, if selection I/O setting is H5D_SELECTION_IO_MODE_AUTO turn it on only if
-         * the VFD has a vector or selection I/O callback */
-        if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
-            if (H5F_has_vector_select_io(dset0->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))
-                io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
-            else {
-                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
-            }
-        }
 
-#ifdef H5_HAVE_PARALLEL
 done:
-#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_adjust() */
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__typeinfo_init_phase3
@@ -1379,19 +1377,9 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
         if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
 
-#ifdef H5_HAVE_PARALLEL
-        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
-
-        /* Get the original state of parallel I/O transfer mode */
-        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
-
-        /* Check if we're doing collective I/O */
-        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
-            /* Only implemented for selection I/O */
-            HDassert(io_info->use_select_io == H5D_SELECTION_IO_MODE_ON);
-
-            /* Collective I/O, conversion buffers must be large enough for entire I/O (for now) */
+        /* Check if we're doing selection I/O */
+        if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
+            /* Selection I/O, conversion buffers must be large enough for entire I/O (for now) */
 
             /* Allocate global type conversion buffer (if any, could be none if datasets in this
              * I/O have 0 elements selected) */
@@ -1413,19 +1401,14 @@ H5D__typeinfo_init_phase3(H5D_io_info_t *io_info)
                 io_info->bkg_buf_allocated = TRUE;
             }
         }
-        else
-#endif /* H5_HAVE_PARALLEL */
-        {
-            /* No collective I/O, only need to make sure it's big enough for one element */
+        else {
+            /* No selection I/O, only need to make sure it's big enough for one element */
             size_t max_temp_buf; /* Maximum temporary buffer size */
             size_t target_size;  /* Desired buffer size	*/
             size_t i;
 
-            /* Disable selection I/O (for now) since the selection I/O type conversion code path
-             * assumes the tconv buf is large enough to hold all data in the I/O, and we don't want
-             * to impose this when there's no benefit */
-            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_SEL_IO_DATATYPE_CONVERSION;
+            /* Make sure selection I/O is disabled (DEFAULT should have been handled by now) */
+            HDassert(io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF);
 
             /* Get max buffer size from API context */
             if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
