@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Fsuper_cache.c
- *			Aug 15 2009
- *			Quincey Koziol
  *
- * Purpose:		Implement file superblock & driver info metadata cache methods.
+ * Purpose:		Implement file superblock & driver info metadata cache methods
  *
  *-------------------------------------------------------------------------
  */
@@ -135,13 +133,9 @@ H5FL_EXTERN(H5F_super_t);
 /*-------------------------------------------------------------------------
  * Function:    H5F__superblock_prefix_decode
  *
- * Purpose:	Decode a superblock prefix
+ * Purpose:     Decode a superblock prefix
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              December 15, 2016
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -153,7 +147,6 @@ H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref,
 
     FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
     HDassert(sblock);
     HDassert(image_ref);
     HDassert(image);
@@ -177,11 +170,12 @@ H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref,
     if (sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2) {
         sblock->sizeof_addr = image[4];
         sblock->sizeof_size = image[5];
-    } /* end if */
+    }
     else {
         sblock->sizeof_addr = image[0];
         sblock->sizeof_size = image[1];
-    } /* end else */
+    }
+
     if (sblock->sizeof_addr != 2 && sblock->sizeof_addr != 4 && sblock->sizeof_addr != 8 &&
         sblock->sizeof_addr != 16 && sblock->sizeof_addr != 32)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad byte number in an address")
@@ -201,7 +195,7 @@ H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref,
         /* Make certain we can read the variable-sized portion of the superblock */
         if (H5F__set_eoa(udata->f, H5FD_MEM_SUPER, (haddr_t)(H5F_SUPERBLOCK_FIXED_SIZE + variable_size)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
-    } /* end if */
+    }
 
     /* Update the image buffer pointer */
     *image_ref = image;
@@ -211,15 +205,11 @@ done:
 } /* end H5F__superblock_prefix_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__drvrinfo_prefix_decode
+ * Function:    H5F__drvrinfo_prefix_decode
  *
- * Purpose:	Decode a driver info prefix
+ * Purpose:     Decode a driver info prefix
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              December 15, 2016
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -232,7 +222,6 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(drvrinfo);
     HDassert(image_ref);
     HDassert(image);
@@ -244,7 +233,8 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
     if (drv_vers != HDF5_DRIVERINFO_VERSION_0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad driver information block version number")
 
-    image += 3; /* reserved bytes */
+    /* Reserved bytes */
+    image += 3;
 
     /* Driver info size */
     UINT32DECODE(image, drvrinfo->len);
@@ -273,7 +263,7 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
         if (H5F_addr_gt(min_eoa, eoa))
             if (H5FD_set_eoa(udata->f->shared->lf, H5FD_MEM_SUPER, min_eoa) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
-    } /* end if */
+    }
 
     /* Update the image buffer pointer */
     *image_ref = image;
@@ -285,13 +275,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_superblock_get_initial_load_size
  *
- * Purpose:     Compute the size of the data structure on disk.
+ * Purpose:     Compute the size of the data structure on disk
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 17, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -299,7 +285,6 @@ H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t 
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(image_len);
 
     /* Set the initial image length size */
@@ -312,13 +297,9 @@ H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t 
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_superblock_get_final_load_size
  *
- * Purpose:     Compute the final size of the data structure on disk.
+ * Purpose:     Compute the final size of the data structure on disk
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 17, 2016
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -332,7 +313,6 @@ H5F__cache_superblock_get_final_load_size(const void *_image, size_t H5_ATTR_NDE
 
     FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
     HDassert(image);
     HDassert(udata);
     HDassert(actual_len);
@@ -357,14 +337,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_superblock_verify_chksum
  *
- * Purpose:	Verify the computed checksum of the data structure is the
- *		same as the stored chksum.
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
  *
- * Return:      Success:        TRUE/FALSE
- *              Failure:        Negative
- *
- * Programmer:  Vailin Choi; Aug 2015
- *
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    Negative
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -374,11 +351,10 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
     uint32_t                   stored_chksum;    /* Stored metadata checksum value */
     uint32_t                   computed_chksum;  /* Computed metadata checksum value */
-    htri_t                     ret_value = TRUE; /* Return value */
+    htri_t                     ret_value = TRUE;
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(image);
     HDassert(udata);
 
@@ -390,22 +366,18 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
 
         if (stored_chksum != computed_chksum)
             ret_value = FALSE;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__cache_superblock_verify_chksum() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__cache_superblock_deserialize
+ * Function:    H5F__cache_superblock_deserialize
  *
- * Purpose:	Loads an object from the disk.
+ * Purpose:     Load an object from the disk
  *
- * Return:	Success:	Pointer to new object
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		July 18 2013
- *
+ * Return:      Success:    Pointer to new object
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -419,7 +391,6 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
 
     FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
     HDassert(image);
     HDassert(udata);
     HDassert(udata->f);
@@ -535,7 +506,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
                 if (H5_IS_BUFFER_OVERFLOW(image, 1, image_end))
                     HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
             }
-        } /* end if */
+        }
         else
             chunk_btree_k = HDF5_BTREE_CHUNK_IK_DEF;
         udata->btree_k[H5B_CHUNK_ID] = chunk_btree_k;
@@ -572,11 +543,11 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
             /* Eliminate the driver info */
             sblock->driver_addr     = HADDR_UNDEF;
             udata->drvrinfo_removed = TRUE;
-        } /* end if */
+        }
 
         /* NOTE: Driver info block is decoded separately, later */
 
-    } /* end if */
+    }
     else {
         uint32_t read_chksum; /* Checksum read from file  */
 
@@ -621,7 +592,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUS
          * any attempt to load the Driver Information Block.
          */
         sblock->driver_addr = HADDR_UNDEF;
-    } /* end else */
+    }
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) <= len);
@@ -641,13 +612,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_superblock_image_len
  *
- * Purpose:     Compute the size of the data structure on disk.
+ * Purpose:     Compute the size of the data structure on disk
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 19, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -657,7 +624,6 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(sblock);
     HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
@@ -672,13 +638,9 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:	H5F__cache_superblock_serialize
  *
- * Purpose:	Flushes a dirty object to disk.
+ * Purpose:     Flush a dirty object to disk
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July 19 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -691,7 +653,6 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(f);
     HDassert(image);
     HDassert(sblock);
@@ -796,7 +757,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
 
         /* Sanity check */
         HDassert((size_t)(image - (uint8_t *)_image) == (size_t)H5F_SUPERBLOCK_SIZE(sblock));
-    } /* end else */
+    }
 
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) == len);
@@ -808,18 +769,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F__cache_superblock_free_icr
  *
- * Purpose:	Destroy/release an "in core representation" of a data
+ * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
+ * Note:        The metadata cache sets the object's cache_info.magic to
+ *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
+ *              callback (checked in assert).
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 20, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -830,7 +787,6 @@ H5F__cache_superblock_free_icr(void *_thing)
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(sblock);
     HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
@@ -848,11 +804,7 @@ done:
  *
  * Purpose:     Compute the initial size of the data structure on disk.
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 20, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -860,7 +812,6 @@ H5F__cache_drvrinfo_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *i
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(image_len);
 
     /* Set the initial image length size */
@@ -874,11 +825,7 @@ H5F__cache_drvrinfo_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *i
  *
  * Purpose:     Compute the final size of the data structure on disk.
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              November 17, 2016
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -892,7 +839,6 @@ H5F__cache_drvrinfo_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBU
 
     FUNC_ENTER_PACKAGE
 
-    /* Check arguments */
     HDassert(image);
     HDassert(udata);
     HDassert(actual_len);
@@ -913,14 +859,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F__cache_drvrinfo_deserialize
  *
- * Purpose:	Loads an object from the disk.
+ * Purpose:     Loads an object from the disk
  *
- * Return:	Success:	Pointer to a new driver info struct
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		July 20 2013
- *
+ * Return:      Success:    Pointer to a new driver info struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -935,7 +877,6 @@ H5F__cache_drvrinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(image);
     HDassert(len >= H5F_DRVINFOBLOCK_HDR_SIZE);
     HDassert(udata);
@@ -973,13 +914,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__cache_drvrinfo_image_len
  *
- * Purpose:     Compute the size of the data structure on disk.
+ * Purpose:     Compute the size of the data structure on disk
  *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              July 20, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -989,7 +926,6 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(drvinfo);
     HDassert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(drvinfo->cache_info.type == H5AC_DRVRINFO);
@@ -1005,13 +941,9 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
 /*-------------------------------------------------------------------------
  * Function:	H5F__cache_drvrinfo_serialize
  *
- * Purpose:	Flushes a dirty object to disk.
+ * Purpose:     Flush a dirty object to disk
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		July 20 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1024,7 +956,6 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBU
 
     FUNC_ENTER_PACKAGE
 
-    /* check arguments */
     HDassert(f);
     HDassert(image);
     HDassert(drvinfo);
@@ -1061,18 +992,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5F__cache_drvrinfo_free_icr
  *
- * Purpose:	Destroy/release an "in core representation" of a data
+ * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
+ * Note:        The metadata cache sets the object's cache_info.magic to
+ *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
+ *              callback (checked in assert).
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              July 20, 2013
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1082,7 +1009,6 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Check arguments */
     HDassert(drvinfo);
     HDassert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(drvinfo->cache_info.type == H5AC_DRVRINFO);
