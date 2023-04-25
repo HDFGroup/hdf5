@@ -117,6 +117,16 @@ Bug Fixes since HDF5-1.10.10 release
 ===================================
     Library
     -------
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
+
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information threw an error, which is due to the memory that was 
+      allocated for pline and efl not being properly cleaned up on error.  
+
+      Fixes Github issue #2602
+
     - Fixed potential heap buffer overflow in decoding of link info message
 
       Detections of buffer overflow were added for decoding version, index
