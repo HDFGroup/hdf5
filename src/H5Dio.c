@@ -1134,12 +1134,15 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
     /* check args */
     HDassert(io_info);
 
-    /* If selection I/O mode is default (auto), enable it here if the VFD supports it (it will be turned off later if something else conflicts), otherwise disable it.  If we're using the MPIO VFD, the automatic selection will happen in H5D__mpio_opt_possible() inside H5D__ioinfo_adjust(). */
+    /* If selection I/O mode is default (auto), enable it here if the VFD supports it (it will be turned off
+     * later if something else conflicts), otherwise disable it.  If we're using the MPIO VFD, the automatic
+     * selection will happen in H5D__mpio_opt_possible() inside H5D__ioinfo_adjust(). */
 #ifdef H5_HAVE_PARALLEL
     if (!io_info->using_mpi_vfd)
 #endif /* H5_HAVE_PARALLEL */
         if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
-            if (H5F_has_vector_select_io(io_info->dsets_info[0].dset->oloc.file, io_info->op_type == H5D_IO_OP_WRITE))
+            if (H5F_has_vector_select_io(io_info->dsets_info[0].dset->oloc.file,
+                                         io_info->op_type == H5D_IO_OP_WRITE))
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
             else {
                 io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
@@ -1155,7 +1158,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
-        /* If we might be doing selection I/O, check if the buffers are large enough to handle the whole I/O */
+        /* If we might be doing selection I/O, check if the buffers are large enough to handle the whole I/O
+         */
         if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
             size_t max_temp_buf; /* Maximum temporary buffer size */
             size_t i;            /* Local index variable */
