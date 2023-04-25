@@ -629,7 +629,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dapl_id, H5P_genplist_t *plist)
     if ((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists")
     if (msg_exists) {
-        /* Retrieve the EFL  message */
+        /* Retrieve the EFL message */
         if (NULL == H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
         efl_copied = TRUE;
