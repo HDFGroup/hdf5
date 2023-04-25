@@ -131,7 +131,7 @@ New Features
       information threw an error, which is due to the memory that was 
       allocated for pline and efl not being properly cleaned up on error.  
 	
-	Fixes Github issue #2602
+      Fixes Github issue #2602
 
     - HDF5GroupInfo class has been deprecated.
 
