@@ -154,6 +154,12 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed H5Pget_vol_cap_flags and H5Pget_vol_id to accept H5P_DEFAULT
+
+      H5Pget_vol_cap_flags and H5Pget_vol_id were updated to correctly
+      accept H5P_DEFAULT for the 'plist_id' FAPL parameter. Previously,
+      they would fail if provided with H5P_DEFAULT as the FAPL.
+
     - Fixed ROS3 VFD anonymous credential usage with h5dump and h5ls
 
       ROS3 VFD anonymous credential functionality became broken in h5dump
