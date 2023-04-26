@@ -250,11 +250,8 @@ typedef struct H5CX_t {
     hbool_t                 dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
-
-    uint32_t no_selection_io_cause;      /* Reason for not performing selection I/O
-                                               (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
-    hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
+    hbool_t                 modify_write_buf;     /* Whether the library can modify write buffers */
+    hbool_t                 modify_write_buf_valid; /* Whether the modify_write_buf field is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -303,6 +300,10 @@ typedef struct H5CX_t {
         mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
 #endif                             /* H5_HAVE_INSTRUMENTED_LIBRARY */
 #endif                             /* H5_HAVE_PARALLEL */
+    uint32_t no_selection_io_cause;      /* Reason for not performing selection I/O
+                                               (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
+    hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -385,6 +386,7 @@ typedef struct H5CX_dxpl_cache_t {
     H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
                                                             (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    hbool_t                 modify_write_buf;      /* Whether the library can modify write buffers */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -572,13 +574,18 @@ H5CX_init(void)
     if (H5P_get(dx_plist, H5D_XFER_CONV_CB_NAME, &H5CX_def_dxpl_cache.dt_conv_cb) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve datatype conversion exception callback")
 
+    /* Get the selection I/O mode */
     if (H5P_get(dx_plist, H5D_XFER_SELECTION_IO_MODE_NAME, &H5CX_def_dxpl_cache.selection_io_mode) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
 
-    /* Get the local & global reasons for breaking collective I/O values */
+    /* Get the local & global reasons for breaking selection I/O values */
     if (H5P_get(dx_plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, &H5CX_def_dxpl_cache.no_selection_io_cause) <
         0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve cause for no selection I/O")
+
+    /* Get the modify write buffer property */
+    if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property")
 
     /* Reset the "default LCPL cache" information */
     HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
@@ -2649,6 +2656,39 @@ H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_no_selection_io_cause() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_modify_write_buf
+ *
+ * Purpose:     Retrieves the modify write buffer property for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_modify_write_buf(hbool_t *modify_write_buf)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(modify_write_buf);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME,
+                             modify_write_buf)
+
+    /* Get the value */
+    *modify_write_buf = (*head)->ctx.modify_write_buf;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_encoding

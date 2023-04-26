@@ -98,7 +98,7 @@ typedef enum {
 
 #define MULTI_NUM_DSETS 3
 #define MULTI_MIN_DSETS 3
-#define DSET_NAME_LEN   35
+#define DSET_NAME_LEN   64
 
 /* Compound type */
 typedef struct s1_t {
@@ -159,7 +159,7 @@ typedef enum {
  */
 static void
 set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, H5FD_mpio_xfer_t mpio_type,
-         H5FD_mpio_collective_opt_t mpio_coll_opt)
+         H5FD_mpio_collective_opt_t mpio_coll_opt, unsigned mwbuf)
 {
     if (H5Pset_selection_io(dxpl, select_io_mode) < 0)
         P_TEST_ERROR;
@@ -169,6 +169,10 @@ set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, H5FD_mpio_xfer_t mp
 
     if (H5Pset_dxpl_mpio_collective_opt(dxpl, mpio_coll_opt) < 0)
         P_TEST_ERROR;
+
+    if (mwbuf)
+        if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+            P_TEST_ERROR;
 
 } /* set_dxpl() */
 
@@ -204,7 +208,7 @@ check_io_mode(hid_t dxpl, unsigned chunked)
  *  Case 1: single dataset read/write, no type conversion (null case)
  */
 static void
-test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
+test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -218,8 +222,10 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
     hsize_t     cdims[1];
     hsize_t     start[1], stride[1], count[1], block[1];
     int         wbuf[DSET_SELECT_DIM];
+    int         wbuf_bak[DSET_SELECT_DIM];
     int         trans_wbuf[DSET_SELECT_DIM];
     int         rbuf[DSET_SELECT_DIM];
+    char        dset_name[DSET_NAME_LEN];
     const char *expr = "2*x";
 
     curr_nerrors = nerrors;
@@ -236,19 +242,14 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         cdims[0] = DSET_SELECT_CHUNK_DIM;
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
-
-        /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
-                              sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
     }
-    else {
 
-        /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_NO_CONV_TRANS : DSET_CONTIG_NO_CONV_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
-    }
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "no_tconv_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+
+    /* Create dataset */
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        P_TEST_ERROR;
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -278,7 +279,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -288,9 +289,17 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_data_transform(dxpl, expr) < 0)
             P_TEST_ERROR;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite(did, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
 
@@ -347,7 +356,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
  *  Case 2: single dataset read/write, no size change, no background buffer
  */
 static void
-test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
+test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
     int     i;
     hid_t   did       = H5I_INVALID_HID;
@@ -360,11 +369,15 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     hsize_t cdims[1];
     hsize_t start[1], stride[1], count[1], block[1];
     char   *wbuf = NULL;
+    char   *wbuf_bak = NULL;
     char   *rbuf = NULL;
+    char    dset_name[DSET_NAME_LEN];
 
     curr_nerrors = nerrors;
 
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
+        P_TEST_ERROR;
+    if (mwbuf && (wbuf_bak = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         P_TEST_ERROR;
     if ((rbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         P_TEST_ERROR;
@@ -382,10 +395,11 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
             P_TEST_ERROR;
     }
 
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "no_size_change_%s_%s", chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+
     /* Create 1d dataset */
-    if ((did =
-             H5Dcreate2(fid, chunked ? DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG : DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG,
-                        H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, dset_name, H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     /* Each process takes x number of elements */
@@ -418,11 +432,19 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(wbuf_bak, wbuf, (size_t)(4 * DSET_SELECT_DIM));
 
     /* Write the data to the dataset with little endian */
     if (H5Dwrite(did, H5T_STD_I32LE, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(wbuf, wbuf_bak, (size_t)(4 * DSET_SELECT_DIM));
 
     check_io_mode(dxpl, chunked);
 
@@ -468,6 +490,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     if (wbuf)
         HDfree(wbuf);
 
+    if (wbuf_bak)
+        HDfree(wbuf_bak);
+
     if (rbuf)
         HDfree(rbuf);
 
@@ -480,7 +505,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
  *  Case 3: single dataset read/write, larger mem type, no background buffer
  */
 static void
-test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
+test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -494,8 +519,10 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     hsize_t     cdims[1];
     hsize_t     start[1], stride[1], count[1], block[1];
     long        wbuf[DSET_SELECT_DIM];
+    long        wbuf_bak[DSET_SELECT_DIM];
     long        trans_wbuf[DSET_SELECT_DIM];
     long long   rbuf[DSET_SELECT_DIM];
+    char        dset_name[DSET_NAME_LEN];
     const char *expr = "100 - x";
 
     curr_nerrors = nerrors;
@@ -511,18 +538,14 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         cdims[0] = DSET_SELECT_CHUNK_DIM;
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
+    }
+
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "larger_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+
         /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_LARGER_NO_BKG_TRANS : DSET_CHK_LARGER_NO_BKG_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
-    }
-    else {
-        /* Create 1d contiguous dataset with/without data transform */
-        if ((did =
-                 H5Dcreate2(fid, dtrans ? DSET_CONTIG_LARGER_NO_BKG_TRANS : DSET_CONTIG_LARGER_NO_BKG_NTRANS,
-                            H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
-    }
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        P_TEST_ERROR;
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -552,7 +575,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -562,9 +585,17 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_data_transform(dxpl, expr) < 0)
             P_TEST_ERROR;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+
     /* Write data to the dataset with/without data transform set in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
 
@@ -621,7 +652,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
  *  Case 4: single dataset reader/write, smaller mem type, no background buffer
  */
 static void
-test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
+test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int         i;
     hid_t       did         = H5I_INVALID_HID;
@@ -635,8 +666,10 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     hsize_t     cdims[1];
     hsize_t     start[1], stride[1], count[1], block[1];
     short       wbuf[DSET_SELECT_DIM];
+    int         wbuf_bak[DSET_SELECT_DIM];
     short       trans_wbuf[DSET_SELECT_DIM];
     short       rbuf[DSET_SELECT_DIM];
+    char        dset_name[DSET_NAME_LEN];
     const char *expr = "2 * (10 + x)";
 
     curr_nerrors = nerrors;
@@ -652,20 +685,14 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         cdims[0] = DSET_SELECT_CHUNK_DIM;
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
-
-        /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_SMALLER_NO_BKG_TRANS : DSET_CHK_SMALLER_NO_BKG_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
     }
-    else {
 
-        /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid,
-                              dtrans ? DSET_CONTIG_SMALLER_NO_BKG_TRANS : DSET_CONTIG_SMALLER_NO_BKG_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
-    }
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "smaller_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+
+    /* Create 1d chunked dataset with/without data transform */
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        P_TEST_ERROR;
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -695,7 +722,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -706,9 +733,17 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
     }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(wbuf_bak, wbuf, sizeof(wbuf));
+
     /* Write data to the dataset with/without data transform in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_SHORT, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
 
@@ -784,7 +819,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
  *      Verify the values read
  */
 static void
-test_cmpd_with_bkg(hid_t fid, unsigned chunked)
+test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
     int     i;
     hid_t   did       = H5I_INVALID_HID;
@@ -801,18 +836,25 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     hsize_t cdims[1];
     hsize_t start[1], stride[1], count[1], block[1];
     s1_t   *s1_wbuf = NULL;
+    s1_t   *s1_wbuf_bak = NULL;
     s1_t   *s1_rbuf = NULL;
     s2_t   *s2_wbuf = NULL;
+    s2_t   *s2_wbuf_bak = NULL;
     s2_t   *s2_rbuf = NULL;
+    char        dset_name[DSET_NAME_LEN];
 
     curr_nerrors = nerrors;
 
     /* Allocate buffers for datasets */
     if (NULL == (s1_wbuf = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
         P_TEST_ERROR;
+    if (mwbuf && NULL == (s1_wbuf_bak = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
+        P_TEST_ERROR;
     if (NULL == (s1_rbuf = (s1_t *)HDmalloc(sizeof(s1_t) * DSET_SELECT_DIM)))
         P_TEST_ERROR;
     if (NULL == (s2_wbuf = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
+        P_TEST_ERROR;
+    if (mwbuf && NULL == (s2_wbuf_bak = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
         P_TEST_ERROR;
     if (NULL == (s2_rbuf = (s2_t *)HDmalloc(sizeof(s2_t) * DSET_SELECT_DIM)))
         P_TEST_ERROR;
@@ -842,9 +884,11 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Case 5(a) */
 
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "cmpd_with_bkg_%s_%s", chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+
     /* Create 1d dataset */
-    if ((did = H5Dcreate2(fid, chunked ? DSET_CHUNKED_CMPD_WITH_BKG : DSET_CONTIG_CMPD_WITH_BKG, s1_tid, sid,
-                          H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, dset_name, s1_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     /* Each process takes x number of elements */
@@ -877,11 +921,19 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
+
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Write all the data to the dataset */
     if (H5Dwrite(did, s1_tid, mspace_id, fspace_id, dxpl, s1_wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
 
     check_io_mode(dxpl, chunked);
 
@@ -921,9 +973,17 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         H5Tinsert(ss_ac_tid, "c", HOFFSET(s1_t, c), H5T_NATIVE_INT) < 0)
         P_TEST_ERROR;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(s1_wbuf_bak, s1_wbuf, sizeof(s1_t) * DSET_SELECT_DIM);
+
     /* Write s1_wbuf to the dataset but with only subset members in ss_tid */
     if (H5Dwrite(did, ss_ac_tid, mspace_id, fspace_id, dxpl, s1_wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
 
     /* Read the whole compound back */
     HDmemset(s1_rbuf, 0, sizeof(s1_t) * DSET_SELECT_DIM);
@@ -1004,8 +1064,17 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         s2_wbuf[i].c = (8 * (i + (int)start[0]) + 2);
         s2_wbuf[i].d = (short)(8 * (i + (int)start[0]) + 3);
     }
+
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(s2_wbuf_bak, s2_wbuf, sizeof(s2_t) * DSET_SELECT_DIM);
+
     if (H5Dwrite(did, s2_tid, mspace_id, fspace_id, dxpl, s2_wbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(s2_wbuf, s2_wbuf_bak, sizeof(s2_t) * DSET_SELECT_DIM);
 
     /* Read it back */
     HDmemset(s2_rbuf, 0, sizeof(s2_t) * DSET_SELECT_DIM);
@@ -1044,8 +1113,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Release buffers */
     HDfree(s1_wbuf);
+    HDfree(s1_wbuf_bak);
     HDfree(s1_rbuf);
     HDfree(s2_wbuf);
+    HDfree(s2_wbuf_bak);
     HDfree(s2_rbuf);
 
     CHECK_PASSED();
@@ -1058,7 +1129,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
  *  Case 6: Type conversions + some processes have null/empty selections in datasets
  */
 static void
-test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
+test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     int     i;
     hid_t   did         = H5I_INVALID_HID;
@@ -1073,12 +1144,15 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     hsize_t start[1], stride[1], count[1], block[1];
 
     long      lwbuf[DSET_SELECT_DIM];
+    long      lwbuf_bak[DSET_SELECT_DIM];
     long      trans_lwbuf[DSET_SELECT_DIM];
     long      lrbuf[DSET_SELECT_DIM];
     short     srbuf[DSET_SELECT_DIM];
     short     swbuf[DSET_SELECT_DIM];
+    short     swbuf_bak[DSET_SELECT_DIM];
     short     trans_swbuf[DSET_SELECT_DIM];
     long long llrbuf[DSET_SELECT_DIM];
+    char      dset_name[DSET_NAME_LEN];
 
     const char *expr = "2*x";
 
@@ -1095,25 +1169,21 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         cdims[0] = DSET_SELECT_CHUNK_DIM;
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
-        /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_TCONV_SEL_EMPTY_TRANS : DSET_CHK_TCONV_SEL_EMPTY_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
     }
-    else {
-        /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid,
-                              dtrans ? DSET_CONTIG_TCONV_SEL_EMPTY_TRANS : DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS,
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-            P_TEST_ERROR;
-    }
+
+    /* Generate dataset name */
+    HDsnprintf(dset_name, sizeof(dset_name), "tconv_sel_empty_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+
+    /* Create dataset */
+    if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        P_TEST_ERROR;
 
     /* Create dataset transfer property list */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -1158,9 +1228,17 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
     }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(lwbuf_bak, lwbuf, sizeof(lwbuf));
+
     /* Write data to the dataset with/without data transform in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(lwbuf, lwbuf_bak, sizeof(lwbuf));
 
     check_io_mode(dxpl, chunked);
 
@@ -1209,9 +1287,17 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
     }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(lwbuf_bak, lwbuf, sizeof(lwbuf));
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite(did, H5T_NATIVE_LONG, mspace_id, fspace_id, dxpl, lwbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(lwbuf, lwbuf_bak, sizeof(lwbuf));
 
     /* Read the data from the dataset: type conversion int-->short */
     /* If dtrans, without data transform set in dxpl */
@@ -1262,9 +1348,17 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
     }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(swbuf_bak, swbuf, sizeof(swbuf));
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite(did, H5T_NATIVE_SHORT, mspace_id, fspace_id, dxpl, swbuf) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(swbuf, swbuf_bak, sizeof(swbuf));
 
     /* Read the data from the dataset: type conversion int-->llong */
     /* If dtrans, without data transform set in dxpl */
@@ -1314,7 +1408,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
  *    Datatype for all datasets: H5T_NATIVE_LONG
  */
 static void
-test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
+test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     size_t  ndsets;
     int     i, j;
@@ -1335,10 +1429,12 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     size_t buf_size;
 
     int *total_wbuf       = NULL;
+    int   *total_wbuf_bak    = NULL;
     int *total_trans_wbuf = NULL;
     int *total_rbuf       = NULL;
 
     long *total_lwbuf       = NULL;
+    long  *total_lwbuf_bak   = NULL;
     long *total_trans_lwbuf = NULL;
     long *total_lrbuf       = NULL;
 
@@ -1374,7 +1470,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -1389,18 +1485,10 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         if ((file_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
             P_TEST_ERROR;
 
-        /* Create ith dataset */
-        if (chunked) {
-            if (snprintf(dset_names[i], DSET_NAME_LEN,
-                         dtrans ? "multi_chk_trans_dset%u" : "multi_chk_ntrans_dset%u", i) < 0)
-                P_TEST_ERROR;
-        }
-        else {
-            if (snprintf(dset_names[i], DSET_NAME_LEN,
-                         dtrans ? "multi_contig_trans_dset%u" : "multi_contig_ntrans_dset%u", i) < 0)
-                P_TEST_ERROR;
-        }
+        /* Generate dataset name */
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s", i, chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
+        /* Create ith dataset */
         if ((dset_dids[i] =
                  H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_INT),
                             file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1426,6 +1514,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     /* Allocate buffers for all datasets */
     if (NULL == (total_wbuf = (int *)HDmalloc(buf_size)))
         P_TEST_ERROR;
+    if (mwbuf && NULL == (total_wbuf_bak = (int *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
     if (NULL == (total_trans_wbuf = (int *)HDmalloc(buf_size)))
         P_TEST_ERROR;
     if (NULL == (total_rbuf = (int *)HDmalloc(buf_size)))
@@ -1434,6 +1524,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
 
     if (NULL == (total_lwbuf = (long *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
+    if (mwbuf && NULL == (total_lwbuf_bak = (long *)HDmalloc(buf_size)))
         P_TEST_ERROR;
     if (NULL == (total_trans_lwbuf = (long *)HDmalloc(buf_size)))
         P_TEST_ERROR;
@@ -1463,9 +1555,17 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_INT;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf_bak, total_wbuf, ndsets * DSET_SELECT_DIM * sizeof(int));
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
 
     check_io_mode(dxpl, chunked);
 
@@ -1524,9 +1624,17 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_LONG;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_lwbuf_bak, total_lwbuf, ndsets * DSET_SELECT_DIM * sizeof(long));
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_lwbuf, total_lwbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
 
     /* Read data from the dataset (if dtrans, with data transform again in dxpl */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -1561,9 +1669,11 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     }
 
     HDfree(total_wbuf);
+    HDfree(total_wbuf_bak);
     HDfree(total_rbuf);
     HDfree(total_trans_wbuf);
     HDfree(total_lwbuf);
+    HDfree(total_lwbuf_bak);
     HDfree(total_trans_lwbuf);
     HDfree(total_lrbuf);
 
@@ -1610,7 +1720,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
  *      --Verify values read
  */
 static void
-test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
+test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
     size_t  ndsets;
     int     i, j, mm;
@@ -1636,9 +1746,11 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     size_t s2_buf_size;
 
     s1_t *total_wbuf = NULL;
+    s1_t *total_wbuf_bak = NULL;
     s1_t *total_rbuf = NULL;
 
     s2_t *s2_total_wbuf = NULL;
+    s2_t *s2_total_wbuf_bak = NULL;
     s2_t *s2_total_rbuf = NULL;
 
     s1_t *wbufi[MULTI_NUM_DSETS];
@@ -1669,7 +1781,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     /* Each process takes x number of elements */
     block[0]  = dims[0] / (hsize_t)mpi_size;
@@ -1693,9 +1805,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
         if ((mem_sids[i] = H5Screate_simple(1, block, NULL)) < 0)
             P_TEST_ERROR;
 
-        if (snprintf(dset_names[i], DSET_NAME_LEN,
-                     chunked ? "multi_chk_cmpd_dset%u" : "multi_contig_cmpd_dset%u", i) < 0)
-            P_TEST_ERROR;
+        /* Generate dataset name */
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_cmpd_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+
+        /* Create ith dataset */
         if ((dset_dids[i] =
                  H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
@@ -1710,10 +1823,14 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     /* Allocate buffers for all datasets */
     if (NULL == (total_wbuf = (s1_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
+    if (mwbuf && NULL == (total_wbuf_bak = (s1_t *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
     if (NULL == (total_rbuf = (s1_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
 
     if (NULL == (s2_total_wbuf = (s2_t *)HDmalloc(s2_buf_size)))
+        P_TEST_ERROR;
+    if (mwbuf && NULL == (s2_total_wbuf_bak = (s2_t *)HDmalloc(s2_buf_size)))
         P_TEST_ERROR;
     if (NULL == (s2_total_rbuf = (s2_t *)HDmalloc(s2_buf_size)))
         P_TEST_ERROR;
@@ -1742,8 +1859,16 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = s1_tid;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
 
@@ -1798,8 +1923,16 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
             P_TEST_ERROR;
     }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         P_TEST_ERROR;
@@ -1970,8 +2103,16 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
             s2_wbufi[i][j].d = (short)((8 * (j + (int)start[0])) + 3);
         }
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(s2_total_wbuf_bak, s2_total_wbuf, s2_buf_size);
+
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(s2_total_wbuf, s2_total_wbuf_bak, s2_buf_size);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         P_TEST_ERROR;
@@ -2005,8 +2146,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
     }
 
     HDfree(total_wbuf);
+    HDfree(total_wbuf_bak);
     HDfree(total_rbuf);
     HDfree(s2_total_wbuf);
+    HDfree(s2_total_wbuf_bak);
     HDfree(s2_total_rbuf);
 
     CHECK_PASSED();
@@ -2032,7 +2175,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked)
  *    Datatype for all datasets: H5T_STD_I16BE
  */
 static void
-test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
+test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
     size_t  ndsets;
     int     i, j;
@@ -2051,10 +2194,13 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
 
     size_t   buf_size, ss;
     uint8_t *total_wbuf  = NULL;
+    uint8_t *total_wbuf_bak  = NULL;
     uint8_t *total_rbuf  = NULL;
     uint8_t *total_lwbuf = NULL;
+    uint8_t *total_lwbuf_bak = NULL;
     uint8_t *total_lrbuf = NULL;
     uint8_t *total_swbuf = NULL;
+    uint8_t *total_swbuf_bak = NULL;
     uint8_t *total_srbuf = NULL;
 
     uint8_t *wbufi[MULTI_NUM_DSETS];
@@ -2087,32 +2233,20 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     /* Set up file space ids, mem space ids, and dataset ids */
     for (i = 0; i < (int)ndsets; i++) {
         if ((file_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
             P_TEST_ERROR;
 
-        if ((mem_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
-            P_TEST_ERROR;
+        /* Generate dataset name */
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_size_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
-        if (snprintf(dset_names[i], DSET_NAME_LEN,
-                     chunked ? "multi_chk_size_dset%u" : "multi_contig_size_dset%u", i) < 0)
+        if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_STD_I32BE, file_sids[i], H5P_DEFAULT, dcpl,
+                                       H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
-
-        if (i == 0) {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_STD_I32BE, file_sids[i], H5P_DEFAULT, dcpl,
-                                           H5P_DEFAULT)) < 0)
-                P_TEST_ERROR;
-        }
-        else {
-            if ((dset_dids[i] =
-                     H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_STD_I64LE : H5T_STD_I16LE),
-                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                P_TEST_ERROR;
-        }
     }
 
     /* Each process takes x number of elements */
@@ -2136,6 +2270,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
 
     /* Allocate buffers for all datasets */
     if (NULL == (total_wbuf = (uint8_t *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
+    if (NULL == (total_wbuf_bak = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
     if (NULL == (total_rbuf = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
@@ -2162,9 +2298,17 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_STD_I32BE;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
 
@@ -2196,6 +2340,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     /* Allocate buffers for all datasets */
     if (NULL == (total_lwbuf = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
+    if (NULL == (total_lwbuf_bak = (uint8_t *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
     if (NULL == (total_lrbuf = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
 
@@ -2225,9 +2371,17 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_STD_I64BE;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_lwbuf_bak, total_lwbuf, buf_size);
+
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_lwbuf, total_lwbuf_bak, buf_size);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2261,6 +2415,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     /* Allocate buffers for all datasets */
     if (NULL == (total_swbuf = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
+    if (NULL == (total_swbuf_bak = (uint8_t *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
     if (NULL == (total_srbuf = (uint8_t *)HDmalloc(buf_size)))
         P_TEST_ERROR;
 
@@ -2284,9 +2440,17 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_STD_I16BE;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_swbuf_bak, total_swbuf, buf_size);
+
     /* Write data to the dataset */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_swbuf, total_swbuf_bak, buf_size);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2319,10 +2483,13 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
     }
 
     HDfree(total_wbuf);
+    HDfree(total_wbuf_bak);
     HDfree(total_rbuf);
     HDfree(total_lwbuf);
+    HDfree(total_lwbuf_bak);
     HDfree(total_lrbuf);
     HDfree(total_swbuf);
+    HDfree(total_swbuf_bak);
     HDfree(total_srbuf);
 
     CHECK_PASSED();
@@ -2353,7 +2520,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked)
  *  --this will trigger type conversion for (a), (b) & (c)
  */
 static void
-test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
+test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
 {
     size_t ndsets;
     int    i, j;
@@ -2374,6 +2541,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 
     size_t buf_size;
     int   *total_wbuf       = NULL;
+    int   *total_wbuf_bak   = NULL;
     int   *total_trans_wbuf = NULL;
     long  *total_lrbuf      = NULL;
 
@@ -2410,7 +2578,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     /* Set selection I/O mode, type of I/O and type of collective I/O */
-    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
     if ((ntrans_dxpl = H5Pcopy(dxpl)) < 0)
         P_TEST_ERROR;
@@ -2425,16 +2593,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         if ((file_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
             P_TEST_ERROR;
 
-        if (chunked) {
-            if (snprintf(dset_names[i], DSET_NAME_LEN,
-                         dtrans ? "multi_chk_trans_sel_dset%u" : "multi_chk_ntrans_sel_dset%u", i) < 0)
-                P_TEST_ERROR;
-        }
-        else {
-            if (snprintf(dset_names[i], DSET_NAME_LEN,
-                         dtrans ? "multi_contig_trans_sel_dset%u" : "multi_contig_ntrans_sel_dset%u", i) < 0)
-                P_TEST_ERROR;
-        }
+        /* Generate dataset name */
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_sel_dset%d_%s_%s_%s", i, chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
         if (i == 0) {
             if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
@@ -2453,6 +2613,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Allocate buffers for all datasets */
     if (NULL == (total_wbuf = (int *)HDmalloc(buf_size)))
+        P_TEST_ERROR;
+    if (NULL == (total_wbuf_bak = (int *)HDmalloc(buf_size)))
         P_TEST_ERROR;
     if (NULL == (total_trans_wbuf = (int *)HDmalloc(buf_size)))
         P_TEST_ERROR;
@@ -2604,9 +2766,17 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_INT;
 
+    /* Copy wbuf if the library will be modifying it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf_bak, total_wbuf, buf_size);
+
     /* Write data to the dataset with/without data transform */
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
         P_TEST_ERROR;
+
+    /* Restore wbuf from backup if the library modified it */
+    if (mwbuf)
+        HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
 
@@ -2671,6 +2841,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     }
 
     HDfree(total_wbuf);
+    HDfree(total_wbuf_bak);
     HDfree(total_trans_wbuf);
     HDfree(total_lrbuf);
 
@@ -2741,7 +2912,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
  *     --fields 'b' and 'd' are (DSET_SELECT_DIM + j + start[0])
  */
 static void
-test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
+test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 {
     size_t ndsets;
     int    i, j, mm;
@@ -2770,27 +2941,32 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
     size_t buf_size;
 
     int *total_wbuf1 = NULL;
+    int *total_wbuf1_bak = NULL;
     int *total_rbuf1 = NULL;
 
     int *wbufi1[MULTI_NUM_DSETS];
     int *rbufi1[MULTI_NUM_DSETS];
 
     unsigned long *ul_total_wbuf2 = NULL;
+    unsigned long *ul_total_wbuf2_bak = NULL;
     long          *l_total_rbuf2  = NULL;
     unsigned long *ul_wbufi2[MULTI_NUM_DSETS];
     long          *l_rbufi2[MULTI_NUM_DSETS];
 
     long  *l_total_wbuf2 = NULL;
+    long  *l_total_wbuf2_bak = NULL;
     short *s_total_rbuf2 = NULL;
     long  *l_wbufi2[MULTI_NUM_DSETS];
     short *s_rbufi2[MULTI_NUM_DSETS];
 
     s1_t *s1_total_wbuf3 = NULL;
+    s1_t *s1_total_wbuf3_bak = NULL;
     s3_t *s3_total_rbuf3 = NULL;
     s1_t *s1_wbufi3[MULTI_NUM_DSETS];
     s3_t *s3_rbufi3[MULTI_NUM_DSETS];
 
     s4_t *s4_total_wbuf3 = NULL;
+    s4_t *s4_total_wbuf3_bak = NULL;
     s1_t *s1_total_rbuf3 = NULL;
     s4_t *s4_wbufi3[MULTI_NUM_DSETS];
     s1_t *s1_rbufi3[MULTI_NUM_DSETS];
@@ -2809,7 +2985,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
             P_TEST_ERROR;
 
         /* Set selection I/O mode, type of I/O and type of collective I/O */
-        set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO);
+        set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, mwbuf);
 
         /* Set dataset layout: contiguous or chunked */
         dims[0] = DSET_SELECT_DIM;
@@ -2870,29 +3046,21 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
             mm = HDrandom() % (int)ndsets;
             if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
-                if (snprintf(dset_names[i], DSET_NAME_LEN,
-                             chunked ? "multi_all_chk_nconv_dset%u" : "multi_all_contig_nconv_dset%u", i) < 0)
-                    P_TEST_ERROR;
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
             }
             else if (mm == 1) {
                 dset_types[i] = DSET_WITH_CONV_AND_NO_BKG;
-                if (snprintf(dset_names[i], DSET_NAME_LEN,
-                             chunked ? "multi_all_chk_conv_nbkg_dset%u" : "multi_all_contig_conv_nbkg_dset%u",
-                             i) < 0)
-                    P_TEST_ERROR;
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
             }
             else {
                 dset_types[i] = DSET_WITH_CONV_AND_BKG;
-                if (snprintf(dset_names[i], DSET_NAME_LEN,
-                             chunked ? "multi_all_chk_conv_bkg_dset%u" : "multi_all_contig_conv_bkg_dset%u",
-                             i) < 0)
-                    P_TEST_ERROR;
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl,
                                                H5P_DEFAULT)) < 0)
                     P_TEST_ERROR;
@@ -2909,6 +3077,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(int);
         if (NULL == (total_wbuf1 = (int *)HDmalloc(buf_size)))
             P_TEST_ERROR;
+        if (mwbuf && NULL == (total_wbuf1_bak = (int *)HDmalloc(buf_size)))
+            P_TEST_ERROR;
         if (NULL == (total_rbuf1 = (int *)HDmalloc(buf_size)))
             P_TEST_ERROR;
 
@@ -2916,12 +3086,16 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(unsigned long);
         if (NULL == (ul_total_wbuf2 = (unsigned long *)HDmalloc(buf_size)))
             P_TEST_ERROR;
+        if (mwbuf && NULL == (ul_total_wbuf2_bak = (unsigned long *)HDmalloc(buf_size)))
+            P_TEST_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
         if (NULL == (l_total_rbuf2 = (long *)HDmalloc(buf_size)))
             P_TEST_ERROR;
 
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(long);
         if (NULL == (l_total_wbuf2 = (long *)HDmalloc(buf_size)))
+            P_TEST_ERROR;
+        if (mwbuf && NULL == (l_total_wbuf2_bak = (long *)HDmalloc(buf_size)))
             P_TEST_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(short);
         if (NULL == (s_total_rbuf2 = (short *)HDmalloc(buf_size)))
@@ -2931,12 +3105,16 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
         if (NULL == (s1_total_wbuf3 = (s1_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
+        if (mwbuf && NULL == (s1_total_wbuf3_bak = (s1_t *)HDmalloc(buf_size)))
+            P_TEST_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s3_t);
         if (NULL == (s3_total_rbuf3 = (s3_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
 
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s4_t);
         if (NULL == (s4_total_wbuf3 = (s4_t *)HDmalloc(buf_size)))
+            P_TEST_ERROR;
+        if (mwbuf && NULL == (s4_total_wbuf3_bak = (s4_t *)HDmalloc(buf_size)))
             P_TEST_ERROR;
         buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
         if (NULL == (s1_total_rbuf3 = (s1_t *)HDmalloc(buf_size)))
@@ -3048,8 +3226,27 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 
             } /* end for i ndsets */
 
+            /* Copy wbufs if the library will be modifying them */
+            if (mwbuf) {
+                HDmemcpy(total_wbuf1_bak, total_wbuf1, ndsets * DSET_SELECT_DIM * sizeof(int));
+                HDmemcpy(ul_total_wbuf2_bak, ul_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                HDmemcpy(l_total_wbuf2_bak, l_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(long));
+                HDmemcpy(s1_total_wbuf3_bak, s1_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
+                HDmemcpy(s4_total_wbuf3_bak, s4_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
+            }
+
             if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, wbufs) < 0)
                 P_TEST_ERROR;
+
+            /* Restore wbufs from backup if the library modified them */
+            if (mwbuf) {
+                HDmemcpy(total_wbuf1, total_wbuf1_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
+                HDmemcpy(ul_total_wbuf2, ul_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                HDmemcpy(l_total_wbuf2, l_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
+                HDmemcpy(s1_total_wbuf3, s1_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
+                HDmemcpy(s4_total_wbuf3, s4_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
+            }
+
             if (H5Dread_multi(ndsets, dset_dids, r_mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
                 P_TEST_ERROR;
 
@@ -3157,16 +3354,21 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked)
 
         /* Freeing */
         HDfree(total_wbuf1);
+        HDfree(total_wbuf1_bak);
         HDfree(total_rbuf1);
 
         HDfree(ul_total_wbuf2);
+        HDfree(ul_total_wbuf2_bak);
         HDfree(l_total_rbuf2);
         HDfree(l_total_wbuf2);
+        HDfree(l_total_wbuf2_bak);
         HDfree(s_total_rbuf2);
 
         HDfree(s1_total_wbuf3);
+        HDfree(s1_total_wbuf3_bak);
         HDfree(s3_total_rbuf3);
         HDfree(s4_total_wbuf3);
+        HDfree(s4_total_wbuf3_bak);
         HDfree(s1_total_rbuf3);
 
     } /* end for n niter */
@@ -3327,6 +3529,7 @@ main(int argc, char *argv[])
     int      test_select_config;
     unsigned chunked;
     unsigned dtrans;
+    unsigned mwbuf;
 
     h5_reset();
 
@@ -3352,153 +3555,160 @@ main(int argc, char *argv[])
         /* therefore, not all tests are run with data transform */
         for (dtrans = FALSE; dtrans <= TRUE; dtrans++) {
 
-            if (MAINPROCESS) {
-                if (chunked) {
-                    if (dtrans)
-                        HDputs("\nTesting for selection I/O with chunked dataset and data transform\n");
+            /* Test with and without modify_write_buf turned on */
+            for (mwbuf = FALSE; mwbuf <= TRUE; mwbuf++) {
+
+                if (MAINPROCESS) {
+                    /* Print configuration message */
+                    printf("Testing for selection I/O ");
+                    if (chunked)
+                        printf("with chunked dataset, ");
                     else
-                        HDputs("\nTesting for selection I/O with chunked dataset and no data transform\n");
-                }
-                else {
+                        printf("with contiguous datset, ");
                     if (dtrans)
-                        HDputs("\nTesting for selection I/O with contiguous dataset and data transform\n");
+                        printf("data transform, ");
                     else
-                        HDputs("\nTesting for selection I/O with contiguous dataset and no data transform\n");
+                        printf("without data transform, ");
+                    if (mwbuf)
+                        printf("and with modifying write buffers\n");
+                    else
+                        printf("and without modifying write buffers\n");
                 }
-            }
 
-            for (test_select_config = (int)TEST_NO_TYPE_CONV; test_select_config < (int)TEST_SELECT_NTESTS;
-                 test_select_config++) {
+                for (test_select_config = (int)TEST_NO_TYPE_CONV; test_select_config < (int)TEST_SELECT_NTESTS;
+                     test_select_config++) {
 
-                switch (test_select_config) {
+                    switch (test_select_config) {
 
-                    case TEST_NO_TYPE_CONV: /* case 1 */
-                        if (MAINPROCESS)
-                            TESTING_2("No type conversion (null case)");
-
-                        test_no_type_conv(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_NO_SIZE_CHANGE_NO_BKG: /* case 2 */
-                        if (MAINPROCESS)
-                            TESTING_2("No size change, no background buffer");
-
-                        /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        case TEST_NO_TYPE_CONV: /* case 1 */
                             if (MAINPROCESS)
-                                SKIPPED();
-                            continue;
-                        }
+                                TESTING_2("No type conversion (null case)");
 
-                        test_no_size_change_no_bkg(fid, chunked);
+                            test_no_type_conv(fid, chunked, dtrans, mwbuf);
 
-                        break;
+                            break;
 
-                    case TEST_LARGER_MEM_NO_BKG: /* case 3 */
-                        if (MAINPROCESS)
-                            TESTING_2("Larger memory type, no background buffer");
-
-                        test_larger_mem_type_no_bkg(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_SMALLER_MEM_NO_BKG: /* case 4 */
-                        if (MAINPROCESS)
-                            TESTING_2("Smaller memory type, no background buffer");
-
-                        test_smaller_mem_type_no_bkg(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_CMPD_WITH_BKG: /* case 5 */
-                        if (MAINPROCESS)
-                            TESTING_2("Compound types with background buffer");
-                        /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        case TEST_NO_SIZE_CHANGE_NO_BKG: /* case 2 */
                             if (MAINPROCESS)
-                                SKIPPED();
-                            continue;
-                        }
+                                TESTING_2("No size change, no background buffer");
 
-                        test_cmpd_with_bkg(fid, chunked);
+                            /* Data transforms does not apply to the dataset datatype for this test */
+                            if (dtrans) {
+                                if (MAINPROCESS)
+                                    SKIPPED();
+                                continue;
+                            }
 
-                        break;
+                            test_no_size_change_no_bkg(fid, chunked, mwbuf);
 
-                    case TEST_TYPE_CONV_SEL_EMPTY: /* case 6 */
-                        if (MAINPROCESS)
-                            TESTING_2("Empty selections + Type conversion");
+                            break;
 
-                        test_type_conv_sel_empty(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_MULTI_CONV_NO_BKG: /* case 7 */
-                        if (MAINPROCESS)
-                            TESTING_2("multi-datasets: type conv + no bkg buffer");
-
-                        test_multi_dsets_no_bkg(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_MULTI_CONV_BKG: /* case 8 */
-                        if (MAINPROCESS)
-                            TESTING_2("multi-datasets: type conv + bkg buffer");
-
-                        /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        case TEST_LARGER_MEM_NO_BKG: /* case 3 */
                             if (MAINPROCESS)
-                                SKIPPED();
-                        }
-                        else
-                            test_multi_dsets_cmpd_with_bkg(fid, chunked);
+                                TESTING_2("Larger memory type, no background buffer");
 
-                        break;
+                            test_larger_mem_type_no_bkg(fid, chunked, dtrans, mwbuf);
 
-                    case TEST_MULTI_CONV_SIZE_CHANGE: /* case 9 */
-                        if (MAINPROCESS)
-                            TESTING_2("multi-datasets: type conv + size change + no bkg buffer");
+                            break;
 
-                        /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        case TEST_SMALLER_MEM_NO_BKG: /* case 4 */
                             if (MAINPROCESS)
-                                SKIPPED();
-                        }
-                        else
-                            test_multi_dsets_size_change_no_bkg(fid, chunked);
+                                TESTING_2("Smaller memory type, no background buffer");
 
-                        break;
+                            test_smaller_mem_type_no_bkg(fid, chunked, dtrans, mwbuf);
 
-                    case TEST_MULTI_CONV_SEL_EMPTY: /* case 10 */
-                        if (MAINPROCESS)
-                            TESTING_2("multi-datasets: type conv + empty selections");
+                            break;
 
-                        test_multi_dsets_conv_sel_empty(fid, chunked, dtrans);
-
-                        break;
-
-                    case TEST_MULTI_ALL: /* case 11 */
-                        if (MAINPROCESS)
-                            TESTING_2("multi-datasets: no conv + conv without bkg + conv with bkg");
-
-                        /* Data transforms does not apply to the dataset datatype for this test */
-                        if (dtrans) {
+                        case TEST_CMPD_WITH_BKG: /* case 5 */
                             if (MAINPROCESS)
-                                SKIPPED();
-                        }
-                        else
-                            test_multi_dsets_all(2, fid, chunked);
+                                TESTING_2("Compound types with background buffer");
+                            /* Data transforms does not apply to the dataset datatype for this test */
+                            if (dtrans) {
+                                if (MAINPROCESS)
+                                    SKIPPED();
+                                continue;
+                            }
 
-                        break;
+                            test_cmpd_with_bkg(fid, chunked, mwbuf);
 
-                    case TEST_SELECT_NTESTS:
-                    default:
-                        P_TEST_ERROR;
-                        break;
+                            break;
 
-                } /* end switch */
+                        case TEST_TYPE_CONV_SEL_EMPTY: /* case 6 */
+                            if (MAINPROCESS)
+                                TESTING_2("Empty selections + Type conversion");
 
-            } /* end for test_select_config */
+                            test_type_conv_sel_empty(fid, chunked, dtrans, mwbuf);
+
+                            break;
+
+                        case TEST_MULTI_CONV_NO_BKG: /* case 7 */
+                            if (MAINPROCESS)
+                                TESTING_2("multi-datasets: type conv + no bkg buffer");
+
+                            test_multi_dsets_no_bkg(fid, chunked, dtrans, mwbuf);
+
+                            break;
+
+                        case TEST_MULTI_CONV_BKG: /* case 8 */
+                            if (MAINPROCESS)
+                                TESTING_2("multi-datasets: type conv + bkg buffer");
+
+                            /* Data transforms does not apply to the dataset datatype for this test */
+                            if (dtrans) {
+                                if (MAINPROCESS)
+                                    SKIPPED();
+                            }
+                            else
+                                test_multi_dsets_cmpd_with_bkg(fid, chunked, mwbuf);
+
+                            break;
+
+                        case TEST_MULTI_CONV_SIZE_CHANGE: /* case 9 */
+                            if (MAINPROCESS)
+                                TESTING_2("multi-datasets: type conv + size change + no bkg buffer");
+
+                            /* Data transforms does not apply to the dataset datatype for this test */
+                            if (dtrans) {
+                                if (MAINPROCESS)
+                                    SKIPPED();
+                            }
+                            else
+                                test_multi_dsets_size_change_no_bkg(fid, chunked, mwbuf);
+
+                            break;
+
+                        case TEST_MULTI_CONV_SEL_EMPTY: /* case 10 */
+                            if (MAINPROCESS)
+                                TESTING_2("multi-datasets: type conv + empty selections");
+
+                            test_multi_dsets_conv_sel_empty(fid, chunked, dtrans, mwbuf);
+
+                            break;
+
+                        case TEST_MULTI_ALL: /* case 11 */
+                            if (MAINPROCESS)
+                                TESTING_2("multi-datasets: no conv + conv without bkg + conv with bkg");
+
+                            /* Data transforms does not apply to the dataset datatype for this test */
+                            if (dtrans) {
+                                if (MAINPROCESS)
+                                    SKIPPED();
+                            }
+                            else
+                                test_multi_dsets_all(2, fid, chunked, mwbuf);
+
+                            break;
+
+                        case TEST_SELECT_NTESTS:
+                        default:
+                            P_TEST_ERROR;
+                            break;
+
+                    } /* end switch */
+
+                } /* end for test_select_config */
+
+            } /* end mwbuf */
 
         } /* end dtrans */
     }     /* end chunked */

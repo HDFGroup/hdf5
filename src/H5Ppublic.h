@@ -8342,32 +8342,84 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
  *          as follows. If there are multiple causes, it is a bitwise OR of
  *          the relevant causes.
  *
- *          - #H5D_DISABLE_BY_API
+ *          - #H5D_SEL_IO_DISABLE_BY_API
  *          Selection I/O was not performed because the feature was disabled by the API
- *          - #H5D_DATATYPE_CONVERSION
- *          Selection I/O was not performed because of datatype conversion
- *          - #H5D_NOT_CONTIGUOUS_OR_CHUNKED_DATASET
+ *          - #H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET
  *          Selection I/O was not performed because the dataset was neither contiguous nor chunked
- *          - #H5D_CONTIGUOUS_SIEVE_BUFFER
+ *          - #H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER
  *          Selection I/O was not performed because of sieve buffer for contiguous dataset
- *          - #H5D_NO_VECTOR_OR_SELECTION_IO_CB
+ *          - #H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB
  *          Selection I/O was not performed because the VFD does not have vector or selection I/O callback
- *          - #H5D_PAGE_BUFFER
+ *          - #H5D_SEL_IO_PAGE_BUFFER
  *          Selection I/O was not performed because of page buffer
- *          - #H5D_DATASET_FILTER
+ *          - #H5D_SEL_IO_DATASET_FILTER
  *          Selection I/O was not performed because of dataset filters
- *          - #H5D_CHUNK_CACHE
+ *          - #H5D_SEL_IO_CHUNK_CACHE
  *          Selection I/O was not performed because of chunk cache
- *          - #H5D_TCONV_BUF_TOO_SMALL
+ *          - #H5D_SEL_IO_TCONV_BUF_TOO_SMALL
  *          Selection I/O was not performed because the type conversion buffer is too small
- *          (for collective I/O)
- *          - #H5D_NO_BENEFIT_BY_MPIO
- *          Selection I/O was not performed because there is no benefit (for MPIO)
+ *          - #H5D_SEL_IO_BKG_BUF_TOO_SMALL
+ *          Selection I/O was not performed because the type conversion background buffer is too small
+ *          - #H5D_SEL_IO_DEFAULT_OFF
+ *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it to be off for this case
  *
  * \since 1.14.3
  *
  */
 H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Allows the library to modify the contents of the write buffer
+ *
+ * \param[in] dxpl_id   Property list identifier
+ * \param[in] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_modify_write_buf() sets whether the library is allowed to
+ *          modify the contents of write buffers passed to HDF5 API routines
+ *          that are passed the dataset transfer property list \p dxpl_id.  The
+ *          default value for modify_write_buf is FALSE.
+ *
+ *          This function can be used to allow the library to perform in-place
+ *          type conversion on write operations to save memory space.  This is
+ *          currently only used for selection I/O operations, which are used for
+ *          collective I/O with type conversion.  After making an API call with
+ *          this parameter set to TRUE, the contents of the write buffer are
+ *          undefined.
+ *
+ * \note    When modify_write_buf is set to TRUE the library may violate the
+ *          const qualifier on the API parameter for the write buffer.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the "modify write buffer" property
+ *
+ * \param[in] dxpl_id   Property list identifier
+ * \param[out] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_modify_write_buf() gets the "modify write buffer" property
+ *          from the dataset transfer property list \p dxpl_id.  This property
+ *          determines whether the library is allowed to  modify the contents of
+ *          write buffers passed to HDF5 API routines that are passed
+ *          \p dxpl_id.  The default value for modify_write_buf is FALSE.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_modify_write_buf(hid_t dxpl_id, hbool_t *modify_write_buf);
 
 /**
  * \ingroup LCPL

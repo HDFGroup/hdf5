@@ -1054,7 +1054,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
 
                 /* Set buffer to point to write buffer + offset */
                 /* Use cast to union to twiddle away const.  OK because if we're doing this it means the user
-                 * explicitly allowed us to modify this buffer via H5Pset_modfy_write_buf(). */
+                 * explicitly allowed us to modify this buffer via H5Pset_modify_write_buf(). */
                 flex_buf.cvp  = io_info->wbufs[i];
                 tmp_write_buf = (uint8_t *)flex_buf.vp + io_info->sel_pieces[i]->buf_off;
             }

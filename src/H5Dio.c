@@ -937,8 +937,13 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
         io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset_info[0].dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
-    /* Check if we could potentially use in-place type conversion.  For now just check if it's a read op */
-    io_info->may_use_in_place_tconv = (op_type == H5D_IO_OP_READ);
+    /* Check if we could potentially use in-place type conversion */
+    if (op_type == H5D_IO_OP_READ)
+        /* Always on for read (modulo other restrictions that are handled in layout callbacks) */
+        io_info->may_use_in_place_tconv = (op_type == H5D_IO_OP_READ);
+    else
+        /* Only enable in-place type conversion if we're allowed to modify the write buffer */
+        H5CX_get_modify_write_buf(&io_info->may_use_in_place_tconv);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__ioinfo_init() */

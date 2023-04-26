@@ -176,6 +176,11 @@
 /* Definitions for cause of no selection I/O property */
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE sizeof(uint32_t)
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
+/* Definitions for modify write buffer property */
+#define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
+#define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
+#define H5D_XFER_MODIFY_WRITE_BUF_ENC  H5P__dxfr_modify_write_buf_enc
+#define H5D_XFER_MODIFY_WRITE_BUF_DEC  H5P__dxfr_modify_write_buf_dec
 
 /******************/
 /* Local Typedefs */
@@ -218,6 +223,8 @@ static int    H5P__dxfr_dset_io_hyp_sel_cmp(const void *value1, const void *valu
 static herr_t H5P__dxfr_dset_io_hyp_sel_close(const char *name, size_t size, void *value);
 static herr_t H5P__dxfr_selection_io_mode_enc(const void *value, void **pp, size_t *size);
 static herr_t H5P__dxfr_selection_io_mode_dec(const void **pp, void *value);
+static herr_t H5P__dxfr_modify_write_buf_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dxfr_modify_write_buf_dec(const void **pp, void *value);
 
 /*********************/
 /* Package Variables */
@@ -289,6 +296,7 @@ static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
+static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -458,10 +466,16 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
                            H5D_XFER_SELECTION_IO_MODE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the cause of no selection I/O */
+    /* Register the cause of no selection I/O property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
                            &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the modify write buffer property */
+    if (H5P__register_real(pclass, H5D_XFER_MODIFY_WRITE_BUF_NAME, H5D_XFER_MODIFY_WRITE_BUF_SIZE,
+                           &H5D_def_modify_write_buf_g, NULL, NULL, NULL, H5D_XFER_MODIFY_WRITE_BUF_ENC, H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL,
                            NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -2557,13 +2571,14 @@ H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode)
     /* Get the selection I/O mode */
     if (selection_io_mode)
         if (H5P_get(plist, H5D_XFER_SELECTION_IO_MODE_NAME, selection_io_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_selection_io() */
+
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_mpio_no_collective_cause
+ * Function:	H5Pget_no_selection_io_cause
  *
  * Purpose:	    Retrieves causes for not performing selection I/O
  *
@@ -2594,3 +2609,133 @@ H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*o
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_no_selection_io_cause() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dxfr_modify_write_buf_enc
+ *
+ * Purpose:     Callback routine which is called whenever the modify write
+ *              buffer property in the dataset transfer property list is
+ *              encoded.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp, size_t *size)
+{
+    const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDassert(modify_write_buf);
+    HDassert(size);
+
+    if (NULL != *pp)
+        /* Encode modify write buf property.  Use "!!" so we always get 0 or 1 */
+        *(*pp)++ = (uint8_t)(!!(*modify_write_buf));
+
+    /* Size of modify write buf property */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dxfr_modify_write_buf_enc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dxfr_modify_write_buf_dec
+ *
+ * Purpose:     Callback routine which is called whenever the modify write
+ *              buffer property in the dataset transfer property list is
+ *              decoded.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value)
+{
+    hbool_t *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
+    const uint8_t **pp = (const uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(modify_write_buf);
+
+    /* Decode selection I/O mode property */
+    *modify_write_buf = (hbool_t) * (*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dxfr_modify_write_buf_dec() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_modify_write_buf
+ *
+ * Purpose:     Allows the library to modify the contents of the write
+ *              buffer
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the selection I/O mode */
+    if (H5P_set(plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &modify_write_buf) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_modify_write_buf() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_modify_write_buf
+ *
+ * Purpose:     Retrieves the "modify write buffer" property
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_modify_write_buf(hid_t dxpl_id, hbool_t *modify_write_buf)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the selection I/O mode */
+    if (modify_write_buf)
+        if (H5P_get(plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, modify_write_buf) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_modify_write_buf() */
