@@ -250,8 +250,8 @@ typedef struct H5CX_t {
     hbool_t                 dt_conv_cb_valid;     /* Whether datatype conversion struct is valid */
     H5D_selection_io_mode_t selection_io_mode;    /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     hbool_t                 selection_io_mode_valid; /* Whether selection I/O mode is valid */
-    hbool_t                 modify_write_buf;     /* Whether the library can modify write buffers */
-    hbool_t                 modify_write_buf_valid; /* Whether the modify_write_buf field is valid */
+    hbool_t                 modify_write_buf;        /* Whether the library can modify write buffers */
+    hbool_t                 modify_write_buf_valid;  /* Whether the modify_write_buf field is valid */
 
     /* Return-only DXPL properties to return to application */
 #ifdef H5_HAVE_PARALLEL
@@ -297,11 +297,11 @@ typedef struct H5CX_t {
     hbool_t mpio_coll_rank0_bcast;                /* Instrumented "collective chunk multi ratio ind" value
                                                      (H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME) */
     hbool_t
-        mpio_coll_rank0_bcast_set; /* Whether instrumented "collective chunk multi ratio ind" value is set */
-#endif                             /* H5_HAVE_INSTRUMENTED_LIBRARY */
-#endif                             /* H5_HAVE_PARALLEL */
-    uint32_t no_selection_io_cause;      /* Reason for not performing selection I/O
-                                               (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+        mpio_coll_rank0_bcast_set;  /* Whether instrumented "collective chunk multi ratio ind" value is set */
+#endif                              /* H5_HAVE_INSTRUMENTED_LIBRARY */
+#endif                              /* H5_HAVE_PARALLEL */
+    uint32_t no_selection_io_cause; /* Reason for not performing selection I/O
+                                          (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
     hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
     hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
@@ -386,7 +386,7 @@ typedef struct H5CX_dxpl_cache_t {
     H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
                                                             (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    hbool_t                 modify_write_buf;      /* Whether the library can modify write buffers */
+    hbool_t modify_write_buf;                      /* Whether the library can modify write buffers */
 } H5CX_dxpl_cache_t;
 
 /* Typedef for cached default link creation property list information */
@@ -2680,8 +2680,7 @@ H5CX_get_modify_write_buf(hbool_t *modify_write_buf)
     HDassert(head && *head);
     HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
 
-    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME,
-                             modify_write_buf)
+    H5CX_RETRIEVE_PROP_VALID(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_MODIFY_WRITE_BUF_NAME, modify_write_buf)
 
     /* Get the value */
     *modify_write_buf = (*head)->ctx.modify_write_buf;

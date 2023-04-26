@@ -141,7 +141,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "no_tconv_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    HDsnprintf(dset_name, sizeof(dset_name), "no_tconv_%s_%s_%s", chunked ? "chunked" : "contig",
+               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -260,9 +261,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     hid_t   dxpl = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
-    char   *wbuf = NULL;
+    char   *wbuf     = NULL;
     char   *wbuf_bak = NULL;
-    char   *rbuf = NULL;
+    char   *rbuf     = NULL;
     char    dset_name[DSET_NAME_LEN];
 
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
@@ -298,7 +299,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "no_size_change_%s_%s", chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+    HDsnprintf(dset_name, sizeof(dset_name), "no_size_change_%s_%s", chunked ? "chunked" : "contig",
+               mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -429,7 +431,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "larger_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    HDsnprintf(dset_name, sizeof(dset_name), "larger_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
+               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create dataset */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -570,7 +573,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     }
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "smaller_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+    HDsnprintf(dset_name, sizeof(dset_name), "smaller_no_bkg_%s_%s_%s", chunked ? "chunked" : "contig",
+               dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d chunked dataset with/without data transform */
     if ((did = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -710,13 +714,13 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     hid_t   ss_bc_tid = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
-    s1_t   *s1_wbuf = NULL;
+    s1_t   *s1_wbuf     = NULL;
     s1_t   *s1_wbuf_bak = NULL;
-    s1_t   *s1_rbuf = NULL;
-    s2_t   *s2_wbuf = NULL;
+    s1_t   *s1_rbuf     = NULL;
+    s2_t   *s2_wbuf     = NULL;
     s2_t   *s2_wbuf_bak = NULL;
-    s2_t   *s2_rbuf = NULL;
-    char        dset_name[DSET_NAME_LEN];
+    s2_t   *s2_rbuf     = NULL;
+    char    dset_name[DSET_NAME_LEN];
 
     /* Create dataset transfer property list */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -770,7 +774,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     /* Case 5(a) */
 
     /* Generate dataset name */
-    HDsnprintf(dset_name, sizeof(dset_name), "cmpd_with_bkg_%s_%s", chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+    HDsnprintf(dset_name, sizeof(dset_name), "cmpd_with_bkg_%s_%s", chunked ? "chunked" : "contig",
+               mwbuf ? "mwbuf" : "nomwbuf");
 
     /* Create 1d dataset */
     if ((did = H5Dcreate2(fid, dset_name, s1_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -1096,7 +1101,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             FAIL_STACK_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s", i, chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_dset%d_%s_%s_%s", i,
+                   chunked ? "chunked" : "contig", dtrans ? "xform" : "noxform", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] =
@@ -1367,13 +1373,13 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     size_t buf_size;
     size_t s2_buf_size;
 
-    s1_t *total_wbuf = NULL;
+    s1_t *total_wbuf     = NULL;
     s1_t *total_wbuf_bak = NULL;
-    s1_t *total_rbuf = NULL;
+    s1_t *total_rbuf     = NULL;
 
-    s2_t *s2_total_wbuf = NULL;
+    s2_t *s2_total_wbuf     = NULL;
     s2_t *s2_total_wbuf_bak = NULL;
-    s2_t *s2_total_rbuf = NULL;
+    s2_t *s2_total_rbuf     = NULL;
 
     s1_t *wbufi[MULTI_NUM_DSETS];
     s1_t *rbufi[MULTI_NUM_DSETS];
@@ -1425,7 +1431,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             FAIL_STACK_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_cmpd_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_cmpd_dset%d_%s_%s", i,
+                   chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] =
@@ -1804,15 +1811,15 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     hid_t dset_dids[MULTI_NUM_DSETS];
 
     size_t   buf_size, ss;
-    uint8_t *total_wbuf  = NULL;
+    uint8_t *total_wbuf      = NULL;
     uint8_t *total_wbuf_bak  = NULL;
-    uint8_t *total_rbuf  = NULL;
-    uint8_t *total_lwbuf = NULL;
+    uint8_t *total_rbuf      = NULL;
+    uint8_t *total_lwbuf     = NULL;
     uint8_t *total_lwbuf_bak = NULL;
-    uint8_t *total_lrbuf = NULL;
-    uint8_t *total_swbuf = NULL;
+    uint8_t *total_lrbuf     = NULL;
+    uint8_t *total_swbuf     = NULL;
     uint8_t *total_swbuf_bak = NULL;
-    uint8_t *total_srbuf = NULL;
+    uint8_t *total_srbuf     = NULL;
 
     uint8_t *wbufi[MULTI_NUM_DSETS];
     uint8_t *rbufi[MULTI_NUM_DSETS];
@@ -1858,7 +1865,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             FAIL_STACK_ERROR;
 
         /* Generate dataset name */
-        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_size_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+        HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_size_dset%d_%s_%s", i,
+                   chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
 
         /* Create ith dataset */
         if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_STD_I32BE, file_sids[i], H5P_DEFAULT, dcpl,
@@ -2218,34 +2226,34 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
     size_t buf_size;
 
-    int *total_wbuf1 = NULL;
+    int *total_wbuf1     = NULL;
     int *total_wbuf1_bak = NULL;
-    int *total_rbuf1 = NULL;
+    int *total_rbuf1     = NULL;
 
     int *wbufi1[MULTI_NUM_DSETS];
     int *rbufi1[MULTI_NUM_DSETS];
 
-    unsigned long *ul_total_wbuf2 = NULL;
+    unsigned long *ul_total_wbuf2     = NULL;
     unsigned long *ul_total_wbuf2_bak = NULL;
-    long          *l_total_rbuf2  = NULL;
+    long          *l_total_rbuf2      = NULL;
     unsigned long *ul_wbufi2[MULTI_NUM_DSETS];
     long          *l_rbufi2[MULTI_NUM_DSETS];
 
-    long  *l_total_wbuf2 = NULL;
+    long  *l_total_wbuf2     = NULL;
     long  *l_total_wbuf2_bak = NULL;
-    short *s_total_rbuf2 = NULL;
+    short *s_total_rbuf2     = NULL;
     long  *l_wbufi2[MULTI_NUM_DSETS];
     short *s_rbufi2[MULTI_NUM_DSETS];
 
-    s1_t *s1_total_wbuf3 = NULL;
+    s1_t *s1_total_wbuf3     = NULL;
     s1_t *s1_total_wbuf3_bak = NULL;
-    s3_t *s3_total_rbuf3 = NULL;
+    s3_t *s3_total_rbuf3     = NULL;
     s1_t *s1_wbufi3[MULTI_NUM_DSETS];
     s3_t *s3_rbufi3[MULTI_NUM_DSETS];
 
-    s4_t *s4_total_wbuf3 = NULL;
+    s4_t *s4_total_wbuf3     = NULL;
     s4_t *s4_total_wbuf3_bak = NULL;
-    s1_t *s1_total_rbuf3 = NULL;
+    s1_t *s1_total_rbuf3     = NULL;
     s4_t *s4_wbufi3[MULTI_NUM_DSETS];
     s1_t *s1_rbufi3[MULTI_NUM_DSETS];
 
@@ -2324,21 +2332,24 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             mm = HDrandom() % (int)ndsets;
             if (mm == 0) {
                 dset_types[i] = DSET_WITH_NO_CONV;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_nconv_dset%d_%s_%s", i,
+                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     FAIL_STACK_ERROR;
             }
             else if (mm == 1) {
                 dset_types[i] = DSET_WITH_CONV_AND_NO_BKG;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_nbkg_dset%d_%s_%s", i,
+                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_LONG, file_sids[i], H5P_DEFAULT,
                                                dcpl, H5P_DEFAULT)) < 0)
                     FAIL_STACK_ERROR;
             }
             else {
                 dset_types[i] = DSET_WITH_CONV_AND_BKG;
-                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s", i, chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
+                HDsnprintf(dset_names[i], sizeof(dset_names[i]), "multi_all_conv_bkg_dset%d_%s_%s", i,
+                           chunked ? "chunked" : "contig", mwbuf ? "mwbuf" : "nomwbuf");
                 if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl,
                                                H5P_DEFAULT)) < 0)
                     FAIL_STACK_ERROR;
@@ -2505,7 +2516,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             /* Copy wbufs if the library will be modifying them */
             if (mwbuf) {
                 HDmemcpy(total_wbuf1_bak, total_wbuf1, ndsets * DSET_SELECT_DIM * sizeof(int));
-                HDmemcpy(ul_total_wbuf2_bak, ul_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                HDmemcpy(ul_total_wbuf2_bak, ul_total_wbuf2,
+                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
                 HDmemcpy(l_total_wbuf2_bak, l_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(long));
                 HDmemcpy(s1_total_wbuf3_bak, s1_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
                 HDmemcpy(s4_total_wbuf3_bak, s4_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
@@ -2517,7 +2529,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             /* Restore wbufs from backup if the library modified them */
             if (mwbuf) {
                 HDmemcpy(total_wbuf1, total_wbuf1_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
-                HDmemcpy(ul_total_wbuf2, ul_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                HDmemcpy(ul_total_wbuf2, ul_total_wbuf2_bak,
+                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
                 HDmemcpy(l_total_wbuf2, l_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
                 HDmemcpy(s1_total_wbuf3, s1_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
                 HDmemcpy(s4_total_wbuf3, s4_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
@@ -2929,7 +2942,8 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         TEST_ERROR;
 
     /* Flush to clear the sieve buf */
-    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || test_mode & TEST_DATATYPE_CONVERSION || test_mode & TEST_PAGE_BUFFER) {
+    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB || test_mode & TEST_DATATYPE_CONVERSION ||
+        test_mode & TEST_PAGE_BUFFER) {
 
         if (H5Dflush(did) < 0)
             FAIL_STACK_ERROR;
@@ -3071,9 +3085,8 @@ main(void)
                 else
                     printf("and without modifying write buffers\n");
 
-
-                for (test_select_config = (int)TEST_NO_TYPE_CONV; test_select_config < (int)TEST_SELECT_NTESTS;
-                     test_select_config++) {
+                for (test_select_config = (int)TEST_NO_TYPE_CONV;
+                     test_select_config < (int)TEST_SELECT_NTESTS; test_select_config++) {
 
                     switch (test_select_config) {
                         case TEST_NO_TYPE_CONV: /* case 1 */
@@ -3104,7 +3117,8 @@ main(void)
                         case TEST_SMALLER_MEM_NO_BKG: /* case 4 */
                             TESTING_2("Smaller memory type, no background buffer");
 
-                            nerrors += (test_smaller_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
+                            nerrors +=
+                                (test_smaller_mem_type_no_bkg(fid, chunked, dtrans, mwbuf) < 0 ? 1 : 0);
 
                             break;
 

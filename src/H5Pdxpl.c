@@ -475,8 +475,8 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the modify write buffer property */
     if (H5P__register_real(pclass, H5D_XFER_MODIFY_WRITE_BUF_NAME, H5D_XFER_MODIFY_WRITE_BUF_SIZE,
-                           &H5D_def_modify_write_buf_g, NULL, NULL, NULL, H5D_XFER_MODIFY_WRITE_BUF_ENC, H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL,
-                           NULL) < 0)
+                           &H5D_def_modify_write_buf_g, NULL, NULL, NULL, H5D_XFER_MODIFY_WRITE_BUF_ENC,
+                           H5D_XFER_MODIFY_WRITE_BUF_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2626,7 +2626,7 @@ static herr_t
 H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp, size_t *size)
 {
     const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint8_t      **pp               = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2659,8 +2659,8 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value)
 {
-    hbool_t *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
-    const uint8_t **pp = (const uint8_t **)_pp;
+    hbool_t        *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
+    const uint8_t **pp               = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 

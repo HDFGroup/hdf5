@@ -8361,7 +8361,8 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
  *          - #H5D_SEL_IO_BKG_BUF_TOO_SMALL
  *          Selection I/O was not performed because the type conversion background buffer is too small
  *          - #H5D_SEL_IO_DEFAULT_OFF
- *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it to be off for this case
+ *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it
+ * to be off for this case
  *
  * \since 1.14.3
  *
