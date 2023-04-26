@@ -8266,7 +8266,7 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *
  * \ingroup DXPL
  *
- * \brief Sets
+ * \brief Sets the selection I/O mode
  *
  * \param[in] dxpl_id   Property list identifier
  * \param[in] selection_io_mode    The selection I/O mode to be set
@@ -8277,12 +8277,16 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *          \p selection_io_mode in the dataset transfer property
  *          list \p dxpl_id.
  *
+ *          This can be used to enable collective I/O with type conversion, or
+ *          with custom VFDs that support vector or selection I/O.
+ *
  *          Values that can be set in \p selection_io_mode:
  *          \snippet this H5D_selection_io_mode_t_snip
  *          \click4more
  *
  * \note    The library may not perform selection I/O as it asks for if the
- *          layout callback determines that it is not feasible to do so.
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
  *
  * \since 1.14.1
  *
@@ -8293,7 +8297,7 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  *
  * \ingroup DXPL
  *
- * \brief
+ * \brief Retrieves the selection I/O mode
  *
  * \param[in] plist_id Property list identifier
  * \param[out] selection_io_mode   The selection I/O mode
@@ -8308,7 +8312,8 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  *          \click4more
  *
  * \note    The library may not perform selection I/O as it asks for if the
- *          layout callback determines that it is not feasible to do so.
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
  *
  * \since 1.14.1
  *
@@ -8318,7 +8323,8 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
 /**
  * \ingroup DXPL
  *
- * \brief Retrieves the cause for not performing selection I/O
+ * \brief Retrieves the cause for not performing selection or vector I/O on the
+ *        last parallel I/O call
  *
  * \dxpl_id{plist_id}
  * \param[out] no_selection_io_cause A bitwise set value indicating the relevant
@@ -8327,16 +8333,22 @@ H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *select
  *
  * \par Motivation:
  *      A user can request selection I/O to be performed via a data transfer
- *      property list (DXPL).  However, there are
- *      conditions that can cause HDF5 to forgo selection I/O and perform
- *      legacy (scalar) or vector I/O instead.
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
  *
  * \details H5Pget_no_selection_io_cause() can be used to determine whether
- *          selection I/O was applied for the last preceding I/O call.
- *          If selection I/O was not used, this function retrieves the
- *          cause(s) that prevent selection I/O to be performed on that I/O call.
- *          The properties retrieved by this function are set before
- *          I/O takes place and are retained even when I/O fails.
+ *          selection or vector I/O was applied for the last preceding I/O call.
+ *          If selection or vector I/O was not used, this function retrieves the
+ *          cause(s) that prevent selection or vector I/O to be performed on
+ *          that I/O call.  The properties retrieved by this function are set
+ *          before I/O takes place and are retained even when I/O fails.
+ *
+ *          If a selection I/O request falls back to vector I/O, that is not
+ *          considered "breaking" selection I/O by this function, since vector
+ *          I/O still passes all information to the file driver in a single
+ *          callback.
  *
  *          Valid values returned in \p no_selection_io_cause are listed
  *          as follows. If there are multiple causes, it is a bitwise OR of
