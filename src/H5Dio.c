@@ -1155,7 +1155,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             }
         }
 
-    /* If we're doing type converison and we might be doing selection I/O, check if the buffers are large
+    /* If we're doing type conversion and we might be doing selection I/O, check if the buffers are large
      * enough to handle the whole I/O */
     if (io_info->max_tconv_type_size && io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
         size_t max_temp_buf; /* Maximum temporary buffer size */
