@@ -39,8 +39,6 @@
  * Programmer:	Quincey Koziol
  *              Friday, January  3, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int

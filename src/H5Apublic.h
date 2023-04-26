@@ -127,7 +127,7 @@ H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
  *          The attribute identifier returned by this function must be released
  *          with H5Aclose() resource leaks will develop.
  *
- * \note If \p loc_id is a file identifier, the attribute will be attached
+ * \note If \p loc_id is a file identifier, the attribute will be attached to
  *       that file’s root group.
  *
  * \par Example
@@ -246,8 +246,8 @@ H5_DLL herr_t H5Adelete(hid_t loc_id, const char *attr_name);
  * \param[in] obj_name Name of object, relative to location, from which
  *                     attribute is to be removed
  * \param[in] idx_type Type of index
- * \param[in] order    Order in which to iterate over index
- * \param[in] n        Offset within index
+ * \param[in] order    Order in which to iterate over the index
+ * \param[in] n        Offset within the index
  * \lapl_id
  *
  * \return \herr_t
@@ -264,7 +264,7 @@ H5_DLL herr_t H5Adelete(hid_t loc_id, const char *attr_name);
  *          The order in which the index is to be traversed is specified by
  *          \p order. For example, if \p idx_type, \p order,
  *          and \p n are set to #H5_INDEX_NAME, #H5_ITER_INC, and 5,
- *          respectively, the fifth attribute in lexicographic order of
+ *          respectively, the fifth attribute in the lexicographic order of
  *          attribute names will be removed.
  *
  *          The link access property list, \p lapl_id, may provide
@@ -354,7 +354,7 @@ H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, hbool_t *exis
  *          \p loc_id specifies a location in the file containing the object.
  *          \p obj_name is the name of the object to which the attribute is
  *          attached and can be a relative name, relative to \p loc_id,
- *          or an absolute name, based in the root group of the file.
+ *          or an absolute name, based on the root group of the file.
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to access
@@ -392,6 +392,9 @@ H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const 
  *          creation property list associated with the attribute specified
  *          by \p attr_id.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
+ *
  * \since 1.8.0
  *
  */
@@ -400,7 +403,7 @@ H5_DLL hid_t H5Aget_create_plist(hid_t attr_id);
 /**
  * \ingroup H5A
  *
- * \brief Retrieves attribute information, by attribute identifier
+ * \brief Retrieves attribute information by attribute identifier
  *
  * \attr_id
  * \param[out]  ainfo   Attribute information struct
@@ -435,7 +438,7 @@ H5_DLL herr_t H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
  * \details H5Aget_info_by_idx() retrieves information for an attribute
  *          that is attached to an object, which is specified by its
  *          location and name, \p loc_id and \p obj_name, respectively.
- *          The attribute is located by its index position and the attribute
+ *          The attribute is located by its index position, and the attribute
  *          information is returned in the \p ainfo struct.
  *
  *          The attribute is located by means of an index type, an index
@@ -455,7 +458,7 @@ H5_DLL herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t 
 /**
  * \ingroup H5A
  *
- * \brief Retrieves attribute information, by attribute name
+ * \brief Retrieves attribute information by attribute name
  *
  * \fgdt_loc_id
  * \param[in] obj_name   Name of the object to which an attribute is attached,
@@ -491,7 +494,7 @@ H5_DLL herr_t H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char
  * \param[out] buf       Buffer to store name in
  *
  * \return  Returns the length of the attribute's name, which may be longer
- *          than \p buf_size, if successful. Otherwise returns a negative
+ *          than \p buf_size, if successful. Otherwise, returns a negative
  *          value.
  *
  * \details H5Aget_name() retrieves the name of an attribute specified by
@@ -526,7 +529,7 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  * \lapl_id
  *
  * \return Returns attribute name size, in bytes, if successful;
- *         otherwise returns a negative value.
+ *         otherwise, returns a negative value.
  *
  * \details H5Aget_name_by_idx() retrieves the name of an attribute that is
  *          attached to an object, which is specified by its location and
@@ -581,7 +584,7 @@ H5_DLL hid_t H5Aget_space(hid_t attr_id);
  * \attr_id
  *
  * \return Returns the amount of storage size allocated for the attribute;
- *         otherwise returns 0 (zero).
+ *         otherwise, returns 0 (zero).
  *
  * \details H5Aget_storage_size() returns the amount of storage that is
  *          required for the specified attribute, \p attr_id.
@@ -684,7 +687,7 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *
  * \return \herr_t
  *         Further note that this function returns the return value of
- *         the last operator if it was non-zero, which can be a negative
+ *         the last operator if it is non-zero, which can be a negative
  *         value, zero if all attributes were processed, or a positive value
  *         indicating short-circuit success.
  *
@@ -1147,7 +1150,7 @@ H5_DLL hid_t H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  *
  * \fgdt_loc_id
  *
- * \return Returns the number of attributes if successful; otherwise returns
+ * \return Returns the number of attributes if successful; otherwise, returns
  *         a negative value.
  *
  * \deprecation_note{H5Oget_info(), H5Oget_info_by_name(), and H5Oget_info_by_idx()}
@@ -1204,8 +1207,8 @@ H5_DLL herr_t H5Aiterate1(hid_t loc_id, unsigned *idx, H5A_operator1_t op, void 
  *
  * \deprecation_note{H5Aopen_by_idx()}
  *
- * \details H5Aopen_idx() opens an attribute which is attached to the
- *          object specified with \p loc_id . The location object may be
+ * \details H5Aopen_idx() opens an attribute that is attached to the
+ *          object specified with \p loc_id. The location object may be
  *          either a group, dataset, or named datatype, all of which may
  *          have any sort of attribute. The attribute specified by the index,
  *          \p idx , indicates the attribute to access. The value of \p idx

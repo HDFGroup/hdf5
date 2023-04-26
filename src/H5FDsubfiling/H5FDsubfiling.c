@@ -106,6 +106,8 @@ typedef struct H5FD_subfiling_t {
     uint64_t file_id;
     int64_t  context_id; /* The value used to lookup a subfiling context for the file */
 
+    hbool_t fail_to_encode; /* Used to check for failures from sb_get_size routine */
+
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
 
@@ -144,6 +146,12 @@ typedef struct H5FD_subfiling_t {
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
     (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+
+/*
+ * NOTE: Must be kept in sync with the private
+ * H5F_MAX_DRVINFOBLOCK_SIZE macro value for now
+ */
+#define H5FD_SUBFILING_MAX_DRV_INFO_SIZE 1024
 
 /* Prototypes */
 static herr_t  H5FD__subfiling_term(void);
@@ -421,8 +429,6 @@ done:
  * Programmer:  John Mainzer
  *              9/10/17
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -679,8 +685,9 @@ done:
 static hsize_t
 H5FD__subfiling_sb_size(H5FD_t *_file)
 {
-    H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
-    hsize_t           ret_value = 0;
+    subfiling_context_t *sf_context = NULL;
+    H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
+    hsize_t              ret_value  = 0;
 
     HDassert(file);
 
@@ -699,6 +706,24 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
     /* Subfiling stripe count (encoded as int64_t for future) */
     ret_value += sizeof(int64_t);
 
+    /* Subfiling config file prefix string length */
+    ret_value += sizeof(uint64_t);
+
+    /*
+     * Since this callback currently can't return any errors, we
+     * will set the "fail to encode" flag on the file if we fail
+     * to retrieve the context object here so we can check for
+     * errors later.
+     */
+    if (NULL == (sf_context = H5_get_subfiling_object(file->context_id))) {
+        file->fail_to_encode = TRUE;
+    }
+    else {
+        if (sf_context->config_file_prefix) {
+            ret_value += HDstrlen(sf_context->config_file_prefix) + 1;
+        }
+    }
+
     /* Add superblock information from IOC file if necessary */
     if (file->sf_file) {
         /* Encode the IOC's name into the subfiling information */
@@ -706,6 +731,16 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
 
         ret_value += H5FD_sb_size(file->sf_file);
     }
+
+    /*
+     * Since the library doesn't currently properly check this,
+     * set the "fail to encode" flag if the message size is
+     * larger than the library's currently accepted max message
+     * size so that we don't try to encode the message and overrun
+     * a buffer.
+     */
+    if (ret_value > H5FD_SUBFILING_MAX_DRV_INFO_SIZE)
+        file->fail_to_encode = TRUE;
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__subfiling_sb_size() */
@@ -725,9 +760,17 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
     subfiling_context_t *sf_context = NULL;
     H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
     uint8_t             *p          = (uint8_t *)buf;
+    uint64_t             tmpu64;
     int64_t              tmp64;
     int32_t              tmp32;
-    herr_t               ret_value = SUCCEED;
+    size_t               prefix_len = 0;
+    herr_t               ret_value  = SUCCEED;
+
+    /* Check if the "fail to encode flag" is set */
+    if (file->fail_to_encode)
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_VFL, H5E_CANTENCODE, FAIL,
+            "can't encode subfiling driver info message - message was too large or internal error occurred");
 
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
@@ -752,6 +795,21 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
     /* Encode subfiling stripe count (number of subfiles) */
     tmp64 = sf_context->sf_num_subfiles;
     INT64ENCODE(p, tmp64);
+
+    /* Encode config file prefix string length */
+    if (sf_context->config_file_prefix) {
+        prefix_len = HDstrlen(sf_context->config_file_prefix) + 1;
+        H5_CHECKED_ASSIGN(tmpu64, uint64_t, prefix_len, size_t);
+    }
+    else
+        tmpu64 = 0;
+    UINT64ENCODE(p, tmpu64);
+
+    /* Encode config file prefix string */
+    if (sf_context->config_file_prefix) {
+        HDmemcpy(p, sf_context->config_file_prefix, prefix_len);
+        p += prefix_len;
+    }
 
     /* Encode IOC VFD configuration information if necessary */
     if (file->sf_file) {
@@ -786,9 +844,16 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     subfiling_context_t *sf_context = NULL;
     H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
     const uint8_t       *p          = (const uint8_t *)buf;
+    uint64_t             tmpu64;
     int64_t              tmp64;
     int32_t              tmp32;
     herr_t               ret_value = SUCCEED;
+
+    /* Check if we previously failed to encode the info */
+    if (file->fail_to_encode)
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_VFL, H5E_CANTDECODE, FAIL,
+            "can't decode subfiling driver info message - message wasn't encoded (or encoded improperly)");
 
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
@@ -813,6 +878,25 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     INT64DECODE(p, tmp64);
     H5_CHECK_OVERFLOW(tmp64, int64_t, int32_t);
     file->fa.shared_cfg.stripe_count = (int32_t)tmp64;
+
+    /* Decode config file prefix string length */
+    UINT64DECODE(p, tmpu64);
+
+    /* Decode config file prefix string */
+    if (tmpu64 > 0) {
+        if (!sf_context->config_file_prefix) {
+            if (NULL == (sf_context->config_file_prefix = HDmalloc(tmpu64)))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate space for config file prefix string");
+
+            HDmemcpy(sf_context->config_file_prefix, p, tmpu64);
+
+            /* Just in case.. */
+            sf_context->config_file_prefix[tmpu64 - 1] = '\0';
+        }
+
+        p += tmpu64;
+    }
 
     if (file->sf_file) {
         char ioc_name[9];
@@ -858,8 +942,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              9/8/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -942,8 +1024,6 @@ done:
  * Programmer:  John Mainzer
  *              9/8/17
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -985,8 +1065,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              9/8/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1051,6 +1129,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
+    file_ptr->fail_to_encode = FALSE;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1239,6 +1318,8 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
 
     if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+
+    file_ptr->fail_to_encode = FALSE;
 
 done:
     HDfree(file_ptr->file_path);
@@ -1966,8 +2047,6 @@ done:
  *
  * Programmer:  RAW -- ??/??/21
  *
- * Changes:     None.
- *
  * Notes:       Thus function doesn't actually implement vector read.
  *              Instead, it comverts the vector read call into a series
  *              of scalar read calls.  Fix this when time permits.
@@ -2129,8 +2208,6 @@ done:
  *                          subfiling writes have failed for some reason.
  *
  * Programmer:  RAW -- ??/??/21
- *
- * Changes:     None.
  *
  * Notes:       Thus function doesn't actually implement vector write.
  *              Instead, it comverts the vector write call into a series

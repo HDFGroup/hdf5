@@ -45,11 +45,6 @@
  *     ```
  *     ...in destination buffer.
  *
- * TODO: put documentation in a consistent place and point to it from here.
- *
- * Programmer: Jacob Smith
- *             2017-11-30
- *
  *****************************************************************************/
 
 #include "H5private.h" /* Generic Functions        */

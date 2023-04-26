@@ -713,12 +713,14 @@ test_coords(void)
  * Programmer:	Raymond Lu
  *              20 Dec. 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 cleanup_coords(void)
 {
-    HDremove(FILENAME);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILENAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

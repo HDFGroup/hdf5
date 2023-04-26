@@ -4,7 +4,7 @@ project (HDF5_UTILS_TOOLS_H5DWALK C)
 # --------------------------------------------------------------------
 # Add the h5dwalk and test executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5dwalk ${HDF5_UTILS_TOOLS_H5DWALK_SOURCE_DIR}/h5dwalk.c)
 #  add_custom_target(generate_demo ALL
 #    DEPENDS "${HDF5_TOOLS_DIR}/test/demo_destfiles.test"
@@ -35,7 +35,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5DWALK_SRC_FORMAT h5dwalk)
   else ()
     clang_format (HDF5_H5DWALK_SRC_FORMAT h5dwalk-shared)

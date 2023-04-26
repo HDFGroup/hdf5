@@ -421,7 +421,7 @@ extern "C" {
  *          issued. If one finds that an HDF5 library function is failing
  *          inexplicably, H5open() can be called first. It is safe to call
  *          H5open() before an application issues any other function calls to
- *          the HDF5 library as there are no damaging side effects in calling
+ *          the HDF5 library, as there are no damaging side effects in calling
  *          it more than once.
  */
 H5_DLL herr_t H5open(void);
@@ -434,13 +434,13 @@ H5_DLL herr_t H5open(void);
  *
  * \details H5atclose() registers a callback that the HDF5 library will invoke
  *          when closing.  The full capabilities of the HDF5 library are
- *          available to callbacks invoked through this mechanism, library
+ *          available to callbacks invoked through this mechanism, and library
  *          shutdown will only begin in earnest when all callbacks have been
  *          invoked and have returned.
  *
  *          Registered callbacks are invoked in LIFO order, similar to the
  *          Standard C 'atexit' routine.  For example, if 'func1' is registered,
- *          then 'func2', when the library is closing 'func2' will
+ *          then 'func2', when the library is closing 'func2', will
  *          be invoked first, then 'func1'.
  *
  *          The \p ctx pointer will be passed to \p func when it's invoked.
@@ -474,13 +474,13 @@ H5_DLL herr_t H5close(void);
  *          function is in situations where the library is dynamically linked
  *          into an application and is un-linked from the application before
  *          exit() gets called. In those situations, a routine installed with
- *          atexit() would jump to a routine which was no longer in memory,
+ *          atexit() would jump to a routine that was no longer in memory,
  *          causing errors.
  *
  * \attention In order to be effective, this routine \Emph{must} be called
  *            before any other HDF5 function calls, and must be called each
  *            time the library is loaded/linked into the application (the first
- *            time and after it's been un-loaded).
+ *            time and after it's been unloaded).
  */
 H5_DLL herr_t H5dont_atexit(void);
 /**
@@ -492,7 +492,7 @@ H5_DLL herr_t H5dont_atexit(void);
  *          of the library, freeing any unused memory.
  *
  *          It is not required that H5garbage_collect() be called at any
- *          particular time; it is only necessary in certain situations where
+ *          particular time; it is only necessary for certain situations where
  *          the application has performed actions that cause the library to
  *          allocate many objects. The application should call
  *          H5garbage_collect() if it eventually releases those objects and
@@ -678,7 +678,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  * \param[in] mem Buffer to be freed. Can be NULL
  * \return \herr_t
  *
- * \details H5free_memory() frees memory that has been allocated by the caller
+ * \details H5free_memory() frees the memory that has been allocated by the caller
  *          with H5allocate_memory() or by the HDF5 library on behalf of the
  *          caller.
  *
@@ -728,7 +728,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and
- *          calloc(). However, unlike malloc() and calloc() which allow for a
+ *          calloc(). However, unlike malloc() and calloc(), which allow for a
  *          "special" pointer to be returned instead of NULL, this function
  *          always returns NULL on failure or when size is set to 0 (zero).
  *
@@ -740,7 +740,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *            the same library that initially allocated it. In most cases, the
  *            HDF5 API uses resources that are allocated and freed either
  *            entirely by the user or entirely by the library, so this is not a
- *            problem. In rare cases, however, HDF5 API calls will free memory
+ *            problem. In rare cases, however, HDF5 API calls will free the memory
  *            that the user allocated. This function allows the user to safely
  *            allocate this memory.\n
  *            It is particularly important to use this function to allocate

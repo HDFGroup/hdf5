@@ -39,13 +39,6 @@ const char *FILENAME[] = {"mtime", NULL};
  * Programmer:    Robb Matzke
  *              Thursday, July 30, 1998
  *
- * Modifications:
- *              Added checks for old and new modification time messages
- *              in pre-created datafiles (generated with gen_old_mtime.c and
- *              gen_new_mtime.c).
- *              Quincey Koziol
- *              Friday, January  3, 2003
- *
  *-------------------------------------------------------------------------
  */
 int

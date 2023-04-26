@@ -565,114 +565,6 @@ set_sort_order(const char *form)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    parse_hsize_list
- *
- * Purpose:     Parse a list of comma or space separated integers and return
- *              them in a list. The string being passed into this function
- *              should be at the start of the list you want to parse. You are
- *              responsible for freeing the array returned from here.
- *
- *              Lists in the so-called "terse" syntax are separated by
- *              semicolons (;). The lists themselves can be separated by
- *              either commas (,) or white spaces.
- *
- * Return:      <none>
- *-------------------------------------------------------------------------
- */
-static void
-parse_hsize_list(const char *h_list, subset_d *d)
-{
-    hsize_t     *p_list;
-    const char  *ptr;
-    unsigned int size_count = 0;
-    unsigned int i          = 0;
-    unsigned int last_digit = 0;
-
-    if (!h_list || !*h_list || *h_list == ';')
-        return;
-
-    /* count how many integers do we have */
-    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
-            if (!last_digit)
-                /* the last read character wasn't a digit */
-                size_count++;
-
-            last_digit = 1;
-        }
-        else
-            last_digit = 0;
-
-    if (size_count == 0)
-        /* there aren't any integers to read */
-        return;
-
-    /* allocate an array for the integers in the list */
-    p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t));
-
-    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
-            /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
-
-            while (HDisdigit(*ptr))
-                /* scroll to end of integer */
-                ptr++;
-        }
-    d->data = p_list;
-    d->len  = size_count;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    parse_subset_params
- *
- * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
- *
- * Return:      Success:    struct subset_t object
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-static struct subset_t *
-parse_subset_params(const char *dset)
-{
-    struct subset_t *s = NULL;
-    char            *brace;
-
-    if (!dump_opts.disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
-        *brace++ = '\0';
-
-        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
-        parse_hsize_list(brace, &s->start);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->stride);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->count);
-
-        while (*brace && *brace != ';')
-            brace++;
-
-        if (*brace)
-            brace++;
-
-        parse_hsize_list(brace, &s->block);
-    }
-
-    return s;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    parse_mask_list
  *
  * Purpose:     Parse a list of comma or space separated integers and fill
@@ -957,10 +849,11 @@ parse_start:
 
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
-                        hand[i].func        = handle_datasets;
-                        hand[i].obj         = HDstrdup(H5_optarg);
-                        hand[i].subset_info = parse_subset_params(hand[i].obj);
-                        last_dset           = &hand[i];
+                        hand[i].func = handle_datasets;
+                        hand[i].obj  = HDstrdup(H5_optarg);
+                        if (!dump_opts.disable_compact_subset)
+                            hand[i].subset_info = parse_subset_params(hand[i].obj);
+                        last_dset = &hand[i];
                         break;
                     }
 
@@ -969,8 +862,19 @@ parse_start:
             case 'f':
                 vfd_info_g.type   = VFD_BY_NAME;
                 vfd_info_g.u.name = H5_optarg;
-                vfd_info_g.info   = NULL;
                 use_custom_vfd_g  = TRUE;
+
+#ifdef H5_HAVE_ROS3_VFD
+                if (0 == HDstrcmp(vfd_info_g.u.name, drivernames[ROS3_VFD_IDX]))
+                    if (!vfd_info_g.info)
+                        vfd_info_g.info = &ros3_fa_g;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+                if (0 == HDstrcmp(vfd_info_g.u.name, drivernames[HDFS_VFD_IDX]))
+                    if (!vfd_info_g.info)
+                        vfd_info_g.info = &hdfs_fa_g;
+#endif
+
                 break;
             case 'g':
                 dump_opts.display_all = 0;
@@ -1694,8 +1598,6 @@ done:
  * Purpose:     allocate and initialize prefix
  *
  * Return:      void
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

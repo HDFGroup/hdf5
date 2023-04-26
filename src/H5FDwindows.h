@@ -11,11 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Scott Wegner
- *		Based on code by Robb Matzke
- *              Thursday, May 24 2007
- *
- * Purpose:	The public header file for the windows driver.
+ * Purpose: The public header file for the Windows driver
  */
 #ifndef H5FDwindows_H
 #define H5FDwindows_H

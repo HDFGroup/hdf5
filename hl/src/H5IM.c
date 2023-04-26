@@ -27,8 +27,6 @@
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -82,9 +80,6 @@ H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t 
  * Interlace Mode Dimensions in the Dataspace
  * INTERLACE_PIXEL [height][width][pixel components]
  * INTERLACE_PLANE [pixel components][height][width]
- *
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -154,8 +149,6 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -197,8 +190,6 @@ find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
  * Comments:
  *  The function uses H5Aiterate2 with the operator function find_palette
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -222,8 +213,6 @@ H5IM_find_palette(hid_t loc_id)
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -390,8 +379,6 @@ out:
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -436,8 +423,6 @@ out:
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -492,8 +477,6 @@ H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, co
  *  An image (dataset) within an HDF5 file may optionally specify an array of
  *  palettes to be viewed with. The dataset will have an attribute
  *  which contains an array of object reference pointers which refer to palettes in the file.
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -660,8 +643,6 @@ out:
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -756,8 +737,6 @@ out:
  *
  * Comments:
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -841,8 +820,6 @@ out:
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -951,8 +928,6 @@ out:
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1053,8 +1028,6 @@ out:
  * Comments:
  *  based on HDF5 Image and Palette Specification
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1153,8 +1126,6 @@ out:
  *
  * Comments:
  *  based on HDF5 Image and Palette Specification
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -72,7 +72,7 @@ static htri_t
 H5Z__can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     const H5T_t *type;             /* Datatype */
-    unsigned     dtype_size;       /* Datatype's size (in bits) */
+    size_t       dtype_size;       /* Datatype's size (in bits) */
     H5T_order_t  dtype_order;      /* Datatype's endianness order */
     htri_t       ret_value = TRUE; /* Return value */
 
@@ -130,7 +130,7 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     H5T_order_t     dtype_order;                      /* Datatype's endianness order */
     size_t          dtype_size;                       /* Datatype's size (in bits) */
     size_t          dtype_precision;                  /* Datatype's precision (in bits) */
-    size_t          dtype_offset;                     /* Datatype's offset (in bits) */
+    int             dtype_offset;                     /* Datatype's offset (in bits) */
     hsize_t         scanline;                         /* Size of dataspace's fastest changing dimension */
     herr_t          ret_value = SUCCEED;              /* Return value */
 
@@ -160,16 +160,16 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         dtype_offset = H5T_get_offset(type);
         if (dtype_offset != 0)
             dtype_precision = dtype_size;
-    } /* end if */
+    }
     if (dtype_precision > 24) {
         if (dtype_precision <= 32)
             dtype_precision = 32;
         else if (dtype_precision <= 64)
             dtype_precision = 64;
-    } /* end if */
+    }
 
     /* Set "local" parameter for this dataset's "bits-per-pixel" */
-    cd_values[H5Z_SZIP_PARM_BPP] = dtype_precision;
+    cd_values[H5Z_SZIP_PARM_BPP] = (unsigned)dtype_precision;
 
     /* Get dataspace */
     if (NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -199,7 +199,7 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         if (npoints < cd_values[H5Z_SZIP_PARM_PPB])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "pixels per block greater than total number of elements in the chunk")
-        scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
+        scanline = (hsize_t)MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
     }
     else {
         if (scanline <= SZ_MAX_PIXELS_PER_SCANLINE)
@@ -217,7 +217,7 @@ H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Set the correct endianness flag for szip */
     /* (Note: this may not handle non-atomic datatypes well) */
-    cd_values[H5Z_SZIP_PARM_MASK] &= ~(SZ_LSB_OPTION_MASK | SZ_MSB_OPTION_MASK);
+    cd_values[H5Z_SZIP_PARM_MASK] &= ~((unsigned)SZ_LSB_OPTION_MASK | (unsigned)SZ_MSB_OPTION_MASK);
     switch (dtype_order) {
         case H5T_ORDER_LE: /* Little-endian byte order */
             cd_values[H5Z_SZIP_PARM_MASK] |= SZ_LSB_OPTION_MASK;

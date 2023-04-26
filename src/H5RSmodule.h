@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, October 10, 2020
- *
  * Purpose:	This file contains declarations which define macros for the
- *		H5RS package.  Including this header means that the source file
- *		is part of the H5RS package.
+ *          H5RS package.  Including this header means that the source file
+ *          is part of the H5RS package.
  */
 #ifndef H5RSmodule_H
 #define H5RSmodule_H

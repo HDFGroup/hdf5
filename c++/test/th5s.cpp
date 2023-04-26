@@ -87,16 +87,6 @@ int space5_data = 7;
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
- *     April 12, 2011: Raymond Lu
- *              Starting from the 1.8.7 release, we allow dimension
- *              size to be zero.  So I took out the test against it.
  *-------------------------------------------------------------------------
  */
 static void
@@ -223,13 +213,6 @@ test_h5s_basic()
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -287,13 +270,6 @@ test_h5s_scalar_write()
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -348,13 +324,6 @@ test_h5s_scalar_read()
  * Programmer   Raymond Lu (using C version)
  *              May 18, 2004
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -402,13 +371,6 @@ test_h5s_null()
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void
@@ -470,13 +432,6 @@ test_h5s_compound_scalar_write()
  * Programmer   Binh-Minh Ribler (using C version)
  *              Mar 2001
  *
- * Modifications:
- *      January, 2005: C tests' macro VERIFY casts values to 'long' for all
- *              cases.  Since there are no operator<< for 'long long'
- *              or int64 in VS C++ ostream, I casted the hssize_t values
- *              passed to verify_val to 'long' as well.  If problems
- *              arises later, this will have to be specifically handled
- *              with a special routine.
  *-------------------------------------------------------------------------
  */
 static void

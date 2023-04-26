@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, January 8, 2008
- *
  * Purpose:     This file contains declarations which are visible only within
  *              the H5MF package.  Source files outside the H5MF package should
  *              include H5MFprivate.h instead.

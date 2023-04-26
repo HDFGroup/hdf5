@@ -341,11 +341,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Saturday, August 30, 2003
  *
- * Modifications:
- *              Raymond Lu
- *              8 December 2009
- *              I added a field of VL string in the compound type to test
- *              H5Tdetect_class correctly detect it as string type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -1347,11 +1342,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Tuesday, December 18, 2001
  *
- * Modifications:
- *              The size of compound datatype can be expanded now.
- *              Raymond Lu
- *              Wednesday, September 10, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1496,11 +1486,6 @@ error:
  * Programmer:  Robb Matzke
  *              Wednesday, January  7, 1998
  *
- * Modifications:
- *              Raymond Lu
- *              27 June 2008
- *              Added verification of compound type size for H5Tpack and
- *              test for array of nested compound type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -2019,8 +2004,6 @@ error:
  * Programmer:  Raymond Lu
  *              Tuesday, June 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2232,8 +2215,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 7, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2516,8 +2497,6 @@ error:
  * Programmer:  Raymond Lu
  *              Wednesday, September 29, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2737,9 +2716,9 @@ error:
  * Function:    test_compound_14
  *
  * Purpose:     Tests compound type conversions where a vlen string will
-                be misaligned in the conversion buffer and the file.  The
-                two compound types are meant to trigger two different
-                conversion routines.
+ *              be misaligned in the conversion buffer and the file.  The
+ *              two compound types are meant to trigger two different
+ *              conversion routines.
  *
  * Return:      Success:        0
  *
@@ -2747,8 +2726,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Monday, August 25, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3204,8 +3181,6 @@ error:
  * Programmer:  Neil Fortner
  *              Friday, September 19, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3379,8 +3354,6 @@ error:
  * Programmer:  Ray Lu
  *              14 July 2022
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3507,8 +3480,6 @@ error:
  * Programmer:  Neil Fortner
  *              Friday, October 3, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3620,8 +3591,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              Tuesday, January 13, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3927,11 +3896,6 @@ error:
  * Programmer:  Raymond Lu
  *              Thursday, April 4, 2002
  *
- * Modifications:
- *              Raymond Lu
- *              Wednesday, February 9, 2005
- *              Added test for H5Tenum_valueof, H5Tenum_nameof, and
- *              H5Tget_member_value.
  *-------------------------------------------------------------------------
  */
 static int
@@ -4174,8 +4138,6 @@ error:
  * Programmer:    Robb Matzke
  *              Thursday, June  4, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4330,8 +4292,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Monday, June  1, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -5285,8 +5245,6 @@ error:
  * Programmer:    Robb Matzke
  *              Tuesday, January  5, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -6007,41 +5965,37 @@ error:
  *
  * Purpose:     Tests functions of encoding and decoding datatype.
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              July 14, 2004
- *
- * Modifications: Raymond Lu
- *              July 13, 2009
- *              Added the test for VL string types.
- *
- *              Raymond Lu
- *              17 February 2011
- *              I added the test of reference count for decoded datatypes.
+ * Return:      Success:    0
+ *              Failure:    number of errors
  *-------------------------------------------------------------------------
  */
 static int
 test_encode(void)
 {
-    struct s1 {
+    struct cmpd {
         int    a;
         float  b;
         long   c;
         double d;
     };
-    hid_t          file = -1, tid1 = -1, tid2 = -1, tid3 = -1;
-    hid_t          decoded_tid1 = -1, decoded_tid2 = -1, decoded_tid3 = -1;
+    hid_t          file         = H5I_INVALID_HID;
+    hid_t          tid1         = H5I_INVALID_HID;
+    hid_t          tid2         = H5I_INVALID_HID;
+    hid_t          tid3         = H5I_INVALID_HID;
+    hid_t          decoded_tid1 = H5I_INVALID_HID;
+    hid_t          decoded_tid2 = H5I_INVALID_HID;
+    hid_t          decoded_tid3 = H5I_INVALID_HID;
     char           filename[1024];
-    char           compnd_type[] = "Compound_type", enum_type[] = "Enum_type";
-    char           vlstr_type[] = "VLstring_type";
+    char           compnd_type[] = "Compound_type";
+    char           enum_type[]   = "Enum_type";
+    char           vlstr_type[]  = "VLstring_type";
     short          enum_val;
     size_t         cmpd_buf_size  = 0;
     size_t         enum_buf_size  = 0;
     size_t         vlstr_buf_size = 0;
-    unsigned char *cmpd_buf = NULL, *enum_buf = NULL, *vlstr_buf = NULL;
+    unsigned char *cmpd_buf       = NULL;
+    unsigned char *enum_buf       = NULL;
+    unsigned char *vlstr_buf      = NULL;
     hid_t          ret_id;
     herr_t         ret;
 
@@ -6057,75 +6011,75 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Create a compound datatype */
-    if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) {
+    if ((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd))) < 0) {
         H5_FAILED();
         HDprintf("Can't create datatype!\n");
         goto error;
-    } /* end if */
-    if (H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0) {
+    }
+    if (H5Tinsert(tid1, "a", HOFFSET(struct cmpd, a), H5T_NATIVE_INT) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field 'a'\n");
         goto error;
-    } /* end if */
-    if (H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0) {
+    }
+    if (H5Tinsert(tid1, "b", HOFFSET(struct cmpd, b), H5T_NATIVE_FLOAT) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field 'b'\n");
         goto error;
-    } /* end if */
-    if (H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0) {
+    }
+    if (H5Tinsert(tid1, "c", HOFFSET(struct cmpd, c), H5T_NATIVE_LONG) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field 'c'\n");
         goto error;
-    } /* end if */
-    if (H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0) {
+    }
+    if (H5Tinsert(tid1, "d", HOFFSET(struct cmpd, d), H5T_NATIVE_DOUBLE) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field 'd'\n");
         goto error;
-    } /* end if */
+    }
 
     /* Create a enumerate datatype */
     if ((tid2 = H5Tcreate(H5T_ENUM, sizeof(short))) < 0) {
         H5_FAILED();
         HDprintf("Can't create enumerate type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tenum_insert(tid2, "RED", (enum_val = 0, &enum_val)) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tenum_insert(tid2, "GREEN", (enum_val = 1, &enum_val)) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tenum_insert(tid2, "BLUE", (enum_val = 2, &enum_val)) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tenum_insert(tid2, "ORANGE", (enum_val = 3, &enum_val)) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tenum_insert(tid2, "YELLOW", (enum_val = 4, &enum_val)) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Create a variable-length string type */
     if ((tid3 = H5Tcopy(H5T_C_S1)) < 0) {
         H5_FAILED();
         HDprintf("Can't copy a string type\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tset_size(tid3, H5T_VARIABLE) < 0) {
         H5_FAILED();
         HDprintf("Can't the string type to be variable-length\n");
         goto error;
-    } /* end if */
+    }
 
     /*-----------------------------------------------------------------------
      * Test encoding and decoding compound, enumerate, and VL string datatypes
@@ -6136,12 +6090,12 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode compound type\n");
         goto error;
-    } /* end if */
+    }
 
     if (cmpd_buf_size > 0)
         cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
 
-    /* Try decoding bogus buffer */
+    /* Try decoding an incorrect (empty) buffer (should fail) */
     H5E_BEGIN_TRY
     {
         ret_id = H5Tdecode(cmpd_buf);
@@ -6149,7 +6103,7 @@ test_encode(void)
     H5E_END_TRY;
     if (ret_id != FAIL) {
         H5_FAILED();
-        HDprintf("Decoded bogus buffer!\n");
+        HDprintf("Decoded an empty buffer!\n");
         goto error;
     }
 
@@ -6157,7 +6111,7 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode compound type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the compound buffer and return an object handle */
     if ((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
@@ -6168,26 +6122,26 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /* Query member number and member index by name, for compound type. */
     if (H5Tget_nmembers(decoded_tid1) != 4) {
         H5_FAILED();
         HDprintf("Can't get member number\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tget_member_index(decoded_tid1, "c") != 2) {
         H5_FAILED();
         HDprintf("Can't get correct index number\n");
         goto error;
-    } /* end if */
+    }
 
     /* Encode enumerate type in a buffer */
     if (H5Tencode(tid2, NULL, &enum_buf_size) < 0) {
         H5_FAILED();
         HDprintf("Can't encode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     if (enum_buf_size > 0)
         enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
@@ -6196,40 +6150,40 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the enumerate buffer and return an object handle */
     if ((decoded_tid2 = H5Tdecode(enum_buf)) < 0) {
         H5_FAILED();
         HDprintf("Can't decode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Verify that the datatype was copied exactly */
     if (H5Tequal(decoded_tid2, tid2) <= 0) {
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /* Query member number and member index by name, for enumeration type. */
     if (H5Tget_nmembers(decoded_tid2) != 5) {
         H5_FAILED();
         HDprintf("Can't get member number\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tget_member_index(decoded_tid2, "ORANGE") != 3) {
         H5_FAILED();
         HDprintf("Can't get correct index number\n");
         goto error;
-    } /* end if */
+    }
 
     /* Encode VL string type in a buffer */
     if (H5Tencode(tid3, NULL, &vlstr_buf_size) < 0) {
         H5_FAILED();
         HDprintf("Can't encode VL string type\n");
         goto error;
-    } /* end if */
+    }
 
     if (vlstr_buf_size > 0)
         vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
@@ -6238,26 +6192,26 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode VL string type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the VL string buffer and return an object handle */
     if ((decoded_tid3 = H5Tdecode(vlstr_buf)) < 0) {
         H5_FAILED();
         HDprintf("Can't decode VL string type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Verify that the datatype was copied exactly */
     if (H5Tequal(decoded_tid3, tid3) <= 0) {
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
     if (!H5Tis_variable_str(decoded_tid3)) {
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /*-----------------------------------------------------------------------
      * Commit and reopen the compound, enumerate, VL string datatypes
@@ -6268,17 +6222,17 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't commit compound datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(tid1) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(decoded_tid1) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     HDfree(cmpd_buf);
     cmpd_buf_size = 0;
 
@@ -6287,17 +6241,17 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't commit compound datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(tid2) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(decoded_tid2) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     HDfree(enum_buf);
     enum_buf_size = 0;
 
@@ -6306,17 +6260,17 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't commit vl string datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(tid3) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(decoded_tid3) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     HDfree(vlstr_buf);
     vlstr_buf_size = 0;
 
@@ -6337,7 +6291,7 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode compound type\n");
         goto error;
-    } /* end if */
+    }
 
     if (cmpd_buf_size > 0)
         cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
@@ -6346,7 +6300,7 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode compound type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the compound buffer and return an object handle */
     if ((decoded_tid1 = H5Tdecode(cmpd_buf)) < 0)
@@ -6357,26 +6311,26 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /* Query member number and member index by name, for compound type. */
     if (H5Tget_nmembers(decoded_tid1) != 4) {
         H5_FAILED();
         HDprintf("Can't get member number\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tget_member_index(decoded_tid1, "c") != 2) {
         H5_FAILED();
         HDprintf("Can't get correct index number\n");
         goto error;
-    } /* end if */
+    }
 
     /* Encode enumerate type in a buffer */
     if (H5Tencode(tid2, NULL, &enum_buf_size) < 0) {
         H5_FAILED();
         HDprintf("Can't encode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     if (enum_buf_size > 0)
         enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
@@ -6385,40 +6339,40 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the enumerate buffer and return an object handle */
     if ((decoded_tid2 = H5Tdecode(enum_buf)) < 0) {
         H5_FAILED();
         HDprintf("Can't decode enumerate type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Verify that the datatype was copied exactly */
     if (H5Tequal(decoded_tid2, tid2) <= 0) {
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /* Query member number and member index by name, for enumeration type. */
     if (H5Tget_nmembers(decoded_tid2) != 5) {
         H5_FAILED();
         HDprintf("Can't get member number\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tget_member_index(decoded_tid2, "ORANGE") != 3) {
         H5_FAILED();
         HDprintf("Can't get correct index number\n");
         goto error;
-    } /* end if */
+    }
 
     /* Encode VL string type in a buffer */
     if (H5Tencode(tid3, NULL, &vlstr_buf_size) < 0) {
         H5_FAILED();
         HDprintf("Can't encode VL string type\n");
         goto error;
-    } /* end if */
+    }
 
     if (vlstr_buf_size > 0)
         vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
@@ -6427,14 +6381,14 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't encode VL string type\n");
         goto error;
-    } /* end if */
+    }
 
     /* Decode from the VL string buffer and return an object handle */
     if ((decoded_tid3 = H5Tdecode(vlstr_buf)) < 0) {
         H5_FAILED();
         HDprintf("Can't decode VL string type\n");
         goto error;
-    } /* end if */
+    }
     HDfree(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
@@ -6442,12 +6396,12 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
     if (!H5Tis_variable_str(decoded_tid3)) {
         H5_FAILED();
         HDprintf("Datatype wasn't encoded & decoded identically\n");
         goto error;
-    } /* end if */
+    }
 
     /*-----------------------------------------------------------------------
      * Test the reference count of the decoded datatypes
@@ -6459,19 +6413,19 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Decoded datatype has incorrect reference count\n");
         goto error;
-    } /* end if */
+    }
 
     if (H5Iget_ref(decoded_tid2) != 1) {
         H5_FAILED();
         HDprintf("Decoded datatype has incorrect reference count\n");
         goto error;
-    } /* end if */
+    }
 
     if (H5Iget_ref(decoded_tid3) != 1) {
         H5_FAILED();
         HDprintf("Decoded datatype has incorrect reference count\n");
         goto error;
-    } /* end if */
+    }
 
     /* Make sure the reference counts for the decoded datatypes can be
      * decremented and the datatypes are closed. */
@@ -6479,19 +6433,19 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Decoded datatype can't close\n");
         goto error;
-    } /* end if */
+    }
 
     if (H5Idec_ref(decoded_tid2) != 0) {
         H5_FAILED();
         HDprintf("Decoded datatype can't close\n");
         goto error;
-    } /* end if */
+    }
 
     if (H5Idec_ref(decoded_tid3) != 0) {
         H5_FAILED();
         HDprintf("Decoded datatype can't close\n");
         goto error;
-    } /* end if */
+    }
 
     /* Make sure the decoded datatypes are already closed. */
     H5E_BEGIN_TRY
@@ -6536,23 +6490,23 @@ test_encode(void)
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(tid2) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
     if (H5Tclose(tid3) < 0) {
         H5_FAILED();
         HDprintf("Can't close datatype\n");
         goto error;
-    } /* end if */
+    }
 
     if (H5Fclose(file) < 0) {
         H5_FAILED();
         HDprintf("Can't close file\n");
         goto error;
-    } /* end if */
+    }
 
     HDfree(cmpd_buf);
     HDfree(enum_buf);
@@ -6809,8 +6763,6 @@ conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
  *              floats and I can't think of a particularly good way to
  *              make it portable to other architectures, but further
  *              input and changes are welcome.  -QAK
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

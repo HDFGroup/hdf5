@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5P package.  Including this header means that the source file
- *		is part of the H5P package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5P package.  Including this header means that the source file
+ *          is part of the H5P package.
  */
 #ifndef H5Pmodule_H
 #define H5Pmodule_H
@@ -904,6 +901,7 @@
  *
  * \ref PLCR
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \ref PLCR
  * \snippet{doc} tables/propertyLists.dox lapl_table
@@ -1007,6 +1005,7 @@
  * can be adjusted at runtime before a file is created or opened.
  *
  * \snippet{doc} tables/propertyLists.dox fapl_table
+ * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  * \defgroup FCPL File Creation Properties
  * \ingroup GCPL

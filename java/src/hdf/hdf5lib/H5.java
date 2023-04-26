@@ -57,6 +57,9 @@ import hdf.hdf5lib.structs.H5O_info_t;
 import hdf.hdf5lib.structs.H5O_native_info_t;
 import hdf.hdf5lib.structs.H5O_token_t;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @page HDF5LIB HDF5 Java API Package
  * This class is the Java interface for the HDF5 library.
@@ -257,7 +260,7 @@ public class H5 implements java.io.Serializable {
      */
     private static final long serialVersionUID = 6129888282117053288L;
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5.class);
+    private final static Logger log = LoggerFactory.getLogger(H5.class);
 
     /**
      * @ingroup JH5
@@ -5112,8 +5115,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param name
      *            IN: File name to check.
-     * @param file_id
-     *            IN: File identifier for a currently-open HDF5 file
+     * @param fapl_id
+     *            IN: File access property list identifier
      *
      * @return true if file is accessible, false if not.
      *
@@ -5122,7 +5125,7 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            name is null.
      **/
-    public synchronized static native boolean H5Fis_accessible(String name, long file_id)
+    public synchronized static native boolean H5Fis_accessible(String name, long fapl_id)
         throws HDF5LibraryException, NullPointerException;
 
     /**

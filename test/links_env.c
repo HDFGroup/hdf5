@@ -48,8 +48,6 @@ static int external_link_env(hid_t fapl, hbool_t new_format);
  * Programmer:  Vailin Choi
  *              Feb. 20, 2008
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int

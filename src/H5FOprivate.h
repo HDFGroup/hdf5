@@ -16,10 +16,6 @@
 #ifndef H5FOprivate_H
 #define H5FOprivate_H
 
-#ifdef LATER
-#include "H5FOpublic.h"
-#endif /* LATER */
-
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions			*/
 #include "H5Fprivate.h"  /* File access				*/
