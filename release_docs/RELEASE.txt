@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Added support for CMake presets file.
+
+      CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+      that allow users to specify common configure options and share them with others.
+      HDF added a CMakePresets.json file of a typical configuration and support
+      file, config/cmake-presets/hidden-presets.json. 
+      Also added a section to INSTALL_CMake.txt with very basic explanation of the
+      process to use CMakePresets.
+
     - Enabled instrumentation of the library by default in CMake for parallel
       debug builds
 

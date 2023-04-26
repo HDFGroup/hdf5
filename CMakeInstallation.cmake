@@ -146,17 +146,56 @@ if (HDF5_PACK_EXAMPLES)
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+
+  option (EXAMPLES_USE_RELEASE_NAME "Use the released examples artifact name" OFF)
+  option (EXAMPLES_DOWNLOAD "Download to use released examples files" OFF)
+  if (EXAMPLES_DOWNLOAD)
+    if (NOT EXAMPLES_USE_LOCALCONTENT)
+      set (EXAMPLES_URL ${EXAMPLES_TGZ_ORIGPATH}/${EXAMPLES_TGZ_ORIGNAME})
+    else ()
+      set (EXAMPLES_URL ${TGZPATH}/${EXAMPLES_TGZ_ORIGNAME})
+    endif ()
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Examples file is ${EXAMPLES_URL}")
+    endif ()
+    file (DOWNLOAD ${EXAMPLES_URL} ${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED})
+    if (EXISTS "${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+      execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED}
+          WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+          COMMAND_ECHO STDOUT
+      )
+    endif ()
+    set (EXAMPLES_USE_RELEASE_NAME ON CACHE BOOL "" FORCE)
+  else ()
+    if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+      execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
+          WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+          COMMAND_ECHO STDOUT
+      )
+    endif ()
+  endif ()
+  if (EXAMPLES_USE_RELEASE_NAME)
+    get_filename_component (EX_LAST_EXT ${HDF5_EXAMPLES_COMPRESSED} LAST_EXT)
+    if (${EX_LAST_EXT} STREQUAL ".zip")
+      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+    else ()
+      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+      get_filename_component (EX_DIR_NAME ${EX_DIR_NAME} NAME_WLE)
+    endif ()
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
-    )
-    install (
-      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
-      DESTINATION ${HDF5_INSTALL_DATA_DIR}
-      USE_SOURCE_PERMISSIONS
-      COMPONENT hdfdocuments
+        COMMAND ${CMAKE_COMMAND} -E rename ${EX_DIR_NAME} HDF5Examples
+        WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+        COMMAND_ECHO STDOUT
     )
   endif ()
+  install (
+    DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
+    DESTINATION ${HDF5_INSTALL_DATA_DIR}
+    USE_SOURCE_PERMISSIONS
+    COMPONENT hdfdocuments
+  )
   install (
       FILES
           ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
