@@ -1,0 +1,478 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "ci-base",
+      "displayName": "Basic Config",
+      "description": "Basic build using Ninja generator",
+      "generator": "Ninja",
+      "hidden": true,
+      "binaryDir": "${sourceParentDir}/build/${presetName}",
+      "installDir": "${sourceParentDir}/install/${presetName}"
+    },
+   {
+      "name": "ci-x64",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "hidden": true
+    },
+    {
+      "name": "ci-x86",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "hidden": true
+    },
+    {
+      "name": "ci-Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "hidden": true
+    },
+    {
+      "name": "ci-Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "HDF5_BUILD_DOC": "ON"
+      },
+      "hidden": true
+    },
+    {
+      "name": "ci-MSVC",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ci-Clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/clang.cmake"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ci-GNUC",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/gcc.cmake"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ci-Intel",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "config/toolchain/intel.cmake"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ci-Fortran",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_FORTRAN": "ON"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ci-CPP",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_CPP_LIB": "ON"
+      }
+    },
+    {
+      "name": "ci-Java",
+      "hidden": true,
+      "cacheVariables": {
+        "HDF5_BUILD_JAVA": "ON"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ci-x64-Debug-MSVC",
+      "description": "MSVC for x64 (Debug)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Debug",
+        "ci-MSVC"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-MSVC",
+      "description": "MSVC for x64 (Release)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Release",
+        "ci-MSVC"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-Clang",
+      "description": "Clang/LLVM for x64 (Debug)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Debug",
+        "ci-Clang"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-Clang",
+      "description": "Clang/LLVM for x64 (Release)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Release",
+        "ci-Clang"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC",
+      "description": "GNUC for x64 (Debug)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Debug",
+        "ci-GNUC"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-GNUC",
+      "description": "GNUC for x64 (Release)",
+      "hidden": true,
+      "inherits": [
+        "ci-base",
+        "ci-x64",
+        "ci-Release",
+        "ci-GNUC"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-MSVC-asan",
+      "description": "x64-Debug-MSVC with /fsanitize=address",
+      "hidden": true,
+      "inherits": "ci-x64-Debug-MSVC",
+      "cacheVariables": {
+        "USE_SANITIZER": "Address",
+        "HDF5_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-asan",
+      "hidden": true,
+      "inherits": "ci-x64-Debug-GNUC",
+      "cacheVariables": {
+        "USE_SANITIZER": "Address",
+        "HDF5_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-tsan",
+      "hidden": true,
+      "inherits": "ci-x64-Debug-GNUC",
+      "cacheVariables": {
+        "USE_SANITIZER": "Thread",
+        "HDF5_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-lsan",
+      "hidden": true,
+      "inherits": "ci-x64-Debug-GNUC",
+      "cacheVariables": {
+        "USE_SANITIZER": "Leak",
+        "HDF5_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-ubsan",
+      "hidden": true,
+      "inherits": "ci-x64-Debug-GNUC",
+      "cacheVariables": {
+        "USE_SANITIZER": "Undefined",
+        "HDF5_ENABLE_SANITIZERS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-base",
+      "configurePreset": "ci-base",
+      "hidden": true,
+      "verbose": true,
+      "jobs": 8
+    },
+    {
+      "name": "ci-x64-Debug-MSVC",
+      "configurePreset": "ci-x64-Debug-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-MSVC",
+      "configurePreset": "ci-x64-Release-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-Clang",
+      "configurePreset": "ci-x64-Debug-Clang",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-Clang",
+      "configurePreset": "ci-x64-Release-Clang",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC",
+      "configurePreset": "ci-x64-Debug-GNUC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-GNUC",
+      "configurePreset": "ci-x64-Release-GNUC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-MSVC-asan",
+      "configurePreset": "ci-x64-Debug-MSVC-asan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-asan",
+      "configurePreset": "ci-x64-Debug-GNUC-asan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-tsan",
+      "configurePreset": "ci-x64-Debug-GNUC-tsan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-lsan",
+      "configurePreset": "ci-x64-Debug-GNUC-lsan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-ubsan",
+      "configurePreset": "ci-x64-Debug-GNUC-ubsan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ci-base",
+      "configurePreset": "ci-base",
+      "output": {
+        "outputOnFailure": false,
+        "shortProgress": true,
+        "verbosity": "verbose"
+      },
+      "hidden": true,
+      "execution": {
+        "noTestsAction": "error",
+        "timeout": 180,
+        "jobs": 8
+      }
+    },
+    {
+      "name": "ci-x64-Debug-MSVC",
+      "configurePreset": "ci-x64-Debug-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-MSVC",
+      "configurePreset": "ci-x64-Release-MSVC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-Clang",
+      "configurePreset": "ci-x64-Debug-Clang",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-Clang",
+      "configurePreset": "ci-x64-Release-Clang",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC",
+      "configurePreset": "ci-x64-Debug-GNUC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-GNUC",
+      "configurePreset": "ci-x64-Release-GNUC",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-MSVC-asan",
+      "configurePreset": "ci-x64-Debug-MSVC-asan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-asan",
+      "configurePreset": "ci-x64-Debug-GNUC-asan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-tsan",
+      "configurePreset": "ci-x64-Debug-GNUC-tsan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-lsan",
+      "configurePreset": "ci-x64-Debug-GNUC-lsan",
+      "hidden": true,
+      "inherits": [
+        "ci-base"
+      ]
+    },
+    {
+      "name": "ci-x64-Debug-GNUC-ubsan",
+      "configurePreset": "ci-x64-Debug-GNUC-ubsan",
+      "inherits": [
+        "ci-base"
+      ]
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "ci-base",
+      "hidden": true,
+      "output": {
+        "verbose": true
+      }
+    },
+    {
+      "name": "ci-x64-Release-MSVC",
+      "configurePreset": "ci-x64-Release-MSVC",
+      "hidden": true,
+      "inherits": "ci-base",
+      "generators": [
+        "ZIP"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-Clang",
+      "configurePreset": "ci-x64-Release-Clang",
+      "hidden": true,
+      "inherits": "ci-base",
+      "generators": [
+        "TGZ"
+      ]
+    },
+    {
+      "name": "ci-x64-Release-GNUC",
+      "configurePreset": "ci-x64-Release-GNUC",
+      "hidden": true,
+      "inherits": "ci-base",
+      "generators": [
+        "TGZ"
+      ]
+    }
+  ]
+}
