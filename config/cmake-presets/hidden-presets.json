@@ -97,8 +97,21 @@
       }
     },
     {
+      "name": "ci-Fortran-Clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_Fortran_COMPILER": "gfortran"
+      },
+      "condition": {
+        "type": "matches",
+        "string": "${presetName}",
+        "regex": ".*-Clang"
+      }
+    },
+    {
       "name": "ci-Fortran",
       "hidden": true,
+      "inherits": "ci-Fortran-Clang",
       "cacheVariables": {
         "HDF5_BUILD_FORTRAN": "ON"
       },
