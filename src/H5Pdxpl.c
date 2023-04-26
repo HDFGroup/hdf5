@@ -2515,19 +2515,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selection_io_mode)
+H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "iDC", dxpl_id, selection_io_mode);
+    H5TRACE2("e", "iDC", plist_id, selection_io_mode);
 
     /* Check arguments */
-    if (dxpl_id == H5P_DEFAULT)
+    if (plist_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the selection I/O mode */
@@ -2556,16 +2556,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode)
+H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*DC", dxpl_id, selection_io_mode);
+    H5TRACE2("e", "i*DC", plist_id, selection_io_mode);
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Get the selection I/O mode */
@@ -2595,7 +2595,7 @@ H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*o
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ixx", plist_id, no_selection_io_cause);
+    H5TRACE2("e", "ix", plist_id, no_selection_io_cause);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2687,18 +2687,19 @@ H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf)
+H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", plist_id, modify_write_buf);
 
     /* Check arguments */
-    if (dxpl_id == H5P_DEFAULT)
+    if (plist_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the selection I/O mode */
@@ -2720,15 +2721,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_modify_write_buf(hid_t dxpl_id, hbool_t *modify_write_buf)
+H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", plist_id, modify_write_buf);
 
     /* Check arguments */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Get the selection I/O mode */

@@ -8271,7 +8271,7 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *
  * \brief Sets the selection I/O mode
  *
- * \param[in] dxpl_id   Property list identifier
+ * \dxpl_id{plist_id}
  * \param[in] selection_io_mode    The selection I/O mode to be set
  *
  * \return \herr_t
@@ -8306,7 +8306,7 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  * \since 1.14.1
  *
  */
-H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selection_io_mode);
+H5_DLL herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode);
 
 /**
  *
@@ -8314,7 +8314,7 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  *
  * \brief Retrieves the selection I/O mode
  *
- * \param[in] plist_id Property list identifier
+ * \dxpl_id{plist_id}
  * \param[out] selection_io_mode   The selection I/O mode
  *
  * \return \herr_t
@@ -8333,7 +8333,7 @@ H5_DLL herr_t H5Pset_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t selecti
  * \since 1.14.1
  *
  */
-H5_DLL herr_t H5Pget_selection_io(hid_t dxpl_id, H5D_selection_io_mode_t *selection_io_mode);
+H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode);
 
 /**
  * \ingroup DXPL
@@ -8402,7 +8402,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *
  * \brief Allows the library to modify the contents of the write buffer
  *
- * \param[in] dxpl_id   Property list identifier
+ * \dxpl_id{plist_id}
  * \param[in] modify_write_buf   Whether the library can modify the contents of the write buffer
  *
  * \return \herr_t
@@ -8425,7 +8425,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  * \since 1.14.1
  *
  */
-H5_DLL herr_t H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf);
+H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
 
 /**
  *
@@ -8433,7 +8433,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf);
  *
  * \brief Retrieves the "modify write buffer" property
  *
- * \param[in] dxpl_id   Property list identifier
+ * \dxpl_id{plist_id}
  * \param[out] modify_write_buf   Whether the library can modify the contents of the write buffer
  *
  * \return \herr_t
@@ -8447,7 +8447,7 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t dxpl_id, hbool_t modify_write_buf);
  * \since 1.14.1
  *
  */
-H5_DLL herr_t H5Pget_modify_write_buf(hid_t dxpl_id, hbool_t *modify_write_buf);
+H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf);
 
 /**
  * \ingroup LCPL
