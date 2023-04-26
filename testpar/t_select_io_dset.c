@@ -3579,7 +3579,7 @@ main(int argc, char *argv[])
                     if (chunked)
                         printf("with chunked dataset, ");
                     else
-                        printf("with contiguous datset, ");
+                        printf("with contiguous dataset, ");
                     if (dtrans)
                         printf("data transform, ");
                     else

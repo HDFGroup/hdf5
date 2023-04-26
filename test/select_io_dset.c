@@ -161,7 +161,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -280,7 +280,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -451,7 +451,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -593,7 +593,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -729,7 +729,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -1079,7 +1079,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -1399,7 +1399,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -1840,7 +1840,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
         FAIL_STACK_ERROR;
 
-    /* Set modfy write buffer if requested */
+    /* Set modify write buffer if requested */
     if (mwbuf)
         if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
             FAIL_STACK_ERROR;
@@ -2274,7 +2274,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             FAIL_STACK_ERROR;
 
-        /* Set modfy write buffer if requested */
+        /* Set modify write buffer if requested */
         if (mwbuf)
             if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
                 FAIL_STACK_ERROR;
@@ -3075,7 +3075,7 @@ main(void)
                 if (chunked)
                     printf("with chunked dataset, ");
                 else
-                    printf("with contiguous datset, ");
+                    printf("with contiguous dataset, ");
                 if (dtrans)
                     printf("data transform, ");
                 else
