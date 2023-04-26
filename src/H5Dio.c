@@ -290,16 +290,16 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     if (io_op_init == 0)
         HGOTO_DONE(SUCCEED)
 
-#ifdef H5_HAVE_PARALLEL
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
-#endif /* H5_HAVE_PARALLEL */
 
+#ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                     "unable to adjust I/O info for parallel or selection I/O")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
@@ -694,16 +694,16 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
     HDassert(io_op_init == count);
 
-#ifdef H5_HAVE_PARALLEL
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
-#endif /* H5_HAVE_PARALLEL */
 
+#ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel or selection I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                     "unable to adjust I/O info for parallel or selection I/O")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Perform third phase of type info initialization */
     if (H5D__typeinfo_init_phase3(&io_info) < 0)
@@ -1155,58 +1155,49 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             }
         }
 
-    /* Check if we need to allocate a shared type conversion buffer */
-    if (io_info->max_tconv_type_size) {
-        H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
+    /* If we're doing type converison and we might be doing selection I/O, check if the buffers are large
+     * enough to handle the whole I/O */
+    if (io_info->max_tconv_type_size && io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
+        size_t max_temp_buf; /* Maximum temporary buffer size */
+        size_t i;            /* Local index variable */
 
-        /* Get the original state of parallel I/O transfer mode */
-        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
+        /* Collective I/O, conversion buffer must be large enough for entire I/O (for now) */
 
-        /* If we might be doing selection I/O, check if the buffers are large enough to handle the whole I/O
+        /* Calculate size of background buffer (tconv buf size was calculated in layout io_init callbacks)
          */
-        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF) {
-            size_t max_temp_buf; /* Maximum temporary buffer size */
-            size_t i;            /* Local index variable */
+        for (i = 0; i < io_info->count; i++) {
+            H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
-            /* Collective I/O, conversion buffer must be large enough for entire I/O (for now) */
+            /* Check for background buffer */
+            if (type_info->need_bkg) {
+                /* Add size of this dataset's background buffer to the global background buffer size
+                 */
+                io_info->bkg_buf_size += io_info->dsets_info[i].nelmts * type_info->dst_type_size;
 
-            /* Calculate size of background buffer (tconv buf size was calculated in layout io_init callbacks)
-             */
-            for (i = 0; i < io_info->count; i++) {
-                H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
-
-                /* Check for background buffer */
-                if (type_info->need_bkg) {
-                    /* Add size of this dataset's background buffer to the global background buffer size
-                     */
-                    io_info->bkg_buf_size += io_info->dsets_info[i].nelmts * type_info->dst_type_size;
-
-                    /* Check if we need to fill the background buffer with the destination contents */
-                    if (type_info->need_bkg == H5T_BKG_YES)
-                        io_info->must_fill_bkg = TRUE;
-                }
+                /* Check if we need to fill the background buffer with the destination contents */
+                if (type_info->need_bkg == H5T_BKG_YES)
+                    io_info->must_fill_bkg = TRUE;
             }
+        }
 
-            /* Get max temp buffer size from API context */
-            if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
+        /* Get max temp buffer size from API context */
+        if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
 
-            /* Check if the needed type conversion or background buffer size is too big */
-            if (io_info->tconv_buf_size > max_temp_buf) {
-                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                io_info->no_selection_io_cause |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
-                io_info->tconv_buf_size = 0;
-                io_info->bkg_buf_size   = 0;
-                io_info->must_fill_bkg  = FALSE;
-            }
-            if (io_info->bkg_buf_size > max_temp_buf) {
-                io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-                io_info->no_selection_io_cause |= H5D_SEL_IO_BKG_BUF_TOO_SMALL;
-                io_info->tconv_buf_size = 0;
-                io_info->bkg_buf_size   = 0;
-                io_info->must_fill_bkg  = FALSE;
-            }
+        /* Check if the needed type conversion or background buffer size is too big */
+        if (io_info->tconv_buf_size > max_temp_buf) {
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+            io_info->tconv_buf_size = 0;
+            io_info->bkg_buf_size   = 0;
+            io_info->must_fill_bkg  = FALSE;
+        }
+        if (io_info->bkg_buf_size > max_temp_buf) {
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_BKG_BUF_TOO_SMALL;
+            io_info->tconv_buf_size = 0;
+            io_info->bkg_buf_size   = 0;
+            io_info->must_fill_bkg  = FALSE;
         }
     }
 
