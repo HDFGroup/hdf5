@@ -8291,6 +8291,18 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *          layout callback determines that it is not feasible to do so.  Please
  *          refer to H5Pget_no_selection_io_cause() for details.
  *
+ *          When used with type conversion, selection I/O requires the type
+ *          conversion buffer (and the background buffer if applicable) be large
+ *          enough to hold the entirety of the data involved in the I/O.  For
+ *          read operations, the library will use the application's read buffer
+ *          as the type conversion buffer if the memory type is not smaller than
+ *          the file type, eliminating the need for a separate type conversion
+ *          buffer (a background buffer may still be required).  For write
+ *          operations, the library will similarly use the write buffer as a
+ *          type conversion buffer, but only if H5Pset_modify_write_buf() is
+ *          used to allow the library to modify the contents of the write
+ *          buffer.
+ *
  * \since 1.14.1
  *
  */
