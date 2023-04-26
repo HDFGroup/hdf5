@@ -58,10 +58,10 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: rank
-    INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(1:rank) :: dims
     INTEGER(HID_T), INTENT(OUT) :: space_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HSIZE_T), OPTIONAL, INTENT(IN) :: maxdims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), OPTIONAL, DIMENSION(1:rank) :: maxdims
     INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: f_maxdims
 
     INTERFACE
@@ -81,9 +81,9 @@ CONTAINS
        RETURN
     ENDIF
     IF (PRESENT(maxdims)) THEN
-       f_maxdims = maxdims
+       f_maxdims(1:rank) = maxdims(1:rank)
     ELSE
-       f_maxdims = dims
+       f_maxdims(1:rank) = dims(1:rank)
     ENDIF
     hdferr = h5screate_simple_c(rank, dims, f_maxdims, space_id)
     DEALLOCATE(f_maxdims)
@@ -823,8 +823,8 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: stride
-    INTEGER(HSIZE_T), DIMENSION(:), OPTIONAL, INTENT(IN) :: BLOCK
+    INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN), OPTIONAL :: stride
+    INTEGER(HSIZE_T), DIMENSION(:), INTENT(IN), OPTIONAL :: BLOCK
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_block
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_stride
     INTEGER :: rank
@@ -1225,7 +1225,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: buf
     INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: fapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: fapl_id
     INTEGER(HID_T) :: fapl_id_default
 
     INTERFACE

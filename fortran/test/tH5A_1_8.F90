@@ -2614,6 +2614,7 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      WRITE(chr5,'(I5.5)') u
      attrname = 'attr '//chr5
      CALL H5Aexists_f( gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.FALSE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname,  exists, error, lapl_id = H5P_DEFAULT_F)
@@ -2623,9 +2624,11 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      CALL check("h5acreate_f",error,total_error)
 
      CALL H5Aexists_f(gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.TRUE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname, exists, error)
+     CALL check("H5Aexists_by_name_f", error, total_error)
      CALL verify("H5Aexists_by_name_f",exists,.TRUE.,total_error )
 
      attr_data1(1) = u
@@ -2638,9 +2641,11 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
      CALL check("h5aclose_f",error,total_error)
 
      CALL H5Aexists_f(gid, attrname, exists, error)
+     CALL check("H5Aexists_f", error, total_error)
      CALL verify("H5Aexists",exists,.TRUE.,total_error )
 
      CALL H5Aexists_by_name_f(fid, GROUP1_NAME, attrname, exists, error)
+     CALL check("H5Aexists_by_name_f", error, total_error)
      CALL verify("H5Aexists_by_name_f",exists,.TRUE.,total_error )
 
   ENDDO

@@ -75,8 +75,6 @@ test_configure(void)
  * Programmer:    Albert Cheng
  *              September 25, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -94,10 +92,6 @@ cleanup_configure(void)
  *
  * Programmer:    Albert Cheng
  *              September 25, 2001
- *
- * Modifications:
- *    Albert Cheng, 2004/10/14
- *    Verified both signed and unsigned int types.
  *
  *-------------------------------------------------------------------------
  */
@@ -182,8 +176,6 @@ test_config_ctypes(void)
  *
  * Programmer:    Albert Cheng
  *              October 12, 2009
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

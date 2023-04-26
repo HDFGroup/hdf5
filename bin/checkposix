@@ -103,7 +103,7 @@ foreach $arg (@ARGV) {
         # Now find all function calls on this line which don't start with 'H'
         while (($name)=/\b([a-z_A-GI-Z]\w*)\s*\(/) {
             $_ = $';
-              
+
             # Ignore C statements that look sort of like function
             # calls.
             next if $name =~ /^(if|for|offsetof|return|sizeof|switch|while|void)$/;
@@ -186,7 +186,7 @@ foreach $arg (@ARGV) {
             }
 
             # TESTING (not comprehensive - just noise reduction)
-            
+
             # Test macros and functions (testhdf5.h)
             next if $name =~ /^(AddTest|TestErrPrintf|TestSummary|TestCleanup|TestShutdown)$/;
             next if $name =~ /^(CHECK|CHECK_PTR|CHECK_PTR_NULL|CHECK_PTR_EQ|CHECK_I)$/;

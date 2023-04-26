@@ -227,12 +227,12 @@ extern "C" {
  *          descriptive name for the filter, and may be the null pointer.
  *
  *          \c can_apply, described in detail below, is a user-defined callback
- *          function which determines whether the combination of the dataset
+ *          function that determines whether the combination of the dataset
  *          creation property list values, the datatype, and the dataspace
  *          represent a valid combination to apply this filter to.
  *
  *          \c set_local, described in detail below, is a user-defined callback
- *          function which sets any parameters that are specific to this
+ *          function that sets any parameters that are specific to this
  *          dataset, based on the combination of the dataset creation property
  *          list values, the datatype, and the dataspace.
  *
@@ -242,9 +242,9 @@ extern "C" {
  *          The statistics associated with a filter are not reset by this
  *          function; they accumulate over the life of the library.
  *
- *          #H5Z_class_t is a macro which maps to either H5Z_class1_t or
+ *          #H5Z_class_t is a macro that maps to either H5Z_class1_t or
  *          H5Z_class2_t, depending on the needs of the application. To affect
- *          only this macro, H5Z_class_t_vers may be defined to either 1 or 2.
+ *          only this macro, H5Z_class_t_vers may be defined as either 1 or 2.
  *          Otherwise, it will behave in the same manner as other API
  *          compatibility macros. See API Compatibility Macros in HDF5 for more
  *          information. H5Z_class1_t matches the #H5Z_class_t structure that is
@@ -261,15 +261,15 @@ extern "C" {
  *          defined as described in the HDF5 library header file H5Zpublic.h.
  *
  *          When a filter is applied to the fractal heap for a group (e.g.,
- *          when compressing group metadata) and if the can apply and set local
- *          callback functions have been defined for that filter, HDF5 passes
+ *          when compressing group metadata) and if they can apply and set local
+ *          callback functions that have been defined for that filter, HDF5 passes
  *          the value -1 for all parameters for those callback functions. This
  *          is done to ensure that the filter will not be applied to groups if
  *          it relies on these parameters, as they are not applicable to group
  *          fractal heaps; to operate on group fractal heaps, a filter must be
  *          capable of operating on an opaque block of binary data.
  *
- *          The \Emph{can apply} callback function must return a positive value
+ *          The \Emph{can-apply} callback function must return a positive value
  *          for a valid combination, zero for an invalid combination, and a
  *          negative value for an error.
  *          \snippet this H5Z_can_apply_func_t_snip
@@ -302,9 +302,9 @@ extern "C" {
  *          \Emph{set local} callback functions for any filters used in the
  *          dataset creation property list are called. These callbacks receive
  *          \c dcpl_id, the dataset's private copy of the dataset creation
- *          property list passed in to H5Dcreate() (i.e. not the actual
- *          property list passed in to H5Dcreate()); \c type_id, the datatype
- *          identifier passed in to H5Dcreate(), which is not copied and should
+ *          property list passed into H5Dcreate() (i.e. not the actual
+ *          property list passed into H5Dcreate()); \c type_id, the datatype
+ *          identifier passed into H5Dcreate(), which is not copied and should
  *          not be modified; and \c space_id, a dataspace describing the chunk
  *          (for chunked dataset storage), which should also not be modified.
  *
@@ -345,13 +345,13 @@ extern "C" {
  *          will work in many cases, but if there is a mismatch between the
  *          memory allocators used in the library and any filter that
  *          reallocates a buffer, there could be problems. This is most often
- *          the case with Windows and/or when debug memory allocators are being
+ *          the case with Windows and/or when debugging memory allocators are being
  *          used. In both cases, the "state" of the memory allocator lies in
  *          different libraries and will get corrupted if you allocate in one
  *          library and free in another. Windows adds the C standard library
- *          via dlls that can vary with Visual Studio version and debug vs
+ *          via dlls that can vary with Visual Studio version and debug vs.
  *          release builds. Static links to the MSVC CRT can also introduce
- *          new memory allocator state.
+ *          a new memory allocator state.
  *
  *          The library does provide H5allocate_memory() and H5free_memory()
  *          functions that will use the library's allocation and free functions,
@@ -398,7 +398,7 @@ H5_DLL herr_t H5Zregister(const void *cls);
  *          sure that all cached data that may use this filter are written out.
  *
  *          If the application is a parallel program, all processes that
- *          participate in collective data write should call this function to
+ *          participate in collective data writing should call this function to
  *          ensure that all data is flushed.
  *
  *          After a call to H5Zunregister(), the filter specified in filter

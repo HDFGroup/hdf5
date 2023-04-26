@@ -11,16 +11,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Friday, January 19, 2007
- *
  * Purpose:	This file contains inline definitions for "generic" routines
- *		supporting a "shared message interface" (ala Java) for object
- *		header messages that can be shared.  This interface is
- *              dependent on a bunch of macros being defined which define
- *              the name of the interface and "real" methods which need to
- *              be implemented for each message class that supports the
- *              shared message interface.
+ *          supporting a "shared message interface" (ala Java) for object
+ *          header messages that can be shared.  This interface is
+ *          dependent on a bunch of macros being defined which define
+ *          the name of the interface and "real" methods which need to
+ *          be implemented for each message class that supports the
+ *          shared message interface.
  */
 
 #ifndef H5Oshared_H
@@ -31,16 +28,12 @@
  *
  * Purpose:     Decode an object header message that may be shared.
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:	    The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:      Success:        Pointer to the new message in native form
- *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      Success:    Pointer to the new message in native form
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static inline void *
@@ -90,16 +83,11 @@ done:
  *
  * Purpose:     Encode an object header message that may be shared.
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline herr_t
@@ -143,18 +131,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O_SHARED_SIZE
  *
- * Purpose:	Returns the length of an encoded message.
+ * Purpose:     Returns the length of an encoded message.
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:	Success:	Length
- *		Failure:	0
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      Success:    Length
+ *              Failure:	0
  *-------------------------------------------------------------------------
  */
 static inline size_t
@@ -198,16 +182,11 @@ done:
  * Purpose:     Decrement reference count on any objects referenced by
  *              message
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline herr_t
@@ -249,16 +228,11 @@ done:
  * Purpose:     Increment reference count on any objects referenced by
  *              message
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline herr_t
@@ -299,16 +273,11 @@ done:
  *
  * Purpose:     Copies a message from _SRC to _DEST in file
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 19, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline void *
@@ -366,12 +335,7 @@ done:
  *              file that this header file is included in, and must be defined
  *              prior to including this header file.
  *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Peter Cao
- *              May 25, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline herr_t
@@ -418,7 +382,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to update native message")
 #endif /* H5O_SHARED_POST_COPY_FILE_UPD */
 
-    /* Make sure that if the the source or destination is committed, both are
+    /* Make sure that if the source or destination is committed, both are
      * committed */
     HDassert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) ==
              (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
@@ -432,16 +396,11 @@ done:
  *
  * Purpose:     Prints debugging info for a potentially shared message.
  *
- * Note:	The actual name of this routine can be different in each source
- *		file that this header file is included in, and must be defined
- *		prior to including this header file.
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, February  3, 2007
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static inline herr_t

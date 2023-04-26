@@ -859,5 +859,9 @@ test_unicode(void)
 void
 cleanup_unicode(void)
 {
-    HDremove(FILENAME);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILENAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

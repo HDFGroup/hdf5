@@ -246,7 +246,7 @@ H5O__group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
     HDassert(crt_info);
     HDassert(obj_loc);
 
-    /* Create the the group */
+    /* Create the group */
     if (NULL == (grp = H5G__create(f, crt_info)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
 

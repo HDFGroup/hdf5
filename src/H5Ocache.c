@@ -1510,8 +1510,9 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                 H5O_cont_t *cont;
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, NULL, 0, &ioflags, mesg->raw_size,
-                                                            mesg->raw);
+                if (NULL == (cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, NULL, 0, &ioflags,
+                                                                         mesg->raw_size, mesg->raw)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "bad continuation message found")
                 H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1,
                                   size_t); /* the next continuation message/chunk */
 

@@ -793,7 +793,7 @@ done:
  *     or "meta" (any other flag)
  *
  *     Prints filename and listing of total number of reads and bytes read,
- *     both as a grand total and separate  meta- and rawdata reads.
+ *     both as a grand total and separate  meta- and raw data reads.
  *
  *     If any reads were done, prints out two tables:
  *
@@ -1042,11 +1042,11 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                   suffixes[suffix_i], /* bin ceiling      */
                   m->count,           /* metadata reads   */
-                  r->count,           /* rawdata reads    */
+                  r->count,           /* raw data reads    */
                   bm_val, bm_suffix,  /* metadata bytes   */
-                  br_val, br_suffix,  /* rawdata bytes    */
+                  br_val, br_suffix,  /* raw data bytes    */
                   am_val, am_suffix,  /* metadata average */
-                  ar_val, ar_suffix); /* rawdata average  */
+                  ar_val, ar_suffix); /* raw data average  */
 
         HDfflush(stream);
     }

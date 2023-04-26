@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5D package.  Including this header means that the source file
- *		is part of the H5D package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5D package.  Including this header means that the source file
+ *          is part of the H5D package.
  */
 #ifndef H5Dmodule_H
 #define H5Dmodule_H

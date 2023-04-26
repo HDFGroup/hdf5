@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Olink.c
- *                      Aug 29 2005
- *                      Quincey Koziol
  *
- * Purpose:             Link messages.
+ * Purpose:             Link messages
  *
  *-------------------------------------------------------------------------
  */
@@ -100,32 +98,27 @@ H5FL_DEFINE_STATIC(H5O_link_t);
  * Purpose:     Decode a message and return a pointer to
  *              a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native order.
- *
- *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Aug 29 2005
- *
+ * Return:      Success:    Pointer to new message in native order
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_link_t    *lnk = NULL;             /* Pointer to link message */
-    size_t         len = 0;                /* Length of a string in the message */
-    unsigned char  link_flags;             /* Flags for encoding link info */
-    const uint8_t *p_end     = p + p_size; /* End of the p buffer */
-    void          *ret_value = NULL;       /* Return value */
+    H5O_link_t    *lnk = NULL;                 /* Pointer to link message */
+    size_t         len = 0;                    /* Length of a string in the message */
+    unsigned char  link_flags;                 /* Flags for encoding link info */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     if (*p++ != H5O_LINK_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -134,6 +127,8 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Get the encoding flags for the link */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     link_flags = *p++;
     if (link_flags & ~H5O_LINK_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
@@ -141,63 +136,74 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     /* Check for non-default link type */
     if (link_flags & H5O_LINK_STORE_LINK_TYPE) {
         /* Get the type of the link */
+        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         lnk->type = (H5L_type_t)*p++;
         if (lnk->type < H5L_TYPE_HARD || lnk->type > H5L_TYPE_MAX)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
-    } /* end if */
+    }
     else
         lnk->type = H5L_TYPE_HARD;
 
     /* Get the link creation time from the file */
     if (link_flags & H5O_LINK_STORE_CORDER) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         INT64DECODE(p, lnk->corder)
         lnk->corder_valid = TRUE;
-    } /* end if */
+    }
     else {
         lnk->corder       = 0;
         lnk->corder_valid = FALSE;
-    } /* end else */
+    }
 
     /* Check for non-default name character set */
     if (link_flags & H5O_LINK_STORE_NAME_CSET) {
         /* Get the link name's character set */
+        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         lnk->cset = (H5T_cset_t)*p++;
         if (lnk->cset < H5T_CSET_ASCII || lnk->cset > H5T_CSET_UTF8)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad cset type")
-    } /* end if */
+    }
     else
         lnk->cset = H5T_CSET_ASCII;
 
     /* Get the length of the link's name */
     switch (link_flags & H5O_LINK_NAME_SIZE) {
         case 0: /* 1 byte size */
+            if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             len = *p++;
             break;
 
         case 1: /* 2 byte size */
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT16DECODE(p, len);
             break;
 
         case 2: /* 4 byte size */
+            if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT32DECODE(p, len);
             break;
 
         case 3: /* 8 byte size */
+            if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT64DECODE(p, len);
             break;
 
         default:
-            HDassert(0 && "bad size for name");
-    } /* end switch */
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "no appropriate size for name length")
+    }
     if (len == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid name length")
 
-    /* Make sure that length doesn't exceed buffer size, which could occur
-       when the file is corrupted */
-    if (p + len > p_end)
-        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
-
     /* Get the link's name */
+    if (H5_IS_BUFFER_OVERFLOW(p, len, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     if (NULL == (lnk->name = (char *)H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     H5MM_memcpy(lnk->name, p, len);
@@ -208,20 +214,21 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     switch (lnk->type) {
         case H5L_TYPE_HARD:
             /* Get the address of the object the link points to */
+            if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             H5F_addr_decode(f, &p, &(lnk->u.hard.addr));
             break;
 
         case H5L_TYPE_SOFT:
             /* Get the link value */
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT16DECODE(p, len)
             if (len == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
 
-            /* Make sure that length doesn't exceed buffer size, which could occur
-               when the file is corrupted */
-            if (p + len > p_end)
-                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
-
+            if (H5_IS_BUFFER_OVERFLOW(p, len, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             if (NULL == (lnk->u.soft.name = (char *)H5MM_malloc((size_t)len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             H5MM_memcpy(lnk->u.soft.name, p, len);
@@ -238,16 +245,15 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown link type")
 
             /* A UD link.  Get the user-supplied data */
+            if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
             UINT16DECODE(p, len)
             if (lnk->type == H5L_TYPE_EXTERNAL && len < 3)
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "external link information length < 3")
             lnk->u.ud.size = len;
             if (len > 0) {
-                /* Make sure that length doesn't exceed buffer size, which could
-                   occur when the file is corrupted */
-                if (p + len > p_end)
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "name length causes read past end of buffer")
-
+                if (H5_IS_BUFFER_OVERFLOW(p, len, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
                 if (NULL == (lnk->u.ud.udata = H5MM_malloc((size_t)len)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
                 H5MM_memcpy(lnk->u.ud.udata, p, len);
@@ -255,22 +261,20 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
             }
             else
                 lnk->u.ud.udata = NULL;
-    } /* end switch */
+    }
 
     /* Set return value */
     ret_value = lnk;
 
 done:
-    if (ret_value == NULL)
-        if (lnk != NULL) {
-            if (lnk->name != NULL)
-                H5MM_xfree(lnk->name);
-            if (lnk->type == H5L_TYPE_SOFT && lnk->u.soft.name != NULL)
-                H5MM_xfree(lnk->u.soft.name);
-            if (lnk->type >= H5L_TYPE_UD_MIN && lnk->u.ud.size > 0 && lnk->u.ud.udata != NULL)
-                H5MM_xfree(lnk->u.ud.udata);
-            lnk = H5FL_FREE(H5O_link_t, lnk);
-        } /* end if */
+    if (!ret_value && lnk) {
+        H5MM_xfree(lnk->name);
+        if (lnk->type == H5L_TYPE_SOFT && lnk->u.soft.name != NULL)
+            H5MM_xfree(lnk->u.soft.name);
+        if (lnk->type >= H5L_TYPE_UD_MIN && lnk->u.ud.size > 0 && lnk->u.ud.udata != NULL)
+            H5MM_xfree(lnk->u.ud.udata);
+        H5FL_FREE(H5O_link_t, lnk);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__link_decode() */

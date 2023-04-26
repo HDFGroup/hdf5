@@ -2382,10 +2382,13 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *          (#H5Z_FILTER_DEFLATE) and the Fletcher32 error detection filter
  *          (#H5Z_FILTER_FLETCHER32).
  *
- *          The array \p c_values contains \p cd_nelmts integers which are
- *          auxiliary data for the filter. The integer values will be
- *          stored in the dataset object header as part of the filter
- *          information.
+ *          The array \p cd_values contains \p cd_nelmts unsigned integers
+ *          which are auxiliary data for the filter. The values are typically
+ *          used as parameters to control the filter. In a filter's
+ *          \p set_local method (called from \p H5Dcreate), the values are
+ *          interpreted and possibly modified before they are used to control
+ *          the filter. These, possibly modified values, are then stored in
+ *          the dataset object header as auxiliary data for the filter.
  *
  *          The \p flags argument is a bit vector with the following
  *          fields specifying certain general properties of the filter:
@@ -2477,7 +2480,7 @@ H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned level);
  *       format. The filters will come into play only when dense storage
  *       is used (see H5Pset_link_phase_change()) and will be applied to
  *       the group’s fractal heap. The fractal heap will contain most of
- *       the the group’s link metadata, including link names.
+ *       the group’s link metadata, including link names.
  *
  * \note When working with group creation property lists, if you are
  *       adding a filter that is not in HDF5’s set of predefined filters,
@@ -3326,7 +3329,7 @@ H5_DLL herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts, /* out */
  *       after the call to H5Pset_fapl_core(). It is an error to use this
  *       function with any other VFD.
  *
- * \note This function only applies to the backing store write operation
+ * \note This function only applies to the backing store write operation,
  *       which typically occurs when the file is flushed or closed. This
  *       function has no relationship to the increment parameter passed
  *       to H5Pset_fapl_core().
@@ -3373,7 +3376,7 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *           <tr>
  *            <td>Direct</td>
  *            <td>#H5FD_DIRECT</td>
- *            <td>This is the #H5FD_SEC2 driver except data is written to or
+ *            <td>This is the #H5FD_SEC2 driver, except data is written to or
  *                read from the file synchronously without being cached by the
  *                system.</td>
  *            <td>H5Pset_fapl_direct()</td>
@@ -3424,7 +3427,7 @@ H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, siz
  *            <td>Multi</td>
  *            <td>#H5FD_MULTI</td>
  *            <td>With this driver, data can be stored in multiple files
- *                according to the type of the data. I/O might work better if
+ *                according to the type of data. I/O might work better if
  *                data is stored in separate files based on the type of data.
  *                The Split driver is a special case of this driver.</td>
  *            <td>H5Pset_fapl_multi()</td>
@@ -4005,7 +4008,7 @@ H5_DLL herr_t H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts);
  *          for more information.
  *
  *          The type of data returned in \p type will be one of those
- *          listed in the discussion of the \p type parameter in the the
+ *          listed in the discussion of the \p type parameter in the
  *          description of the function H5Pset_multi_type().
  *
  *          Use of this function is only appropriate for an HDF5 file
@@ -4078,7 +4081,7 @@ H5_DLL herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned
  * \brief Returns maximum data sieve buffer size
  *
  * \fapl_id{fapl_id}
- * \param[in] size Maximum size, in bytes, of data sieve buffer
+ * \param[out] size Maximum size, in bytes, of data sieve buffer
  *
  * \return \herr_t
  *
@@ -4164,7 +4167,7 @@ H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
  * \details H5Pset_alignment() sets the alignment properties of a
  *          file access property list so that any file object greater
  *          than or equal in size to \p threshold bytes will be aligned
- *          on an address which is a multiple of \p alignment. The
+ *          on an address that is a multiple of \p alignment. The
  *          addresses are relative to the end of the user block; the
  *          alignment is calculated by subtracting the user block size
  *          from the absolute file address and then adjusting the address
@@ -4174,7 +4177,7 @@ H5_DLL herr_t H5Pget_vol_info(hid_t plist_id, void **vol_info);
  *          implying no alignment. Generally the default values will
  *          result in the best performance for single-process access to
  *          the file. For MPI IO and other parallel systems, choose an
- *          alignment which is a multiple of the disk block size.
+ *          alignment that is a multiple of the disk block size.
  *
  *          If the file space handling strategy is set to
  *          #H5F_FSPACE_STRATEGY_PAGE, then the alignment set via this
@@ -4212,7 +4215,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *                        penalized when determining which chunks to flush
  *                        from cache. A value of 0 means fully read or
  *                        written chunks are treated no differently than
- *                        other chunks (the preemption is strictly LRU)
+ *                        other chunks (the preemption is strictly LRU),
  *                        while a value of 1 means fully read or written
  *                        chunks are always preempted before other chunks.
  *                        If your application only reads or writes data once,
@@ -4234,7 +4237,7 @@ H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignme
  *          computing a hash value using the address of a chunk and then by
  *          using that hash value as the chunk’s index into the table of
  *          cached chunks. In other words, the size of this hash table and the
- *          number of possible hash values is determined by the \p rdcc_nslots
+ *          number of possible hash values are determined by the \p rdcc_nslots
  *          parameter. If a different chunk in the cache has the same hash value,
  *          a collision will occur, which will reduce efficiency. If inserting
  *          the chunk into the cache would cause the cache to be too big, then
@@ -5399,7 +5402,7 @@ H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags);
 /**
  * \ingroup GAPL
  *
- * \brief Sets metadata I/O mode for read operations to collective or independent (default)
+ * \brief Sets metadata I/O mode for read operations to be collective or independent (default)
  *
  * \gacpl_id
  * \param[in] is_collective Boolean value indicating whether metadata reads are collective
@@ -5488,7 +5491,7 @@ H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collectiv
 /**
  * \ingroup FAPL
  *
- * \brief Sets metadata write mode to collective or independent (default)
+ * \brief Sets metadata write mode to be collective or independent (default)
  *
  * \fapl_id{plist_id}
  * \param[out] is_collective Boolean value indicating whether metadata
@@ -6757,7 +6760,7 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *          Specifically, a dataset with a datatype that is 8-, 16-, 32-, or
  *          64-bit signed or unsigned integer; char; or 32- or 64-bit float
  *          can be compressed with SZIP. See Note, below, for further
- *          discussion of the the SZIP \p bits_per_pixel setting.
+ *          discussion of the SZIP \p bits_per_pixel setting.
  *
  *          SZIP options are passed in an options mask, \p options_mask,
  *          as follows.
