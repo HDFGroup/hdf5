@@ -1088,10 +1088,10 @@ Creating your own configurations
 --------------------------------
 The quickest way is to copy CMakePresets.json to CMakeUserPresets.json and
 edit CMakeUserPresets.json configuration names from ci-* to my-*. Change the
-configurePresets inherits only for those that you have provided alternates for
-different options. Then change the configurePreset entries in buildPresets,
-testPresets, packagePresets to your my-StdShar-<compiler-type>, And finally the
-names settings in the workflowPresets steps will also need the ci-* to my-* change.
+"configurePresets" section "inherits" field only for those that you have alternate
+options. Then change the "configurePreset" field entries in the "buildPresets",
+"testPresets", "packagePresets" sections to match your my-StdShar-<compiler-type>.
+And finally the names settings in the "workflowPresets" steps will also need the ci-* to my-* change.
 
 For instance, to change the support files to use a local directory, edit CMakeUserPresets.json:
 ......
