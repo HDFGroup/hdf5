@@ -115,11 +115,9 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
     if (NULL == (sdim = H5FL_CALLOC(H5S_extent_t)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "dataspace structure allocation failed")
     sdim->type = H5S_NO_CLASS;
@@ -154,9 +152,11 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
         if (sdim->type != H5S_SIMPLE && sdim->rank > 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid rank for scalar or NULL dataspace")
-    } /* end if */
+    }
     else {
-        /* Set the dataspace type to be simple or scalar as appropriate */
+        /* Set the dataspace type to be simple or scalar as appropriate
+         * (version 1 does not allow H5S_NULL)
+         */
         if (sdim->rank > 0)
             sdim->type = H5S_SIMPLE;
         else
@@ -166,50 +166,46 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
         if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         p++;
-    } /* end else */
-    HDassert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
+    }
 
-    /* Only Version 1 has these reserved bytes */
+    /* Version 1 has 4 reserved bytes */
     if (version == H5O_SDSPACE_VERSION_1) {
         if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        p += 4; /*reserved*/
+        p += 4;
     }
 
     /* Decode dimension sizes */
     if (sdim->rank > 0) {
-        uint8_t sizeof_size = H5F_SIZEOF_SIZE(f);
 
-        /*
-         * Ensure that decoding doesn't cause reading past buffer's end,
-         * due to possible data corruption - check that we have space to
-         * decode a "sdim->rank" number of hsize_t values
-         */
-        if (H5_IS_BUFFER_OVERFLOW(p, (sizeof_size * sdim->rank), p_end))
+        /* Sizes */
+
+        /* Check that we have space to decode sdim->rank values */
+        if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
-
         for (i = 0; i < sdim->rank; i++)
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
+
+        /* Max sizes */
 
         if (flags & H5S_VALID_MAX) {
             if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-            /*
-             * Ensure that decoding doesn't cause reading past buffer's end,
-             * due to possible data corruption - check that we have space to
-             * decode a "sdim->rank" number of hsize_t values
-             */
-            if (H5_IS_BUFFER_OVERFLOW(p, (sizeof_size * sdim->rank), p_end))
+            /* Check that we have space to decode sdim->rank values */
+            if (H5_IS_BUFFER_OVERFLOW(p, (H5F_sizeof_size(f) * sdim->rank), p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-
             for (i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
-        } /* end if */
-    }     /* end if */
+        }
+
+        /* NOTE: The version 1 permutation indexes were never implemented so
+         *       there is nothing to decode.
+         */
+    }
 
     /* Compute the number of elements in the extent */
     if (sdim->type == H5S_NULL)
@@ -217,16 +213,16 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
     else {
         for (i = 0, sdim->nelem = 1; i < sdim->rank; i++)
             sdim->nelem *= sdim->size[i];
-    } /* end else */
+    }
 
     /* Set return value */
-    ret_value = (void *)sdim; /*success*/
+    ret_value = (void *)sdim;
 
 done:
     if (!ret_value && sdim) {
         H5S__extent_release(sdim);
-        sdim = H5FL_FREE(H5S_extent_t, sdim);
-    } /* end if */
+        H5FL_FREE(H5S_extent_t, sdim);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__sdspace_decode() */

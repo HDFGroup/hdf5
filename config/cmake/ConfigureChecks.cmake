@@ -131,7 +131,7 @@ CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 if (WINDOWS)
   CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
-  # Checking for StrStrIA in the library is not relaible for mingw32 to stdcall
+  # Checking for StrStrIA in the library is not reliable for mingw32 to stdcall
   set (LINK_LIBS ${LINK_LIBS} "shlwapi")
 endif ()
 
@@ -826,7 +826,6 @@ if (HDF5_BUILD_FORTRAN)
             message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
         endif ()
     endmacro ()
-
     set (PROG_SRC
         "
 #include <float.h>\n\

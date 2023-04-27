@@ -56,29 +56,25 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__shmesg_decode
+ * Function:    H5O__shmesg_decode
  *
- * Purpose:	Decode a shared message table message and return a pointer
+ * Purpose:     Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_shmesg_table_t struct.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *		Failure:	NULL
- *
- * Programmer:  James Laird
- *              Jan 29, 2007
- *
+ * Return:      Success:    Ptr to new message in native struct.
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_shmesg_table_t *mesg;             /* Native message */
-    void               *ret_value = NULL; /* Return value */
+    H5O_shmesg_table_t *mesg;                       /* New shared message table */
+    const uint8_t      *p_end     = p + p_size - 1; /* End of the p buffer */
+    void               *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(f);
     HDassert(p);
 
@@ -87,14 +83,25 @@ H5O__shmesg_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     "memory allocation failed for shared message table message")
 
     /* Retrieve version, table address, and number of indexes */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     mesg->version = *p++;
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->addr));
+
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     mesg->nindexes = *p++;
 
     /* Set return value */
     ret_value = (void *)mesg;
 
 done:
+    if (!ret_value && mesg)
+        H5MM_xfree(mesg);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__shmesg_decode() */
 

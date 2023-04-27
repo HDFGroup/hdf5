@@ -6147,6 +6147,9 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id /*out*/)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, vol_id);
 
+    if (H5P_DEFAULT == plist_id)
+        plist_id = H5P_FILE_ACCESS_DEFAULT;
+
     /* Get property list for ID */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -6263,6 +6266,9 @@ H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
 
     /* Get the 'cap_flags' from the connector */
     if (cap_flags) {
+        if (H5P_DEFAULT == plist_id)
+            plist_id = H5P_FILE_ACCESS_DEFAULT;
+
         if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
             H5P_genplist_t       *plist;          /* Property list pointer */
             H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */

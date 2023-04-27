@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Ofsinfo.c
- *                      Feb 2009
- *                      Vailin Choi
  *
- * Purpose:             File space info message.
+ * Purpose:             File space info message
  *
  *-------------------------------------------------------------------------
  */
@@ -82,27 +80,22 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  *
  * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native form.
- *              Failure:        NULL
- *
- * Programmer:  Vailin Choi; Feb 2009
- *
+ * Return:      Success:    Pointer to new message in native form
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-
 static void *
 H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_fsinfo_t  *fsinfo = NULL; /* File space info message */
-    H5F_mem_page_t ptype;         /* Memory type for iteration */
-    unsigned       vers;          /* message version */
-    const uint8_t *p_end     = p + p_size;
-    void          *ret_value = NULL; /* Return value */
+    H5O_fsinfo_t  *fsinfo = NULL;              /* File space info message */
+    H5F_mem_page_t ptype;                      /* Memory type for iteration */
+    unsigned       vers;                       /* Message version */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
@@ -114,8 +107,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         fsinfo->fs_addr[ptype - 1] = HADDR_UNDEF;
 
     /* Version of message */
-    if (p + 1 - 1 > p_end) /* one byte for version */
-        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     vers = *p++;
 
     if (vers == H5O_FSINFO_VERSION_0) {
@@ -129,8 +122,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         fsinfo->pgend_meta_thres    = H5F_FILE_SPACE_PGEND_META_THRES;
         fsinfo->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
 
-        if (p + 1 + H5F_SIZEOF_SIZE(f) - 1 > p_end) /* one byte for strategy + sizeof(f)  */
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+        if (H5_IS_BUFFER_OVERFLOW(p, 1 + H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         strategy = (H5F_file_space_type_t)*p++; /* File space strategy */
         H5F_DECODE_LENGTH(f, p, threshold);     /* Free-space section threshold */
 
@@ -143,9 +136,9 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 if (HADDR_UNDEF == (fsinfo->eoa_pre_fsm_fsalloc = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
                 for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
-                    if (p + H5_SIZEOF_HADDR_T > p_end)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL,
-                                    "ran off end of input buffer while decoding")
+                    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
+                                    "ran off end of input buffer while decoding");
                     H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
                 }
                 break;
@@ -167,32 +160,43 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             case H5F_FILE_SPACE_DEFAULT:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file space strategy")
-        } /* end switch */
+        }
 
         fsinfo->version = H5O_FSINFO_VERSION_1;
         fsinfo->mapped  = TRUE;
     }
     else {
-        HDassert(vers >= H5O_FSINFO_VERSION_1);
+        if (vers < H5O_FSINFO_VERSION_1)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad version number")
 
         fsinfo->version = vers;
-        /* strategy (1) + persist (1) + sizeof(f) + sizeof(f) + pgend_meta_thres (2)  + sizeofaddr(f) */
-        if (p + 1 + 1 + 2 * H5F_SIZEOF_SIZE(f) + 2 + H5F_SIZEOF_ADDR(f) - 1 > p_end)
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+        if (H5_IS_BUFFER_OVERFLOW(p, 1 + 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         fsinfo->strategy = (H5F_fspace_strategy_t)*p++; /* File space strategy */
         fsinfo->persist  = *p++;                        /* Free-space persist or not */
-        H5F_DECODE_LENGTH(f, p, fsinfo->threshold);     /* Free-space section threshold */
 
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        H5F_DECODE_LENGTH(f, p, fsinfo->threshold); /* Free-space section threshold */
+
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_DECODE_LENGTH(f, p, fsinfo->page_size); /* File space page size */
-        UINT16DECODE(p, fsinfo->pgend_meta_thres);  /* Page end metadata threshold */
+
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+        UINT16DECODE(p, fsinfo->pgend_meta_thres); /* Page end metadata threshold */
+
+        if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_addr_decode(f, &p,
                         &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
         if (fsinfo->persist)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++) {
-                if (p + H5F_SIZEOF_SIZE(f) - 1 > p_end) /* one byte for sizeof(f)  */
-                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off end of input buffer while decoding")
+                if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
             }
         fsinfo->mapped = FALSE;
@@ -202,8 +206,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     ret_value = fsinfo;
 
 done:
-    if (ret_value == NULL && fsinfo != NULL)
-        fsinfo = H5FL_FREE(H5O_fsinfo_t, fsinfo);
+    if (!ret_value && fsinfo)
+        H5FL_FREE(H5O_fsinfo_t, fsinfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__fsinfo_decode() */

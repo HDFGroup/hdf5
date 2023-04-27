@@ -132,76 +132,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Of/h5oopen_c
- * NAME
- *  h5oopen_c
- * PURPOSE
- *  Calls H5Oopen
- * INPUTS
- *  loc_id  - File or group identifier
- *  name    - Attribute access property list
- *  namelen - Size of name
- *  lapl_id - Link access property list
- * OUTPUTS
- *  obj_id  - Dataset identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 18, 2008
- * SOURCE
- */
-int_f
-h5oopen_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *obj_id)
-/******/
-{
-    char *c_name    = NULL; /* Buffer to hold C string */
-    int_f ret_value = 0;    /* Return value */
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Oopen function.
-     */
-    if ((*obj_id = (hid_t_f)H5Oopen((hid_t)*loc_id, c_name, (hid_t)*lapl_id)) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    if (c_name)
-        HDfree(c_name);
-    return ret_value;
-}
-/****if* H5Of/h5oclose_c
- * NAME
- *  h5oclose_c
- * PURPOSE
- *  Call H5Oclose
- * INPUTS
- *  object_id   - Object identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *   M. Scot Breitenfeld
- *  December 17, 2008
- * SOURCE
- */
-int_f
-h5oclose_c(hid_t_f *object_id)
-/******/
-{
-    int_f ret_value = 0; /* Return value */
-
-    if (H5Oclose((hid_t)*object_id) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    return ret_value;
-}
-
 /****if* H5Of/h5ovisit_c
  * NAME
  *  h5ovisit_c
@@ -292,6 +222,11 @@ done:
  *  namelen      - Name length.
  *  lapl_id      - Link access property list.
  *  fields       - Flags specifying the fields to include in object_info.
+ *  file         - Filename the async subroutine is being called from
+ *  func         - Function name the async subroutine is being called in
+ *  line         - Line number the async subroutine is being called at
+ *  es_id        - Event set identifier
+ *
  * OUTPUTS
  *  object_info  - Buffer in which to return object information.
  *
@@ -303,31 +238,30 @@ done:
  * SOURCE
  */
 int_f
-h5oget_info_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id,
-                      H5O_info_t_f *object_info, int_f *fields)
+h5oget_info_by_name_c(hid_t_f *loc_id, char *name, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields,
+                      hid_t_f *es_id, char *file, char *func, int_f *line)
 /******/
 {
-    char       *c_name    = NULL; /* Buffer to hold C string */
-    int_f       ret_value = 0;    /* Return value */
+    int_f       ret_value = 0; /* Return value */
     H5O_info2_t Oinfo;
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
-        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Oinfo_by_name function.
      */
-    if (H5Oget_info_by_name3((hid_t)*loc_id, c_name, &Oinfo, (unsigned)*fields, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL);
+
+    if ((hid_t)*es_id != -1) {
+        if (H5Oget_info_by_name3((hid_t)*loc_id, name, &Oinfo, (unsigned)*fields, (hid_t)*lapl_id) < 0)
+            HGOTO_DONE(FAIL);
+    }
+    else {
+        if (H5Oget_info_by_name_async_wrap(file, func, (unsigned)*line, (hid_t)*loc_id, name, &Oinfo,
+                                           (unsigned)*fields, (hid_t)*lapl_id, (hid_t)*es_id) < 0)
+            HGOTO_DONE(FAIL);
+    }
 
     ret_value = fill_h5o_info_t_f(Oinfo, object_info);
 
 done:
-    if (c_name)
-        HDfree(c_name);
     return ret_value;
 }
 
@@ -424,78 +358,22 @@ done:
     return ret_value;
 }
 
-/* ***if* H5Of/H5Ocopy_c
- * NAME
- *  H5Ocopy_c
- * PURPOSE
- *  Calls H5Ocopy
- * INPUTS
- *  src_loc_id   - Object identifier indicating the location of the source object to be copied
- *  src_name     - Name of the source object to be copied
- *  src_name_len - Length of src_name
- *  dst_loc_id   - Location identifier specifying the destination
- *  dst_name     - Name to be assigned to the new copy
- *  dst_name_len - Length of dst_name
- *  ocpypl_id    - Object copy property list
- *  lcpl_id      - Link creation property list for the new hard link
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 14, 2012
- * SOURCE
- */
-int_f
-h5ocopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len, hid_t_f *dst_loc_id, _fcd dst_name,
-          size_t_f *dst_name_len, hid_t_f *ocpypl_id, hid_t_f *lcpl_id)
-/******/
-{
-    char *c_src_name = NULL; /* Buffer to hold C string */
-    char *c_dst_name = NULL; /* Buffer to hold C string */
-
-    int_f ret_value = 0; /* Return value */
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_src_name = HD5f2cstring(src_name, (size_t)*src_name_len)) == NULL)
-        HGOTO_DONE(FAIL);
-    if ((c_dst_name = HD5f2cstring(dst_name, (size_t)*dst_name_len)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Ocopy function.
-     */
-    if (H5Ocopy((hid_t)*src_loc_id, c_src_name, (hid_t)*dst_loc_id, c_dst_name, (hid_t)*ocpypl_id,
-                (hid_t)*lcpl_id) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    if (c_src_name)
-        HDfree(c_src_name);
-    if (c_dst_name)
-        HDfree(c_dst_name);
-
-    return ret_value;
-}
-
 /****if* H5Of/h5ovisit_by_name_c
  * NAME
  *  h5ovisit_by_name_c
  * PURPOSE
  *  Calls H5Ovisit_by_name
  * INPUTS
- *  object_id - Identifier specifying subject group
- *  index_type - Type of index which determines the order
- *  order - Order within index
- *  idx - Iteration position at which to start
- *  op - Callback function passing data regarding the link to the calling application
- *  op_data - User-defined pointer to data required by the application for its processing of the link
+ *  object_id - Identifier specifying subject group.
+ *  index_type - Type of index which determines the order.
+ *  order - Order within index.
+ *  idx - Iteration position at which to start.
+ *  op - Callback function passing data regarding the link to the calling application.
+ *  op_data - User-defined pointer to data required by the application for its processing of the link.
  *  fields - Flags specifying the fields to include in object_info.
  *
  * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted
+ *  idx - Position at which an interrupted iteration may be restarted.
  *
  * RETURNS
  *  >0 on success, 0< on failure
@@ -728,59 +606,6 @@ done:
         HDfree(c_name);
     if (c_comment)
         HDfree(c_comment);
-    return ret_value;
-}
-/****if* H5Of/h5oopen_by_idx_c
- * NAME
- *  h5oopen_by_idx_c
- * PURPOSE
- *  Calls H5Oopen_by_idx_c
- * INPUTS
- *  loc_id        - A file or group identifier.
- *  group_name    - Name of group, relative to loc_id, in which object is located.
- *  group_namelen - Length of group_name
- *  index_type    - Type of index by which objects are ordered.
- *  order         - Order of iteration within index.
- *  n             - Object to open.
- *  lapl_id       - Link access property list.
- * OUTPUTS
- *  obj_id       - An object identifier for the opened object.
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 17, 2012
- * SOURCE
- */
-int_f
-h5oopen_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, int_f *index_type, int_f *order,
-                 hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
-/******/
-{
-    char           *c_group_name = NULL; /* Buffer to hold C string */
-    int_f           ret_value    = 0;
-    H5_index_t      c_index_type;
-    H5_iter_order_t c_order;
-
-    /*
-     * Convert FORTRAN string to C string
-     */
-    if ((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    c_index_type = (H5_index_t)*index_type;
-    c_order      = (H5_iter_order_t)*order;
-
-    /*
-     * Call H5Oopen_by_idx function.
-     */
-    if ((*obj_id = (hid_t_f)H5Oopen_by_idx((hid_t)*loc_id, c_group_name, c_index_type, c_order, (hsize_t)*n,
-                                           (hid_t)*lapl_id)) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-    if (c_group_name)
-        HDfree(c_group_name);
     return ret_value;
 }
 

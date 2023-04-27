@@ -2227,9 +2227,10 @@ test_vol_cap_flags(void)
 {
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
+    char                    *vol_env = NULL;
     H5VL_pass_through_info_t passthru_info;
 
-    TESTING("VOL capacity flags");
+    TESTING("VOL capability flags");
 
     vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
@@ -2252,6 +2253,29 @@ test_vol_cap_flags(void)
 
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
+
+    /* If using the native VOL by default, check flags again with H5P_DEFAULT */
+    vol_env = HDgetenv(HDF5_VOL_CONNECTOR);
+    if (!vol_env || (0 == HDstrcmp(vol_env, "native"))) {
+        H5VL_class_t *cls;
+        hid_t         connector_id;
+
+        if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
+            TEST_ERROR;
+        if (NULL == (cls = H5I_object(connector_id)))
+            TEST_ERROR;
+
+        vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+        if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0)
+            TEST_ERROR;
+
+        if (vol_cap_flags_g != cls->cap_flags)
+            TEST_ERROR;
+
+        if (H5VLclose(connector_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Stack the [internal] passthrough VOL connector on top of the fake connector */
     passthru_info.under_vol_id   = vol_id;
