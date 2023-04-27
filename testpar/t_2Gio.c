@@ -4094,7 +4094,7 @@ test_no_collective_cause_mode(int selection_mode)
                                           &no_collective_cause_global_write);
     VRFY((ret >= 0), "retrieving no collective cause succeeded");
 
-    ret = H5Pget_no_selection_io_cause(dxpl_write, &no_selection_io_cause_read);
+    ret = H5Pget_no_selection_io_cause(dxpl_write, &no_selection_io_cause_write);
     VRFY((ret >= 0), "retrieving no selection io cause succeeded");
 
     if (no_collective_cause_local_write & H5D_MPIO_NO_SELECTION_IO) {
