@@ -211,7 +211,7 @@ extern "C" {
  * \details H5Mcreate() creates a new map object for storing key-value
  *          pairs. The in-file datatype for keys is defined by \p key_type_id
  *          and the in-file datatype for values is defined by \p val_type_id. \p
- *          loc_id specifies the location to create the the map object and \p
+ *          loc_id specifies the location to create the map object and \p
  *          name specifies the name of the link to the map object relative to
  *          \p loc_id.
  *
@@ -351,6 +351,9 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
  *
  * \details H5Mget_create_plist() returns an identifier for a copy of the
  *          creation property list for a map object specified by \p map_id.
+ *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
  *
  * \since 1.12.0
  *

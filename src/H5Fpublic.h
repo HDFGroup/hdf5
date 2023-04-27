@@ -398,7 +398,7 @@ H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id
  *          opened.
  *
  *          The \p fapl_id parameter specifies the file access property list.
- *          Use of #H5P_DEFAULT specifies that default I/O access properties
+ *          The use of #H5P_DEFAULT specifies that default I/O access properties
  *          are to be used.
  *
  *          The \p flags parameter specifies whether the file will be opened in
@@ -530,7 +530,7 @@ H5_DLL hid_t H5Freopen_async(hid_t file_id, hid_t es_id);
  * \snippet H5F_examples.c flush
  *
  * \attention HDF5 does not possess full control over buffering. H5Fflush()
- *            flushes the internal HDF5 buffers then asks the operating system
+ *            flushes the internal HDF5 buffers and then asks the operating system
  *            (the OS) to flush the system buffers for the open files. After
  *            that, the OS is responsible for ensuring that the data is
  *            actually flushed to disk.
@@ -568,7 +568,7 @@ H5_DLL herr_t H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id);
  * \snippet H5F_examples.c minimal
  *
  * \note \Bold{Delayed close:} Note the following deviation from the
- *       above-described behavior. If H5Fclose() is called for a file but one
+ *       above-described behavior. If H5Fclose() is called for a file, but one
  *       or more objects within the file remain open, those objects will remain
  *       accessible until they are individually closed. Thus, if the dataset
  *       \c data_sample is open when H5Fclose() is called for the file
@@ -577,7 +577,7 @@ H5_DLL herr_t H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id);
  *       automatically closed once all objects in the file have been closed.\n
  *       Be warned, however, that there are circumstances where it is not
  *       possible to delay closing a file. For example, an MPI-IO file close is
- *       a collective call; all of the processes that opened the file must
+ *       a collective call; all of the processes that open the file must
  *       close it collectively. The file cannot be closed at some time in the
  *       future by each process in an independent fashion. Another example is
  *       that an application using an AFS token-based file access privilege may
@@ -1360,7 +1360,7 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
  *          \snippet this H5F_sect_info_t_snip
  *
  *          This routine retrieves free-space section information for \p nsects
- *          sections or at most the maximum number of sections in the specified
+ *          sections or, at most, the maximum number of sections in the specified
  *          free-space manager. If the number of sections is not known, a
  *          preliminary H5Fget_free_sections() call can be made by setting \p
  *          sect_info to NULL and the total number of free-space sections for
@@ -1662,7 +1662,7 @@ H5_DLL herr_t H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr, hsize_t 
  *          file_id. This setting is used to inform the library to create
  *          minimized dataset object headers when \c TRUE.
  *
- *          The setting's value is returned in the boolean pointer minimize.
+ *          The setting's value is returned in the boolean pointer minimized.
  *
  * \since 1.10.5
  *
@@ -1888,7 +1888,7 @@ H5_DLL herr_t H5Fget_info1(hid_t obj_id, H5F_info1_t *file_info);
 /**
  * \ingroup H5F
  *
- * \brief Sets thelatest version of the library to be used for writing objects
+ * \brief Sets the latest version of the library to be used for writing objects
  *
  * \file_id
  * \param[in] latest_format Latest format flag

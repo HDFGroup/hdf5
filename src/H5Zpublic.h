@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Thursday, April 16, 1998
- */
-
 #ifndef H5Zpublic_H
 #define H5Zpublic_H
 
@@ -268,7 +264,7 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  * \details H5Zget_filter_info() retrieves information about a filter. At
  *          present, this means that the function retrieves a filter's
  *          configuration flags, indicating whether the filter is configured to
- *          decode data, to encode data, neither, or both.
+ *          decode data, encode data, neither, or both.
  *
  *          If \p filter_config_flags is not set to NULL prior to the function
  *          call, the returned parameter contains a bit field specifying the
@@ -305,8 +301,8 @@ H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
  *          to read an existing file encoded with that filter.
  *
  *          This function should be called, and the returned \p
- *          filter_config_flags analyzed, before calling any other function,
- *          such as H5Pset_szip() , that might require a particular filter
+ *          filter_config_flags should be analyzed, before calling any other function,
+ *          such as H5Pset_szip(), that might require a particular filter
  *          configuration.
  *
  * \since 1.6.3

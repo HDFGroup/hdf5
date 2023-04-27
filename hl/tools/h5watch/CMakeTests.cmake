@@ -86,7 +86,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
           DEPENDS ${last_test}
           FIXTURES_REQUIRED gen_test_watch
       )
-      set (last_test "H5WATCH_ARGS-h5watch-${resultfile}s")
+      set (last_test "H5WATCH_ARGS-h5watch-${resultfile}")
     endif ()
   endmacro ()
 

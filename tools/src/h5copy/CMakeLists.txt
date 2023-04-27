@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5COPY C)
 # --------------------------------------------------------------------
 # Add the h5copy and test executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5copy ${HDF5_TOOLS_SRC_H5COPY_SOURCE_DIR}/h5copy.c)
   target_include_directories (h5copy PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5copy PRIVATE "${HDF5_CMAKE_C_FLAGS}")
@@ -32,7 +32,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5COPY_SRC_FORMAT h5copy)
   else ()
     clang_format (HDF5_H5COPY_SRC_FORMAT h5copy-shared)

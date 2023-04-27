@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: James Laird
- *             Friday, December 1, 2005
- *
  * Purpose:     This file contains declarations which are visible
  *              only within the H5L package. Source files outside the
  *              H5L package should include H5Lprivate.h instead.
@@ -33,12 +30,6 @@
 /**************************/
 /* Package Private Macros */
 /**************************/
-
-/* Version of external link format */
-#define H5L_EXT_VERSION 0
-
-/* Valid flags for external links */
-#define H5L_EXT_FLAGS_ALL 0
 
 /****************************/
 /* Package Private Typedefs */

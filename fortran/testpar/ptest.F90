@@ -55,6 +55,9 @@ PROGRAM parallel_test
   ! initialize the HDF5 fortran interface
   !
   CALL h5open_f(hdferror)
+
+  IF(mpi_rank==0) CALL write_test_header("COMPREHENSIVE PARALLEL FORTRAN TESTS")
+
   !
   ! test write/read dataset by hyperslabs (contiguous/chunk) with independent/collective MPI I/O
   !
@@ -93,6 +96,8 @@ PROGRAM parallel_test
   CALL h5close_f(hdferror)
 
   CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
+
+  IF(mpi_rank==0) CALL write_test_footer()
 
   !
   ! close MPI

@@ -94,8 +94,6 @@ is_sparse(void)
  * Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -136,13 +134,6 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *
  * Programmer:    Robb Matzke
  *        Wednesday, October 15, 1997
- *
- * Modifications:
- *              Converted to use datasets instead of directly messing with
- *              the istore routines, etc. since the new raw data architecture
- *              performs hyperslab operations at a higher level than the
- *              istore routines did and the new istore routines can't handle
- *              I/O on more than one chunk at a time. QAK - 2003/04/16
  *
  *-------------------------------------------------------------------------
  */
@@ -198,8 +189,6 @@ error:
  * Programmer:    Robb Matzke
  *        Wednesday, October 15, 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -245,8 +234,6 @@ test_create(hid_t f, const char *prefix)
  *
  * Programmer:    Robb Matzke
  *        Wednesday, October 15, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -444,8 +431,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *        Wednesday, October 22, 1997
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

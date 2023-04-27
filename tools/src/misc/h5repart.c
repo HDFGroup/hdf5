@@ -45,8 +45,6 @@
  * Programmer:    Robb Matzke
  *              Wednesday, May 13, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -145,8 +143,6 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
  *
  * Programmer:    Robb Matzke
  *              Wednesday, May 13, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

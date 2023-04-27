@@ -35,11 +35,6 @@ static void H5VM__stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /
                                    const hsize_t *size, hsize_t *stride1);
 static void H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/,
                                    const hsize_t *size, hsize_t *stride1, hsize_t *stride2);
-#ifdef LATER
-static void H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsize_t *dst_size,
-                               const ssize_t *dst_stride, void *_dst, unsigned src_n, const hsize_t *src_size,
-                               const ssize_t *src_stride, const void *_src);
-#endif /* LATER */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VM__stride_optimize1
@@ -760,76 +755,6 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
-
-#ifdef LATER
-
-/*-------------------------------------------------------------------------
- * Function:    H5VM__stride_copy2
- *
- * Purpose:     Similar to H5VM_stride_copy() except the source and
- *              destination each have their own dimensionality and size and
- *              we copy exactly NELMTS elements each of size ELMT_SIZE.	 The
- *              size counters wrap if NELMTS is more than a size counter.
- *
- * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
- *
- *-------------------------------------------------------------------------
- */
-static void
-H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsize_t *dst_size,
-                   const hsize_t *dst_stride, void *_dst, unsigned src_n, const hsize_t *src_size,
-                   const hsize_t *src_stride, const void *_src)
-{
-    uint8_t       *dst = (uint8_t *)_dst;
-    const uint8_t *src = (const uint8_t *)_src;
-    hsize_t        dst_idx[H5VM_HYPER_NDIMS];
-    hsize_t        src_idx[H5VM_HYPER_NDIMS];
-    hsize_t        i; /* Local index variable */
-    int            j; /* Local index variable */
-    hbool_t        carry;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    HDassert(elmt_size < SIZE_MAX);
-    HDassert(dst_n > 0);
-    HDassert(src_n > 0);
-
-    H5VM_vector_cpy(dst_n, dst_idx, dst_size);
-    H5VM_vector_cpy(src_n, src_idx, src_size);
-
-    for (i = 0; i < nelmts; i++) {
-
-        /* Copy an element */
-        H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-        H5MM_memcpy(dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
-
-        /* Decrement indices and advance pointers */
-        for (j = (int)(dst_n - 1), carry = TRUE; j >= 0 && carry; --j) {
-            dst += dst_stride[j];
-            if (--dst_idx[j])
-                carry = FALSE;
-            else {
-                HDassert(dst_size);
-                dst_idx[j] = dst_size[j];
-            } /* end else */
-        }
-        for (j = (int)(src_n - 1), carry = TRUE; j >= 0 && carry; --j) {
-            src += src_stride[j];
-            if (--src_idx[j])
-                carry = FALSE;
-            else {
-                HDassert(src_size);
-                src_idx[j] = src_size[j];
-            } /* end else */
-        }
-    }
-
-    FUNC_LEAVE_NOAPI_VOID
-}
-#endif /* LATER */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VM_array_fill

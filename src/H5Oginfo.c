@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Oginfo.c
- *                      Aug 23 2005
- *                      Quincey Koziol
  *
- * Purpose:             Group Information messages.
+ * Purpose:             Group Information messages
  *
  *-------------------------------------------------------------------------
  */
@@ -78,29 +76,27 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  * Purpose:     Decode a message and return a pointer to
  *              a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native order.
- *
- *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Aug 30 2005
- *
+ * Return:      Success:    Pointer to new message in native order
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_ginfo_t  *ginfo = NULL;     /* Pointer to group information message */
-    unsigned char flags;            /* Flags for encoding group info */
-    void         *ret_value = NULL; /* Return value */
+    H5O_ginfo_t   *ginfo = NULL;               /* Pointer to group information message */
+    unsigned char  flags;                      /* Flags for encoding group info */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
+    HDassert(f);
     HDassert(p);
 
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     if (*p++ != H5O_GINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -109,6 +105,9 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Get the flags for the group */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
+
     flags = *p++;
     if (flags & ~H5O_GINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
@@ -117,31 +116,34 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     if (ginfo->store_link_phase_change) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, ginfo->max_compact)
         UINT16DECODE(p, ginfo->min_dense)
-    } /* end if */
+    }
     else {
         ginfo->max_compact = H5G_CRT_GINFO_MAX_COMPACT;
         ginfo->min_dense   = H5G_CRT_GINFO_MIN_DENSE;
-    } /* end else */
+    }
 
     /* Get the estimated # of entries & name lengths */
     if (ginfo->store_est_entry_info) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 2 * 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         UINT16DECODE(p, ginfo->est_num_entries)
         UINT16DECODE(p, ginfo->est_name_len)
-    } /* end if */
+    }
     else {
         ginfo->est_num_entries = H5G_CRT_GINFO_EST_NUM_ENTRIES;
         ginfo->est_name_len    = H5G_CRT_GINFO_EST_NAME_LEN;
-    } /* end if */
+    }
 
     /* Set return value */
     ret_value = ginfo;
 
 done:
-    if (ret_value == NULL)
-        if (ginfo != NULL)
-            ginfo = H5FL_FREE(H5O_ginfo_t, ginfo);
+    if (!ret_value && ginfo)
+        H5FL_FREE(H5O_ginfo_t, ginfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__ginfo_decode() */

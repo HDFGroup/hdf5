@@ -11,11 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:
- *
- * Purpose:    This file contains declarations which are visible only within
- *        the H5FA package.  Source files outside the H5FA package should
- *        include H5FAprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5FA package.  Source files outside the H5FA package should
+ *          include H5FAprivate.h instead.
  */
 #if !(defined(H5FA_FRIEND) | defined(H5FA_MODULE))
 #error "Do not include this file outside the H5FA package!"

@@ -480,8 +480,6 @@ error:
  * Programmer:  James Laird
  *              Saturday, August 26, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -554,8 +552,6 @@ error:
  *
  * Programmer:  James Laird
  *              Wednesday, October 4, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1521,8 +1517,6 @@ size2_verify_plist2(hid_t plist)
  * Programmer:  James Laird
  *              Friday, January 26, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1564,8 +1558,6 @@ size2_dump_struct(const char *name, size2_helper_struct *sizes)
  *
  * Programmer:  James Laird
  *              Friday, November 17, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2724,8 +2716,6 @@ test_sohm_size2(int close_reopen)
  * Programmer:  James Laird
  *              Tuesday, December 19, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2762,8 +2752,6 @@ delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id, int x)
  *
  * Programmer:  James Laird
  *              Tuesday, December 19, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2811,8 +2799,6 @@ delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
  *
  * Programmer:  James Laird
  *              Tuesday, December 19, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2895,8 +2881,6 @@ delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
  *
  * Programmer:  James Laird
  *              Tuesday, December 19, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3036,8 +3020,6 @@ test_sohm_delete(void)
  * Programmer:  James Laird
  *              Wednesday, January 3, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -3137,8 +3119,6 @@ verify_dset_create_and_delete_does_not_grow_file(hid_t fcpl_id)
  * Programmer:  James Laird
  *              Wednesday, January 3, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3217,8 +3197,6 @@ test_sohm_delete_revert(void)
  * Programmer:  James Laird
  *              Friday, December 22, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3285,8 +3263,6 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
  * Programmer:  James Laird
  *              Friday, December 22, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3332,8 +3308,6 @@ test_sohm_extlink(void)
  *
  * Programmer:  James Laird
  *              Wednesday, January 10, 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3600,8 +3574,6 @@ verify_dataset_extension(hid_t fcpl_id, hbool_t close_reopen)
  * Programmer:  James Laird
  *              Wednesday, January 10, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -3681,8 +3653,6 @@ test_sohm_extend_dset(void)
  *
  * Programmer:  Raymond Lu
  *              13 October, 2008
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3874,8 +3844,6 @@ test_sohm(void)
  *
  * Programmer:  James Laird
  *              October 9, 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

@@ -3440,9 +3440,6 @@ actual_io_mode_tests(void)
  * Programmer: Jonathan Kim
  * Date: Aug, 2012
  */
-#ifdef LATER
-#define DSET_NOCOLCAUSE "nocolcause"
-#endif
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
 test_no_collective_cause_mode(int selection_mode)
@@ -3558,23 +3555,42 @@ test_no_collective_cause_mode(int selection_mode)
     dataset = H5Dcreate2(fid, "nocolcause", data_type, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
 
+    /* Set up the dxpl for the write */
+    dxpl_write = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_write >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
+
     /*
      * Set expected causes and some tweaks based on the type of test
      */
     if (selection_mode & TEST_DATATYPE_CONVERSION) {
         test_name = "Broken Collective I/O - Datatype Conversion";
-        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
-        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
+
         /* set different sign to trigger type conversion */
         data_type = H5T_NATIVE_UINT;
+
+        /* Disable selection I/O since datatype conversion is supported in collective with selection I/O */
+        ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
+
+        VRFY((ret >= 0), "H5Pset_selection_io succeeded");
+        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
+        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {
         test_name = "Broken Collective I/O - DATA Transforms";
+
+        /* Set transform */
+        ret = H5Pset_data_transform(dxpl_write, "x+1");
+        VRFY((ret >= 0), "H5Pset_data_transform succeeded");
+
+        /* Disable selection I/O since data transforms are supported in collective with selection I/O */
+        ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
+        VRFY((ret >= 0), "H5Pset_selection_io succeeded");
+
         no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
         no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS | H5D_MPIO_NO_SELECTION_IO;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DATATYPE_CONVERSION;
+        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
@@ -3635,10 +3651,6 @@ test_no_collective_cause_mode(int selection_mode)
     for (i = 0; i < length; i++)
         buffer[i] = i;
 
-    /* Set up the dxpl for the write */
-    dxpl_write = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_write >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
-
     if (is_independent) {
         /* Set Independent I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_INDEPENDENT);
@@ -3648,15 +3660,6 @@ test_no_collective_cause_mode(int selection_mode)
         /* Set Collective I/O */
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
-    }
-
-    /* Disable selection I/O if we're using datatype conversion or transforms since those are supported in
-     * collective with selection I/O */
-    if ((selection_mode & TEST_DATA_TRANSFORMS) || (selection_mode & TEST_DATATYPE_CONVERSION)) {
-        /* Disable selection I/O */
-        ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
-        VRFY((ret >= 0), "H5Pset_selection_io succeeded");
-        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
     if (selection_mode & TEST_DATA_TRANSFORMS) {

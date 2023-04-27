@@ -2664,11 +2664,6 @@ verify_unprotected(void)
  * Programmer:    John Mainzer
  *              7/6/06
  *
- * Changes:    Added code to set entry_ptr->expunged to TRUE if
- *        H5C_expunge_entry() returns without error.
- *
- *                    JRM -- 8/21/14
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2726,19 +2721,6 @@ expunge_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
  *
  * Programmer:    John Mainzer
  *                6/23/04
- *
- * Changes:    Added code to setup and take down the skip list before
- *             and after calls to H5C_flush_cache().  Do this via calls
- *             to the H5C_FLUSH_CACHE macro.
- *
- *             This is necessary, as H5C_flush() is called repeatedly
- *             during file flush.  If we setup and took down the
- *             skip list on H5C_flush_cache(), we would find ourselves
- *             doing this repeatedly -- which is contrary to the
- *             objective of the exercise (avoiding as many skip list
- *             operations as possible).
- *
- *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -3511,11 +3493,6 @@ unprotect_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
  *
  * Programmer:    John Mainzer
  *              6/12/04
- *
- * Changes:     Updated slist size == dirty index size checks to
- *              bypass the test if cache_ptr->slist_enabled is FALSE.
- *
- *                                           JRM -- 5/8/20
  *
  *-------------------------------------------------------------------------
  */

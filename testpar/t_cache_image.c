@@ -125,10 +125,6 @@ static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank,
  * Programmer:  John Mainzer
  *              1/25/17
  *
- * Modifications:
- *
- *        None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -389,13 +385,6 @@ construct_test_file(int test_file_index)
  *
  * Programmer:  John Mainzer
  *              7/15/15
- *
- * Modifications:
- *
- *              Added min_dset and max_dset parameters and supporting
- *        code.  This allows the caller to specify a range of
- *        datasets to create.
- *                        JRM -- 8/20/15
  *
  *-------------------------------------------------------------------------
  */
@@ -723,11 +712,6 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
  * Programmer:  John Mainzer
  *              10/31/16
  *
- * Modifications:
- *
- *              None.
- *                        JRM -- 8/20/15
- *
  *-------------------------------------------------------------------------
  */
 #if 0
@@ -822,14 +806,6 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
  *
  * Programmer:  John Mainzer
  *              7/14/15
- *
- * Modifications:
- *
- *              Modified function to handle parallel file creates / opens.
- *
- *                                                 JRM -- 2/1/17
- *
- *              Modified function to handle
  *
  *-------------------------------------------------------------------------
  */
@@ -1300,10 +1276,6 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
  * Programmer:  John Mainzer
  *              3/4/17
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1689,10 +1661,6 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
  * Programmer:  John Mainzer
  *              3/6/17
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1760,10 +1728,6 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
  * Programmer:  John Mainzer
  *              3/8/17
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1808,10 +1772,6 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
  *
  * Programmer:  John Mainzer
  *              3/6/17
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2067,10 +2027,6 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
  * Programmer:  John Mainzer
  *              3/8/17
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2180,10 +2136,6 @@ serial_insert_cache_image(int file_name_idx, int mpi_size)
  *
  * Programmer:  John Mainzer
  *              3/6/17
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2412,13 +2364,6 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
  *
  * Programmer:  John Mainzer
  *              7/15/15
- *
- * Modifications:
- *
- *              Added min_dset and max_dset parameters and supporting
- *        code.  This allows the caller to specify a range of
- *        datasets to verify.
- *                        JRM -- 8/20/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2676,10 +2621,6 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
  *
  * Programmer:  John Mainzer
  *              3/11/17
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -2943,10 +2884,6 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
  *
  * Programmer:  John Mainzer
  *              1/25/17
- *
- * Modifications:
- *
- *        None.
  *
  *-------------------------------------------------------------------------
  */
@@ -3613,8 +3550,6 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
  *
  * Programmer:  John Mainzer
  *              1/25/17
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

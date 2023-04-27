@@ -122,7 +122,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S__point_iter_init,
 }};
 
-/* Format version bounds for dataspace hyperslab selection */
+/* Format version bounds for dataspace point selection */
 const unsigned H5O_sds_point_ver_bounds[] = {
     H5S_POINT_VERSION_1, /* H5F_LIBVER_EARLIEST */
     H5S_POINT_VERSION_1, /* H5F_LIBVER_V18 */
@@ -2319,7 +2319,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             /* Copy over the point's coordinates */
             HDmemset(new_node->pnt, 0, sizeof(hsize_t) * rank_diff);
             H5MM_memcpy(&new_node->pnt[rank_diff], base_node->pnt,
-                        (new_space->extent.rank * sizeof(hsize_t)));
+                        (base_space->extent.rank * sizeof(hsize_t)));
 
             /* Keep the order the same when copying */
             if (NULL == prev_node)

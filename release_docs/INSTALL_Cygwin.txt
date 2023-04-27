@@ -2,7 +2,7 @@
          HDF5 Build and Install Instructions for Cygwin
 ************************************************************************
 
-This document is a instruction on how to build, test and install HDF5 library on
+This document is an instruction on how to build, test and install HDF5 library on
 Cygwin.  See detailed information in hdf5/INSTALL.
 
 NOTE: hdf5 can be built with CMake, see the INSTALL_CMake.txt file for more guidance.
@@ -98,19 +98,19 @@ Build, Test and Install HDF5 on Cygwin
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates
-   an `hdf5-1.13.x' directory.
+   an `hdf5-1.15.x' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.13.x.tar
+            $ tar xf hdf5-1.15.x.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.13.x.tar.gz | tar xf -
+            $ gunzip < hdf5-1.15.x.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.13.x.tar.bz2 | tar xf -
+            $ bunzip2 < hdf5-1.15.x.tar.bz2 | tar xf -
 
 2. Setup Environment
 

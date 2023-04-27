@@ -4,7 +4,7 @@ project (HDF5_TOOLS_SRC_H5IMPORT C)
 # --------------------------------------------------------------------
 # Add the h5import executables
 # --------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_executable (h5import ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.c ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.h)
   target_include_directories (h5import PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5import STATIC)
@@ -32,7 +32,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_H5IMPORT_SRC_FORMAT h5import)
   else ()
     clang_format (HDF5_H5IMPORT_SRC_FORMAT h5import-shared)

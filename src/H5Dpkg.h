@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Quincey Koziol
- *        Monday, April 14, 2003
- *
- * Purpose:    This file contains declarations which are visible only within
- *        the H5D package.  Source files outside the H5D package should
- *        include H5Dprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5D package.  Source files outside the H5D package should
+ *          include H5Dprivate.h instead.
  */
 #if !(defined H5D_FRIEND || defined H5D_MODULE)
 #error "Do not include this file outside the H5D package!"

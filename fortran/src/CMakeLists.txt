@@ -13,6 +13,9 @@ if (WIN32)
       if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
         set (H5_DBL_NOT_UNIQUE_EXP ";")
       endif ()
+      if (NOT H5_NO_DEPRECATED_SYMBOLS)
+        set (H5_NO_DEPRECATED_SYMBOLS ";")
+      endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif ()
   endif ()
@@ -64,7 +67,7 @@ if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
   set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${HDF_CFG_BUILD_TYPE})
 endif ()
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/static")
   set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/${HDF_CFG_BUILD_TYPE})
 endif ()
@@ -83,7 +86,7 @@ add_custom_command (TARGET H5match_types POST_BUILD
     DEPENDS H5match_types
 )
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_custom_command (TARGET H5match_types POST_BUILD
       BYPRODUCTS ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
       COMMAND    ${CMAKE_COMMAND}
@@ -139,7 +142,7 @@ set (f90CStub_C_HDRS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
 )
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   set (f90CStub_CGEN_HDRS
       # generated files
       ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
@@ -159,7 +162,7 @@ if (BUILD_SHARED_LIBS)
   )
 endif ()
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS} ${f90CStub_CGEN_HDRS})
   target_include_directories (${HDF5_F90_C_LIB_TARGET}
       PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
@@ -202,7 +205,7 @@ endif ()
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     clang_format (HDF5_F90_C_SRC_FORMAT
         ${HDF5_F90_C_LIB_TARGET}
         ${HDF5_F90_SRC_SOURCE_DIR}/H5match_types.c
@@ -236,7 +239,7 @@ add_custom_command (TARGET H5_buildiface POST_BUILD
     DEPENDS H5_buildiface ${f90_F_GEN_SOURCES}
     COMMENT "Generating the H5_gen.F90 file"
 )
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_custom_command (TARGET H5_buildiface POST_BUILD
       BYPRODUCTS ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
       COMMAND    ${CMAKE_COMMAND}
@@ -274,6 +277,7 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff.F90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5ESff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Gff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Iff.F90
@@ -287,7 +291,7 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   set (f90_F_SOURCES
       # generated file
       ${HDF5_F90_BINARY_DIR}/static/H5fortran_types.F90
@@ -319,7 +323,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Add Main fortran library
 #-----------------------------------------------------------------------------
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   add_library (${HDF5_F90_LIB_TARGET} STATIC ${f90_F_SOURCES})
   target_include_directories (${HDF5_F90_LIB_TARGET}
       PRIVATE "${HDF5_F90_SRC_SOURCE_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
@@ -401,7 +405,7 @@ install (
     COMPONENT
         fortheaders
 )
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   install (
       FILES
           ${HDF5_F90_BINARY_DIR}/static/H5f90i_gen.h
@@ -423,7 +427,7 @@ else ()
   )
 endif ()
 
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   set (mod_files
       ${MOD_BUILD_DIR}/h5fortran_types.mod
       ${MOD_BUILD_DIR}/hdf5.mod
@@ -517,7 +521,7 @@ if (HDF5_EXPORTED_TARGETS)
     INSTALL_TARGET_PDB (${HDF5_F90_C_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
   endif ()
-  if (NOT ONLY_SHARED_LIBS)
+  if (BUILD_STATIC_LIBS)
     INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
   endif ()
@@ -545,14 +549,18 @@ set (_PKG_CONFIG_INCLUDEDIR \${prefix}/${HDF5_INSTALL_INCLUDE_DIR})
 set (_PKG_CONFIG_MODULEDIR \${prefix}/${HDF5_INSTALL_MODULE_DIR})
 set (_PKG_CONFIG_LIBNAME "${HDF5_F90_LIB_CORENAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
+set (PKG_CONFIG_LIBNAME "${HDF5_F90_LIB_CORENAME}")
+if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
+  set (PKG_CONFIG_LIBNAME "${PKG_CONFIG_LIBNAME}${CMAKE_DEBUG_POSTFIX}")
+endif ()
 
 set (_PKG_CONFIG_LIBS_PRIVATE)
 
-if (NOT ONLY_SHARED_LIBS)
-  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${HDF5_F90_LIB_CORENAME}")
+if (BUILD_STATIC_LIBS)
+  set (_PKG_CONFIG_LIBS "${_PKG_CONFIG_LIBS} -l${PKG_CONFIG_LIBNAME}")
 endif ()
 if (BUILD_SHARED_LIBS)
-  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${HDF5_F90_LIB_CORENAME}")
+  set (_PKG_CONFIG_SH_LIBS "${_PKG_CONFIG_SH_LIBS} -l${PKG_CONFIG_LIBNAME}")
 endif ()
 
 set (_PKG_CONFIG_REQUIRES "${HDF5_LIB_CORENAME} = ${HDF5_PACKAGE_VERSION}")

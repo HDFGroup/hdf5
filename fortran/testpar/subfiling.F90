@@ -91,6 +91,8 @@ PROGRAM subfiling_test
   !
   CALL h5open_f(hdferror)
 
+  IF(mpi_rank==0) CALL write_test_header("SUBFILING FORTRAN TESTING")
+
   ! ***********************************
   ! Test H5Pset/get_mpi_params_f APIs
   ! ***********************************
@@ -384,6 +386,9 @@ PROGRAM subfiling_test
         WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF
   ENDIF
+
+  IF(mpi_rank==0) CALL write_test_footer()
+
   !
   ! end main program
   !
@@ -392,8 +397,13 @@ PROGRAM subfiling_test
 
   CALL mpi_init(mpierror)
   CALL mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, mpierror)
-  IF(mpi_rank==0) CALL write_test_status( -1, &
-       'Subfiling not enabled', total_error)
+
+  IF(mpi_rank==0) THEN
+     CALL write_test_header("SUBFILING FORTRAN TESTING")
+     CALL write_test_status( -1, 'Subfiling not enabled', total_error)
+     CALL write_test_footer()
+  ENDIF
+
   CALL mpi_finalize(mpierror)
 
 #endif

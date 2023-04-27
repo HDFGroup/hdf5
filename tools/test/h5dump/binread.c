@@ -39,8 +39,6 @@
  *
  * Programmer:  Pedro Vicente Nunes
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
