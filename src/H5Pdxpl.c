@@ -2556,7 +2556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode)
+H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -2623,7 +2623,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp, size_t *size)
+H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp /*out*/, size_t *size /*out*/)
 {
     const hbool_t *modify_write_buf = (const hbool_t *)value; /* Create local alias for values */
     uint8_t      **pp               = (uint8_t **)_pp;
@@ -2657,7 +2657,7 @@ H5P__dxfr_modify_write_buf_enc(const void *value, void **_pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value)
+H5P__dxfr_modify_write_buf_dec(const void **_pp, void *_value /*out*/)
 {
     hbool_t        *modify_write_buf = (hbool_t *)_value; /* Modify write buffer */
     const uint8_t **pp               = (const uint8_t **)_pp;
@@ -2721,7 +2721,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf)
+H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* Return value */

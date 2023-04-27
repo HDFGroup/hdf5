@@ -425,7 +425,7 @@ test_stripe_sizes(void)
     VRFY(tmp_filename, "HDmalloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
 
     /* Set selection I/O mode on DXPL */
     VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
@@ -1022,7 +1022,7 @@ test_read_different_stripe_size(void)
     curr_nerrors = nerrors;
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
 
     /* Set selection I/O mode on DXPL */
     VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
@@ -1232,7 +1232,7 @@ test_subfiling_precreate_rank_0(void)
     curr_nerrors = nerrors;
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
 
     /* Set selection I/O mode on DXPL */
     VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
@@ -1431,7 +1431,7 @@ test_subfiling_write_many_read_one(void)
     curr_nerrors = nerrors;
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    VRFY((dxpl_id >= 0), "DCPL creation succeeded");
+    VRFY((dxpl_id >= 0), "DXPL creation succeeded");
 
     /* Set selection I/O mode on DXPL */
     VRFY((H5Pset_selection_io(dxpl_id, H5D_SELECTION_IO_MODE_ON) >= 0), "H5Pset_selection_io succeeded");
