@@ -8343,7 +8343,8 @@ H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selec
  *
  * \dxpl_id{plist_id}
  * \param[out] no_selection_io_cause A bitwise set value indicating the relevant
- *                                   causes that prevented selection I/O to be performed
+ *                                   causes that prevented selection I/O from
+ *                                   being performed
  * \return \herr_t
  *
  * \par Motivation:
@@ -8391,7 +8392,7 @@ H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selec
  *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it
  * to be off for this case
  *
- * \since 1.14.3
+ * \since 1.14.1
  *
  */
 H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);

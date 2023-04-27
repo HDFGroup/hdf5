@@ -3362,6 +3362,7 @@ actual_io_mode_tests(void)
      * currently */
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
     ret     = H5Pget_selection_io(dxpl_id, &selection_io_mode);
     VRFY((ret >= 0), "retrieving selection io mode succeeded");
     ret = H5Pclose(dxpl_id);
