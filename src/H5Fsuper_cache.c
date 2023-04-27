@@ -495,7 +495,8 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
         if (H5_IS_BUFFER_OVERFLOW(image, 4, end))
             HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, NULL, "image pointer is out of bounds")
         UINT32DECODE(image, status_flags);
-        HDassert(status_flags <= 255);
+        if (status_flags > 255)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad superblock status flags")
         sblock->status_flags = (uint8_t)status_flags;
         if (sblock->status_flags & ~H5F_SUPER_ALL_FLAGS)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad flag value for superblock")
