@@ -104,11 +104,6 @@ FAILED=1
 #
 SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-.}"
 
-# cd to the subfile configuration location
-if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
-   cd "$SUBF_CONFDIR" || exit
-fi
-
 # Try to find the config file
 if [ -z "$file_config" ]; then
     nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
@@ -150,7 +145,8 @@ if test -z "$subfile_dir"; then
 fi
 
 # For bash 4.4+
-mapfile -t subfiles < <( sed -e '1,/subfile_dir=/d' "$file_config" )
+subfs=$(sed -e '1,/subfile_dir=/d' "$file_config")
+mapfile -t subfiles <<< "$subfs"
 if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED
