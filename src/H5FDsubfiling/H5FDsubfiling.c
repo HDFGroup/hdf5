@@ -374,12 +374,29 @@ H5FD__subfiling_term(void)
     herr_t ret_value = SUCCEED;
 
     if (H5FD_SUBFILING_g >= 0) {
+        int mpi_finalized;
         int mpi_code;
 
+        /*
+         * Retrieve status of whether MPI has already been terminated.
+         * This can happen if an HDF5 ID is left unclosed and HDF5
+         * shuts down after MPI_Finalize() is called in an application.
+         */
+        if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+
         /* Free RPC message MPI Datatype */
-        if (H5_subfiling_rpc_msg_type != MPI_DATATYPE_NULL)
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&H5_subfiling_rpc_msg_type)))
-                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+        if (H5_subfiling_rpc_msg_type != MPI_DATATYPE_NULL) {
+            if (!mpi_finalized) {
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&H5_subfiling_rpc_msg_type)))
+                    H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+            }
+#ifdef H5FD_SUBFILING_DEBUG
+            else
+                HDprintf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was "
+                         "called - an HDF5 ID was probably left unclosed\n");
+#endif
+        }
 
         /* Clean up resources */
         if (H5_subfiling_terminate() < 0)
@@ -1297,9 +1314,14 @@ done:
 static herr_t
 H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
 {
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     HDassert(file_ptr);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
 
     if (file_ptr->sf_file && H5FD_close(file_ptr->sf_file) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
@@ -1311,13 +1333,15 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close IOC FAPL");
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
 
-    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
-    if (H5_mpi_info_free(&file_ptr->info) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    if (!mpi_finalized) {
+        if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+        if (H5_mpi_info_free(&file_ptr->info) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
 
-    if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+        if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+    }
 
     file_ptr->fail_to_encode = FALSE;
 
