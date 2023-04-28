@@ -3369,22 +3369,37 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
         /* Freeing */
         HDfree(total_wbuf1);
+        total_wbuf1 = NULL;
         HDfree(total_wbuf1_bak);
+        total_wbuf1_bak = NULL;
         HDfree(total_rbuf1);
+        total_rbuf1 = NULL;
 
         HDfree(ul_total_wbuf2);
+        ul_total_wbuf2 = NULL;
         HDfree(ul_total_wbuf2_bak);
+        ul_total_wbuf2_bak = NULL;
         HDfree(l_total_rbuf2);
+        l_total_rbuf2 = NULL;
         HDfree(l_total_wbuf2);
+        l_total_wbuf2 = NULL;
         HDfree(l_total_wbuf2_bak);
+        l_total_wbuf2_bak = NULL;
         HDfree(s_total_rbuf2);
+        s_total_rbuf2 = NULL;
 
         HDfree(s1_total_wbuf3);
+        s1_total_wbuf3 = NULL;
         HDfree(s1_total_wbuf3_bak);
+        s1_total_wbuf3_bak = NULL;
         HDfree(s3_total_rbuf3);
+        s3_total_rbuf3 = NULL;
         HDfree(s4_total_wbuf3);
+        s4_total_wbuf3 = NULL;
         HDfree(s4_total_wbuf3_bak);
+        s4_total_wbuf3_bak = NULL;
         HDfree(s1_total_rbuf3);
+        s1_total_rbuf3 = NULL;
 
     } /* end for n niter */
 
@@ -3402,12 +3417,11 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
  *        as needed.
  */
 static void
-test_no_selection_io_cause_mode(uint32_t test_mode)
+test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_mode)
 {
     hid_t    dcpl = H5I_INVALID_HID;
     hid_t    dxpl = H5I_INVALID_HID;
     hid_t    fid  = H5I_INVALID_HID;
-    hid_t    fapl = H5I_INVALID_HID;
     hid_t    did  = H5I_INVALID_HID;
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
@@ -3421,19 +3435,12 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     int      rbuf[DSET_SELECT_DIM];
     int      i;
 
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        P_TEST_ERROR;
-
-    /* Set MPIO file driver */
-    if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-        P_TEST_ERROR;
-
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         P_TEST_ERROR;
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if ((fid = H5Fcreate("no_selection_io_cause.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
 
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
@@ -3503,9 +3510,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
 
-    if (H5Pclose(fapl) < 0)
-        P_TEST_ERROR;
-
     return;
 
 } /* test_no_selection_io_cause_mode() */
@@ -3514,10 +3518,10 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
  * Test for causes of not performing selection I/O
  */
 static void
-test_get_no_selection_io_cause(void)
+test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
-    test_no_selection_io_cause_mode(TEST_DISABLE_BY_API);
-    test_no_selection_io_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
 
     CHECK_PASSED();
 
@@ -3728,9 +3732,6 @@ main(int argc, char *argv[])
         } /* end dtrans */
     }     /* end chunked */
 
-    if (H5Pclose(fapl) < 0)
-        P_TEST_ERROR;
-
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
 
@@ -3738,7 +3739,7 @@ main(int argc, char *argv[])
         printf("\n");
         TESTING("Testing for H5Pget_no_selection_io_cause()");
     }
-    test_get_no_selection_io_cause();
+    test_get_no_selection_io_cause(FILENAME, fapl);
 
     /* Barrier to make sure all ranks are done before deleting the file, and
      * also to clean up output (make sure PASSED is printed before any of the
@@ -3747,9 +3748,11 @@ main(int argc, char *argv[])
         P_TEST_ERROR;
 
     /* Delete file */
-    if (MAINPROCESS)
-        if (MPI_File_delete(FILENAME, MPI_INFO_NULL) != MPI_SUCCESS)
-            P_TEST_ERROR;
+    if (H5Fdelete(FILENAME, fapl) < 0)
+        P_TEST_ERROR;
+
+    if (H5Pclose(fapl) < 0)
+        P_TEST_ERROR;
 
     /* Gather errors from all processes */
     MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);

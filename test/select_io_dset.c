@@ -2638,22 +2638,37 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
         /* Freeing */
         HDfree(total_wbuf1);
+        total_wbuf1 = NULL;
         HDfree(total_wbuf1_bak);
+        total_wbuf1_bak = NULL;
         HDfree(total_rbuf1);
+        total_rbuf1 = NULL;
 
         HDfree(ul_total_wbuf2);
+        ul_total_wbuf2 = NULL;
         HDfree(ul_total_wbuf2_bak);
+        ul_total_wbuf2_bak = NULL;
         HDfree(l_total_rbuf2);
+        l_total_rbuf2 = NULL;
         HDfree(l_total_wbuf2);
+        l_total_wbuf2 = NULL;
         HDfree(l_total_wbuf2_bak);
+        l_total_wbuf2_bak = NULL;
         HDfree(s_total_rbuf2);
+        s_total_rbuf2 = NULL;
 
         HDfree(s1_total_wbuf3);
+        s1_total_wbuf3 = NULL;
         HDfree(s1_total_wbuf3_bak);
+        s1_total_wbuf3_bak = NULL;
         HDfree(s3_total_rbuf3);
+        s3_total_rbuf3 = NULL;
         HDfree(s4_total_wbuf3);
+        s4_total_wbuf3 = NULL;
         HDfree(s4_total_wbuf3_bak);
+        s4_total_wbuf3_bak = NULL;
         HDfree(s1_total_rbuf3);
+        s1_total_rbuf3 = NULL;
 
     } /* end for n niter */
 
@@ -2823,13 +2838,12 @@ error:
  *       of test_mode as needed.
  */
 static herr_t
-test_no_selection_io_cause_mode(uint32_t test_mode)
+test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_mode)
 {
     hid_t    dcpl = H5I_INVALID_HID;
     hid_t    dxpl = H5I_INVALID_HID;
     hid_t    fid  = H5I_INVALID_HID;
     hid_t    fcpl = H5I_INVALID_HID;
-    hid_t    fapl = H5I_INVALID_HID;
     hid_t    did  = H5I_INVALID_HID;
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
@@ -2845,8 +2859,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR;
@@ -2860,8 +2872,15 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
             FAIL_STACK_ERROR;
     }
+    else {
+        /* Not page buffer test, reset to default */
+        if (H5Pset_page_buffer_size(fapl, 0, 0, 0) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, 0, (hsize_t)1) < 0)
+            FAIL_STACK_ERROR;
+    }
 
-    if ((fid = H5Fcreate("no_selection_io_cause.h5", H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* If default mode, 1st write will trigger cb, 2nd write will trigger sieve */
@@ -2973,8 +2992,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pclose(fapl) < 0)
-        FAIL_STACK_ERROR;
     if (H5Pclose(fcpl) < 0)
         FAIL_STACK_ERROR;
 
@@ -2984,7 +3001,6 @@ error:
     H5E_BEGIN_TRY
     {
         H5Pclose(fcpl);
-        H5Pclose(fapl);
         H5Pclose(dcpl);
         H5Pclose(dxpl);
         H5Dclose(did);
@@ -3000,7 +3016,7 @@ error:
  * Test for causes of not performing selection I/O
  */
 static herr_t
-test_get_no_selection_io_cause(void)
+test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
 
     int errs = 0;
@@ -3008,15 +3024,15 @@ test_get_no_selection_io_cause(void)
     HDprintf("\n");
     TESTING("H5Pget_no_selection_io_cause()");
 
-    errs += test_no_selection_io_cause_mode(TEST_DISABLE_BY_API);
-    errs += test_no_selection_io_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
-    errs += test_no_selection_io_cause_mode(TEST_CONTIGUOUS_SIEVE_BUFFER);
-    errs += test_no_selection_io_cause_mode(TEST_DATASET_FILTER);
-    errs += test_no_selection_io_cause_mode(TEST_CHUNK_CACHE);
-    errs += test_no_selection_io_cause_mode(TEST_NO_VECTOR_OR_SELECTION_IO_CB);
-    errs += test_no_selection_io_cause_mode(TEST_DATATYPE_CONVERSION);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CONTIGUOUS_SIEVE_BUFFER);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATASET_FILTER);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CHUNK_CACHE);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NO_VECTOR_OR_SELECTION_IO_CB);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
 #ifndef H5_HAVE_PARALLEL
-    errs += test_no_selection_io_cause_mode(TEST_PAGE_BUFFER);
+    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_PAGE_BUFFER);
 #endif
 
     if (errs) {
@@ -3187,11 +3203,11 @@ main(void)
 
     nerrors += test_set_get_select_io_mode(fid);
 
-    /* Use own file */
-    nerrors += test_get_no_selection_io_cause();
-
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
+
+    /* Use own file */
+    nerrors += test_get_no_selection_io_cause(filename, fapl);
 
     if (nerrors)
         goto error;
