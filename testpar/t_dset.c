@@ -3571,8 +3571,8 @@ test_no_collective_cause_mode(int selection_mode)
 
         /* Disable selection I/O since datatype conversion is supported in collective with selection I/O */
         ret = H5Pset_selection_io(dxpl_write, H5D_SELECTION_IO_MODE_OFF);
-
         VRFY((ret >= 0), "H5Pset_selection_io succeeded");
+
         no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
         no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION | H5D_MPIO_NO_SELECTION_IO;
         no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
