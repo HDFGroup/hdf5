@@ -847,7 +847,7 @@ END SUBROUTINE test_misc_properties
 !           h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 !
 ! Return:   Success:    0
-!           Failure:    -1
+!           Failure:    >0
 !
 !-------------------------------------------------------------------------
 !
