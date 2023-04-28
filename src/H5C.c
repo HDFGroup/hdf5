@@ -6628,7 +6628,7 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
 
             if (entry_ptr->is_dirty && (entry_ptr->tag_info && entry_ptr->tag_info->corked)) {
                 /* Skip "dirty" corked entries.  */
-                num_corked_entries = num_corked_netries + 1;
+                num_corked_entries = num_corked_entries + 1;
                 didnt_flush_entry = TRUE;
             }
             else if ((entry_ptr->type->id != H5AC_EPOCH_MARKER_ID) && !entry_ptr->flush_in_progress &&
