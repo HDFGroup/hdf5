@@ -6579,6 +6579,9 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
+#if !defined(SYCL_LANGUAGE_VERSION) || !defined (__INTEL_LLVM_COMPILER)
+    uint32_t num_corked_entries = 0;
+#endif    
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
