@@ -676,45 +676,6 @@ CONTAINS
 !>
 !! \ingroup FH5P
 !!
-!! \brief Retrieves the cause for not performing selection or vector I/O on the
-!!        last parallel I/O call
-!!
-!! \param plist_id              \fortran_plist_id
-!! \param no_selection_io_cause A bitwise set value indicating the relevant causes that
-!!                              prevented selection I/O from being performed
-!! \param hdferr                \fortran_error
-!!
-!! See C API: @ref H5Pget_no_selection_io_cause()
-!!
-
-  SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
-
-    IMPLICIT NONE
-
-    INTEGER(HID_T), INTENT(IN) :: plist_id
-    INTEGER, INTENT(OUT)       :: no_selection_io_cause
-    INTEGER, INTENT(OUT)       :: hdferr
-
-    INTEGER(C_INT32_T) :: c_no_selection_io_cause
-
-    INTERFACE
-       INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
-            BIND(C, NAME='H5Pget_no_selection_io_cause')
-         IMPORT :: HID_T, C_INT, C_INT32_T
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: plist_id
-         INTEGER(C_INT32_T) :: no_selection_io_cause
-       END FUNCTION H5Pget_no_selection_io_cause
-    END INTERFACE
-
-    hdferr = INT(H5Pget_no_selection_io_cause(plist_id, c_no_selection_io_cause))
-    no_selection_io_cause = INT(c_no_selection_io_cause)
-
-  END SUBROUTINE h5pget_no_selection_io_cause_f
-
-!>
-!! \ingroup FH5P
-!!
 !! \brief Allows the library to modify the contents of the write buffer
 !!
 !! \param plist_id         \fortran_plist_id
