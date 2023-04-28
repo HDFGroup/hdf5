@@ -289,21 +289,21 @@ static ssize_t H5D__nonexistent_readvv(const H5D_io_info_t *io_info, const H5D_d
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
-static herr_t  H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
-                                        const hsize_t *max_dims);
-static herr_t  H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
-static herr_t  H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
-static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
-static herr_t  H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
-static herr_t  H5D__create_piece_mem_map_1d(const H5D_dset_io_info_t *di);
-static herr_t  H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *di);
-static herr_t  H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
+static herr_t   H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
+                                         const hsize_t *max_dims);
+static herr_t   H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
+static herr_t   H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
+static hbool_t  H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
+static herr_t   H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *di, H5D_io_info_t *io_info);
+static herr_t   H5D__create_piece_mem_map_1d(const H5D_dset_io_info_t *di);
+static herr_t   H5D__create_piece_mem_map_hyper(const H5D_dset_io_info_t *di);
+static herr_t   H5D__piece_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
+                                   void *_opdata);
+static herr_t   H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
                                   void *_opdata);
-static herr_t  H5D__piece_mem_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
-                                 void *_opdata);
-static htri_t H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
+static herr_t   H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
 static herr_t   H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t   H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush);
@@ -1062,9 +1062,8 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     htri_t           file_space_normalized = FALSE; /* File dataspace was normalized */
     unsigned         f_ndims;                       /* The number of dimensions of the file's dataspace */
     int              sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
-    htri_t           use_selection_io = FALSE; /* Whether to use selection I/O */
-    unsigned         u;                        /* Local index variable */
-    herr_t           ret_value = SUCCEED;      /* Return value        */
+    unsigned         u;        /* Local index variable */
+    herr_t           ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -1114,10 +1113,29 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Check if we're performing selection I/O and save the result if it hasn't
      * been disabled already */
-    if (io_info->use_select_io) {
-        if ((use_selection_io = H5D__chunk_may_use_select_io(io_info, dinfo)) < 0)
+    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF)
+        if (H5D__chunk_may_use_select_io(io_info, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-        io_info->use_select_io = (hbool_t)use_selection_io;
+
+    /* Calculate type conversion buffer size if necessary.  Currently only implemented for selection I/O. */
+    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF &&
+        !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
+        H5SL_node_t *chunk_node; /* Current node in chunk skip list */
+
+        /* Iterate through nodes in chunk skip list */
+        chunk_node = H5D_CHUNK_GET_FIRST_NODE(dinfo);
+        while (chunk_node) {
+            H5D_piece_info_t *piece_info; /* Chunk information */
+
+            /* Get the actual chunk information from the skip list node */
+            piece_info = H5D_CHUNK_GET_NODE_INFO(dinfo, chunk_node);
+
+            /* Handle type conversion buffer */
+            H5D_INIT_PIECE_TCONV(io_info, dinfo, piece_info)
+
+            /* Advance to next chunk in list */
+            chunk_node = H5D_CHUNK_GET_NEXT_NODE(dinfo, chunk_node);
+        }
     }
 
 done:
@@ -1571,6 +1589,10 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     /* Indicate that the chunk's memory dataspace is shared */
     piece_info->mspace_shared = TRUE;
 
+    /* Initialize in-place type conversion info. Start with it disabled. */
+    piece_info->in_place_tconv = FALSE;
+    piece_info->buf_off        = 0;
+
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
 
@@ -1699,6 +1721,10 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
         /* make connection to related dset info from this piece_info */
         new_piece_info->dset_info = di;
+
+        /* Initialize in-place type conversion info. Start with it disabled. */
+        new_piece_info->in_place_tconv = FALSE;
+        new_piece_info->buf_off        = 0;
 
         /* Insert the new chunk into the skip list */
         if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
@@ -1895,6 +1921,10 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
             /* make connection to related dset info from this piece_info */
             new_piece_info->dset_info = dinfo;
+
+            /* Initialize in-place type conversion info. Start with it disabled. */
+            new_piece_info->in_place_tconv = FALSE;
+            new_piece_info->buf_off        = 0;
 
             /* Add piece to global piece_count */
             io_info->piece_count++;
@@ -2271,6 +2301,10 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
             H5MM_memcpy(piece_info->scaled, scaled, sizeof(hsize_t) * fm->f_ndims);
             piece_info->scaled[fm->f_ndims] = 0;
 
+            /* Initialize in-place type conversion info. Start with it disabled. */
+            piece_info->in_place_tconv = FALSE;
+            piece_info->buf_off        = 0;
+
             /* Make connection to related dset info from this piece_info */
             piece_info->dset_info = dinfo;
 
@@ -2547,11 +2581,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
-H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
+static herr_t
+H5D__chunk_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
-    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
-    htri_t       ret_value = FAIL; /* Return value */
+    const H5D_t *dataset   = NULL;    /* Local pointer to dataset info */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2562,20 +2596,22 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
     dataset = dset_info->dset;
     HDassert(dataset);
 
-    /* Don't use selection I/O if it's globally disabled, there is a type
-     * conversion, or if there are filters on the dataset (for now) */
-    if (dset_info->io_ops.single_read != H5D__select_read || dataset->shared->dcpl_cache.pline.nused > 0)
-        ret_value = FALSE;
+    /* Don't use selection I/O if there are filters on the dataset (for now) */
+    if (dataset->shared->dcpl_cache.pline.nused > 0) {
+        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+        io_info->no_selection_io_cause |= H5D_SEL_IO_DATASET_FILTER;
+    }
     else {
         hbool_t page_buf_enabled;
-
-        HDassert(dset_info->io_ops.single_write == H5D__select_write);
 
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
-        if (page_buf_enabled)
-            ret_value = FALSE;
+        if (page_buf_enabled) {
+            /* Note that page buffer is disabled in parallel */
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_PAGE_BUFFER;
+        }
         else {
             /* Check if chunks in this dataset may be cached, if so don't use
              * selection I/O (for now).  Note that chunks temporarily cached for
@@ -2586,16 +2622,14 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_inf
              * must bypass the chunk-cache scheme because other MPI processes
              * could be writing to other elements in the same chunk.
              */
-            if (io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_INTENT(dataset->oloc.file)))
-                ret_value = TRUE;
-            else {
+            if (!(io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_INTENT(dataset->oloc.file)))) {
 #endif /* H5_HAVE_PARALLEL */
                 /* Check if the chunk is too large to keep in the cache */
                 H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, uint32_t, size_t);
-                if ((size_t)dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes_max)
-                    ret_value = TRUE;
-                else
-                    ret_value = FALSE;
+                if ((size_t)dataset->shared->layout.u.chunk.size <= dataset->shared->cache.chunk.nbytes_max) {
+                    io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+                    io_info->no_selection_io_cause |= H5D_SEL_IO_CHUNK_CACHE;
+                }
 #ifdef H5_HAVE_PARALLEL
             } /* end else */
 #endif        /* H5_HAVE_PARALLEL */
@@ -2668,7 +2702,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     }
 
     /* Different blocks depending on whether we're using selection I/O */
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         size_t num_chunks;
         size_t element_sizes[2] = {dset_info->type_info.src_type_size, 0};
         void  *bufs[2]          = {dset_info->buf.vp, NULL};
@@ -2749,6 +2783,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
                     io_info->rbufs[io_info->pieces_added]         = bufs[0];
+                    if (io_info->sel_pieces)
+                        io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
                 }
             } /* end if */
@@ -2766,7 +2802,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
 
-        /* Only perform I/O if not performing multi dataset I/O, otherwise the
+        /* Only perform I/O if not performing multi dataset I/O or type conversion, otherwise the
          * higher level will handle it after all datasets have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             /* Issue selection I/O call (we can skip the page buffer because we've
@@ -2787,7 +2823,13 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
         }     /* end if */
-    }         /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was
+         * requested) */
+        io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
+    }  /* end if */
     else {
         H5D_io_info_t ctg_io_info; /* Contiguous I/O info object */
         H5D_storage_t ctg_store;   /* Chunk storage information as contiguous dataset */
@@ -2981,7 +3023,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     cpt_store.compact.dirty = &cpt_dirty;
 
     /* Different blocks depending on whether we're using selection I/O */
-    if (io_info->use_select_io) {
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         size_t      num_chunks;
         size_t      element_sizes[2] = {dset_info->type_info.dst_type_size, 0};
         const void *bufs[2]          = {dset_info->buf.cvp, NULL};
@@ -3139,6 +3181,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
                     io_info->wbufs[io_info->pieces_added]         = bufs[0];
+                    if (io_info->sel_pieces)
+                        io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
                 }
             } /* end else */
@@ -3147,7 +3191,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
 
-        /* Only perform I/O if not performing multi dataset I/O, otherwise the
+        /* Only perform I/O if not performing multi dataset I/O or type conversion, otherwise the
          * higher level will handle it after all datasets have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             /* Issue selection I/O call (we can skip the page buffer because we've
@@ -3168,7 +3212,13 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                 chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
         }     /* end if */
-    }         /* end if */
+
+#ifdef H5_HAVE_PARALLEL
+        /* Report that collective chunk I/O was used (will only be set on the DXPL if collective I/O was
+         * requested) */
+        io_info->actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
+#endif /* H5_HAVE_PARALLEL */
+    }  /* end if */
     else {
         /* Iterate through nodes in chunk skip list */
         chunk_node = H5D_CHUNK_GET_FIRST_NODE(dset_info);

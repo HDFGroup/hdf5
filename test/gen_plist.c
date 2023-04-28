@@ -183,6 +183,11 @@ main(void)
         assert(ret > 0);
     if ((ret = H5Pset_data_transform(dxpl1, c_to_f)) < 0)
         assert(ret > 0);
+    if ((ret = H5Pset_selection_io(dxpl1, H5D_SELECTION_IO_MODE_ON)) < 0)
+        assert(ret > 0);
+
+    if ((ret = H5Pset_modify_write_buf(dxpl1, TRUE)) < 0)
+        assert(ret > 0);
 
     if ((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/dxpl_")) < 0)
         assert(ret > 0);
