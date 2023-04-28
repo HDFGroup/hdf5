@@ -118,8 +118,8 @@ New Features
       H5A, H5D, H5ES, H5G, H5F, H5L and H5O async APIs were added.
 
     - Added Fortran APIs:
-      H5PSET_SELECTION_IO_F, H5PGET_SELECTION_IO_F
-      H5PSET_MODIFY_WRITE_BUF_F, H5PGET_MODIFY_WRITE_BUF_F
+      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     C++ Library:
     ------------
