@@ -940,7 +940,7 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
     /* Check if we could potentially use in-place type conversion */
     if (op_type == H5D_IO_OP_READ)
         /* Always on for read (modulo other restrictions that are handled in layout callbacks) */
-        io_info->may_use_in_place_tconv = (op_type == H5D_IO_OP_READ);
+        io_info->may_use_in_place_tconv = TRUE;
     else
         /* Only enable in-place type conversion if we're allowed to modify the write buffer */
         H5CX_get_modify_write_buf(&io_info->may_use_in_place_tconv);
