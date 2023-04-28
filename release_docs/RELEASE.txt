@@ -114,8 +114,7 @@ New Features
 
     Fortran Library:
     ----------------
-    - Added Fortran async APIs:
-      H5A, H5D, H5ES, H5G, H5F, H5L and H5O async APIs were added.
+    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
       h5pset_selection_io_f, h5pget_selection_io_f
