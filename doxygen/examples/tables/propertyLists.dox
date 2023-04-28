@@ -694,6 +694,18 @@ of the library for reading or writing the actual data.</td>
 <td>Gets local and global causes that broke collective I/O on the last parallel I/O call.</td>
 </tr>
 <tr>
+<td>#H5Pset_selection_io/#H5Pget_selection_io</td>
+<td>Sets/gets the selection I/O mode.</td>
+</tr>
+<tr>
+<td>#H5Pget_no_selection_io_cause</td>
+<td>Gets the cause for not performing selection or vector I/O on the last parallel I/O call.</td>
+</tr>
+<tr>
+<td>#H5Pset_modify_write_buf/#H5Pget_modify_write_buf</td>
+<td>Sets/gets a flag allowing the library to modify the contents of the write buffer.</td>
+</tr>
+<tr>
 <td>H5Pset_preserve/H5Pget_preserve</td>
 <td>No longer available, deprecated as it no longer has any effect.</td>
 </tr>
@@ -952,4 +964,3 @@ encoding for object names.</td>
 //! [acpl_table]
  *
  */
- 
