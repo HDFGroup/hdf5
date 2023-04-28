@@ -609,6 +609,179 @@ CONTAINS
 !>
 !! \ingroup FH5P
 !!
+!! \brief Sets the selection I/O mode
+!!
+!! \param plist_id          \fortran_plist_id
+!! \param selection_io_mode The selection I/O mode
+!! \param hdferr            \fortran_error
+!!
+!! See C API: @ref H5Pset_selection_io()
+!!
+  SUBROUTINE h5pset_selection_io_f(plist_id, selection_io_mode, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN) :: plist_id
+    INTEGER, INTENT(IN)        :: selection_io_mode
+    INTEGER, INTENT(OUT)       :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_selection_io(plist_id, selection_io_mode) BIND(C, NAME='H5Pset_selection_io')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: plist_id
+         INTEGER(C_INT), VALUE :: selection_io_mode
+       END FUNCTION H5Pset_selection_io
+    END INTERFACE
+
+    hdferr = INT(H5Pset_selection_io(plist_id, INT(selection_io_mode, C_INT)))
+
+  END SUBROUTINE h5pset_selection_io_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the selection I/O mode
+!!
+!! \param plist_id          \fortran_plist_id
+!! \param selection_io_mode The selection I/O mode
+!! \param hdferr            \fortran_error
+!!
+!! See C API: @ref H5Pget_selection_io()
+!!
+  SUBROUTINE h5pget_selection_io_f(plist_id, selection_io_mode, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN) :: plist_id
+    INTEGER, INTENT(OUT)       :: selection_io_mode
+    INTEGER, INTENT(OUT)       :: hdferr
+
+    INTEGER(C_INT) :: c_selection_io_mode
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_selection_io(plist_id, selection_io_mode) BIND(C, NAME='H5Pget_selection_io')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: plist_id
+         INTEGER(C_INT)        :: selection_io_mode
+       END FUNCTION H5Pget_selection_io
+    END INTERFACE
+
+    hdferr = INT(H5Pget_selection_io(plist_id, c_selection_io_mode))
+    selection_io_mode = INT(c_selection_io_mode)
+
+  END SUBROUTINE h5pget_selection_io_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the cause for not performing selection or vector I/O on the
+!!        last parallel I/O call
+!!
+!! \param plist_id              \fortran_plist_id
+!! \param no_selection_io_cause A bitwise set value indicating the relevant causes that
+!!                              prevented selection I/O from being performed
+!! \param hdferr                \fortran_error
+!!
+!! See C API: @ref H5Pget_no_selection_io_cause()
+!!
+
+  SUBROUTINE h5pget_no_selection_io_cause_f(plist_id, no_selection_io_cause, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN) :: plist_id
+    INTEGER, INTENT(OUT)       :: no_selection_io_cause
+    INTEGER, INTENT(OUT)       :: hdferr
+
+    INTEGER(C_INT32_T) :: c_no_selection_io_cause
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_no_selection_io_cause(plist_id, no_selection_io_cause) &
+            BIND(C, NAME='H5Pget_no_selection_io_cause')
+         IMPORT :: HID_T, C_INT, C_INT32_T
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: plist_id
+         INTEGER(C_INT32_T) :: no_selection_io_cause
+       END FUNCTION H5Pget_no_selection_io_cause
+    END INTERFACE
+
+    hdferr = INT(H5Pget_no_selection_io_cause(plist_id, c_no_selection_io_cause))
+    no_selection_io_cause = INT(c_no_selection_io_cause)
+
+  END SUBROUTINE h5pget_no_selection_io_cause_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Allows the library to modify the contents of the write buffer
+!!
+!! \param plist_id         \fortran_plist_id
+!! \param modify_write_buf Whether the library can modify the contents of the write buffer
+!! \param hdferr           \fortran_error
+!!
+!! See C API: @ref  H5Pset_modify_write_buf()
+!!
+  SUBROUTINE h5pset_modify_write_buf_f(plist_id, modify_write_buf, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN) :: plist_id
+    LOGICAL, INTENT(IN)        :: modify_write_buf
+    INTEGER, INTENT(OUT)       :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pset_modify_write_buf(plist_id, modify_write_buf) BIND(C, NAME='H5Pset_modify_write_buf')
+         IMPORT :: HID_T, C_INT, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: plist_id
+         LOGICAL(C_BOOL), VALUE :: modify_write_buf
+       END FUNCTION H5Pset_modify_write_buf
+    END INTERFACE
+
+    hdferr = INT(H5Pset_modify_write_buf(plist_id, LOGICAL(modify_write_buf, C_BOOL)))
+
+  END SUBROUTINE h5pset_modify_write_buf_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Retrieves the "modify write buffer" property
+!!
+!! \param plist_id         \fortran_plist_id
+!! \param modify_write_buf Whether the library can modify the contents of the write buffer
+!! \param hdferr           \fortran_error
+!!
+!! See C API: @ref  H5Pget_modify_write_buf()
+!!
+  SUBROUTINE h5pget_modify_write_buf_f(plist_id, modify_write_buf, hdferr)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN) :: plist_id
+    LOGICAL, INTENT(OUT)       :: modify_write_buf
+    INTEGER, INTENT(OUT)       :: hdferr
+
+    LOGICAL(C_BOOL) :: c_modify_write_buf
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_modify_write_buf(plist_id, modify_write_buf) BIND(C, NAME='H5Pget_modify_write_buf')
+         IMPORT :: HID_T, C_INT, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: plist_id
+         LOGICAL(C_BOOL) :: modify_write_buf
+       END FUNCTION H5Pget_modify_write_buf
+    END INTERFACE
+
+    hdferr = INT(H5Pget_modify_write_buf(plist_id, c_modify_write_buf))
+    modify_write_buf = LOGICAL(c_modify_write_buf)
+
+  END SUBROUTINE h5pget_modify_write_buf_f
+
+!>
+!! \ingroup FH5P
+!!
 !! \brief Sets the byte size of the offsets and lengths used to address objects in an HDF5 file.
 !!
 !! \param prp_id      File creation property list identifier.
