@@ -2935,7 +2935,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
         /* If we're testing a too small tconv buffer, set the buffer to be too small */
         if (test_mode & TEST_TCONV_BUF_TOO_SMALL) {
-            if (H5Pset_buffer(dxpl, 4, NULL, NULL) < 0)
+            if (H5Pset_buffer(dxpl, sizeof(int), NULL, NULL) < 0)
                 FAIL_STACK_ERROR;
 
             /* If we're using in-place type conversion sel io will succeed and only switch to scalar at the
