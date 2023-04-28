@@ -669,8 +669,10 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         new_piece_info->in_place_tconv = FALSE;
         new_piece_info->buf_off        = 0;
 
-        /* Calculate type conversion buffer size and check for in-place conversion if necessary.  Currently only implemented for selection I/O. */
-        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF && !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop))
+        /* Calculate type conversion buffer size and check for in-place conversion if necessary.  Currently
+         * only implemented for selection I/O. */
+        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF &&
+            !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop))
             H5D_INIT_PIECE_TCONV(io_info, dinfo, new_piece_info)
 
         /* Save piece to dataset info struct so it is freed at the end of the
