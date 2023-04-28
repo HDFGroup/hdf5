@@ -70,32 +70,6 @@ typedef enum {
 #define DSET_SELECT_DIM       100
 #define DSET_SELECT_CHUNK_DIM 10
 
-#define DSET_CONTIG_NO_CONV_NTRANS "contig_no_conv_ntrans"
-#define DSET_CONTIG_NO_CONV_TRANS  "contig_no_conv_trans"
-#define DSET_CHK_NO_CONV_NTRANS    "chunked_no_conv_ntrans"
-#define DSET_CHK_NO_CONV_TRANS     "chunked_no_conv_trans"
-
-#define DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG  "contig_no_size_change_no_bkg"
-#define DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG "chunked_no_size_change_no_bkg"
-
-#define DSET_CONTIG_LARGER_NO_BKG_NTRANS "contig_larger_mem_no_bkg_ntrans"
-#define DSET_CONTIG_LARGER_NO_BKG_TRANS  "contig_larger_mem_no_bkg_trans"
-#define DSET_CHK_LARGER_NO_BKG_NTRANS    "chunked_larger_mem_no_bkg_ntrans"
-#define DSET_CHK_LARGER_NO_BKG_TRANS     "chunked_larger_mem_no_bkg_trans"
-
-#define DSET_CONTIG_SMALLER_NO_BKG_NTRANS "contig_smaller_mem_no_bkg_ntrans"
-#define DSET_CONTIG_SMALLER_NO_BKG_TRANS  "contig_smaller_mem_no_bkg_trans"
-#define DSET_CHK_SMALLER_NO_BKG_NTRANS    "chk_smaller_mem_no_bkg_ntrans"
-#define DSET_CHK_SMALLER_NO_BKG_TRANS     "chk_smaller_mem_no_bkg_trans"
-
-#define DSET_CONTIG_CMPD_WITH_BKG  "contig_cmpd_with_bkg"
-#define DSET_CHUNKED_CMPD_WITH_BKG "chunked_cmpd_with_bkg"
-
-#define DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS "contig_tconv_sel_ntrans"
-#define DSET_CONTIG_TCONV_SEL_EMPTY_TRANS  "contig_tconv_sel_trans"
-#define DSET_CHK_TCONV_SEL_EMPTY_NTRANS    "chunked_tconv_sel_ntrans"
-#define DSET_CHK_TCONV_SEL_EMPTY_TRANS     "chunked_tconv_sel_trans"
-
 #define MULTI_NUM_DSETS 3
 #define MULTI_MIN_DSETS 3
 #define DSET_NAME_LEN   64
@@ -150,6 +124,9 @@ typedef enum {
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x002
+#define TEST_DATATYPE_CONVERSION               0x004
+#define TEST_TCONV_BUF_TOO_SMALL               0x008
+#define TEST_IN_PLACE_TCONV                    0x010
 
 /*
  * Helper routine to set dxpl
@@ -3426,11 +3403,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                     = FALSE;
-    hid_t    tid                            = H5T_NATIVE_INT;
-    uint32_t no_selection_io_cause_write    = 0;
-    uint32_t no_selection_io_cause_read     = 0;
-    uint32_t no_selection_io_cause_expected = 0;
+    hbool_t  is_chunked                           = FALSE;
+    hid_t    tid                                  = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write          = 0;
+    uint32_t no_selection_io_cause_read           = 0;
+    uint32_t no_selection_io_cause_write_expected = 0;
+    uint32_t no_selection_io_cause_read_expected  = 0;
     int      wbuf[DSET_SELECT_DIM];
     int      rbuf[DSET_SELECT_DIM];
     int      i;
@@ -3446,13 +3424,40 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_DISABLE_BY_API;
+    }
+
+    /* Datatype conversion */
+    if (test_mode & TEST_DATATYPE_CONVERSION) {
+        if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+            P_TEST_ERROR;
+        tid = H5T_NATIVE_UINT;
+
+        /* If we're testing a too small tconv buffer, set the buffer to be too small */
+        if (test_mode & TEST_TCONV_BUF_TOO_SMALL) {
+            if (H5Pset_buffer(dxpl, 4, NULL, NULL) < 0)
+                P_TEST_ERROR;
+
+            /* If we're using in-place type conversion sel io will succeed */
+            if (test_mode & TEST_IN_PLACE_TCONV) {
+                if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                    P_TEST_ERROR;
+            }
+            else
+                no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+
+            /* In-place type conversion for read doesn't require modify_write_buf */
+        }
+
+        /* If the tconv buf is largge enough sel io will succeed */
     }
 
     /* Create 1d data space */
@@ -3480,19 +3485,18 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write is as expected */
-    if (no_selection_io_cause_write != no_selection_io_cause_expected)
+    /* Verify causes of no selection I/O for write are as expected */
+    if (no_selection_io_cause_write != no_selection_io_cause_write_expected)
         P_TEST_ERROR;
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for read is as expected */
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_read) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write and read are the same */
-    if (no_selection_io_cause_write != no_selection_io_cause_read)
+    /* Verify causes of no selection I/O for read are as expected */
+    if (no_selection_io_cause_read != no_selection_io_cause_read_expected)
         P_TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -3522,6 +3526,10 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
     test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
     test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
+    test_no_selection_io_cause_mode(
+        filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
 
     CHECK_PASSED();
 

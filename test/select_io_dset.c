@@ -103,6 +103,8 @@ typedef enum {
 #define TEST_PAGE_BUFFER                       0x020
 #define TEST_DATASET_FILTER                    0x040
 #define TEST_CHUNK_CACHE                       0x080
+#define TEST_TCONV_BUF_TOO_SMALL               0x100
+#define TEST_IN_PLACE_TCONV                    0x200
 
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
@@ -2848,11 +2850,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                     = FALSE;
-    hid_t    tid                            = H5T_NATIVE_INT;
-    uint32_t no_selection_io_cause_write    = 0;
-    uint32_t no_selection_io_cause_read     = 0;
-    uint32_t no_selection_io_cause_expected = 0;
+    hbool_t  is_chunked                           = FALSE;
+    hid_t    tid                                  = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write          = 0;
+    uint32_t no_selection_io_cause_read           = 0;
+    uint32_t no_selection_io_cause_write_expected = 0;
+    uint32_t no_selection_io_cause_read_expected  = 0;
     int      wbuf[DSET_SELECT_DIM];
     int      rbuf[DSET_SELECT_DIM];
     int      i;
@@ -2886,45 +2889,79 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     /* If default mode, 1st write will trigger cb, 2nd write will trigger sieve */
     /* If on mode, will trigger nothing because the on mode path is different */
     /* Need 2 writes */
-    if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER)
-        no_selection_io_cause_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
+    if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER) {
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
+    }
 
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             FAIL_STACK_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
     if (test_mode == TEST_DATASET_FILTER) {
         if (H5Pset_deflate(dcpl, 9) < 0)
             FAIL_STACK_ERROR;
         is_chunked = TRUE;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DATASET_FILTER;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_DATASET_FILTER;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_DATASET_FILTER;
     }
 
     if (test_mode == TEST_CHUNK_CACHE) {
         is_chunked = TRUE;
-        no_selection_io_cause_expected |= H5D_SEL_IO_CHUNK_CACHE;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_CHUNK_CACHE;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_CHUNK_CACHE;
     }
 
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             FAIL_STACK_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_DISABLE_BY_API;
     }
 
-    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB)
-        no_selection_io_cause_expected |= H5D_SEL_IO_DEFAULT_OFF;
+    if (test_mode & TEST_NO_VECTOR_OR_SELECTION_IO_CB) {
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_DEFAULT_OFF;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_DEFAULT_OFF;
+    }
 
+    /* Datatype conversion */
     if (test_mode & TEST_DATATYPE_CONVERSION) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
             FAIL_STACK_ERROR;
         tid = H5T_NATIVE_UINT;
-        no_selection_io_cause_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+
+        /* If we're testing a too small tconv buffer, set the buffer to be too small */
+        if (test_mode & TEST_TCONV_BUF_TOO_SMALL) {
+            if (H5Pset_buffer(dxpl, 4, NULL, NULL) < 0)
+                FAIL_STACK_ERROR;
+
+            /* If we're using in-place type conversion sel io will succeed and only switch to scalar at the
+             * VFL */
+            if (test_mode & TEST_IN_PLACE_TCONV) {
+                if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                    FAIL_STACK_ERROR;
+                no_selection_io_cause_write_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+            }
+            else
+                no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+
+            /* In-place type conversion for read doesn't require modify_write_buf */
+            no_selection_io_cause_read_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+        }
+        else {
+            /* sel io will succeed and only switch to scalar at the VFL */
+            no_selection_io_cause_write_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+            no_selection_io_cause_read_expected |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
+        }
     }
 
-    if (test_mode & TEST_PAGE_BUFFER)
-        no_selection_io_cause_expected |= H5D_SEL_IO_PAGE_BUFFER;
+    if (test_mode & TEST_PAGE_BUFFER) {
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_PAGE_BUFFER;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_PAGE_BUFFER;
+    }
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -2956,8 +2993,8 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write is as expected */
-    if (no_selection_io_cause_write != no_selection_io_cause_expected)
+    /* Verify causes of no selection I/O for write are as expected */
+    if (no_selection_io_cause_write != no_selection_io_cause_write_expected)
         TEST_ERROR;
 
     /* Flush to clear the sieve buf */
@@ -2975,8 +3012,8 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_read) < 0)
         TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write and read are the same */
-    if (no_selection_io_cause_write != no_selection_io_cause_read)
+    /* Verify causes of no selection I/O for read are as expected */
+    if (no_selection_io_cause_read != no_selection_io_cause_read_expected)
         TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -3031,6 +3068,10 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CHUNK_CACHE);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NO_VECTOR_OR_SELECTION_IO_CB);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
+    errs +=
+        test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
+    errs += test_no_selection_io_cause_mode(
+        filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
 #ifndef H5_HAVE_PARALLEL
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_PAGE_BUFFER);
 #endif
