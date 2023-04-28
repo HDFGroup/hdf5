@@ -10,31 +10,28 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:     Quincey Koziol
- *               Thursday, April 24, 2008
+/* Purpose: Abstract indexed (chunked) I/O functions.  The logical
+ *          multi-dimensional dataspace is regularly partitioned into
+ *          same-sized "chunks", the first of which is aligned with the
+ *          logical origin.  The chunks are indexed by different methods,
+ *          that map a chunk index to disk address.  Each chunk can be
+ *          compressed independently and the chunks may move around in the
+ *          file as their storage requirements change.
  *
- * Purpose:    Abstract indexed (chunked) I/O functions.  The logical
- *        multi-dimensional dataspace is regularly partitioned into
- *        same-sized "chunks", the first of which is aligned with the
- *        logical origin.  The chunks are indexed by different methods,
- *        that map a chunk index to disk address.  Each chunk can be
- *              compressed independently and the chunks may move around in the
- *              file as their storage requirements change.
+ * Cache:   Disk I/O is performed in units of chunks and H5MF_alloc()
+ *          contains code to optionally align chunks on disk block
+ *          boundaries for performance.
  *
- * Cache:    Disk I/O is performed in units of chunks and H5MF_alloc()
- *        contains code to optionally align chunks on disk block
- *        boundaries for performance.
- *
- *        The chunk cache is an extendible hash indexed by a function
- *        of storage B-tree address and chunk N-dimensional offset
- *        within the dataset.  Collisions are not resolved -- one of
- *        the two chunks competing for the hash slot must be preempted
- *        from the cache.  All entries in the hash also participate in
- *        a doubly-linked list and entries are penalized by moving them
- *        toward the front of the list.  When a new chunk is about to
- *        be added to the cache the heap is pruned by preempting
- *        entries near the front of the list to make room for the new
- *        entry which is added to the end of the list.
+ *          The chunk cache is an extendible hash indexed by a function
+ *          of storage B-tree address and chunk N-dimensional offset
+ *          within the dataset.  Collisions are not resolved -- one of
+ *          the two chunks competing for the hash slot must be preempted
+ *          from the cache.  All entries in the hash also participate in
+ *          a doubly-linked list and entries are penalized by moving them
+ *          toward the front of the list.  When a new chunk is about to
+ *          be added to the cache the heap is pruned by preempting
+ *          entries near the front of the list to make room for the new
+ *          entry which is added to the end of the list.
  */
 
 /****************/
@@ -670,31 +667,30 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_set_info_real
  *
- * Purpose:    Internal routine to set the information about chunks for a dataset
+ * Purpose:     Internal routine to set the information about chunks for a dataset
  *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 30, 2009
- *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
                          const hsize_t *max_dims)
 {
-    unsigned u;                   /* Local index variable */
-    herr_t   ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
     HDassert(layout);
-    HDassert(ndims > 0);
     HDassert(curr_dims);
 
+    /* Can happen when corrupt files are parsed */
+    if (ndims == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "number of dimensions cannot be zero")
+
     /* Compute the # of chunks in dataset dimensions */
-    for (u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
+    layout->nchunks     = 1;
+    layout->max_nchunks = 1;
+    for (unsigned u = 0; u < ndims; u++) {
         /* Round up to the next integer # of chunks, to accommodate partial chunks */
         layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
         if (H5S_UNLIMITED == max_dims[u])
@@ -710,7 +706,7 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
         /* Accumulate the # of chunks */
         layout->nchunks *= layout->chunks[u];
         layout->max_nchunks *= layout->max_chunks[u];
-    } /* end for */
+    }
 
     /* Get the "down" sizes for each dimension */
     H5VM_array_down(ndims, layout->chunks, layout->down_chunks);
