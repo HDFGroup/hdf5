@@ -3403,12 +3403,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                     = FALSE;
-    hid_t    tid                            = H5T_NATIVE_INT;
-    uint32_t no_selection_io_cause_write    = 0;
-    uint32_t no_selection_io_cause_read     = 0;
+    hbool_t  is_chunked                           = FALSE;
+    hid_t    tid                                  = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write          = 0;
+    uint32_t no_selection_io_cause_read           = 0;
     uint32_t no_selection_io_cause_write_expected = 0;
-    uint32_t no_selection_io_cause_read_expected = 0;
+    uint32_t no_selection_io_cause_read_expected  = 0;
     int      wbuf[DSET_SELECT_DIM];
     int      rbuf[DSET_SELECT_DIM];
     int      i;
@@ -3528,7 +3528,8 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
     test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
     test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
-    test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
+    test_no_selection_io_cause_mode(
+        filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
 
     CHECK_PASSED();
 

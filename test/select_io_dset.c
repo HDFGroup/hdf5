@@ -2850,12 +2850,12 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                     = FALSE;
-    hid_t    tid                            = H5T_NATIVE_INT;
-    uint32_t no_selection_io_cause_write    = 0;
-    uint32_t no_selection_io_cause_read     = 0;
+    hbool_t  is_chunked                           = FALSE;
+    hid_t    tid                                  = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write          = 0;
+    uint32_t no_selection_io_cause_read           = 0;
     uint32_t no_selection_io_cause_write_expected = 0;
-    uint32_t no_selection_io_cause_read_expected = 0;
+    uint32_t no_selection_io_cause_read_expected  = 0;
     int      wbuf[DSET_SELECT_DIM];
     int      rbuf[DSET_SELECT_DIM];
     int      i;
@@ -2938,7 +2938,8 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             if (H5Pset_buffer(dxpl, 4, NULL, NULL) < 0)
                 FAIL_STACK_ERROR;
 
-            /* If we're using in-place type conversion sel io will succeed and only switch to scalar at the VFL */
+            /* If we're using in-place type conversion sel io will succeed and only switch to scalar at the
+             * VFL */
             if (test_mode & TEST_IN_PLACE_TCONV) {
                 if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
                     FAIL_STACK_ERROR;
@@ -3067,8 +3068,10 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_CHUNK_CACHE);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_NO_VECTOR_OR_SELECTION_IO_CB);
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
-    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
-    errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
+    errs +=
+        test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
+    errs += test_no_selection_io_cause_mode(
+        filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
 #ifndef H5_HAVE_PARALLEL
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_PAGE_BUFFER);
 #endif
