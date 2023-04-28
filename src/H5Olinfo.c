@@ -13,16 +13,14 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Olinfo.c
- *                      Aug 23 2005
- *                      Quincey Koziol
  *
- * Purpose:             Link Information messages.
+ * Purpose:             Link information messages
  *
  *-------------------------------------------------------------------------
  */
 
-#define H5G_FRIEND     /*suppress error about including H5Gpkg   */
-#define H5L_FRIEND     /*suppress error about including H5Lpkg	  */
+#define H5G_FRIEND     /* Suppress error about including H5Gpkg */
+#define H5L_FRIEND     /* Suppress error about including H5Lpkg */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -95,12 +93,8 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *
  * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native form.
+ * Return:      Success:        Pointer to new message in native form
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -115,7 +109,6 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 

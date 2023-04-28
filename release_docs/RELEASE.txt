@@ -47,6 +47,15 @@ New Features
 
     Configuration:
     -------------
+    - Added support for CMake presets file.
+
+      CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+      that allow users to specify common configure options and share them with others.
+      HDF added a CMakePresets.json file of a typical configuration and support
+      file, config/cmake-presets/hidden-presets.json. 
+      Also added a section to INSTALL_CMake.txt with very basic explanation of the
+      process to use CMakePresets.
+
     - Deprecated and removed old SZIP library in favor of LIBAEC library
 
       LIBAEC library has been used in HDF5 binaries as the szip library of choice
@@ -154,6 +163,12 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed H5Pget_vol_cap_flags and H5Pget_vol_id to accept H5P_DEFAULT
+
+      H5Pget_vol_cap_flags and H5Pget_vol_id were updated to correctly
+      accept H5P_DEFAULT for the 'plist_id' FAPL parameter. Previously,
+      they would fail if provided with H5P_DEFAULT as the FAPL.
+
     - Fixed ROS3 VFD anonymous credential usage with h5dump and h5ls
 
       ROS3 VFD anonymous credential functionality became broken in h5dump

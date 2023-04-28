@@ -10,11 +10,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
+/*
  * Purpose:    The fill message indicates a bit pattern to use for
- *        uninitialized data points of a dataset.
+ *             uninitialized data points of a dataset.
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
@@ -178,16 +176,12 @@ H5FL_BLK_EXTERN(type_conv);
 /*-------------------------------------------------------------------------
  * Function:    H5O__fill_new_decode
  *
- * Purpose:    Decode a new fill value message.  The new fill value
- *          message is fill value plus space allocation time and
- *          fill value writing time and whether fill value is defined.
+ * Purpose:     Decode a new fill value message.  The new fill value
+ *              message is fill value plus space allocation time and
+ *              fill value writing time and whether fill value is defined.
  *
- * Return:    Success:    Ptr to new message in native struct.
- *          Failure:    NULL
- *
- * Programmer:  Raymond Lu
- *              Feb 26, 2002
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -208,12 +202,21 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message")
 
     /* Version */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     fill->version = *p++;
     if (fill->version < H5O_FILL_VERSION_1 || fill->version > H5O_FILL_VERSION_LATEST)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message")
 
     /* Decode each version */
     if (fill->version < H5O_FILL_VERSION_3) {
+
+        /* Versions 1 & 2 */
+
+        /* Buffer size check for the next three bytes */
+        if (H5_IS_BUFFER_OVERFLOW(p, 3, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+
         /* Space allocation time */
         fill->alloc_time = (H5D_alloc_time_t)*p++;
 
@@ -225,26 +228,34 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
         /* Only decode fill value information if one is defined */
         if (fill->fill_defined) {
+
+            if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             INT32DECODE(p, fill->size);
+
             if (fill->size > 0) {
                 H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
 
-                /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
-                if (p + fill->size - 1 > p_end)
-                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
+                if (H5_IS_BUFFER_OVERFLOW(p, fill->size, p_end))
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
                 if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
                 H5MM_memcpy(fill->buf, p, (size_t)fill->size);
-            } /* end if */
-        }     /* end if */
+            }
+        }
         else
-            fill->size = (-1);
-    } /* end if */
+            fill->size = -1;
+    }
     else {
+
+        /* Version 3 */
+
         unsigned flags; /* Status flags */
 
         /* Flags */
+        if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         flags = *p++;
 
         /* Check for unknown flags */
@@ -260,39 +271,45 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
         /* Check for undefined fill value */
         if (flags & H5O_FILL_FLAG_UNDEFINED_VALUE) {
-            /* Sanity check */
-            HDassert(!(flags & H5O_FILL_FLAG_HAVE_VALUE));
+
+            if (flags & (unsigned)~H5O_FILL_FLAG_HAVE_VALUE)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "have value and undefined value flags both set")
 
             /* Set value for "undefined" fill value */
-            fill->size = (-1);
-        } /* end if */
+            fill->size = -1;
+        }
         else if (flags & H5O_FILL_FLAG_HAVE_VALUE) {
             /* Fill value size */
+            if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
             UINT32DECODE(p, fill->size);
 
             /* Fill value */
             H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
+
+            if (H5_IS_BUFFER_OVERFLOW(p, fill->size, p_end))
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+
             if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
             H5MM_memcpy(fill->buf, p, (size_t)fill->size);
 
             /* Set the "defined" flag */
             fill->fill_defined = TRUE;
-        } /* end else */
+        }
         else
             /* Set the "defined" flag */
             fill->fill_defined = TRUE;
-    } /* end else */
+    }
 
     /* Set return value */
     ret_value = (void *)fill;
 
 done:
     if (!ret_value && fill) {
-        if (fill->buf)
-            H5MM_xfree(fill->buf);
+        H5MM_xfree(fill->buf);
         fill = H5FL_FREE(H5O_fill_t, fill);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__fill_new_decode() */
@@ -300,14 +317,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__fill_old_decode
  *
- * Purpose:     Decode an old fill value message.
+ * Purpose:     Decode an old fill value message
  *
- * Return:      Success:        Ptr to new message in native struct.
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Wednesday, September 30, 1998
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
@@ -334,6 +347,8 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
     fill->fill_time  = H5D_FILL_TIME_IFSET;
 
     /* Fill value size */
+    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT32DECODE(p, fill->size);
 
     /* Only decode the fill value itself if there is one */
@@ -341,8 +356,8 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
         H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
 
         /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
-        if (p + fill->size - 1 > p_end)
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
+        if (H5_IS_BUFFER_OVERFLOW(p, fill->size, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
 
         /* Get the datatype message  */
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)
@@ -353,15 +368,15 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
             /* Verify size */
             if (fill->size != (ssize_t)H5T_GET_SIZE(dt))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "inconsistent fill value size")
-        } /* end if */
+        }
 
         if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
         H5MM_memcpy(fill->buf, p, (size_t)fill->size);
         fill->fill_defined = TRUE;
-    } /* end if */
+    }
     else
-        fill->size = (-1);
+        fill->size = -1;
 
     /* Set return value */
     ret_value = (void *)fill;
@@ -371,10 +386,9 @@ done:
         H5O_msg_free(H5O_DTYPE_ID, dt);
 
     if (!ret_value && fill) {
-        if (fill->buf)
-            H5MM_xfree(fill->buf);
-        fill = H5FL_FREE(H5O_fill_t, fill);
-    } /* end if */
+        H5MM_xfree(fill->buf);
+        H5FL_FREE(H5O_fill_t, fill);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__fill_old_decode() */

@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Orefcount.c
- *                      Mar 10 2007
- *                      Quincey Koziol
  *
- * Purpose:             Object ref. count messages.
+ * Purpose:             Object reference count messages
  *
  *-------------------------------------------------------------------------
  */
@@ -72,31 +70,30 @@ H5FL_DEFINE_STATIC(H5O_refcount_t);
 /*-------------------------------------------------------------------------
  * Function:    H5O__refcount_decode
  *
- * Purpose:     Decode a message and return a pointer to a newly allocated one.
+ * Purpose:     Decode a message and return a pointer to a newly allocated
+ *              one.
  *
- * Return:      Success:        Ptr to new message in native form.
- *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar 10 2007
- *
+ * Return:      Success:    Pointer to new message in native form
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                     size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                     const uint8_t *p)
 {
-    H5O_refcount_t *refcount  = NULL; /* Reference count */
-    void           *ret_value = NULL; /* Return value */
+    H5O_refcount_t *refcount  = NULL;           /* Reference count */
+    const uint8_t  *p_end     = p + p_size - 1; /* End of the p buffer */
+    void           *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     if (*p++ != H5O_REFCOUNT_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -104,15 +101,17 @@ H5O__refcount_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if (NULL == (refcount = H5FL_MALLOC(H5O_refcount_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Get ref. count for object */
+    /* Get reference count for object */
+    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
     UINT32DECODE(p, *refcount)
 
     /* Set return value */
     ret_value = refcount;
 
 done:
-    if (ret_value == NULL && refcount != NULL)
-        refcount = H5FL_FREE(H5O_refcount_t, refcount);
+    if (!ret_value && refcount)
+        H5FL_FREE(H5O_refcount_t, refcount);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__refcount_decode() */
