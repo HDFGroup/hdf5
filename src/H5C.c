@@ -6579,8 +6579,8 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
-    uint32_t num_corked_entries = 0;
-    herr_t ret_value = SUCCEED; /* Return value */
+    uint32_t           num_corked_entries = 0;
+    herr_t             ret_value          = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -6629,7 +6629,7 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
             if (entry_ptr->is_dirty && (entry_ptr->tag_info && entry_ptr->tag_info->corked)) {
                 /* Skip "dirty" corked entries.  */
                 num_corked_entries = num_corked_entries + 1;
-                didnt_flush_entry = TRUE;
+                didnt_flush_entry  = TRUE;
             }
             else if ((entry_ptr->type->id != H5AC_EPOCH_MARKER_ID) && !entry_ptr->flush_in_progress &&
                      !entry_ptr->prefetched_dirty) {
