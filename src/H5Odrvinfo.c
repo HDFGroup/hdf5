@@ -60,34 +60,32 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
 #define H5O_DRVINFO_VERSION 0
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__drvinfo_decode
+ * Function:    H5O__drvinfo_decode
  *
- * Purpose:	Decode a shared message table message and return a pointer
+ * Purpose:     Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_drvinfo_t struct.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *		Failure:	NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
+ * Return:      Success:	Pointer to new message in native struct
+ *              Failure:	NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                    const uint8_t *p)
 {
-    H5O_drvinfo_t *mesg;             /* Native message */
-    void          *ret_value = NULL; /* Return value */
+    H5O_drvinfo_t *mesg      = NULL;           /* Native message */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(f);
     HDassert(p);
 
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_DRVINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -96,27 +94,37 @@ H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message")
 
     /* Retrieve driver name */
+    if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5MM_memcpy(mesg->name, p, 8);
     mesg->name[8] = '\0';
     p += 8;
 
     /* Decode buffer size */
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT16DECODE(p, mesg->len);
-    HDassert(mesg->len);
+    if (0 == mesg->len)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "message length can't be zero");
 
     /* Allocate space for buffer */
-    if (NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
-        mesg = (H5O_drvinfo_t *)H5MM_xfree(mesg);
+    if (NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer")
-    } /* end if */
 
     /* Copy encoded driver info into buffer */
+    if (H5_IS_BUFFER_OVERFLOW(p, mesg->len, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5MM_memcpy(mesg->buf, p, mesg->len);
 
     /* Set return value */
     ret_value = (void *)mesg;
 
 done:
+    if (!ret_value && mesg) {
+        H5MM_xfree(mesg->buf);
+        H5MM_xfree(mesg);
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__drvinfo_decode() */
 

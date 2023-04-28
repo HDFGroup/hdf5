@@ -86,7 +86,31 @@ application developers, library developers, and system administrators.
 
 # Release Note <A NAME="releasenote"></A>
 
-The use and format of release notes is described in `doc/release_txt_notes.md` in this source code tree
+* **Entry Syntax**
+The release note entry syntax is shown below.
+
+```
+    - Title/Problem
+
+      Problem/Solution
+
+```
+
+* **Entry Elements** - The elements of the entry - title, problem, solution, and signature - are described in more detail in the table
+below. Descriptions of the problem and the solution should be clear without any ambiguities and should be short without losing clarity or specifics.
+
+    * **Title** - The title or tag should identify one or more categories that will help readers decide if the entry is something they need to study. Can be combined with the `Problem` element
+    * **Problem** - Describe the problem and how users might see the problem in a paragraph.
+You might also consider the following as you describe the problem:
+        * Under what specific conditions does this issue arise?
+        * Under what specific conditions are we sure this issue will not arise?
+        * For a performance issue, instead of saying something is a performance issue, describe what the performance impact of issue is?
+    * **Solution** - Describe the solution in another paragraph.
+You might also consider the following as you describe the solution:
+        * What was done to resolve the issue?
+        * What is the functional impact?
+        * Is there a workaround – a way for users design their software so as not to encounter the issue? If so, what is the workaround?
+        * For a performance fix, how has the performance improved? Links to published documentation would be good.
 
 # Checklist <A NAME="checklist"></A>
 
