@@ -467,7 +467,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the cause of no selection I/O property */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
+    /* (Note: this property should not have an encode/decode callback) */
     if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
                            &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)

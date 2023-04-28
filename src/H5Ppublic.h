@@ -8278,7 +8278,7 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  *
  * \details H5Pset_selection_io() sets the selection I/O mode
  *          \p selection_io_mode in the dataset transfer property
- *          list \p dxpl_id.
+ *          list \p plist_id.
  *
  *          This can be used to enable collective I/O with type conversion, or
  *          with custom VFDs that support vector or selection I/O.
@@ -8320,7 +8320,7 @@ H5_DLL herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t select
  * \return \herr_t
  *
  * \details H5Pget_selection_io() queries the selection I/O mode set in
- *          in the dataset transfer property list \p dxpl_id.
+ *          in the dataset transfer property list \p plist_id.
  *
  *          Values returned in \p selection_io_mode:
  *          \snippet this H5D_selection_io_mode_t_snip
@@ -8410,7 +8410,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *
  * \details H5Pset_modify_write_buf() sets whether the library is allowed to
  *          modify the contents of write buffers passed to HDF5 API routines
- *          that are passed the dataset transfer property list \p dxpl_id.  The
+ *          that are passed the dataset transfer property list \p plist_id.  The
  *          default value for modify_write_buf is FALSE.
  *
  *          This function can be used to allow the library to perform in-place
@@ -8440,10 +8440,10 @@ H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
  * \return \herr_t
  *
  * \details H5Pget_modify_write_buf() gets the "modify write buffer" property
- *          from the dataset transfer property list \p dxpl_id.  This property
+ *          from the dataset transfer property list \p plist_id.  This property
  *          determines whether the library is allowed to  modify the contents of
  *          write buffers passed to HDF5 API routines that are passed
- *          \p dxpl_id.  The default value for modify_write_buf is FALSE.
+ *          \p plist_id.  The default value for modify_write_buf is FALSE.
  *
  * \since 1.14.1
  *
