@@ -72,7 +72,7 @@ static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
 static herr_t H5O__cache_chk_free_icr(void *thing);
 
 /* Prefix routines */
-static herr_t H5O__prefix_deserialize(const uint8_t *image, H5O_cache_ud_t *udata);
+static herr_t H5O__prefix_deserialize(const uint8_t *image, size_t len, H5O_cache_ud_t *udata);
 
 /* Chunk routines */
 static herr_t H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image,
@@ -170,8 +170,7 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED image_len, void *_udata,
-                               size_t *actual_len)
+H5O__cache_get_final_load_size(const void *image, size_t image_len, void *_udata, size_t *actual_len)
 {
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     herr_t          ret_value = SUCCEED;
@@ -184,7 +183,7 @@ H5O__cache_get_final_load_size(const void *image, size_t H5_ATTR_NDEBUG_UNUSED i
     HDassert(*actual_len == image_len);
 
     /* Deserialize the object header prefix */
-    if (H5O__prefix_deserialize((const uint8_t *)image, udata) < 0)
+    if (H5O__prefix_deserialize((const uint8_t *)image, image_len, udata) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't deserialize object header prefix")
 
     /* Sanity check */
@@ -287,11 +286,11 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
      */
     if (NULL == udata->oh) {
         /* Deserialize the object header prefix */
-        if (H5O__prefix_deserialize((const uint8_t *)image, udata) < 0)
+        if (H5O__prefix_deserialize((const uint8_t *)image, len, udata) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix")
 
-        /* Sanity check */
-        HDassert(udata->oh);
+        if (NULL == udata->oh)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "no partially deserialized data")
     }
 
     /* Retrieve partially deserialized object header from user data */
@@ -961,7 +960,7 @@ done:
 static herr_t
 H5O__add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
 {
-    size_t contno;              /* Continuation message index */
+    size_t contno; /* Continuation message index */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -999,9 +998,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
+H5O__prefix_deserialize(const uint8_t *_image, size_t len, H5O_cache_ud_t *udata)
 {
     const uint8_t *image     = (const uint8_t *)_image; /* Pointer into raw data buffer */
+    const uint8_t *p_end     = image + len - 1;         /* End of image buffer */
     H5O_t         *oh        = NULL;                    /* Object header read in */
     herr_t         ret_value = SUCCEED;
 
@@ -1022,14 +1022,20 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     /* (indicates version 2 or later) */
     if (!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /* Magic number */
+        if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         image += H5_SIZEOF_MAGIC;
 
         /* Version */
+        if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         oh->version = *image++;
         if (H5O_VERSION_2 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
 
         /* Flags */
+        if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         oh->flags = *image++;
         if (oh->flags & ~H5O_HDR_ALL_FLAGS)
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown object header status flag(s)")
@@ -1039,7 +1045,10 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 
         /* Time fields */
         if (oh->flags & H5O_HDR_STORE_TIMES) {
-            uint32_t tmp; /* Temporary value */
+            uint32_t tmp;
+
+            if (H5_IS_BUFFER_OVERFLOW(image, 4 + 4 + 4 + 4, p_end))
+                HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
 
             UINT32DECODE(image, tmp);
             oh->atime = (time_t)tmp;
@@ -1055,6 +1064,9 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 
         /* Attribute fields */
         if (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+            if (H5_IS_BUFFER_OVERFLOW(image, 2 + 2, p_end))
+                HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+
             UINT16DECODE(image, oh->max_compact);
             UINT16DECODE(image, oh->min_dense);
             if (oh->max_compact < oh->min_dense)
@@ -1068,18 +1080,26 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
         /* First chunk size */
         switch (oh->flags & H5O_HDR_CHUNK0_SIZE) {
             case 0: /* 1 byte size */
+                if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+                    HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 udata->chunk0_size = *image++;
                 break;
 
             case 1: /* 2 byte size */
+                if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))
+                    HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 UINT16DECODE(image, udata->chunk0_size);
                 break;
 
             case 2: /* 4 byte size */
+                if (H5_IS_BUFFER_OVERFLOW(image, 4, p_end))
+                    HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 UINT32DECODE(image, udata->chunk0_size);
                 break;
 
             case 3: /* 8 byte size */
+                if (H5_IS_BUFFER_OVERFLOW(image, 8, p_end))
+                    HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 UINT64DECODE(image, udata->chunk0_size);
                 break;
 
@@ -1091,6 +1111,8 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
     }
     else {
         /* Version */
+        if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         oh->version = *image++;
         if (H5O_VERSION_1 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
@@ -1099,12 +1121,18 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
         oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
 
         /* Reserved */
+        if (H5_IS_BUFFER_OVERFLOW(image, 1, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         image++;
 
         /* Number of messages */
+        if (H5_IS_BUFFER_OVERFLOW(image, 2, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         UINT16DECODE(image, udata->v1_pfx_nmesgs);
 
         /* Link count */
+        if (H5_IS_BUFFER_OVERFLOW(image, 4, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         UINT32DECODE(image, oh->nlink);
 
         /* Reset unused time fields */
@@ -1115,17 +1143,22 @@ H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
         oh->min_dense   = 0;
 
         /* First chunk size */
+        if (H5_IS_BUFFER_OVERFLOW(image, 4, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         UINT32DECODE(image, udata->chunk0_size);
         if ((udata->v1_pfx_nmesgs > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
             (udata->v1_pfx_nmesgs == 0 && udata->chunk0_size > 0))
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
 
         /* Reserved, in version 1 (for 8-byte alignment padding) */
+        if (H5_IS_BUFFER_OVERFLOW(image, 4, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         image += 4;
     }
 
     /* Verify object header prefix length */
-    HDassert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    if ((size_t)(image - _image) != (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header prefix length")
 
     /* If udata->oh is to be freed (see H5O__cache_verify_chksum),
      * save the pointer to udata->oh and free it later after setting
@@ -1168,7 +1201,8 @@ static herr_t
 H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image, size_t len,
                        H5O_common_cache_ud_t *udata, hbool_t *dirty)
 {
-    const uint8_t *chunk_image;          /* Pointer into buffer to decode */
+    const uint8_t *chunk_image = NULL;   /* Pointer into buffer to decode */
+    const uint8_t *p_end       = NULL;   /* End of image buffer */
     uint8_t       *eom_ptr;              /* Pointer to end of messages for a chunk */
     unsigned       merged_null_msgs = 0; /* Number of null messages merged together */
     unsigned       chunkno;              /* Current chunk's index */
@@ -1219,15 +1253,23 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
 
     /* Point into chunk image to decode */
     chunk_image = oh->chunk[chunkno].image;
+    p_end       = chunk_image + oh->chunk[chunkno].size - 1;
 
-    /* Handle chunk 0 as special case */
-    if (chunkno == 0)
-        /* Skip over [already decoded] prefix */
-        chunk_image += (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh));
+    /* Skip over [already decoded] prefix in special case of chunk 0 */
+    if (chunkno == 0) {
+        size_t skip = (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh));
+
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, skip, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+        chunk_image += skip;
+    }
+
     /* Check for magic # on chunks > 0 in later versions of the format */
     else if (chunkno > 0 && oh->version > H5O_VERSION_1) {
         /* Magic number */
-        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, H5_SIZEOF_MAGIC, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, H5_SIZEOF_MAGIC) != 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "wrong object header chunk signature")
         chunk_image += H5_SIZEOF_MAGIC;
     }
@@ -1246,17 +1288,27 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         /* Decode message prefix info */
 
         /* Version # */
-        if (oh->version == H5O_VERSION_1)
+        if (oh->version == H5O_VERSION_1) {
+            if (H5_IS_BUFFER_OVERFLOW(chunk_image, 2, p_end))
+                HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             UINT16DECODE(chunk_image, id)
-        else
+        }
+        else {
+            if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))
+                HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
             id = *chunk_image++;
+        }
 
         /* Message size */
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, 2, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         UINT16DECODE(chunk_image, mesg_size);
         if (mesg_size != H5O_ALIGN_OH(oh, mesg_size))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "message not aligned")
 
         /* Message flags */
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         flags = *chunk_image++;
         if (flags & ~H5O_MSG_FLAG_BITS)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unknown flag for message")
@@ -1271,12 +1323,19 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
          * knows about */
 
         /* Reserved bytes/creation index */
-        if (oh->version == H5O_VERSION_1)
-            chunk_image += 3; /*reserved*/
+        if (oh->version == H5O_VERSION_1) {
+            /* Reserved bytes */
+            if (H5_IS_BUFFER_OVERFLOW(chunk_image, 3, p_end))
+                HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+            chunk_image += 3;
+        }
         else {
             /* Only decode creation index if they are being tracked */
-            if (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+            if (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) {
+                if (H5_IS_BUFFER_OVERFLOW(chunk_image, 2, p_end))
+                    HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
                 UINT16DECODE(chunk_image, crt_idx);
+            }
         }
 
         /* Try to detect invalidly formatted object header message that
@@ -1302,7 +1361,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
             oh->mesg[mesgno].raw_size += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
             oh->mesg[mesgno].dirty = TRUE;
             merged_null_msgs++;
-        } /* end if */
+        }
         else {
             H5O_mesg_t *mesg;        /* Pointer to new message */
             unsigned    ioflags = 0; /* Flags for decode routine */
@@ -1477,11 +1536,14 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         /* checksum verification already done in verify_chksum cb */
 
         /* Metadata checksum */
+        if (H5_IS_BUFFER_OVERFLOW(chunk_image, 4, p_end))
+            HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
         UINT32DECODE(chunk_image, stored_chksum);
     }
 
-    /* Sanity check */
-    HDassert(chunk_image == oh->chunk[chunkno].image + oh->chunk[chunkno].size);
+    /* Size check */
+    if (chunk_image != oh->chunk[chunkno].image + oh->chunk[chunkno].size)
+        HGOTO_ERROR(H5E_BTREE, H5E_OVERFLOW, FAIL, "object header image size mismatch");
 
     /* Mark the chunk dirty if we've modified messages */
     if (mesgs_modified)
@@ -1512,8 +1574,8 @@ done:
 static herr_t
 H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
 {
-    H5O_mesg_t *curr_msg;            /* Pointer to current message being operated on */
-    unsigned    u;                   /* Local index variable */
+    H5O_mesg_t *curr_msg; /* Pointer to current message being operated on */
+    unsigned    u;        /* Local index variable */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
