@@ -467,6 +467,9 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5d_flags[26] = (int_f)H5D_VDS_FIRST_MISSING;
     h5d_flags[27] = (int_f)H5D_VDS_LAST_AVAILABLE;
     h5d_flags[28] = (int_f)H5D_VIRTUAL;
+    h5d_flags[29] = (int_f)H5D_SELECTION_IO_MODE_DEFAULT;
+    h5d_flags[30] = (int_f)H5D_SELECTION_IO_MODE_OFF;
+    h5d_flags[31] = (int_f)H5D_SELECTION_IO_MODE_ON;
 
     /*
      *  H5E flags
