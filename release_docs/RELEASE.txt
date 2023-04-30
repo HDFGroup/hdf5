@@ -127,6 +127,18 @@ Bug Fixes since HDF5-1.10.10 release
 
       Fixes Github issue #2602
 
+    - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
+
+      H5Ocopy was missing a check to determine whether the new object's
+      object header version is greater than version 1. Without this check,
+      copying of objects with object headers that are smaller than a
+      certain size would cause H5Ocopy to create an object header for the
+      new object that has a gap in the header data. According to the
+      HDF5 File Format Specification, this is not allowed for version
+      1 of the object header format.
+
+      Fixes GitHub issue #2653
+
     - Fixed potential heap buffer overflow in decoding of link info message
 
       Detections of buffer overflow were added for decoding version, index
@@ -198,7 +210,12 @@ Bug Fixes since HDF5-1.10.10 release
 
     Tools
     -----
-    -
+    - Names of objects with square brackets will have trouble without the
+      special argument, --no-compact-subset, on the h5dump command line.
+
+      h5diff did not have this option and now it has been added.
+
+      Fix for GitHub issue #2682
 
 
     Performance
