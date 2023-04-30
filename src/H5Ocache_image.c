@@ -13,14 +13,12 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Ocache_image.c
- *              June 21, 2015
- *              John Mainzer
  *
  * Purpose:     A message indicating that a metadata cache image block
- *		of the indicated length exists at the specified offset
- *		in the HDF5 file.
+ *              of the indicated length exists at the specified offset
+ *              in the HDF5 file.
  *
- * 		The mdci_msg only appears in the superblock extension.
+ *              The mdci_msg only appears in the superblock extension
  *
  *-------------------------------------------------------------------------
  */
@@ -79,30 +77,28 @@ H5FL_DEFINE(H5O_mdci_t);
  * Function:    H5O__mdci_decode
  *
  * Purpose:     Decode a metadata cache image  message and return a
- * 		pointer to a newly allocated H5O_mdci_t struct.
+ *              pointer to a newly allocated H5O_mdci_t struct.
  *
- * Return:      Success:        Ptr to new message in native struct.
- *              Failure:        NULL
- *
- * Programmer:  John Mainzer
- *              6/22/15
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                 unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_mdci_t *mesg;             /* Native message        */
-    void       *ret_value = NULL; /* Return value          */
+    H5O_mdci_t    *mesg      = NULL;           /* New cache image message */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
     HDassert(f);
     HDassert(p);
 
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_MDCI_VERSION_0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -111,14 +107,21 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                     "memory allocation failed for metadata cache image message")
 
-    /* Decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->addr));
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_size(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_DECODE_LENGTH(f, p, mesg->size);
 
     /* Set return value */
     ret_value = (void *)mesg;
 
 done:
+    if (!ret_value && mesg)
+        H5FL_FREE(H5O_mdci_t, mesg);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__mdci_decode() */
 

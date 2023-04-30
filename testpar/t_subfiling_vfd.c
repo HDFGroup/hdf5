@@ -1858,7 +1858,7 @@ test_subfiling_h5fuse(void)
             args[0] = HDstrdup("env");
             args[1] = HDstrdup("sh");
             args[2] = HDstrdup("h5fuse.sh");
-            args[3] = HDstrdup("-f");
+            args[3] = HDstrdup("-q -f");
             args[4] = tmp_filename;
             args[5] = NULL;
 
