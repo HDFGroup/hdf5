@@ -14,7 +14,9 @@
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if (_isMultiConfig)
-    set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+    set_property (CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRINGS "Debug" "Release"
+      "MinSizeRel" "RelWithDebInfo" "Developer" FORCE)
+    set (HDF_CFG_NAME "RelWithDebInfo")
     set (HDF_BUILD_TYPE ${CMAKE_CFG_INTDIR})
     set (HDF_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
   else ()
@@ -26,13 +28,6 @@ macro (SET_HDF_BUILD_TYPE)
       set (HDF_CFG_NAME "Release")
       set (HDF_BUILD_TYPE "Release")
     endif ()
-  endif ()
-  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message (VERBOSE "Setting build type to 'RelWithDebInfo' as none was specified.")
-    set (CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-      "MinSizeRel" "RelWithDebInfo" "Developer")
   endif ()
 endmacro ()
 
@@ -455,7 +450,7 @@ macro (HDF_DIR_PATHS package_prefix)
     )
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
