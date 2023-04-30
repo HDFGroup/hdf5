@@ -854,14 +854,6 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
     }
 
-    /* Free selection I/O arrays */
-    H5MM_xfree(io_info.mem_spaces);
-    H5MM_xfree(io_info.file_spaces);
-    H5MM_xfree(io_info.addrs);
-    H5MM_xfree(io_info.element_sizes);
-    H5MM_xfree(io_info.wbufs);
-    H5MM_xfree(io_info.sel_pieces);
-
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
@@ -880,6 +872,16 @@ done:
         if (orig_mem_space != &orig_mem_space_local)
             H5MM_free(orig_mem_space);
     }
+
+    /* Free global piece array */
+    H5MM_xfree(io_info.sel_pieces);
+
+    /* Free selection I/O arrays */
+    H5MM_xfree(io_info.mem_spaces);
+    H5MM_xfree(io_info.file_spaces);
+    H5MM_xfree(io_info.addrs);
+    H5MM_xfree(io_info.element_sizes);
+    H5MM_xfree(io_info.wbufs);
 
     /* Free store array if it was allocated */
     if (store != &store_local)
