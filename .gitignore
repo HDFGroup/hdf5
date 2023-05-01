@@ -41,3 +41,4 @@ src/H5overflow.h
 src/H5version.h
 
 /.classpath
+/CMakeUserPresets.json
