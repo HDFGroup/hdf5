@@ -2533,9 +2533,9 @@ cleanup_files(void)
     remove_test_file(test_path_prefix, FILE_INTENT_TEST_FILENAME);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME1);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME2);
-#ifndef NO_FILE_MOUNTS
+//#ifndef NO_FILE_MOUNTS
     remove_test_file(test_path_prefix, FILE_MOUNT_TEST_FILENAME);
-#endif
+//#endif
     remove_test_file(test_path_prefix, GET_FILE_NAME_TEST_FNAME);
 }
 
