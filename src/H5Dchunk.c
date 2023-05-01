@@ -1117,8 +1117,9 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         if (H5D__chunk_may_use_select_io(io_info, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
 
-    /* Calculate type conversion buffer size if necessary */
-    if (!(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
+    /* Calculate type conversion buffer size if necessary.  Currently only implemented for selection I/O. */
+    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF &&
+        !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop)) {
         H5SL_node_t *chunk_node; /* Current node in chunk skip list */
 
         /* Iterate through nodes in chunk skip list */

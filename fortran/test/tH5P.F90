@@ -34,8 +34,8 @@ SUBROUTINE external_test(cleanup, total_error)
 
 !   This subroutine tests following functionalities:
 !   h5pset_external_f,  h5pget_external_count_f,
-!   h5pget_external_f
-
+!   h5pget_external_f, h5pget_selection_io_f
+!   h5pSet_selection_io_f
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -62,6 +62,7 @@ SUBROUTINE external_test(cleanup, total_error)
   INTEGER(SIZE_T) :: namesize
   INTEGER(HSIZE_T) :: size, buf_size
   INTEGER :: idx
+  INTEGER :: selection_io_mode
 
   buf_size = 4*1024*1024
 
@@ -77,6 +78,44 @@ SUBROUTINE external_test(cleanup, total_error)
 
   CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   CALL check("h5pcreate_f", error, total_error)
+
+  ! Check default Selection IO state
+  CALL h5pget_selection_io_f(plist_id, selection_io_mode, error)
+  CALL check("h5pget_selection_io_f", error, total_error)
+  CALL VERIFY("h5pget_selection_io_f", selection_io_mode, H5D_SELECTION_IO_MODE_DEFAULT_F, total_error)
+
+  ! Turn off Section IO
+  CALL h5pset_selection_io_f(plist_id, H5D_SELECTION_IO_MODE_OFF_F, error)
+  CALL check("h5pset_selection_io_f", error, total_error)
+
+  CALL h5pget_selection_io_f(plist_id, selection_io_mode, error)
+  CALL check("h5pget_selection_io_f", error, total_error)
+  CALL VERIFY("h5pget_selection_io_f", selection_io_mode, H5D_SELECTION_IO_MODE_OFF_F, total_error)
+
+  ! Turn on Section IO
+  CALL h5pset_selection_io_f(plist_id, H5D_SELECTION_IO_MODE_ON_F, error)
+  CALL check("h5pset_selection_io_f", error, total_error)
+
+  CALL h5pget_selection_io_f(plist_id, selection_io_mode, error)
+  CALL check("h5pget_selection_io_f", error, total_error)
+  CALL VERIFY("h5pget_selection_io_f", selection_io_mode, H5D_SELECTION_IO_MODE_ON_F, total_error)
+
+  ! Turn off Section IO
+  CALL h5pset_selection_io_f(plist_id, H5D_SELECTION_IO_MODE_OFF_F, error)
+  CALL check("h5pset_selection_io_f", error, total_error)
+
+  CALL h5pget_selection_io_f(plist_id, selection_io_mode, error)
+  CALL check("h5pget_selection_io_f", error, total_error)
+  CALL VERIFY("h5pget_selection_io_f", selection_io_mode, H5D_SELECTION_IO_MODE_OFF_F, total_error)
+
+  ! Change back to the default
+  CALL h5pset_selection_io_f(plist_id, H5D_SELECTION_IO_MODE_DEFAULT_F, error)
+  CALL check("h5pset_selection_io_f", error, total_error)
+
+  CALL h5pget_selection_io_f(plist_id, selection_io_mode, error)
+  CALL check("h5pget_selection_io_f", error, total_error)
+  CALL VERIFY("h5pget_selection_io_f", selection_io_mode, H5D_SELECTION_IO_MODE_DEFAULT_F, total_error)
+
   CALL h5pset_buffer_f(plist_id, buf_size, error)
   CALL check("h5pset_buffer_f", error, total_error)
   CALL h5pget_buffer_f(plist_id, size, error)
@@ -795,5 +834,126 @@ SUBROUTINE test_misc_properties(cleanup, total_error)
   CALL check("H5Pclose_f", error, total_error)
 
 END SUBROUTINE test_misc_properties
+
+!-------------------------------------------------------------------------
+! Function: test_in_place_conversion
+!
+! Purpose:  single dataset reader/write, smaller mem type, no background buffer
+!           -- create dataset with H5T_NATIVE_DOUBLE
+!           -- write dataset with H5T_NATIVE_REAL
+!           -- read dataset with H5T_NATIVE_REAL
+!
+!           Tests APIs:
+!           h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
+!
+! Return:   Success:    0
+!           Failure:    >0
+!
+!-------------------------------------------------------------------------
+!
+SUBROUTINE test_in_place_conversion(cleanup, total_error)
+
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+
+  CHARACTER(LEN=12), PARAMETER :: filename = "inplace_conv"
+  CHARACTER(LEN=80) :: fix_filename
+  CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"
+
+  INTEGER(HID_T) :: file_id       ! File identifier
+  INTEGER(HID_T) :: dset_id       ! Dataset identifier
+  INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
+  INTEGER(HID_T) :: plist_id
+  LOGICAL :: modify_write_buf
+  INTEGER :: error !error code
+
+  INTEGER, PARAMETER :: array_len = 10
+  INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/array_len/) ! Dataset dimensions
+  INTEGER     ::   rank = 1                              ! Dataset rank
+
+  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len), TARGET :: wbuf_d
+  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
+  REAL(KIND=Fortran_REAL)  , DIMENSION(1:array_len), TARGET  :: rbuf
+  INTEGER :: i
+  TYPE(C_PTR) :: f_ptr
+
+  ! create the data
+  DO i = 1, array_len
+     wbuf_d(i) = 1_Fortran_DOUBLE + 0.123456789123456_Fortran_DOUBLE
+     wbuf_d_org(i) = wbuf_d(i)
+  ENDDO
+
+  !
+  !Create file "inplace_conv.h5" using default properties.
+  !
+  CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+  IF (error .NE. 0) STOP "Cannot modify filename"
+
+  CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+  CALL check("h5fcreate_f",error,total_error)
+  !
+  ! Create the dataspace.
+  !
+  CALL h5screate_simple_f(rank, dims, dspace_id, error)
+  CALL check("h5screate_simple_f", error, total_error)
+
+  ! Create dataset transfer property list
+  CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
+  CALL check("h5pcreate_f", error, total_error)
+
+  CALL h5pset_selection_io_f(plist_id, H5D_SELECTION_IO_MODE_ON_F, error)
+  CALL check("h5pset_selection_io_f", error, total_error)
+
+  CALL h5pget_modify_write_buf_f(plist_id, modify_write_buf, error)
+  CALL check("h5pget_modify_write_buf_f", error, total_error)
+  CALL VERIFY("h5pget_modify_write_buf_f", modify_write_buf, .FALSE., total_error)
+
+  ! Set to modify the write buffer
+  CALL h5pset_modify_write_buf_f(plist_id, .TRUE., error)
+  CALL check("h5pset_modify_write_buf_f", error, total_error)
+
+  CALL h5pget_modify_write_buf_f(plist_id, modify_write_buf, error)
+  CALL check("h5pget_modify_write_buf_f", error, total_error)
+  CALL VERIFY("h5pget_modify_write_buf_f", modify_write_buf, .TRUE., total_error)
+
+  CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_REAL, dspace_id, dset_id, error)
+  CALL check("h5dcreate_f", error, total_error)
+
+  f_ptr = C_LOC(wbuf_d)
+  CALL h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, f_ptr, error, H5S_ALL_F, H5S_ALL_F, xfer_prp=plist_id)
+  CALL check("h5dwrite_f", error, total_error)
+
+  ! Should not be equal for in-place buffer use
+  CALL VERIFY("h5dwrite_f -- in-place", wbuf_d(1), wbuf_d_org(1), total_error, .FALSE.)
+
+  f_ptr = C_LOC(rbuf)
+  CALL h5dread_f(dset_id, H5T_NATIVE_REAL, f_ptr, error)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, array_len
+     CALL VERIFY("h5dwrite_f -- in-place", rbuf(i), REAL(wbuf_d_org(i), Fortran_REAL), total_error)
+  ENDDO
+
+  !
+  ! End access to the dataset and release resources used by it.
+  !
+  CALL h5dclose_f(dset_id, error)
+  CALL check("h5dclose_f", error, total_error)
+  !
+  ! Terminate access to the data space.
+  !
+  CALL h5sclose_f(dspace_id, error)
+  CALL check("h5sclose_f", error, total_error)
+
+  !
+  ! Close the file.
+  !
+  CALL h5fclose_f(file_id, error)
+  CALL check("h5fclose_f", error, total_error)
+  CALL h5pclose_f(plist_id, error)
+  CALL check("h5pclose_f", error, total_error)
+
+END SUBROUTINE test_in_place_conversion
 
 END MODULE TH5P

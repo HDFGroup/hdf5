@@ -70,32 +70,6 @@ typedef enum {
 #define DSET_SELECT_DIM       100
 #define DSET_SELECT_CHUNK_DIM 10
 
-#define DSET_CONTIG_NO_CONV_NTRANS "contig_no_conv_ntrans"
-#define DSET_CONTIG_NO_CONV_TRANS  "contig_no_conv_trans"
-#define DSET_CHK_NO_CONV_NTRANS    "chunked_no_conv_ntrans"
-#define DSET_CHK_NO_CONV_TRANS     "chunked_no_conv_trans"
-
-#define DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG  "contig_no_size_change_no_bkg"
-#define DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG "chunked_no_size_change_no_bkg"
-
-#define DSET_CONTIG_LARGER_NO_BKG_NTRANS "contig_larger_mem_no_bkg_ntrans"
-#define DSET_CONTIG_LARGER_NO_BKG_TRANS  "contig_larger_mem_no_bkg_trans"
-#define DSET_CHK_LARGER_NO_BKG_NTRANS    "chunked_larger_mem_no_bkg_ntrans"
-#define DSET_CHK_LARGER_NO_BKG_TRANS     "chunked_larger_mem_no_bkg_trans"
-
-#define DSET_CONTIG_SMALLER_NO_BKG_NTRANS "contig_smaller_mem_no_bkg_ntrans"
-#define DSET_CONTIG_SMALLER_NO_BKG_TRANS  "contig_smaller_mem_no_bkg_trans"
-#define DSET_CHK_SMALLER_NO_BKG_NTRANS    "chk_smaller_mem_no_bkg_ntrans"
-#define DSET_CHK_SMALLER_NO_BKG_TRANS     "chk_smaller_mem_no_bkg_trans"
-
-#define DSET_CONTIG_CMPD_WITH_BKG  "contig_cmpd_with_bkg"
-#define DSET_CHUNKED_CMPD_WITH_BKG "chunked_cmpd_with_bkg"
-
-#define DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS "contig_tconv_sel_ntrans"
-#define DSET_CONTIG_TCONV_SEL_EMPTY_TRANS  "contig_tconv_sel_trans"
-#define DSET_CHK_TCONV_SEL_EMPTY_NTRANS    "chunked_tconv_sel_ntrans"
-#define DSET_CHK_TCONV_SEL_EMPTY_TRANS     "chunked_tconv_sel_trans"
-
 #define MULTI_NUM_DSETS 3
 #define MULTI_MIN_DSETS 3
 #define DSET_NAME_LEN   64
@@ -150,6 +124,9 @@ typedef enum {
 /* Definitions of the test modes for test_get_no_selection_io_cause() */
 #define TEST_DISABLE_BY_API                    0x001
 #define TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET 0x002
+#define TEST_DATATYPE_CONVERSION               0x004
+#define TEST_TCONV_BUF_TOO_SMALL               0x008
+#define TEST_IN_PLACE_TCONV                    0x010
 
 /*
  * Helper routine to set dxpl
@@ -3369,22 +3346,37 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
 
         /* Freeing */
         HDfree(total_wbuf1);
+        total_wbuf1 = NULL;
         HDfree(total_wbuf1_bak);
+        total_wbuf1_bak = NULL;
         HDfree(total_rbuf1);
+        total_rbuf1 = NULL;
 
         HDfree(ul_total_wbuf2);
+        ul_total_wbuf2 = NULL;
         HDfree(ul_total_wbuf2_bak);
+        ul_total_wbuf2_bak = NULL;
         HDfree(l_total_rbuf2);
+        l_total_rbuf2 = NULL;
         HDfree(l_total_wbuf2);
+        l_total_wbuf2 = NULL;
         HDfree(l_total_wbuf2_bak);
+        l_total_wbuf2_bak = NULL;
         HDfree(s_total_rbuf2);
+        s_total_rbuf2 = NULL;
 
         HDfree(s1_total_wbuf3);
+        s1_total_wbuf3 = NULL;
         HDfree(s1_total_wbuf3_bak);
+        s1_total_wbuf3_bak = NULL;
         HDfree(s3_total_rbuf3);
+        s3_total_rbuf3 = NULL;
         HDfree(s4_total_wbuf3);
+        s4_total_wbuf3 = NULL;
         HDfree(s4_total_wbuf3_bak);
+        s4_total_wbuf3_bak = NULL;
         HDfree(s1_total_rbuf3);
+        s1_total_rbuf3 = NULL;
 
     } /* end for n niter */
 
@@ -3402,50 +3394,70 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
  *        as needed.
  */
 static void
-test_no_selection_io_cause_mode(uint32_t test_mode)
+test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_mode)
 {
     hid_t    dcpl = H5I_INVALID_HID;
     hid_t    dxpl = H5I_INVALID_HID;
     hid_t    fid  = H5I_INVALID_HID;
-    hid_t    fapl = H5I_INVALID_HID;
     hid_t    did  = H5I_INVALID_HID;
     hid_t    sid  = H5I_INVALID_HID;
     hsize_t  dims[1];
     hsize_t  cdims[1];
-    hbool_t  is_chunked                     = FALSE;
-    hid_t    tid                            = H5T_NATIVE_INT;
-    uint32_t no_selection_io_cause_write    = 0;
-    uint32_t no_selection_io_cause_read     = 0;
-    uint32_t no_selection_io_cause_expected = 0;
+    hbool_t  is_chunked                           = FALSE;
+    hid_t    tid                                  = H5T_NATIVE_INT;
+    uint32_t no_selection_io_cause_write          = 0;
+    uint32_t no_selection_io_cause_read           = 0;
+    uint32_t no_selection_io_cause_write_expected = 0;
+    uint32_t no_selection_io_cause_read_expected  = 0;
     int      wbuf[DSET_SELECT_DIM];
     int      rbuf[DSET_SELECT_DIM];
     int      i;
-
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        P_TEST_ERROR;
-
-    /* Set MPIO file driver */
-    if (H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-        P_TEST_ERROR;
 
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         P_TEST_ERROR;
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
-    if ((fid = H5Fcreate("no_selection_io_cause.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
 
     if (test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET) {
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
     if (test_mode == TEST_DISABLE_BY_API) {
         if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_OFF) < 0)
             P_TEST_ERROR;
-        no_selection_io_cause_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_write_expected |= H5D_SEL_IO_DISABLE_BY_API;
+        no_selection_io_cause_read_expected |= H5D_SEL_IO_DISABLE_BY_API;
+    }
+
+    /* Datatype conversion */
+    if (test_mode & TEST_DATATYPE_CONVERSION) {
+        if (H5Pset_selection_io(dxpl, H5D_SELECTION_IO_MODE_ON) < 0)
+            P_TEST_ERROR;
+        tid = H5T_NATIVE_UINT;
+
+        /* If we're testing a too small tconv buffer, set the buffer to be too small */
+        if (test_mode & TEST_TCONV_BUF_TOO_SMALL) {
+            if (H5Pset_buffer(dxpl, sizeof(int), NULL, NULL) < 0)
+                P_TEST_ERROR;
+
+            /* If we're using in-place type conversion sel io will succeed */
+            if (test_mode & TEST_IN_PLACE_TCONV) {
+                if (H5Pset_modify_write_buf(dxpl, TRUE) < 0)
+                    P_TEST_ERROR;
+            }
+            else
+                no_selection_io_cause_write_expected |= H5D_SEL_IO_TCONV_BUF_TOO_SMALL;
+
+            /* In-place type conversion for read doesn't require modify_write_buf */
+        }
+
+        /* If the tconv buf is largge enough sel io will succeed */
     }
 
     /* Create 1d data space */
@@ -3473,19 +3485,18 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write is as expected */
-    if (no_selection_io_cause_write != no_selection_io_cause_expected)
+    /* Verify causes of no selection I/O for write are as expected */
+    if (no_selection_io_cause_write != no_selection_io_cause_write_expected)
         P_TEST_ERROR;
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for read is as expected */
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_read) < 0)
         P_TEST_ERROR;
 
-    /* Verify causes of no selection I/O for write and read are the same */
-    if (no_selection_io_cause_write != no_selection_io_cause_read)
+    /* Verify causes of no selection I/O for read are as expected */
+    if (no_selection_io_cause_read != no_selection_io_cause_read_expected)
         P_TEST_ERROR;
 
     if (H5Dclose(did) < 0)
@@ -3503,9 +3514,6 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
 
-    if (H5Pclose(fapl) < 0)
-        P_TEST_ERROR;
-
     return;
 
 } /* test_no_selection_io_cause_mode() */
@@ -3514,10 +3522,14 @@ test_no_selection_io_cause_mode(uint32_t test_mode)
  * Test for causes of not performing selection I/O
  */
 static void
-test_get_no_selection_io_cause(void)
+test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 {
-    test_no_selection_io_cause_mode(TEST_DISABLE_BY_API);
-    test_no_selection_io_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION);
+    test_no_selection_io_cause_mode(filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL);
+    test_no_selection_io_cause_mode(
+        filename, fapl, TEST_DATATYPE_CONVERSION | TEST_TCONV_BUF_TOO_SMALL | TEST_IN_PLACE_TCONV);
 
     CHECK_PASSED();
 
@@ -3728,9 +3740,6 @@ main(int argc, char *argv[])
         } /* end dtrans */
     }     /* end chunked */
 
-    if (H5Pclose(fapl) < 0)
-        P_TEST_ERROR;
-
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
 
@@ -3738,7 +3747,7 @@ main(int argc, char *argv[])
         printf("\n");
         TESTING("Testing for H5Pget_no_selection_io_cause()");
     }
-    test_get_no_selection_io_cause();
+    test_get_no_selection_io_cause(FILENAME, fapl);
 
     /* Barrier to make sure all ranks are done before deleting the file, and
      * also to clean up output (make sure PASSED is printed before any of the
@@ -3747,9 +3756,11 @@ main(int argc, char *argv[])
         P_TEST_ERROR;
 
     /* Delete file */
-    if (MAINPROCESS)
-        if (MPI_File_delete(FILENAME, MPI_INFO_NULL) != MPI_SUCCESS)
-            P_TEST_ERROR;
+    if (H5Fdelete(FILENAME, fapl) < 0)
+        P_TEST_ERROR;
+
+    if (H5Pclose(fapl) < 0)
+        P_TEST_ERROR;
 
     /* Gather errors from all processes */
     MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);

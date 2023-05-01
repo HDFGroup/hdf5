@@ -85,7 +85,7 @@
                                         : (DINFO)->type_info.dst_type_size;                                  \
                                                                                                              \
             /* Make sure the memory type is not smaller than the file type, otherwise the memory buffer      \
-             * won't be big enough tp serve as the type conversion buffer */                                 \
+             * won't be big enough to serve as the type conversion buffer */                                 \
             if (mem_type_size >= file_type_size) {                                                           \
                 hbool_t is_contig;                                                                           \
                 hsize_t sel_off;                                                                             \
