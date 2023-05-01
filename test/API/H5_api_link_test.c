@@ -2034,13 +2034,13 @@ error:
 static int
 test_create_external_link(void)
 {
-//#ifndef NO_EXTERNAL_LINKS
+#ifndef NO_EXTERNAL_LINKS
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  root_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-//#endif
+#endif
 
     TESTING("external link creation to existing object");
 
