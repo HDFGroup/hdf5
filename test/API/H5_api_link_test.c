@@ -2149,17 +2149,17 @@ error:
 static int
 test_create_external_link_dangling(void)
 {
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  object_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-#endif
+//#endif
 
     TESTING("dangling external link creation");
 
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2275,10 +2275,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
@@ -2288,7 +2288,7 @@ error:
 static int
 test_create_external_link_multi(void)
 {
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t group_id2 = H5I_INVALID_HID, group_id3 = H5I_INVALID_HID;
@@ -2297,11 +2297,11 @@ test_create_external_link_multi(void)
     char  ext_link_filename2[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  ext_link_filename3[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  objname[EXTERNAL_LINK_TEST_MULTI_NAME_BUF_SIZE];
-#endif
+//#endif
 
     TESTING_MULTIPART("external link creation to an object across several files");
 
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2644,10 +2644,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
@@ -2664,18 +2664,18 @@ error:
 static int
 test_create_external_link_ping_pong(void)
 {
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     hid_t file_id   = H5I_INVALID_HID;
     hid_t group_id  = H5I_INVALID_HID;
     hid_t group_id2 = H5I_INVALID_HID;
     char  ext_link_filename1[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  ext_link_filename2[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  objname[EXTERNAL_LINK_TEST_MULTI_NAME_BUF_SIZE];
-#endif
+//#endif
 
     TESTING_MULTIPART("external link creation to an object in ping pong style");
 
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2913,10 +2913,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
