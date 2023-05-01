@@ -2860,6 +2860,16 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     int      rbuf[DSET_SELECT_DIM];
     int      i;
 
+    /* Check for (currently) incompatible combindations */
+    if (test_mode & TEST_PAGE_BUFFER) {
+        char *env_h5_drvr = NULL;
+
+        /* The split and multi driver are not compatible with page buffering.  No message since the other cases aren't skipped. */
+        env_h5_drvr = HDgetenv(HDF5_DRIVER);
+        if (env_h5_drvr && (!HDstrcmp(env_h5_drvr, "split") || !HDstrcmp(env_h5_drvr, "multi")))
+            return 0;
+    }
+
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
