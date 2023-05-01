@@ -77,10 +77,10 @@ static herr_t link_iter_hard_links_cb(hid_t group_id, const char *name, const H5
                                       void *op_data);
 static herr_t link_iter_soft_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                       void *op_data);
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
-#endif
+//#endif
 #ifndef NO_USER_DEFINED_LINKS
 static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
 #endif
@@ -25877,7 +25877,7 @@ done:
  * through all of the links in the test group and checks to make sure
  * their names and link classes match what is expected.
  */
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -25886,6 +25886,10 @@ link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t 
     size_t  test_iteration;
     char    expected_link_name[LINK_ITER_EXT_LINKS_TEST_BUF_SIZE];
     herr_t  ret_val = H5_ITER_CONT;
+    
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
     UNUSED(op_data);
@@ -25932,7 +25936,7 @@ done:
 
     return ret_val;
 }
-#endif
+//#endif
 #ifndef NO_USER_DEFINED_LINKS
 static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
 #endif
