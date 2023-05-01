@@ -337,6 +337,7 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
+    select_io_dset
     chunk_info # compression lib link
     cmpd_dset
     mdset

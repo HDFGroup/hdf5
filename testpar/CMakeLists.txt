@@ -8,6 +8,7 @@ project (HDF5_TEST_PAR C)
 set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/testphdf5.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_dset.c
+    ${HDF5_TEST_PAR_SOURCE_DIR}/t_select_io_dset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file_image.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_mdset.c
@@ -96,6 +97,7 @@ set (H5P_TESTS
     t_prestart
     t_init_term
     t_pmulti_dset
+    t_select_io_dset
     t_shapesame
     t_filters_parallel
     t_subfiling_vfd
