@@ -70,9 +70,11 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
+  option (DISABLE_PDB_FILES "Do not install PDB files" OFF)
+  mark_as_advanced (DISABLE_PDB_FILES)
   if (WIN32 AND MSVC AND NOT DISABLE_PDB_FILES)
     get_target_property (target_type ${libtarget} TYPE)
-    if (${libtype} MATCHES "SHARED")
+    if (${target_type} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
     else ()
       get_property (target_name TARGET ${libtarget} PROPERTY $<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
