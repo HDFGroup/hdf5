@@ -25888,7 +25888,10 @@ link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t 
     herr_t  ret_val = H5_ITER_CONT;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -25954,7 +25957,10 @@ link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *in
     herr_t  ret_val     = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external and user-defined links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -26042,7 +26048,10 @@ link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *inf
     int *broken = (int *)op_data;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external and user-defined links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -26326,7 +26335,10 @@ link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H
     herr_t  ret_val = H5_ITER_CONT;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external and user-defined links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -26443,7 +26455,10 @@ link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_
     herr_t  ret_val     = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external and user-defined links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -26814,7 +26829,10 @@ link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_
     herr_t  ret_val = H5_ITER_CONT;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
@@ -26931,7 +26949,10 @@ link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_inf
     herr_t  ret_val     = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
-        goto done;
+        SKIPPED();
+        HDprintf("    API functions for external and user-defined links aren't supported with this "
+                 "connector\n");
+        return 0;
     }
 
     UNUSED(group_id);
