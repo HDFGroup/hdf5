@@ -2075,12 +2075,12 @@ error:
 static int
 test_file_mounts(void)
 {
-//#ifndef NO_FILE_MOUNTS
+    //#ifndef NO_FILE_MOUNTS
     hid_t file_id           = H5I_INVALID_HID;
     hid_t child_fid         = H5I_INVALID_HID;
     hid_t group_id          = H5I_INVALID_HID;
     char *prefixed_filename = NULL;
-//#endif
+    //#endif
 
     TESTING("file mounting/unmounting");
 
@@ -2093,7 +2093,7 @@ test_file_mounts(void)
         return 0;
     }
 
-//#ifndef NO_FILE_MOUNTS
+    //#ifndef NO_FILE_MOUNTS
     if (prefix_filename(test_path_prefix, FILE_MOUNT_TEST_FILENAME, &prefixed_filename) < 0) {
         H5_FAILED();
         HDprintf("    couldn't prefix filename\n");
@@ -2158,10 +2158,10 @@ error:
     HDfree(prefixed_filename);
 
     return 1;
-//#else
-    //SKIPPED();
-    //return 0;
-//#endif
+    //#else
+    // SKIPPED();
+    // return 0;
+    //#endif
 }
 
 /*
@@ -2533,9 +2533,9 @@ cleanup_files(void)
     remove_test_file(test_path_prefix, FILE_INTENT_TEST_FILENAME);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME1);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME2);
-//#ifndef NO_FILE_MOUNTS
+    //#ifndef NO_FILE_MOUNTS
     remove_test_file(test_path_prefix, FILE_MOUNT_TEST_FILENAME);
-//#endif
+    //#endif
     remove_test_file(test_path_prefix, GET_FILE_NAME_TEST_FNAME);
 }
 
