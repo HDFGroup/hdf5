@@ -193,7 +193,7 @@ PROGRAM fortranlibtest
 
   ret_total_error = 0
   CALL external_test(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' External dataset test', total_error)
+  CALL write_test_status(ret_total_error, ' External dataset and Selection IO test', total_error)
 
   ret_total_error = 0
   CALL multi_file_test(cleanup, ret_total_error)
@@ -206,6 +206,10 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL test_misc_properties(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Miscellaneous properties', total_error)
+
+  ret_total_error = 0
+  CALL test_in_place_conversion(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Test in-place conversion', total_error)
 
 !
 !      '========================================='
