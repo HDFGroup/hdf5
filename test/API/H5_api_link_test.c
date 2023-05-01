@@ -25886,7 +25886,7 @@ link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t 
     size_t  test_iteration;
     char    expected_link_name[LINK_ITER_EXT_LINKS_TEST_BUF_SIZE];
     herr_t  ret_val = H5_ITER_CONT;
-    
+
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
         goto done;
     }
