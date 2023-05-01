@@ -383,4 +383,5 @@ ALIASES += fortran_obsolete="Obsolete API, use the Fortran 2003 version instead.
 ALIASES += fortran_file="Pointer to filename the async subroutine is being called from, filename must be null character terminated"
 ALIASES += fortran_func="Pointer to function name the async subroutine is being called in, func must be null character terminated"
 ALIASES += fortran_line="Line number the async subroutine is being called at"
+ALIASES += fortran_plist_id="Property list identifier"
 
