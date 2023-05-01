@@ -14,24 +14,21 @@
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if (_isMultiConfig)
-    set_property (CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRINGS "Debug" "Release"
-      "MinSizeRel" "RelWithDebInfo" "Developer" FORCE)
-    if (CMAKE_BUILD_TYPE)
-      set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
-      set (HDF_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-    else ()
-      set (HDF_CFG_NAME "RelWithDebInfo")
-      set (HDF_BUILD_TYPE ${CMAKE_CFG_INTDIR})
-    endif ()
+    # HDF_CFG_BUILD_TYPE is used in the Fortran install commands for the build location of the .mod files
     set (HDF_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
+    if (CMAKE_BUILD_TYPE)
+      # set the default to the specified command line define
+      set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+    else ()
+      # set the default to the MultiConfig variable
+      set (HDF_CFG_NAME ${CMAKE_CFG_INTDIR})
+    endif ()
   else ()
     set (HDF_CFG_BUILD_TYPE ".")
     if (CMAKE_BUILD_TYPE)
       set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
-      set (HDF_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     else ()
       set (HDF_CFG_NAME "Release")
-      set (HDF_BUILD_TYPE "Release")
     endif ()
   endif ()
 endmacro ()
@@ -173,8 +170,8 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
         )
       else ()
         set_target_properties (${libtarget} PROPERTIES
-            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
-            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
       endif ()
     else ()
@@ -199,7 +196,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   else ()
     if (WIN32 AND NOT MINGW)
       set_target_properties (${libtarget} PROPERTIES
-          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           IMPORTED_LINK_INTERFACE_LANGUAGES "C"
       )
     else ()
