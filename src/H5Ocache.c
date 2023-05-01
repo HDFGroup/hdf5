@@ -288,9 +288,7 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
         /* Deserialize the object header prefix */
         if (H5O__prefix_deserialize((const uint8_t *)image, len, udata) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix")
-
-        if (NULL == udata->oh)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "no partially deserialized data")
+        HDassert(udata->oh);
     }
 
     /* Retrieve partially deserialized object header from user data */
@@ -1020,10 +1018,11 @@ H5O__prefix_deserialize(const uint8_t *_image, size_t len, H5O_cache_ud_t *udata
 
     /* Check for presence of magic number */
     /* (indicates version 2 or later) */
+    if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
     if (!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
-        /* Magic number */
-        if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
-            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
+
+        /* Magic number (bounds checked above) */
         image += H5_SIZEOF_MAGIC;
 
         /* Version */
