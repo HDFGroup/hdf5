@@ -141,7 +141,7 @@ function initNavTree(toroot,relpath)
   $(window).on("load", showRoot);
 }
 
-// return false if the the node has no children at all, or has only section/subsection children
+// return false if the node has no children at all, or has only section/subsection children
 function checkChildrenData(node) {
   if (!(typeof(node.childrenData)==='string')) {
     for (var i in node.childrenData) {
