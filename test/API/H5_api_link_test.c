@@ -81,53 +81,53 @@ static herr_t link_iter_soft_links_cb(hid_t group_id, const char *name, const H5
 static herr_t link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
 //#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
-#endif
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#endif
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data);
-#endif
+//#endif
 static herr_t link_iter_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
 static herr_t link_iter_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                       void *op_data);
-#endif
+//#endif
 
 static herr_t link_visit_hard_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                  void *op_data);
 static herr_t link_visit_soft_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                  void *op_data);
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name,
                                                      const H5L_info2_t *info, void *op_data);
-#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#endif
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
-#endif
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#endif
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
-#endif
+//#endif
 static herr_t link_visit_hard_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                               void *op_data);
 static herr_t link_visit_soft_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                               void *op_data);
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
-#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#endif
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                             void *op_data);
-#endif
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#endif
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
-#endif
+//#endif
 static herr_t link_visit_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                            void *op_data);
 static herr_t link_visit_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
@@ -25937,9 +25937,9 @@ done:
     return ret_val;
 }
 //#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
-#endif
+//#endif
 /*
  * Link iteration callback for the mixed link types test which iterates
  * through all of the links in the test group and checks to make sure
@@ -26035,11 +26035,15 @@ link_iter_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, 
  * Link iteration callback to test that the index-saving behavior of H5Literate2
  * works correctly.
  */
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
     int *broken = (int *)op_data;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
 
@@ -26084,7 +26088,7 @@ link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *inf
 error:
     return -1;
 }
-#endif
+//#endif
 
 /*
  * Link visiting callback for the hard links + no cycles test which
@@ -26307,7 +26311,7 @@ done:
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data)
@@ -26320,6 +26324,10 @@ link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H
     size_t  link_idx_val;
     char    expected_link_name[LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_BUF_SIZE];
     herr_t  ret_val = H5_ITER_CONT;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
     UNUSED(op_data);
@@ -26416,23 +26424,27 @@ done:
 
     return ret_val;
 }
-#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#endif
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
-#endif
+//#endif
 /*
  * Link visiting callback for the mixed link types + no cycles test which
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     herr_t  ret_val     = 0;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
     UNUSED(op_data);
@@ -26565,7 +26577,7 @@ done:
 
     return ret_val;
 }
-#endif
+//#endif
 
 /*
  * Link visiting callback for the hard links + cycles test which
@@ -26788,7 +26800,7 @@ done:
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -26800,6 +26812,10 @@ link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_
     size_t  link_idx_val;
     char    expected_link_name[LINK_VISIT_EXT_LINKS_CYCLE_TEST_BUF_SIZE];
     herr_t  ret_val = H5_ITER_CONT;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
     UNUSED(op_data);
@@ -26896,23 +26912,27 @@ done:
 
     return ret_val;
 }
-#endif
-#ifndef NO_USER_DEFINED_LINKS
+//#endif
+//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                             void *op_data);
-#endif
+//#endif
 /*
  * Link visiting callback for the mixed link types + cycles test which
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     herr_t  ret_val     = 0;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
     UNUSED(op_data);
@@ -27013,7 +27033,7 @@ done:
 
     return ret_val;
 }
-#endif
+//#endif
 
 /*
  * Link visiting callback for the H5Lvisit(_by_name)2 invalid
