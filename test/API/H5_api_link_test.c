@@ -25945,13 +25945,17 @@ static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_
  * through all of the links in the test group and checks to make sure
  * their names and link classes match what is expected.
  */
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
     size_t *i           = (size_t *)op_data;
     size_t  counter_val = *((size_t *)op_data);
     herr_t  ret_val     = 0;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        goto done;
+    }
 
     UNUSED(group_id);
 
@@ -25995,7 +25999,7 @@ done:
 
     return ret_val;
 }
-#endif
+//#endif
 
 /*
  * Link iteration callback for the H5Literate(_by_name)2 invalid
