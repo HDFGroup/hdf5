@@ -4494,20 +4494,20 @@ test_misc23(void)
     /**********************************************************************
      * test H5Lcreate_ud()
      **********************************************************************/
-//#ifndef NO_USER_DEFINED_LINKS
+    //#ifndef NO_USER_DEFINED_LINKS
     uint64_t vol_cap_flags_l = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(file_id, &vol_cap_flags_l) < 0) {
-        //throw an error
+        // throw an error
     }
     if (vol_cap_flags_l & H5VL_CAP_FLAG_UD_LINKS) {
-        status =
-            H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t)9, create_id, access_id);
+        status = H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t)9, create_id,
+                              access_id);
         CHECK(status, FAIL, "H5Lcreate_ud");
 
         tri_status = H5Lexists(file_id, "/A/B21/grp", access_id);
         VERIFY(tri_status, TRUE, "H5Lexists");
     }
-//#endif
+    //#endif
     /**********************************************************************
      * close
      **********************************************************************/
