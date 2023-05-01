@@ -2034,13 +2034,15 @@ error:
 static int
 test_create_external_link(void)
 {
-#ifndef NO_EXTERNAL_LINKS
-    htri_t link_exists;
-    hid_t  file_id         = H5I_INVALID_HID;
-    hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t  root_id = H5I_INVALID_HID;
-    char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-#endif
+//#ifndef NO_EXTERNAL_LINKS
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) {
+        htri_t link_exists;
+        hid_t  file_id         = H5I_INVALID_HID;
+        hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+        hid_t  root_id = H5I_INVALID_HID;
+        char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    }
+//#endif
 
     TESTING("external link creation to existing object");
 
@@ -2053,7 +2055,7 @@ test_create_external_link(void)
         return 0;
     }
 
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
 
     if ((file_id = H5Fcreate(ext_link_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -2135,10 +2137,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
