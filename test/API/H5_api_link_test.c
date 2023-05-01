@@ -18595,7 +18595,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in increasing order");
-//#ifndef NO_EXTERNAL_LINKS
+#ifndef NO_EXTERNAL_LINKS
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -18763,10 +18763,10 @@ test_get_link_name(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_name_by_idx_external_crt_order_increasing);
-//#endif
+#else
+            SKIPPED();
+            PART_EMPTY(H5Lget_name_by_idx_external_crt_order_increasing);
+#endif
         }
         PART_END(H5Lget_name_by_idx_external_crt_order_increasing);
 
@@ -18782,7 +18782,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in decreasing order");
-//#ifndef NO_EXTERNAL_LINKS
+#ifndef NO_EXTERNAL_LINKS
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -18950,10 +18950,10 @@ test_get_link_name(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_name_by_idx_external_crt_order_decreasing);
-//#endif
+#else
+            SKIPPED();
+            PART_EMPTY(H5Lget_name_by_idx_external_crt_order_decreasing);
+#endif
         }
         PART_END(H5Lget_name_by_idx_external_crt_order_decreasing);
 
