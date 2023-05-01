@@ -2860,7 +2860,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     int      rbuf[DSET_SELECT_DIM];
     int      i;
 
-    /* Check for (currently) incompatible combindations */
+    /* Check for (currently) incompatible combinations */
     if (test_mode & TEST_PAGE_BUFFER) {
         char *env_h5_drvr = NULL;
 
