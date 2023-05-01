@@ -1407,7 +1407,7 @@ Known Problems
   for your installation.
 
   Observe that the basic idea is to insert the script as the first item
-  on the command line which executes the the test.  The script then
+  on the command line which executes the test.  The script then
   executes the test and filters out the offending text before passing
   it on.
 

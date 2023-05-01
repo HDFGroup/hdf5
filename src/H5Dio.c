@@ -876,6 +876,13 @@ done:
     /* Free global piece array */
     H5MM_xfree(io_info.sel_pieces);
 
+    /* Free selection I/O arrays */
+    H5MM_xfree(io_info.mem_spaces);
+    H5MM_xfree(io_info.file_spaces);
+    H5MM_xfree(io_info.addrs);
+    H5MM_xfree(io_info.element_sizes);
+    H5MM_xfree(io_info.wbufs);
+
     /* Free store array if it was allocated */
     if (store != &store_local)
         H5MM_free(store);
