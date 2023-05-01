@@ -2864,7 +2864,8 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if (test_mode & TEST_PAGE_BUFFER) {
         char *env_h5_drvr = NULL;
 
-        /* The split and multi driver are not compatible with page buffering.  No message since the other cases aren't skipped. */
+        /* The split and multi driver are not compatible with page buffering.  No message since the other
+         * cases aren't skipped. */
         env_h5_drvr = HDgetenv(HDF5_DRIVER);
         if (env_h5_drvr && (!HDstrcmp(env_h5_drvr, "split") || !HDstrcmp(env_h5_drvr, "multi")))
             return 0;
