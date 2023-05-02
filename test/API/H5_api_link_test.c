@@ -20789,7 +20789,7 @@ test_link_iterate_ud_links(void)
 static int
 test_link_iterate_mixed_links(void)
 {
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     hsize_t saved_idx;
     size_t  i;
     htri_t  link_exists;
@@ -20801,7 +20801,7 @@ test_link_iterate_mixed_links(void)
     hid_t   dset_dspace = H5I_INVALID_HID;
     int     halted;
     char    ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-//#endif
+#endif
 
     TESTING_MULTIPART("link iteration (mixed link types)");
 
@@ -20809,14 +20809,14 @@ test_link_iterate_mixed_links(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS))) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, link, soft or external link, iterate, or creation "
                  "order aren't supported with this connector\n");
         return 0;
     }
 
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -21239,10 +21239,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-//#else
-    //SKIPPED();
-    //return 0;
-//#endif
+#else
+    SKIPPED();
+    return 0;
+#endif
 }
 
 /*
