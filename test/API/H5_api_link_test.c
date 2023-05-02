@@ -15039,7 +15039,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on hard link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP8_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -15183,10 +15183,10 @@ test_get_link_info(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_info_by_idx_hard_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_info_by_idx_hard_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_info_by_idx_hard_name_order_decreasing);
 
@@ -15779,7 +15779,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on soft link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP12_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -15959,10 +15959,10 @@ test_get_link_info(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_info_by_idx_soft_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_info_by_idx_soft_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_info_by_idx_soft_name_order_decreasing);
 
@@ -16585,7 +16585,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -16769,10 +16769,10 @@ test_get_link_info(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_info_by_idx_external_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_info_by_idx_external_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_info_by_idx_external_name_order_decreasing);
 
@@ -17777,7 +17777,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on hard link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_HARD_SUBGROUP_NAME4, H5P_DEFAULT,
                                           gcpl_id, H5P_DEFAULT)) < 0) {
@@ -17926,10 +17926,10 @@ test_get_link_name(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_name_by_idx_hard_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_name_by_idx_hard_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_name_by_idx_hard_name_order_decreasing);
 
@@ -18429,7 +18429,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on soft link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_SOFT_SUBGROUP_NAME4, H5P_DEFAULT,
                                           gcpl_id, H5P_DEFAULT)) < 0) {
@@ -18578,10 +18578,10 @@ test_get_link_name(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_name_by_idx_soft_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_name_by_idx_soft_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_name_by_idx_soft_name_order_decreasing);
 
@@ -19156,7 +19156,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by alphabetical order in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -19324,10 +19324,10 @@ test_get_link_name(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lget_name_by_idx_external_name_order_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lget_name_by_idx_external_name_order_decreasing);
+            //#endif
         }
         PART_END(H5Lget_name_by_idx_external_name_order_decreasing);
 
@@ -19850,7 +19850,7 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19867,10 +19867,10 @@ test_link_iterate_hard_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -19950,7 +19950,7 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19969,10 +19969,10 @@ test_link_iterate_hard_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -20192,7 +20192,7 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20209,10 +20209,10 @@ test_link_iterate_soft_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -20292,7 +20292,7 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20311,10 +20311,10 @@ test_link_iterate_soft_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -20539,7 +20539,7 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20557,10 +20557,10 @@ test_link_iterate_external_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -20640,7 +20640,7 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20659,10 +20659,10 @@ test_link_iterate_external_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -21754,7 +21754,7 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_0_links_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if (H5Literate2(group_id, H5_INDEX_NAME, H5_ITER_DEC, NULL, link_iter_0_links_cb, NULL) < 0) {
                 H5_FAILED();
                 HDprintf("    H5Literate2 by index type name in decreasing order failed\n");
@@ -21762,10 +21762,10 @@ test_link_iterate_0_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_0_links_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_0_links_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_0_links_name_decreasing);
 
@@ -21818,7 +21818,7 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_by_name_0_links_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if (H5Literate_by_name2(
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_0_LINKS_TEST_SUBGROUP_NAME, H5_INDEX_NAME,
                     H5_ITER_DEC, NULL, link_iter_0_links_cb, NULL, H5P_DEFAULT) < 0) {
@@ -21828,10 +21828,10 @@ test_link_iterate_0_links(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Literate_by_name_0_links_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Literate_by_name_0_links_name_decreasing);
+            //#endif
         }
         PART_END(H5Literate_by_name_0_links_name_decreasing);
 
@@ -22064,7 +22064,7 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-///#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            ///#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22081,10 +22081,10 @@ test_link_visit_hard_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22164,7 +22164,7 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22183,10 +22183,10 @@ test_link_visit_hard_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -22434,7 +22434,7 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22451,10 +22451,10 @@ test_link_visit_soft_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22533,7 +22533,7 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22552,10 +22552,10 @@ test_link_visit_soft_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -22809,7 +22809,7 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22827,10 +22827,10 @@ test_link_visit_external_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22911,7 +22911,7 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22931,10 +22931,10 @@ test_link_visit_external_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -23302,7 +23302,7 @@ test_link_visit_mixed_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
 
@@ -23320,10 +23320,10 @@ test_link_visit_mixed_links_no_cycles(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
+            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
