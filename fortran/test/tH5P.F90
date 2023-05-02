@@ -870,10 +870,7 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
 
   INTEGER, PARAMETER :: array_len = 10
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/array_len/) ! Dataset dimensions
-  INTEGER     ::   rank = 1                              ! Dataset rank
-
-  INTEGER, PARAMETER :: sp = KIND(1.0)
-  INTEGER, PARAMETER :: dp = KIND(1.d0)
+  INTEGER     ::   rank = 1
 
   REAL(KIND=C_DOUBLE), DIMENSION(1:array_len), TARGET :: wbuf_d
   REAL(KIND=C_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
