@@ -105,6 +105,16 @@ New Features
       machine's node-local storage while placing the subfiling configuration
       file on a file system readable by all machine nodes.
 
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
+
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
+
 
     Parallel Library:
     -----------------
@@ -113,9 +123,11 @@ New Features
 
     Fortran Library:
     ----------------
-    - Added Fortran async APIs
+    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
-      H5A, H5D, H5ES, H5G, H5F, H5L and H5O async APIs were added.
+    - Added Fortran APIs:
+      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     C++ Library:
     ------------

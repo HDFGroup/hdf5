@@ -13,7 +13,7 @@ General Information:
 
 Compiling Options:
 ------------------
-                     Build Mode: @CMAKE_BUILD_TYPE@
+                     Build Mode: @HDF_CFG_NAME@
               Debugging Symbols: @HDF5_ENABLE_SYMBOLS@
                         Asserts: @HDF5_ENABLE_ASSERTS@
                       Profiling: @HDF5_ENABLE_PROFILING@

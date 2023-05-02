@@ -234,7 +234,7 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
@@ -411,7 +411,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
@@ -753,7 +753,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
@@ -934,7 +934,7 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
   CHARACTER(LEN=*) :: attrname
   INTEGER(HSIZE_T) :: n
   LOGICAL :: use_index
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
@@ -1397,7 +1397,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER(HID_T) :: attr        !String Attribute identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
@@ -2690,7 +2690,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
   INTEGER :: u
   CHARACTER (LEN=8) :: attrname
   INTEGER :: error
-  LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute
+  LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters

@@ -1155,7 +1155,7 @@ AC_SUBST([HDF5_TOOLS])
 ## Default is to build tests and tools
 HDF5_TOOLS=yes
 
-AC_MSG_CHECKING([if building tools is disabled])
+AC_MSG_CHECKING([if building tools is enabled])
 
 AC_ARG_ENABLE([tools],
               [AS_HELP_STRING([--enable-tools],
