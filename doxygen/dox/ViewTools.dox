@@ -465,7 +465,7 @@ example <code style="background-color:whitesmoke;">h5_crtgrpar.c</code>. To disp
 \endcode
 
 \subsubsection subsubsecViewToolsViewDset_h5dumpEx5 Example 5
-The <code style="background-color:whitesmoke;">-p</code> option is used to examine the dataset filters, storage layout, and fill value properties of a dataset.
+The <code style="background-color:whitesmoke;">-p</code> option is used to examine the the dataset filters, storage layout, and fill value properties of a dataset.
 
 This option can be useful for checking how well compression works, or even for analyzing performance
 and dataset size issues related to chunking. (The smaller the chunk size, the more chunks that HDF5

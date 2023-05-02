@@ -260,7 +260,6 @@ H5_DLL herr_t   H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, 
 H5_DLL herr_t H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
                                               H5S_t **new_space_ptr, hbool_t share_space);
 H5_DLL herr_t H5S_select_subtract(H5S_t *space, H5S_t *subtract_space);
-H5_DLL herr_t H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *len);
 
 /* Operations on all selections */
 H5_DLL herr_t H5S_select_all(H5S_t *space, hbool_t rel_prev);

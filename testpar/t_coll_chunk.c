@@ -566,8 +566,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    unsigned                prop_value;
-    H5D_selection_io_mode_t selection_io_mode;
+    unsigned prop_value;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     int mpi_size, mpi_rank;
@@ -805,11 +804,7 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     /* Only check chunk optimization mode if selection I/O is not being used -
      * selection I/O bypasses this IO mode decision - it's effectively always
      * multi chunk currently */
-
-    status = H5Pget_selection_io(xfer_plist, &selection_io_mode);
-    VRFY((status >= 0), "testing property list get succeeded");
-
-    if (facc_type == FACC_MPIO && (selection_io_mode != H5D_SELECTION_IO_MODE_ON)) {
+    if (facc_type == FACC_MPIO && !H5_use_selection_io_g) {
         switch (api_option) {
             case API_LINK_HARD:
                 status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);

@@ -469,7 +469,6 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
          */
         extend_sizes = FALSE;
         extend_types = FALSE;
-        uint32_t no_selection_io_cause;
 
         for (i = 0; i < count; i++) {
 
@@ -506,11 +505,6 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
             if ((file->cls->read)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
         }
-
-        /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
-        H5CX_get_no_selection_io_cause(&no_selection_io_cause);
-        no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-        H5CX_set_no_selection_io_cause(no_selection_io_cause);
     }
 
 done:
@@ -675,7 +669,6 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
          */
         extend_sizes = FALSE;
         extend_types = FALSE;
-        uint32_t no_selection_io_cause;
 
         for (i = 0; i < count; i++) {
 
@@ -712,11 +705,6 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
             if ((file->cls->write)(file, type, dxpl_id, addrs[i], size, bufs[i]) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver write request failed")
         }
-
-        /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
-        H5CX_get_no_selection_io_cause(&no_selection_io_cause);
-        no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-        H5CX_set_no_selection_io_cause(no_selection_io_cause);
     }
 
 done:
@@ -1002,14 +990,6 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
-    }
-    else {
-        uint32_t no_selection_io_cause;
-
-        /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
-        H5CX_get_no_selection_io_cause(&no_selection_io_cause);
-        no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-        H5CX_set_no_selection_io_cause(no_selection_io_cause);
     }
 
 done:
@@ -1649,14 +1629,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
-    }
-    else {
-        uint32_t no_selection_io_cause;
-
-        /* Add H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB to no selection I/O cause */
-        H5CX_get_no_selection_io_cause(&no_selection_io_cause);
-        no_selection_io_cause |= H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB;
-        H5CX_set_no_selection_io_cause(no_selection_io_cause);
     }
 
 done:

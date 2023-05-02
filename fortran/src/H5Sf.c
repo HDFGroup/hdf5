@@ -176,7 +176,7 @@ h5scopy_c(hid_t_f *space_id, hid_t_f *new_space_id)
  *  h5sget_select_hyper_nblocks_c
  * PURPOSE
  *  Call H5SH5Sget_select_hyper_nblocks to
- *  get the number of hyperslab blocks in
+ *  get the the number of hyperslab blocks in
  *  the current dataspace selection if successful
  * INPUTS
  *  space_id   - identifier of the dataspace
@@ -215,7 +215,7 @@ h5sget_select_hyper_nblocks_c(hid_t_f *space_id, hssize_t_f *num_blocks)
  *  h5sget_select_elem_npoints_c
  * PURPOSE
  *  Call H5Sget_select_elem_npoints to
- *  get the number of element points in
+ *  get the the number of element points in
  *  the current dataspace selection if successful
  * INPUTS
  *  space_id   - identifier of the dataspace

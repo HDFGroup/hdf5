@@ -10,9 +10,13 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Purpose:     v1 B-tree indexed (chunked) I/O functions.  The chunks are
+/* Programmer: 	Robb Matzke
+ *	       	Wednesday, October  8, 1997
+ *
+ * Purpose:	v1 B-tree indexed (chunked) I/O functions.  The chunks are
  *              given a multi-dimensional index which is used as a lookup key
  *              in a B-tree that maps chunk index to disk address.
+ *
  */
 
 /****************/
@@ -623,11 +627,15 @@ done:
 } /* end H5D__btree_remove() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__btree_decode_key
+ * Function:	H5D__btree_decode_key
  *
- * Purpose:     Decodes a raw key into a native key for the B-tree
+ * Purpose:	Decodes a raw key into a native key for the B-tree
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, October 10, 1997
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -636,33 +644,33 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
     const H5O_layout_chunk_t *layout;                        /* Chunk layout description */
     H5D_btree_key_t          *key = (H5D_btree_key_t *)_key; /* Pointer to decoded key */
     hsize_t                   tmp_offset;                    /* Temporary coordinate offset, from file */
-    herr_t                    ret_value = SUCCEED;
+    unsigned                  u;                             /* Local index variable */
+    herr_t                    ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* check args */
     HDassert(shared);
     HDassert(raw);
     HDassert(key);
     layout = (const H5O_layout_chunk_t *)shared->udata;
     HDassert(layout);
+    HDassert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
 
-    if (layout->ndims > H5O_LAYOUT_NDIMS)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "bad number of dimensions")
-
+    /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for (unsigned u = 0; u < layout->ndims; u++) {
+    for (u = 0; u < layout->ndims; u++) {
         if (layout->dim[u] == 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk size must be > 0, dim = %u ", u)
 
         /* Retrieve coordinate offset */
         UINT64DECODE(raw, tmp_offset);
-        if (0 != (tmp_offset % layout->dim[u]))
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "bad coordinate offset")
+        HDassert(0 == (tmp_offset % layout->dim[u]));
 
         /* Convert to a scaled offset */
         key->scaled[u] = tmp_offset / layout->dim[u];
-    }
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

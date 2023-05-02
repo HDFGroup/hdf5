@@ -107,17 +107,6 @@
       "inherits": [
         "ci-x64-Release-MSVC",
         "ci-CPP",
-        "ci-Java",
-        "ci-StdShar",
-        "ci-StdExamples"
-      ]
-    },
-    {
-      "name": "ci-StdShar-MSVC-Fortran",
-      "description": "MSVC Standard Config for x64 (Release)",
-      "inherits": [
-        "ci-x64-Release-MSVC",
-        "ci-CPP",
         "ci-Fortran",
         "ci-Java",
         "ci-StdShar",
@@ -182,12 +171,7 @@
       "configurePreset": "ci-StdShar-MSVC",
       "inherits": [
         "ci-x64-Release-MSVC"
-      ],
-      "filter": {
-        "exclude": {
-          "name": "H5DUMP-tfloatsattrs"
-        }
-      }
+      ]
     },
     {
       "name": "ci-StdShar-Clang",

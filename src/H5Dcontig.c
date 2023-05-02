@@ -106,7 +106,7 @@ static herr_t  H5D__contig_io_term(H5D_io_info_t *io_info, H5D_dset_io_info_t *d
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsize_t offset,
                                     size_t size);
-static herr_t H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                             H5D_io_op_type_t op_type);
 
 /*********************/
@@ -586,7 +586,8 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
-    herr_t ret_value = SUCCEED; /* Return value */
+    htri_t use_selection_io = FALSE;   /* Whether to use selection I/O */
+    herr_t ret_value        = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -665,16 +666,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* get dset file address for piece */
         new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
-        /* Initialize in-place type conversion info. Start with it disabled. */
-        new_piece_info->in_place_tconv = FALSE;
-        new_piece_info->buf_off        = 0;
-
-        /* Calculate type conversion buffer size and check for in-place conversion if necessary.  Currently
-         * only implemented for selection I/O. */
-        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF &&
-            !(dinfo->type_info.is_xform_noop && dinfo->type_info.is_conv_noop))
-            H5D_INIT_PIECE_TCONV(io_info, dinfo, new_piece_info)
-
         /* Save piece to dataset info struct so it is freed at the end of the
          * operation */
         dinfo->layout_io_info.contig_piece_info = new_piece_info;
@@ -685,9 +676,11 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
-    if (io_info->use_select_io != H5D_SELECTION_IO_MODE_OFF)
-        if (H5D__contig_may_use_select_io(io_info, dinfo, io_info->op_type) < 0)
+    if (io_info->use_select_io) {
+        if ((use_selection_io = H5D__contig_may_use_select_io(io_info, dinfo, H5D_IO_OP_READ)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
+        io_info->use_select_io = (hbool_t)use_selection_io;
+    }
 
 done:
     if (ret_value < 0) {
@@ -747,12 +740,12 @@ H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+static htri_t
+H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                               H5D_io_op_type_t op_type)
 {
-    const H5D_t *dataset   = NULL;    /* Local pointer to dataset info */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    htri_t       ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -764,33 +757,27 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
 
     dataset = dset_info->dset;
 
-    /* None of the reasons this function might disable selection I/O are relevant to parallel, so no need to
-     * update no_selection_io_cause since we're only keeping track of the reason for no selection I/O in
-     * parallel (for now) */
-
-    /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
-     * buffer exists (write) or is dirty (read) */
-    if (dset_info->layout_ops.readvv != H5D__contig_readvv) {
-        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-        io_info->no_selection_io_cause |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
-    }
-    else if ((op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
-             (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf)) {
-        io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-        io_info->no_selection_io_cause |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
-    }
+    /* Don't use selection I/O if it's globally disabled, if there is a type
+     * conversion, or if it's not a contiguous dataset, or if the sieve buffer
+     * exists (write) or is dirty (read) */
+    if (dset_info->io_ops.single_read != H5D__select_read ||
+        dset_info->layout_ops.readvv != H5D__contig_readvv ||
+        (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
+        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
+        ret_value = FALSE;
     else {
         hbool_t page_buf_enabled;
 
+        HDassert(dset_info->io_ops.single_write == H5D__select_write);
         HDassert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
-        if (page_buf_enabled) {
-            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
-            io_info->no_selection_io_cause |= H5D_SEL_IO_PAGE_BUFFER;
-        }
+        if (page_buf_enabled)
+            ret_value = FALSE;
+        else
+            ret_value = TRUE;
     } /* end else */
 
 done:
@@ -823,9 +810,9 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->mem_space);
     HDassert(dinfo->file_space);
 
-    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        /* Only perform I/O if not performing multi dataset I/O or type conversion,
-         * otherwise the higher level will handle it after all datasets
+    if (io_info->use_select_io) {
+        /* Only perform I/O if not performing multi dataset I/O with selection
+         * I/O, otherwise the higher level will handle it after all datasets
          * have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             size_t dst_type_size = dinfo->type_info.dst_type_size;
@@ -854,17 +841,10 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.src_type_size;
                 io_info->rbufs[io_info->pieces_added]         = dinfo->buf.vp;
-                if (io_info->sel_pieces)
-                    io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
                 io_info->pieces_added++;
             }
         }
-
-#ifdef H5_HAVE_PARALLEL
-        /* Report that collective contiguous I/O was used */
-        io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-#endif /* H5_HAVE_PARALLEL */
-    }  /* end if */
+    } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_read)(io_info, dinfo) < 0)
@@ -900,9 +880,9 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     HDassert(dinfo->mem_space);
     HDassert(dinfo->file_space);
 
-    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        /* Only perform I/O if not performing multi dataset I/O or type conversion,
-         * otherwise the higher level will handle it after all datasets
+    if (io_info->use_select_io) {
+        /* Only perform I/O if not performing multi dataset I/O with selection
+         * I/O, otherwise the higher level will handle it after all datasets
          * have been processed */
         if (H5D_LAYOUT_CB_PERFORM_IO(io_info)) {
             size_t dst_type_size = dinfo->type_info.dst_type_size;
@@ -931,17 +911,10 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.dst_type_size;
                 io_info->wbufs[io_info->pieces_added]         = dinfo->buf.cvp;
-                if (io_info->sel_pieces)
-                    io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
                 io_info->pieces_added++;
             }
         }
-
-#ifdef H5_HAVE_PARALLEL
-        /* Report that collective contiguous I/O was used */
-        io_info->actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-#endif /* H5_HAVE_PARALLEL */
-    }  /* end if */
+    } /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((dinfo->io_ops.single_write)(io_info, dinfo) < 0)

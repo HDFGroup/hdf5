@@ -3747,7 +3747,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 /*-------------------------------------------------------------------------
  * Function:    dump_comment
  *
- * Purpose:     prints the comment for the object name
+ * Purpose:     prints the comment for the the object name
  *
  * Return:      void
  *-------------------------------------------------------------------------

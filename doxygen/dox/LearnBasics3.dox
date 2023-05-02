@@ -210,7 +210,7 @@ For details on compiling an HDF5 application:
 an extendible array dataset, pass in #H5P_DATASET_CREATE for the property list class.
 \li The #H5Pset_chunk call modifies a Dataset Creation Property List instance to store a chunked
 layout dataset and sets the size of the chunks used.
-\li To extend an unlimited dimension dataset use the #H5Dset_extent call. Please be aware that
+\li To extend an unlimited dimension dataset use the the #H5Dset_extent call. Please be aware that
 after this call, the dataset's dataspace must be refreshed with #H5Dget_space before more data can be accessed.
 \li The #H5Pget_chunk call retrieves the size of chunks for the raw data of a chunked layout dataset.
 \li Once there is no longer a need for a Property List instance, it should be closed with the #H5Pclose call.

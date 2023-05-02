@@ -1265,7 +1265,7 @@ main(void)
     /*
      * The following tests illustrate the scenarios when H5DOappend does not work with extensible array
      * indexing:
-     *        - when the dataset has 1 unlimited dimension and the other dimension is fixed but extendible
+     *        - when the the dataset has 1 unlimited dimension and the other dimension is fixed but extendible
      *        - the dataset expands along 1 dimension and then expands along the other dimension
      */
     flush_ct = 0; /* Reset flush counter */

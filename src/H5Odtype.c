@@ -336,31 +336,18 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             for (dt->shared->u.compnd.nmembs = 0; dt->shared->u.compnd.nmembs < nmembs;
                  dt->shared->u.compnd.nmembs++) {
 
-                size_t   actual_name_length = 0; /* Actual length of name */
-                unsigned ndims              = 0; /* Number of dimensions of the array field */
-                htri_t   can_upgrade;            /* Whether we can upgrade this type's version */
-                hsize_t  dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
-                H5T_t   *array_dt;               /* Temporary pointer to the array datatype */
-                H5T_t   *temp_type;              /* Temporary pointer to the field's datatype */
+                size_t   actual_name_length;                /* Actual length of name */
+                size_t   max   = (size_t)(p_end - *pp + 1); /* Max possible name length */
+                unsigned ndims = 0;                         /* Number of dimensions of the array field */
+                htri_t   can_upgrade;                       /* Whether we can upgrade this type's version */
+                hsize_t  dim[H5O_LAYOUT_NDIMS];             /* Dimensions of the array */
+                H5T_t   *array_dt;                          /* Temporary pointer to the array datatype */
+                H5T_t   *temp_type;                         /* Temporary pointer to the field's datatype */
 
                 /* Get the length of the field name */
-                if (!skip) {
-                    /* There is a realistic buffer end, so check bounds */
-
-                    size_t max = (size_t)(p_end - *pp + 1); /* Max possible name length */
-
-                    actual_name_length = HDstrnlen((const char *)*pp, max);
-                    if (actual_name_length == max)
-                        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "field name not null terminated")
-                }
-                else {
-                    /* The buffer end can't be determined when it's an unbounded buffer
-                     * passed via H5Tdecode(), so don't bounds check and hope for
-                     * the best.
-                     */
-                    actual_name_length = HDstrlen((const char *)*pp);
-                }
-
+                actual_name_length = HDstrnlen((const char *)*pp, max);
+                if (actual_name_length == max)
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "field name not null terminated")
                 if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
 
@@ -637,25 +624,12 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             for (dt->shared->u.enumer.nmembs = 0; dt->shared->u.enumer.nmembs < nmembs;
                  dt->shared->u.enumer.nmembs++) {
 
-                size_t actual_name_length = 0; /* Actual length of name */
+                size_t actual_name_length;              /* Actual length of name */
+                size_t max = (size_t)(p_end - *pp + 1); /* Max possible name length */
 
-                /* Get the length of the enum name */
-                if (!skip) {
-                    /* There is a realistic buffer end, so check bounds */
-
-                    size_t max = (size_t)(p_end - *pp + 1); /* Max possible name length */
-
-                    actual_name_length = HDstrnlen((const char *)*pp, max);
-                    if (actual_name_length == max)
-                        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "enum name not null terminated")
-                }
-                else {
-                    /* The buffer end can't be determined when it's an unbounded buffer
-                     * passed via H5Tdecode(), so don't bounds check and hope for
-                     * the best.
-                     */
-                    actual_name_length = HDstrlen((const char *)*pp);
-                }
+                actual_name_length = HDstrnlen((const char *)*pp, max);
+                if (actual_name_length == max)
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "enum name not null terminated")
 
                 if (H5_DTYPE_IS_BUFFER_OVERFLOW(skip, *pp, actual_name_length, p_end))
                     HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");

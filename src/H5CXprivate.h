@@ -115,9 +115,6 @@ H5_DLL herr_t H5CX_get_filter_cb(H5Z_cb_t *filter_cb);
 H5_DLL herr_t H5CX_get_data_transform(H5Z_data_xform_t **data_transform);
 H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
-H5_DLL herr_t H5CX_get_selection_io_mode(H5D_selection_io_mode_t *selection_io_mode);
-H5_DLL herr_t H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause);
-H5_DLL herr_t H5CX_get_modify_write_buf(hbool_t *modify_write_buf);
 
 /* "Getter" routines for LCPL properties cached in API context */
 H5_DLL herr_t H5CX_get_encoding(H5T_cset_t *encoding);
@@ -161,9 +158,6 @@ H5_DLL herr_t H5CX_set_nlinks(size_t nlinks);
 H5_DLL herr_t H5CX_init(void);
 
 /* "Setter" routines for cached DXPL properties that must be returned to application */
-
-H5_DLL void H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause);
-
 #ifdef H5_HAVE_PARALLEL
 H5_DLL void H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t chunk_opt);
 H5_DLL void H5CX_set_mpio_actual_io_mode(H5D_mpio_actual_io_mode_t actual_io_mode);

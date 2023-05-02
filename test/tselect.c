@@ -2280,7 +2280,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
      * H5Sselect_shape_same() views as being of the same shape.
      *
      * Start by writing small_rank D slices from the in memory large cube, to
-     * the on disk small cube dataset.  After each write, read the small
+     * the the on disk small cube dataset.  After each write, read the small
      * cube dataset back from disk, and verify that it contains the expected
      * data. Verify that H5Sselect_shape_same() returns true on the
      * memory and file selections.
@@ -3309,7 +3309,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
      * H5Sselect_shape_same() views as being of the same shape.
      *
      * Start by writing small_rank D slices from the in memory large cube, to
-     * the on disk small cube dataset.  After each write, read the small
+     * the the on disk small cube dataset.  After each write, read the small
      * cube dataset back from disk, and verify that it contains the expected
      * data. Verify that H5Sselect_shape_same() returns true on the
      * memory and file selections.
@@ -15840,7 +15840,7 @@ test_hyper_io_1d(void)
     hsize_t      chunk_dims[1];                 /* Chunk dimension size */
     hsize_t      offset[1];                     /* Starting offset for hyperslab */
     hsize_t      stride[1];                     /* Distance between blocks in the hyperslab selection */
-    hsize_t      count[1];                      /* # of blocks in the hyperslab selection */
+    hsize_t      count[1];                      /* # of blocks in the the hyperslab selection */
     hsize_t      block[1];                      /* Size of block in the hyperslab selection */
     unsigned int wdata[CHUNKSZ];                /* Data to be written */
     unsigned int rdata[NUM_ELEMENTS / 10];      /* Data to be read */

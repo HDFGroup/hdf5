@@ -337,7 +337,6 @@ set (H5_TESTS
     page_buffer
     dtypes
     dsets
-    select_io_dset
     chunk_info # compression lib link
     cmpd_dset
     mdset
@@ -393,6 +392,24 @@ set (H5_TESTS
 )
 if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)
+endif ()
+
+set (HDF5_API_TESTS
+  attribute
+  dataset
+  datatype
+  file
+  group
+  link
+  misc
+  object
+)
+
+if (HDF5_TEST_API_ENABLE_ASYNC)
+  set (HDF5_API_TESTS
+    ${HDF5_API_TESTS}
+    async
+  )
 endif ()
 
 macro (ADD_H5_EXE file)
@@ -878,6 +895,8 @@ set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_use_disable_mdc_flushes_FORMAT use_disable_mdc_flushes)
 endif ()
+
+add_subdirectory (API)
 
 if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)

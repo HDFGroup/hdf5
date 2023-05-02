@@ -423,16 +423,6 @@ if (WIN32)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Configure the LICENSE.txt file for the windows binary package
-#-----------------------------------------------------------------------------
-if (WIN32)
-  configure_file (${ZLIB_SOURCE_DIR}/LICENSE ${ZLIB_BINARY_DIR}/ZLIB_LICENSE.txt @ONLY)
-else ()
-  configure_file (${ZLIB_SOURCE_DIR}/LICENSE ${ZLIB_BINARY_DIR}/ZLIB_LICENSE @ONLY)
-endif ()
-configure_file (${ZLIB_SOURCE_DIR}/README ${ZLIB_BINARY_DIR}/ZLIB_README @ONLY)
-
-#-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
 if (NOT ZLIB_EXTERNALLY_CONFIGURED)
@@ -446,9 +436,9 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
   set (CPACK_PACKAGE_VERSION_MAJOR "${ZLIB_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${ZLIB_PACKAGE_VERSION_MINOR}")
   set (CPACK_PACKAGE_VERSION_PATCH "")
-  set (CPACK_RESOURCE_FILE_LICENSE "${ZLIB_BINARY_DIR}/ZLIB_LICENSE")
-  set (CPACK_PACKAGE_DESCRIPTION_FILE "${ZLIB_BINARY_DIR}/ZLIB_README")
-  set (CPACK_RESOURCE_FILE_README "${ZLIB_BINARY_DIR}/ZLIB_README")
+  set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+  set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+  set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
   set (CPACK_PACKAGE_RELOCATABLE TRUE)
   set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "zlib Installation")
   set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
@@ -482,7 +472,7 @@ if (NOT ZLIB_EXTERNALLY_CONFIGURED)
     endif ()
 #WiX variables
     set (CPACK_WIX_UNINSTALL "1")
-    set (CPACK_RESOURCE_FILE_LICENSE "${ZLIB_BINARY_DIR}/ZLIB_LICENSE.txt")
+    set (CPACK_RESOURCE_FILE_LICENSE "${JPEG_BINARY_DIR}/README")
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "STGZ")
     list (APPEND CPACK_GENERATOR "DragNDrop")

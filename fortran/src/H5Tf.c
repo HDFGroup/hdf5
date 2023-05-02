@@ -1373,7 +1373,7 @@ DONE:
  *  type_id - identifier of the dataspace
  *  member_no - Number of the field whose offset is requested
  * OUTPUTS
- *  offset - byte offset of the beginning of the field of
+ *  offset - byte offset of the the beginning of the field of
  *  a compound datatype
  * RETURNS
  *  always 0
