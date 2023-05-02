@@ -116,13 +116,6 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
-/* Global variables for testing */
-size_t   n_tests_run_g     = 0;
-size_t   n_tests_passed_g  = 0;
-size_t   n_tests_failed_g  = 0;
-size_t   n_tests_skipped_g = 0;
-uint64_t vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
-
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
                               size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);

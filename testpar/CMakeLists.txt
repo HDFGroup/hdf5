@@ -96,6 +96,7 @@ set (H5P_TESTS
     t_prestart
     t_init_term
     t_pmulti_dset
+    t_select_io_dset
     t_shapesame
     t_filters_parallel
     t_subfiling_vfd
@@ -103,29 +104,9 @@ set (H5P_TESTS
     t_vfd
 )
 
-set (HDF5_API_TESTS
-  attribute
-  dataset
-  datatype
-  file
-  group
-  link
-  misc
-  object
-)
-
-if (HDF5_TEST_API_ENABLE_ASYNC)
-  set (HDF5_API_TESTS
-    ${HDF5_API_TESTS}
-    async
-  )
-endif ()
-
 foreach (h5_testp ${H5P_TESTS})
   ADD_H5P_EXE(${h5_testp})
 endforeach ()
-
-add_subdirectory (API)
 
 if (HDF5_TEST_PARALLEL)
   include (CMakeTests.cmake)
