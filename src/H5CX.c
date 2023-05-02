@@ -305,8 +305,9 @@ typedef struct H5CX_t {
     hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
     hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
-    uint32_t actual_selection_io_mode;          /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
-    hbool_t  actual_selection_io_mode_set;      /* Whether actual selection I/O mode is set */
+    uint32_t
+            actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
+    hbool_t actual_selection_io_mode_set; /* Whether actual selection I/O mode is set */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -389,8 +390,8 @@ typedef struct H5CX_dxpl_cache_t {
     H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
                                                             (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
-    uint32_t                actual_selection_io_mode; /* Actual selection I/O mode
-                                                            (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
+    uint32_t actual_selection_io_mode;             /* Actual selection I/O mode
+                                                         (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     hbool_t modify_write_buf;                      /* Whether the library can modify write buffers */
 } H5CX_dxpl_cache_t;
 
@@ -589,8 +590,8 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve cause for no selection I/O")
 
     /* Get the actual selection I/O mode */
-    if (H5P_get(dx_plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME, &H5CX_def_dxpl_cache.actual_selection_io_mode) <
-        0)
+    if (H5P_get(dx_plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                &H5CX_def_dxpl_cache.actual_selection_io_mode) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve actual selection I/O mode")
 
     /* Get the modify write buffer property */
@@ -3742,7 +3743,7 @@ H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode)
     /* If we're using the default DXPL, don't modify it */
     if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
         /* Cache the value for later, marking it to set in DXPL when context popped */
-        (*head)->ctx.actual_selection_io_mode   = actual_selection_io_mode;
+        (*head)->ctx.actual_selection_io_mode     = actual_selection_io_mode;
         (*head)->ctx.actual_selection_io_mode_set = TRUE;
     } /* end if */
 

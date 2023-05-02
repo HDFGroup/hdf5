@@ -420,11 +420,10 @@ typedef enum H5D_selection_io_mode_t {
 } H5D_selection_io_mode_t;
 //! <!--[H5D_selection_io_mode_t_snip] -->
 
-
 /* Actual selection I/O modes for H5Pget_actual_selection_io_mode() property */
-#define H5D_SCALAR_IO       0x1     /* Scalar (or legacy MPIO) I/O was performed */
-#define H5D_VECTOR_IO       0x2     /* Vector I/O was performed */
-#define H5D_SELECTION_IO    0x4     /* Selection I/O was performed */
+#define H5D_SCALAR_IO    0x1 /* Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO    0x2 /* Vector I/O was performed */
+#define H5D_SELECTION_IO 0x4 /* Selection I/O was performed */
 
 /********************/
 /* Public Variables */
@@ -8420,7 +8419,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *
  * \details H5Pget_actual_selection_io_mode() retrieves the type of I/O
  *          that was actually performed.
- *          This property is set after all I/O is completed; 
+ *          This property is set after all I/O is completed;
  *          if I/O fails, it will not be set.
  *          after the actual I/O takes place.
  *
