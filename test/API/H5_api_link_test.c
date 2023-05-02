@@ -1954,7 +1954,7 @@ test_create_soft_link_invalid_params(void)
         PART_BEGIN(H5Lcreate_soft_invalid_lapl)
         {
             TESTING_2("H5Lcreate_soft with an invalid LAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 err_ret = H5Lcreate_soft("/", group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
@@ -1970,10 +1970,10 @@ test_create_soft_link_invalid_params(void)
             }
 
             PASSED();
-//else
-            //SKIPPED();
-            //PART_EMPTY(H5Lcreate_soft_invalid_lapl);
-//#endif
+            // else
+            // SKIPPED();
+            // PART_EMPTY(H5Lcreate_soft_invalid_lapl);
+            //#endif
         }
         PART_END(H5Lcreate_soft_invalid_lapl);
 
@@ -7497,7 +7497,7 @@ test_delete_link_invalid_params(void)
         PART_BEGIN(H5Ldelete_invalid_lapl)
         {
             TESTING_2("H5Ldelete with an invalid LAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 err_ret =
@@ -7512,10 +7512,10 @@ test_delete_link_invalid_params(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Ldelete_invalid_lapl);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Ldelete_invalid_lapl);
+            //#endif
         }
         PART_END(H5Ldelete_invalid_lapl);
 
@@ -7638,7 +7638,7 @@ test_delete_link_invalid_params(void)
         PART_BEGIN(H5Ldelete_by_idx_invalid_lapl)
         {
             TESTING_2("H5Ldelete_by_idx with an invalid LAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, H5I_INVALID_HID);
@@ -7652,10 +7652,10 @@ test_delete_link_invalid_params(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Ldelete_by_idx_invalid_lapl);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Ldelete_by_idx_invalid_lapl);
+            //#endif
         }
         PART_END(H5Ldelete_by_idx_invalid_lapl);
 
@@ -9257,7 +9257,7 @@ test_copy_link_invalid_params(void)
         PART_BEGIN(H5Lcopy_invalid_lapl)
         {
             TESTING_2("H5Lcopy with an invalid LAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 err_ret =
@@ -9273,10 +9273,10 @@ test_copy_link_invalid_params(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lcopy_invalid_lapl);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lcopy_invalid_lapl);
+            //#endif
         }
         PART_END(H5Lcopy_invalid_lapl);
 
@@ -11550,7 +11550,7 @@ test_move_link_invalid_params(void)
         PART_BEGIN(H5Lmove_invalid_lapl)
         {
             TESTING_2("H5Lmove with an invalid LAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
@@ -11565,10 +11565,10 @@ test_move_link_invalid_params(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Lmove_invalid_lapl);
-//#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Lmove_invalid_lapl);
+            //#endif
         }
         PART_END(H5Lmove_invalid_lapl);
 
