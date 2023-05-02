@@ -777,10 +777,9 @@ END SUBROUTINE test_chunk_cache
 !
 !-------------------------------------------------------------------------
 !
-SUBROUTINE test_misc_properties(cleanup, total_error)
+SUBROUTINE test_misc_properties(total_error)
 
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(hid_t) :: fapl_id = -1 !  Local fapl
@@ -952,6 +951,9 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   CALL check("h5fclose_f", error, total_error)
   CALL h5pclose_f(plist_id, error)
   CALL check("h5pclose_f", error, total_error)
+
+  IF(cleanup) CALL h5_cleanup_f(fix_filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_in_place_conversion
 
