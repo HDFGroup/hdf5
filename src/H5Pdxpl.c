@@ -178,7 +178,7 @@
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
 /* Definitions for actual selection I/O mode property */
 #define H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE sizeof(uint32_t)
-#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF H5D_SCALAR_IO
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF  H5D_SCALAR_IO
 /* Definitions for modify write buffer property */
 #define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
@@ -299,8 +299,8 @@ static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
-static const uint32_t                H5D_def_actual_selection_io_mode_g = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
-static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+static const uint32_t H5D_def_actual_selection_io_mode_g             = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
+static const hbool_t  H5D_def_modify_write_buf_g                     = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -479,9 +479,9 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the actual selection I/O mode property */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if (H5P__register_real(pclass, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME, H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE,
-                           &H5D_def_actual_selection_io_mode_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                           NULL) < 0)
+    if (H5P__register_real(pclass, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                           H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE, &H5D_def_actual_selection_io_mode_g, NULL,
+                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the modify write buffer property */
@@ -2624,7 +2624,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_actual_selection_io_mode
  *
- * Purpose:	    Retrieves actual selection I/O mode 
+ * Purpose:	    Retrieves actual selection I/O mode
  *
  * Return:	    Non-negative on success/Negative on failure
  *
