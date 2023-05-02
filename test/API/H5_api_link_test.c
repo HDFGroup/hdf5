@@ -1593,7 +1593,7 @@ error:
 static int
 test_create_soft_link_many(void)
 {
-#ifndef NO_SOFT_LINK_MANY_DANGLING
+//#ifndef NO_SOFT_LINK_MANY_DANGLING
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
@@ -1602,7 +1602,7 @@ test_create_soft_link_many(void)
 #ifndef NO_OBJECT_GET_NAME
     char objname[SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
 #endif
-#endif
+//#endif
 
     TESTING("soft link creation of many links");
 
@@ -1615,7 +1615,7 @@ test_create_soft_link_many(void)
         return 0;
     }
 
-#ifndef NO_SOFT_LINK_MANY_DANGLING
+//#ifndef NO_SOFT_LINK_MANY_DANGLING
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
@@ -1784,10 +1784,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
