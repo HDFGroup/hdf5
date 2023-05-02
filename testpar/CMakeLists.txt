@@ -8,7 +8,6 @@ project (HDF5_TEST_PAR C)
 set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/testphdf5.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_dset.c
-    ${HDF5_TEST_PAR_SOURCE_DIR}/t_select_io_dset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file_image.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_mdset.c
