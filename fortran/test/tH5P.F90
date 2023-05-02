@@ -872,15 +872,18 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/array_len/) ! Dataset dimensions
   INTEGER     ::   rank = 1                              ! Dataset rank
 
-  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len), TARGET :: wbuf_d
-  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
-  REAL(KIND=Fortran_REAL)  , DIMENSION(1:array_len), TARGET  :: rbuf
+  INTEGER, PARAMETER :: sp = KIND(1.0)
+  INTEGER, PARAMETER :: dp = KIND(1.d0)
+
+  REAL(KIND=dp), DIMENSION(1:array_len), TARGET :: wbuf_d
+  REAL(KIND=dp), DIMENSION(1:array_len) :: wbuf_d_org
+  REAL(KIND=sp), DIMENSION(1:array_len), TARGET  :: rbuf
   INTEGER :: i
   TYPE(C_PTR) :: f_ptr
 
   ! create the data
   DO i = 1, array_len
-     wbuf_d(i) = 1_Fortran_DOUBLE + 0.123456789123456_Fortran_DOUBLE
+     wbuf_d(i) = 1_dp + 0.123456789123456_dp
      wbuf_d_org(i) = wbuf_d(i)
   ENDDO
 
@@ -932,7 +935,7 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   CALL check("h5dread_f", error, total_error)
 
   DO i = 1, array_len
-     CALL VERIFY("h5dwrite_f -- in-place", rbuf(i), REAL(wbuf_d_org(i), Fortran_REAL), total_error)
+     CALL VERIFY("h5dwrite_f -- in-place", rbuf(i), REAL(wbuf_d_org(i), sp), total_error)
   ENDDO
 
   !
