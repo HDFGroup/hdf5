@@ -5187,7 +5187,7 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
 
@@ -5205,10 +5205,10 @@ test_object_visit(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_obj_name_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ovisit_obj_name_decreasing);
+//#endif
         }
         PART_END(H5Ovisit_obj_name_decreasing);
 
@@ -5347,7 +5347,7 @@ test_object_visit(void)
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_TEST_NUM_OBJS_VISITED;
 
@@ -5382,10 +5382,10 @@ test_object_visit(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
+//#endif
         }
         PART_END(H5Ovisit_by_name_obj_name_decreasing);
 
@@ -5747,7 +5747,7 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
 
@@ -5765,10 +5765,10 @@ test_object_visit_soft_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_obj_name_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ovisit_obj_name_decreasing);
+//#endif
         }
         PART_END(H5Ovisit_obj_name_decreasing);
 
@@ -5866,7 +5866,7 @@ test_object_visit_soft_link(void)
         PART_BEGIN(H5Ovisit_by_name_obj_name_decreasing)
         {
             TESTING_2("H5Ovisit_by_name by object name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = OBJECT_VISIT_SOFT_LINK_TEST_NUM_OBJS_VISITED;
 
@@ -5903,10 +5903,10 @@ test_object_visit_soft_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ovisit_by_name_obj_name_decreasing);
+//#endif
         }
         PART_END(H5Ovisit_by_name_obj_name_decreasing);
 
