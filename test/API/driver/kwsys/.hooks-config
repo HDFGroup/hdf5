@@ -1,0 +1,2 @@
+[hooks "chain"]
+	pre-commit = GitSetup/pre-commit
