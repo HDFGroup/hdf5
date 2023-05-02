@@ -395,24 +395,6 @@ if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)
 endif ()
 
-set (HDF5_API_TESTS
-  attribute
-  dataset
-  datatype
-  file
-  group
-  link
-  misc
-  object
-)
-
-if (HDF5_TEST_API_ENABLE_ASYNC)
-  set (HDF5_API_TESTS
-    ${HDF5_API_TESTS}
-    async
-  )
-endif ()
-
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
   target_include_directories (${file} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${HDF5_TEST_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
@@ -897,8 +879,10 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_use_disable_mdc_flushes_FORMAT use_disable_mdc_flushes)
 endif ()
 
-add_subdirectory (API)
-
 if (HDF5_TEST_SERIAL)
   include (CMakeTests.cmake)
+endif ()
+
+if (HDF5_TEST_API)
+  add_subdirectory (API)
 endif ()

@@ -9,15 +9,30 @@
 # help@hdfgroup.org.
 #
 
-#------------------------------------------------------------------------------
-# Set module path
-#------------------------------------------------------------------------------
-set(HDF5_TEST_API_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HDF5_TEST_API_CMAKE_MODULE_PATH})
+cmake_minimum_required (VERSION 3.18)
+project (HDF5_TEST_PAR_API C)
 
 #------------------------------------------------------------------------------
-# Setup for API tests
+# Define for API tests
 #------------------------------------------------------------------------------
+
+set (HDF5_API_TESTS
+  attribute
+  dataset
+  datatype
+  file
+  group
+  link
+  misc
+  object
+)
+
+if (HDF5_TEST_API_ENABLE_ASYNC)
+  set (HDF5_API_TESTS
+    ${HDF5_API_TESTS}
+    async
+  )
+endif ()
 
 # Ported HDF5 tests
 set (HDF5_API_PAR_TESTS_EXTRA
