@@ -113,10 +113,9 @@ check_actual_selection_io_mode(hid_t dxpl, uint32_t sel_io_mode_expected)
 
     if (H5Pget_actual_selection_io_mode(dxpl, &actual_sel_io_mode) < 0)
         FAIL_STACK_ERROR;
-    if(actual_sel_io_mode != sel_io_mode_expected)
+    if (actual_sel_io_mode != sel_io_mode_expected)
         TEST_ERROR;
 
-    
     return SUCCEED;
 error:
     return FAIL;
