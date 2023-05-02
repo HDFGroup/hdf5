@@ -3215,17 +3215,17 @@ error:
 static int
 test_create_user_defined_link(void)
 {
-#ifndef NO_USER_DEFINED_LINKS
+//#ifndef NO_USER_DEFINED_LINKS
     ssize_t udata_size;
     htri_t  link_exists;
     hid_t   file_id         = H5I_INVALID_HID;
     hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     char    udata[UD_LINK_TEST_UDATA_MAX_SIZE];
-#endif
+//#endif
 
     TESTING("user-defined link creation");
 
-#ifndef NO_USER_DEFINED_LINKS
+//#ifndef NO_USER_DEFINED_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
@@ -3298,10 +3298,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
