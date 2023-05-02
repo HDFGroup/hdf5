@@ -163,6 +163,7 @@ H5_DLL herr_t H5CX_init(void);
 /* "Setter" routines for cached DXPL properties that must be returned to application */
 
 H5_DLL void H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause);
+H5_DLL void H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL void H5CX_set_mpio_actual_chunk_opt(H5D_mpio_actual_chunk_opt_mode_t chunk_opt);
