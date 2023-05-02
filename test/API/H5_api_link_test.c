@@ -4672,7 +4672,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP8_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -4899,10 +4899,10 @@ test_delete_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ldelete_by_idx_hard_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ldelete_by_idx_hard_name_order_decreasing);
+//#endif
         }
         PART_END(H5Ldelete_by_idx_hard_name_order_decreasing);
 
@@ -5645,7 +5645,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP12_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -5875,10 +5875,10 @@ test_delete_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ldelete_by_idx_soft_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ldelete_by_idx_soft_name_order_decreasing);
+//#endif
         }
         PART_END(H5Ldelete_by_idx_soft_name_order_decreasing);
 
@@ -6732,7 +6732,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6993,10 +6993,10 @@ test_delete_link(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Ldelete_by_idx_external_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Ldelete_by_idx_external_name_order_decreasing);
+//endif
         }
         PART_END(H5Ldelete_by_idx_external_name_order_decreasing);
 
@@ -12571,17 +12571,17 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_soft_name_order_decreasing)
         {
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             const char *link_target_a = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "A";
             const char *link_target_b = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "B";
             const char *link_target_c = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "C";
-#endif
+//#endif
 
             TESTING_2("H5Lget_val_by_idx on soft link by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_VAL_TEST_SUBGROUP7_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -12752,10 +12752,10 @@ test_get_link_val(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Lget_val_by_idx_soft_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Lget_val_by_idx_soft_name_order_decreasing);
+//#endif
         }
         PART_END(H5Lget_val_by_idx_soft_name_order_decreasing);
 
@@ -13527,14 +13527,14 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_external_name_order_decreasing)
         {
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             const char *ext_obj_name_a = "/A";
             const char *ext_obj_name_b = "/B";
             const char *ext_obj_name_c = "/C";
-#endif
+//#endif
 
             TESTING_2("H5Lget_val_by_idx on external link by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -13762,10 +13762,10 @@ test_get_link_val(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Lget_val_by_idx_external_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Lget_val_by_idx_external_name_order_decreasing);
+//#endif
         }
         PART_END(H5Lget_val_by_idx_external_name_order_decreasing);
 
