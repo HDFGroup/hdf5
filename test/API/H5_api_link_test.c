@@ -20429,7 +20429,7 @@ test_link_iterate_external_links(void)
         return 0;
     }
 
-#ifndef NO_EXTERNAL_LINKS
+//#ifndef NO_EXTERNAL_LINKS
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -20746,10 +20746,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
