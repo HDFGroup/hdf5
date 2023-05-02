@@ -951,7 +951,7 @@ test_create_attribute_invalid_params(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, or attribute aren't supported with this connector\n");
@@ -1306,7 +1306,7 @@ test_create_attribute_invalid_params(void)
         PART_BEGIN(H5Acreate_by_name_invalid_aapl)
         {
             TESTING_2("H5Acreate_by_name with invalid AAPL");
-//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 attr_id = H5Acreate_by_name(container_group, ATTRIBUTE_CREATE_INVALID_PARAMS_GROUP_NAME,
@@ -1323,10 +1323,10 @@ test_create_attribute_invalid_params(void)
             }
 
             PASSED();
-//#else
-            //SKIPPED();
-            //PART_EMPTY(H5Acreate_by_name_invalid_aapl);
-//#endif
+#else
+            SKIPPED();
+            PART_EMPTY(H5Acreate_by_name_invalid_aapl);
+#endif
         }
         PART_END(H5Acreate_by_name_invalid_aapl);
 
