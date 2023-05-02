@@ -7121,7 +7121,7 @@ error:
 static int
 test_delete_link_reset_grp_max_crt_order(void)
 {
-#ifndef NO_MAX_LINK_CRT_ORDER_RESET
+//#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     H5G_info_t grp_info;
     size_t     i;
     hid_t      file_id         = H5I_INVALID_HID;
@@ -7129,7 +7129,7 @@ test_delete_link_reset_grp_max_crt_order(void)
     hid_t      subgroup_id = H5I_INVALID_HID;
     hid_t      gcpl_id     = H5I_INVALID_HID;
     char       link_name[LINK_DELETE_RESET_MAX_CRT_ORDER_TEST_BUF_SIZE];
-#endif
+//#endif
 
     TESTING_MULTIPART("H5Ldelete of all links in group resets group's maximum link creation order value");
 
@@ -7142,7 +7142,7 @@ test_delete_link_reset_grp_max_crt_order(void)
         return 0;
     }
 
-#ifndef NO_MAX_LINK_CRT_ORDER_RESET
+//#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -7369,10 +7369,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 static int
@@ -11130,7 +11130,7 @@ test_move_link_across_files(void)
 static int
 test_move_link_reset_grp_max_crt_order(void)
 {
-#ifndef NO_MAX_LINK_CRT_ORDER_RESET
+//#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     H5G_info_t grp_info;
     size_t     i;
     hid_t      file_id         = H5I_INVALID_HID;
@@ -11138,7 +11138,7 @@ test_move_link_reset_grp_max_crt_order(void)
     hid_t      src_grp_id = H5I_INVALID_HID, dst_grp_id = H5I_INVALID_HID;
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       link_name[MOVE_LINK_RESET_MAX_CRT_ORDER_TEST_BUF_SIZE];
-#endif
+//#endif
 
     TESTING("H5Lmove of all links out of group resets group's maximum link creation order value");
 
@@ -11152,7 +11152,7 @@ test_move_link_reset_grp_max_crt_order(void)
         return 0;
     }
 
-#ifndef NO_MAX_LINK_CRT_ORDER_RESET
+//#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
@@ -11307,10 +11307,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 }
 
 /*
