@@ -96,6 +96,7 @@ set (H5P_TESTS
     t_prestart
     t_init_term
     t_pmulti_dset
+    t_select_io_dset
     t_shapesame
     t_filters_parallel
     t_subfiling_vfd

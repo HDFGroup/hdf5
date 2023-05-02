@@ -461,7 +461,7 @@ H5_DLL hid_t  H5Dget_space_async(hid_t dset_id, hid_t es_id);
  * \details H5Dget_space_status() determines whether space has been allocated
  *          for the dataset \p dset_id.
  *
- * \note \Bold{BUG:} Prior to the HDF5 1.13.1, 1.12.2 and 1.10.9 releases,
+ * \note \Bold{BUG:} Prior to the HDF5 1.14.0, 1.12.2 and 1.10.9 releases,
  *       H5Dget_space_status() may return incorrect space allocation status
  *       values for datasets with filters applied to them.
  *       H5Dget_space_status() calculated the space allocation status by
