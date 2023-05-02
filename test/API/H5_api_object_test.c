@@ -1415,7 +1415,7 @@ test_link_object_invalid_params(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, or object aren't supported with this connector\n");
         return 0;
@@ -1550,7 +1550,7 @@ test_link_object_invalid_params(void)
         PART_BEGIN(H5Olink_invalid_lapl)
         {
             TESTING_2("H5Olink with an invalid LAPL");
-#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+//#ifndef NO_INVALID_PROPERTY_LIST_TESTS
             H5E_BEGIN_TRY
             {
                 status =
@@ -1565,10 +1565,10 @@ test_link_object_invalid_params(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Olink_invalid_lapl);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Olink_invalid_lapl);
+//#endif
         }
         PART_END(H5Olink_invalid_lapl);
     }
