@@ -252,7 +252,8 @@ H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     dinfo->store->compact.dirty = &dinfo->dset->shared->layout.storage.u.compact.dirty;
 
     /* Disable selection I/O */
-    io_info->use_select_io = FALSE;
+    io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+    io_info->no_selection_io_cause |= H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__compact_io_init() */

@@ -67,7 +67,49 @@
 #define H5D_BT2_MERGE_PERC        40
 
 /* Macro to determine if the layout I/O callback should perform I/O */
-#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO) (!(IO_INFO)->use_select_io || (IO_INFO)->count == 1)
+#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
+    (((IO_INFO)->use_select_io == H5D_SELECTION_IO_MODE_OFF) ||                                              \
+     ((IO_INFO)->count == 1 && (IO_INFO)->max_tconv_type_size == 0))
+
+/* Macro to check if in-place type conversion will be used for a piece and add it to the global type
+ * conversion size if it won't be used */
+#define H5D_INIT_PIECE_TCONV(IO_INFO, DINFO, PIECE_INFO)                                                     \
+    {                                                                                                        \
+        /* Check for potential in-place conversion */                                                        \
+        if ((IO_INFO)->may_use_in_place_tconv) {                                                             \
+            size_t mem_type_size  = ((IO_INFO)->op_type == H5D_IO_OP_READ)                                   \
+                                        ? (DINFO)->type_info.dst_type_size                                   \
+                                        : (DINFO)->type_info.src_type_size;                                  \
+            size_t file_type_size = ((IO_INFO)->op_type == H5D_IO_OP_READ)                                   \
+                                        ? (DINFO)->type_info.src_type_size                                   \
+                                        : (DINFO)->type_info.dst_type_size;                                  \
+                                                                                                             \
+            /* Make sure the memory type is not smaller than the file type, otherwise the memory buffer      \
+             * won't be big enough to serve as the type conversion buffer */                                 \
+            if (mem_type_size >= file_type_size) {                                                           \
+                hbool_t is_contig;                                                                           \
+                hsize_t sel_off;                                                                             \
+                                                                                                             \
+                /* Check if the space is contiguous */                                                       \
+                if (H5S_select_contig_block((PIECE_INFO)->mspace, &is_contig, &sel_off, NULL) < 0)           \
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't check if dataspace is contiguous")   \
+                                                                                                             \
+                /* If the first sequence includes all the elements selected in this piece, it it contiguous  \
+                 */                                                                                          \
+                if (is_contig) {                                                                             \
+                    H5_CHECK_OVERFLOW(sel_off, hsize_t, size_t);                                             \
+                    (PIECE_INFO)->in_place_tconv = TRUE;                                                     \
+                    (PIECE_INFO)->buf_off        = (size_t)sel_off * mem_type_size;                          \
+                }                                                                                            \
+            }                                                                                                \
+        }                                                                                                    \
+                                                                                                             \
+        /* If we're not using in-place type conversion, add this piece to global type conversion buffer      \
+         * size.  This will only be used if we must allocate a type conversion buffer for the entire I/O. */ \
+        if (!(PIECE_INFO)->in_place_tconv)                                                                   \
+            (IO_INFO)->tconv_buf_size += (PIECE_INFO)->piece_points * MAX((DINFO)->type_info.src_type_size,  \
+                                                                          (DINFO)->type_info.dst_type_size); \
+    }
 
 /****************************/
 /* Package Private Typedefs */
@@ -83,15 +125,13 @@ typedef struct H5D_type_info_t {
     hid_t        dst_type_id; /* Destination datatype ID */
 
     /* Computed/derived values */
-    size_t                   src_type_size;     /* Size of source type */
-    size_t                   dst_type_size;     /* Size of destination type */
-    hbool_t                  is_conv_noop;      /* Whether the type conversion is a NOOP */
-    hbool_t                  is_xform_noop;     /* Whether the data transform is a NOOP */
-    const H5T_subset_info_t *cmpd_subset;       /* Info related to the compound subset conversion functions */
-    H5T_bkg_t                need_bkg;          /* Type of background buf needed */
-    size_t                   request_nelmts;    /* Requested strip mine */
-    uint8_t                 *bkg_buf;           /* Background buffer */
-    hbool_t                  bkg_buf_allocated; /* Whether the background buffer was allocated */
+    size_t                   src_type_size;  /* Size of source type */
+    size_t                   dst_type_size;  /* Size of destination type */
+    hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
+    hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
+    const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
+    H5T_bkg_t                need_bkg;       /* Type of background buf needed */
+    size_t                   request_nelmts; /* Requested strip mine */
 } H5D_type_info_t;
 
 /* Forward declaration of structs used below */
@@ -209,9 +249,11 @@ typedef struct H5D_piece_info_t {
     hsize_t  piece_points;             /* Number of elements selected in piece */
     hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
     H5S_t   *fspace;                   /* Dataspace describing chunk & selection in it */
-    unsigned fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    H5S_t   *mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    unsigned fspace_shared;  /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    H5S_t   *mspace;         /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;  /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    hbool_t  in_place_tconv; /* Whether to perform type conversion in-place */
+    size_t   buf_off;        /* Buffer offset for in-place type conversion */
     struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
@@ -263,10 +305,23 @@ typedef struct H5D_io_info_t {
     const void            **wbufs;               /* Array of write buffers */
     haddr_t                 store_faddr;         /* lowest file addr for read/write */
     H5_flexible_const_ptr_t base_maddr;          /* starting mem address */
-    hbool_t                 use_select_io;       /* Whether to use selection I/O */
+    H5D_selection_io_mode_t use_select_io;       /* Whether to use selection I/O */
     uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t                  max_type_size;       /* Largest of all source and destination type sizes */
+    size_t                  tconv_buf_size;      /* Size of type conversion buffer */
+    uint8_t                *bkg_buf;             /* Background buffer */
+    hbool_t                 bkg_buf_allocated;   /* Whether the background buffer was allocated */
+    size_t                  bkg_buf_size;        /* Size of background buffer */
+    size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
+                                   conversion */
+    hbool_t
+        must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
+    hbool_t may_use_in_place_tconv; /* Whether datasets in this I/O could potentially use in-place type
+                                       conversion if the type sizes are compatible with it */
+#ifdef H5_HAVE_PARALLEL
+    H5D_mpio_actual_io_mode_t actual_io_mode; /* Actual type of collective or independent I/O */
+#endif                                        /* H5_HAVE_PARALLEL */
+    unsigned no_selection_io_cause;           /* "No selection I/O cause" flags */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */
@@ -620,12 +675,14 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_dset_io_
 H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space,
                                 size_t elmt_size, size_t nelmts);
 
-/* Functions that perform scatter-gather serial I/O operations */
+/* Functions that perform scatter-gather I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
                               void *_tgath_buf /*out*/);
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
+H5_DLL herr_t H5D__scatgath_read_select(H5D_io_info_t *io_info);
+H5_DLL herr_t H5D__scatgath_write_select(H5D_io_info_t *io_info);
 
 /* Functions that operate on dataset's layout information */
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);

@@ -37,6 +37,7 @@ $Source = "";
                "H5D_alloc_time_t"           => "Da",
                "H5D_append_cb_t"            => "DA",
                "H5FD_mpio_collective_opt_t" => "Dc",
+               "H5D_selection_io_mode_t"    => "DC",
                "H5D_fill_time_t"            => "Df",
                "H5D_fill_value_t"           => "DF",
                "H5D_gather_func_t"          => "Dg",
