@@ -2771,7 +2771,7 @@ H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf /*out*/)
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", plist_id, modify_write_buf);
+    H5TRACE2("e", "i*b", plist_id, modify_write_buf);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
