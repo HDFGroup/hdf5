@@ -25941,7 +25941,7 @@ done:
 }
 //#endif
 //#ifndef NO_USER_DEFINED_LINKS
-static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
+//static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
 //#endif
 /*
  * Link iteration callback for the mixed link types test which iterates
@@ -26438,8 +26438,8 @@ done:
 }
 //#endif
 //#ifndef NO_USER_DEFINED_LINKS
-static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-                                               void *op_data);
+//static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
+                                               //void *op_data);
 //#endif
 /*
  * Link visiting callback for the mixed link types + no cycles test which
@@ -26932,8 +26932,8 @@ done:
 }
 //#endif
 //#ifndef NO_USER_DEFINED_LINKS
-static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-                                            void *op_data);
+//static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
+                                            //void *op_data);
 //#endif
 /*
  * Link visiting callback for the mixed link types + cycles test which
