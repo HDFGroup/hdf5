@@ -21344,14 +21344,14 @@ test_link_iterate_invalid_params(void)
         HDprintf("    couldn't create soft link '%s'\n", LINK_ITER_INVALID_PARAMS_TEST_SOFT_LINK_NAME);
         goto error;
     }
-//#ifndef NO_EXTERNAL_LINKS
+    //#ifndef NO_EXTERNAL_LINKS
     if (H5Lcreate_external(ext_link_filename, "/", group_id, LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME,
                            H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create external link '%s'\n", LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME);
         goto error;
     }
-//#endif
+    //#endif
     /* Verify the links have been created */
     if ((link_exists = H5Lexists(group_id, LINK_ITER_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -21378,7 +21378,7 @@ test_link_iterate_invalid_params(void)
         HDprintf("    second link did not exist\n");
         goto error;
     }
-//#ifndef NO_EXTERNAL_LINKS
+    //#ifndef NO_EXTERNAL_LINKS
     if ((link_exists = H5Lexists(group_id, LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't determine if link '%s' exists\n", LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME);
@@ -21390,7 +21390,7 @@ test_link_iterate_invalid_params(void)
         HDprintf("    third link did not exist\n");
         goto error;
     }
-//#endif
+    //#endif
 
     PASSED();
 
@@ -22653,7 +22653,7 @@ error:
 static int
 test_link_visit_external_links_no_cycles(void)
 {
-//#ifndef NO_EXTERNAL_LINKS
+    //#ifndef NO_EXTERNAL_LINKS
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -22661,7 +22661,7 @@ test_link_visit_external_links_no_cycles(void)
     hid_t  subgroup_id = H5I_INVALID_HID;
     hid_t  gcpl_id     = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-//#endif
+    //#endif
 
     TESTING_MULTIPART("link visiting without cycles (only external links)");
 
@@ -22675,7 +22675,7 @@ test_link_visit_external_links_no_cycles(void)
         return 0;
     }
 
-//#ifndef NO_EXTERNAL_LINKS
+    //#ifndef NO_EXTERNAL_LINKS
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -23019,10 +23019,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-//#else
-    //SKIPPED();
-    //return 0;
-//#endif
+    //#else
+    // SKIPPED();
+    // return 0;
+    //#endif
 }
 
 /*
@@ -23064,7 +23064,7 @@ test_link_visit_ud_links_no_cycles(void)
 static int
 test_link_visit_mixed_links_no_cycles(void)
 {
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -23075,7 +23075,7 @@ test_link_visit_mixed_links_no_cycles(void)
     hid_t  dset_dtype = H5I_INVALID_HID;
     hid_t  fspace_id  = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-//#endif
+    //#endif
 
     TESTING_MULTIPART("link visiting without cycles (mixed link types)");
 
