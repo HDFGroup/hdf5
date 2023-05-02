@@ -461,6 +461,9 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
         if ((file->cls->read_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
 
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_VECTOR_IO);
     }
     else {
 
@@ -668,6 +671,9 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
         if ((file->cls->write_vector)(file, dxpl_id, count, types, addrs, sizes, bufs) < 0)
 
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_VECTOR_IO);
     }
     else {
         /* otherwise, implement the vector write as a sequence of regular
@@ -1002,6 +1008,9 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read vector request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_VECTOR_IO);
     }
     else {
         uint32_t no_selection_io_cause;
@@ -1190,6 +1199,9 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
         if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                         element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_SELECTION_IO);
     }
     else
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1332,6 +1344,9 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         if ((file->cls->read_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                         element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read selection request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_SELECTION_IO);
     }
     else {
         /* Otherwise, implement the selection read as a sequence of regular
@@ -1649,6 +1664,9 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write vector request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_VECTOR_IO);
     }
     else {
         uint32_t no_selection_io_cause;
@@ -1829,6 +1847,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
         if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                          element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_SELECTION_IO);
     }
     else
         /* Otherwise, implement the selection write as a sequence of regular
@@ -1962,6 +1983,9 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         if ((file->cls->write_selection)(file, type, dxpl_id, count, mem_space_ids, file_space_ids, offsets,
                                          element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write selection request failed")
+
+        /* Set actual selection I/O */
+        H5CX_set_actual_selection_io_mode(H5D_SELECTION_IO);
     }
     else {
         /* Otherwise, implement the selection write as a sequence of regular

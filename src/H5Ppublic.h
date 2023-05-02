@@ -420,6 +420,12 @@ typedef enum H5D_selection_io_mode_t {
 } H5D_selection_io_mode_t;
 //! <!--[H5D_selection_io_mode_t_snip] -->
 
+
+/* Actual selection I/O modes for H5Pget_actual_selection_io_mode() property */
+#define H5D_SCALAR_IO       0x1     /* Scalar (or legacy MPIO) I/O was performed */
+#define H5D_VECTOR_IO       0x2     /* Vector I/O was performed */
+#define H5D_SELECTION_IO    0x4     /* Selection I/O was performed */
+
 /********************/
 /* Public Variables */
 /********************/
@@ -8393,6 +8399,45 @@ H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selec
  *
  */
 H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the type of I/O that HDF5 actually performed on
+ *        last I/O call (not necessarily the type requested)
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] actual_selection_io_mode A bitwise set value indicating the
+ *                                      type of I/O performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *
+ * \details H5Pget_actual_selection_io_mode() retrieves the type of I/O
+ *          that was actually performed.
+ *          This property is set after all I/O is completed; 
+ *          if I/O fails, it will not be set.
+ *          after the actual I/O takes place.
+ *
+ *          Valid values returned in \p actual_selection_io_mode are listed
+ *          as follows.
+ *
+ *          - #H5D_SCALAR_IO
+ *          Scalar (or legacy MPIO) I/O was performed
+ *          - #H5D_VECTOR_IO
+ *          Vector I/O was performed
+ *          - #H5D_SELECTION_IO
+ *          Selection I/O was performed
+ *
+ * \since 1.14.2
+ *
+ */
+H5_DLL herr_t H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode);
 
 /**
  *

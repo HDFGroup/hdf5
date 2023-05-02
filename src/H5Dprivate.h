@@ -86,6 +86,7 @@
 #define H5D_XFER_DSET_IO_SEL_NAME           "dset_io_selection"     /* Dataset I/O selection */
 #define H5D_XFER_SELECTION_IO_MODE_NAME     "selection_io_mode"     /* Selection I/O mode */
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_NAME "no_selection_io_cause" /* Cause for no selection I/O */
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME "actual_selection_io_mode" /* Actual selection I/O mode */
 #define H5D_XFER_MODIFY_WRITE_BUF_NAME      "modify_write_buf"      /* Modify write buffers */
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Collective chunk instrumentation properties */

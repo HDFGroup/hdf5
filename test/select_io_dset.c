@@ -106,6 +106,22 @@ typedef enum {
 #define TEST_TCONV_BUF_TOO_SMALL               0x100
 #define TEST_IN_PLACE_TCONV                    0x200
 
+static herr_t
+check_actual_selection_io_mode(hid_t dxpl, uint32_t sel_io_mode_expected)
+{
+    uint32_t actual_sel_io_mode;
+
+    if (H5Pget_actual_selection_io_mode(dxpl, &actual_sel_io_mode) < 0)
+        FAIL_STACK_ERROR;
+    if(actual_sel_io_mode != sel_io_mode_expected)
+        TEST_ERROR;
+
+    
+    return SUCCEED;
+error:
+    return FAIL;
+}
+
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
  *  --create dataset with H5T_NATIVE_INT
@@ -184,6 +200,9 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
+
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
@@ -191,6 +210,9 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     /* Read data from the dataset without data transform set in dxpl */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
+
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -324,6 +346,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Dwrite(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
+
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
         HDmemcpy(wbuf, wbuf_bak, (size_t)(4 * DSET_SELECT_DIM));
@@ -331,6 +356,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     /* Read the data from the dataset with little endian */
     if (H5Dread(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
+
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
 
     /* Verify data read little endian */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -474,6 +502,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
+
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
@@ -481,6 +512,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     /* Read the data from the dataset without data transform in dxpl */
     if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
+
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -617,6 +651,9 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     if (H5Dwrite(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
+
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
@@ -624,6 +661,9 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     /* Read data from the dataset without data transform in dxpl */
     if (H5Dread(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
+
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -2897,9 +2937,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
 
-    /* If default mode, 1st write will trigger cb, 2nd write will trigger sieve */
-    /* If on mode, will trigger nothing because the on mode path is different */
-    /* Need 2 writes */
     if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER) {
         no_selection_io_cause_write_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
         no_selection_io_cause_read_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
@@ -3001,6 +3038,9 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             FAIL_STACK_ERROR;
     }
 
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
+
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         TEST_ERROR;
 
@@ -3018,6 +3058,9 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
+
+    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+        TEST_ERROR;
 
     /* Verify causes of no selection I/O for write is as expected */
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_read) < 0)
