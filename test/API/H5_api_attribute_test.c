@@ -10759,7 +10759,7 @@ error:
 static int
 test_attr_shared_dtype(void)
 {
-//#ifndef NO_SHARED_DATATYPES
+    //#ifndef NO_SHARED_DATATYPES
     H5O_info2_t obj_info;
     htri_t      attr_exists;
     hid_t       file_id         = H5I_INVALID_HID;
@@ -10769,11 +10769,11 @@ test_attr_shared_dtype(void)
     hid_t       attr_dtype      = H5I_INVALID_HID;
     hid_t       space_id        = H5I_INVALID_HID;
     hid_t       dset_id         = H5I_INVALID_HID;
-//#endif
+    //#endif
 
     TESTING("shared datatype for attributes");
 
-//#ifndef NO_SHARED_DATATYPES
+    //#ifndef NO_SHARED_DATATYPES
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
@@ -10911,10 +10911,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-//#else
-    //SKIPPED();
-    //return 0;
-//#endif
+    //#else
+    // SKIPPED();
+    // return 0;
+    //#endif
 }
 
 static herr_t
