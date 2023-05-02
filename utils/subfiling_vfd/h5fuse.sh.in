@@ -102,28 +102,23 @@ FAILED=1
 # Configure file checks                                    #
 ############################################################
 #
-SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-.}"
-
-# cd to the subfile configuration location
-if [ "$SUBF_CONFDIR" != "." ] || [ "$SUBF_CONFDIR" != "$PWD" ]; then
-   cd "$SUBF_CONFDIR" || exit
-fi
+SUBF_CONFDIR="${H5FD_SUBFILING_CONFIG_FILE_PREFIX:-$PWD}"
 
 # Try to find the config file
 if [ -z "$file_config" ]; then
     nfiles=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
     if [[ "$nfiles" != "1" ]]; then
       if [[ "$nfiles" == "0" ]]; then
-         echo -e "$RED Failed to find .config file in current directory. $NC"
+         echo -e "$RED Failed to find .config file in ${SUBF_CONFDIR} $NC"
          usage
          exit $FAILED
       else
-         echo -e "$RED More than one .config file found in current directory. $NC"
+         echo -e "$RED More than one .config file found in ${SUBF_CONFDIR} $NC"
          usage
          exit $FAILED
       fi
     fi
-    file_config=$(find "$SUBF_CONFDIR" -maxdepth 1 -type f -iname '*.config')
+    file_config=$(find "${SUBF_CONFDIR}" -maxdepth 1 -type f -iname '*.config')
 fi
 
 if [ ! -f "$file_config" ]; then
@@ -150,7 +145,8 @@ if test -z "$subfile_dir"; then
 fi
 
 # For bash 4.4+
-mapfile -t subfiles < <( sed -e '1,/subfile_dir=/d' "$file_config" )
+subfs=$(sed -e '1,/subfile_dir=/d' "$file_config")
+mapfile -t subfiles <<< "$subfs"
 if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED

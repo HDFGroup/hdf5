@@ -232,7 +232,7 @@ done:
  *  lapl_id - Link access property list
  * OUTPUTS
  *
- *  corder_valid - Indicates whether the the creation order data is valid for this attribute
+ *  corder_valid - Indicates whether the creation order data is valid for this attribute
  *  corder - Is a positive integer containing the creation order of the attribute
  *  cset - Indicates the character set used for the attribute’s name
  *  data_size - indicates the size, in the number of characters, of the attribute
