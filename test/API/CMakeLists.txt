@@ -10,20 +10,6 @@
 #
 
 #------------------------------------------------------------------------------
-# Set module path
-#------------------------------------------------------------------------------
-set(HDF5_TEST_API_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HDF5_TEST_API_CMAKE_MODULE_PATH})
-
-# TODO: probably not necessary
-#------------------------------------------------------------------------------
-# Setup CMake Environment
-#------------------------------------------------------------------------------
-if (WIN32)
-  message("The HDF5 API test suite is currently not supported on this platform." FATAL_ERROR)
-endif ()
-
-#------------------------------------------------------------------------------
 # Setup testing configuration file
 #------------------------------------------------------------------------------
 if (HDF5_TEST_PARALLEL)
