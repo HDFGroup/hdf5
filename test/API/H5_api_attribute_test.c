@@ -1689,7 +1689,7 @@ test_open_attribute(void)
         PART_BEGIN(H5Aopen_by_idx_name_order_decreasing)
         {
             TESTING_2("H5Aopen_by_idx by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_DEC, 2, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -1736,10 +1736,10 @@ test_open_attribute(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Aopen_by_idx_name_order_decreasing);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Aopen_by_idx_name_order_decreasing);
+//#endif
         }
         PART_END(H5Aopen_by_idx_name_order_decreasing);
     }
