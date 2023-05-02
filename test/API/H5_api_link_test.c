@@ -20790,6 +20790,7 @@ static int
 test_link_iterate_mixed_links(void)
 {
 #if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+<<<<<<< HEAD
     hsize_t saved_idx;
     size_t  i;
     htri_t  link_exists;
@@ -20801,9 +20802,26 @@ test_link_iterate_mixed_links(void)
     hid_t   dset_dspace = H5I_INVALID_HID;
     int     halted;
     char    ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+=======
+=======
+    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+>>>>>>> a32dc68e43f5d2a141ddeb8e9415469d61d37976
+                                           hsize_t saved_idx;
+    size_t                                         i;
+    htri_t                                         link_exists;
+    hid_t                                          file_id = H5I_INVALID_HID;
+    hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t gcpl_id     = H5I_INVALID_HID;
+    hid_t dset_id     = H5I_INVALID_HID;
+    hid_t dset_dtype  = H5I_INVALID_HID;
+    hid_t dset_dspace = H5I_INVALID_HID;
+    int   halted;
+    char  ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+<<<<<<< HEAD
+>>>>>>> b2345888cee9f70c182c0f4cdb1b85c2d4aa6b22
 #endif
 
-    TESTING_MULTIPART("link iteration (mixed link types)");
+        TESTING_MULTIPART("link iteration (mixed link types)");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
@@ -20817,7 +20835,14 @@ test_link_iterate_mixed_links(void)
     }
 
 #if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+<<<<<<< HEAD
     TESTING_2("test setup");
+=======
+=======
+    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+>>>>>>> a32dc68e43f5d2a141ddeb8e9415469d61d37976
+                                           TESTING_2("test setup");
+>>>>>>> b2345888cee9f70c182c0f4cdb1b85c2d4aa6b22
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -21239,8 +21264,13 @@ error:
     H5E_END_TRY;
 
     return 1;
+<<<<<<< HEAD
 #else
     SKIPPED();
+=======
+<<<<<<< HEAD
+#else SKIPPED();
+>>>>>>> b2345888cee9f70c182c0f4cdb1b85c2d4aa6b22
     return 0;
 #endif
 }
