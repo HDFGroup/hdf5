@@ -716,9 +716,9 @@ test_create_hard_link_invalid_params(void)
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
+//#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-#endif
+//#endif
     hid_t ext_file_id = H5I_INVALID_HID;
 
     TESTING_MULTIPART("hard link creation with invalid parameters");
@@ -931,7 +931,7 @@ test_create_hard_link_invalid_params(void)
         PART_BEGIN(H5Lcreate_hard_across_files)
         {
             TESTING_2("H5Lcreate_hard across files");
-#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
+//#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -968,10 +968,10 @@ test_create_hard_link_invalid_params(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Lcreate_hard_across_files);
-#endif
+//#else
+            //SKIPPED();
+            //PART_EMPTY(H5Lcreate_hard_across_files);
+//#endif
         }
         PART_END(H5Lcreate_hard_across_files);
 
@@ -1001,10 +1001,10 @@ test_create_hard_link_invalid_params(void)
     END_MULTIPART;
 
     TESTING_2("test cleanup");
-#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
+//#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
     if (H5Fclose(ext_file_id) < 0)
         TEST_ERROR;
-#endif
+//#endif
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
     if (H5Gclose(container_group) < 0)
