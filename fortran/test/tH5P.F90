@@ -777,10 +777,9 @@ END SUBROUTINE test_chunk_cache
 !
 !-------------------------------------------------------------------------
 !
-SUBROUTINE test_misc_properties(cleanup, total_error)
+SUBROUTINE test_misc_properties(total_error)
 
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(hid_t) :: fapl_id = -1 !  Local fapl
@@ -872,18 +871,17 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/array_len/) ! Dataset dimensions
   INTEGER     ::   rank = 1                              ! Dataset rank
 
-  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len), TARGET :: wbuf_d
-  REAL(KIND=Fortran_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
-  REAL(KIND=Fortran_REAL)  , DIMENSION(1:array_len), TARGET  :: rbuf
+  REAL(KIND=C_DOUBLE), DIMENSION(1:array_len), TARGET :: wbuf_d
+  REAL(KIND=C_DOUBLE), DIMENSION(1:array_len) :: wbuf_d_org
+  REAL(KIND=C_FLOAT), DIMENSION(1:array_len), TARGET  :: rbuf
   INTEGER :: i
   TYPE(C_PTR) :: f_ptr
 
   ! create the data
   DO i = 1, array_len
-     wbuf_d(i) = 1_Fortran_DOUBLE + 0.123456789123456_Fortran_DOUBLE
+     wbuf_d(i) = 1.0_C_DOUBLE + 0.123456789123456_C_DOUBLE
      wbuf_d_org(i) = wbuf_d(i)
   ENDDO
-
   !
   !Create file "inplace_conv.h5" using default properties.
   !
@@ -917,22 +915,22 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   CALL check("h5pget_modify_write_buf_f", error, total_error)
   CALL VERIFY("h5pget_modify_write_buf_f", modify_write_buf, .TRUE., total_error)
 
-  CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_REAL, dspace_id, dset_id, error)
+  CALL h5dcreate_f(file_id, dsetname, h5kind_to_type(KIND(rbuf(1)), H5_REAL_KIND), dspace_id, dset_id, error)
   CALL check("h5dcreate_f", error, total_error)
 
-  f_ptr = C_LOC(wbuf_d)
-  CALL h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, f_ptr, error, H5S_ALL_F, H5S_ALL_F, xfer_prp=plist_id)
+  f_ptr = C_LOC(wbuf_d(1))
+  CALL h5dwrite_f(dset_id, h5kind_to_type(KIND(wbuf_d(1)), H5_REAL_KIND), f_ptr, error, H5S_ALL_F, H5S_ALL_F, xfer_prp=plist_id)
   CALL check("h5dwrite_f", error, total_error)
 
   ! Should not be equal for in-place buffer use
   CALL VERIFY("h5dwrite_f -- in-place", wbuf_d(1), wbuf_d_org(1), total_error, .FALSE.)
 
   f_ptr = C_LOC(rbuf)
-  CALL h5dread_f(dset_id, H5T_NATIVE_REAL, f_ptr, error)
+  CALL h5dread_f(dset_id, h5kind_to_type(KIND(rbuf(1)), H5_REAL_KIND), f_ptr, error)
   CALL check("h5dread_f", error, total_error)
 
   DO i = 1, array_len
-     CALL VERIFY("h5dwrite_f -- in-place", rbuf(i), REAL(wbuf_d_org(i), Fortran_REAL), total_error)
+     CALL VERIFY("h5dwrite_f -- in-place", rbuf(i), REAL(wbuf_d_org(i), C_FLOAT), total_error)
   ENDDO
 
   !
@@ -953,6 +951,9 @@ SUBROUTINE test_in_place_conversion(cleanup, total_error)
   CALL check("h5fclose_f", error, total_error)
   CALL h5pclose_f(plist_id, error)
   CALL check("h5pclose_f", error, total_error)
+
+  IF(cleanup) CALL h5_cleanup_f(fix_filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_in_place_conversion
 
