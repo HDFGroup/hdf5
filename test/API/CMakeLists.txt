@@ -9,26 +9,12 @@
 # help@hdfgroup.org.
 #
 
-#------------------------------------------------------------------------------
-# Set module path
-#------------------------------------------------------------------------------
-set(HDF5_TEST_API_CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${HDF5_TEST_API_CMAKE_MODULE_PATH})
-
-# TODO: probably not necessary
-#------------------------------------------------------------------------------
-# Setup CMake Environment
-#------------------------------------------------------------------------------
-if (WIN32)
-  message("The HDF5 API test suite is currently not supported on this platform." FATAL_ERROR)
-endif ()
+cmake_minimum_required (VERSION 3.18)
+project (HDF5_TEST_API C)
 
 #------------------------------------------------------------------------------
 # Setup testing configuration file
 #------------------------------------------------------------------------------
-if (HDF5_TEST_PARALLEL)
-  set (HDF5_TEST_API_HAVE_PARALLEL 1)
-endif ()
 if (HDF5_TEST_API_ENABLE_ASYNC)
   set (H5_API_TEST_HAVE_ASYNC 1)
 endif ()
@@ -46,8 +32,26 @@ if (HDF5_TEST_API_ENABLE_DRIVER)
 endif ()
 
 #------------------------------------------------------------------------------
-# Setup for API tests
+# Define for API tests
 #------------------------------------------------------------------------------
+
+set (HDF5_API_TESTS
+  attribute
+  dataset
+  datatype
+  file
+  group
+  link
+  misc
+  object
+)
+
+if (HDF5_TEST_API_ENABLE_ASYNC)
+  set (HDF5_API_TESTS
+    ${HDF5_API_TESTS}
+    async
+  )
+endif ()
 
 # Ported HDF5 tests
 set (HDF5_API_TESTS_EXTRA
