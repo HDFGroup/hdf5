@@ -534,7 +534,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
             for (u = 0; u < oh->nmesgs; u++)
                 if (oh->mesg[u].chunkno == 0)
                     oh->mesg[u].dirty = FALSE;
-#ifdef H5O_DEBUG
+#ifndef NDEBUG
             /* Reset the number of messages dirtied by decoding */
             oh->ndecode_dirtied = 0;
 #endif
