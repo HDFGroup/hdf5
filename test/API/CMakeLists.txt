@@ -9,6 +9,10 @@
 # help@hdfgroup.org.
 #
 
+
+cmake_minimum_required (VERSION 3.18)
+project (HDF5_TEST_API C)
+
 #------------------------------------------------------------------------------
 # Setup testing configuration file
 #------------------------------------------------------------------------------
@@ -29,8 +33,26 @@ if (HDF5_TEST_API_ENABLE_DRIVER)
 endif ()
 
 #------------------------------------------------------------------------------
-# Setup for API tests
+# Define for API tests
 #------------------------------------------------------------------------------
+
+set (HDF5_API_TESTS
+  attribute
+  dataset
+  datatype
+  file
+  group
+  link
+  misc
+  object
+)
+
+if (HDF5_TEST_API_ENABLE_ASYNC)
+  set (HDF5_API_TESTS
+    ${HDF5_API_TESTS}
+    async
+  )
+endif ()
 
 # Ported HDF5 tests
 set (HDF5_API_TESTS_EXTRA
