@@ -1,12 +1,13 @@
 # HDF5 API Tests
 
-This directory contains several test applications that exercise [HDF5](https://github.com/HDFGroup/hdf5)'s
+This directory contains several test applications that exercise HDF5's
 public API and serve as regression tests for HDF5 [VOL Connectors](https://portal.hdfgroup.org/display/HDF5/Virtual+Object+Layer).
 
 ## Build Process and options
 
-These HDF5 API tests are enabled and built by default, but can be disabled if desired.
-The following build options are available to influence how the API tests get built:
+These HDF5 API tests are disabled by default, but can be enabled by passing the
+`-DHDF5_TEST_API=ON` option to CMake. The following build options are available
+to influence how the API tests get built:
 
 ### CMake
 
@@ -39,9 +40,9 @@ Currently unsupported
 
 ### Usage
 
-These API tests currently only support usage with HDF5 VOL connectors that can be loaded dynamically
-as a plugin. For information on how to build a VOL connector in this manner, refer to section 2.3 of
-the [HDF5 VOL Connector Author Guide](https://portal.hdfgroup.org/display/HDF5/HDF5+VOL+Connector+Authors+Guide?preview=/53610813/59903039/vol_connector_author_guide.pdf).
+These API tests currently only support usage with the native HDF5 VOL connector and HDF5 VOL
+connectors that can be loaded dynamically as a plugin. For information on how to build a VOL
+connector in this manner, refer to section 2.3 of the [HDF5 VOL Connector Author Guide](https://portal.hdfgroup.org/display/HDF5/HDF5+VOL+Connector+Authors+Guide?preview=/53610813/59903039/vol_connector_author_guide.pdf).
 
 TODO: section on building VOL connectors alongside HDF5 for use with tests
 
@@ -64,7 +65,7 @@ and use it when running tests. If HDF5 is unable to locate or load the VOL conne
 will fall back to running the tests with the native HDF5 VOL connector and an error similar to the
 following will appear in the test output:
 
-    HDF5-DIAG: Error detected in HDF5 (1.13.0) MPI-process 0:
+    HDF5-DIAG: Error detected in HDF5 (X.XX.X) MPI-process 0:
       #000: /home/user/git/hdf5/src/H5.c line 1010 in H5open(): library initialization failed
         major: Function entry/exit
         minor: Unable to initialize object
