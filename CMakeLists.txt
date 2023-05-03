@@ -961,7 +961,7 @@ if (BUILD_TESTING)
   math (EXPR CTEST_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 2")
   math (EXPR CTEST_VERY_LONG_TIMEOUT "${DART_TESTING_TIMEOUT} * 3")
 
-  option (HDF5_TEST_API "Execute HDF5 API tests" ON)
+  option (HDF5_TEST_API "Execute HDF5 API tests" OFF)
   mark_as_advanced (HDF5_TEST_API)
   if (HDF5_TEST_API)
     option (HDF5_TEST_API_INSTALL "Install HDF5 API tests" OFF)

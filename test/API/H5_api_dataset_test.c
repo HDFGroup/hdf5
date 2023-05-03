@@ -8298,9 +8298,9 @@ test_dataset_set_extent_data(void)
     hid_t   dcpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, dset_space_id = H5I_INVALID_HID;
     int     buf_origin[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM][DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM];
-#ifndef NO_CLEAR_ON_SHRINK
+    //#ifndef NO_CLEAR_ON_SHRINK
     int buf_expand2[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM][DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM];
-#endif
+    //#endif
     int buf_expand[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM * 2 - 1]
                   [DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM * 2 - 1];
     int buf_shrink[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM / 2 + 1]
@@ -8468,7 +8468,7 @@ test_dataset_set_extent_data(void)
         PART_BEGIN(H5Dset_extent_data_expand_to_origin)
         {
             TESTING_2("H5Dset_extent for data back to the original size");
-#ifndef NO_CLEAR_ON_SHRINK
+            //#ifndef NO_CLEAR_ON_SHRINK
             /* Expand the dataset back to the original size. The data should look like this:
              * X X X X X 0 0 0
              * X X X X X 0 0 0
@@ -8508,10 +8508,10 @@ test_dataset_set_extent_data(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Dset_extent_data_expand_to_origin);
-#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Dset_extent_data_expand_to_origin);
+            //#endif
         }
         PART_END(H5Dset_extent_data_expand_to_origin);
 
@@ -8552,7 +8552,7 @@ test_dataset_set_extent_data(void)
         PART_BEGIN(H5Dset_extent_data_expand_to_origin_again)
         {
             TESTING_2("H5Dset_extent for data expansion back to the original again");
-#ifndef NO_CLEAR_ON_SHRINK
+            //#ifndef NO_CLEAR_ON_SHRINK
             /* Expand the dataset back to the original size. The data should look like this:
              * 0 0 0 0 0 0 0 0
              * 0 0 0 0 0 0 0 0
@@ -8581,10 +8581,10 @@ test_dataset_set_extent_data(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Dset_extent_data_expand_to_origin_again);
-#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Dset_extent_data_expand_to_origin_again);
+            //#endif
         }
         PART_END(H5Dset_extent_data_expand_to_origin_again);
     }

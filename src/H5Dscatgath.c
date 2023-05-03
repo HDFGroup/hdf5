@@ -31,6 +31,11 @@
 /* Local Macros */
 /****************/
 
+/* Macro to determine if we're using H5D__compound_opt_read() */
+#define H5D__SCATGATH_USE_CMPD_OPT_READ(DSET_INFO, PIECE_INFO)                                               \
+    ((DSET_INFO)->type_info.cmpd_subset && H5T_SUBSET_FALSE != (DSET_INFO)->type_info.cmpd_subset->subset && \
+     !(PIECE_INFO)->in_place_tconv)
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -529,7 +534,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
         } /* end if */
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, dset_info->type_info.bkg_buf /*out*/);
+                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
             } /* end if */
@@ -539,7 +544,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -672,8 +677,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
         } /* end if */
         else {
             if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
-                n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts,
-                                     dset_info->type_info.bkg_buf /*out*/);
+                n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts, io_info->bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
@@ -697,7 +701,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, io_info->bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
@@ -725,6 +729,559 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__scatgath_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__scatgath_read_select
+ *
+ * Purpose:	Perform scatter/gather read from a list of dataset pieces
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__scatgath_read_select(H5D_io_info_t *io_info)
+{
+    H5S_t         **tmp_mem_spaces   = NULL;  /* Memory spaces to use for read from disk */
+    H5S_sel_iter_t *mem_iter         = NULL;  /* Memory selection iteration info */
+    hbool_t         mem_iter_init    = FALSE; /* Memory selection iteration info has been initialized */
+    void          **tmp_bufs         = NULL;  /* Buffers to use for read from disk */
+    void           *tmp_bkg_buf      = NULL;  /* Temporary background buffer pointer */
+    size_t          tconv_bytes_used = 0;     /* Number of bytes used so far in conversion buffer */
+    size_t          bkg_bytes_used   = 0;     /* Number of bytes used so far in background buffer */
+    size_t          i;                        /* Local index variable */
+    herr_t          ret_value = SUCCEED;      /* Return value		*/
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(io_info);
+    HDassert(io_info->count > 0);
+    HDassert(io_info->mem_spaces || io_info->pieces_added == 0);
+    HDassert(io_info->file_spaces || io_info->pieces_added == 0);
+    HDassert(io_info->addrs || io_info->pieces_added == 0);
+    HDassert(io_info->element_sizes || io_info->pieces_added == 0);
+    HDassert(io_info->rbufs || io_info->pieces_added == 0);
+
+    /* Allocate list of buffers (within the tconv buf) */
+    if (NULL == (tmp_bufs = H5MM_malloc(io_info->pieces_added * sizeof(void *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list")
+
+    /* Allocate the iterator */
+    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+
+    /* Allocate list of block memory spaces */
+    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0
+     */
+    if (NULL == (tmp_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                    "memory allocation failed for temporary memory space list")
+
+    /* Build read operation to tconv buffer */
+    for (i = 0; i < io_info->pieces_added; i++) {
+        H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
+
+        HDassert(io_info->sel_pieces[i]->piece_points > 0);
+
+        /* Check if this piece is involved in type conversion */
+        if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
+            /* No type conversion, just copy the mem space and buffer */
+            tmp_mem_spaces[i] = io_info->mem_spaces[i];
+            tmp_bufs[i]       = io_info->rbufs[i];
+        }
+        else {
+            /* Create block memory space */
+            if (NULL ==
+                (tmp_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL))) {
+                HDmemset(&tmp_mem_spaces[i], 0, (io_info->pieces_added - i) * sizeof(tmp_mem_spaces[0]));
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
+            }
+
+            /* Check for in-place type conversion */
+            if (io_info->sel_pieces[i]->in_place_tconv)
+                /* Set buffer to point to read buffer + offset */
+                tmp_bufs[i] = (uint8_t *)(io_info->rbufs[i]) + io_info->sel_pieces[i]->buf_off;
+            else {
+                /* Set buffer to point into type conversion buffer */
+                tmp_bufs[i] = io_info->tconv_buf + tconv_bytes_used;
+                tconv_bytes_used +=
+                    io_info->sel_pieces[i]->piece_points *
+                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+            }
+
+            /* Fill background buffer here unless we will use H5D__compound_opt_read().  Must do this before
+             * the read so the read buffer doesn't get wiped out if we're using in-place type conversion */
+            if (!H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
+                /* Check for background buffer */
+                if (dset_info->type_info.need_bkg) {
+                    HDassert(io_info->bkg_buf);
+
+                    /* Calculate background buffer position */
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
+                    bkg_bytes_used +=
+                        io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+
+                    /* Gather data from read buffer to background buffer if necessary */
+                    if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                        /* Initialize memory iterator */
+                        HDassert(!mem_iter_init);
+                        if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i],
+                                                 dset_info->type_info.dst_type_size, 0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                                        "unable to initialize memory selection information")
+                        mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+
+                        if ((size_t)io_info->sel_pieces[i]->piece_points !=
+                            H5D__gather_mem(io_info->rbufs[i], mem_iter,
+                                            (size_t)io_info->sel_pieces[i]->piece_points,
+                                            tmp_bkg_buf /*out*/))
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
+
+                        /* Reset selection iterator */
+                        HDassert(mem_iter_init);
+                        if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+                        mem_iter_init = FALSE;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Read data from all pieces */
+    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t)
+    if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added, tmp_mem_spaces,
+                               io_info->file_spaces, io_info->addrs, io_info->element_sizes, tmp_bufs) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
+
+    /* Reset bkg_bytes_used */
+    bkg_bytes_used = 0;
+
+    /* Perform type conversion and scatter data to memory buffers for datasets that need this */
+    for (i = 0; i < io_info->pieces_added; i++) {
+        H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
+
+        HDassert(tmp_mem_spaces[i]);
+
+        /* Check if this piece is involved in type conversion */
+        if (tmp_mem_spaces[i] != io_info->mem_spaces[i]) {
+            H5_CHECK_OVERFLOW(io_info->sel_pieces[i]->piece_points, hsize_t, size_t);
+
+            /* Initialize memory iterator */
+            HDassert(!mem_iter_init);
+            if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.dst_type_size,
+                                     0) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to initialize memory selection information")
+            mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+
+            /* If the source and destination are compound types and subset of each other
+             * and no conversion is needed, copy the data directly into user's buffer and
+             * bypass the rest of steps.
+             */
+            if (H5D__SCATGATH_USE_CMPD_OPT_READ(dset_info, io_info->sel_pieces[i])) {
+                if (H5D__compound_opt_read((size_t)io_info->sel_pieces[i]->piece_points, mem_iter,
+                                           &dset_info->type_info, tmp_bufs[i], io_info->rbufs[i] /*out*/) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+            }
+            else {
+                /* Check for background buffer */
+                if (dset_info->type_info.need_bkg) {
+                    HDassert(io_info->bkg_buf);
+
+                    /* Calculate background buffer position */
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
+                    bkg_bytes_used +=
+                        io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+                }
+
+                /*
+                 * Perform datatype conversion.
+                 */
+                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
+                                dset_info->type_info.dst_type_id,
+                                (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
+                                tmp_bufs[i], tmp_bkg_buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+
+                /* Do the data transform after the conversion (since we're using type mem_type) */
+                if (!dset_info->type_info.is_xform_noop) {
+                    H5Z_data_xform_t *data_transform; /* Data transform info */
+
+                    /* Retrieve info from API context */
+                    if (H5CX_get_data_transform(&data_transform) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+
+                    if (H5Z_xform_eval(data_transform, tmp_bufs[i],
+                                       (size_t)io_info->sel_pieces[i]->piece_points,
+                                       dset_info->type_info.mem_type) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                }
+
+                /* Scatter the data into memory if this was not an in-place conversion */
+                if (!io_info->sel_pieces[i]->in_place_tconv)
+                    if (H5D__scatter_mem(tmp_bufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
+                                         io_info->rbufs[i] /*out*/) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
+            }
+
+            /* Release selection iterator */
+            HDassert(mem_iter_init);
+            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+            mem_iter_init = FALSE;
+        }
+    }
+
+done:
+    /* Release and free selection iterator */
+    if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if (mem_iter)
+        mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
+
+    /* Free tmp_bufs */
+    H5MM_free(tmp_bufs);
+    tmp_bufs = NULL;
+
+    /* Clear and free tmp_mem_spaces */
+    if (tmp_mem_spaces) {
+        for (i = 0; i < io_info->pieces_added; i++)
+            if (tmp_mem_spaces[i] != io_info->mem_spaces[i] && tmp_mem_spaces[i] &&
+                H5S_close(tmp_mem_spaces[i]) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
+        H5MM_free(tmp_mem_spaces);
+        tmp_mem_spaces = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__scatgath_read_select() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__scatgath_write_select
+ *
+ * Purpose:	Perform scatter/gather write to a list of dataset pieces.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__scatgath_write_select(H5D_io_info_t *io_info)
+{
+    H5S_t         **write_mem_spaces  = NULL;  /* Memory spaces to use for write to disk */
+    size_t          spaces_added      = 0;     /* Number of spaces added to write_mem_spaces */
+    H5S_sel_iter_t *mem_iter          = NULL;  /* Memory selection iteration info */
+    hbool_t         mem_iter_init     = FALSE; /* Memory selection iteration info has been initialized */
+    const void    **write_bufs        = NULL;  /* Buffers to use for write to disk */
+    size_t          tconv_bytes_used  = 0;     /* Number of bytes used so far in conversion buffer */
+    size_t          bkg_bytes_used    = 0;     /* Number of bytes used so far in background buffer */
+    H5S_t         **bkg_mem_spaces    = NULL;  /* Array of memory spaces for read to background buffer */
+    H5S_t         **bkg_file_spaces   = NULL;  /* Array of file spaces for read to background buffer */
+    haddr_t        *bkg_addrs         = NULL;  /* Array of file addresses for read to background buffer */
+    size_t         *bkg_element_sizes = NULL;  /* Array of element sizes for read to background buffer */
+    void          **bkg_bufs   = NULL; /* Array background buffers for read of existing file contents */
+    size_t          bkg_pieces = 0;    /* Number of pieces that need to read the background data from disk */
+    size_t          i;                 /* Local index variable */
+    herr_t          ret_value = SUCCEED; /* Return value		*/
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(io_info);
+    HDassert(io_info->count > 0);
+    HDassert(io_info->mem_spaces || io_info->pieces_added == 0);
+    HDassert(io_info->file_spaces || io_info->pieces_added == 0);
+    HDassert(io_info->addrs || io_info->pieces_added == 0);
+    HDassert(io_info->element_sizes || io_info->pieces_added == 0);
+    HDassert(io_info->wbufs || io_info->pieces_added == 0);
+
+    /* Allocate list of buffers (within the tconv buf) */
+    if (NULL == (write_bufs = (const void **)H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary buffer list")
+
+    /* Allocate the iterator */
+    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
+
+    /* Allocate list of block memory spaces */
+    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0
+     */
+    if (NULL == (write_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                    "memory allocation failed for temporary memory space list")
+
+    /* Build operations to read data to background buffer and to write data */
+    for (i = 0; i < io_info->pieces_added; i++) {
+        H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
+
+        HDassert(io_info->sel_pieces[i]->piece_points > 0);
+
+        /* Check if this piece is involved in type conversion */
+        if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
+            /* No type conversion, just copy the mem space and buffer */
+            write_mem_spaces[i] = io_info->mem_spaces[i];
+            spaces_added++;
+            write_bufs[i] = io_info->wbufs[i];
+        }
+        else {
+            void *tmp_write_buf; /* To sidestep const warnings */
+            void *tmp_bkg_buf = NULL;
+
+            H5_CHECK_OVERFLOW(io_info->sel_pieces[i]->piece_points, hsize_t, size_t);
+
+            /* Initialize memory iterator */
+            HDassert(!mem_iter_init);
+            if (H5S_select_iter_init(mem_iter, io_info->mem_spaces[i], dset_info->type_info.src_type_size,
+                                     0) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                            "unable to initialize memory selection information")
+            mem_iter_init = TRUE; /* Memory selection iteration info has been initialized */
+
+            /* Create block memory space */
+            if (NULL ==
+                (write_mem_spaces[i] = H5S_create_simple(1, &io_info->sel_pieces[i]->piece_points, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
+            spaces_added++;
+
+            /* Check for in-place type conversion */
+            if (io_info->sel_pieces[i]->in_place_tconv) {
+                H5_flexible_const_ptr_t flex_buf;
+
+                /* Set buffer to point to write buffer + offset */
+                /* Use cast to union to twiddle away const.  OK because if we're doing this it means the user
+                 * explicitly allowed us to modify this buffer via H5Pset_modify_write_buf(). */
+                flex_buf.cvp  = io_info->wbufs[i];
+                tmp_write_buf = (uint8_t *)flex_buf.vp + io_info->sel_pieces[i]->buf_off;
+            }
+            else {
+                /* Set buffer to point into type conversion buffer */
+                tmp_write_buf = io_info->tconv_buf + tconv_bytes_used;
+                tconv_bytes_used +=
+                    io_info->sel_pieces[i]->piece_points *
+                    MAX(dset_info->type_info.src_type_size, dset_info->type_info.dst_type_size);
+                HDassert(tconv_bytes_used <= io_info->tconv_buf_size);
+
+                /* Gather data from application buffer into the datatype conversion buffer */
+                if ((size_t)io_info->sel_pieces[i]->piece_points !=
+                    H5D__gather_mem(io_info->wbufs[i], mem_iter, (size_t)io_info->sel_pieces[i]->piece_points,
+                                    tmp_write_buf /*out*/))
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
+            }
+
+            /* Set buffer for writing to disk (from type conversion buffer) */
+            write_bufs[i] = (const void *)tmp_write_buf;
+
+            /* If the source and destination are compound types and the destination is a subset of
+             * the source and no conversion is needed, copy the data directly into the type
+             * conversion buffer and bypass the rest of steps.  If the source is a subset of the
+             * destination, the optimization is done in conversion function H5T_conv_struct_opt to
+             * protect the background data.
+             */
+            if (dset_info->type_info.cmpd_subset &&
+                H5T_SUBSET_DST == dset_info->type_info.cmpd_subset->subset &&
+                dset_info->type_info.dst_type_size == dset_info->type_info.cmpd_subset->copy_size &&
+                !io_info->sel_pieces[i]->in_place_tconv) {
+                if (H5D__compound_opt_write((size_t)io_info->sel_pieces[i]->piece_points,
+                                            &dset_info->type_info, tmp_write_buf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+                /* No background buffer necessary, prevent this element from being considered in the second
+                 * loop */
+                /* Add this to H5Tconv.c? -NAF */
+                dset_info->type_info.need_bkg = H5T_BKG_NO;
+            } /* end if */
+            else {
+                /* Check for background buffer */
+                if (dset_info->type_info.need_bkg) {
+                    HDassert(io_info->bkg_buf);
+
+                    /* Calculate background buffer position */
+                    tmp_bkg_buf = io_info->bkg_buf + bkg_bytes_used;
+                    bkg_bytes_used +=
+                        io_info->sel_pieces[i]->piece_points * dset_info->type_info.dst_type_size;
+                    HDassert(bkg_bytes_used <= io_info->bkg_buf_size);
+                }
+
+                /* Set up background buffer read operation if necessary */
+                if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                    HDassert(io_info->must_fill_bkg);
+
+                    /* Allocate arrays of parameters for selection read to background buffer if necessary */
+                    if (!bkg_mem_spaces) {
+                        HDassert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
+                        if (NULL == (bkg_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for memory space list")
+                        if (NULL == (bkg_file_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for file space list")
+                        if (NULL == (bkg_addrs = H5MM_malloc(io_info->pieces_added * sizeof(haddr_t))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for piece address list")
+                        if (NULL == (bkg_element_sizes = H5MM_malloc(io_info->pieces_added * sizeof(size_t))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for element size list")
+                        if (NULL == (bkg_bufs = H5MM_malloc(io_info->pieces_added * sizeof(const void *))))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "memory allocation failed for write buffer list")
+                    }
+
+                    /* Use same (block) memory space, file space, address, and element size as write operation
+                     */
+                    HDassert(bkg_mem_spaces && bkg_file_spaces && bkg_addrs && bkg_element_sizes && bkg_bufs);
+                    bkg_mem_spaces[bkg_pieces]    = write_mem_spaces[i];
+                    bkg_file_spaces[bkg_pieces]   = io_info->file_spaces[i];
+                    bkg_addrs[bkg_pieces]         = io_info->addrs[i];
+                    bkg_element_sizes[bkg_pieces] = io_info->element_sizes[i];
+
+                    /* Use previously calculated background buffer position */
+                    bkg_bufs[bkg_pieces] = tmp_bkg_buf;
+
+                    /* Add piece */
+                    bkg_pieces++;
+                }
+                else {
+                    /* Perform type conversion here to avoid second loop if no dsets use the background buffer
+                     */
+                    /* Do the data transform before the type conversion (since
+                     * transforms must be done in the memory type). */
+                    if (!dset_info->type_info.is_xform_noop) {
+                        H5Z_data_xform_t *data_transform; /* Data transform info */
+
+                        /* Retrieve info from API context */
+                        if (H5CX_get_data_transform(&data_transform) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+
+                        if (H5Z_xform_eval(data_transform, tmp_write_buf,
+                                           (size_t)io_info->sel_pieces[i]->piece_points,
+                                           dset_info->type_info.mem_type) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                    }
+
+                    /*
+                     * Perform datatype conversion.
+                     */
+                    if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
+                                    dset_info->type_info.dst_type_id,
+                                    (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
+                                    tmp_write_buf, tmp_bkg_buf) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+                }
+            }
+
+            /* Release selection iterator */
+            HDassert(mem_iter_init);
+            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+            mem_iter_init = FALSE;
+        }
+    }
+
+    HDassert(spaces_added == io_info->pieces_added);
+
+    /* Gather data to background buffer if necessary */
+    if (io_info->must_fill_bkg) {
+        size_t j = 0; /* Index into array of background buffers */
+
+        /* Read data */
+        H5_CHECK_OVERFLOW(bkg_pieces, size_t, uint32_t)
+        if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)bkg_pieces, bkg_mem_spaces,
+                                   bkg_file_spaces, bkg_addrs, bkg_element_sizes, bkg_bufs) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to background buffer failed")
+
+        /* Perform type conversion on pieces with background buffers that were just read */
+        for (i = 0; i < io_info->pieces_added; i++) {
+            H5D_dset_io_info_t *dset_info = io_info->sel_pieces[i]->dset_info;
+
+            if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                /* Non-const write_buf[i].  Use pointer math here to avoid const warnings.  When
+                 * there's a background buffer write_buf[i] always points inside the non-const tconv
+                 * buf so this is OK. */
+                void *tmp_write_buf =
+                    (void *)((uint8_t *)io_info->tconv_buf +
+                             ((const uint8_t *)write_bufs[i] - (const uint8_t *)io_info->tconv_buf));
+
+                /* Do the data transform before the type conversion (since
+                 * transforms must be done in the memory type). */
+                if (!dset_info->type_info.is_xform_noop) {
+                    H5Z_data_xform_t *data_transform; /* Data transform info */
+
+                    /* Retrieve info from API context */
+                    if (H5CX_get_data_transform(&data_transform) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
+
+                    if (H5Z_xform_eval(data_transform, tmp_write_buf,
+                                       (size_t)io_info->sel_pieces[i]->piece_points,
+                                       dset_info->type_info.mem_type) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
+                }
+
+                /*
+                 * Perform datatype conversion.
+                 */
+                HDassert(j < bkg_pieces);
+                if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
+                                dset_info->type_info.dst_type_id,
+                                (size_t)io_info->sel_pieces[i]->piece_points, (size_t)0, (size_t)0,
+                                tmp_write_buf, bkg_bufs[j]) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+
+                /* Advance to next background buffer */
+                j++;
+            }
+        }
+
+        HDassert(j == bkg_pieces);
+    }
+
+    /* Write data to disk */
+    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t)
+    if (H5F_shared_select_write(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added,
+                                write_mem_spaces, io_info->file_spaces, io_info->addrs,
+                                io_info->element_sizes, write_bufs) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
+
+done:
+    /* Release and free selection iterator */
+    if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if (mem_iter)
+        mem_iter = H5FL_FREE(H5S_sel_iter_t, mem_iter);
+
+    /* Free write_bufs */
+    H5MM_free(write_bufs);
+    write_bufs = NULL;
+
+    /* Clear and free write_mem_spaces */
+    if (write_mem_spaces) {
+        for (i = 0; i < spaces_added; i++) {
+            HDassert(write_mem_spaces[i]);
+            if (write_mem_spaces[i] != io_info->mem_spaces[i] && H5S_close(write_mem_spaces[i]) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
+        }
+        H5MM_free(write_mem_spaces);
+        write_mem_spaces = NULL;
+    }
+
+    /* Free bakcground buffer parameter arrays */
+    H5MM_free(bkg_mem_spaces);
+    bkg_mem_spaces = NULL;
+    H5MM_free(bkg_file_spaces);
+    bkg_file_spaces = NULL;
+    H5MM_free(bkg_addrs);
+    bkg_addrs = NULL;
+    H5MM_free(bkg_element_sizes);
+    bkg_element_sizes = NULL;
+    H5MM_free(bkg_bufs);
+    bkg_bufs = NULL;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__scatgath_write_select() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__compound_opt_read

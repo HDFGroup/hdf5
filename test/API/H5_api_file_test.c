@@ -1742,7 +1742,7 @@ test_get_file_obj_count(void)
         PART_BEGIN(H5Fget_obj_count_types)
         {
             TESTING_2("H5Fget_obj_count for datatypes");
-#ifndef WRONG_DATATYPE_OBJ_COUNT
+            //#ifndef WRONG_DATATYPE_OBJ_COUNT
             /* Get the number of named datatype in two opened files */
             if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATATYPE)) < 0) {
                 H5_FAILED();
@@ -1758,10 +1758,10 @@ test_get_file_obj_count(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Fget_obj_count_types);
-#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Fget_obj_count_types);
+            //#endif
         }
         PART_END(H5Fget_obj_count_types);
 
@@ -1833,7 +1833,7 @@ test_get_file_obj_count(void)
         PART_BEGIN(H5Fget_obj_count_all)
         {
             TESTING_2("H5Fget_obj_count for all object types");
-#ifndef WRONG_DATATYPE_OBJ_COUNT
+            //#ifndef WRONG_DATATYPE_OBJ_COUNT
             /* Get the number of all open objects */
             if ((obj_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0) {
                 H5_FAILED();
@@ -1848,10 +1848,10 @@ test_get_file_obj_count(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Fget_obj_count_all);
-#endif
+            //#else
+            // SKIPPED();
+            // PART_EMPTY(H5Fget_obj_count_all);
+            //#endif
         }
         PART_END(H5Fget_obj_count_all);
 
