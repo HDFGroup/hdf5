@@ -15,6 +15,7 @@
 #
 #-------------------------------------------------------------------------------
 enable_language (Fortran)
+
 set (HDF_PREFIX "H5")
 
 # Force lowercase Fortran module file names
