@@ -23,8 +23,8 @@ documents cover a mix of tasks, concepts, and reference, to help a specific
 \par Versions
      Version-specific documentation (see the version in the title area) can be found
      here:
-     - <a href="https://docs.hdfgroup.org/hdf5/v1_14/index.html">HDF5 1.14.x (this site)</a>
      - <a href="https://docs.hdfgroup.org/hdf5/develop/index.html">HDF5 <code>develop</code> branch</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_14/index.html">HDF5 1.14.x (this site)</a>
      - <a href="https://docs.hdfgroup.org/hdf5/v1_12/index.html">HDF5 1.12.x</a>
      - <a href="https://docs.hdfgroup.org/hdf5/v1_10/index.html">HDF5 1.10.x</a>
      - <a href="https://docs.hdfgroup.org/hdf5/v1_8/index.html">HDF5 1.8.x</a>
