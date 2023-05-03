@@ -130,5 +130,4 @@ Procedure for adding a new file to the repository
 Add the name of the file to the:
     (1) Makefile.am located in the same directory as the newfile
     (2) CMakeLists.txt located in the same directory as the newfile
-    (3) MANIFEST located in the top level directory
 

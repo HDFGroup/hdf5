@@ -111,3 +111,7 @@ endforeach ()
 if (HDF5_TEST_PARALLEL)
   include (CMakeTests.cmake)
 endif ()
+
+if (HDF5_TEST_API)
+  add_subdirectory (API)
+endif ()
