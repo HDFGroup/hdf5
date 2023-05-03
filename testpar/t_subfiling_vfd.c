@@ -1888,7 +1888,7 @@ test_subfiling_h5fuse(void)
 
         if (pid == 0) {
             char *tmp_filename;
-            char *args[6];
+            char *args[7];
 
             tmp_filename = HDmalloc(PATH_MAX);
             VRFY(tmp_filename, "HDmalloc succeeded");
@@ -1900,9 +1900,10 @@ test_subfiling_h5fuse(void)
             args[0] = HDstrdup("env");
             args[1] = HDstrdup("sh");
             args[2] = HDstrdup("h5fuse.sh");
-            args[3] = HDstrdup("-q -f");
-            args[4] = tmp_filename;
-            args[5] = NULL;
+            args[3] = HDstrdup("-q");
+            args[4] = HDstrdup("-f");
+            args[5] = tmp_filename;
+            args[6] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
             HDexecvp("env", args);
