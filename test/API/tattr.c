@@ -5915,27 +5915,29 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
          *  a good way to easily predict the order of the links in the name index.
          */
 
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
-    /* Verify the information for first attribute, in decreasing name order */
-    HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &ainfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Aget_info_by_idx");
-    VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
+//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        /* Verify the information for first attribute, in decreasing name order */
+        HDmemset(&ainfo, 0, sizeof(ainfo));
+        ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &ainfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Aget_info_by_idx");
+        VERIFY(ainfo.corder, 0, "H5Aget_info_by_idx");
 
-    /* Verify the information for new attribute, in increasing name order */
-    HDmemset(&ainfo, 0, sizeof(ainfo));
-    ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &ainfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Aget_info_by_idx");
-    VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
+        /* Verify the information for new attribute, in increasing name order */
+        HDmemset(&ainfo, 0, sizeof(ainfo));
+        ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &ainfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Aget_info_by_idx");
+        VERIFY(ainfo.corder, n, "H5Aget_info_by_idx");
 
-    /* Verify the name for new link, in increasing name order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
-                                     (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Aget_name_by_idx");
-    if (HDstrcmp(attrname, tmpname) != 0)
-        TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
-#endif
+        /* Verify the name for new link, in increasing name order */
+        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+        ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
+                                        (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Aget_name_by_idx");
+        if (HDstrcmp(attrname, tmpname) != 0)
+            TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
+    }
+//#endif
     /* Retrieve current # of errors */
     if (old_nerrs == nerrors)
         return (0);
