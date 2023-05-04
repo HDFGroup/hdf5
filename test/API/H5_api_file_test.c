@@ -1930,7 +1930,7 @@ error:
 static int
 test_file_open_overlap(void)
 {
-//#ifndef NO_DOUBLE_OBJECT_OPENS
+    //#ifndef NO_DOUBLE_OBJECT_OPENS
     ssize_t obj_count;
     hid_t   file_id           = H5I_INVALID_HID;
     hid_t   file_id2          = H5I_INVALID_HID;
@@ -1938,7 +1938,7 @@ test_file_open_overlap(void)
     hid_t   dspace_id         = H5I_INVALID_HID;
     hid_t   dset_id           = H5I_INVALID_HID;
     char   *prefixed_filename = NULL;
-//#endif
+    //#endif
 
     TESTING("overlapping file opens");
 
@@ -1951,7 +1951,7 @@ test_file_open_overlap(void)
         return 0;
     }
 
-//#ifndef NO_DOUBLE_OBJECT_OPENS
+    //#ifndef NO_DOUBLE_OBJECT_OPENS
     if (prefix_filename(test_path_prefix, OVERLAPPING_FILENAME, &prefixed_filename) < 0) {
         H5_FAILED();
         HDprintf("    couldn't prefix filename\n");
@@ -2062,10 +2062,10 @@ error:
     HDfree(prefixed_filename);
 
     return 1;
-//#else
-    //SKIPPED();
-    //return 0;
-//#endif
+    //#else
+    // SKIPPED();
+    // return 0;
+    //#endif
 }
 
 /*
@@ -2523,9 +2523,9 @@ cleanup_files(void)
     /* The below file should not get created */
     /* remove_test_file(test_path_prefix, FILE_CREATE_INVALID_PARAMS_FILE_NAME); */
 
-//#ifndef NO_DOUBLE_OBJECT_OPENS
+    //#ifndef NO_DOUBLE_OBJECT_OPENS
     remove_test_file(test_path_prefix, OVERLAPPING_FILENAME);
-//#endif
+    //#endif
     remove_test_file(test_path_prefix, FILE_PERMISSION_TEST_FILENAME);
     remove_test_file(test_path_prefix, FILE_FLUSH_TEST_FILENAME);
     remove_test_file(test_path_prefix, FILE_PROPERTY_LIST_TEST_FNAME1);

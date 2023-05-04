@@ -400,9 +400,9 @@ test_create_hard_link_many(void)
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID;
-//#ifndef NO_OBJECT_GET_NAME
+    //#ifndef NO_OBJECT_GET_NAME
     char objname[HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
-//#endif
+                                                           //#endif
 
     TESTING("hard link creation of many links");
 
@@ -533,7 +533,7 @@ test_create_hard_link_many(void)
                  HARD_LINK_TEST_GROUP_MANY_FINAL_NAME);
         goto error;
     }
-//#ifndef NO_OBJECT_GET_NAME
+    //#ifndef NO_OBJECT_GET_NAME
     /* Check name */
     if (H5Iget_name(group_id2, objname, (size_t)HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE) < 0) {
         H5_FAILED();
@@ -546,7 +546,7 @@ test_create_hard_link_many(void)
         HDprintf("    wrong name of the object '%s'\n", objname);
         goto error;
     }
-//#endif
+    //#endif
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
@@ -1599,9 +1599,9 @@ test_create_soft_link_many(void)
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id        = H5I_INVALID_HID;
     hid_t  object_id       = H5I_INVALID_HID;
-//#ifndef NO_OBJECT_GET_NAME
+    //#ifndef NO_OBJECT_GET_NAME
     char objname[SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
-//#endif
+                                                           //#endif
     //#endif
 
     TESTING("soft link creation of many links");
@@ -1745,7 +1745,7 @@ test_create_soft_link_many(void)
         HDprintf("    failed to open object pointed to by soft link '%s'\n", SOFT_LINK_TEST_GROUP_MANY_NAME);
         goto error;
     }
-//#ifndef NO_OBJECT_GET_NAME
+    //#ifndef NO_OBJECT_GET_NAME
     /* Check name */
     if (H5Iget_name(object_id, objname, (size_t)SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE) < 0) {
         H5_FAILED();
@@ -1758,7 +1758,7 @@ test_create_soft_link_many(void)
         HDprintf("    wrong name of the object '%s'\n", objname);
         goto error;
     }
-//#endif
+    //#endif
 
     if (H5Gclose(object_id) < 0)
         TEST_ERROR;

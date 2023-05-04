@@ -2359,14 +2359,14 @@ test_resurrect_datatype(void)
         HDprintf("    failed to delete datatype\n");
         goto error;
     }
-//#ifndef NO_OBJECT_GET_NAME
+    //#ifndef NO_OBJECT_GET_NAME
     /* Check that datatype name is NULL */
     if (H5Iget_name(type_id, NULL, (size_t)0) != 0) {
         H5_FAILED();
         HDprintf("    deleted datatype name was not NULL!\n");
         goto error;
     }
-//#endif
+    //#endif
 
     /* Re-link the datatype to the group hierarchy (shouldn't get deleted now) */
     if (H5Lcreate_hard(type_id, ".", group_id, DATATYPE_RESURRECT_TEST_DTYPE_NAME2, H5P_DEFAULT,
