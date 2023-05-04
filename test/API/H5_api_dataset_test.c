@@ -8633,7 +8633,7 @@ error:
 static int
 test_dataset_set_extent_double_handles(void)
 {
-#ifndef NO_DOUBLE_OBJECT_OPENS
+//#ifndef NO_DOUBLE_OBJECT_OPENS
     hsize_t dims_origin[DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_RANK] = {
         DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_DIM, DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_DIM};
     hsize_t dims_expand[DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_RANK] = {
@@ -8650,11 +8650,11 @@ test_dataset_set_extent_double_handles(void)
     hid_t   dcpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, dset_space_id = H5I_INVALID_HID;
     int     i;
-#endif
+//#endif
 
     TESTING("H5Dset_extent on double dataset handles");
 
-#ifndef NO_DOUBLE_OBJECT_OPENS
+//#ifndef NO_DOUBLE_OBJECT_OPENS
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
@@ -8768,10 +8768,10 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
+//#else
+    //SKIPPED();
+    //return 0;
+//#endif
 } /* test_dataset_set_extent_double_handles */
 
 /*
