@@ -4495,8 +4495,8 @@ test_misc23(void)
      * test H5Lcreate_ud()
      **********************************************************************/
     //#ifndef NO_USER_DEFINED_LINKS
-    //if (H5Pget_vol_cap_flags(file_id, &vol_cap_flags) < 0) {
-        // throw an error
+    // if (H5Pget_vol_cap_flags(file_id, &vol_cap_flags) < 0) {
+    // throw an error
     //}
     if (vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS) {
         status = H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t)9, create_id,
