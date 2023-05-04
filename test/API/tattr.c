@@ -6518,20 +6518,22 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-//#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+                        //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
                         if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                             if (use_index)
                                 MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
                                             "w/Creation Order Index\n"))
                             else
-                                MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
-                                            "Creation Order Index\n"))
-                        } else {
+                                MESSAGE(5,
+                                        ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
+                                         "Creation Order Index\n"))
+                        }
+                        else {
                             continue;
                         }
-//#else
-                        //continue;
-//#endif
+                        //#else
+                        // continue;
+                        //#endif
                     } /* end else */
                 }     /* end else */
 
