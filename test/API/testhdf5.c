@@ -41,7 +41,7 @@ char *paraprefix = NULL; /* for command line option para-prefix */
 /* Length of multi-file VFD filename buffers */
 #define H5TEST_MULTI_FILENAME_LEN 1024
 
-uint64_t vol_cap_flags_g   = H5VL_CAP_FLAG_NONE;
+uint64_t vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
