@@ -446,6 +446,12 @@ Bug Fixes since HDF5-1.14.0 release
 
       Fixes GitHub issues #1546 and #2259
 
+    - Force lowercase Fortran module file names
+
+      The Cray Fortran compiler  uses  uppercase Fortran module file names, which
+      caused CMake installs to fail. A compiler option was added to use lowercase
+      instead.
+
 
     Tools
     -----
