@@ -4484,15 +4484,16 @@ test_misc23(void)
     /**********************************************************************
      * test H5Lcreate_external()
      **********************************************************************/
-//#ifndef NO_EXTERNAL_LINKS
+    //#ifndef NO_EXTERNAL_LINKS
     if (vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) {
-        status = H5Lcreate_external("fake_filename", "fake_path", file_id, "/A/B20/grp", create_id, access_id);
+        status =
+            H5Lcreate_external("fake_filename", "fake_path", file_id, "/A/B20/grp", create_id, access_id);
         CHECK(status, FAIL, "H5Lcreate_external");
 
         tri_status = H5Lexists(file_id, "/A/B20/grp", access_id);
         VERIFY(tri_status, TRUE, "H5Lexists");
     }
-//#endif
+    //#endif
     /**********************************************************************
      * test H5Lcreate_ud()
      **********************************************************************/
