@@ -1859,6 +1859,8 @@ main(int argc, char **argv)
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
+    int     ret;
+    herr_t  status;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1914,18 +1916,34 @@ main(int argc, char **argv)
 
         H5E_BEGIN_TRY
         {
-            H5Fdelete(FILENAME[0], fapl_id);
-            H5Fdelete(FILENAME[1], fapl_id);
+            status = H5Fdelete(FILENAME[0], fapl_id);
+            if (status < 0)
+                nerrors++;
         }
         H5E_END_TRY;
 
         H5Pclose(fapl_id);
     }
 
+    /* Gather errors from all ranks */
+    MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+    nerrors = ret;
+
+    if (mpi_rank_g == 0) {
+        printf("\n==================================================\n");
+        if (nerrors)
+            printf("***Parallel big IO tests detected %d errors***\n", nerrors);
+        else
+            printf("Parallel big IO tests finished with no errors\n");
+        printf("==================================================\n");
+    } /* end if */
+
     /* close HDF5 library */
     H5close();
 
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
 
-    return 0;
+    /* cannot just return (nerrors) because exit code is limited to 1 byte */
+    return (nerrors != 0);
 }
