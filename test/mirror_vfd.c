@@ -2367,7 +2367,6 @@ confirm_server(struct mt_opts *opts)
                 HDprintf("ERROR socket()\n");
                 return -1;
             }
-
         }
         else
             break;
