@@ -3003,16 +3003,6 @@ typedef struct H5C_tag_info_t {
  *
  * Catchall structure for all variables specific to an instance of the cache.
  *
- * While the individual fields of the structure are discussed below, the
- * following overview may be helpful.
- *
- * Entries in the cache are stored in an instance of H5TB_TREE, indexed on
- * the entry's disk address.  While the H5TB_TREE is less efficient than
- * hash table, it keeps the entries in address sorted order.  As flushes
- * in parallel mode are more efficient if they are issued in increasing
- * address order, this is a significant benefit.  Also the H5TB_TREE code
- * was readily available, which reduced development time.
- *
  * While the cache was designed with multiple replacement policies in mind,
  * at present only a modified form of LRU is supported.
  *
