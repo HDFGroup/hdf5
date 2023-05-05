@@ -1709,7 +1709,7 @@ test_attr_delete(hid_t fapl)
 static void
 test_attr_dtype_shared(hid_t fapl)
 {
-#ifndef NO_SHARED_DATATYPES
+//#ifndef NO_SHARED_DATATYPES
     hid_t       file_id;   /* File ID */
     hid_t       dset_id;   /* Dataset ID */
     hid_t       space_id;  /* Dataspace ID for dataset & attribute */
@@ -1723,164 +1723,169 @@ test_attr_dtype_shared(hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
 #endif
     herr_t ret; /* Generic return value        */
-#else
-    (void)fapl;
-#endif
+//#else
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
+         (void)fapl;
+    }
+//x#endif
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Shared Datatypes with Attributes - SKIPPED for now due to no support for shared "
                 "datatypes\n"));
-#ifndef NO_SHARED_DATATYPES
-    /* Create a file */
-    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    CHECK(file_id, FAIL, "H5Fopen");
+//#ifndef NO_SHARED_DATATYPES
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && 
+        (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+        /* Create a file */
+        file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+        CHECK(file_id, FAIL, "H5Fopen");
 
-    /* Close file */
-    ret = H5Fclose(file_id);
-    CHECK(ret, FAIL, "H5Fclose");
-#if 0
-    /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME, fapl);
-    if (empty_filesize < 0)
-        TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
-#endif
+        /* Close file */
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
+    #if 0
+        /* Get size of file */
+        empty_filesize = h5_get_file_size(FILENAME, fapl);
+        if (empty_filesize < 0)
+            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+    #endif
 
-    /* Re-open file */
-    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
-    CHECK(file_id, FAIL, "H5Fopen");
+        /* Re-open file */
+        file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+        CHECK(file_id, FAIL, "H5Fopen");
 
-    /* Create a datatype to commit and use */
-    type_id = H5Tcopy(H5T_NATIVE_INT);
-    CHECK(type_id, FAIL, "H5Tcopy");
+        /* Create a datatype to commit and use */
+        type_id = H5Tcopy(H5T_NATIVE_INT);
+        CHECK(type_id, FAIL, "H5Tcopy");
 
-    /* Commit datatype to file */
-    ret = H5Tcommit2(file_id, TYPE1_NAME, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Tcommit2");
+        /* Commit datatype to file */
+        ret = H5Tcommit2(file_id, TYPE1_NAME, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Tcommit2");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 1, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 1, "H5Oget_info_by_name3");
 
-    /* Create dataspace for dataset */
-    space_id = H5Screate(H5S_SCALAR);
-    CHECK(space_id, FAIL, "H5Screate");
+        /* Create dataspace for dataset */
+        space_id = H5Screate(H5S_SCALAR);
+        CHECK(space_id, FAIL, "H5Screate");
 
-    /* Create dataset */
-    dset_id = H5Dcreate2(file_id, DSET1_NAME, type_id, space_id, H5P_DEFAULT, dcpl_g, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate2");
+        /* Create dataset */
+        dset_id = H5Dcreate2(file_id, DSET1_NAME, type_id, space_id, H5P_DEFAULT, dcpl_g, H5P_DEFAULT);
+        CHECK(dset_id, FAIL, "H5Dcreate2");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 2, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 2, "H5Oget_info_by_name3");
 
-    /* Create attribute on dataset */
-    attr_id = H5Acreate2(dset_id, ATTR1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr_id, FAIL, "H5Acreate2");
+        /* Create attribute on dataset */
+        attr_id = H5Acreate2(dset_id, ATTR1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate2");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
 
-    /* Close attribute */
-    ret = H5Aclose(attr_id);
-    CHECK(ret, FAIL, "H5Aclose");
+        /* Close attribute */
+        ret = H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
 
-    /* Delete attribute */
-    ret = H5Adelete(dset_id, ATTR1_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+        /* Delete attribute */
+        ret = H5Adelete(dset_id, ATTR1_NAME);
+        CHECK(ret, FAIL, "H5Adelete");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 2, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 2, "H5Oget_info_by_name3");
 
-    /* Create attribute on dataset */
-    attr_id = H5Acreate2(dset_id, ATTR1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(attr_id, FAIL, "H5Acreate2");
+        /* Create attribute on dataset */
+        attr_id = H5Acreate2(dset_id, ATTR1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate2");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
 
-    /* Write data into the attribute */
-    ret = H5Awrite(attr_id, H5T_NATIVE_INT, &data);
-    CHECK(ret, FAIL, "H5Awrite");
+        /* Write data into the attribute */
+        ret = H5Awrite(attr_id, H5T_NATIVE_INT, &data);
+        CHECK(ret, FAIL, "H5Awrite");
 
-    /* Close attribute */
-    ret = H5Aclose(attr_id);
-    CHECK(ret, FAIL, "H5Aclose");
+        /* Close attribute */
+        ret = H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
 
-    /* Close dataset */
-    ret = H5Dclose(dset_id);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Close dataset */
+        ret = H5Dclose(dset_id);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Close dataspace */
-    ret = H5Sclose(space_id);
-    CHECK(ret, FAIL, "H5Sclose");
+        /* Close dataspace */
+        ret = H5Sclose(space_id);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    /* Close datatype */
-    ret = H5Tclose(type_id);
-    CHECK(ret, FAIL, "H5Tclose");
+        /* Close datatype */
+        ret = H5Tclose(type_id);
+        CHECK(ret, FAIL, "H5Tclose");
 
-    /* Close file */
-    ret = H5Fclose(file_id);
-    CHECK(ret, FAIL, "H5Fclose");
+        /* Close file */
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    /* Re-open file */
-    file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
-    CHECK(file_id, FAIL, "H5Fopen");
+        /* Re-open file */
+        file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+        CHECK(file_id, FAIL, "H5Fopen");
 
-    /* Open dataset */
-    dset_id = H5Dopen2(file_id, DSET1_NAME, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dopen2");
+        /* Open dataset */
+        dset_id = H5Dopen2(file_id, DSET1_NAME, H5P_DEFAULT);
+        CHECK(dset_id, FAIL, "H5Dopen2");
 
-    /* Open attribute */
-    attr_id = H5Aopen(dset_id, ATTR1_NAME, H5P_DEFAULT);
-    CHECK(attr_id, FAIL, "H5Aopen");
+        /* Open attribute */
+        attr_id = H5Aopen(dset_id, ATTR1_NAME, H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Aopen");
 
-    /* Read data from the attribute */
-    ret = H5Aread(attr_id, H5T_NATIVE_INT, &rdata);
-    CHECK(ret, FAIL, "H5Aread");
-    VERIFY(data, rdata, "H5Aread");
+        /* Read data from the attribute */
+        ret = H5Aread(attr_id, H5T_NATIVE_INT, &rdata);
+        CHECK(ret, FAIL, "H5Aread");
+        VERIFY(data, rdata, "H5Aread");
 
-    /* Close attribute */
-    ret = H5Aclose(attr_id);
-    CHECK(ret, FAIL, "H5Aclose");
+        /* Close attribute */
+        ret = H5Aclose(attr_id);
+        CHECK(ret, FAIL, "H5Aclose");
 
-    /* Close dataset */
-    ret = H5Dclose(dset_id);
-    CHECK(ret, FAIL, "H5Dclose");
+        /* Close dataset */
+        ret = H5Dclose(dset_id);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 3, "H5Oget_info_by_name3");
 
-    /* Unlink the dataset */
-    ret = H5Ldelete(file_id, DSET1_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Ldelete");
+        /* Unlink the dataset */
+        ret = H5Ldelete(file_id, DSET1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
-    /* Check reference count on named datatype */
-    ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info_by_name3");
-    VERIFY(oinfo.rc, 1, "H5Oget_info_by_name3");
+        /* Check reference count on named datatype */
+        ret = H5Oget_info_by_name3(file_id, TYPE1_NAME, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info_by_name3");
+        VERIFY(oinfo.rc, 1, "H5Oget_info_by_name3");
 
-    /* Unlink the named datatype */
-    ret = H5Ldelete(file_id, TYPE1_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Ldelete");
+        /* Unlink the named datatype */
+        ret = H5Ldelete(file_id, TYPE1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
-    /* Close file */
-    ret = H5Fclose(file_id);
-    CHECK(ret, FAIL, "H5Fclose");
-#if 0
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
-#endif
-#endif
+        /* Close file */
+        ret = H5Fclose(file_id);
+        CHECK(ret, FAIL, "H5Fclose");
+    #if 0
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    #endif
+    }
+//#endif
 } /* test_attr_dtype_shared() */
 
 /****************************************************************
