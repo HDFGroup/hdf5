@@ -118,10 +118,10 @@ test_h5s_basic(void)
     hid_t fid1;       /* HDF5 File IDs        */
     hid_t sid1, sid2; /* Dataspace ID            */
     hid_t dset1;      /* Dataset ID            */
-//#ifndef NO_VALIDATE_DATASPACE
-    hid_t aid1; /* Attribute ID                 */
-//#endif
-    int      rank; /* Logical rank of dataspace    */
+                      //#ifndef NO_VALIDATE_DATASPACE
+    hid_t aid1;       /* Attribute ID                 */
+                      //#endif
+    int      rank;    /* Logical rank of dataspace    */
     hsize_t  dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t  dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4};
     hsize_t  dims3[H5S_MAX_RANK + 1];
@@ -254,17 +254,18 @@ test_h5s_basic(void)
     CHECK(sid1, FAIL, "H5Screate");
     sid2 = H5Screate_simple(1, dims1, dims1);
     CHECK(sid2, FAIL, "H5Screate");
-//#ifndef NO_VALIDATE_DATASPACE
+    //#ifndef NO_VALIDATE_DATASPACE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         /* This dataset's space has no extent; it should not be created */
         H5E_BEGIN_TRY
         {
-            dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            dset1 =
+                H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         }
         H5E_END_TRY
         VERIFY(dset1, FAIL, "H5Dcreate2");
     }
-//#endif
+    //#endif
     dset1 = H5Dcreate2(fid1, BASICDATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
@@ -275,7 +276,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
-//#ifndef NO_VALIDATE_DATASPACE
+    //#ifndef NO_VALIDATE_DATASPACE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         H5E_BEGIN_TRY
         {
@@ -291,7 +292,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dwrite");
     }
-//#endif
+    //#endif
     /* Try to iterate using the bad dataspace */
     H5E_BEGIN_TRY
     {
@@ -307,7 +308,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dfill");
-//#ifndef NO_VALIDATE_DATASPACE
+    //#ifndef NO_VALIDATE_DATASPACE
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         /* Now use the bad dataspace as the space for an attribute */
         H5E_BEGIN_TRY
@@ -317,7 +318,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(aid1, FAIL, "H5Acreate2");
     }
-//#endif
+    //#endif
     /* Make sure that dataspace reads using the bad dataspace fail */
     H5E_BEGIN_TRY
     {
@@ -325,7 +326,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
-//#ifndef NO_VALIDATE_DATASPACE
+    //#ifndef NO_VALIDATE_DATASPACE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         H5E_BEGIN_TRY
         {
@@ -341,7 +342,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dread");
     }
-//#endif
+    //#endif
     /* Clean up */
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
