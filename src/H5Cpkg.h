@@ -13,16 +13,9 @@
 /*
  * Programmer: John Mainzer -- 10/12/04
  *
- * Purpose:     This file contains declarations which are normally visible
- *              only within the H5C package.
- *
- *        Source files outside the H5C package should include
- *        H5Cprivate.h instead.
- *
- *        The one exception to this rule is test/cache.c.  The test
- *        code is easier to write if it can look at the cache's
- *        internal data structures.  Indeed, this is the main
- *        reason why this file was created.
+ * Purpose:	This file contains declarations which are visible only within
+ *		the H5C package.  Source files outside the H5C package should
+ *		include H5Cprivate.h instead.
  */
 
 /* clang-format off */
@@ -82,424 +75,167 @@
 
 #ifdef H5C_DO_SANITY_CHECKS
 
-#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (head_ptr) == NULL ) ||                                               \
-     ( (tail_ptr) == NULL ) ||                                               \
-     ( (entry_ptr) == NULL ) ||                                              \
-     ( (len) <= 0 ) ||                                                       \
-     ( (list_size) < (entry_ptr)->size ) ||                                       \
-     ( ( (entry_ptr)->prev == NULL ) && ( (head_ptr) != (entry_ptr) ) ) ||   \
-     ( ( (entry_ptr)->next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||   \
-     ( ( (len) == 1 ) &&                                                     \
-       ( ! ( ( (head_ptr) == (entry_ptr) ) &&                                \
-             ( (tail_ptr) == (entry_ptr) ) &&                                \
-             ( (entry_ptr)->next == NULL ) &&                                \
-             ( (entry_ptr)->prev == NULL ) &&                                \
-             ( (list_size) == (entry_ptr)->size )                                 \
-           )                                                                 \
-       )                                                                     \
-     )                                                                       \
+#define H5C__GEN_DLL_PRE_REMOVE_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+if (((head_ptr) == NULL) || ((tail_ptr) == NULL) ||                          \
+    ((entry_ptr) == NULL) || ((len) <= 0) ||                                 \
+    ((list_size) < (entry_ptr)->size) ||                                     \
+    ((entry_ptr)->list_prev == NULL && (head_ptr) != (entry_ptr)) ||        \
+    ((entry_ptr)->list_next == NULL && (tail_ptr) != (entry_ptr)) ||        \
+    ((len) == 1 &&                                                           \
+     !((head_ptr) == (entry_ptr) && (tail_ptr) == (entry_ptr) &&             \
+       (entry_ptr)->list_next == NULL && (entry_ptr)->list_prev == NULL && \
+       (list_size) == (entry_ptr)->size                                      \
+      )                                                                      \
+    )                                                                        \
    ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre remove SC failed")     \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed")               \
 }
 
-#define H5C__DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                   \
-if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&           \
-       ( (head_ptr) != (tail_ptr) )                                      \
-     ) ||                                                                \
-     ( (len) < 0 ) ||                                                    \
-     ( (list_size) < 0 ) ||                                                   \
-     ( ( (len) == 1 ) &&                                                 \
-       ( ( (head_ptr) != (tail_ptr) ) ||                                 \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (list_size) )        \
-       )                                                                 \
-     ) ||                                                                \
-     ( ( (len) >= 1 ) &&                                                 \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->prev != NULL ) ||       \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->next != NULL )          \
-       )                                                                 \
-     )                                                                   \
-   ) {                                                                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL sanity check failed")  \
+#define H5C__GEN_DLL_SC(list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+if ((((head_ptr) == NULL || (tail_ptr) == NULL) && (head_ptr) != (tail_ptr)) || \
+    ((len) == 1 &&                                                              \
+     ((head_ptr) != (tail_ptr) || (head_ptr) == NULL ||                         \
+      (head_ptr)->size != (list_size))                                          \
+    ) ||                                                                        \
+    ((len) >= 1 &&                                                              \
+     ((head_ptr) == NULL || (head_ptr)->list_prev != NULL||                     \
+      (tail_ptr) == NULL || (tail_ptr)->list_next != NULL                       \
+     )                                                                          \
+    )                                                                           \
+   ) {                                                                          \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL sanity check failed")   \
 }
 
-#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (entry_ptr) == NULL ) ||                                              \
-     ( (entry_ptr)->next != NULL ) ||                                        \
-     ( (entry_ptr)->prev != NULL ) ||                                        \
-     ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
-       ( (head_ptr) != (tail_ptr) )                                          \
-     ) ||                                                                    \
-     ( ( (len) == 1 ) &&                                                     \
-       ( ( (head_ptr) != (tail_ptr) ) ||                                     \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (list_size) )            \
+#define H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+if ((entry_ptr) == NULL || (entry_ptr)->list_next != NULL || (entry_ptr)->list_prev != NULL || \
+    (((head_ptr) == NULL || (tail_ptr) == NULL) && (head_ptr) != (tail_ptr)) ||                \
+    ( (len) == 0 &&                                                     \
+       ((list_size) > 0 ||                       \
+       (head_ptr) != NULL || (tail_ptr) != NULL                                            \
        )                                                                     \
-     ) ||                                                                    \
-     ( ( (len) >= 1 ) &&                                                     \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->prev != NULL ) ||           \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->next != NULL )              \
-       )                                                                     \
-     )                                                                       \
-   ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed")     \
+    ) ||                                                                    \
+    ((len) == 1 &&                                                                             \
+     ((head_ptr) != (tail_ptr) ||                                            \
+      (head_ptr) == NULL || (head_ptr)->size != (list_size)                                    \
+     )                                                                                         \
+    ) ||                                                                                       \
+    ((len) >= 1 &&                                                                             \
+     ((head_ptr) == NULL || (head_ptr)->list_prev != NULL ||                                   \
+      (tail_ptr) == NULL || (tail_ptr)->list_next != NULL                                      \
+     )                                                                                         \
+    )                                                                                          \
+   ) {                                                                                         \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed")                 \
 }
 
-#define H5C__DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)    \
-if ( ( (dll_len) <= 0 ) ||                                                    \
-     ( (dll_size) <= 0 ) ||                                                   \
-     ( (old_size) <= 0 ) ||                                                   \
-     ( (old_size) > (dll_size) ) ||                                           \
-     ( (new_size) <= 0 ) ||                                                   \
-     ( ( (dll_len) == 1 ) && ( (old_size) != (dll_size) ) ) ) {               \
+#define H5C__GEN_DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val) \
+if ((dll_len) <= 0 || (dll_size) <= 0 || (old_size) <= 0 ||                   \
+    (old_size) > (dll_size) || (new_size) <= 0 ||                             \
+    ((dll_len) == 1 && (old_size) != (dll_size))                              \
+   ) {                                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre size update SC failed") \
 }
 
-#define H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)    \
-if ( ( (new_size) > (dll_size) ) ||                                            \
-     ( ( (dll_len) == 1 ) && ( (new_size) != (dll_size) ) ) ) {                \
+#define H5C__GEN_DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val) \
+if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))    \
+    ) {                                                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL post size update SC failed") \
 }
-
 #else /* H5C_DO_SANITY_CHECKS */
-
-#define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
-#define H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
-
+#define H5C__GEN_DLL_PRE_REMOVE_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__GEN_DLL_SC(list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__GEN_DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
+#define H5C__GEN_DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
 #endif /* H5C_DO_SANITY_CHECKS */
 
-
-#define H5C__DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-{                                                                           \
-    H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,        \
-                           fail_val)                                        \
-    if ( (head_ptr) == NULL )                                               \
-    {                                                                       \
-       (head_ptr) = (entry_ptr);                                            \
-       (tail_ptr) = (entry_ptr);                                            \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-       (tail_ptr)->next = (entry_ptr);                                      \
-       (entry_ptr)->prev = (tail_ptr);                                      \
-       (tail_ptr) = (entry_ptr);                                            \
-    }                                                                       \
-    (len)++;                                                                \
-    (list_size) += (entry_ptr)->size;                                            \
-} /* H5C__DLL_APPEND() */
-
-#define H5C__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-{                                                                            \
-    H5C__DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,         \
-                           fail_val)                                         \
-    if ( (head_ptr) == NULL )                                                \
-    {                                                                        \
-       (head_ptr) = (entry_ptr);                                             \
-       (tail_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    else                                                                     \
-    {                                                                        \
-       (head_ptr)->prev = (entry_ptr);                                       \
-       (entry_ptr)->next = (head_ptr);                                       \
-       (head_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    (len)++;                                                                 \
-    (list_size) += (entry_ptr)->size;                                             \
-} /* H5C__DLL_PREPEND() */
-
-#define H5C__DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-{                                                                           \
-    H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,        \
-                           fail_val)                                        \
-    {                                                                       \
-       if ( (head_ptr) == (entry_ptr) )                                     \
-       {                                                                    \
-          (head_ptr) = (entry_ptr)->next;                                   \
-          if ( (head_ptr) != NULL )                                         \
-             (head_ptr)->prev = NULL;                                       \
-       }                                                                    \
-       else                                                                 \
-          (entry_ptr)->prev->next = (entry_ptr)->next;                      \
-       if ( (tail_ptr) == (entry_ptr) )                                     \
-       {                                                                    \
-          (tail_ptr) = (entry_ptr)->prev;                                   \
-          if ( (tail_ptr) != NULL )                                         \
-             (tail_ptr)->next = NULL;                                       \
-       }                                                                    \
-       else                                                                 \
-          (entry_ptr)->next->prev = (entry_ptr)->prev;                      \
-       (entry_ptr)->next = NULL;                                            \
-       (entry_ptr)->prev = NULL;                                            \
-       (len)--;                                                             \
-       (list_size) -= (entry_ptr)->size;                                         \
-    }                                                                       \
-} /* H5C__DLL_REMOVE() */
-
-#define H5C__DLL_UPDATE_FOR_SIZE_CHANGE(dll_len, dll_size, old_size, new_size, fail_val) \
+#define H5C__GEN_DLL_APPEND(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)    \
 {                                                                              \
-    H5C__DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)         \
-    (dll_size) -= (old_size);                                                  \
-    (dll_size) += (new_size);                                                  \
-    H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)        \
-} /* H5C__DLL_UPDATE_FOR_SIZE_CHANGE() */
-
-#ifdef H5C_DO_SANITY_CHECKS
-
-#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (hd_ptr) == NULL ) ||                                                   \
-     ( (tail_ptr) == NULL ) ||                                                 \
-     ( (entry_ptr) == NULL ) ||                                                \
-     ( (len) <= 0 ) ||                                                         \
-     ( (list_size) < (entry_ptr)->size ) ||                                         \
-     ( ( (list_size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
-     ( ( (entry_ptr)->aux_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
-     ( ( (entry_ptr)->aux_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
-     ( ( (len) == 1 ) &&                                                       \
-       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
-             ( (entry_ptr)->aux_next == NULL ) &&                              \
-             ( (entry_ptr)->aux_prev == NULL ) &&                              \
-             ( (list_size) == (entry_ptr)->size )                                   \
-           )                                                                   \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "aux DLL pre remove SC failed")   \
-}
-
-#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                  \
-if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
-       ( (head_ptr) != (tail_ptr) )                                         \
-     ) ||                                                                   \
-     ( (len) < 0 ) ||                                                       \
-     ( (list_size) < 0 ) ||                                                      \
-     ( ( (len) == 1 ) &&                                                    \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (list_size) <= 0 ) ||                 \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (list_size) )           \
-       )                                                                    \
-     ) ||                                                                   \
-     ( ( (len) >= 1 ) &&                                                    \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->aux_prev != NULL ) ||      \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->aux_next != NULL )         \
-       )                                                                    \
-     )                                                                      \
-   ) {                                                                      \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "AUX DLL sanity check failed") \
-}
-
-#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (entry_ptr) == NULL ) ||                                                \
-     ( (entry_ptr)->aux_next != NULL ) ||                                      \
-     ( (entry_ptr)->aux_prev != NULL ) ||                                      \
-     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                   \
-       ( (hd_ptr) != (tail_ptr) )                                              \
-     ) ||                                                                      \
-     ( ( (len) == 1 ) &&                                                       \
-       ( ( (hd_ptr) != (tail_ptr) ) || ( (list_size) <= 0 ) ||                      \
-         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (list_size) )                  \
-       )                                                                       \
-     ) ||                                                                      \
-     ( ( (len) >= 1 ) &&                                                       \
-       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->aux_prev != NULL ) ||             \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->aux_next != NULL )            \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "AUX DLL pre insert SC failed")   \
-}
-
-#else /* H5C_DO_SANITY_CHECKS */
-
-#define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__AUX_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-
-#endif /* H5C_DO_SANITY_CHECKS */
-
-
-#define H5C__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)\
-{                                                                              \
-    H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,       \
-                               fail_val)                                       \
-    if ( (head_ptr) == NULL )                                                  \
-    {                                                                          \
+    H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+    if ((head_ptr) == NULL) {                                                  \
        (head_ptr) = (entry_ptr);                                               \
        (tail_ptr) = (entry_ptr);                                               \
     }                                                                          \
-    else                                                                       \
-    {                                                                          \
-       (tail_ptr)->aux_next = (entry_ptr);                                     \
-       (entry_ptr)->aux_prev = (tail_ptr);                                     \
+    else {                                                                     \
+       (tail_ptr)->list_next = (entry_ptr);                                    \
+       (entry_ptr)->list_prev = (tail_ptr);                                    \
        (tail_ptr) = (entry_ptr);                                               \
     }                                                                          \
     (len)++;                                                                   \
-    (list_size) += entry_ptr->size;                                                 \
-} /* H5C__AUX_DLL_APPEND() */
+    (list_size) += (entry_ptr)->size;                                               \
+} /* H5C__GEN_DLL_APPEND() */
 
-#define H5C__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)   \
-{                                                                            \
-    H5C__AUX_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-    if ( (head_ptr) == NULL )                                                \
-    {                                                                        \
-       (head_ptr) = (entry_ptr);                                             \
-       (tail_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    else                                                                     \
-    {                                                                        \
-       (head_ptr)->aux_prev = (entry_ptr);                                   \
-       (entry_ptr)->aux_next = (head_ptr);                                   \
-       (head_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    (len)++;                                                                 \
-    (list_size) += entry_ptr->size;                                               \
-} /* H5C__AUX_DLL_PREPEND() */
+#define H5C__GEN_DLL_PREPEND(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)    \
+{                                                                              \
+    H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+    if ((head_ptr) == NULL) {                                                  \
+       (head_ptr) = (entry_ptr);                                               \
+       (tail_ptr) = (entry_ptr);                                               \
+    }                                                                          \
+    else {                                                                     \
+       (head_ptr)->list_prev = (entry_ptr);                                         \
+       (entry_ptr)->list_next = (head_ptr);                                         \
+       (head_ptr) = (entry_ptr);                                               \
+    }                                                                          \
+    (len)++;                                                                   \
+    (list_size) += (entry_ptr)->size;                                               \
+} /* H5C__GEN_DLL_PREPEND() */
 
-#define H5C__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)    \
-{                                                                            \
-    H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-    {                                                                        \
-       if ( (head_ptr) == (entry_ptr) )                                      \
-       {                                                                     \
-          (head_ptr) = (entry_ptr)->aux_next;                                \
-          if ( (head_ptr) != NULL )                                          \
-             (head_ptr)->aux_prev = NULL;                                    \
-       }                                                                     \
-       else                                                                  \
-          (entry_ptr)->aux_prev->aux_next = (entry_ptr)->aux_next;           \
-       if ( (tail_ptr) == (entry_ptr) )                                      \
-       {                                                                     \
-          (tail_ptr) = (entry_ptr)->aux_prev;                                \
-          if ( (tail_ptr) != NULL )                                          \
-             (tail_ptr)->aux_next = NULL;                                    \
-       }                                                                     \
-       else                                                                  \
-          (entry_ptr)->aux_next->aux_prev = (entry_ptr)->aux_prev;           \
-       entry_ptr->aux_next = NULL;                                           \
-       entry_ptr->aux_prev = NULL;                                           \
-       (len)--;                                                              \
-       (list_size) -= entry_ptr->size;                                            \
-    }                                                                        \
-} /* H5C__AUX_DLL_REMOVE() */
+#define H5C__GEN_DLL_REMOVE(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)    \
+{                                                                              \
+    H5C__GEN_DLL_PRE_REMOVE_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
+    if ((head_ptr) == (entry_ptr)) {                                           \
+       (head_ptr) = (entry_ptr)->list_next;                                         \
+       if ((head_ptr) != NULL)                                                 \
+          (head_ptr)->list_prev = NULL;                                             \
+    }                                                                          \
+    else                                                                       \
+       (entry_ptr)->list_prev->list_next = (entry_ptr)->list_next;                            \
+    if ((tail_ptr) == (entry_ptr)) {                                           \
+       (tail_ptr) = (entry_ptr)->list_prev;                                         \
+       if ((tail_ptr) != NULL)                                                 \
+          (tail_ptr)->list_next = NULL;                                             \
+    }                                                                          \
+    else                                                                       \
+       (entry_ptr)->list_next->list_prev = (entry_ptr)->list_prev;                            \
+    (entry_ptr)->list_next = NULL;                                                  \
+    (entry_ptr)->list_prev = NULL;                                                  \
+    (len)--;                                                                   \
+    (list_size) -= (entry_ptr)->size;                                               \
+} /* H5C__GEN_DLL_REMOVE() */
 
-#ifdef H5C_DO_SANITY_CHECKS
-
-#define H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (hd_ptr) == NULL ) ||                                                  \
-     ( (tail_ptr) == NULL ) ||                                                \
-     ( (entry_ptr) == NULL ) ||                                               \
-     ( (len) <= 0 ) ||                                                        \
-     ( (list_size) < (entry_ptr)->size ) ||                                        \
-     ( ( (list_size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||           \
-     ( ( (entry_ptr)->il_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
-     ( ( (entry_ptr)->il_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
-     ( ( (len) == 1 ) &&                                                      \
-       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&  \
-             ( (entry_ptr)->il_next == NULL ) &&                              \
-             ( (entry_ptr)->il_prev == NULL ) &&                              \
-             ( (list_size) == (entry_ptr)->size )                                  \
-           )                                                                  \
-       )                                                                      \
-     )                                                                        \
-   ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "il DLL pre remove SC failed")   \
-}
-
-#define H5C__IL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (entry_ptr) == NULL ) ||                                               \
-     ( (entry_ptr)->il_next != NULL ) ||                                      \
-     ( (entry_ptr)->il_prev != NULL ) ||                                      \
-     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                  \
-       ( (hd_ptr) != (tail_ptr) )                                             \
-     ) ||                                                                     \
-     ( ( (len) == 1 ) &&                                                      \
-       ( ( (hd_ptr) != (tail_ptr) ) || ( (list_size) <= 0 ) ||                     \
-         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (list_size) )                 \
-       )                                                                      \
-     ) ||                                                                     \
-     ( ( (len) >= 1 ) &&                                                      \
-       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->il_prev != NULL ) ||             \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->il_next != NULL )            \
-       )                                                                      \
-     )                                                                        \
-   ) {                                                                        \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "IL DLL pre insert SC failed")   \
-}
-
-#define H5C__IL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                  \
-if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
-       ( (head_ptr) != (tail_ptr) )                                        \
-     ) ||                                                                  \
-     ( ( (len) == 1 ) &&                                                   \
-       ( ( (head_ptr) != (tail_ptr) ) ||                                   \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (list_size) )          \
-       )                                                                   \
-     ) ||                                                                  \
-     ( ( (len) >= 1 ) &&                                                   \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->il_prev != NULL ) ||      \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->il_next != NULL )         \
-       )                                                                   \
-     )                                                                     \
-   ) {                                                                     \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "IL DLL sanity check failed") \
-}
-
-#else /* H5C_DO_SANITY_CHECKS */
-
-#define H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__IL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__IL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)
-
-#endif /* H5C_DO_SANITY_CHECKS */
+#define H5C__GEN_DLL_UPDATE_FOR_SIZE_CHANGE(dll_len, dll_size, old_size, new_size, fail_val) \
+{                                                                              \
+    H5C__GEN_DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)     \
+    (dll_size) -= (old_size);                                                  \
+    (dll_size) += (new_size);                                                  \
+    H5C__GEN_DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)        \
+} /* H5C__GEN_DLL_UPDATE_FOR_SIZE_CHANGE() */
 
 
-#define H5C__IL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)\
-{                                                                             \
-    H5C__IL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,       \
-                               fail_val)                                      \
-    if ( (head_ptr) == NULL )                                                 \
-    {                                                                         \
-       (head_ptr) = (entry_ptr);                                              \
-       (tail_ptr) = (entry_ptr);                                              \
-    }                                                                         \
-    else                                                                      \
-    {                                                                         \
-       (tail_ptr)->il_next = (entry_ptr);                                     \
-       (entry_ptr)->il_prev = (tail_ptr);                                     \
-       (tail_ptr) = (entry_ptr);                                              \
-    }                                                                         \
-    (len)++;                                                                  \
-    (list_size) += entry_ptr->size;                                                \
-    H5C__IL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                   \
-} /* H5C__IL_DLL_APPEND() */
+/* Macros that modify the LRU/protected/pinned lists */
+#define H5C__DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)    \
+    H5C__GEN_DLL_APPEND(entry_ptr, next, prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_PREPEND(entry_ptr, next, prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_REMOVE(entry_ptr, next, prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__DLL_UPDATE_FOR_SIZE_CHANGE(dll_len, dll_size, old_size, new_size, fail_val) \
+    H5C__GEN_DLL_UPDATE_FOR_SIZE_CHANGE(dll_len, dll_size, old_size, new_size, fail_val)
 
-#define H5C__IL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)    \
-{                                                                           \
-    H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-    {                                                                       \
-       if ( (head_ptr) == (entry_ptr) )                                     \
-       {                                                                    \
-          (head_ptr) = (entry_ptr)->il_next;                                \
-          if ( (head_ptr) != NULL )                                         \
-             (head_ptr)->il_prev = NULL;                                    \
-       }                                                                    \
-       else                                                                 \
-          (entry_ptr)->il_prev->il_next = (entry_ptr)->il_next;             \
-       if ( (tail_ptr) == (entry_ptr) )                                     \
-       {                                                                    \
-          (tail_ptr) = (entry_ptr)->il_prev;                                \
-          if ( (tail_ptr) != NULL )                                         \
-             (tail_ptr)->il_next = NULL;                                    \
-       }                                                                    \
-       else                                                                 \
-          (entry_ptr)->il_next->il_prev = (entry_ptr)->il_prev;             \
-       entry_ptr->il_next = NULL;                                           \
-       entry_ptr->il_prev = NULL;                                           \
-       (len)--;                                                             \
-       (list_size) -= entry_ptr->size;                                           \
-    }                                                                       \
-    H5C__IL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                       \
-} /* H5C__IL_DLL_REMOVE() */
+/* Macros that modify the "auxiliary" LRU list */
+#define H5C__AUX_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)  \
+    H5C__GEN_DLL_APPEND(entry_ptr, aux_next, aux_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__AUX_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_PREPEND(entry_ptr, aux_next, aux_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__AUX_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)  \
+    H5C__GEN_DLL_REMOVE(entry_ptr, aux_next, aux_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+
+/* Macros that modify the "index" list */
+#define H5C__IL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_APPEND(entry_ptr, il_next, il_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__IL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_REMOVE(entry_ptr, il_next, il_prev, head_ptr, tail_ptr, len, list_size, fail_val)
 
 
 /***********************************************************************
@@ -2718,144 +2454,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #ifdef H5_HAVE_PARALLEL
 
-#ifdef H5C_DO_SANITY_CHECKS
-
-#define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val) \
-if ( ( (hd_ptr) == NULL ) ||                                                   \
-     ( (tail_ptr) == NULL ) ||                                                 \
-     ( (entry_ptr) == NULL ) ||                                                \
-     ( (len) <= 0 ) ||                                                         \
-     ( (list_size) < (entry_ptr)->size ) ||                                         \
-     ( ( (list_size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
-     ( ( (entry_ptr)->coll_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||  \
-     ( ( (entry_ptr)->coll_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) ||\
-     ( ( (len) == 1 ) &&                                                       \
-       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
-             ( (entry_ptr)->coll_next == NULL ) &&                             \
-             ( (entry_ptr)->coll_prev == NULL ) &&                             \
-             ( (list_size) == (entry_ptr)->size )                                   \
-           )                                                                   \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "coll DLL pre remove SC failed")  \
-}
-
-#define H5C__COLL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)                 \
-if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
-       ( (head_ptr) != (tail_ptr) )                                         \
-     ) ||                                                                   \
-     ( (len) < 0 ) ||                                                       \
-     ( (list_size) < 0 ) ||                                                      \
-     ( ( (len) == 1 ) &&                                                    \
-       ( ( (head_ptr) != (tail_ptr) ) || ( (list_size) <= 0 ) ||                 \
-         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (list_size) )           \
-       )                                                                    \
-     ) ||                                                                   \
-     ( ( (len) >= 1 ) &&                                                    \
-       ( ( (head_ptr) == NULL ) || ( (head_ptr)->coll_prev != NULL ) ||     \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->coll_next != NULL )        \
-       )                                                                    \
-     )                                                                      \
-   ) {                                                                      \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "COLL DLL sanity check failed")\
-}
-
-#define H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)\
-if ( ( (entry_ptr) == NULL ) ||                                                \
-     ( (entry_ptr)->coll_next != NULL ) ||                                     \
-     ( (entry_ptr)->coll_prev != NULL ) ||                                     \
-     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                   \
-       ( (hd_ptr) != (tail_ptr) )                                              \
-     ) ||                                                                      \
-     ( ( (len) == 1 ) &&                                                       \
-       ( ( (hd_ptr) != (tail_ptr) ) || ( (list_size) <= 0 ) ||                      \
-         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (list_size) )                  \
-       )                                                                       \
-     ) ||                                                                      \
-     ( ( (len) >= 1 ) &&                                                       \
-       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->coll_prev != NULL ) ||            \
-         ( (tail_ptr) == NULL ) || ( (tail_ptr)->coll_next != NULL )           \
-       )                                                                       \
-     )                                                                         \
-   ) {                                                                         \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "COLL DLL pre insert SC failed")  \
-}
-
-#else /* H5C_DO_SANITY_CHECKS */
-
-#define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__COLL_DLL_SC(head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, list_size, fail_val)
-
-#endif /* H5C_DO_SANITY_CHECKS */
-
-
-#define H5C__COLL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
-{                                                                            \
-    H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size,    \
-                               fail_val)                                     \
-    if ( (head_ptr) == NULL )                                                \
-    {                                                                        \
-       (head_ptr) = (entry_ptr);                                             \
-       (tail_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    else                                                                     \
-    {                                                                        \
-       (tail_ptr)->coll_next = (entry_ptr);                                  \
-       (entry_ptr)->coll_prev = (tail_ptr);                                  \
-       (tail_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    (len)++;                                                                 \
-    (list_size) += entry_ptr->size;                                               \
-} /* H5C__COLL_DLL_APPEND() */
-
-#define H5C__COLL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)  \
-{                                                                            \
-    H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)\
-    if ( (head_ptr) == NULL )                                                \
-    {                                                                        \
-       (head_ptr) = (entry_ptr);                                             \
-       (tail_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    else                                                                     \
-    {                                                                        \
-       (head_ptr)->coll_prev = (entry_ptr);                                  \
-       (entry_ptr)->coll_next = (head_ptr);                                  \
-       (head_ptr) = (entry_ptr);                                             \
-    }                                                                        \
-    (len)++;                                                                 \
-    (list_size) += entry_ptr->size;                                               \
-} /* H5C__COLL_DLL_PREPEND() */
-
-#define H5C__COLL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)   \
-{                                                                            \
-    H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)\
-    {                                                                        \
-       if ( (head_ptr) == (entry_ptr) )                                      \
-       {                                                                     \
-          (head_ptr) = (entry_ptr)->coll_next;                               \
-          if ( (head_ptr) != NULL )                                          \
-             (head_ptr)->coll_prev = NULL;                                   \
-       }                                                                     \
-       else                                                                  \
-       {                                                                     \
-          (entry_ptr)->coll_prev->coll_next = (entry_ptr)->coll_next;        \
-       }                                                                     \
-       if ( (tail_ptr) == (entry_ptr) )                                      \
-       {                                                                     \
-          (tail_ptr) = (entry_ptr)->coll_prev;                               \
-          if ( (tail_ptr) != NULL )                                          \
-             (tail_ptr)->coll_next = NULL;                                   \
-       }                                                                     \
-       else                                                                  \
-          (entry_ptr)->coll_next->coll_prev = (entry_ptr)->coll_prev;        \
-       entry_ptr->coll_next = NULL;                                          \
-       entry_ptr->coll_prev = NULL;                                          \
-       (len)--;                                                              \
-       (list_size) -= entry_ptr->size;                                            \
-    }                                                                        \
-} /* H5C__COLL_DLL_REMOVE() */
+/* Macros that modify the "collective I/O" LRU list */
+#define H5C__COLL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val) \
+    H5C__GEN_DLL_PREPEND(entry_ptr, coll_next, coll_prev, head_ptr, tail_ptr, len, list_size, fail_val)
+#define H5C__COLL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, list_size, fail_val)  \
+    H5C__GEN_DLL_REMOVE(entry_ptr, coll_next, coll_prev, head_ptr, tail_ptr, len, list_size, fail_val)
 
 
 /*-------------------------------------------------------------------------
