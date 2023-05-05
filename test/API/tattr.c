@@ -201,9 +201,9 @@ test_attr_basic_write(hid_t fapl)
     hsize_t dims3[]                = {ATTR2_DIM1, ATTR2_DIM2};
     int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int     i;
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value */
-#endif
+//#endif
     herr_t ret; /* Generic return value */
 
     /* Output message about test being performed */
@@ -252,15 +252,17 @@ test_attr_basic_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -398,15 +400,17 @@ test_attr_basic_write(hid_t fapl)
     attr_size = H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5Aget_storage_size");
 #endif
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -731,9 +735,9 @@ test_attr_compound_write(hid_t fapl)
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t dims2[] = {ATTR4_DIM1, ATTR4_DIM2};
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-#endif
+//#endif
     herr_t ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -775,15 +779,17 @@ test_attr_compound_write(hid_t fapl)
     /* Create complex attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write complex attribute data */
     ret = H5Awrite(attr, tid1, attr_data4);
     CHECK(ret, FAIL, "H5Awrite");
@@ -975,9 +981,9 @@ test_attr_scalar_write(hid_t fapl)
     hid_t   sid1, sid2; /* Dataspace ID            */
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-#endif
+//#endif
     herr_t ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -1002,15 +1008,17 @@ test_attr_scalar_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_FLOAT, &attr_data5);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1120,9 +1128,9 @@ test_attr_mult_write(hid_t fapl)
     hsize_t dims2[] = {ATTR1_DIM1};
     hsize_t dims3[] = {ATTR2_DIM1, ATTR2_DIM2};
     hsize_t dims4[] = {ATTR3_DIM1, ATTR3_DIM2, ATTR3_DIM3};
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-#endif
+//#endif
     herr_t ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -1151,15 +1159,17 @@ test_attr_mult_write(hid_t fapl)
     /* Create 1st attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write 1st attribute data */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1179,15 +1189,17 @@ test_attr_mult_write(hid_t fapl)
     /* Create 2nd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write 2nd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1207,15 +1219,17 @@ test_attr_mult_write(hid_t fapl)
     /* Create 3rd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Try to create the same attribute again (should fail) */
-    H5E_BEGIN_TRY
-    {
-        ret_id = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to create the same attribute again (should fail) */
+        H5E_BEGIN_TRY
+        {
+            ret_id = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(ret_id, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Write 3rd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_DOUBLE, attr_data3);
     CHECK(ret, FAIL, "H5Awrite");
@@ -2319,15 +2333,17 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     /* Close attribute */
     ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
-#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
-    /* Attempt to add attribute again, which should fail */
-    H5E_BEGIN_TRY
-    {
-        attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Attempt to add attribute again, which should fail */
+        H5E_BEGIN_TRY
+        {
+            attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(attr, FAIL, "H5Acreate2");
     }
-    H5E_END_TRY;
-    VERIFY(attr, FAIL, "H5Acreate2");
-#endif
+//#endif
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
