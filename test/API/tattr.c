@@ -7131,7 +7131,7 @@ attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 #endif
 
-#ifndef NO_ITERATION_RESTART
+//#ifndef NO_ITERATION_RESTART
 /*-------------------------------------------------------------------------
  * Function:    attr_iterate2_fail_cb
  *
@@ -7182,6 +7182,13 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
 
     /* Retrieve the current # of reported errors */
     old_nerrs = nerrors;
+
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
+        //SKIPPED();
+        HDprintf("    API functions for iterate aren't "
+                 "supported with this connector\n");
+        return 0;
+    }
 
     /* Iterate over attributes on object */
     iter_info->nskipped = (unsigned)(skip = 0);
@@ -7460,7 +7467,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else
         return (-1);
 } /* end attr_iterate_check() */
-#endif
+//#endif
 
 /****************************************************************
 **
