@@ -13,8 +13,13 @@ jobs:
     steps:
     - name: Checkout spack
       uses: actions/checkout@v3
+      with:
+        repository: spack/spack
+        path: ./spack
+
     - name: Run a multi-line script
       run: |
+        cd ./spack
         . ./share/spack/setup-env.sh
         spack spec hdf5@develop+mpi+fortran
         spack install hdf5@develop+mpi+fortran
