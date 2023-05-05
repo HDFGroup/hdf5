@@ -103,6 +103,8 @@ New Features
       LIBAEC library has been used in HDF5 binaries as the szip library of choice
       for a few years. We are removing the options for using the old SZIP library.
 
+      Also removed the config/cmake/FindSZIP.cmake file.
+
     - Enabled instrumentation of the library by default in CMake for parallel
       debug builds
 
@@ -415,6 +417,19 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Fixed syntax of generator expressions used by CMake
+
+      Add quotes around the generator expression should allow CMake to
+      correctly parse the expression. Generator expressions are typically
+      parsed after command arguments. If a generator expression contains
+      spaces, new lines, semicolons or other characters that may be
+      interpreted as command argument separators, the whole expression
+      should be surrounded by quotes when passed to a command. Failure to
+      do so may result in the expression being split and it may no longer
+      be recognized as a generator expression.
+
+      Fixes GitHub issue #2906
+
     - Fixed improper include of Subfiling VFD build directory
 
       With the release of the Subfiling Virtual File Driver feature, compiler

@@ -134,7 +134,7 @@ target_compile_options (
 target_compile_definitions (
   h5_api_test
   PRIVATE
-    $<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>
+    "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (h5_api_test STATIC)
@@ -214,7 +214,7 @@ foreach (api_test_extra ${HDF5_API_TESTS_EXTRA})
   target_compile_definitions (
     h5_api_test_${api_test_extra}
     PRIVATE
-      $<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>
+      "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
   )
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (h5_api_test_${api_test_extra} STATIC)

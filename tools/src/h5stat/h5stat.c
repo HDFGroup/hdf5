@@ -208,7 +208,7 @@ static void
 usage(const char *prog)
 {
     HDfflush(stdout);
-    HDfprintf(stdout, "Usage: %s [OPTIONS] file\n", prog);
+    HDfprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
     HDfprintf(stdout, "\n");
     HDfprintf(stdout, "      ERROR\n");
     HDfprintf(stdout, "     --enable-error-stack  Prints messages from the HDF5 error stack as they occur\n");
