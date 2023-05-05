@@ -1283,8 +1283,8 @@ test_get_obj_ids(void)
 
     /* Close the file first */
     H5Fclose(fid);
-//#ifndef WRONG_DATATYPE_OBJ_COUNT
-    if (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) {
+    //#ifndef WRONG_DATATYPE_OBJ_COUNT
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPE) {
         /* Get the number of all opened objects */
         oid_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL);
         CHECK(oid_count, FAIL, "H5Fget_obj_count");
@@ -1308,7 +1308,7 @@ test_get_obj_ids(void)
 
         HDfree(oid_list);
     }
-//#endif
+    //#endif
 }
 
 /****************************************************************
@@ -2344,13 +2344,13 @@ test_file_open_overlap(void)
     /* Create dataset in group w/first file ID */
     did1 = H5Dcreate2(gid, DSET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(did1, FAIL, "H5Dcreate2");
-//#ifndef WRONG_DATATYPE_OBJ_COUNT
-    if (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) {
+    //#ifndef WRONG_DATATYPE_OBJ_COUNT
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPE) {
         /* Check number of objects opened in first file */
         nobjs = H5Fget_obj_count(fid1, H5F_OBJ_LOCAL | H5F_OBJ_ALL);
         VERIFY(nobjs, 3, "H5Fget_obj_count"); /* 3 == file, dataset & group */
     }
-//#endif
+    //#endif
     /* Close dataset */
     ret = H5Dclose(did1);
     CHECK(ret, FAIL, "H5Dclose");
