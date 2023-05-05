@@ -2018,7 +2018,7 @@ test_reference_region_1D(H5F_libver_t libver_low, H5F_libver_t libver_high)
 static void
 test_reference_obj_deleted(void)
 {
-//#ifndef NO_REFERENCE_TO_DELETED
+    //#ifndef NO_REFERENCE_TO_DELETED
     hid_t fid1;          /* HDF5 File IDs            */
     hid_t dataset,       /* Dataset ID               */
         dset2;           /* Dereferenced dataset ID  */
@@ -2026,9 +2026,9 @@ test_reference_obj_deleted(void)
     H5R_ref_t  oref;     /* Object Reference to test */
     H5O_type_t obj_type; /* Object type              */
     herr_t     ret;      /* Generic return value     */
-//#endif
+                         //#endif
     MESSAGE(5, ("Testing References to Deleted Objects - SKIPPED for now due to no support\n"));
-//#ifndef NO_REFERENCE_TO_DELETED
+    //#ifndef NO_REFERENCE_TO_DELETED
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_REF_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         /* Create file */
         fid1 = H5Fcreate(FILE_REF_OBJ_DEL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2109,7 +2109,7 @@ test_reference_obj_deleted(void)
         ret = H5Rdestroy(&oref);
         CHECK(ret, FAIL, "H5Rdestroy");
     }
-//#endif
+    //#endif
 } /* test_reference_obj_deleted() */
 
 /****************************************************************
