@@ -1168,11 +1168,7 @@ single_rank_independent_io(void)
         H5Dclose(dset_id);
         H5Fclose(file_id);
 
-        H5E_BEGIN_TRY
-        {
-            H5Fdelete(FILENAME[1], fapl_id);
-        }
-        H5E_END_TRY;
+        H5Fdelete(FILENAME[1], fapl_id);
 
         H5Pclose(fapl_id);
     }
@@ -1912,12 +1908,8 @@ main(int argc, char **argv)
 
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
 
-        H5E_BEGIN_TRY
-        {
-            if (H5Fdelete(FILENAME[0], fapl_id) < 0)
-                nerrors++;
-        }
-        H5E_END_TRY;
+        if (H5Fdelete(FILENAME[0], fapl_id) < 0)
+            nerrors++;
 
         H5Pclose(fapl_id);
     }
@@ -1932,7 +1924,7 @@ main(int argc, char **argv)
         else
             printf("Parallel big IO tests finished with no errors\n");
         printf("==================================================\n");
-    } /* end if */
+    }
 
     /* close HDF5 library */
     H5close();
