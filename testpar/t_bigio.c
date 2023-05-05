@@ -1168,11 +1168,7 @@ single_rank_independent_io(void)
         H5Dclose(dset_id);
         H5Fclose(file_id);
 
-        H5E_BEGIN_TRY
-        {
-            H5Fdelete(FILENAME[1], fapl_id);
-        }
-        H5E_END_TRY;
+        H5Fdelete(FILENAME[1], fapl_id);
 
         H5Pclose(fapl_id);
     }
@@ -1912,20 +1908,30 @@ main(int argc, char **argv)
 
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
 
-        H5E_BEGIN_TRY
-        {
-            H5Fdelete(FILENAME[0], fapl_id);
-            H5Fdelete(FILENAME[1], fapl_id);
-        }
-        H5E_END_TRY;
+        if (H5Fdelete(FILENAME[0], fapl_id) < 0)
+            nerrors++;
 
         H5Pclose(fapl_id);
+    }
+
+    /* Gather errors from all ranks */
+    MPI_Allreduce(MPI_IN_PLACE, &nerrors, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+
+    if (mpi_rank_g == 0) {
+        printf("\n==================================================\n");
+        if (nerrors)
+            printf("***Parallel big IO tests detected %d errors***\n", nerrors);
+        else
+            printf("Parallel big IO tests finished with no errors\n");
+        printf("==================================================\n");
     }
 
     /* close HDF5 library */
     H5close();
 
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
 
-    return 0;
+    /* cannot just return (nerrors) because exit code is limited to 1 byte */
+    return (nerrors != 0);
 }
