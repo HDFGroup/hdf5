@@ -137,7 +137,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             ${HDF5_F90_LIB_TARGET}
             ${HDF5_LIB_TARGET}
-            $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>
+            "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>"
     )
     set_target_properties (f90_ex_ph5example PROPERTIES
         LINKER_LANGUAGE Fortran
@@ -158,7 +158,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         PRIVATE
             ${HDF5_F90_LIBSH_TARGET}
             ${HDF5_LIBSH_TARGET}
-            $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>
+            "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>"
     )
     set_target_properties (f90_ex_ph5example PROPERTIES
         LINKER_LANGUAGE Fortran
