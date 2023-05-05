@@ -1860,7 +1860,6 @@ main(int argc, char **argv)
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
     int     ret;
-    herr_t  status;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1916,8 +1915,7 @@ main(int argc, char **argv)
 
         H5E_BEGIN_TRY
         {
-            status = H5Fdelete(FILENAME[0], fapl_id);
-            if (status < 0)
+            if (H5Fdelete(FILENAME[0], fapl_id) < 0)
                 nerrors++;
         }
         H5E_END_TRY;
