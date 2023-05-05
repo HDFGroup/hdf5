@@ -7184,7 +7184,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     old_nerrs = nerrors;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
-        //SKIPPED();
+        // SKIPPED();
         HDprintf("    API functions for iterate aren't "
                  "supported with this connector\n");
         return 0;
