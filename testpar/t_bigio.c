@@ -1859,7 +1859,6 @@ main(int argc, char **argv)
     hsize_t newsize = 1048576;
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
-    int     ret;
 
     /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
@@ -1924,8 +1923,7 @@ main(int argc, char **argv)
     }
 
     /* Gather errors from all ranks */
-    MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-    nerrors = ret;
+    MPI_Allreduce(MPI_IN_PLACE, &nerrors, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
     if (mpi_rank_g == 0) {
         printf("\n==================================================\n");
