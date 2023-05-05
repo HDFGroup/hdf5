@@ -559,7 +559,7 @@ test_attr_flush(hid_t fapl)
 
     att = H5Acreate2(set, ATTR1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
-//#ifndef NO_ATTR_FILL_VALUE_SUPPORT
+    //#ifndef NO_ATTR_FILL_VALUE_SUPPORT
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILL_VALUES)) {
         ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
         CHECK(ret, FAIL, "H5Aread");
@@ -575,12 +575,13 @@ test_attr_flush(hid_t fapl)
 
         if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
             TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
-    } else {
+    }
+    else {
         HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
     }
-//#else
-    //HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
-//#endif
+    //#else
+    // HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
+    //#endif
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");
 
