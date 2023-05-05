@@ -1268,7 +1268,6 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     return ret_value;
 
 error:
-    HDfree(splitter_config);
     H5E_BEGIN_TRY
     {
         H5Pclose(splitter_config->wo_fapl_id);
@@ -1276,6 +1275,7 @@ error:
         H5Pclose(ret_value);
     }
     H5E_END_TRY;
+    HDfree(splitter_config);
 
     return H5I_INVALID_HID;
 } /* end create_mirroring_split_fapl() */
@@ -2328,7 +2328,7 @@ static int
 confirm_server(struct mt_opts *opts)
 {
     char               mybuf[16];
-    int                live_socket;
+    int                live_socket = -1;
     struct sockaddr_in target_addr;
     unsigned           attempt = 0;
 
@@ -2349,9 +2349,25 @@ confirm_server(struct mt_opts *opts)
                 HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
                 return -1;
             }
+
+            /* Close socket during sleep() */
+            if (HDclose(live_socket) < 0) {
+                HDprintf("ERROR close() can't close socket\n");
+                return -1;
+            }
+            live_socket = -1;
+
             attempt++;
             HDsleep(1);
             HDprintf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
+
+            /* Re-open socket for retry */
+            live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+            if (live_socket < 0) {
+                HDprintf("ERROR socket()\n");
+                return -1;
+            }
+
         }
         else
             break;
