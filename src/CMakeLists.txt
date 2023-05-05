@@ -1280,10 +1280,10 @@ if (BUILD_SHARED_LIBS)
           ${HDF_EXTRA_C_FLAGS}
           ${HDF_EXTRA_FLAGS}
       PRIVATE
-          $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>
-          $<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>  # Enable tracing of the API
-          $<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>
-          $<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>
+          "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>"
+          "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API
+          "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
+          "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
   )
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_LIBSH_TARGET}
