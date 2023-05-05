@@ -46,8 +46,6 @@ char                      *str_flag  = NULL;
  * Programmer:  Quincey Koziol
  *              Saturday, 31. January 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -76,8 +74,6 @@ leave(int ret)
  * Return: void
  *
  * Programmer: Pedro Vicente Nunes, 7/8/2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -159,8 +155,6 @@ usage(void)
  *
  * Programmer: Pedro Vicente Nunes, 7/8/2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -206,8 +200,6 @@ parse_flag(const char *s_flag, unsigned *flag)
  * Purpose: main program
  *
  * Programmer: Pedro Vicente Nunes
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
