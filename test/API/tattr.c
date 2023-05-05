@@ -1605,15 +1605,17 @@ test_attr_delete(hid_t fapl)
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info3");
-#ifndef NO_DELETE_NONEXISTENT_ATTRIBUTE
-    /* Try to delete bogus attribute */
-    H5E_BEGIN_TRY
-    {
-        ret = H5Adelete(dataset, "Bogus");
+//#ifndef NO_DELETE_NONEXISTENT_ATTRIBUTE
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
+        /* Try to delete bogus attribute */
+        H5E_BEGIN_TRY
+        {
+            ret = H5Adelete(dataset, "Bogus");
+        }
+        H5E_END_TRY;
+        VERIFY(ret, FAIL, "H5Adelete");
     }
-    H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Adelete");
-#endif
+//#endif
     /* Verify the correct number of attributes */
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
