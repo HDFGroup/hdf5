@@ -258,18 +258,20 @@ test_file_create(void)
     /* Create with H5F_ACC_EXCL */
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
-#ifndef NO_TRUNCATE_OPEN_FILE
-    /*
-     * try to create the same file with H5F_ACC_TRUNC. This should fail
-     * because fid1 is the same file and is currently open.
-     */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_TRUNCATE_OPEN_FILE
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
+        /*
+        * try to create the same file with H5F_ACC_TRUNC. This should fail
+        * because fid1 is the same file and is currently open.
+        */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(fid2, FAIL, "H5Fcreate");
     }
-    H5E_END_TRY;
-    VERIFY(fid2, FAIL, "H5Fcreate");
-#endif
+//#endif
     /* Close all files */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -295,18 +297,20 @@ test_file_create(void)
     /* Test create with H5F_ACC_TRUNC. This will truncate the existing file. */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
-#ifndef NO_TRUNCATE_OPEN_FILE
-    /*
-     * Try to truncate first file again. This should fail because fid1 is the
-     * same file and is currently open.
-     */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+//#ifndef NO_TRUNCATE_OPEN_FILE
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
+        /*
+        * Try to truncate first file again. This should fail because fid1 is the
+        * same file and is currently open.
+        */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(fid2, FAIL, "H5Fcreate");
     }
-    H5E_END_TRY;
-    VERIFY(fid2, FAIL, "H5Fcreate");
-#endif
+//#endif
     /*
      * Try with H5F_ACC_EXCL. This should fail too because the file already
      * exists.
