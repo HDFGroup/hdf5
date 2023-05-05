@@ -1709,7 +1709,7 @@ test_attr_delete(hid_t fapl)
 static void
 test_attr_dtype_shared(hid_t fapl)
 {
-//#ifndef NO_SHARED_DATATYPES
+    //#ifndef NO_SHARED_DATATYPES
     hid_t       file_id;   /* File ID */
     hid_t       dset_id;   /* Dataset ID */
     hid_t       space_id;  /* Dataspace ID for dataset & attribute */
@@ -1723,17 +1723,16 @@ test_attr_dtype_shared(hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
 #endif
     herr_t ret; /* Generic return value        */
-//#else
+                //#else
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
-         (void)fapl;
+        (void)fapl;
     }
-//x#endif
+    // x#endif
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Shared Datatypes with Attributes - SKIPPED for now due to no support for shared "
                 "datatypes\n"));
-//#ifndef NO_SHARED_DATATYPES
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && 
-        (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+    //#ifndef NO_SHARED_DATATYPES
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         /* Create a file */
         file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
         CHECK(file_id, FAIL, "H5Fopen");
@@ -1741,12 +1740,12 @@ test_attr_dtype_shared(hid_t fapl)
         /* Close file */
         ret = H5Fclose(file_id);
         CHECK(ret, FAIL, "H5Fclose");
-    #if 0
+#if 0
         /* Get size of file */
         empty_filesize = h5_get_file_size(FILENAME, fapl);
         if (empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
-    #endif
+#endif
 
         /* Re-open file */
         file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
@@ -1879,13 +1878,13 @@ test_attr_dtype_shared(hid_t fapl)
         /* Close file */
         ret = H5Fclose(file_id);
         CHECK(ret, FAIL, "H5Fclose");
-    #if 0
+#if 0
         /* Check size of file */
         filesize = h5_get_file_size(FILENAME, fapl);
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
-    #endif
+#endif
     }
-//#endif
+    //#endif
 } /* test_attr_dtype_shared() */
 
 /****************************************************************
