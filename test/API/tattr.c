@@ -7490,9 +7490,9 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     H5_iter_order_t  order;          /* Order within in the index */
     attr_iter_info_t iter_info;      /* Iterator info */
     hbool_t         *visited = NULL; /* Array of flags for visiting links */
-#ifndef NO_ITERATION_RESTART
+//#ifndef NO_ITERATION_RESTART
     hsize_t idx; /* Start index for iteration */
-#endif
+//#endif
     unsigned    use_index;               /* Use index on creation order values */
     const char *dsetname;                /* Name of dataset for attributes */
     char        attrname[NAME_BUF_SIZE]; /* Name of attribute */
@@ -7668,38 +7668,40 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     is_dense = H5O__is_attr_dense_test(my_dataset);
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 #endif
-#ifndef NO_ITERATION_RESTART
-                    /* Check for out of bound iteration */
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate2");
+//#ifndef NO_ITERATION_RESTART
+                    if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
+                        /* Check for out of bound iteration */
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate2");
 
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                                 H5P_DEFAULT);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate_by_name");
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
+                                                    H5P_DEFAULT);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
-                                                 NULL, H5P_DEFAULT);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate_by_name");
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
+                                                    NULL, H5P_DEFAULT);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
-                    /* Test iteration over attributes stored compactly */
-                    ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
-                    CHECK(ret, FAIL, "attr_iterate_check");
-#endif
+                        /* Test iteration over attributes stored compactly */
+                        ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
+                        CHECK(ret, FAIL, "attr_iterate_check");
+                    }
+//#endif
                 } /* end for */
 
                 /* Work on all the datasets */
@@ -7767,41 +7769,43 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         if (use_index)
                             VERIFY(name_count, corder_count, "H5O__attr_dense_info_test");
                         VERIFY(name_count, (max_compact * 2), "H5O__attr_dense_info_test");
-                    } /* end if */
+                    }
 #endif
-#ifndef NO_ITERATION_RESTART
-                    /* Check for out of bound iteration */
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate2");
+//#ifndef NO_ITERATION_RESTART
+                    if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
+                        /* Check for out of bound iteration */
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate2");
 
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                                 H5P_DEFAULT);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate_by_name");
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
+                                                    H5P_DEFAULT);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
-                    idx = u;
-                    H5E_BEGIN_TRY
-                    {
-                        ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
-                                                 NULL, H5P_DEFAULT);
-                    }
-                    H5E_END_TRY;
-                    VERIFY(ret, FAIL, "H5Aiterate_by_name");
+                        idx = u;
+                        H5E_BEGIN_TRY
+                        {
+                            ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
+                                                    NULL, H5P_DEFAULT);
+                        }
+                        H5E_END_TRY;
+                        VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
-                    /* Test iteration over attributes stored densely */
-                    ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
-                    CHECK(ret, FAIL, "attr_iterate_check");
-#endif
-                } /* end for */
+                        /* Test iteration over attributes stored densely */
+                        ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
+                        CHECK(ret, FAIL, "attr_iterate_check");
+                    }
+//#endif
+                } 
 
                 /* Close Datasets */
                 ret = H5Dclose(dset1);
