@@ -603,12 +603,12 @@ test_h5s_zero_dim(void)
     short   rdata_short[SPACE1_DIM2][SPACE1_DIM3];
     int     wdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
     int     rdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
-#ifndef NO_CHECK_SELECTION_BOUNDS
+//#ifndef NO_CHECK_SELECTION_BOUNDS
     int     val     = 3;
     hsize_t start[] = {0, 0, 0};
     hsize_t count[] = {3, 15, 13};
     hsize_t coord[1][3]; /* Coordinates for point selection */
-#endif
+//#endif
     hssize_t         nelem;      /* Number of elements           */
     H5S_sel_type     sel_type;   /* Type of selection currently  */
     H5S_class_t      stype;      /* dataspace type               */
