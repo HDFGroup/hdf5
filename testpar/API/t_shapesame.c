@@ -28,6 +28,10 @@
 #include "hdf5.h"
 #include "testphdf5.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 512
+#endif
+
 /* FILENAME and filenames must have the same number of names.
  * Use PARATESTFILE in general and use a separated filename only if the file
  * created in one test is accessed by a different test.
@@ -3966,12 +3970,6 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
 /*
  * Main driver of the Parallel HDF5 tests
  */
-
-#include "testphdf5.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 512
-#endif /* !PATH_MAX */
 
 /* global variables */
 int dim0;
