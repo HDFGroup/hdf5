@@ -36,19 +36,6 @@ static int mpi_size, mpi_rank;
 #define HS_DIM1 200
 #define HS_DIM2 100
 
-const char *
-h5_rmprefix(const char *filename)
-{
-    const char *ret_ptr;
-
-    if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
-        ret_ptr = filename;
-    else
-        ret_ptr++;
-
-    return (ret_ptr);
-}
-
 #ifdef H5_HAVE_FILTER_SZIP
 
 /*-------------------------------------------------------------------------
