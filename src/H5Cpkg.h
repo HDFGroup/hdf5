@@ -88,7 +88,7 @@ if (((head_ptr) == NULL) || ((tail_ptr) == NULL) ||                          \
       )                                                                      \
     )                                                                        \
    ) {                                                                       \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre insert SC failed")               \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre remove SC failed")               \
 }
 
 #define H5C__GEN_DLL_SC(list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
