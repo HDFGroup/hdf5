@@ -21,10 +21,10 @@
 #ifndef H5Gpublic_H
 #define H5Gpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5Ipublic.h"          /* Identifiers                              */
-#include "H5Lpublic.h"          /* Links                                    */
-#include "H5Opublic.h"          /* Object Headers                           */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Lpublic.h" /* Links                                    */
+#include "H5Opublic.h" /* Object Headers                           */
 
 /*****************/
 /* Public Macros */

@@ -19,9 +19,9 @@
 #ifndef H5Mpublic_H
 #define H5Mpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5Ipublic.h"          /* Identifiers                              */
-#include "H5VLpublic.h"         /* Virtual Object Layer                     */
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5Ipublic.h"  /* Identifiers                              */
+#include "H5VLpublic.h" /* Virtual Object Layer                     */
 
 /* Exposes VOL connector types, so it needs the connector header */
 #include "H5VLconnector.h"

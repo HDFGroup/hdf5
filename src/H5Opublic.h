@@ -22,8 +22,8 @@
 #ifndef H5Opublic_H
 #define H5Opublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5Ipublic.h"          /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /*****************/
 /* Public Macros */

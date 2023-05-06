@@ -16,9 +16,9 @@
 #ifndef H5Fpublic_H
 #define H5Fpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5ACpublic.h"         /* Metadata Cache                           */
-#include "H5Ipublic.h"          /* Identifiers                              */
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5ACpublic.h" /* Metadata Cache                           */
+#include "H5Ipublic.h"  /* Identifiers                              */
 
 /* When this header is included from a private header, don't make calls to H5check() */
 #undef H5CHECK

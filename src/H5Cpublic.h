@@ -21,7 +21,7 @@
 #ifndef H5Cpublic_H
 #define H5Cpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
+#include "H5public.h" /* Generic Functions                        */
 
 enum H5C_cache_incr_mode {
     H5C_incr__off,

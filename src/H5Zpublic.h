@@ -13,7 +13,7 @@
 #ifndef H5Zpublic_H
 #define H5Zpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
+#include "H5public.h" /* Generic Functions                        */
 
 /**
  * \brief Filter identifiers

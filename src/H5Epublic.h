@@ -18,8 +18,8 @@
 
 #include <stdio.h> /* FILE arg of H5Eprint() */
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5Ipublic.h"          /* Identifiers                              */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /* Value for the default error stack */
 #define H5E_DEFAULT 0 /* (hid_t) */

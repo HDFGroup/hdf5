@@ -17,18 +17,18 @@
 #ifndef H5Ppublic_H
 #define H5Ppublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5ACpublic.h"         /* Metadata Cache                           */
-#include "H5Dpublic.h"          /* Datasets                                 */
-#include "H5Fpublic.h"          /* Files                                    */
-#include "H5FDpublic.h"         /* (Virtual) File Drivers                   */
-#include "H5Ipublic.h"          /* Identifiers                              */
-#include "H5Lpublic.h"          /* Links                                    */
-#include "H5MMpublic.h"         /* Memory Management                        */
-#include "H5Opublic.h"          /* Object Headers                           */
-#include "H5Spublic.h"          /* Dataspaces                               */
-#include "H5Tpublic.h"          /* Datatypes                                */
-#include "H5Zpublic.h"          /* Data Filters                             */
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5ACpublic.h" /* Metadata Cache                           */
+#include "H5Dpublic.h"  /* Datasets                                 */
+#include "H5Fpublic.h"  /* Files                                    */
+#include "H5FDpublic.h" /* (Virtual) File Drivers                   */
+#include "H5Ipublic.h"  /* Identifiers                              */
+#include "H5Lpublic.h"  /* Links                                    */
+#include "H5MMpublic.h" /* Memory Management                        */
+#include "H5Opublic.h"  /* Object Headers                           */
+#include "H5Spublic.h"  /* Dataspaces                               */
+#include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5Zpublic.h"  /* Data Filters                             */
 
 /*****************/
 /* Public Macros */

@@ -17,7 +17,7 @@
 #ifndef H5Ipublic_H
 #define H5Ipublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
+#include "H5public.h" /* Generic Functions                        */
 
 /**
  * Library type values.

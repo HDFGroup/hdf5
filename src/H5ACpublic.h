@@ -21,8 +21,8 @@
 #ifndef H5ACpublic_H
 #define H5ACpublic_H
 
-#include "H5public.h"           /* Generic Functions                        */
-#include "H5Cpublic.h"          /* Cache                                    */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Cpublic.h" /* Cache                                    */
 
 /****************************************************************************
  *
