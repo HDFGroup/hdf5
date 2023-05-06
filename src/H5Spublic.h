@@ -25,7 +25,7 @@
 /**
  * Used with @ref H5Dread and @ref H5Dwrite to indicate that the entire
  * dataspace will be selected. In the case of a file dataspace, this means
- * that the entire file dataspace, as defined by the datset's dimensions
+ * that the entire file dataspace, as defined by the dataset's dimensions,
  * will be selected. In the case of a memory dataspace, this means that
  * the specified file dataspace will also be used for the memory dataspace.
  * Used in place of a file or memory dataspace @ref hid_t value.
