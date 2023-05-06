@@ -21,9 +21,30 @@
 #include "H5Ipublic.h"
 
 /* Define special dataspaces for dataset I/O operations */
-#define H5S_ALL   0 /* (hid_t) */
-#define H5S_BLOCK 1 /* (hid_t) */
-#define H5S_PLIST 2 /* (hid_t) */
+
+/**
+ * Used with @ref H5Dread and @ref H5Dwrite to indicate that the entire
+ * dataspace will be selected. In the case of a file dataspace, this means
+ * that the entire file dataspace, as defined by the dataset's dimensions,
+ * will be selected. In the case of a memory dataspace, this means that
+ * the specified file dataspace will also be used for the memory dataspace.
+ * Used in place of a file or memory dataspace @ref hid_t value.
+ */
+#define H5S_ALL 0
+
+/**
+ * Indicates that the buffer provided in a call to @ref H5Dread or @ref H5Dwrite
+ * is a single contiguous block of memory, with the same number of elements
+ * as the file dataspace. Used in place of a memory dataspace @ref hid_t value.
+ */
+#define H5S_BLOCK 1
+
+/**
+ * Used with @ref H5Dread and @ref H5Dwrite to indicate that the file dataspace
+ * selection was set via @ref H5Pset_dataset_io_hyperslab_selection calls.
+ * Used in place of a file dataspace @ref hid_t value.
+ */
+#define H5S_PLIST 2
 
 #define H5S_UNLIMITED HSIZE_UNDEF /**< Value for 'unlimited' dimensions */
 
