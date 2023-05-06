@@ -13,21 +13,17 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Opublic.h
- *                      Aug  5 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5O (object header)
- *                      package.
+ *                      package
  *
  *-------------------------------------------------------------------------
  */
 #ifndef H5Opublic_H
 #define H5Opublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions            */
-#include "H5Ipublic.h" /* IDs                          */
-#include "H5Lpublic.h" /* Links                        */
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Ipublic.h"          /* Identifiers                              */
 
 /*****************/
 /* Public Macros */

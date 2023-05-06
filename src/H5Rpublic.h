@@ -16,10 +16,10 @@
 #ifndef H5Rpublic_H
 #define H5Rpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Gpublic.h"
-#include "H5Ipublic.h"
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Gpublic.h"          /* Groups                                   */
+#include "H5Ipublic.h"          /* Identifiers                              */
+#include "H5Opublic.h"          /* Object Headers                           */
 
 /*****************/
 /* Public Macros */

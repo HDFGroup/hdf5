@@ -13,9 +13,9 @@
 #ifndef H5FDpublic_H
 #define H5FDpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions */
-#include "H5Fpublic.h" /* Files */
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Fpublic.h"          /* Files                                    */
+#include "H5Ipublic.h"          /* Identifiers                              */
 
 /*****************/
 /* Public Macros */

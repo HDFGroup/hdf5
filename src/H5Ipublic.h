@@ -17,8 +17,7 @@
 #ifndef H5Ipublic_H
 #define H5Ipublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
+#include "H5public.h"           /* Generic Functions                        */
 
 /**
  * Library type values.

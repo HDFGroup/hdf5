@@ -16,11 +16,10 @@
 #ifndef H5Epublic_H
 #define H5Epublic_H
 
-#include <stdio.h> /*FILE arg of H5Eprint()                     */
+#include <stdio.h> /* FILE arg of H5Eprint() */
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Ipublic.h"          /* Identifiers                              */
 
 /* Value for the default error stack */
 #define H5E_DEFAULT 0 /* (hid_t) */

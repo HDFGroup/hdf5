@@ -16,10 +16,10 @@
 #ifndef H5Apublic_H
 #define H5Apublic_H
 
-/* Public headers needed by this file */
-#include "H5Ipublic.h" /* IDs			  		*/
-#include "H5Opublic.h" /* Object Headers			*/
-#include "H5Tpublic.h" /* Datatypes				*/
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Ipublic.h"          /* Identifiers                              */
+#include "H5Opublic.h"          /* Object Headers                           */
+#include "H5Tpublic.h"          /* Datatypes                                */
 
 //! <!-- [H5A_info_t_snip] -->
 /**

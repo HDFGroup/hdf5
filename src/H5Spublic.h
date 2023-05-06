@@ -16,9 +16,8 @@
 #ifndef H5Spublic_H
 #define H5Spublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
+#include "H5public.h"           /* Generic Functions                        */
+#include "H5Ipublic.h"          /* Identifiers                              */
 
 /* Define special dataspaces for dataset I/O operations */
 #define H5S_ALL   0 /* (hid_t) */
