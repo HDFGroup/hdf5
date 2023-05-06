@@ -18,23 +18,26 @@
 #define H5ESpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h" /* Generic Functions                    */
+#include "H5public.h"
 
 /*****************/
 /* Public Macros */
 /*****************/
 
-/* Default value for "no event set" / synchronous execution */
-#define H5ES_NONE 0 /* (hid_t) */
+/**
+ * Default value for "no event set" / synchronous execution. Used in
+ * place of a @ref hid_t identifier.
+ */
+#define H5ES_NONE 0
 
 /* Special "wait" timeout values */
-#define H5ES_WAIT_FOREVER (UINT64_MAX) /* Wait until all operations complete */
-#define H5ES_WAIT_NONE                                                                                       \
-    (0) /* Don't wait for operations to complete,                                                            \
-         *  just check their status.                                                                         \
-         *  (this allows H5ESwait to behave                                                                  \
-         *   like a 'test' operation)                                                                        \
-         */
+#define H5ES_WAIT_FOREVER (UINT64_MAX) /**< Wait until all operations complete */
+
+/**
+ * Don't wait for operations to complete, just check their status.
+ * (This allows @ref H5ESwait to behave like a 'test' operation)
+ */
+#define H5ES_WAIT_NONE (0)
 
 /*******************/
 /* Public Typedefs */
