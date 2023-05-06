@@ -22,7 +22,7 @@
 
 /* Define special dataspaces for dataset I/O operations */
 
-/** 
+/**
  * Used with @ref H5Dread and @ref H5Dwrite to indicate that the entire
  * dataspace will be selected. In the case of a file dataspace, this means
  * that the entire file dataspace, as defined by the datset's dimensions
