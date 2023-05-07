@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Lpublic.h
- *                      Dec 1 2005
- *                      James Laird
  *
  * Purpose:             Public declarations for the H5L package (links)
  *
@@ -23,11 +21,10 @@
 #ifndef H5Lpublic_H
 #define H5Lpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions            */
-#include "H5Ipublic.h" /* IDs                      */
-#include "H5Opublic.h" /* Object Headers            */
-#include "H5Tpublic.h" /* Datatypes                */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Opublic.h" /* Object Headers                           */
+#include "H5Tpublic.h" /* Datatypes                                */
 
 /*****************/
 /* Public Macros */

@@ -17,9 +17,8 @@
 #ifndef H5VLpublic_H
 #define H5VLpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions                    */
-#include "H5Ipublic.h" /* IDs                                  */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /*****************/
 /* Public Macros */
