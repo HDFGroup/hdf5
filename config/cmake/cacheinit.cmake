@@ -62,7 +62,7 @@ set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchCont
 ########################
 # API test options
 ########################
-set (KWSYS_TGZ_ORIGPATH "https://gitlab.kitware.com/utils/kwsys/-/archive/master/kwsys-master.tar.gz" CACHE STRING "Use KWSYS from original location" FORCE)
+set (KWSYS_TGZ_ORIGPATH "https://gitlab.kitware.com/utils/kwsys/-/archive/master" CACHE STRING "Use KWSYS from original location" FORCE)
 set (KWSYS_TGZ_ORIGNAME "kwsys-master.tar.gz" CACHE STRING "Use KWSYS from original compressed file" FORCE)
 set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchContent" FORCE)
 
