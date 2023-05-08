@@ -4933,7 +4933,7 @@ error:
     return 1;
 } /* end test_dataset_io_point_selections() */
 
-//#ifndef NO_LARGE_TESTS
+#ifndef NO_LARGE_TESTS
 /*
  * A test to check that a large amount of data can be
  * read back from a dataset using an H5S_ALL selection.
@@ -5297,7 +5297,7 @@ error:
 
     return 1;
 }
-//#endif
+#endif
 
 /*
  * A test to check that data can't be read from a
