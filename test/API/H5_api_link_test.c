@@ -7139,7 +7139,7 @@ test_delete_link_reset_grp_max_crt_order(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
         HDprintf("    API functions for basic file, basic and more group, basic link, or creation order "
-                "aren't supported with this connector\n");
+                 "aren't supported with this connector\n");
         return 0;
     }
 
