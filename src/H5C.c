@@ -1500,7 +1500,7 @@ H5C_mark_entry_clean(void *_thing)
         if (was_dirty)
             H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL)
         if (entry_ptr->in_slist)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
 
         /* Update stats for entry being marked clean */
         H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
@@ -1703,7 +1703,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
         if (entry_ptr->in_slist) {
             HDassert(cache_ptr->slist_ptr);
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
         } /* end if */
     }     /* end if */
 
@@ -2747,7 +2747,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 while (node_ptr != NULL) {
                     entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
                     node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 }
             }
@@ -5884,7 +5884,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
         if (entry_ptr->in_slist && del_from_slist_on_destroy)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
 
 #ifdef H5_HAVE_PARALLEL
         /* Check for collective read access flag */
@@ -5916,7 +5916,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * Hence no differentiation between them.
          */
         H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
-        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
+        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
 
         /* mark the entry as clean and update the index for
          * entry clean.  Also, call the clear callback
@@ -6579,7 +6579,9 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
+#ifndef NDEBUG
     uint32_t           num_corked_entries = 0;
+#endif /* NDEBUG */
     herr_t             ret_value          = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -6628,7 +6630,9 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
 
             if (entry_ptr->is_dirty && (entry_ptr->tag_info && entry_ptr->tag_info->corked)) {
                 /* Skip "dirty" corked entries.  */
+#ifndef NDEBUG
                 ++num_corked_entries;
+#endif /* NDEBUG */
                 didnt_flush_entry = TRUE;
             }
             else if ((entry_ptr->type->id != H5AC_EPOCH_MARKER_ID) && !entry_ptr->flush_in_progress &&
@@ -8119,7 +8123,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
             if (entry_ptr->addr == old_addr) {
                 /* Delete the entry from the hash table and the slist */
                 H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
-                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
+                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
 
                 /* Update the entry for its new address */
                 entry_ptr->addr = new_addr;

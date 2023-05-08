@@ -2039,7 +2039,9 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
                                        H5C_cache_entry_t **fd_children)
 {
     H5C_cache_entry_t *entry_ptr;
+#ifndef NDEBUG
     unsigned           entries_visited   = 0;
+#endif /* NDEBUG */
     int                fd_children_found = 0;
     hbool_t            found;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -2123,7 +2125,9 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
             } /* end if */
         }     /* end if */
 
+#ifndef NDEBUG
         entries_visited++;
+#endif /* NDEBUG */
         entry_ptr = entry_ptr->il_next;
     } /* end while */
 
@@ -2374,9 +2378,11 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *parent_ptr;
+#ifndef NDEBUG
     unsigned           entries_removed_from_image      = 0;
     unsigned           external_parent_fd_refs_removed = 0;
     unsigned           external_child_fd_refs_removed  = 0;
+#endif /* NDEBUG */
     hbool_t            done                            = FALSE;
     unsigned           u; /* Local index variable */
     herr_t             ret_value = SUCCEED;
@@ -2415,7 +2421,9 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                         entry_ptr->include_in_image) {
 
                         /* Must remove child from image -- only do this once */
+#ifndef NDEBUG
                         entries_removed_from_image++;
+#endif /* NDEBUG */
                         entry_ptr->include_in_image = FALSE;
                     } /* end if */
                 }     /* for */
@@ -2458,7 +2466,9 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                         parent_ptr->fd_dirty_child_count--;
                     } /* end if */
 
+#ifndef NDEBUG
                     external_child_fd_refs_removed++;
+#endif /* NDEBUG */
                 } /* end if */
             }     /* for */
         }         /* end if */
@@ -2483,7 +2493,9 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                     HDassert(parent_ptr->addr == entry_ptr->fd_parent_addrs[u]);
 
                     entry_ptr->fd_parent_addrs[u] = HADDR_UNDEF;
+#ifndef NDEBUG
                     external_parent_fd_refs_removed++;
+#endif /* NDEBUG */
                 } /* end if */
             }     /* for */
 
@@ -2651,7 +2663,9 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
     H5C_image_entry_t *image_entries   = NULL;
+#ifndef NDEBUG
     uint32_t           entries_visited = 0;
+#endif /* NDEBUG */
     unsigned           u;                   /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -2736,7 +2750,9 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
             HDassert(u <= cache_ptr->num_entries_in_image);
         } /* end if */
 
+#ifndef NDEBUG
         entries_visited++;
+#endif /* NDEBUG */
 
         entry_ptr = entry_ptr->il_next;
     } /* end while */
@@ -2789,9 +2805,11 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
     hbool_t            include_in_image;
-    unsigned           entries_visited                  = 0;
     int                lru_rank                         = 1;
+#ifndef NDEBUG
+    unsigned           entries_visited                  = 0;
     uint32_t           num_entries_tentatively_in_image = 0;
+#endif /* NDEBUG */
     uint32_t           num_entries_in_image             = 0;
     size_t             image_len;
     size_t             entry_header_len;
@@ -2897,10 +2915,14 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
                 entry_ptr->fd_dirty_child_count = entry_ptr->flush_dep_ndirty_children;
             } /* end if */
 
+#ifndef NDEBUG
             num_entries_tentatively_in_image++;
+#endif /* NDEBUG */
         } /* end if */
 
+#ifndef NDEBUG
         entries_visited++;
+#endif /* NDEBUG */
         entry_ptr = entry_ptr->il_next;
     } /* end while */
     HDassert(entries_visited == cache_ptr->index_len);
@@ -2935,7 +2957,9 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
      * image should be marked correctly.  Compute the size of the
      * cache image.
      */
+#ifndef NDEBUG
     entries_visited = 0;
+#endif /* NDEBUG */
     entry_ptr       = cache_ptr->il_head;
     while (entry_ptr != NULL) {
         HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
@@ -2950,7 +2974,9 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
             num_entries_in_image++;
         } /* end if */
 
+#ifndef NDEBUG
         entries_visited++;
+#endif /* NDEBUG */
         entry_ptr = entry_ptr->il_next;
     } /* end while */
     HDassert(entries_visited == cache_ptr->index_len);
@@ -2968,7 +2994,9 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 #endif
 
     cache_ptr->num_entries_in_image = num_entries_in_image;
+#ifndef NDEBUG
     entries_visited                 = 0;
+#endif /* NDEBUG */
 
     /* Now scan the LRU list to set the lru_rank fields of all entries
      * on the LRU.
@@ -3001,7 +3029,9 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
             lru_rank++;
         } /* end else-if */
 
+#ifndef NDEBUG
         entries_visited++;
+#endif /* NDEBUG */
         entry_ptr = entry_ptr->next;
     } /* end while */
     HDassert(entries_visited == cache_ptr->LRU_list_len);

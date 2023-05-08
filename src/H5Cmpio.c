@@ -161,8 +161,10 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 {
     unsigned           first_entry_to_flush;
     unsigned           last_entry_to_flush;
+#ifndef NDEBUG
     unsigned           total_entries_to_clear     = 0;
     unsigned           total_entries_to_flush     = 0;
+#endif /* NDEBUG */
     unsigned          *candidate_assignment_table = NULL;
     unsigned           entries_to_flush[H5C_RING_NTYPES];
     unsigned           entries_to_clear[H5C_RING_NTYPES];
@@ -316,12 +318,16 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
          * markings.
          */
         if (u >= first_entry_to_flush && u <= last_entry_to_flush) {
+#ifndef NDEBUG
             total_entries_to_flush++;
+#endif /* NDEBUG */
             entries_to_flush[entry_ptr->ring]++;
             entry_ptr->flush_immediately = TRUE;
         } /* end if */
         else {
+#ifndef NDEBUG
             total_entries_to_clear++;
+#endif /* NDEBUG */
             entries_to_clear[entry_ptr->ring]++;
             entry_ptr->clear_on_unprotect = TRUE;
         } /* end else */
