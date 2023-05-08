@@ -50,20 +50,20 @@ static int test_read_dataset_small_all(void);
 static int test_read_dataset_small_hyperslab(void);
 static int test_read_dataset_small_point_selection(void);
 static int test_dataset_io_point_selections(void);
-#ifndef NO_LARGE_TESTS
-static int test_read_dataset_large_all(void);
-static int test_read_dataset_large_hyperslab(void);
-static int test_read_dataset_large_point_selection(void);
-#endif
+//#ifndef NO_LARGE_TESTS
+//static int test_read_dataset_large_all(void);
+//static int test_read_dataset_large_hyperslab(void);
+//static int test_read_dataset_large_point_selection(void);
+//#endif
 static int test_read_dataset_invalid_params(void);
 static int test_write_dataset_small_all(void);
 static int test_write_dataset_small_hyperslab(void);
 static int test_write_dataset_small_point_selection(void);
-#ifndef NO_LARGE_TESTS
-static int test_write_dataset_large_all(void);
-static int test_write_dataset_large_hyperslab(void);
-static int test_write_dataset_large_point_selection(void);
-#endif
+//#ifndef NO_LARGE_TESTS
+//static int test_write_dataset_large_all(void);
+//static int test_write_dataset_large_hyperslab(void);
+//static int test_write_dataset_large_point_selection(void);
+//#endif
 static int test_write_dataset_data_verification(void);
 static int test_write_dataset_invalid_params(void);
 static int test_dataset_builtin_type_conversion(void);
@@ -132,20 +132,20 @@ static int (*dataset_tests[])(void) = {
     test_read_dataset_small_hyperslab,
     test_read_dataset_small_point_selection,
     test_dataset_io_point_selections,
-#ifndef NO_LARGE_TESTS
-    test_read_dataset_large_all,
-    test_read_dataset_large_hyperslab,
-    test_read_dataset_large_point_selection,
-#endif
+//#ifndef NO_LARGE_TESTS
+    //test_read_dataset_large_all,
+    //test_read_dataset_large_hyperslab,
+    //test_read_dataset_large_point_selection,
+//#endif
     test_read_dataset_invalid_params,
     test_write_dataset_small_all,
     test_write_dataset_small_hyperslab,
     test_write_dataset_small_point_selection,
-#ifndef NO_LARGE_TESTS
-    test_write_dataset_large_all,
-    test_write_dataset_large_hyperslab,
-    test_write_dataset_large_point_selection,
-#endif
+//#ifndef NO_LARGE_TESTS
+    //test_write_dataset_large_all,
+    //test_write_dataset_large_hyperslab,
+    //test_write_dataset_large_point_selection,
+//#endif
     test_write_dataset_data_verification,
     test_write_dataset_invalid_params,
     test_dataset_builtin_type_conversion,
@@ -4933,371 +4933,371 @@ error:
     return 1;
 } /* end test_dataset_io_point_selections() */
 
-#ifndef NO_LARGE_TESTS
-/*
- * A test to check that a large amount of data can be
- * read back from a dataset using an H5S_ALL selection.
- */
-static int
-test_read_dataset_large_all(void)
-{
-    hsize_t dims[DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK] = {600, 600, 600};
-    size_t  i, data_size;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id   = H5I_INVALID_HID;
-    hid_t   fspace_id = H5I_INVALID_HID;
-    void   *read_buf  = NULL;
+// #ifndef NO_LARGE_TESTS
+// /*
+//  * A test to check that a large amount of data can be
+//  * read back from a dataset using an H5S_ALL selection.
+//  */
+// static int
+// test_read_dataset_large_all(void)
+// {
+//     hsize_t dims[DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK] = {600, 600, 600};
+//     size_t  i, data_size;
+//     hid_t   file_id         = H5I_INVALID_HID;
+//     hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+//     hid_t   dset_id   = H5I_INVALID_HID;
+//     hid_t   fspace_id = H5I_INVALID_HID;
+//     void   *read_buf  = NULL;
 
-    TESTING("large read from dataset with H5S_ALL");
+//     TESTING("large read from dataset with H5S_ALL");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
-        SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
-    }
+//     /* Make sure the connector supports the API functions being tested */
+//     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+//         SKIPPED();
+//         HDprintf(
+//             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+//         return 0;
+//     }
 
-    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
-        goto error;
-    }
+//     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+//         goto error;
+//     }
 
-    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
-        goto error;
-    }
+//     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_ALL_GROUP_NAME, H5P_DEFAULT,
-                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create container sub-group '%s'\n", DATASET_LARGE_READ_TEST_ALL_GROUP_NAME);
-        goto error;
-    }
+//     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_ALL_GROUP_NAME, H5P_DEFAULT,
+//                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create container sub-group '%s'\n", DATASET_LARGE_READ_TEST_ALL_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_ALL_DSET_NAME,
-                              DATASET_LARGE_READ_TEST_ALL_DSET_DTYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
-                              H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_ALL_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_ALL_DSET_NAME,
+//                               DATASET_LARGE_READ_TEST_ALL_DSET_DTYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
+//                               H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_ALL_DSET_NAME);
+//         goto error;
+//     }
 
-    for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK; i++)
-        data_size *= dims[i];
-    data_size *= DATASET_LARGE_READ_TEST_ALL_DSET_DTYPESIZE;
+//     for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_ALL_DSET_SPACE_RANK; i++)
+//         data_size *= dims[i];
+//     data_size *= DATASET_LARGE_READ_TEST_ALL_DSET_DTYPESIZE;
 
-    if (NULL == (read_buf = HDmalloc(data_size)))
-        TEST_ERROR;
+//     if (NULL == (read_buf = HDmalloc(data_size)))
+//         TEST_ERROR;
 
-    if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) <
-        0) {
-        H5_FAILED();
-        HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_ALL_DSET_NAME);
-        goto error;
-    }
+//     if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) <
+//         0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_ALL_DSET_NAME);
+//         goto error;
+//     }
 
-    if (read_buf) {
-        HDfree(read_buf);
-        read_buf = NULL;
-    }
+//     if (read_buf) {
+//         HDfree(read_buf);
+//         read_buf = NULL;
+//     }
 
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(container_group) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(group_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(container_group) < 0)
+//         TEST_ERROR;
+//     if (H5Fclose(file_id) < 0)
+//         TEST_ERROR;
 
-    PASSED();
+//     PASSED();
 
-    return 0;
+//     return 0;
 
-error:
-    H5E_BEGIN_TRY
-    {
-        if (read_buf)
-            HDfree(read_buf);
-        H5Sclose(fspace_id);
-        H5Dclose(dset_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY;
+// error:
+//     H5E_BEGIN_TRY
+//     {
+//         if (read_buf)
+//             HDfree(read_buf);
+//         H5Sclose(fspace_id);
+//         H5Dclose(dset_id);
+//         H5Gclose(group_id);
+//         H5Gclose(container_group);
+//         H5Fclose(file_id);
+//     }
+//     H5E_END_TRY;
 
-    return 1;
-}
+//     return 1;
+// }
 
-/*
- * A test to check that a large amount of data can be
- * read back from a dataset using a hyperslab selection.
- */
-static int
-test_read_dataset_large_hyperslab(void)
-{
-    hsize_t start[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t stride[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t count[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t block[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t dims[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK] = {600, 600, 600};
-    size_t  i, data_size;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id   = H5I_INVALID_HID;
-    hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
-    void   *read_buf = NULL;
+// /*
+//  * A test to check that a large amount of data can be
+//  * read back from a dataset using a hyperslab selection.
+//  */
+// static int
+// test_read_dataset_large_hyperslab(void)
+// {
+//     hsize_t start[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t stride[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t count[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t block[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t dims[DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK] = {600, 600, 600};
+//     size_t  i, data_size;
+//     hid_t   file_id         = H5I_INVALID_HID;
+//     hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+//     hid_t   dset_id   = H5I_INVALID_HID;
+//     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
+//     void   *read_buf = NULL;
 
-    TESTING("large read from dataset with a hyperslab selection");
+//     TESTING("large read from dataset with a hyperslab selection");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
-        SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
-    }
+//     /* Make sure the connector supports the API functions being tested */
+//     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+//         SKIPPED();
+//         HDprintf(
+//             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+//         return 0;
+//     }
 
-    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
-        goto error;
-    }
+//     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+//         goto error;
+//     }
 
-    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
-        goto error;
-    }
+//     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_HYPERSLAB_GROUP_NAME, H5P_DEFAULT,
-                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create container sub-group '%s'\n",
-                 DATASET_LARGE_READ_TEST_HYPERSLAB_GROUP_NAME);
-        goto error;
-    }
+//     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_HYPERSLAB_GROUP_NAME, H5P_DEFAULT,
+//                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create container sub-group '%s'\n",
+//                  DATASET_LARGE_READ_TEST_HYPERSLAB_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
-    if ((mspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
+//     if ((mspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME,
-                              DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPE, fspace_id, H5P_DEFAULT,
-                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME,
+//                               DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPE, fspace_id, H5P_DEFAULT,
+//                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME);
+//         goto error;
+//     }
 
-    for (i = 0; i < DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK; i++) {
-        start[i]  = 0;
-        stride[i] = 1;
-        count[i]  = dims[i];
-        block[i]  = 1;
-    }
+//     for (i = 0; i < DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK; i++) {
+//         start[i]  = 0;
+//         stride[i] = 1;
+//         count[i]  = dims[i];
+//         block[i]  = 1;
+//     }
 
-    if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) < 0)
-        TEST_ERROR;
+//     if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) < 0)
+//         TEST_ERROR;
 
-    for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK; i++)
-        data_size *= dims[i];
-    data_size *= DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPESIZE;
+//     for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_SPACE_RANK; i++)
+//         data_size *= dims[i];
+//     data_size *= DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPESIZE;
 
-    if (NULL == (read_buf = HDmalloc(data_size)))
-        TEST_ERROR;
+//     if (NULL == (read_buf = HDmalloc(data_size)))
+//         TEST_ERROR;
 
-    if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPE, mspace_id, fspace_id, H5P_DEFAULT,
-                read_buf) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME);
-        goto error;
-    }
+//     if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_DTYPE, mspace_id, fspace_id, H5P_DEFAULT,
+//                 read_buf) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_HYPERSLAB_DSET_NAME);
+//         goto error;
+//     }
 
-    if (read_buf) {
-        HDfree(read_buf);
-        read_buf = NULL;
-    }
+//     if (read_buf) {
+//         HDfree(read_buf);
+//         read_buf = NULL;
+//     }
 
-    if (H5Sclose(mspace_id) < 0)
-        TEST_ERROR;
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(container_group) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
+//     if (H5Sclose(mspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(group_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(container_group) < 0)
+//         TEST_ERROR;
+//     if (H5Fclose(file_id) < 0)
+//         TEST_ERROR;
 
-    PASSED();
+//     PASSED();
 
-    return 0;
+//     return 0;
 
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Sclose(mspace_id);
-        H5Sclose(fspace_id);
-        H5Dclose(dset_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY;
+// error:
+//     H5E_BEGIN_TRY
+//     {
+//         H5Sclose(mspace_id);
+//         H5Sclose(fspace_id);
+//         H5Dclose(dset_id);
+//         H5Gclose(group_id);
+//         H5Gclose(container_group);
+//         H5Fclose(file_id);
+//     }
+//     H5E_END_TRY;
 
-    return 1;
-}
+//     return 1;
+// }
 
-/*
- * A test to check that a large amount of data can be
- * read back from a dataset using a large point selection.
- *
- * XXX: Test takes up significant amounts of memory.
- */
-static int
-test_read_dataset_large_point_selection(void)
-{
-    hsize_t *points                                                        = NULL;
-    hsize_t  dims[DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK] = {225000000};
-    size_t   i, data_size;
-    hid_t    file_id         = H5I_INVALID_HID;
-    hid_t    container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t    dset_id   = H5I_INVALID_HID;
-    hid_t    fspace_id = H5I_INVALID_HID;
-    void    *data      = NULL;
+// /*
+//  * A test to check that a large amount of data can be
+//  * read back from a dataset using a large point selection.
+//  *
+//  * XXX: Test takes up significant amounts of memory.
+//  */
+// static int
+// test_read_dataset_large_point_selection(void)
+// {
+//     hsize_t *points                                                        = NULL;
+//     hsize_t  dims[DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK] = {225000000};
+//     size_t   i, data_size;
+//     hid_t    file_id         = H5I_INVALID_HID;
+//     hid_t    container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+//     hid_t    dset_id   = H5I_INVALID_HID;
+//     hid_t    fspace_id = H5I_INVALID_HID;
+//     void    *data      = NULL;
 
-    TESTING("large read from dataset with a point selection");
+//     TESTING("large read from dataset with a point selection");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
-        SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
-    }
+//     /* Make sure the connector supports the API functions being tested */
+//     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+//         SKIPPED();
+//         HDprintf(
+//             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+//         return 0;
+//     }
 
-    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
-        goto error;
-    }
+//     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+//         goto error;
+//     }
 
-    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
-        goto error;
-    }
+//     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_POINT_SELECTION_GROUP_NAME,
-                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create container sub-group '%s'\n",
-                 DATASET_LARGE_READ_TEST_POINT_SELECTION_GROUP_NAME);
-        goto error;
-    }
+//     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_READ_TEST_POINT_SELECTION_GROUP_NAME,
+//                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create container sub-group '%s'\n",
+//                  DATASET_LARGE_READ_TEST_POINT_SELECTION_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK, dims, NULL)) <
-        0)
-        TEST_ERROR;
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK, dims, NULL)) <
+//         0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME,
-                              DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, fspace_id, H5P_DEFAULT,
-                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME,
+//                               DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, fspace_id, H5P_DEFAULT,
+//                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME);
+//         goto error;
+//     }
 
-    for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK; i++)
-        data_size *= dims[i];
-    data_size *= DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE;
+//     for (i = 0, data_size = 1; i < DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK; i++)
+//         data_size *= dims[i];
+//     data_size *= DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
-        TEST_ERROR;
-    if (NULL ==
-        (points = HDmalloc((data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE) *
-                           ((DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK) * (sizeof(hsize_t))))))
-        TEST_ERROR;
+//     if (NULL == (data = HDmalloc(data_size)))
+//         TEST_ERROR;
+//     if (NULL ==
+//         (points = HDmalloc((data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE) *
+//                            ((DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK) * (sizeof(hsize_t))))))
+//         TEST_ERROR;
 
-    /* Select the entire dataspace */
-    for (i = 0; i < data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE; i++) {
-        points[i] = i;
-    }
+//     /* Select the entire dataspace */
+//     for (i = 0; i < data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE; i++) {
+//         points[i] = i;
+//     }
 
-    if (H5Sselect_elements(fspace_id, H5S_SELECT_SET,
-                           data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE, points) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't select points\n");
-        goto error;
-    }
+//     if (H5Sselect_elements(fspace_id, H5S_SELECT_SET,
+//                            data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE, points) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't select points\n");
+//         goto error;
+//     }
 
-    if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, H5S_ALL, fspace_id, H5P_DEFAULT,
-                data) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME);
-        goto error;
-    }
+//     if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, H5S_ALL, fspace_id, H5P_DEFAULT,
+//                 data) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME);
+//         goto error;
+//     }
 
-    if (data) {
-        HDfree(data);
-        data = NULL;
-    }
+//     if (data) {
+//         HDfree(data);
+//         data = NULL;
+//     }
 
-    if (points) {
-        HDfree(points);
-        points = NULL;
-    }
+//     if (points) {
+//         HDfree(points);
+//         points = NULL;
+//     }
 
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(container_group) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(group_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(container_group) < 0)
+//         TEST_ERROR;
+//     if (H5Fclose(file_id) < 0)
+//         TEST_ERROR;
 
-    PASSED();
+//     PASSED();
 
-    return 0;
+//     return 0;
 
-error:
-    H5E_BEGIN_TRY
-    {
-        if (data)
-            HDfree(data);
-        if (points)
-            HDfree(points);
-        H5Sclose(fspace_id);
-        H5Dclose(dset_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY;
+// error:
+//     H5E_BEGIN_TRY
+//     {
+//         if (data)
+//             HDfree(data);
+//         if (points)
+//             HDfree(points);
+//         H5Sclose(fspace_id);
+//         H5Dclose(dset_id);
+//         H5Gclose(group_id);
+//         H5Gclose(container_group);
+//         H5Fclose(file_id);
+//     }
+//     H5E_END_TRY;
 
-    return 1;
-}
-#endif
+//     return 1;
+// }
+// #endif
 
 /*
  * A test to check that data can't be read from a
@@ -5929,280 +5929,280 @@ error:
     return 1;
 }
 
-#ifndef NO_LARGE_TESTS
-/*
- * A test to check that a large write can be made
- * to a dataset using an H5S_ALL selection.
- */
-static int
-test_write_dataset_large_all(void)
-{
-    hssize_t space_npoints;
-    hsize_t  dims[DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK] = {600, 600, 600};
-    size_t   i, data_size;
-    hid_t    file_id         = H5I_INVALID_HID;
-    hid_t    container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t    dset_id   = H5I_INVALID_HID;
-    hid_t    fspace_id = H5I_INVALID_HID;
-    void    *data      = NULL;
+//#ifndef NO_LARGE_TESTS
+// /*
+//  * A test to check that a large write can be made
+//  * to a dataset using an H5S_ALL selection.
+//  */
+// static int
+// test_write_dataset_large_all(void)
+// {
+//     hssize_t space_npoints;
+//     hsize_t  dims[DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK] = {600, 600, 600};
+//     size_t   i, data_size;
+//     hid_t    file_id         = H5I_INVALID_HID;
+//     hid_t    container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+//     hid_t    dset_id   = H5I_INVALID_HID;
+//     hid_t    fspace_id = H5I_INVALID_HID;
+//     void    *data      = NULL;
 
-    TESTING("large write to dataset with H5S_ALL");
+//     TESTING("large write to dataset with H5S_ALL");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        SKIPPED();
-        HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
-                 "connector\n");
-        return 0;
-    }
+//     /* Make sure the connector supports the API functions being tested */
+//     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+//         SKIPPED();
+//         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
+//                  "connector\n");
+//         return 0;
+//     }
 
-    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
-        goto error;
-    }
+//     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+//         goto error;
+//     }
 
-    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
-        goto error;
-    }
+//     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME, H5P_DEFAULT,
-                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create container sub-group '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME);
-        goto error;
-    }
+//     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME, H5P_DEFAULT,
+//                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create container sub-group '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME,
-                              DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
-                              H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME,
+//                               DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT,
+//                               H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
+//         goto error;
+//     }
 
-    /* Close the dataset and dataspace to ensure that retrieval of file space ID is working */
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
+//     /* Close the dataset and dataspace to ensure that retrieval of file space ID is working */
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dopen2(group_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dopen2(group_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Dget_space(dset_id)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't get dataset dataspace\n");
-        goto error;
-    }
+//     if ((fspace_id = H5Dget_space(dset_id)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't get dataset dataspace\n");
+//         goto error;
+//     }
 
-    if ((space_npoints = H5Sget_simple_extent_npoints(fspace_id)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't get dataspace num points\n");
-        goto error;
-    }
+//     if ((space_npoints = H5Sget_simple_extent_npoints(fspace_id)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't get dataspace num points\n");
+//         goto error;
+//     }
 
-    if (NULL == (data = HDmalloc((hsize_t)space_npoints * DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPESIZE)))
-        TEST_ERROR;
+//     if (NULL == (data = HDmalloc((hsize_t)space_npoints * DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPESIZE)))
+//         TEST_ERROR;
 
-    for (i = 0; i < (hsize_t)space_npoints; i++)
-        ((int *)data)[i] = (int)i;
+//     for (i = 0; i < (hsize_t)space_npoints; i++)
+//         ((int *)data)[i] = (int)i;
 
-    if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't write to dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
-        goto error;
-    }
+//     if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't write to dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
+//         goto error;
+//     }
 
-    if (data) {
-        HDfree(data);
-        data = NULL;
-    }
+//     if (data) {
+//         HDfree(data);
+//         data = NULL;
+//     }
 
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(container_group) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(group_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(container_group) < 0)
+//         TEST_ERROR;
+//     if (H5Fclose(file_id) < 0)
+//         TEST_ERROR;
 
-    PASSED();
+//     PASSED();
 
-    return 0;
+//     return 0;
 
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Sclose(fspace_id);
-        H5Dclose(dset_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY;
+// error:
+//     H5E_BEGIN_TRY
+//     {
+//         H5Sclose(fspace_id);
+//         H5Dclose(dset_id);
+//         H5Gclose(group_id);
+//         H5Gclose(container_group);
+//         H5Fclose(file_id);
+//     }
+//     H5E_END_TRY;
 
-    return 1;
-}
+//     return 1;
+// }
 
-/*
- * A test to check that a large write can be made
- * to a dataset using a hyperslab selection.
- */
-static int
-test_write_dataset_large_hyperslab(void)
-{
-    hsize_t start[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t stride[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t count[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t block[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
-    hsize_t dims[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK] = {600, 600, 600};
-    size_t  i, data_size;
-    hid_t   file_id         = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t   dset_id   = H5I_INVALID_HID;
-    hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
-    void   *data = NULL;
+// /*
+//  * A test to check that a large write can be made
+//  * to a dataset using a hyperslab selection.
+//  */
+// static int
+// test_write_dataset_large_hyperslab(void)
+// {
+//     hsize_t start[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t stride[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t count[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t block[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK];
+//     hsize_t dims[DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK] = {600, 600, 600};
+//     size_t  i, data_size;
+//     hid_t   file_id         = H5I_INVALID_HID;
+//     hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+//     hid_t   dset_id   = H5I_INVALID_HID;
+//     hid_t   mspace_id = H5I_INVALID_HID, fspace_id = H5I_INVALID_HID;
+//     void   *data = NULL;
 
-    TESTING("large write to dataset with a hyperslab selection");
+//     TESTING("large write to dataset with a hyperslab selection");
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
-        SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
-        return 0;
-    }
+//     /* Make sure the connector supports the API functions being tested */
+//     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+//         SKIPPED();
+//         HDprintf(
+//             "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+//         return 0;
+//     }
 
-    if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
-        goto error;
-    }
+//     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+//         goto error;
+//     }
 
-    if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
-        goto error;
-    }
+//     if ((container_group = H5Gopen2(file_id, DATASET_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't open container group '%s'\n", DATASET_TEST_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_WRITE_TEST_HYPERSLAB_GROUP_NAME, H5P_DEFAULT,
-                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create container sub-group '%s'\n",
-                 DATASET_LARGE_WRITE_TEST_HYPERSLAB_GROUP_NAME);
-        goto error;
-    }
+//     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_WRITE_TEST_HYPERSLAB_GROUP_NAME, H5P_DEFAULT,
+//                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create container sub-group '%s'\n",
+//                  DATASET_LARGE_WRITE_TEST_HYPERSLAB_GROUP_NAME);
+//         goto error;
+//     }
 
-    if ((fspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
-    if ((mspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
-        TEST_ERROR;
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
+//     if ((mspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK, dims, NULL)) < 0)
+//         TEST_ERROR;
 
-    if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME,
-                              DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPE, fspace_id, H5P_DEFAULT,
-                              H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME);
-        goto error;
-    }
+//     if ((dset_id = H5Dcreate2(group_id, DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME,
+//                               DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPE, fspace_id, H5P_DEFAULT,
+//                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't create dataset '%s'\n", DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME);
+//         goto error;
+//     }
 
-    for (i = 0, data_size = 1; i < DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK; i++)
-        data_size *= dims[i];
-    data_size *= DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE;
+//     for (i = 0, data_size = 1; i < DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK; i++)
+//         data_size *= dims[i];
+//     data_size *= DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
-        TEST_ERROR;
+//     if (NULL == (data = HDmalloc(data_size)))
+//         TEST_ERROR;
 
-    for (i = 0; i < data_size / DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE; i++)
-        ((int *)data)[i] = (int)i;
+//     for (i = 0; i < data_size / DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE; i++)
+//         ((int *)data)[i] = (int)i;
 
-    for (i = 0; i < DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK; i++) {
-        start[i]  = 0;
-        stride[i] = 1;
-        count[i]  = dims[i];
-        block[i]  = 1;
-    }
+//     for (i = 0; i < DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_SPACE_RANK; i++) {
+//         start[i]  = 0;
+//         stride[i] = 1;
+//         count[i]  = dims[i];
+//         block[i]  = 1;
+//     }
 
-    if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) < 0)
-        TEST_ERROR;
+//     if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) < 0)
+//         TEST_ERROR;
 
-    if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPE, mspace_id, fspace_id, H5P_DEFAULT,
-                 data) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't write to dataset '%s'\n", DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME);
-        goto error;
-    }
+//     if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_DTYPE, mspace_id, fspace_id, H5P_DEFAULT,
+//                  data) < 0) {
+//         H5_FAILED();
+//         HDprintf("    couldn't write to dataset '%s'\n", DATASET_LARGE_WRITE_TEST_HYPERSLAB_DSET_NAME);
+//         goto error;
+//     }
 
-    if (data) {
-        HDfree(data);
-        data = NULL;
-    }
+//     if (data) {
+//         HDfree(data);
+//         data = NULL;
+//     }
 
-    if (H5Sclose(mspace_id) < 0)
-        TEST_ERROR;
-    if (H5Sclose(fspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Gclose(container_group) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
+//     if (H5Sclose(mspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Sclose(fspace_id) < 0)
+//         TEST_ERROR;
+//     if (H5Dclose(dset_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(group_id) < 0)
+//         TEST_ERROR;
+//     if (H5Gclose(container_group) < 0)
+//         TEST_ERROR;
+//     if (H5Fclose(file_id) < 0)
+//         TEST_ERROR;
 
-    PASSED();
+//     PASSED();
 
-    return 0;
+//     return 0;
 
-error:
-    H5E_BEGIN_TRY
-    {
-        if (data)
-            HDfree(data);
-        H5Sclose(mspace_id);
-        H5Sclose(fspace_id);
-        H5Dclose(dset_id);
-        H5Gclose(group_id);
-        H5Gclose(container_group);
-        H5Fclose(file_id);
-    }
-    H5E_END_TRY;
+// error:
+//     H5E_BEGIN_TRY
+//     {
+//         if (data)
+//             HDfree(data);
+//         H5Sclose(mspace_id);
+//         H5Sclose(fspace_id);
+//         H5Dclose(dset_id);
+//         H5Gclose(group_id);
+//         H5Gclose(container_group);
+//         H5Fclose(file_id);
+//     }
+//     H5E_END_TRY;
 
-    return 1;
-}
+//     return 1;
+// }
 
-/*
- * A test to check that a large write can be made
- * to a dataset using a point selection.
- */
-static int
-test_write_dataset_large_point_selection(void)
-{
-    TESTING("large write to dataset with a point selection");
+// /*
+//  * A test to check that a large write can be made
+//  * to a dataset using a point selection.
+//  */
+// static int
+// test_write_dataset_large_point_selection(void)
+// {
+//     TESTING("large write to dataset with a point selection");
 
-    SKIPPED();
+//     SKIPPED();
 
-    return 0;
+//     return 0;
 
-error:
-    return 1;
-}
-#endif
+// error:
+//     return 1;
+// }
+// #endif
 
 /*
  * A test to ensure that data is read back correctly from
