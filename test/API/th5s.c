@@ -752,38 +752,42 @@ test_h5s_zero_dim(void)
                 }
             }
         }
-#ifndef NO_CHECK_SELECTION_BOUNDS
-        /* Select a hyperslab beyond its current dimension sizes, then try to write
-         * the data.  It should fail. */
-        ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
-        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+//#ifndef NO_CHECK_SELECTION_BOUNDS
+        if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
+            /* Select a hyperslab beyond its current dimension sizes, then try to write
+            * the data.  It should fail. */
+            ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-        H5E_BEGIN_TRY
-        {
-            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
+            }
+            H5E_END_TRY;
+            VERIFY(ret, FAIL, "H5Dwrite");
         }
-        H5E_END_TRY;
-        VERIFY(ret, FAIL, "H5Dwrite");
-#endif
+//#endif
         /* Change to "none" selection */
         ret = H5Sselect_none(sid1);
         CHECK(ret, FAIL, "H5Sselect_none");
-#ifndef NO_CHECK_SELECTION_BOUNDS
-        /* Select a point beyond the dimension size, then try to write the data.
-         * It should fail. */
-        coord[0][0] = 2;
-        coord[0][1] = 5;
-        coord[0][2] = 3;
-        ret         = H5Sselect_elements(sid1, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
-        CHECK(ret, FAIL, "H5Sselect_elements");
+//#ifndef NO_CHECK_SELECTION_BOUNDS
+        if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
+            /* Select a point beyond the dimension size, then try to write the data.
+            * It should fail. */
+            coord[0][0] = 2;
+            coord[0][1] = 5;
+            coord[0][2] = 3;
+            ret         = H5Sselect_elements(sid1, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
+            CHECK(ret, FAIL, "H5Sselect_elements");
 
-        H5E_BEGIN_TRY
-        {
-            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
+            }
+            H5E_END_TRY;
+            VERIFY(ret, FAIL, "H5Dwrite");
         }
-        H5E_END_TRY;
-        VERIFY(ret, FAIL, "H5Dwrite");
-#endif
+//#endif
         /* Restore the selection to all */
         ret = H5Sselect_all(sid1);
         CHECK(ret, FAIL, "H5Sselect_all");
@@ -873,17 +877,19 @@ test_h5s_zero_dim(void)
                     HDprintf("element [%d][%d] is %d but should have been 7\n", i, j, rdata[i][j]);
                 }
             }
-#ifndef NO_CHECK_SELECTION_BOUNDS
-        /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
-         * It is supposed to fail. */
-        extend_dims[0] = SPACE1_DIM1 * 3;
-        H5E_BEGIN_TRY
-        {
-            ret = H5Dset_extent(dset1, extend_dims);
+//#ifndef NO_CHECK_SELECTION_BOUNDS
+        if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+            /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
+            * It is supposed to fail. */
+            extend_dims[0] = SPACE1_DIM1 * 3;
+            H5E_BEGIN_TRY
+            {
+                ret = H5Dset_extent(dset1, extend_dims);
+            }
+            H5E_END_TRY;
+            VERIFY(ret, FAIL, "H5Dset_extent");
         }
-        H5E_END_TRY;
-        VERIFY(ret, FAIL, "H5Dset_extent");
-#endif
+//#endif
         ret = H5Pclose(plist_id);
         CHECK(ret, FAIL, "H5Pclose");
 

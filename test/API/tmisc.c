@@ -4271,7 +4271,8 @@ test_misc23(void)
     CHECK(tmp_id, FAIL, "H5Gcreate2");
     //#ifndef NO_OBJECT_GET_NAME
     /* Query that the name of the new group is correct */
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) || (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE)) {
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) || (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) 
+        || (vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC) || (vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE)) {
         namelen = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
         CHECK(namelen, FAIL, "H5Iget_name");
         VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
