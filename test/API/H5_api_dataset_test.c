@@ -50,20 +50,20 @@ static int test_read_dataset_small_all(void);
 static int test_read_dataset_small_hyperslab(void);
 static int test_read_dataset_small_point_selection(void);
 static int test_dataset_io_point_selections(void);
-//#ifndef NO_LARGE_TESTS
+#ifndef NO_LARGE_TESTS
 static int test_read_dataset_large_all(void);
 static int test_read_dataset_large_hyperslab(void);
 static int test_read_dataset_large_point_selection(void);
-//#endif
+#endif
 static int test_read_dataset_invalid_params(void);
 static int test_write_dataset_small_all(void);
 static int test_write_dataset_small_hyperslab(void);
 static int test_write_dataset_small_point_selection(void);
-//#ifndef NO_LARGE_TESTS
+#ifndef NO_LARGE_TESTS
 static int test_write_dataset_large_all(void);
 static int test_write_dataset_large_hyperslab(void);
 static int test_write_dataset_large_point_selection(void);
-//#endif
+#endif
 static int test_write_dataset_data_verification(void);
 static int test_write_dataset_invalid_params(void);
 static int test_dataset_builtin_type_conversion(void);
@@ -132,11 +132,11 @@ static int (*dataset_tests[])(void) = {
     test_read_dataset_small_hyperslab,
     test_read_dataset_small_point_selection,
     test_dataset_io_point_selections,
-    //#ifndef NO_LARGE_TESTS
+    #ifndef NO_LARGE_TESTS
     test_read_dataset_large_all,
     test_read_dataset_large_hyperslab,
     test_read_dataset_large_point_selection,
-    //#endif
+    #endif
     test_read_dataset_invalid_params,
     test_write_dataset_small_all,
     test_write_dataset_small_hyperslab,
