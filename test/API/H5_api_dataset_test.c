@@ -132,20 +132,20 @@ static int (*dataset_tests[])(void) = {
     test_read_dataset_small_hyperslab,
     test_read_dataset_small_point_selection,
     test_dataset_io_point_selections,
-//#ifndef NO_LARGE_TESTS
+    //#ifndef NO_LARGE_TESTS
     test_read_dataset_large_all,
     test_read_dataset_large_hyperslab,
     test_read_dataset_large_point_selection,
-//#endif
+    //#endif
     test_read_dataset_invalid_params,
     test_write_dataset_small_all,
     test_write_dataset_small_hyperslab,
     test_write_dataset_small_point_selection,
-//#ifndef NO_LARGE_TESTS
+    //#ifndef NO_LARGE_TESTS
     test_write_dataset_large_all,
     test_write_dataset_large_hyperslab,
     test_write_dataset_large_point_selection,
-//#endif
+    //#endif
     test_write_dataset_data_verification,
     test_write_dataset_invalid_params,
     test_dataset_builtin_type_conversion,
