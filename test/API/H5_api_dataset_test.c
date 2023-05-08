@@ -51,18 +51,18 @@ static int test_read_dataset_small_hyperslab(void);
 static int test_read_dataset_small_point_selection(void);
 static int test_dataset_io_point_selections(void);
 //#ifndef NO_LARGE_TESTS
-//static int test_read_dataset_large_all(void);
-//static int test_read_dataset_large_hyperslab(void);
-//static int test_read_dataset_large_point_selection(void);
+// static int test_read_dataset_large_all(void);
+// static int test_read_dataset_large_hyperslab(void);
+// static int test_read_dataset_large_point_selection(void);
 //#endif
 static int test_read_dataset_invalid_params(void);
 static int test_write_dataset_small_all(void);
 static int test_write_dataset_small_hyperslab(void);
 static int test_write_dataset_small_point_selection(void);
 //#ifndef NO_LARGE_TESTS
-//static int test_write_dataset_large_all(void);
-//static int test_write_dataset_large_hyperslab(void);
-//static int test_write_dataset_large_point_selection(void);
+// static int test_write_dataset_large_all(void);
+// static int test_write_dataset_large_hyperslab(void);
+// static int test_write_dataset_large_point_selection(void);
 //#endif
 static int test_write_dataset_data_verification(void);
 static int test_write_dataset_invalid_params(void);
@@ -132,20 +132,20 @@ static int (*dataset_tests[])(void) = {
     test_read_dataset_small_hyperslab,
     test_read_dataset_small_point_selection,
     test_dataset_io_point_selections,
-//#ifndef NO_LARGE_TESTS
-    //test_read_dataset_large_all,
-    //test_read_dataset_large_hyperslab,
-    //test_read_dataset_large_point_selection,
-//#endif
+    //#ifndef NO_LARGE_TESTS
+    // test_read_dataset_large_all,
+    // test_read_dataset_large_hyperslab,
+    // test_read_dataset_large_point_selection,
+    //#endif
     test_read_dataset_invalid_params,
     test_write_dataset_small_all,
     test_write_dataset_small_hyperslab,
     test_write_dataset_small_point_selection,
-//#ifndef NO_LARGE_TESTS
-    //test_write_dataset_large_all,
-    //test_write_dataset_large_hyperslab,
-    //test_write_dataset_large_point_selection,
-//#endif
+    //#ifndef NO_LARGE_TESTS
+    // test_write_dataset_large_all,
+    // test_write_dataset_large_hyperslab,
+    // test_write_dataset_large_point_selection,
+    //#endif
     test_write_dataset_data_verification,
     test_write_dataset_invalid_params,
     test_dataset_builtin_type_conversion,
@@ -5213,7 +5213,8 @@ error:
 //         goto error;
 //     }
 
-//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK, dims, NULL)) <
+//     if ((fspace_id = H5Screate_simple(DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK, dims, NULL))
+//     <
 //         0)
 //         TEST_ERROR;
 
@@ -5233,7 +5234,8 @@ error:
 //         TEST_ERROR;
 //     if (NULL ==
 //         (points = HDmalloc((data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE) *
-//                            ((DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK) * (sizeof(hsize_t))))))
+//                            ((DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_SPACE_RANK) *
+//                            (sizeof(hsize_t))))))
 //         TEST_ERROR;
 
 //     /* Select the entire dataspace */
@@ -5242,17 +5244,19 @@ error:
 //     }
 
 //     if (H5Sselect_elements(fspace_id, H5S_SELECT_SET,
-//                            data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE, points) < 0) {
+//                            data_size / DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE, points) < 0)
+//                            {
 //         H5_FAILED();
 //         HDprintf("    couldn't select points\n");
 //         goto error;
 //     }
 
-//     if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, H5S_ALL, fspace_id, H5P_DEFAULT,
+//     if (H5Dread(dset_id, DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_DTYPE, H5S_ALL, fspace_id,
+//     H5P_DEFAULT,
 //                 data) < 0) {
 //         H5_FAILED();
-//         HDprintf("    couldn't read from dataset '%s'\n", DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME);
-//         goto error;
+//         HDprintf("    couldn't read from dataset '%s'\n",
+//         DATASET_LARGE_READ_TEST_POINT_SELECTION_DSET_NAME); goto error;
 //     }
 
 //     if (data) {
@@ -5950,9 +5954,9 @@ error:
 
 //     /* Make sure the connector supports the API functions being tested */
 //     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-//         SKIPPED();
-//         HDprintf("    API functions for basic file, group, basic or more dataset aren't supported with this "
+//         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g &
+//         H5VL_CAP_FLAG_DATASET_MORE)) { SKIPPED(); HDprintf("    API functions for basic file, group, basic
+//         or more dataset aren't supported with this "
 //                  "connector\n");
 //         return 0;
 //     }
@@ -5972,8 +5976,8 @@ error:
 //     if ((group_id = H5Gcreate2(container_group, DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME, H5P_DEFAULT,
 //                                H5P_DEFAULT, H5P_DEFAULT)) < 0) {
 //         H5_FAILED();
-//         HDprintf("    couldn't create container sub-group '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME);
-//         goto error;
+//         HDprintf("    couldn't create container sub-group '%s'\n",
+//         DATASET_LARGE_WRITE_TEST_ALL_GROUP_NAME); goto error;
 //     }
 
 //     if ((fspace_id = H5Screate_simple(DATASET_LARGE_WRITE_TEST_ALL_DSET_SPACE_RANK, dims, NULL)) < 0)
@@ -6017,7 +6021,8 @@ error:
 //     for (i = 0; i < (hsize_t)space_npoints; i++)
 //         ((int *)data)[i] = (int)i;
 
-//     if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0) {
+//     if (H5Dwrite(dset_id, DATASET_LARGE_WRITE_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) <
+//     0) {
 //         H5_FAILED();
 //         HDprintf("    couldn't write to dataset '%s'\n", DATASET_LARGE_WRITE_TEST_ALL_DSET_NAME);
 //         goto error;
