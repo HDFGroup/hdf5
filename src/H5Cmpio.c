@@ -159,11 +159,11 @@ herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    unsigned           first_entry_to_flush;
-    unsigned           last_entry_to_flush;
+    unsigned first_entry_to_flush;
+    unsigned last_entry_to_flush;
 #ifndef NDEBUG
-    unsigned           total_entries_to_clear     = 0;
-    unsigned           total_entries_to_flush     = 0;
+    unsigned total_entries_to_clear = 0;
+    unsigned total_entries_to_flush = 0;
 #endif /* NDEBUG */
     unsigned          *candidate_assignment_table = NULL;
     unsigned           entries_to_flush[H5C_RING_NTYPES];

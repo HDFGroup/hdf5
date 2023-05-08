@@ -2040,11 +2040,11 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
 {
     H5C_cache_entry_t *entry_ptr;
 #ifndef NDEBUG
-    unsigned           entries_visited   = 0;
+    unsigned entries_visited = 0;
 #endif /* NDEBUG */
-    int                fd_children_found = 0;
-    hbool_t            found;
-    herr_t             ret_value = SUCCEED; /* Return value */
+    int     fd_children_found = 0;
+    hbool_t found;
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2379,13 +2379,13 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *parent_ptr;
 #ifndef NDEBUG
-    unsigned           entries_removed_from_image      = 0;
-    unsigned           external_parent_fd_refs_removed = 0;
-    unsigned           external_child_fd_refs_removed  = 0;
+    unsigned entries_removed_from_image      = 0;
+    unsigned external_parent_fd_refs_removed = 0;
+    unsigned external_child_fd_refs_removed  = 0;
 #endif /* NDEBUG */
-    hbool_t            done                            = FALSE;
-    unsigned           u; /* Local index variable */
-    herr_t             ret_value = SUCCEED;
+    hbool_t  done = FALSE;
+    unsigned u; /* Local index variable */
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -2468,7 +2468,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
 
 #ifndef NDEBUG
                     external_child_fd_refs_removed++;
-#endif /* NDEBUG */
+#endif            /* NDEBUG */
                 } /* end if */
             }     /* for */
         }         /* end if */
@@ -2495,7 +2495,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                     entry_ptr->fd_parent_addrs[u] = HADDR_UNDEF;
 #ifndef NDEBUG
                     external_parent_fd_refs_removed++;
-#endif /* NDEBUG */
+#endif            /* NDEBUG */
                 } /* end if */
             }     /* for */
 
@@ -2662,12 +2662,12 @@ static herr_t
 H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
-    H5C_image_entry_t *image_entries   = NULL;
+    H5C_image_entry_t *image_entries = NULL;
 #ifndef NDEBUG
-    uint32_t           entries_visited = 0;
-#endif /* NDEBUG */
-    unsigned           u;                   /* Local index variable */
-    herr_t             ret_value = SUCCEED; /* Return value */
+    uint32_t entries_visited = 0;
+#endif                            /* NDEBUG */
+    unsigned u;                   /* Local index variable */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2805,16 +2805,16 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 {
     H5C_cache_entry_t *entry_ptr;
     hbool_t            include_in_image;
-    int                lru_rank                         = 1;
+    int                lru_rank = 1;
 #ifndef NDEBUG
-    unsigned           entries_visited                  = 0;
-    uint32_t           num_entries_tentatively_in_image = 0;
+    unsigned entries_visited                  = 0;
+    uint32_t num_entries_tentatively_in_image = 0;
 #endif /* NDEBUG */
-    uint32_t           num_entries_in_image             = 0;
-    size_t             image_len;
-    size_t             entry_header_len;
-    size_t             fd_parents_list_len;
-    herr_t             ret_value = SUCCEED; /* Return value */
+    uint32_t num_entries_in_image = 0;
+    size_t   image_len;
+    size_t   entry_header_len;
+    size_t   fd_parents_list_len;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2917,7 +2917,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 
 #ifndef NDEBUG
             num_entries_tentatively_in_image++;
-#endif /* NDEBUG */
+#endif    /* NDEBUG */
         } /* end if */
 
 #ifndef NDEBUG
@@ -2953,14 +2953,14 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     if (H5C__prep_for_file_close__compute_fd_heights(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "computation of flush dependency heights failed?!?")
 
-    /* At this point, all entries that will appear in the cache
-     * image should be marked correctly.  Compute the size of the
-     * cache image.
-     */
+        /* At this point, all entries that will appear in the cache
+         * image should be marked correctly.  Compute the size of the
+         * cache image.
+         */
 #ifndef NDEBUG
     entries_visited = 0;
 #endif /* NDEBUG */
-    entry_ptr       = cache_ptr->il_head;
+    entry_ptr = cache_ptr->il_head;
     while (entry_ptr != NULL) {
         HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
@@ -2995,7 +2995,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 
     cache_ptr->num_entries_in_image = num_entries_in_image;
 #ifndef NDEBUG
-    entries_visited                 = 0;
+    entries_visited = 0;
 #endif /* NDEBUG */
 
     /* Now scan the LRU list to set the lru_rank fields of all entries
