@@ -5929,7 +5929,7 @@ error:
     return 1;
 }
 
-//#ifndef NO_LARGE_TESTS
+#ifndef NO_LARGE_TESTS
 /*
  * A test to check that a large write can be made
  * to a dataset using an H5S_ALL selection.
@@ -6202,7 +6202,7 @@ test_write_dataset_large_point_selection(void)
 error:
     return 1;
 }
-//#endif
+#endif
 
 /*
  * A test to ensure that data is read back correctly from
