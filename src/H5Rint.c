@@ -1209,7 +1209,7 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
     if (H5S_set_extent_simple(space, rank, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set extent rank for selection")
-    if (H5S_SELECT_DESERIALIZE(&space, &p) < 0)
+    if (H5S_SELECT_DESERIALIZE(&space, &p, *nbytes - 2 * sizeof(uint32_t)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't deserialize selection")
 
     *nbytes    = buf_size;
@@ -1508,7 +1508,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
             HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, FAIL, "not found")
 
         /* Unserialize the selection */
-        if (H5S_SELECT_DESERIALIZE(&space, &p) < 0)
+        if (H5S_SELECT_DESERIALIZE(&space, &p, data_size - token_size) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't deserialize selection")
 
         *space_ptr = space;

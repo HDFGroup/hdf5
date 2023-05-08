@@ -521,11 +521,11 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize(H5S_t **space, const uint8_t **p)
+H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
 {
     uint32_t sel_type;         /* Pointer to the selection type */
     herr_t   ret_value = FAIL; /* Return value */
-
+    char    *p_end = (char*) (*p + p_size - 1); /* Pointer to last valid byte in buffer */
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
@@ -533,24 +533,26 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     /* Selection-type specific coding is moved to the callbacks. */
 
     /* Decode selection type */
+    if (H5_IS_BUFFER_OVERFLOW(*p, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection type")
     UINT32DECODE(*p, sel_type);
 
     /* Make routine for selection type */
     switch (sel_type) {
         case H5S_SEL_POINTS: /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(space, p);
+            ret_value = (*H5S_sel_point->deserialize)(space, p, p_size - sizeof(uint32_t));
             break;
 
         case H5S_SEL_HYPERSLABS: /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(space, p);
+            ret_value = (*H5S_sel_hyper->deserialize)(space, p, p_size - sizeof(uint32_t));
             break;
 
         case H5S_SEL_ALL: /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(space, p);
+            ret_value = (*H5S_sel_all->deserialize)(space, p, p_size - sizeof(uint32_t));
             break;
 
         case H5S_SEL_NONE: /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(space, p);
+            ret_value = (*H5S_sel_none->deserialize)(space, p, p_size - sizeof(uint32_t));
             break;
 
         default:

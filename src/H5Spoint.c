@@ -60,7 +60,7 @@ static herr_t   H5S__point_release(H5S_t *space);
 static htri_t   H5S__point_is_valid(const H5S_t *space);
 static hssize_t H5S__point_serial_size(H5S_t *space);
 static herr_t   H5S__point_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p);
+static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size);
 static herr_t   H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__point_unlim_dim(const H5S_t *space);
@@ -1352,7 +1352,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_deserialize(H5S_t **space, const uint8_t **p)
+H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
 {
     H5S_t *tmp_space = NULL;                 /* Pointer to actual dataspace to use,
                                                 either *space or a newly allocated one */
@@ -1365,7 +1365,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     unsigned       rank;                     /* Rank of points */
     unsigned       i, j;                     /* local counting variables */
     herr_t         ret_value = SUCCEED;      /* Return value */
-
+    char          *p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
     FUNC_ENTER_PACKAGE
 
     /* Check args */
@@ -1386,16 +1386,22 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
         tmp_space = *space;
 
     /* Decode version */
+    if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version")
     UINT32DECODE(pp, version);
 
     if (version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
 
-    if (version >= (uint32_t)H5S_POINT_VERSION_2)
+    if (version >= (uint32_t)H5S_POINT_VERSION_2) {
         /* Decode size of point info */
+        if (H5_IS_BUFFER_OVERFLOW(pp, 1, p_end))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding point info")
         enc_size = *(pp)++;
-    else {
+    } else {
         /* Skip over the remainder of the header */
+        if (H5_IS_BUFFER_OVERFLOW(pp, 8, p_end))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection headers")
         pp += 8;
         enc_size = H5S_SELECT_INFO_ENC_SIZE_4;
     }
@@ -1405,6 +1411,8 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown size of point/offset info for selection")
 
     /* Decode the rank of the point selection */
+    if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection rank")
     UINT32DECODE(pp, rank);
 
     if (!*space) {
@@ -1422,12 +1430,21 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     /* decode the number of points */
     switch (enc_size) {
         case H5S_SELECT_INFO_ENC_SIZE_2:
+            if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint16_t), p_end))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding number of points")
+            
             UINT16DECODE(pp, num_elem);
             break;
         case H5S_SELECT_INFO_ENC_SIZE_4:
+            if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint32_t), p_end))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding number of points")
+
             UINT32DECODE(pp, num_elem);
             break;
         case H5S_SELECT_INFO_ENC_SIZE_8:
+            if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint64_t), p_end))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding number of points")
+            
             UINT64DECODE(pp, num_elem);
             break;
         default:
@@ -1444,14 +1461,23 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
         for (j = 0; j < (unsigned)rank; j++, tcoord++)
             switch (enc_size) {
                 case H5S_SELECT_INFO_ENC_SIZE_2:
+                    if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint16_t), p_end))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates")
+                    
                     UINT16DECODE(pp, *tcoord);
                     break;
 
                 case H5S_SELECT_INFO_ENC_SIZE_4:
+                    if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint32_t), p_end))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates")
+
                     UINT32DECODE(pp, *tcoord);
                     break;
 
                 case H5S_SELECT_INFO_ENC_SIZE_8:
+                    if (H5_IS_BUFFER_OVERFLOW(pp, sizeof(uint64_t), p_end))
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection coordinates")
+
                     UINT64DECODE(pp, *tcoord);
                     break;
                 default:
