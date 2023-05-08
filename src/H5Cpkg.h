@@ -91,21 +91,6 @@ if (((head_ptr) == NULL) || ((tail_ptr) == NULL) ||                          \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL pre remove SC failed")               \
 }
 
-#define H5C__GEN_DLL_SC(list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
-if ((((head_ptr) == NULL || (tail_ptr) == NULL) && (head_ptr) != (tail_ptr)) || \
-    ((len) == 1 &&                                                              \
-     ((head_ptr) != (tail_ptr) || (head_ptr) == NULL ||                         \
-      (head_ptr)->size != (list_size))                                          \
-    ) ||                                                                        \
-    ((len) >= 1 &&                                                              \
-     ((head_ptr) == NULL || (head_ptr)->list_prev != NULL||                     \
-      (tail_ptr) == NULL || (tail_ptr)->list_next != NULL                       \
-     )                                                                          \
-    )                                                                           \
-   ) {                                                                          \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fail_val), "DLL sanity check failed")   \
-}
-
 #define H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val) \
 if ((entry_ptr) == NULL || (entry_ptr)->list_next != NULL || (entry_ptr)->list_prev != NULL || \
     (((head_ptr) == NULL || (tail_ptr) == NULL) && (head_ptr) != (tail_ptr)) ||                \
@@ -143,7 +128,6 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))    \
 }
 #else /* H5C_DO_SANITY_CHECKS */
 #define H5C__GEN_DLL_PRE_REMOVE_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
-#define H5C__GEN_DLL_SC(list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
 #define H5C__GEN_DLL_PRE_INSERT_SC(entry_ptr, list_next, list_prev, head_ptr, tail_ptr, len, list_size, fail_val)
 #define H5C__GEN_DLL_PRE_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
 #define H5C__GEN_DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size, fail_val)
