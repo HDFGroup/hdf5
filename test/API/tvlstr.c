@@ -871,7 +871,6 @@ test_vl_rewrite(void)
 static void
 test_write_same_element(void)
 {
-    //#ifndef NO_WRITE_SAME_ELEMENT_TWICE
     hid_t       file1, dataset1;
     hid_t       mspace, fspace, dtype;
     hsize_t     fdim[]             = {SPACE1_DIM1};
@@ -880,12 +879,10 @@ test_write_same_element(void)
     hsize_t     marray[]           = {NUMP};
     hsize_t     coord[SPACE1_RANK][NUMP];
     herr_t      ret;
-    //#endif
 
     MESSAGE(
         5,
         ("Testing writing to same element of VL string dataset twice - SKIPPED for now due to no support\n"));
-    //#ifndef NO_WRITE_SAME_ELEMENT_TWICE
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(file1, FAIL, "H5Fcreate");
@@ -961,7 +958,6 @@ test_write_same_element(void)
         ret = H5Fclose(file1);
         CHECK(ret, FAIL, "H5Fclose");
     }
-    //#endif
 } /* test_write_same_element */
 
 /****************************************************************

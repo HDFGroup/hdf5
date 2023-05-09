@@ -62,10 +62,8 @@ static int find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_clie
 /* Local functions */
 int iter_strcmp(const void *s1, const void *s2);
 int iter_strcmp2(const void *s1, const void *s2);
-//#ifndef NO_ITERATION_RESTART
 static herr_t liter_cb(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
 static herr_t liter_cb2(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
-//#endif
 herr_t aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo, void *op_data);
 
 /****************************************************************
@@ -84,7 +82,6 @@ iter_strcmp(const void *s1, const void *s2)
 **  liter_cb(): Custom link iteration callback routine.
 **
 ****************************************************************/
-//#ifndef NO_ITERATION_RESTART
 static herr_t
 liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info,
          void *op_data)
@@ -94,7 +91,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
     static int count2 = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
-        // SKIPPED();
+        SKIPPED();
         HDprintf("    API functions for iterate aren't "
                  "supported with this connector\n");
         return 0;
@@ -122,7 +119,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
             return (-1);
     } /* end switch */
 } /* end liter_cb() */
-//#endif
 
 /****************************************************************
 **
@@ -132,7 +128,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 static void
 test_iter_group(hid_t fapl, hbool_t new_format)
 {
-    //#ifndef NO_ITERATION_RESTART
     hid_t      file;                  /* File ID */
     hid_t      dataset;               /* Dataset ID */
     hid_t      datatype;              /* Common datatype ID */
@@ -146,15 +141,12 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     iter_info  info;                  /* Custom iteration information */
     H5G_info_t ginfo;                 /* Buffer for querying object's info */
     herr_t     ret;                   /* Generic return value */
-                                      //#else
     (void)fapl;
     (void)new_format;
-    //#endif
 
     /* Output message about test being performed */
     MESSAGE(
         5, ("Testing Group Iteration Functionality - SKIPPED for now due to no iteration restart support\n"));
-    //#ifndef NO_ITERATION_RESTART
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         /* Create the test file with the datasets */
@@ -391,7 +383,6 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         for (i = 0; i < (NDATASETS + 2); i++)
             HDfree(lnames[i]);
     }
-    //#endif
 } /* test_iter_group() */
 
 /****************************************************************
@@ -437,7 +428,6 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
 static void
 test_iter_attr(hid_t fapl, hbool_t new_format)
 {
-    //#ifndef NO_ITERATION_RESTART
     hid_t     file;          /* File ID */
     hid_t     dataset;       /* Common Dataset ID */
     hid_t     filespace;     /* Common dataspace ID */
@@ -448,16 +438,13 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     char     *anames[NATTR]; /* Names of the attributes created */
     iter_info info;          /* Custom iteration information */
     herr_t    ret;           /* Generic return value        */
-                             //#else
     (void)fapl;
     (void)new_format;
-    //#endif
 
     /* Output message about test being performed */
     MESSAGE(
         5,
         ("Testing Attribute Iteration Functionality - SKIPPED for no due to no iteration restart support\n"));
-    //#ifndef NO_ITERATION_RESTART
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         HDmemset(&info, 0, sizeof(iter_info));
 
@@ -607,7 +594,6 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
         for (i = 0; i < NATTR; i++)
             HDfree(anames[i]);
     }
-    //#endif
 } /* test_iter_attr() */
 
 /****************************************************************
@@ -626,7 +612,6 @@ iter_strcmp2(const void *s1, const void *s2)
 **  liter_cb2(): Custom link iteration callback routine.
 **
 ****************************************************************/
-//#ifndef NO_ITERATION_RESTART
 static herr_t
 liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link_info, void *opdata)
 {
@@ -635,7 +620,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     herr_t           ret; /* Generic return value        */
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
-        // SKIPPED();
+        SKIPPED();
         HDprintf("    API functions for basic file and iterate aren't "
                  "supported with this connector\n");
         return 0;
@@ -659,7 +644,6 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
 
     return (H5_ITER_STOP);
 } /* liter_cb2() */
-//#endif
 
 /****************************************************************
 **
@@ -670,7 +654,6 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
 static void
 test_iter_group_large(hid_t fapl)
 {
-    //#ifndef NO_ITERATION_RESTART
     hid_t      file;    /* HDF5 File IDs        */
     hid_t      dataset; /* Dataset ID            */
     hid_t      group;   /* Group ID             */
@@ -693,13 +676,10 @@ test_iter_group_large(hid_t fapl)
     /* Allocate & initialize array */
     names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
     CHECK_PTR(names, "HDcalloc");
-    //#else
     (void)fapl;
-    //#endif
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality - SKIPPED for now due to no iteration restart "
                 "support\n"));
-    //#ifndef NO_ITERATION_RESTART
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
         /* Create file */
         file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -790,7 +770,6 @@ test_iter_group_large(hid_t fapl)
         /* Release memory */
         HDfree(names);
     }
-    //#endif
 } /* test_iterate_group_large() */
 
 /****************************************************************
