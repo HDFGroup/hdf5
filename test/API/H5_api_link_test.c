@@ -8718,7 +8718,8 @@ test_copy_link(void)
 
             if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
                 H5_FAILED();
-                HDprintf("    copied link's creation order value %" PRId64 " doesn't match original link's creation "
+                HDprintf("    copied link's creation order value %" PRId64
+                         " doesn't match original link's creation "
                          "order value %" PRId64 "\n",
                          new_info.corder, orig_info.corder);
                 PART_ERROR(H5Lcopy_external_check);
@@ -10530,7 +10531,8 @@ test_move_link(void)
 
             if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
                 H5_FAILED();
-                HDprintf("    moved link's creation order value %" PRId64 " doesn't match original link's creation "
+                HDprintf("    moved link's creation order value %" PRId64
+                         " doesn't match original link's creation "
                          "order value %" PRId64 "\n",
                          new_info.corder, orig_info.corder);
                 PART_ERROR(H5Lmove_external_check);
@@ -11932,8 +11934,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf("    link value size %zu did not match expected size of %zu\n",
-                         link_info.u.val_size, link_val_size);
+                HDprintf("    link value size %zu did not match expected size of %zu\n", link_info.u.val_size,
+                         link_val_size);
                 PART_ERROR(H5Lget_val_external);
             }
 
@@ -12661,9 +12663,8 @@ test_get_link_val(void)
             link_val_size = strlen(link_target_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 2, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 2, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
@@ -12693,9 +12694,8 @@ test_get_link_val(void)
             link_val_size = strlen(link_target_b) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 1, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 1, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
@@ -12725,9 +12725,8 @@ test_get_link_val(void)
             link_val_size = strlen(link_target_c) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 0, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_soft_name_order_decreasing);
             }
 
@@ -12870,9 +12869,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 0, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
@@ -12916,9 +12914,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_b) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 1, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 1, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
@@ -12962,9 +12959,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_c) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 2, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 2, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_increasing);
             }
 
@@ -13123,9 +13119,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d not match expected size of %zu\n",
-                    link_info.u.val_size, 2, link_val_size);
+                HDprintf("    link value size %zu for link at index %d not match expected size of %zu\n",
+                         link_info.u.val_size, 2, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
@@ -13169,9 +13164,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_b) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 1, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 1, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
@@ -13215,9 +13209,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_c) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 0, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_crt_order_decreasing);
             }
 
@@ -13376,9 +13369,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zud\n",
-                    link_info.u.val_size, 0, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zud\n",
+                         link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
@@ -13422,9 +13414,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_b) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 1, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 1, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
@@ -13468,9 +13459,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_c) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 2, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 2, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
 
@@ -13629,9 +13619,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 2, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 2, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
@@ -13675,9 +13664,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_b) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 1, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 1, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
@@ -13721,9 +13709,8 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_c) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf(
-                    "    link value size %zu for link at index %d did not match expected size of %zu\n",
-                    link_info.u.val_size, 0, link_val_size);
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
+                         link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_decreasing);
             }
 
