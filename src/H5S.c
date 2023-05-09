@@ -1655,10 +1655,10 @@ H5S_decode(const unsigned char **p)
     if (H5S_select_all(ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
-    /* Decode the select part of dataspace.  I believe this part always exists. 
-    *  Because size of buffer is unknown, just assume arbitrarily large buffer to allow decoding. */
+    /* Decode the select part of dataspace.
+    *  Because size of buffer is unknown, assume arbitrarily large buffer to allow decoding. */
     *p = pp;
-    if (H5S_SELECT_DESERIALIZE(&ds, p, HDpow(2, sizeof(size_t)) - 1) < 0)
+    if (H5S_SELECT_DESERIALIZE(&ds, p, SIZE_MAX) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */
