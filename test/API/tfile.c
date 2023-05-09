@@ -259,7 +259,7 @@ test_file_create(void)
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
     //#ifndef NO_TRUNCATE_OPEN_FILE
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) {
         /*
          * try to create the same file with H5F_ACC_TRUNC. This should fail
          * because fid1 is the same file and is currently open.
@@ -298,7 +298,7 @@ test_file_create(void)
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
     //#ifndef NO_TRUNCATE_OPEN_FILE
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /*
          * Try to truncate first file again. This should fail because fid1 is the
          * same file and is currently open.

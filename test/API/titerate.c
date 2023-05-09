@@ -94,7 +94,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
     static int count2 = 0;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
-        //SKIPPED();
+        // SKIPPED();
         HDprintf("    API functions for iterate aren't "
                  "supported with this connector\n");
         return 0;
@@ -635,7 +635,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     herr_t           ret; /* Generic return value        */
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
-        //SKIPPED();
+        // SKIPPED();
         HDprintf("    API functions for basic file and iterate aren't "
                  "supported with this connector\n");
         return 0;
