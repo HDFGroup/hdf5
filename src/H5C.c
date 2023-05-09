@@ -3435,7 +3435,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
         for (u = 0; u < child_entry->flush_dep_nparents; u++)
             HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    }  /* end block */
+    } /* end block */
 #endif
 
     /* More sanity checks */

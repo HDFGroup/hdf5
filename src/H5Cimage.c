@@ -401,7 +401,7 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
 
         fake_cache_ptr->image_entries = (H5C_image_entry_t *)H5MM_xfree(fake_cache_ptr->image_entries);
         fake_cache_ptr                = (H5C_t *)H5MM_xfree(fake_cache_ptr);
-    }  /* end block */
+    } /* end block */
 #endif
 
 done:
@@ -3215,7 +3215,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
          * we add code to store and restore adaptive resize status.
          */
         HDassert(lru_rank_holes <= H5C__MAX_EPOCH_MARKERS);
-    }  /* end block */
+    } /* end block */
 #endif
 
     /* Check to see if the cache is oversize, and evict entries as
