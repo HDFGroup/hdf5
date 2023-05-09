@@ -7637,8 +7637,8 @@ test_dataset_set_extent_data(void)
     hid_t   dcpl_id   = H5I_INVALID_HID;
     hid_t   fspace_id = H5I_INVALID_HID, dset_space_id = H5I_INVALID_HID;
     int     buf_origin[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM][DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM];
-    int buf_expand2[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM][DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM];
-    int buf_expand[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM * 2 - 1]
+    int     buf_expand2[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM][DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM];
+    int     buf_expand[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM * 2 - 1]
                   [DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM * 2 - 1];
     int buf_shrink[DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM / 2 + 1]
                   [DATASET_SET_EXTENT_DATA_TEST_SPACE_DIM / 2 + 1];
@@ -8055,7 +8055,8 @@ test_dataset_set_extent_double_handles(void)
     for (i = 0; i < DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_RANK; i++)
         if (dims_out[i] != dims_expand[i]) {
             H5_FAILED();
-            HDprintf("    dims_out[%d] = %" PRIuHSIZE ".  It should be %" PRIuHSIZE ".\n", i, dims_out[i], dims_expand[i]);
+            HDprintf("    dims_out[%d] = %" PRIuHSIZE ".  It should be %" PRIuHSIZE ".\n", i, dims_out[i],
+                     dims_expand[i]);
             goto error;
         }
 
