@@ -2195,8 +2195,9 @@ H5F__close_cb(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->shared == NULL || f->file_id >
-             0); /* This routine should only be called when a file ID's ref count drops to zero */
+    HDassert(f->shared == NULL ||
+             f->file_id >
+                 0); /* This routine should only be called when a file ID's ref count drops to zero */
 
     if (f->shared == NULL)
         f = H5FL_FREE(H5F_t, f);
@@ -2220,7 +2221,8 @@ H5F__close_cb(H5F_t *f)
              * a "real" attempt at closing the file.
              */
             if (nopen_files == 1 && nopen_objs > 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                            "can't close file, there are objects still open")
         }
 
         /* Reset the file ID for this file */
@@ -2229,7 +2231,6 @@ H5F__close_cb(H5F_t *f)
         /* Attempt to close the file/mount hierarchy */
         if (H5F_try_close(f, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
-
     }
 
 done:
