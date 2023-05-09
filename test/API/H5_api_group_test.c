@@ -1714,7 +1714,7 @@ test_get_group_info(void)
         PART_BEGIN(H5Gget_info_by_idx_name_order_decreasing)
         {
             TESTING_2("H5Gget_info_by_idx by alphabetical order in decreasing order");
-            
+
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
 
@@ -1728,7 +1728,8 @@ test_get_group_info(void)
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%" PRIuHSIZE "' doesn't match expected value '%d'\n",
+                    HDprintf("    group's number of links '%" PRIuHSIZE
+                             "' doesn't match expected value '%d'\n",
                              group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }

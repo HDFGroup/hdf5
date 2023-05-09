@@ -379,7 +379,7 @@ test_create_hard_link_many(void)
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID;
-    char objname[HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
+    char   objname[HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
 
     TESTING("hard link creation of many links");
 
@@ -691,8 +691,8 @@ test_create_hard_link_invalid_params(void)
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    hid_t ext_file_id = H5I_INVALID_HID;
+    char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    hid_t  ext_file_id = H5I_INVALID_HID;
 
     TESTING_MULTIPART("hard link creation with invalid parameters");
 
@@ -1566,7 +1566,7 @@ test_create_soft_link_many(void)
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id        = H5I_INVALID_HID;
     hid_t  object_id       = H5I_INVALID_HID;
-    char objname[SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
+    char   objname[SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
 
     TESTING("soft link creation of many links");
 
@@ -3483,7 +3483,7 @@ test_delete_link(void)
     hid_t  subgroup_id   = H5I_INVALID_HID;
     hid_t  nested_grp_id = H5I_INVALID_HID;
     hid_t  gcpl_id       = H5I_INVALID_HID;
-    char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link deletion");
 
@@ -7593,7 +7593,7 @@ test_copy_link(void)
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  src_grp_id = H5I_INVALID_HID, dst_grp_id = H5I_INVALID_HID;
-    char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link copying");
 
@@ -11556,14 +11556,14 @@ test_get_link_val(void)
     const char *ext_link_filepath;
     const char *ext_link_val;
     unsigned    ext_link_flags;
-    htri_t link_exists;
-    size_t link_val_size;
-    char   link_val_buf[GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE];
-    hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
-    hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t  subgroup_id = H5I_INVALID_HID;
-    hid_t  gcpl_id     = H5I_INVALID_HID;
-    char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    htri_t      link_exists;
+    size_t      link_val_size;
+    char        link_val_buf[GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE];
+    hid_t       file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
+    hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
+    hid_t       subgroup_id = H5I_INVALID_HID;
+    hid_t       gcpl_id     = H5I_INVALID_HID;
+    char        ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link value retrieval");
 
@@ -14015,8 +14015,8 @@ test_get_link_info(void)
     hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t       subgroup_id = H5I_INVALID_HID;
     hid_t       gcpl_id     = H5I_INVALID_HID;
-    char *ext_objname;
-    char  ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    char       *ext_objname;
+    char        ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link info retrieval");
 
@@ -16976,7 +16976,7 @@ test_get_link_name(void)
     hid_t   subgroup_id = H5I_INVALID_HID;
     hid_t   gcpl_id     = H5I_INVALID_HID;
     char    link_name_buf[GET_LINK_NAME_TEST_BUF_SIZE];
-    char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
+    char    ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link name retrieval");
 
@@ -24537,7 +24537,7 @@ test_link_visit_mixed_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
 

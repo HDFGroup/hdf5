@@ -9174,7 +9174,7 @@ test_delete_attribute(void)
         PART_BEGIN(H5Adelete_by_idx_name_order_decreasing)
         {
             TESTING_2("H5Adelete_by_idx by alphabetical order in decreasing order");
-            
+
             /* Create several attributes */
             if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_DELETION_TEST_ATTR_NAME, attr_dtype, space_id,
                                       H5P_DEFAULT, H5P_DEFAULT)) < 0) {

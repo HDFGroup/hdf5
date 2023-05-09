@@ -1829,7 +1829,7 @@ test_get_file_obj_count(void)
         PART_BEGIN(H5Fget_obj_count_all)
         {
             TESTING_2("H5Fget_obj_count for all object types");
-            
+
             /* Get the number of all open objects */
             if ((obj_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0) {
                 H5_FAILED();
