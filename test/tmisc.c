@@ -5821,7 +5821,7 @@ test_misc35(void)
 
 /****************************************************************
 **
-**  test_misc37():
+**  test_misc36():
 **      Test for seg fault issue when closing the provided test file
 **      which has an illegal file size in its cache image.
 **      See HDFFV-11052/CVE-2020-10812 for details.
