@@ -621,7 +621,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file and iterate aren't "
+        HDprintf("    API functions for iterate and basic links aren't "
                  "supported with this connector\n");
         return 0;
     }

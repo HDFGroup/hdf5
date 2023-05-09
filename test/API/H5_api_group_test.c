@@ -1123,7 +1123,7 @@ test_group_property_lists(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, property list, creation order aren't supported "
+        HDprintf("    API functions for basic file, group, property list, or creation order aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -1811,7 +1811,7 @@ test_get_group_info_invalid_params(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
+        HDprintf("    API functions for basic file, more group, or creation order aren't supported with this "
                  "connector\n");
         return 0;
     }
@@ -2169,7 +2169,7 @@ test_flush_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
+        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
                  "connector\n");
         return 0;
     }
@@ -2278,7 +2278,7 @@ test_refresh_group(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
         HDprintf(
-            "    API functions for basic file, group, or refresh aren't supported with this connector\n");
+            "    API functions for basic file, group, or flush refresh aren't supported with this connector\n");
         return 0;
     }
 

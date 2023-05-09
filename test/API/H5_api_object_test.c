@@ -1620,7 +1620,7 @@ test_incr_decr_object_refcount(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, stored datatype, basic or more object  "
+        HDprintf("    API functions for basic file, group, dataset, stored datatype, or object  "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -3840,7 +3840,7 @@ test_object_copy_group_with_soft_links(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, link, or soft link aren't supported with "
+        HDprintf("    API functions for basic file, group, object, link, iterate, or soft link aren't supported with "
                  "this connector\n");
         return 0;
     }
@@ -6604,7 +6604,7 @@ test_close_invalid_objects(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, dataset, attribute, or stored datatype "
+        HDprintf("    API functions for basic file, group, or object "
                  "aren't supported with this connector\n");
         return 0;
     }

@@ -2063,7 +2063,7 @@ test_create_dataset_creation_properties(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_TRACK_TIMES) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, dataset, creation order, track time, or filter "
                  "pipeline aren't supported with this connector\n");
@@ -10873,7 +10873,7 @@ test_get_vlen_buf_size(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, or more aren't supported with this "
+        HDprintf("    API functions for basic file, group, or dataset aren't supported with this "
                  "connector\n");
         return 0;
     }

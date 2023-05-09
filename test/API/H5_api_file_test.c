@@ -602,7 +602,7 @@ test_file_permission(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, attribute, stored datatype aren't "
+        HDprintf("    API functions for basic file, group, dataset, attribute, or stored datatype aren't "
                  "supported with this connector\n");
         return 0;
     }
@@ -1597,7 +1597,7 @@ test_get_file_obj_count(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic or more file,  basic dataset, group, datatype, or attribute "
+        HDprintf("    API functions for basic or more file,  basic dataset, group, stored datatypes, or attribute "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -2166,7 +2166,7 @@ test_get_file_name(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic or more file, basic dataset, group, datatype, or attribute "
+        HDprintf("    API functions for basic or more file, basic dataset, group, stored datatypes, or attribute "
                  "aren't supported with this connector\n");
         return 0;
     }
