@@ -1922,6 +1922,7 @@ error:
 static int
 test_file_open_overlap(void)
 {
+    /*
     ssize_t obj_count;
     hid_t   file_id           = H5I_INVALID_HID;
     hid_t   file_id2          = H5I_INVALID_HID;
@@ -1929,6 +1930,7 @@ test_file_open_overlap(void)
     hid_t   dspace_id         = H5I_INVALID_HID;
     hid_t   dset_id           = H5I_INVALID_HID;
     char   *prefixed_filename = NULL;
+    */
 
     TESTING("overlapping file opens");
 
