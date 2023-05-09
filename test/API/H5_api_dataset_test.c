@@ -8735,7 +8735,7 @@ test_dataset_set_extent_double_handles(void)
     for (i = 0; i < DATASET_SET_EXTENT_DOUBLE_HANDLES_TEST_SPACE_RANK; i++)
         if (dims_out[i] != dims_expand[i]) {
             H5_FAILED();
-            HDprintf("    dims_out[%d] = %d.  It should be %d.\n", i, dims_out[i], dims_expand[i]);
+            HDprintf("    dims_out[%d] = %zu.  It should be %zu.\n", i, dims_out[i], dims_expand[i]);
             goto error;
         }
 

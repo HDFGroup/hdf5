@@ -1728,14 +1728,14 @@ test_get_group_info(void)
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%lld' doesn't match expected value '%lld'\n",
+                    HDprintf("    group's number of links '%zu' doesn't match expected value '%d'\n",
                              group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
+                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
                              (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
