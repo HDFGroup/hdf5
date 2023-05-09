@@ -201,8 +201,8 @@ test_attr_basic_write(hid_t fapl)
     hsize_t dims3[]                = {ATTR2_DIM1, ATTR2_DIM2};
     int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int     i;
-    hid_t ret_id; /* Generic hid_t return value */
-    herr_t ret;   /* Generic return value */
+    hid_t   ret_id; /* Generic hid_t return value */
+    herr_t  ret;    /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
@@ -731,8 +731,8 @@ test_attr_compound_write(hid_t fapl)
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t dims2[] = {ATTR4_DIM1, ATTR4_DIM2};
-    hid_t ret_id; /* Generic hid_t return value    */
-    herr_t ret;   /* Generic return value        */
+    hid_t   ret_id; /* Generic hid_t return value    */
+    herr_t  ret;    /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
@@ -973,8 +973,8 @@ test_attr_scalar_write(hid_t fapl)
     hid_t   sid1, sid2; /* Dataspace ID            */
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hid_t ret_id; /* Generic hid_t return value    */
-    herr_t ret;   /* Generic return value        */
+    hid_t   ret_id; /* Generic hid_t return value    */
+    herr_t  ret;    /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1116,8 +1116,8 @@ test_attr_mult_write(hid_t fapl)
     hsize_t dims2[] = {ATTR1_DIM1};
     hsize_t dims3[] = {ATTR2_DIM1, ATTR2_DIM2};
     hsize_t dims4[] = {ATTR3_DIM1, ATTR3_DIM2, ATTR3_DIM3};
-    hid_t ret_id; /* Generic hid_t return value    */
-    herr_t ret;   /* Generic return value        */
+    hid_t   ret_id; /* Generic hid_t return value    */
+    herr_t  ret;    /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
@@ -6518,8 +6518,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         else {
                             continue;
                         }
-                    } 
-                }     /* end else */
+                    }
+                } /* end else */
 
                 /* Create file */
                 fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -7448,17 +7448,17 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     name_count;     /* # of records in name index */
     hsize_t     corder_count;   /* # of records in creation order index */
 #endif
-    H5_index_t       idx_type;           /* Type of index to operate on */
-    H5_iter_order_t  order;              /* Order within in the index */
-    attr_iter_info_t iter_info;          /* Iterator info */
-    hbool_t         *visited = NULL;     /* Array of flags for visiting links */
-    hsize_t idx;                         /* Start index for iteration */
-    unsigned    use_index;               /* Use index on creation order values */
-    const char *dsetname;                /* Name of dataset for attributes */
-    char        attrname[NAME_BUF_SIZE]; /* Name of attribute */
-    unsigned    curr_dset;               /* Current dataset to work on */
-    unsigned    u;                       /* Local index variable */
-    herr_t      ret;                     /* Generic return value        */
+    H5_index_t       idx_type;                /* Type of index to operate on */
+    H5_iter_order_t  order;                   /* Order within in the index */
+    attr_iter_info_t iter_info;               /* Iterator info */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
+    hsize_t          idx;                     /* Start index for iteration */
+    unsigned         use_index;               /* Use index on creation order values */
+    const char      *dsetname;                /* Name of dataset for attributes */
+    char             attrname[NAME_BUF_SIZE]; /* Name of attribute */
+    unsigned         curr_dset;               /* Current dataset to work on */
+    unsigned         u;                       /* Local index variable */
+    herr_t           ret;                     /* Generic return value        */
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
