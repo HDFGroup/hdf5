@@ -1922,7 +1922,6 @@ error:
 static int
 test_file_open_overlap(void)
 {
-    /*
     ssize_t obj_count;
     hid_t   file_id           = H5I_INVALID_HID;
     hid_t   file_id2          = H5I_INVALID_HID;
@@ -1930,7 +1929,6 @@ test_file_open_overlap(void)
     hid_t   dspace_id         = H5I_INVALID_HID;
     hid_t   dset_id           = H5I_INVALID_HID;
     char   *prefixed_filename = NULL;
-    */
 
     TESTING("overlapping file opens");
 
@@ -1943,7 +1941,116 @@ test_file_open_overlap(void)
         return 0;
     }
 
+    if (prefix_filename(test_path_prefix, OVERLAPPING_FILENAME, &prefixed_filename) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't prefix filename\n");
+        goto error;
+    }
+
+    if ((file_id = H5Fcreate(prefixed_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't create file '%s'\n", prefixed_filename);
+        goto error;
+    }
+
+    if ((file_id2 = H5Fopen(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't open file '%s'\n", prefixed_filename);
+        goto error;
+    }
+
+    if ((group_id = H5Gcreate2(file_id, OVERLAPPING_OPEN_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
+                               H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't create group '%s'\n", OVERLAPPING_OPEN_TEST_GRP_NAME);
+        goto error;
+    }
+
+    /* Create a dataspace for the dataset */
+    if ((dspace_id = H5Screate(H5S_SCALAR)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't create data space for dataset\n");
+        goto error;
+    }
+
+    /* Create a dataset in the group of the first file */
+    if ((dset_id = H5Dcreate2(group_id, OVERLAPPING_OPEN_TEST_DSET_NAME, H5T_NATIVE_INT, dspace_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't create the dataset '%s'\n", OVERLAPPING_OPEN_TEST_DSET_NAME);
+        goto error;
+    }
+
+    /* Get the number of objects opened in the first file: 3 == file + dataset + group */
+    if ((obj_count = H5Fget_obj_count(file_id, H5F_OBJ_LOCAL | H5F_OBJ_ALL)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't retrieve the number of objects opened in the file\n");
+        goto error;
+    }
+
+    if (obj_count != 3) {
+        H5_FAILED();
+        HDprintf("    number of objects opened in file (%ld) did not match expected number (3)\n", obj_count);
+        goto error;
+    }
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    /* Create a dataset in the second file */
+    if ((dset_id = H5Dcreate2(file_id2, OVERLAPPING_OPEN_TEST_DSET_NAME, H5T_NATIVE_INT, dspace_id,
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't create the dataset '%s'\n", OVERLAPPING_OPEN_TEST_DSET_NAME);
+        goto error;
+    }
+
+    /* Get the number of objects opened in the first file: 2 == file + dataset */
+    if ((obj_count = H5Fget_obj_count(file_id2, H5F_OBJ_ALL)) < 0) {
+        H5_FAILED();
+        HDprintf("    couldn't retrieve the number of objects opened in the file\n");
+        goto error;
+    }
+
+    if (obj_count != 2) {
+        H5_FAILED();
+        HDprintf("    number of objects opened in the file (%ld) did not match expected number (2)\n",
+                 obj_count);
+        goto error;
+    }
+
+    if (H5Sclose(dspace_id) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id2) < 0)
+        TEST_ERROR;
+
+    HDfree(prefixed_filename);
+    prefixed_filename = NULL;
+
+    PASSED();
+
     return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Sclose(dspace_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+        H5Fclose(file_id2);
+    }
+    H5E_END_TRY;
+
+    HDfree(prefixed_filename);
+
+    return 1;
 }
 
 /*
