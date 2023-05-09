@@ -127,7 +127,7 @@ static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t add
 #ifndef NDEBUG
 static void H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry,
                                           const H5C_cache_entry_t *base_entry);
-#endif /* NDEBUG */
+#endif
 
 /*********************/
 /* Package Variables */
@@ -410,7 +410,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
 #ifndef NDEBUG
     cache_ptr->get_entry_ptr_from_addr_counter = 0;
-#endif /* NDEBUG */
+#endif
 
     /* Set return value */
     ret_value = cache_ptr;
@@ -454,9 +454,9 @@ void
 H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
 #ifndef NDEBUG
                             int32_t version,
-#else  /* NDEBUG */
+#else
                             int32_t H5_ATTR_UNUSED version,
-#endif /* NDEBUG */
+#endif
                             double hit_rate, enum H5C_resize_status status, size_t old_max_cache_size,
                             size_t new_max_cache_size, size_t old_min_clean_size, size_t new_min_clean_size)
 {
@@ -732,7 +732,7 @@ H5C_dest(H5F_t *f)
 #endif /* H5C_DO_SANITY_CHECKS */
 
     cache_ptr->magic = 0;
-#endif /* NDEBUG */
+#endif
 
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
 
@@ -1216,7 +1216,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     entry_ptr->prefetched_dirty     = FALSE;
 #ifndef NDEBUG /* debugging field */
     entry_ptr->serialization_count = 0;
-#endif /* NDEBUG */
+#endif
 
     /* initialize tag list fields */
     entry_ptr->tl_next  = NULL;
@@ -1500,7 +1500,7 @@ H5C_mark_entry_clean(void *_thing)
         if (was_dirty)
             H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr, FAIL)
         if (entry_ptr->in_slist)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
 
         /* Update stats for entry being marked clean */
         H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
@@ -1703,7 +1703,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
         if (entry_ptr->in_slist) {
             HDassert(cache_ptr->slist_ptr);
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
         } /* end if */
     }     /* end if */
 
@@ -2747,7 +2747,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
                 node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 while (node_ptr != NULL) {
                     entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
                     node_ptr = H5SL_first(cache_ptr->slist_ptr);
                 }
             }
@@ -3435,8 +3435,8 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
         for (u = 0; u < child_entry->flush_dep_nparents; u++)
             HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    }  /* end block */
-#endif /* NDEBUG */
+    } /* end block */
+#endif
 
     /* More sanity checks */
     if (child_entry == parent_entry)
@@ -3529,7 +3529,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
     HDassert(child_entry->flush_dep_parent_nalloc > 0);
 #ifndef NDEBUG
     H5C__assert_flush_dep_nocycle(parent_entry, child_entry);
-#endif /* NDEBUG */
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4859,7 +4859,7 @@ H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
     HDassert(cache_ptr->pl_size == 0);
     HDassert(cache_ptr->LRU_list_len == 0);
     HDassert(cache_ptr->LRU_list_size == 0);
-#endif /* NDEBUG */
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5884,7 +5884,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
         H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
         if (entry_ptr->in_slist && del_from_slist_on_destroy)
-            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
+            H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
 
 #ifdef H5_HAVE_PARALLEL
         /* Check for collective read access flag */
@@ -5916,7 +5916,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * Hence no differentiation between them.
          */
         H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, FAIL)
-        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
+        H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
 
         /* mark the entry as clean and update the index for
          * entry clean.  Also, call the clear callback
@@ -6005,7 +6005,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 entry_ptr->type->image_len((void *)entry_ptr, &curr_len);
                 HDassert(curr_len == entry_ptr->size);
             }
-#endif /* NDEBUG */
+#endif
 
             /* If the file space free size callback is defined, use
              * it to get the size of the block of file space to free.
@@ -6508,7 +6508,7 @@ H5C__load_entry(H5F_t *f,
     entry->prefetched_dirty     = FALSE;
 #ifndef NDEBUG /* debugging field */
     entry->serialization_count = 0;
-#endif /* NDEBUG */
+#endif
 
     /* initialize tag list fields */
     entry->tl_next  = NULL;
@@ -6579,8 +6579,10 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     H5C_cache_entry_t *entry_ptr;
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
-    uint32_t           num_corked_entries = 0;
-    herr_t             ret_value          = SUCCEED; /* Return value */
+#ifndef NDEBUG
+    uint32_t num_corked_entries = 0;
+#endif
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -6628,8 +6630,10 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
 
             if (entry_ptr->is_dirty && (entry_ptr->tag_info && entry_ptr->tag_info->corked)) {
                 /* Skip "dirty" corked entries.  */
-                num_corked_entries = num_corked_entries + 1;
-                didnt_flush_entry  = TRUE;
+#ifndef NDEBUG
+                ++num_corked_entries;
+#endif
+                didnt_flush_entry = TRUE;
             }
             else if ((entry_ptr->type->id != H5AC_EPOCH_MARKER_ID) && !entry_ptr->flush_in_progress &&
                      !entry_ptr->prefetched_dirty) {
@@ -7475,7 +7479,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry, const H5C_cache_en
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5C__assert_flush_dep_nocycle() */
-#endif /* NDEBUG */
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    H5C__serialize_cache
@@ -7587,7 +7591,7 @@ H5C__serialize_cache(H5F_t *f)
             scan_ptr                      = scan_ptr->il_next;
         } /* end while */
     }     /* end block */
-#endif    /* NDEBUG */
+#endif
 
     /* set cache_ptr->serialization_in_progress to TRUE, and back
      * to FALSE at the end of the function.  Must maintain this flag
@@ -7653,7 +7657,7 @@ H5C__serialize_cache(H5F_t *f)
             scan_ptr = scan_ptr->il_next;
         } /* end while */
     }     /* end block */
-#endif    /* NDEBUG */
+#endif
 
 done:
     cache_ptr->serialization_in_progress = FALSE;
@@ -7830,7 +7834,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 #ifndef NDEBUG
                     /* Increment serialization counter (to detect multiple serializations) */
                     entry_ptr->serialization_count++;
-#endif            /* NDEBUG */
+#endif
                 } /* end if */
             }     /* end if */
 
@@ -7899,7 +7903,7 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
 #ifndef NDEBUG
                     /* Increment serialization counter (to detect multiple serializations) */
                     entry_ptr->serialization_count++;
-#endif            /* NDEBUG */
+#endif
                 } /* end if */
             }     /* end if */
             else {
@@ -8119,7 +8123,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
             if (entry_ptr->addr == old_addr) {
                 /* Delete the entry from the hash table and the slist */
                 H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
-                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
+                H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE, FAIL)
 
                 /* Update the entry for its new address */
                 entry_ptr->addr = new_addr;
