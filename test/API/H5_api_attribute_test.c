@@ -1693,7 +1693,7 @@ test_open_attribute(void)
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_DEC, 2, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open attribute '%s' at index %lld using H5Aopen_by_idx by "
+                HDprintf("    couldn't open attribute '%s' at index %d using H5Aopen_by_idx by "
                          "alphabetical order in decreasing order\n",
                          ATTRIBUTE_OPEN_TEST_ATTR_NAME, 2);
                 PART_ERROR(H5Aopen_by_idx_name_order_decreasing);
@@ -1708,7 +1708,7 @@ test_open_attribute(void)
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_DEC, 1, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open attribute '%s' at index %lld using H5Aopen_by_idx by "
+                HDprintf("    couldn't open attribute '%s' at index %d using H5Aopen_by_idx by "
                          "alphabetical order in decreasing order\n",
                          ATTRIBUTE_OPEN_TEST_ATTR_NAME2, 1);
                 PART_ERROR(H5Aopen_by_idx_name_order_decreasing);
@@ -1723,7 +1723,7 @@ test_open_attribute(void)
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_NAME,
                                           H5_ITER_DEC, 0, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open attribute '%s' at index %lld using H5Aopen_by_idx by "
+                HDprintf("    couldn't open attribute '%s' at index %d using H5Aopen_by_idx by "
                          "alphabetical order in decreasing order\n",
                          ATTRIBUTE_OPEN_TEST_ATTR_NAME3, 0);
                 PART_ERROR(H5Aopen_by_idx_name_order_decreasing);
@@ -4306,7 +4306,7 @@ test_get_attribute_name(void)
             if (H5Aget_name_by_idx(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5_INDEX_NAME,
                                    H5_ITER_DEC, 2, name_buf, (size_t)name_buf_size, H5P_DEFAULT) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve name of attribute at index %lld using H5Aget_name_by_index "
+                HDprintf("    couldn't retrieve name of attribute at index %d using H5Aget_name_by_index "
                          "by alphabetical order in decreasing order\n",
                          2);
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
@@ -4324,7 +4324,7 @@ test_get_attribute_name(void)
             if (H5Aget_name_by_idx(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5_INDEX_NAME,
                                    H5_ITER_DEC, 1, name_buf, (size_t)name_buf_size, H5P_DEFAULT) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve name of attribute at index %lld using H5Aget_name_by_index "
+                HDprintf("    couldn't retrieve name of attribute at index %d using H5Aget_name_by_index "
                          "by alphabetical order in decreasing order\n",
                          1);
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
@@ -4342,7 +4342,7 @@ test_get_attribute_name(void)
             if (H5Aget_name_by_idx(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5_INDEX_NAME,
                                    H5_ITER_DEC, 0, name_buf, (size_t)name_buf_size, H5P_DEFAULT) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve name of attribute at index %lld using H5Aget_name_by_index "
+                HDprintf("    couldn't retrieve name of attribute at index %d using H5Aget_name_by_index "
                          "by alphabetical order in decreasing order\n",
                          0);
                 PART_ERROR(H5Aget_name_by_idx_name_order_decreasing);
@@ -5303,7 +5303,7 @@ test_get_attribute_info(void)
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get info for attribute at index %lld using H5Aget_info_by_idx by "
+                HDprintf("    couldn't get info for attribute at index %d using H5Aget_info_by_idx by "
                          "alphabetical order in decreasing order\n",
                          2);
                 PART_ERROR(H5Aget_info_by_idx_name_order_decreasing);
@@ -5328,7 +5328,7 @@ test_get_attribute_info(void)
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get info for attribute at index %lld using H5Aget_info_by_idx by "
+                HDprintf("    couldn't get info for attribute at index %d using H5Aget_info_by_idx by "
                          "alphabetical order in decreasing order\n",
                          1);
                 PART_ERROR(H5Aget_info_by_idx_name_order_decreasing);
@@ -5353,7 +5353,7 @@ test_get_attribute_info(void)
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get info for attribute at index %lld using H5Aget_info_by_idx by "
+                HDprintf("    couldn't get info for attribute at index %d using H5Aget_info_by_idx by "
                          "alphabetical order in decreasing order\n",
                          0);
                 PART_ERROR(H5Aget_info_by_idx_name_order_decreasing);
