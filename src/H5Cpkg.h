@@ -3239,7 +3239,7 @@ struct H5C_t {
 
 #ifndef NDEBUG
     int64_t             get_entry_ptr_from_addr_counter;
-#endif /* NDEBUG */
+#endif
 
 }; /* H5C_t */
 
