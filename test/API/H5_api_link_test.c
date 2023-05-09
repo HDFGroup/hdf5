@@ -11226,7 +11226,7 @@ test_move_link_reset_grp_max_crt_order(void)
 
         if (grp_info.max_corder != MOVE_LINK_RESET_MAX_CRT_ORDER_TEST_NUM_LINKS) {
             H5_FAILED();
-            HDprintf("    source group's maximum creation order value got adjusted to %d during link "
+            HDprintf("    source group's maximum creation order value got adjusted to %lld during link "
                      "moving; value should have remained at %d\n",
                      (long long)grp_info.max_corder, MOVE_LINK_RESET_MAX_CRT_ORDER_TEST_NUM_LINKS);
             goto error;
