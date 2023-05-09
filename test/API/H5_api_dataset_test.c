@@ -7805,6 +7805,7 @@ test_dataset_set_extent_data(void)
         PART_BEGIN(H5Dset_extent_data_expand_to_origin)
         {
             TESTING_2("H5Dset_extent for data back to the original size");
+            
             /* Expand the dataset back to the original size. The data should look like this:
              * X X X X X 0 0 0
              * X X X X X 0 0 0
@@ -7884,6 +7885,7 @@ test_dataset_set_extent_data(void)
         PART_BEGIN(H5Dset_extent_data_expand_to_origin_again)
         {
             TESTING_2("H5Dset_extent for data expansion back to the original again");
+
             /* Expand the dataset back to the original size. The data should look like this:
              * 0 0 0 0 0 0 0 0
              * 0 0 0 0 0 0 0 0

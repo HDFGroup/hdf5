@@ -1742,7 +1742,7 @@ test_get_file_obj_count(void)
         PART_BEGIN(H5Fget_obj_count_types)
         {
             TESTING_2("H5Fget_obj_count for datatypes");
-            //#ifndef WRONG_DATATYPE_OBJ_COUNT
+
             /* Get the number of named datatype in two opened files */
             if ((obj_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_DATATYPE)) < 0) {
                 H5_FAILED();
@@ -1758,10 +1758,6 @@ test_get_file_obj_count(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Fget_obj_count_types);
-            //#endif
         }
         PART_END(H5Fget_obj_count_types);
 
@@ -1833,7 +1829,7 @@ test_get_file_obj_count(void)
         PART_BEGIN(H5Fget_obj_count_all)
         {
             TESTING_2("H5Fget_obj_count for all object types");
-            //#ifndef WRONG_DATATYPE_OBJ_COUNT
+            
             /* Get the number of all open objects */
             if ((obj_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0) {
                 H5_FAILED();
@@ -1848,10 +1844,6 @@ test_get_file_obj_count(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Fget_obj_count_all);
-            //#endif
         }
         PART_END(H5Fget_obj_count_all);
 
@@ -1930,7 +1922,6 @@ error:
 static int
 test_file_open_overlap(void)
 {
-    //#ifndef NO_DOUBLE_OBJECT_OPENS
     ssize_t obj_count;
     hid_t   file_id           = H5I_INVALID_HID;
     hid_t   file_id2          = H5I_INVALID_HID;
@@ -1938,7 +1929,6 @@ test_file_open_overlap(void)
     hid_t   dspace_id         = H5I_INVALID_HID;
     hid_t   dset_id           = H5I_INVALID_HID;
     char   *prefixed_filename = NULL;
-    //#endif
 
     TESTING("overlapping file opens");
 
@@ -1950,122 +1940,6 @@ test_file_open_overlap(void)
                  "connector\n");
         return 0;
     }
-
-    //#ifndef NO_DOUBLE_OBJECT_OPENS
-    if (prefix_filename(test_path_prefix, OVERLAPPING_FILENAME, &prefixed_filename) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't prefix filename\n");
-        goto error;
-    }
-
-    if ((file_id = H5Fcreate(prefixed_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create file '%s'\n", prefixed_filename);
-        goto error;
-    }
-
-    if ((file_id2 = H5Fopen(prefixed_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", prefixed_filename);
-        goto error;
-    }
-
-    if ((group_id = H5Gcreate2(file_id, OVERLAPPING_OPEN_TEST_GRP_NAME, H5P_DEFAULT, H5P_DEFAULT,
-                               H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", OVERLAPPING_OPEN_TEST_GRP_NAME);
-        goto error;
-    }
-
-    /* Create a dataspace for the dataset */
-    if ((dspace_id = H5Screate(H5S_SCALAR)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create data space for dataset\n");
-        goto error;
-    }
-
-    /* Create a dataset in the group of the first file */
-    if ((dset_id = H5Dcreate2(group_id, OVERLAPPING_OPEN_TEST_DSET_NAME, H5T_NATIVE_INT, dspace_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create the dataset '%s'\n", OVERLAPPING_OPEN_TEST_DSET_NAME);
-        goto error;
-    }
-
-    /* Get the number of objects opened in the first file: 3 == file + dataset + group */
-    if ((obj_count = H5Fget_obj_count(file_id, H5F_OBJ_LOCAL | H5F_OBJ_ALL)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't retrieve the number of objects opened in the file\n");
-        goto error;
-    }
-
-    if (obj_count != 3) {
-        H5_FAILED();
-        HDprintf("    number of objects opened in file (%ld) did not match expected number (3)\n", obj_count);
-        goto error;
-    }
-
-    if (H5Gclose(group_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
-
-    /* Create a dataset in the second file */
-    if ((dset_id = H5Dcreate2(file_id2, OVERLAPPING_OPEN_TEST_DSET_NAME, H5T_NATIVE_INT, dspace_id,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create the dataset '%s'\n", OVERLAPPING_OPEN_TEST_DSET_NAME);
-        goto error;
-    }
-
-    /* Get the number of objects opened in the first file: 2 == file + dataset */
-    if ((obj_count = H5Fget_obj_count(file_id2, H5F_OBJ_ALL)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't retrieve the number of objects opened in the file\n");
-        goto error;
-    }
-
-    if (obj_count != 2) {
-        H5_FAILED();
-        HDprintf("    number of objects opened in the file (%ld) did not match expected number (2)\n",
-                 obj_count);
-        goto error;
-    }
-
-    if (H5Sclose(dspace_id) < 0)
-        TEST_ERROR;
-    if (H5Dclose(dset_id) < 0)
-        TEST_ERROR;
-    if (H5Fclose(file_id2) < 0)
-        TEST_ERROR;
-
-    HDfree(prefixed_filename);
-    prefixed_filename = NULL;
-
-    PASSED();
-
-    return 0;
-
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Gclose(group_id);
-        H5Sclose(dspace_id);
-        H5Dclose(dset_id);
-        H5Fclose(file_id);
-        H5Fclose(file_id2);
-    }
-    H5E_END_TRY;
-
-    HDfree(prefixed_filename);
-
-    return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -2075,12 +1949,10 @@ error:
 static int
 test_file_mounts(void)
 {
-    //#ifndef NO_FILE_MOUNTS
     hid_t file_id           = H5I_INVALID_HID;
     hid_t child_fid         = H5I_INVALID_HID;
     hid_t group_id          = H5I_INVALID_HID;
     char *prefixed_filename = NULL;
-    //#endif
 
     TESTING("file mounting/unmounting");
 
@@ -2093,7 +1965,6 @@ test_file_mounts(void)
         return 0;
     }
 
-    //#ifndef NO_FILE_MOUNTS
     if (prefix_filename(test_path_prefix, FILE_MOUNT_TEST_FILENAME, &prefixed_filename) < 0) {
         H5_FAILED();
         HDprintf("    couldn't prefix filename\n");
@@ -2158,10 +2029,6 @@ error:
     HDfree(prefixed_filename);
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -2523,9 +2390,7 @@ cleanup_files(void)
     /* The below file should not get created */
     /* remove_test_file(test_path_prefix, FILE_CREATE_INVALID_PARAMS_FILE_NAME); */
 
-    //#ifndef NO_DOUBLE_OBJECT_OPENS
     remove_test_file(test_path_prefix, OVERLAPPING_FILENAME);
-    //#endif
     remove_test_file(test_path_prefix, FILE_PERMISSION_TEST_FILENAME);
     remove_test_file(test_path_prefix, FILE_FLUSH_TEST_FILENAME);
     remove_test_file(test_path_prefix, FILE_PROPERTY_LIST_TEST_FNAME1);
@@ -2533,9 +2398,7 @@ cleanup_files(void)
     remove_test_file(test_path_prefix, FILE_INTENT_TEST_FILENAME);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME1);
     remove_test_file(test_path_prefix, GET_OBJ_COUNT_TEST_FILENAME2);
-    //#ifndef NO_FILE_MOUNTS
     remove_test_file(test_path_prefix, FILE_MOUNT_TEST_FILENAME);
-    //#endif
     remove_test_file(test_path_prefix, GET_FILE_NAME_TEST_FNAME);
 }
 

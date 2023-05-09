@@ -77,57 +77,36 @@ static herr_t link_iter_hard_links_cb(hid_t group_id, const char *name, const H5
                                       void *op_data);
 static herr_t link_iter_soft_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                       void *op_data);
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
-//#endif
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data);
-//#endif
 static herr_t link_iter_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
 static herr_t link_iter_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                       void *op_data);
-//#endif
-
 static herr_t link_visit_hard_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                  void *op_data);
 static herr_t link_visit_soft_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                  void *op_data);
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name,
                                                      const H5L_info2_t *info, void *op_data);
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
-//#endif
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
-//#endif
 static herr_t link_visit_hard_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                               void *op_data);
 static herr_t link_visit_soft_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                               void *op_data);
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
 static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                             void *op_data);
-//#endif
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
-//#endif
 static herr_t link_visit_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                            void *op_data);
 static herr_t link_visit_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
@@ -400,9 +379,7 @@ test_create_hard_link_many(void)
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id = H5I_INVALID_HID, group_id2 = H5I_INVALID_HID;
-    //#ifndef NO_OBJECT_GET_NAME
     char objname[HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
-                                                           //#endif
 
     TESTING("hard link creation of many links");
 
@@ -533,7 +510,6 @@ test_create_hard_link_many(void)
                  HARD_LINK_TEST_GROUP_MANY_FINAL_NAME);
         goto error;
     }
-    //#ifndef NO_OBJECT_GET_NAME
     /* Check name */
     if (H5Iget_name(group_id2, objname, (size_t)HARD_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE) < 0) {
         H5_FAILED();
@@ -546,7 +522,6 @@ test_create_hard_link_many(void)
         HDprintf("    wrong name of the object '%s'\n", objname);
         goto error;
     }
-    //#endif
 
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
@@ -716,9 +691,7 @@ test_create_hard_link_invalid_params(void)
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    //#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
     hid_t ext_file_id = H5I_INVALID_HID;
 
     TESTING_MULTIPART("hard link creation with invalid parameters");
@@ -931,7 +904,7 @@ test_create_hard_link_invalid_params(void)
         PART_BEGIN(H5Lcreate_hard_across_files)
         {
             TESTING_2("H5Lcreate_hard across files");
-            //#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -968,10 +941,6 @@ test_create_hard_link_invalid_params(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcreate_hard_across_files);
-            //#endif
         }
         PART_END(H5Lcreate_hard_across_files);
 
@@ -1001,10 +970,9 @@ test_create_hard_link_invalid_params(void)
     END_MULTIPART;
 
     TESTING_2("test cleanup");
-    //#ifndef NO_PREVENT_HARD_LINKS_ACROSS_FILES
+
     if (H5Fclose(ext_file_id) < 0)
         TEST_ERROR;
-    //#endif
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
     if (H5Gclose(container_group) < 0)
@@ -1593,16 +1561,12 @@ error:
 static int
 test_create_soft_link_many(void)
 {
-    //#ifndef NO_SOFT_LINK_MANY_DANGLING
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID;
     hid_t  group_id        = H5I_INVALID_HID;
     hid_t  object_id       = H5I_INVALID_HID;
-    //#ifndef NO_OBJECT_GET_NAME
     char objname[SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE]; /* Object name */
-                                                           //#endif
-    //#endif
 
     TESTING("soft link creation of many links");
 
@@ -1615,7 +1579,6 @@ test_create_soft_link_many(void)
         return 0;
     }
 
-    //#ifndef NO_SOFT_LINK_MANY_DANGLING
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
@@ -1745,7 +1708,6 @@ test_create_soft_link_many(void)
         HDprintf("    failed to open object pointed to by soft link '%s'\n", SOFT_LINK_TEST_GROUP_MANY_NAME);
         goto error;
     }
-    //#ifndef NO_OBJECT_GET_NAME
     /* Check name */
     if (H5Iget_name(object_id, objname, (size_t)SOFT_LINK_TEST_GROUP_MANY_NAME_BUF_SIZE) < 0) {
         H5_FAILED();
@@ -1758,7 +1720,6 @@ test_create_soft_link_many(void)
         HDprintf("    wrong name of the object '%s'\n", objname);
         goto error;
     }
-    //#endif
 
     if (H5Gclose(object_id) < 0)
         TEST_ERROR;
@@ -1784,10 +1745,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -1954,7 +1911,7 @@ test_create_soft_link_invalid_params(void)
         PART_BEGIN(H5Lcreate_soft_invalid_lapl)
         {
             TESTING_2("H5Lcreate_soft with an invalid LAPL");
-            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 err_ret = H5Lcreate_soft("/", group_id, SOFT_LINK_INVALID_PARAMS_TEST_LINK_NAME, H5P_DEFAULT,
@@ -1970,10 +1927,6 @@ test_create_soft_link_invalid_params(void)
             }
 
             PASSED();
-            // else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcreate_soft_invalid_lapl);
-            //#endif
         }
         PART_END(H5Lcreate_soft_invalid_lapl);
 
@@ -2034,13 +1987,11 @@ error:
 static int
 test_create_external_link(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  root_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING("external link creation to existing object");
 
@@ -2053,7 +2004,6 @@ test_create_external_link(void)
         return 0;
     }
 
-    //#ifndef NO_EXTERNAL_LINKS
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
 
     if ((file_id = H5Fcreate(ext_link_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -2135,10 +2085,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -2149,17 +2095,14 @@ error:
 static int
 test_create_external_link_dangling(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     htri_t link_exists;
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  object_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING("dangling external link creation");
 
-    //#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2275,10 +2218,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -2288,7 +2227,6 @@ error:
 static int
 test_create_external_link_multi(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t group_id2 = H5I_INVALID_HID, group_id3 = H5I_INVALID_HID;
@@ -2297,11 +2235,9 @@ test_create_external_link_multi(void)
     char  ext_link_filename2[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  ext_link_filename3[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  objname[EXTERNAL_LINK_TEST_MULTI_NAME_BUF_SIZE];
-    //#endif
 
     TESTING_MULTIPART("external link creation to an object across several files");
 
-    //#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2644,10 +2580,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -2664,18 +2596,15 @@ error:
 static int
 test_create_external_link_ping_pong(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     hid_t file_id   = H5I_INVALID_HID;
     hid_t group_id  = H5I_INVALID_HID;
     hid_t group_id2 = H5I_INVALID_HID;
     char  ext_link_filename1[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  ext_link_filename2[H5_API_TEST_FILENAME_MAX_LENGTH];
     char  objname[EXTERNAL_LINK_TEST_MULTI_NAME_BUF_SIZE];
-    //#endif
 
     TESTING_MULTIPART("external link creation to an object in ping pong style");
 
-    //#ifndef NO_EXTERNAL_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS)) {
@@ -2913,10 +2842,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -3215,17 +3140,14 @@ error:
 static int
 test_create_user_defined_link(void)
 {
-    //#ifndef NO_USER_DEFINED_LINKS
     ssize_t udata_size;
     htri_t  link_exists;
     hid_t   file_id         = H5I_INVALID_HID;
     hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     char    udata[UD_LINK_TEST_UDATA_MAX_SIZE];
-    //#endif
 
     TESTING("user-defined link creation");
 
-    //#ifndef NO_USER_DEFINED_LINKS
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
@@ -3298,10 +3220,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -3565,9 +3483,7 @@ test_delete_link(void)
     hid_t  subgroup_id   = H5I_INVALID_HID;
     hid_t  nested_grp_id = H5I_INVALID_HID;
     hid_t  gcpl_id       = H5I_INVALID_HID;
-    //#ifndef NO_EXTERNAL_LINKS
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link deletion");
 
@@ -3842,7 +3758,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_external)
         {
             TESTING_2("H5Ldelete on external link");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -3915,10 +3831,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_external);
-            //#endif
         }
         PART_END(H5Ldelete_external);
 
@@ -4672,7 +4584,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP8_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -4899,10 +4811,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_hard_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_hard_name_order_decreasing);
 
@@ -5645,7 +5553,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP12_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -5875,10 +5783,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_soft_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_soft_name_order_decreasing);
 
@@ -5892,7 +5796,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6153,10 +6057,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_external_crt_order_increasing);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_external_crt_order_increasing);
 
@@ -6172,7 +6072,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in decreasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6433,10 +6333,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_external_crt_order_decreasing);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_external_crt_order_decreasing);
 
@@ -6452,7 +6348,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_increasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by alphabetical order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6713,10 +6609,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_external_name_order_increasing);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_external_name_order_increasing);
 
@@ -6732,7 +6624,7 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6993,10 +6885,6 @@ test_delete_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_external_name_order_decreasing);
-            // endif
         }
         PART_END(H5Ldelete_by_idx_external_name_order_decreasing);
 
@@ -7121,7 +7009,6 @@ error:
 static int
 test_delete_link_reset_grp_max_crt_order(void)
 {
-    //#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     H5G_info_t grp_info;
     size_t     i;
     hid_t      file_id         = H5I_INVALID_HID;
@@ -7129,7 +7016,6 @@ test_delete_link_reset_grp_max_crt_order(void)
     hid_t      subgroup_id = H5I_INVALID_HID;
     hid_t      gcpl_id     = H5I_INVALID_HID;
     char       link_name[LINK_DELETE_RESET_MAX_CRT_ORDER_TEST_BUF_SIZE];
-    //#endif
 
     TESTING_MULTIPART("H5Ldelete of all links in group resets group's maximum link creation order value");
 
@@ -7143,7 +7029,6 @@ test_delete_link_reset_grp_max_crt_order(void)
         return 0;
     }
 
-    //#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -7370,10 +7255,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 static int
@@ -7498,7 +7379,7 @@ test_delete_link_invalid_params(void)
         PART_BEGIN(H5Ldelete_invalid_lapl)
         {
             TESTING_2("H5Ldelete with an invalid LAPL");
-            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 err_ret =
@@ -7513,10 +7394,6 @@ test_delete_link_invalid_params(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_invalid_lapl);
-            //#endif
         }
         PART_END(H5Ldelete_invalid_lapl);
 
@@ -7639,7 +7516,7 @@ test_delete_link_invalid_params(void)
         PART_BEGIN(H5Ldelete_by_idx_invalid_lapl)
         {
             TESTING_2("H5Ldelete_by_idx with an invalid LAPL");
-            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 err_ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, H5I_INVALID_HID);
@@ -7653,10 +7530,6 @@ test_delete_link_invalid_params(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Ldelete_by_idx_invalid_lapl);
-            //#endif
         }
         PART_END(H5Ldelete_by_idx_invalid_lapl);
 
@@ -7720,9 +7593,7 @@ test_copy_link(void)
     hid_t  file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  src_grp_id = H5I_INVALID_HID, dst_grp_id = H5I_INVALID_HID;
-    //#ifndef NO_EXTERNAL_LINKS
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link copying");
 
@@ -8460,7 +8331,7 @@ test_copy_link(void)
         PART_BEGIN(H5Lcopy_external_no_check)
         {
             TESTING_2("H5Lcopy on external link (copied link's properties not checked)");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -8549,10 +8420,6 @@ test_copy_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcopy_external_no_check);
-            //#endif
         }
         PART_END(H5Lcopy_external_no_check);
 
@@ -8565,17 +8432,15 @@ test_copy_link(void)
 
         PART_BEGIN(H5Lcopy_external_check)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             H5L_info2_t orig_info, new_info;
             const char *orig_filename, *new_filename;
             const char *orig_objname, *new_objname;
             unsigned    unpack_flags = 0;
             char        orig_link_val[COPY_LINK_TEST_LINK_VAL_BUF_SIZE];
             char        new_link_val[COPY_LINK_TEST_LINK_VAL_BUF_SIZE];
-            //#endif
 
             TESTING_2("H5Lcopy on external link (copied link's properties checked)");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -8764,10 +8629,6 @@ test_copy_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcopy_external_check);
-            //#endif
         }
         PART_END(H5Lcopy_external_check);
 
@@ -8781,7 +8642,7 @@ test_copy_link(void)
         PART_BEGIN(H5Lcopy_external_same_loc)
         {
             TESTING_2("H5Lcopy on external link using H5L_SAME_LOC");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -8911,10 +8772,6 @@ test_copy_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcopy_external_same_loc);
-            //#endif
         }
         PART_END(H5Lcopy_external_same_loc);
 
@@ -9259,7 +9116,7 @@ test_copy_link_invalid_params(void)
         PART_BEGIN(H5Lcopy_invalid_lapl)
         {
             TESTING_2("H5Lcopy with an invalid LAPL");
-            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 err_ret =
@@ -9275,10 +9132,6 @@ test_copy_link_invalid_params(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lcopy_invalid_lapl);
-            //#endif
         }
         PART_END(H5Lcopy_invalid_lapl);
 
@@ -10275,7 +10128,7 @@ test_move_link(void)
         PART_BEGIN(H5Lmove_external_no_check)
         {
             TESTING_2("H5Lmove on external link (moved link's properties not checked)");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -10364,10 +10217,6 @@ test_move_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lmove_external_no_check);
-            //#endif
         }
         PART_END(H5Lmove_external_no_check);
 
@@ -10380,17 +10229,15 @@ test_move_link(void)
 
         PART_BEGIN(H5Lmove_external_check)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             H5L_info2_t orig_info, new_info;
             const char *orig_filename, *new_filename;
             const char *orig_objname, *new_objname;
             unsigned    unpack_flags = 0;
             char        orig_link_val[MOVE_LINK_TEST_LINK_VAL_BUF_SIZE];
             char        new_link_val[MOVE_LINK_TEST_LINK_VAL_BUF_SIZE];
-            //#endif
 
             TESTING_2("H5Lmove on external link (moved link's properties checked)");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -10577,10 +10424,6 @@ test_move_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lmove_external_check);
-            //#endif
         }
         PART_END(H5Lmove_external_check);
 
@@ -10594,7 +10437,7 @@ test_move_link(void)
         PART_BEGIN(H5Lmove_external_same_loc)
         {
             TESTING_2("H5Lmove on external link using H5L_SAME_LOC");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -10720,10 +10563,6 @@ test_move_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lmove_external_same_loc);
-            //#endif
         }
         PART_END(H5Lmove_external_same_loc);
 
@@ -10737,7 +10576,7 @@ test_move_link(void)
         PART_BEGIN(H5Lmove_external_rename)
         {
             TESTING_2("H5Lmove to rename external link without moving it");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -10826,10 +10665,6 @@ test_move_link(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lmove_external_rename);
-            //#endif
         }
         PART_END(H5Lmove_external_rename);
 
@@ -11133,7 +10968,6 @@ test_move_link_across_files(void)
 static int
 test_move_link_reset_grp_max_crt_order(void)
 {
-    //#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     H5G_info_t grp_info;
     size_t     i;
     hid_t      file_id         = H5I_INVALID_HID;
@@ -11141,7 +10975,6 @@ test_move_link_reset_grp_max_crt_order(void)
     hid_t      src_grp_id = H5I_INVALID_HID, dst_grp_id = H5I_INVALID_HID;
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       link_name[MOVE_LINK_RESET_MAX_CRT_ORDER_TEST_BUF_SIZE];
-    //#endif
 
     TESTING("H5Lmove of all links out of group resets group's maximum link creation order value");
 
@@ -11155,7 +10988,6 @@ test_move_link_reset_grp_max_crt_order(void)
         return 0;
     }
 
-    //#ifndef NO_MAX_LINK_CRT_ORDER_RESET
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
@@ -11310,10 +11142,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -11552,7 +11380,7 @@ test_move_link_invalid_params(void)
         PART_BEGIN(H5Lmove_invalid_lapl)
         {
             TESTING_2("H5Lmove with an invalid LAPL");
-            //#ifndef NO_INVALID_PROPERTY_LIST_TESTS
+
             H5E_BEGIN_TRY
             {
                 err_ret = H5Lmove(src_grp_id, MOVE_LINK_INVALID_PARAMS_TEST_HARD_LINK_NAME, dst_grp_id,
@@ -11567,10 +11395,6 @@ test_move_link_invalid_params(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lmove_invalid_lapl);
-            //#endif
         }
         PART_END(H5Lmove_invalid_lapl);
 
@@ -11729,11 +11553,9 @@ static int
 test_get_link_val(void)
 {
     H5L_info2_t link_info;
-    //#ifndef NO_EXTERNAL_LINKS
     const char *ext_link_filepath;
     const char *ext_link_val;
     unsigned    ext_link_flags;
-    //#endif
     htri_t link_exists;
     size_t link_val_size;
     char   link_val_buf[GET_LINK_VAL_TEST_LINK_VAL_BUF_SIZE];
@@ -11741,9 +11563,7 @@ test_get_link_val(void)
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  subgroup_id = H5I_INVALID_HID;
     hid_t  gcpl_id     = H5I_INVALID_HID;
-    //#ifndef NO_EXTERNAL_LINKS
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link value retrieval");
 
@@ -11875,12 +11695,10 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_external)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             const char *ext_obj_name = "/";
-            //#endif
 
             TESTING_2("H5Lget_val on external link");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDmemset(&link_info, 0, sizeof(link_info));
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
@@ -11974,10 +11792,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_external);
-            //#endif
         }
         PART_END(H5Lget_val_external);
 
@@ -12574,17 +12388,15 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_soft_name_order_decreasing)
         {
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             const char *link_target_a = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "A";
             const char *link_target_b = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "B";
             const char *link_target_c = "/" LINK_TEST_GROUP_NAME "/" GET_LINK_VAL_TEST_SUBGROUP_NAME
                                         "/" GET_LINK_VAL_TEST_SUBGROUP7_NAME "C";
-            //#endif
 
             TESTING_2("H5Lget_val_by_idx on soft link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_VAL_TEST_SUBGROUP7_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -12752,10 +12564,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_by_idx_soft_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_val_by_idx_soft_name_order_decreasing);
 
@@ -12768,14 +12576,12 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_external_crt_order_increasing)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             const char *ext_obj_name_a = "/A";
             const char *ext_obj_name_b = "/B";
             const char *ext_obj_name_c = "/C";
-            //#endif
 
             TESTING_2("H5Lget_val_by_idx on external link by creation order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -13000,10 +12806,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_by_idx_external_crt_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_val_by_idx_external_crt_order_increasing);
 
@@ -13018,14 +12820,12 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_external_crt_order_decreasing)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             const char *ext_obj_name_a = "/A";
             const char *ext_obj_name_b = "/B";
             const char *ext_obj_name_c = "/C";
-            //#endif
 
             TESTING_2("H5Lget_val_by_idx on external link by creation order in decreasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -13250,10 +13050,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_by_idx_external_crt_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_val_by_idx_external_crt_order_decreasing);
 
@@ -13268,14 +13064,12 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_external_name_order_increasing)
         {
-            //#ifndef NO_EXTERNAL_LINKS
             const char *ext_obj_name_a = "/A";
             const char *ext_obj_name_b = "/B";
             const char *ext_obj_name_c = "/C";
-            //#endif
 
             TESTING_2("H5Lget_val_by_idx on external link by alphabetical order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -13500,10 +13294,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_by_idx_external_name_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_val_by_idx_external_name_order_increasing);
 
@@ -13518,14 +13308,12 @@ test_get_link_val(void)
 
         PART_BEGIN(H5Lget_val_by_idx_external_name_order_decreasing)
         {
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             const char *ext_obj_name_a = "/A";
             const char *ext_obj_name_b = "/B";
             const char *ext_obj_name_c = "/C";
-            //#endif
 
             TESTING_2("H5Lget_val_by_idx on external link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -13750,10 +13538,6 @@ test_get_link_val(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_val_by_idx_external_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_val_by_idx_external_name_order_decreasing);
 
@@ -14231,10 +14015,8 @@ test_get_link_info(void)
     hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t       subgroup_id = H5I_INVALID_HID;
     hid_t       gcpl_id     = H5I_INVALID_HID;
-    //#ifndef NO_EXTERNAL_LINKS
     char *ext_objname;
     char  ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link info retrieval");
 
@@ -14439,7 +14221,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_external)
         {
             TESTING_2("H5Lget_info2 on external link");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDmemset(&link_info, 0, sizeof(link_info));
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
@@ -14519,10 +14301,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_external);
-            //#endif
         }
         PART_END(H5Lget_info_external);
 
@@ -15027,7 +14805,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on hard link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP8_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -15171,10 +14949,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_hard_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_hard_name_order_decreasing);
 
@@ -15767,7 +15541,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on soft link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP12_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -15947,10 +15721,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_soft_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_soft_name_order_decreasing);
 
@@ -15964,7 +15734,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by creation order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -16148,10 +15918,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_external_crt_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_external_crt_order_increasing);
 
@@ -16167,7 +15933,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by creation order in decreasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -16351,10 +16117,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_external_crt_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_external_crt_order_decreasing);
 
@@ -16370,7 +16132,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_name_order_increasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by alphabetical order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -16554,10 +16316,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_external_name_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_external_name_order_increasing);
 
@@ -16573,7 +16331,7 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -16757,10 +16515,6 @@ test_get_link_info(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_info_by_idx_external_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_info_by_idx_external_name_order_decreasing);
 
@@ -17222,9 +16976,7 @@ test_get_link_name(void)
     hid_t   subgroup_id = H5I_INVALID_HID;
     hid_t   gcpl_id     = H5I_INVALID_HID;
     char    link_name_buf[GET_LINK_NAME_TEST_BUF_SIZE];
-    //#ifndef NO_EXTERNAL_LINKS
     char ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link name retrieval");
 
@@ -17765,7 +17517,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_hard_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on hard link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_HARD_SUBGROUP_NAME4, H5P_DEFAULT,
                                           gcpl_id, H5P_DEFAULT)) < 0) {
@@ -17914,10 +17666,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_hard_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_hard_name_order_decreasing);
 
@@ -18417,7 +18165,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_soft_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on soft link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_SOFT_SUBGROUP_NAME4, H5P_DEFAULT,
                                           gcpl_id, H5P_DEFAULT)) < 0) {
@@ -18566,10 +18314,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_soft_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_soft_name_order_decreasing);
 
@@ -18583,7 +18327,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -18751,10 +18495,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_external_crt_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_external_crt_order_increasing);
 
@@ -18770,7 +18510,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in decreasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -18938,10 +18678,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_external_crt_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_external_crt_order_decreasing);
 
@@ -18957,7 +18693,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_name_order_increasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by alphabetical order in increasing order");
-            //#ifndef NO_EXTERNAL_LINKS
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -19125,10 +18861,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_external_name_order_increasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_external_name_order_increasing);
 
@@ -19144,7 +18876,7 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_name_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by alphabetical order in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -19312,10 +19044,6 @@ test_get_link_name(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lget_name_by_idx_external_name_order_decreasing);
-            //#endif
         }
         PART_END(H5Lget_name_by_idx_external_name_order_decreasing);
 
@@ -19838,7 +19566,6 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19855,10 +19582,6 @@ test_link_iterate_hard_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -19938,7 +19661,6 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19957,10 +19679,6 @@ test_link_iterate_hard_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -20180,7 +19898,6 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20197,10 +19914,6 @@ test_link_iterate_soft_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -20280,7 +19993,6 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20299,10 +20011,6 @@ test_link_iterate_soft_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -20396,14 +20104,12 @@ error:
 static int
 test_link_iterate_external_links(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  gcpl_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link iteration (only external links)");
 
@@ -20417,7 +20123,6 @@ test_link_iterate_external_links(void)
         return 0;
     }
 
-    //#ifndef NO_EXTERNAL_LINKS
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -20527,7 +20232,7 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20545,10 +20250,6 @@ test_link_iterate_external_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -20628,7 +20329,7 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20647,10 +20348,6 @@ test_link_iterate_external_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
@@ -20734,10 +20431,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -20777,7 +20470,6 @@ test_link_iterate_ud_links(void)
 static int
 test_link_iterate_mixed_links(void)
 {
-    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     hsize_t saved_idx;
     size_t  i;
     htri_t  link_exists;
@@ -20789,7 +20481,6 @@ test_link_iterate_mixed_links(void)
     hid_t   dset_dspace = H5I_INVALID_HID;
     int     halted;
     char    ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link iteration (mixed link types)");
 
@@ -21332,14 +21023,12 @@ test_link_iterate_invalid_params(void)
         HDprintf("    couldn't create soft link '%s'\n", LINK_ITER_INVALID_PARAMS_TEST_SOFT_LINK_NAME);
         goto error;
     }
-    //#ifndef NO_EXTERNAL_LINKS
     if (H5Lcreate_external(ext_link_filename, "/", group_id, LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME,
                            H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create external link '%s'\n", LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME);
         goto error;
     }
-    //#endif
     /* Verify the links have been created */
     if ((link_exists = H5Lexists(group_id, LINK_ITER_INVALID_PARAMS_TEST_HARD_LINK_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
@@ -21366,7 +21055,6 @@ test_link_iterate_invalid_params(void)
         HDprintf("    second link did not exist\n");
         goto error;
     }
-    //#ifndef NO_EXTERNAL_LINKS
     if ((link_exists = H5Lexists(group_id, LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't determine if link '%s' exists\n", LINK_ITER_INVALID_PARAMS_TEST_EXT_LINK_NAME);
@@ -21378,7 +21066,6 @@ test_link_iterate_invalid_params(void)
         HDprintf("    third link did not exist\n");
         goto error;
     }
-    //#endif
 
     PASSED();
 
@@ -21742,7 +21429,7 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_0_links_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if (H5Literate2(group_id, H5_INDEX_NAME, H5_ITER_DEC, NULL, link_iter_0_links_cb, NULL) < 0) {
                 H5_FAILED();
                 HDprintf("    H5Literate2 by index type name in decreasing order failed\n");
@@ -21750,10 +21437,6 @@ test_link_iterate_0_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_0_links_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_0_links_name_decreasing);
 
@@ -21806,7 +21489,7 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_by_name_0_links_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if (H5Literate_by_name2(
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_0_LINKS_TEST_SUBGROUP_NAME, H5_INDEX_NAME,
                     H5_ITER_DEC, NULL, link_iter_0_links_cb, NULL, H5P_DEFAULT) < 0) {
@@ -21816,10 +21499,6 @@ test_link_iterate_0_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Literate_by_name_0_links_name_decreasing);
-            //#endif
         }
         PART_END(H5Literate_by_name_0_links_name_decreasing);
 
@@ -22052,7 +21731,7 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            ///#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22069,10 +21748,6 @@ test_link_visit_hard_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22152,7 +21827,7 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22171,10 +21846,6 @@ test_link_visit_hard_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -22422,7 +22093,6 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22439,10 +22109,6 @@ test_link_visit_soft_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22521,7 +22187,7 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22540,10 +22206,6 @@ test_link_visit_soft_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -22641,7 +22303,6 @@ error:
 static int
 test_link_visit_external_links_no_cycles(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -22649,7 +22310,6 @@ test_link_visit_external_links_no_cycles(void)
     hid_t  subgroup_id = H5I_INVALID_HID;
     hid_t  gcpl_id     = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link visiting without cycles (only external links)");
 
@@ -22663,7 +22323,6 @@ test_link_visit_external_links_no_cycles(void)
         return 0;
     }
 
-    //#ifndef NO_EXTERNAL_LINKS
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -22797,7 +22456,7 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22815,10 +22474,6 @@ test_link_visit_external_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -22899,7 +22554,7 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22919,10 +22574,6 @@ test_link_visit_external_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -23007,10 +22658,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -23052,7 +22699,6 @@ test_link_visit_ud_links_no_cycles(void)
 static int
 test_link_visit_mixed_links_no_cycles(void)
 {
-    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -23063,7 +22709,6 @@ test_link_visit_mixed_links_no_cycles(void)
     hid_t  dset_dtype = H5I_INVALID_HID;
     hid_t  fspace_id  = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link visiting without cycles (mixed link types)");
 
@@ -23079,7 +22724,6 @@ test_link_visit_mixed_links_no_cycles(void)
         return 0;
     }
 
-    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -23290,7 +22934,7 @@ test_link_visit_mixed_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
 
@@ -23308,10 +22952,6 @@ test_link_visit_mixed_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_no_cycles_link_name_decreasing);
 
@@ -23390,7 +23030,7 @@ test_link_visit_mixed_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
 
@@ -23409,10 +23049,6 @@ test_link_visit_mixed_links_no_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_no_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_no_cycles_link_name_decreasing);
 
@@ -23509,10 +23145,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -23664,7 +23296,7 @@ test_link_visit_hard_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23681,10 +23313,6 @@ test_link_visit_hard_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_cycles_link_name_decreasing);
 
@@ -23763,7 +23391,7 @@ test_link_visit_hard_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23782,10 +23410,6 @@ test_link_visit_hard_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_cycles_link_name_decreasing);
 
@@ -24024,7 +23648,7 @@ test_link_visit_soft_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24041,10 +23665,6 @@ test_link_visit_soft_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_cycles_link_name_decreasing);
 
@@ -24124,7 +23744,7 @@ test_link_visit_soft_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24143,10 +23763,6 @@ test_link_visit_soft_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_cycles_link_name_decreasing);
 
@@ -24242,14 +23858,12 @@ error:
 static int
 test_link_visit_external_links_cycles(void)
 {
-    //#ifndef NO_EXTERNAL_LINKS
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
     hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t  subgroup_id = H5I_INVALID_HID;
     hid_t  gcpl_id     = H5I_INVALID_HID;
-    //#endif
 
     TESTING_MULTIPART("link visiting with cycles (only external links)");
 
@@ -24263,7 +23877,6 @@ test_link_visit_external_links_cycles(void)
         return 0;
     }
 
-    //#ifndef NO_EXTERNAL_LINKS
     TESTING_2("test setup");
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -24391,7 +24004,7 @@ test_link_visit_external_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24409,10 +24022,6 @@ test_link_visit_external_links_cycles(void)
             }
 
             PASSED();
-            // else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_cycles_link_name_decreasing);
 
@@ -24492,7 +24101,7 @@ test_link_visit_external_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24511,10 +24120,6 @@ test_link_visit_external_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_cycles_link_name_decreasing);
 
@@ -24599,10 +24204,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -24639,7 +24240,6 @@ test_link_visit_ud_links_cycles(void)
 static int
 test_link_visit_mixed_links_cycles(void)
 {
-    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     htri_t link_exists;
     size_t i;
     hid_t  file_id         = H5I_INVALID_HID;
@@ -24647,7 +24247,6 @@ test_link_visit_mixed_links_cycles(void)
     hid_t  subgroup1 = H5I_INVALID_HID, subgroup2 = H5I_INVALID_HID;
     hid_t  gcpl_id = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
-    //#endif
 
     TESTING_MULTIPART("link visiting with cycles (mixed link types)");
 
@@ -24663,7 +24262,6 @@ test_link_visit_mixed_links_cycles(void)
         return 0;
     }
 
-    //#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -24844,7 +24442,7 @@ test_link_visit_mixed_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
 
@@ -24861,10 +24459,6 @@ test_link_visit_mixed_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_cycles_link_name_decreasing);
 
@@ -24943,7 +24537,7 @@ test_link_visit_mixed_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+            
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
 
@@ -24962,10 +24556,6 @@ test_link_visit_mixed_links_cycles(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_cycles_link_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_cycles_link_name_decreasing);
 
@@ -25053,10 +24643,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#else
-    // SKIPPED();
-    // return 0;
-    //#endif
 }
 
 /*
@@ -25174,14 +24760,12 @@ test_link_visit_invalid_params(void)
         HDprintf("    couldn't create soft link '%s'\n", LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME2);
         goto error;
     }
-    //#ifndef NO_EXTERNAL_LINKS
     if (H5Lcreate_external(ext_link_filename, "/", subgroup2, LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME3,
                            H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create external link '%s'\n", LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME3);
         goto error;
     }
-    //#endif
     if (H5Lcreate_hard(subgroup2, LINK_VISIT_INVALID_PARAMS_TEST_DSET_NAME, subgroup2,
                        LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME4, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
@@ -25215,7 +24799,7 @@ test_link_visit_invalid_params(void)
         HDprintf("    link 2 did not exist\n");
         goto error;
     }
-    //#ifndef NO_EXTERNAL_LINKS
+
     if ((link_exists = H5Lexists(subgroup2, LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME3, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't determine if third link '%s' exists\n",
@@ -25228,7 +24812,7 @@ test_link_visit_invalid_params(void)
         HDprintf("    link 3 did not exist\n");
         goto error;
     }
-    //#endif
+
     if ((link_exists = H5Lexists(subgroup2, LINK_VISIT_INVALID_PARAMS_TEST_LINK_NAME4, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't determine if fourth link '%s' exists\n",
@@ -25602,7 +25186,7 @@ test_link_visit_0_links(void)
         PART_BEGIN(H5Lvisit_0_links_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if (H5Lvisit2(group_id, H5_INDEX_NAME, H5_ITER_DEC, link_visit_0_links_cb, NULL) < 0) {
                 H5_FAILED();
                 HDprintf("    H5Lvisit2 by index type name in decreasing order failed\n");
@@ -25610,10 +25194,6 @@ test_link_visit_0_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_0_links_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_0_links_name_decreasing);
 
@@ -25663,7 +25243,7 @@ test_link_visit_0_links(void)
         PART_BEGIN(H5Lvisit_by_name_0_links_name_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by link name in decreasing order");
-            //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             if (H5Lvisit_by_name2(file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_0_LINKS_TEST_SUBGROUP_NAME,
                                   H5_INDEX_NAME, H5_ITER_DEC, link_visit_0_links_cb, NULL, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -25672,10 +25252,6 @@ test_link_visit_0_links(void)
             }
 
             PASSED();
-            //#else
-            // SKIPPED();
-            // PART_EMPTY(H5Lvisit_by_name_0_links_name_decreasing);
-            //#endif
         }
         PART_END(H5Lvisit_by_name_0_links_name_decreasing);
 
@@ -25866,7 +25442,6 @@ done:
  * through all of the links in the test group and checks to make sure
  * their names and link classes match what is expected.
  */
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -25928,16 +25503,12 @@ done:
 
     return ret_val;
 }
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
-// static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void
-// *op_data); #endif
+
 /*
  * Link iteration callback for the mixed link types test which iterates
  * through all of the links in the test group and checks to make sure
  * their names and link classes match what is expected.
  */
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -25994,7 +25565,6 @@ done:
 
     return ret_val;
 }
-//#endif
 
 /*
  * Link iteration callback for the H5Literate(_by_name)2 invalid
@@ -26030,7 +25600,6 @@ link_iter_0_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, 
  * Link iteration callback to test that the index-saving behavior of H5Literate2
  * works correctly.
  */
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -26086,7 +25655,6 @@ link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *inf
 error:
     return -1;
 }
-//#endif
 
 /*
  * Link visiting callback for the hard links + no cycles test which
@@ -26309,7 +25877,6 @@ done:
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data)
@@ -26425,17 +25992,12 @@ done:
 
     return ret_val;
 }
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
-// static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-// void *op_data);
-//#endif
+
 /*
  * Link visiting callback for the mixed link types + no cycles test which
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -26581,7 +26143,6 @@ done:
 
     return ret_val;
 }
-//#endif
 
 /*
  * Link visiting callback for the hard links + cycles test which
@@ -26804,7 +26365,6 @@ done:
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-//#ifndef NO_EXTERNAL_LINKS
 static herr_t
 link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -26919,17 +26479,12 @@ done:
 
     return ret_val;
 }
-//#endif
-//#ifndef NO_USER_DEFINED_LINKS
-// static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-// void *op_data);
-//#endif
+
 /*
  * Link visiting callback for the mixed link types + cycles test which
  * iterates recursively through all of the links in the test group and
  * checks to make sure their names and link classes match what is expected.
  */
-//#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 static herr_t
 link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data)
 {
@@ -27043,7 +26598,6 @@ done:
 
     return ret_val;
 }
-//#endif
 
 /*
  * Link visiting callback for the H5Lvisit(_by_name)2 invalid

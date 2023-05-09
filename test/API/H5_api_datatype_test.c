@@ -2300,16 +2300,12 @@ error:
 static int
 test_resurrect_datatype(void)
 {
-    //#ifndef NO_ID_PREVENTS_OBJ_DELETE
     hid_t file_id         = H5I_INVALID_HID;
     hid_t container_group = H5I_INVALID_HID;
     hid_t group_id        = H5I_INVALID_HID;
     hid_t type_id         = H5I_INVALID_HID;
-    //#endif /* NO_ID_PREVENTS_OBJ_DELETE */
-
     TESTING("resurrecting datatype after deletion");
 
-    //#ifndef NO_ID_PREVENTS_OBJ_DELETE
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
@@ -2359,14 +2355,12 @@ test_resurrect_datatype(void)
         HDprintf("    failed to delete datatype\n");
         goto error;
     }
-    //#ifndef NO_OBJECT_GET_NAME
     /* Check that datatype name is NULL */
     if (H5Iget_name(type_id, NULL, (size_t)0) != 0) {
         H5_FAILED();
         HDprintf("    deleted datatype name was not NULL!\n");
         goto error;
     }
-    //#endif
 
     /* Re-link the datatype to the group hierarchy (shouldn't get deleted now) */
     if (H5Lcreate_hard(type_id, ".", group_id, DATATYPE_RESURRECT_TEST_DTYPE_NAME2, H5P_DEFAULT,
@@ -2422,13 +2416,8 @@ test_resurrect_datatype(void)
         TEST_ERROR;
 
     PASSED();
-    //#else  /* NO_ID_PREVENTS_OBJ_DELETE */
-    // SKIPPED();
-    //#endif /* NO_ID_PREVENTS_OBJ_DELETE */
-
     return 0;
 
-//#ifndef NO_ID_PREVENTS_OBJ_DELETE
 error:
     H5E_BEGIN_TRY
     {
@@ -2440,7 +2429,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-    //#endif /* NO_ID_PREVENTS_OBJ_DELETE */
 }
 
 static int
