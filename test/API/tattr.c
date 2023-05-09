@@ -201,9 +201,7 @@ test_attr_basic_write(hid_t fapl)
     hsize_t dims3[]                = {ATTR2_DIM1, ATTR2_DIM2};
     int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int     i;
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value */
-                  //#endif
     herr_t ret;   /* Generic return value */
 
     /* Output message about test being performed */
@@ -252,7 +250,6 @@ test_attr_basic_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -262,7 +259,6 @@ test_attr_basic_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -400,7 +396,6 @@ test_attr_basic_write(hid_t fapl)
     attr_size = H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5Aget_storage_size");
 #endif
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -410,7 +405,6 @@ test_attr_basic_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -559,8 +553,8 @@ test_attr_flush(hid_t fapl)
 
     att = H5Acreate2(set, ATTR1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
-    //#ifndef NO_ATTR_FILL_VALUE_SUPPORT
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILL_VALUES)) {
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILL_VALUES) &&
+        (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
         CHECK(ret, FAIL, "H5Aread");
 
@@ -579,9 +573,6 @@ test_attr_flush(hid_t fapl)
     else {
         HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
     }
-    //#else
-    // HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
-    //#endif
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");
 
@@ -740,9 +731,7 @@ test_attr_compound_write(hid_t fapl)
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t dims2[] = {ATTR4_DIM1, ATTR4_DIM2};
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-                  //#endif
     herr_t ret;   /* Generic return value        */
 
     /* Output message about test being performed */
@@ -784,7 +773,6 @@ test_attr_compound_write(hid_t fapl)
     /* Create complex attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -794,7 +782,6 @@ test_attr_compound_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write complex attribute data */
     ret = H5Awrite(attr, tid1, attr_data4);
     CHECK(ret, FAIL, "H5Awrite");
@@ -986,9 +973,7 @@ test_attr_scalar_write(hid_t fapl)
     hid_t   sid1, sid2; /* Dataspace ID            */
     hid_t   attr;       /* Attribute ID            */
     hsize_t dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-                  //#endif
     herr_t ret;   /* Generic return value        */
 
     /* Output message about test being performed */
@@ -1013,7 +998,6 @@ test_attr_scalar_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1023,7 +1007,6 @@ test_attr_scalar_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_FLOAT, &attr_data5);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1133,9 +1116,7 @@ test_attr_mult_write(hid_t fapl)
     hsize_t dims2[] = {ATTR1_DIM1};
     hsize_t dims3[] = {ATTR2_DIM1, ATTR2_DIM2};
     hsize_t dims4[] = {ATTR3_DIM1, ATTR3_DIM2, ATTR3_DIM3};
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     hid_t ret_id; /* Generic hid_t return value    */
-                  //#endif
     herr_t ret;   /* Generic return value        */
 
     /* Output message about test being performed */
@@ -1164,7 +1145,6 @@ test_attr_mult_write(hid_t fapl)
     /* Create 1st attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1174,7 +1154,6 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write 1st attribute data */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1194,7 +1173,6 @@ test_attr_mult_write(hid_t fapl)
     /* Create 2nd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1204,7 +1182,6 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write 2nd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1224,7 +1201,6 @@ test_attr_mult_write(hid_t fapl)
     /* Create 3rd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1234,7 +1210,6 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Write 3rd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_DOUBLE, attr_data3);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1624,7 +1599,6 @@ test_attr_delete(hid_t fapl)
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info3");
-    //#ifndef NO_DELETE_NONEXISTENT_ATTRIBUTE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to delete bogus attribute */
         H5E_BEGIN_TRY
@@ -1634,7 +1608,6 @@ test_attr_delete(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Adelete");
     }
-    //#endif
     /* Verify the correct number of attributes */
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
@@ -1730,7 +1703,6 @@ test_attr_delete(hid_t fapl)
 static void
 test_attr_dtype_shared(hid_t fapl)
 {
-    //#ifndef NO_SHARED_DATATYPES
     hid_t       file_id;   /* File ID */
     hid_t       dset_id;   /* Dataset ID */
     hid_t       space_id;  /* Dataspace ID for dataset & attribute */
@@ -1744,15 +1716,9 @@ test_attr_dtype_shared(hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
 #endif
     herr_t ret; /* Generic return value        */
-                //#else
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
-        (void)fapl;
-    }
-    // x#endif
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Shared Datatypes with Attributes - SKIPPED for now due to no support for shared "
                 "datatypes\n"));
-    //#ifndef NO_SHARED_DATATYPES
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         /* Create a file */
         file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -1905,7 +1871,6 @@ test_attr_dtype_shared(hid_t fapl)
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
 #endif
     }
-    //#endif
 } /* test_attr_dtype_shared() */
 
 /****************************************************************
@@ -2338,7 +2303,6 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     /* Close attribute */
     ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
-    //#ifndef NO_PREVENT_CREATE_SAME_ATTRIBUTE_TWICE
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Attempt to add attribute again, which should fail */
         H5E_BEGIN_TRY
@@ -2348,7 +2312,6 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
         H5E_END_TRY;
         VERIFY(attr, FAIL, "H5Acreate2");
     }
-    //#endif
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
@@ -5942,7 +5905,6 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
      *  a good way to easily predict the order of the links in the name index.
      */
 
-    //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
     if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
         /* Verify the information for first attribute, in decreasing name order */
         HDmemset(&ainfo, 0, sizeof(ainfo));
@@ -5964,7 +5926,6 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
         if (HDstrcmp(attrname, tmpname) != 0)
             TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
     }
-    //#endif
     /* Retrieve current # of errors */
     if (old_nerrs == nerrors)
         return (0);
@@ -6545,7 +6506,6 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
                         if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                             if (use_index)
                                 MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
@@ -6558,10 +6518,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         else {
                             continue;
                         }
-                        //#else
-                        // continue;
-                        //#endif
-                    } /* end else */
+                    } 
                 }     /* end else */
 
                 /* Create file */
@@ -7131,7 +7088,6 @@ attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 #endif
 
-//#ifndef NO_ITERATION_RESTART
 /*-------------------------------------------------------------------------
  * Function:    attr_iterate2_fail_cb
  *
@@ -7184,7 +7140,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     old_nerrs = nerrors;
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
-        // SKIPPED();
+        SKIPPED();
         HDprintf("    API functions for iterate aren't "
                  "supported with this connector\n");
         return 0;
@@ -7467,7 +7423,6 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else
         return (-1);
 } /* end attr_iterate_check() */
-//#endif
 
 /****************************************************************
 **
@@ -7497,9 +7452,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     H5_iter_order_t  order;              /* Order within in the index */
     attr_iter_info_t iter_info;          /* Iterator info */
     hbool_t         *visited = NULL;     /* Array of flags for visiting links */
-                                         //#ifndef NO_ITERATION_RESTART
     hsize_t idx;                         /* Start index for iteration */
-                                         //#endif
     unsigned    use_index;               /* Use index on creation order values */
     const char *dsetname;                /* Name of dataset for attributes */
     char        attrname[NAME_BUF_SIZE]; /* Name of attribute */
@@ -7566,7 +7519,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "w/o Creation Order Index\n"))
                     } /* end if */
                     else {
-                        //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
                         if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                             if (use_index)
                                 MESSAGE(
@@ -7580,9 +7532,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         else {
                             continue;
                         }
-                        //#else
-                        // continue;
-                        //#endif
                     } /* end else */
                 }     /* end else */
 
@@ -7675,7 +7624,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     is_dense = H5O__is_attr_dense_test(my_dataset);
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 #endif
-                    //#ifndef NO_ITERATION_RESTART
                     if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
                         /* Check for out of bound iteration */
                         idx = u;
@@ -7708,7 +7656,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
                         CHECK(ret, FAIL, "attr_iterate_check");
                     }
-                    //#endif
                 } /* end for */
 
                 /* Work on all the datasets */
@@ -7778,7 +7725,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         VERIFY(name_count, (max_compact * 2), "H5O__attr_dense_info_test");
                     }
 #endif
-                    //#ifndef NO_ITERATION_RESTART
                     if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
                         /* Check for out of bound iteration */
                         idx = u;
@@ -7811,7 +7757,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         ret = attr_iterate_check(fid, dsetname, my_dataset, idx_type, order, u, &iter_info);
                         CHECK(ret, FAIL, "attr_iterate_check");
                     }
-                    //#endif
                 }
 
                 /* Close Datasets */
@@ -7985,7 +7930,6 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        //#ifndef NO_DECREASING_ALPHA_ITER_ORDER
                         if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                             if (use_index)
                                 MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
@@ -7998,9 +7942,6 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         else {
                             continue;
                         }
-                        //#else
-                        // continue;
-                        //#endif
                     } /* end else */
                 }     /* end else */
 
