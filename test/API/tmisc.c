@@ -4175,11 +4175,11 @@ test_misc23(void)
     hsize_t dims[]  = {10};
     hid_t   file_id = 0, group_id = 0, type_id = 0, space_id = 0, tmp_id = 0, create_id = H5P_DEFAULT,
           access_id = H5P_DEFAULT;
-    char objname[MISC23_NAME_BUF_SIZE]; /* Name of object */
+    char        objname[MISC23_NAME_BUF_SIZE]; /* Name of object */
     H5O_info2_t oinfo;
     htri_t      tri_status;
-    ssize_t namelen;
-    herr_t status;
+    ssize_t     namelen;
+    herr_t      status;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing intermediate group creation\n"));

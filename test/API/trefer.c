@@ -2027,7 +2027,7 @@ test_reference_obj_deleted(void)
     herr_t     ret;      /* Generic return value     */
 
     MESSAGE(5, ("Testing References to Deleted Objects - SKIPPED for now due to no support\n"));
-    if ((vol_cap_flags_g & H5VL_CAP_FLAG_REF_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) && 
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_REF_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         /* Create file */
         fid1 = H5Fcreate(FILE_REF_OBJ_DEL, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
