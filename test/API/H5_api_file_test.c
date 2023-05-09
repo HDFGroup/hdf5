@@ -1942,6 +1942,8 @@ test_file_open_overlap(void)
                  "connector\n");
         return 0;
     }
+
+    return 0;
 }
 
 /*
