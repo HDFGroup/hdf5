@@ -26,7 +26,7 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 #define DATASET4             "DSET4"
 #define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
-#define DXFER_BIGCOUNT       (1 << 29)
+#define DXFER_BIGCOUNT       (1 < 29)
 
 #define HYPER 1
 #define POINT 2
