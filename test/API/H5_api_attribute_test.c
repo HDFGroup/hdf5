@@ -1401,8 +1401,8 @@ test_open_attribute(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, attribute, or creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, attribute, or creation order aren't supported "
+                 "with this connector\n");
         return 0;
     }
 
@@ -3184,8 +3184,8 @@ test_get_attribute_space_and_type(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, attribute, or attribute aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, attribute, or attribute aren't supported with "
+                 "this connector\n");
         return 0;
     }
 
@@ -8069,7 +8069,8 @@ test_attribute_iterate_0_attributes(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, attribute, iterate, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, dataset, attribute, iterate, or creation order "
+                 "aren't supported "
                  "with this connector\n");
         return 0;
     }

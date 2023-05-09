@@ -2277,8 +2277,8 @@ test_refresh_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or flush refresh aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
+                 "connector\n");
         return 0;
     }
 

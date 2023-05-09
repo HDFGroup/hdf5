@@ -3840,7 +3840,8 @@ test_object_copy_group_with_soft_links(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, object, link, iterate, or soft link aren't supported with "
+        HDprintf("    API functions for basic file, group, object, link, iterate, or soft link aren't "
+                 "supported with "
                  "this connector\n");
         return 0;
     }

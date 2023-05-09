@@ -1765,7 +1765,8 @@ test_create_soft_link_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, or soft link aren't supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, or soft link aren't supported with this connector\n");
         return 0;
     }
 
@@ -3152,8 +3153,9 @@ test_create_user_defined_link(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, or user-defined link aren't supported with this "
-                 "connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, or user-defined link aren't supported with this "
+            "connector\n");
         return 0;
     }
 
@@ -3242,7 +3244,8 @@ test_create_user_defined_link_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, or user-defined link aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, or user-defined link aren't supported with this "
+                 "connector\n");
         return 0;
     }
 
@@ -3493,7 +3496,8 @@ test_delete_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, external link, or creation order aren't "
+        HDprintf("    API functions for basic file, group, link, hard link, soft link, external link, or "
+                 "creation order aren't "
                  "supported with this connector\n");
         return 0;
     }
@@ -7272,7 +7276,8 @@ test_delete_link_invalid_params(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_BY_IDX) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, flag by index, or hard link aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, flag by index, or hard link aren't "
+                 "supported with this connector\n");
         return 0;
     }
 
@@ -7603,8 +7608,9 @@ test_copy_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, or external link aren't "
-                 "supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, hard link, soft link, or external link aren't "
+            "supported with this connector\n");
         return 0;
     }
 
@@ -9249,8 +9255,9 @@ test_move_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, or external link aren't "
-                 "supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, hard link, soft link, or external link aren't "
+            "supported with this connector\n");
         return 0;
     }
 
@@ -19450,7 +19457,8 @@ test_link_iterate_hard_links(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link, iterate, or creation order aren't supported with "
+        HDprintf("    API functions for basic file, group, dataset, link, iterate, or creation order aren't "
+                 "supported with "
                  "this connector\n");
         return 0;
     }
@@ -20490,8 +20498,9 @@ test_link_iterate_mixed_links(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, external link, iterate, or creation "
-                 "order aren't supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, soft link, external link, iterate, or creation "
+            "order aren't supported with this connector\n");
         return 0;
     }
 
@@ -20951,8 +20960,9 @@ test_link_iterate_invalid_params(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link, soft link, external link, iterate, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, dataset, link, soft link, external link, iterate, or "
+            "creation order aren't supported with this connector\n");
         return 0;
     }
 
@@ -21592,7 +21602,8 @@ test_link_visit_hard_links_no_cycles(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link iterate, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, dataset, link iterate, or creation order aren't "
+                 "supported "
                  "with this connector\n");
         return 0;
     }
@@ -22719,8 +22730,9 @@ test_link_visit_mixed_links_no_cycles(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, external link, iterate, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, hard link, soft link, external link, iterate, or "
+            "creation order aren't supported with this connector\n");
         return 0;
     }
 
@@ -24257,8 +24269,9 @@ test_link_visit_mixed_links_cycles(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, external link, iterate, "
-                 "creation order, or user defined link aren't supported with this connector\n");
+        HDprintf(
+            "    API functions for basic file, group, link, hard link, soft link, external link, iterate, "
+            "creation order, or user defined link aren't supported with this connector\n");
         return 0;
     }
 
