@@ -115,11 +115,11 @@ struct space4_struct {
 static void
 test_h5s_basic(void)
 {
-    hid_t fid1;       /* HDF5 File IDs        */
-    hid_t sid1, sid2; /* Dataspace ID            */
-    hid_t dset1;      /* Dataset ID            */
-    hid_t aid1;       /* Attribute ID                 */
-    int      rank;    /* Logical rank of dataspace    */
+    hid_t    fid1;       /* HDF5 File IDs        */
+    hid_t    sid1, sid2; /* Dataspace ID            */
+    hid_t    dset1;      /* Dataset ID            */
+    hid_t    aid1;       /* Attribute ID                 */
+    int      rank;       /* Logical rank of dataspace    */
     hsize_t  dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t  dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3, SPACE2_DIM4};
     hsize_t  dims3[H5S_MAX_RANK + 1];
@@ -576,33 +576,33 @@ test_h5s_null(void)
 static void
 test_h5s_zero_dim(void)
 {
-    hid_t   fid1;           /* HDF5 File IDs        */
-    hid_t   sid1, attr_sid; /* Dataspace ID            */
-    hid_t   sid_chunk;      /* Dataspace ID for chunked dataset */
-    hid_t   dset1;          /* Dataset ID            */
-    hid_t   plist_id;       /* Dataset creation property list */
-    hid_t   attr;           /* Attribute ID                 */
-    int     rank;           /* Logical rank of dataspace    */
-    hsize_t dims1[]       = {0, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t max_dims[]    = {SPACE1_DIM1 + 1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t extend_dims[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t chunk_dims[]  = {SPACE1_DIM1, SPACE1_DIM2 / 3, SPACE1_DIM3};
-    hsize_t tdims[SPACE1_RANK]; /* Dimension array to test with */
-    int     wdata[SPACE1_DIM2][SPACE1_DIM3];
-    int     rdata[SPACE1_DIM2][SPACE1_DIM3];
-    short   wdata_short[SPACE1_DIM2][SPACE1_DIM3];
-    short   rdata_short[SPACE1_DIM2][SPACE1_DIM3];
-    int     wdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
-    int     rdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
-    int     val     = 3;
-    hsize_t start[] = {0, 0, 0};
-    hsize_t count[] = {3, 15, 13};
-    hsize_t coord[1][3];         /* Coordinates for point selection */
-    hssize_t         nelem;      /* Number of elements           */
-    H5S_sel_type     sel_type;   /* Type of selection currently  */
-    H5S_class_t      stype;      /* dataspace type               */
-    H5D_alloc_time_t alloc_time; /* Space allocation time        */
-    herr_t           ret;        /* Generic return value            */
+    hid_t            fid1;           /* HDF5 File IDs        */
+    hid_t            sid1, attr_sid; /* Dataspace ID            */
+    hid_t            sid_chunk;      /* Dataspace ID for chunked dataset */
+    hid_t            dset1;          /* Dataset ID            */
+    hid_t            plist_id;       /* Dataset creation property list */
+    hid_t            attr;           /* Attribute ID                 */
+    int              rank;           /* Logical rank of dataspace    */
+    hsize_t          dims1[]       = {0, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t          max_dims[]    = {SPACE1_DIM1 + 1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t          extend_dims[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t          chunk_dims[]  = {SPACE1_DIM1, SPACE1_DIM2 / 3, SPACE1_DIM3};
+    hsize_t          tdims[SPACE1_RANK]; /* Dimension array to test with */
+    int              wdata[SPACE1_DIM2][SPACE1_DIM3];
+    int              rdata[SPACE1_DIM2][SPACE1_DIM3];
+    short            wdata_short[SPACE1_DIM2][SPACE1_DIM3];
+    short            rdata_short[SPACE1_DIM2][SPACE1_DIM3];
+    int              wdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
+    int              rdata_real[SPACE1_DIM1][SPACE1_DIM2][SPACE1_DIM3];
+    int              val     = 3;
+    hsize_t          start[] = {0, 0, 0};
+    hsize_t          count[] = {3, 15, 13};
+    hsize_t          coord[1][3]; /* Coordinates for point selection */
+    hssize_t         nelem;       /* Number of elements           */
+    H5S_sel_type     sel_type;    /* Type of selection currently  */
+    H5S_class_t      stype;       /* dataspace type               */
+    H5D_alloc_time_t alloc_time;  /* Space allocation time        */
+    herr_t           ret;         /* Generic return value            */
     unsigned int     i, j, k;
 
     /* Output message about test being performed */
@@ -861,7 +861,8 @@ test_h5s_zero_dim(void)
                     HDprintf("element [%d][%d] is %d but should have been 7\n", i, j, rdata[i][j]);
                 }
             }
-        if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
+        if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) &&
+            (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
             /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
              * It is supposed to fail. */
             extend_dims[0] = SPACE1_DIM1 * 3;

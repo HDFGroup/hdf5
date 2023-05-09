@@ -60,11 +60,11 @@ typedef struct searched_err_t {
 static int find_err_msg_cb(unsigned n, const H5E_error2_t *err_desc, void *_client_data);
 #endif
 /* Local functions */
-int iter_strcmp(const void *s1, const void *s2);
-int iter_strcmp2(const void *s1, const void *s2);
+int           iter_strcmp(const void *s1, const void *s2);
+int           iter_strcmp2(const void *s1, const void *s2);
 static herr_t liter_cb(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
 static herr_t liter_cb2(hid_t group, const char *name, const H5L_info2_t *info, void *op_data);
-herr_t aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo, void *op_data);
+herr_t        aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo, void *op_data);
 
 /****************************************************************
 **
