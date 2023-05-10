@@ -1760,7 +1760,7 @@ test_create_dataset_enum_types(void)
     for (i = 0; i < DATASET_ENUM_TYPE_TEST_NUM_MEMBERS; i++) {
         char val_name[15];
 
-        HDsprintf(val_name, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
+        HDsnprintf(val_name, 15, "%s%zu", DATASET_ENUM_TYPE_TEST_VAL_BASE_NAME, i);
 
         if (H5Tenum_insert(enum_non_native, val_name, &i) < 0)
             TEST_ERROR;
