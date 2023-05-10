@@ -6513,7 +6513,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             else {
                                 continue;
                             }
-                        else
+                        } else {
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
                         }
