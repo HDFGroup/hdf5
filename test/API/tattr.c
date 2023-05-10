@@ -6506,17 +6506,18 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (use_index)
+                        if (use_index) {
                             if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                                 MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
                                             "w/Creation Order Index\n"))
                             } else {
                                 continue;
                             }
-                        else
+                        } else {
                             MESSAGE(5,
                                     ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
+                        }
                     }
                 } /* end else */
 
@@ -7518,18 +7519,16 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "w/o Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                            if (use_index)
-                                MESSAGE(
-                                    5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
+                        if (use_index) {
+                            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                                MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
                                         "w/Creation Order Index\n"))
-                            else
-                                MESSAGE(
-                                    5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                        "w/o Creation Order Index\n"))
-                        }
-                        else {
-                            continue;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
+                                    "w/o Creation Order Index\n"))
                         }
                     } /* end else */
                 }     /* end else */
@@ -7929,17 +7928,14 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                            if (use_index)
+                        if (use_index) {
+                            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
                                 MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
                                             "w/Creation Order Index\n"))
-                            else
-                                MESSAGE(5,
-                                        ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
-                                         "Creation Order Index\n"))
-                        }
-                        else {
-                            continue;
+                            }
+                        } else {
+                            MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
+                                        "Creation Order Index\n"))
                         }
                     } /* end else */
                 }     /* end else */
