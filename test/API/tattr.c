@@ -5904,7 +5904,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     /* Don't test "native" order queries on link name order, since there's not
      *  a good way to easily predict the order of the links in the name index.
      */
-    
+
     /* Verify the information for first attribute, in decreasing name order */
     HDmemset(&ainfo, 0, sizeof(ainfo));
     ret = H5Aget_info_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &ainfo, H5P_DEFAULT);
@@ -5920,11 +5920,11 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     /* Verify the name for new link, in increasing name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
-                                        (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                                     (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if (HDstrcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
-    
+
     /* Retrieve current # of errors */
     if (old_nerrs == nerrors)
         return (0);
@@ -6513,7 +6513,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             else {
                                 continue;
                             }
-                        } else {
+                        }
+                        else {
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
                         }
@@ -7520,14 +7521,17 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     else {
                         if (use_index) {
                             if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                                MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
+                                MESSAGE(
+                                    5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
                                         "w/Creation Order Index\n"))
-                            } else {
+                            }
+                            else {
                                 continue;
                             }
-                        } else {
+                        }
+                        else {
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                    "w/o Creation Order Index\n"))
+                                        "w/o Creation Order Index\n"))
                         }
                     } /* end else */
                 }     /* end else */
@@ -7932,7 +7936,8 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                 MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
                                             "w/Creation Order Index\n"))
                             }
-                        } else {
+                        }
+                        else {
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
                         }
