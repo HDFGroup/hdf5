@@ -40,7 +40,7 @@ if (BUILD_STATIC_LIBS)
   TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET}
       PUBLIC ${LINK_LIBS} ${HDF5_LIB_TARGET}
-      PRIVATE $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
+      PRIVATE "$<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>"
   )
   if (MINGW)
     target_link_libraries (${HDF5_TEST_LIB_TARGET} PRIVATE "wsock32.lib")
@@ -473,7 +473,7 @@ if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (ttsafe PRIVATE ${HDF5_TEST_LIB_TARGET})
   if (NOT WIN32)
     target_link_libraries (ttsafe
-      PRIVATE $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
+      PRIVATE "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>"
     )
   endif ()
 else ()
@@ -499,7 +499,7 @@ if (NOT BUILD_SHARED_LIBS)
   target_link_libraries (thread_id PRIVATE ${HDF5_TEST_LIB_TARGET})
   if (NOT WIN32)
     target_link_libraries (thread_id
-      PRIVATE $<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>
+      PRIVATE "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:Threads::Threads>"
     )
   endif ()
 else ()
