@@ -38,8 +38,6 @@
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5Eprivate.h"  /* Error handling		  	*/
 #include "H5Fpkg.h"      /* Files				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5Pprivate.h"  /* Property lists                       */
 
 /****************/
 /* Local Macros */
@@ -81,7 +79,10 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag,
+    H5C_tag_iter_cb_t cb, void *cb_ctx);
 static herr_t H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag);
+static herr_t H5C__flush_marked_entries(H5F_t * f);
 
 /*********************/
 /* Package Variables */
@@ -99,7 +100,6 @@ H5FL_EXTERN(H5C_tag_info_t);
 /*******************/
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_ignore_tags
  *
  * Purpose:     Override all assertion frameworks associated with making
@@ -136,7 +136,6 @@ H5C_ignore_tags(H5C_t *cache)
 } /* H5C_ignore_tags */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_ignore_tags
  *
  * Purpose:     Retrieve the 'ignore_tags' field for the cache
@@ -148,7 +147,7 @@ H5C_ignore_tags(H5C_t *cache)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+H5_ATTR_PURE hbool_t
 H5C_get_ignore_tags(const H5C_t *cache)
 {
     FUNC_ENTER_NOAPI_NOERR
@@ -162,7 +161,6 @@ H5C_get_ignore_tags(const H5C_t *cache)
 } /* H5C_get_ignore_tags */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_num_objs_corked
  *
  * Purpose:     Retrieve the 'num_objs_corked' field for the cache
@@ -173,7 +171,7 @@ H5C_get_ignore_tags(const H5C_t *cache)
  *
  *-------------------------------------------------------------------------
  */
-uint32_t
+H5_ATTR_PURE uint32_t
 H5C_get_num_objs_corked(const H5C_t *cache)
 {
     FUNC_ENTER_NOAPI_NOERR
@@ -187,7 +185,6 @@ H5C_get_num_objs_corked(const H5C_t *cache)
 } /* H5C_get_num_objs_corked */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__tag_entry
  *
  * Purpose:     Tags an entry with the provided tag (contained in the API context).
@@ -274,7 +271,6 @@ done:
 } /* H5C__tag_entry */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__untag_entry
  *
  * Purpose:     Removes an entry from a tag list, possibly removing the tag
@@ -333,7 +329,6 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
 } /* H5C__untag_entry */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__iter_tagged_entries_real
  *
  * Purpose:     Iterate over tagged entries, making a callback for matches
@@ -390,7 +385,6 @@ done:
 } /* H5C__iter_tagged_entries_real() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__iter_tagged_entries
  *
  * Purpose:     Iterate over tagged entries, making a callback for matches
@@ -434,7 +428,6 @@ done:
 } /* H5C__iter_tagged_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__evict_tagged_entries_cb
  *
  * Purpose:     Callback for evicting tagged entries
@@ -485,7 +478,6 @@ done:
 } /* H5C__evict_tagged_entries_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_evict_tagged_entries
  *
  * Purpose:     Evicts all entries with the specified tag from cache
@@ -564,7 +556,6 @@ done:
 } /* H5C_evict_tagged_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__mark_tagged_entries_cb
  *
  * Purpose:     Callback to set the flush marker on dirty entries in the cache
@@ -594,7 +585,6 @@ H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
 } /* H5C__mark_tagged_entries_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__mark_tagged_entries
  *
  * Purpose:     Set the flush marker on dirty entries in the cache that have
@@ -629,10 +619,50 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__mark_tagged_entries() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5C__flush_marked_entries
+ *
+ * Purpose:     Flushes all marked entries in the cache.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              November 3, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__flush_marked_entries(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Assertions */
+    HDassert(f != NULL);
+
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+    /* Flush all marked entries */
+    if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
+
+    /* Disable the slist.  Set the clear_slist parameter to TRUE
+     * since we called H5C_flush_cache() with the
+     * H5C__FLUSH_MARKED_ENTRIES_FLAG.
+     */
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__flush_marked_entries */
+
 #ifdef H5C_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_verify_tag
  *
  * Purpose:     Performs sanity checking on an entrytype/tag pair.
@@ -703,7 +733,6 @@ done:
 #endif
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_flush_tagged_entries
  *
  * Purpose:     Flushes all entries with the specified tag to disk.
@@ -744,7 +773,6 @@ done:
 } /* H5C_flush_tagged_entries */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_retag_entries
  *
  * Purpose:     Searches through cache index for all entries with the
@@ -786,7 +814,6 @@ H5C_retag_entries(H5C_t *cache, haddr_t src_tag, haddr_t dest_tag)
 } /* H5C_retag_entries() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__expunge_tag_type_metadata_cb
  *
  * Purpose:     Expunge from the cache entries associated
@@ -822,7 +849,6 @@ done:
 } /* H5C__expunge_tag_type_metadata_cb() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_expunge_tag_type_metadata
  *
  * Purpose:     Search and expunge from the cache entries associated
@@ -866,7 +892,6 @@ done:
 } /* H5C_expunge_tag_type_metadata() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_tag()
  *
  * Purpose:     Get the tag for a metadata cache entry.

@@ -2215,7 +2215,6 @@ herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f);
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
-H5_DLL herr_t H5C_get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
 H5_DLL herr_t H5C_get_cache_size(const H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
                                  size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
 H5_DLL herr_t H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr);
@@ -2226,7 +2225,6 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_pt
                                    hbool_t *is_flush_dep_child_ptr, hbool_t *image_up_to_date_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void  *H5C_get_aux_ptr(const H5C_t *cache_ptr);
-H5_DLL herr_t H5C_image_stats(H5C_t *cache_ptr, hbool_t print_header);
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing,
                                unsigned int flags);
 H5_DLL herr_t H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_t rw);

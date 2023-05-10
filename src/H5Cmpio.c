@@ -397,7 +397,6 @@ done:
 } /* H5C_apply_candidate_list() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_construct_candidate_list__clean_cache
  *
  * Purpose:     Construct the list of entries that should be flushed to
@@ -597,7 +596,6 @@ done:
 } /* H5C_construct_candidate_list__min_clean() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_mark_entries_as_clean
  *
  * Purpose:     When the H5C code is used to implement the metadata caches
@@ -827,7 +825,6 @@ done:
 } /* H5C_mark_entries_as_clean() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_clear_coll_entries
  *
  * Purpose:     Clear half or the entire list of collective entries and
@@ -879,7 +876,6 @@ done:
 } /* H5C_clear_coll_entries */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__collective_write
  *
  * Purpose:     Perform a collective write of a list of metadata entries.

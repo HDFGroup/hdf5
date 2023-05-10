@@ -247,7 +247,6 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_dump_cache_skip_list
  *
  * Purpose:     Debugging routine that prints a summary of the contents of
@@ -697,7 +696,6 @@ done:
 } /* H5C_stats() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_stats__reset
  *
  * Purpose:     Reset the stats fields to their initial values.
@@ -884,7 +882,6 @@ done:
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_validate_index_list
  *
  * Purpose:     Debugging function that scans the index list for errors.
@@ -1000,7 +997,6 @@ done:
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_entry_ptr_from_addr()
  *
  * Purpose:     Debugging function that attempts to look up an entry in the
@@ -1097,7 +1093,6 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_cache_is_clean()
  *
  * Purpose:     Debugging function that verifies that all rings in the
@@ -1141,7 +1136,6 @@ done:
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_verify_entry_type()
  *
  * Purpose:     Debugging function that attempts to look up an entry in the
@@ -1203,3 +1197,479 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_verify_entry_type() */
 #endif /* NDEBUG */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_def_auto_resize_rpt_fcn
+ *
+ * Purpose:     Print results of a automatic cache resize.
+ *
+ *        This function should only be used where HDprintf() behaves
+ *        well -- i.e. not on Windows.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *        10/27/04
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
+#ifndef NDEBUG
+                            int32_t version,
+#else
+                            int32_t H5_ATTR_UNUSED version,
+#endif
+                            double hit_rate, enum H5C_resize_status status, size_t old_max_cache_size,
+                            size_t new_max_cache_size, size_t old_min_clean_size, size_t new_min_clean_size)
+{
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(version == H5C__CURR_AUTO_RESIZE_RPT_FCN_VER);
+
+    switch (status) {
+        case in_spec:
+            HDfprintf(stdout, "%sAuto cache resize -- no change. (hit rate = %lf)\n", cache_ptr->prefix,
+                      hit_rate);
+            break;
+
+        case increase:
+            HDassert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
+            HDassert(old_max_cache_size < new_max_cache_size);
+
+            HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
+                      cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.lower_hr_threshold);
+            HDfprintf(stdout, "%scache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
+                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+            break;
+
+        case flash_increase:
+            HDassert(old_max_cache_size < new_max_cache_size);
+
+            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
+                      (int)(cache_ptr->resize_ctl.flash_incr_mode), cache_ptr->flash_size_increase_threshold);
+            HDfprintf(stdout, "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
+                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+            break;
+
+        case decrease:
+            HDassert(old_max_cache_size > new_max_cache_size);
+
+            switch (cache_ptr->resize_ctl.decr_mode) {
+                case H5C_decr__off:
+                    HDfprintf(stdout, "%sAuto cache resize -- decrease off.  HR = %lf\n", cache_ptr->prefix,
+                              hit_rate);
+                    break;
+
+                case H5C_decr__threshold:
+                    HDassert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
+
+                    HDfprintf(stdout, "%sAuto cache resize -- decrease by threshold.  HR = %lf > %6.5lf\n",
+                              cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.upper_hr_threshold);
+                    HDfprintf(stdout, "%sout of bounds high (%6.5lf).\n", cache_ptr->prefix,
+                              cache_ptr->resize_ctl.upper_hr_threshold);
+                    break;
+
+                case H5C_decr__age_out:
+                    HDfprintf(stdout, "%sAuto cache resize -- decrease by ageout.  HR = %lf\n",
+                              cache_ptr->prefix, hit_rate);
+                    break;
+
+                case H5C_decr__age_out_with_threshold:
+                    HDassert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
+
+                    HDfprintf(stdout,
+                              "%sAuto cache resize -- decrease by ageout with threshold. HR = %lf > %6.5lf\n",
+                              cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.upper_hr_threshold);
+                    break;
+
+                default:
+                    HDfprintf(stdout, "%sAuto cache resize -- decrease by unknown mode.  HR = %lf\n",
+                              cache_ptr->prefix, hit_rate);
+            }
+
+            HDfprintf(stdout, "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
+                      old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
+            break;
+
+        case at_max_size:
+            HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
+                      cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.lower_hr_threshold);
+            HDfprintf(stdout, "%s    cache already at maximum size so no change.\n", cache_ptr->prefix);
+            break;
+
+        case at_min_size:
+            HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) -- can't decrease.\n", cache_ptr->prefix,
+                      hit_rate);
+            HDfprintf(stdout, "%s    cache already at minimum size.\n", cache_ptr->prefix);
+            break;
+
+        case increase_disabled:
+            HDfprintf(stdout, "%sAuto cache resize -- increase disabled -- HR = %lf.", cache_ptr->prefix,
+                      hit_rate);
+            break;
+
+        case decrease_disabled:
+            HDfprintf(stdout, "%sAuto cache resize -- decrease disabled -- HR = %lf.\n", cache_ptr->prefix,
+                      hit_rate);
+            break;
+
+        case not_full:
+            HDassert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
+
+            HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
+                      cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.lower_hr_threshold);
+            HDfprintf(stdout, "%s    cache not full so no increase in size.\n", cache_ptr->prefix);
+            break;
+
+        default:
+            HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
+            break;
+    }
+} /* H5C_def_auto_resize_rpt_fcn() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__validate_lru_list
+ *
+ * Purpose:     Debugging function that scans the LRU list for errors.
+ *
+ *        If an error is detected, the function generates a
+ *        diagnostic and returns FAIL.  If no error is detected,
+ *        the function returns SUCCEED.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 7/14/05
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
+herr_t
+H5C__validate_lru_list(H5C_t *cache_ptr)
+{
+    int32_t            len       = 0;
+    size_t             size      = 0;
+    H5C_cache_entry_t *entry_ptr = NULL;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_tail_ptr == NULL)) &&
+        (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list head/tail check failed")
+
+    if ((cache_ptr->LRU_list_len == 1) &&
+        ((cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr) || (cache_ptr->LRU_head_ptr == NULL) ||
+         (cache_ptr->LRU_head_ptr->size != cache_ptr->LRU_list_size)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list sanity check failed")
+
+    if ((cache_ptr->LRU_list_len >= 1) &&
+        ((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_head_ptr->prev != NULL) ||
+         (cache_ptr->LRU_tail_ptr == NULL) || (cache_ptr->LRU_tail_ptr->next != NULL)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list sanity check failed")
+
+    entry_ptr = cache_ptr->LRU_head_ptr;
+    while (entry_ptr != NULL) {
+        if ((entry_ptr != cache_ptr->LRU_head_ptr) &&
+            ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if ((entry_ptr != cache_ptr->LRU_tail_ptr) &&
+            ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if (entry_ptr->is_pinned || entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "invalid entry 'pin origin' fields")
+
+        len++;
+        size += entry_ptr->size;
+        entry_ptr = entry_ptr->next;
+    }
+
+    if ((cache_ptr->LRU_list_len != (uint32_t)len) || (cache_ptr->LRU_list_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list length/size check failed")
+
+done:
+    if (ret_value != SUCCEED)
+        HDassert(0);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__validate_lru_list() */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__validate_pinned_entry_list
+ *
+ * Purpose:     Debugging function that scans the pinned entry list for
+ *              errors.
+ *
+ *        If an error is detected, the function generates a
+ *        diagnostic and returns FAIL.  If no error is detected,
+ *        the function returns SUCCEED.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 4/25/14
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
+herr_t
+H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
+{
+    int32_t            len       = 0;
+    size_t             size      = 0;
+    H5C_cache_entry_t *entry_ptr = NULL;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_tail_ptr == NULL)) &&
+        (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list head/tail check failed")
+
+    if ((cache_ptr->pel_len == 1) &&
+        ((cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr) || (cache_ptr->pel_head_ptr == NULL) ||
+         (cache_ptr->pel_head_ptr->size != cache_ptr->pel_size)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list sanity check failed")
+
+    if ((cache_ptr->pel_len >= 1) &&
+        ((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_head_ptr->prev != NULL) ||
+         (cache_ptr->pel_tail_ptr == NULL) || (cache_ptr->pel_tail_ptr->next != NULL)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list sanity check failed")
+
+    entry_ptr = cache_ptr->pel_head_ptr;
+    while (entry_ptr != NULL) {
+        if ((entry_ptr != cache_ptr->pel_head_ptr) &&
+            ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if ((entry_ptr != cache_ptr->pel_tail_ptr) &&
+            ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if (!entry_ptr->is_pinned)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list contains unpinned entry")
+
+        if (!(entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "invalid entry 'pin origin' fields")
+
+        len++;
+        size += entry_ptr->size;
+        entry_ptr = entry_ptr->next;
+    }
+
+    if ((cache_ptr->pel_len != (uint32_t)len) || (cache_ptr->pel_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list length/size check failed")
+
+done:
+    if (ret_value != SUCCEED)
+        HDassert(0);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__validate_pinned_entry_list() */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__validate_protected_entry_list
+ *
+ * Purpose:     Debugging function that scans the protected entry list for
+ *              errors.
+ *
+ *        If an error is detected, the function generates a
+ *        diagnostic and returns FAIL.  If no error is detected,
+ *        the function returns SUCCEED.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  John Mainzer, 4/25/14
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5C_DO_EXTREME_SANITY_CHECKS
+herr_t
+H5C__validate_protected_entry_list(H5C_t *cache_ptr)
+{
+    int32_t            len       = 0;
+    size_t             size      = 0;
+    H5C_cache_entry_t *entry_ptr = NULL;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_tail_ptr == NULL)) &&
+        (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list head/tail check failed")
+
+    if ((cache_ptr->pl_len == 1) &&
+        ((cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr) || (cache_ptr->pl_head_ptr == NULL) ||
+         (cache_ptr->pl_head_ptr->size != cache_ptr->pl_size)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list sanity check failed")
+
+    if ((cache_ptr->pl_len >= 1) &&
+        ((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_head_ptr->prev != NULL) ||
+         (cache_ptr->pl_tail_ptr == NULL) || (cache_ptr->pl_tail_ptr->next != NULL)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list sanity check failed")
+
+    entry_ptr = cache_ptr->pl_head_ptr;
+    while (entry_ptr != NULL) {
+        if ((entry_ptr != cache_ptr->pl_head_ptr) &&
+            ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if ((entry_ptr != cache_ptr->pl_tail_ptr) &&
+            ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
+
+        if (!entry_ptr->is_protected)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list contains unprotected entry")
+
+        if (entry_ptr->is_read_only && (entry_ptr->ro_ref_count <= 0))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "read-only entry has non-positive ref count")
+
+        len++;
+        size += entry_ptr->size;
+        entry_ptr = entry_ptr->next;
+    }
+
+    if ((cache_ptr->pl_len != (uint32_t)len) || (cache_ptr->pl_size != size))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list length/size check failed")
+
+done:
+    if (ret_value != SUCCEED)
+        HDassert(0);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__validate_protected_entry_list() */
+#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__entry_in_skip_list
+ *
+ * Purpose:     Debugging function that scans skip list to see if it
+ *        is in present.  We need this, as it is possible for
+ *        an entry to be in the skip list twice.
+ *
+ * Return:      FALSE if the entry is not in the skip list, and TRUE
+ *        if it is.
+ *
+ * Programmer:  John Mainzer, 11/1/14
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5C_DO_SLIST_SANITY_CHECKS
+hbool_t
+H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
+{
+    H5SL_node_t *node_ptr;
+    hbool_t      in_slist;
+    hbool_t      ret_value;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Assertions */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->slist_ptr);
+
+    node_ptr = H5SL_first(cache_ptr->slist_ptr);
+    in_slist = FALSE;
+    while ((node_ptr != NULL) && (!in_slist)) {
+        H5C_cache_entry_t *entry_ptr;
+
+        entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        HDassert(entry_ptr);
+        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->is_dirty);
+        HDassert(entry_ptr->in_slist);
+
+        if (entry_ptr == target_ptr)
+            in_slist = TRUE;
+        else
+            node_ptr = H5SL_next(node_ptr);
+    }
+
+    /* Set return value */
+    ret_value = in_slist;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__entry_in_skip_list() */
+#endif /* H5C_DO_SLIST_SANITY_CHECKS */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__image_stats
+ *
+ * Purpose:     Prints statistics specific to the cache image.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              10/26/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+#if H5C_COLLECT_CACHE_STATS
+H5C__image_stats(H5C_t *cache_ptr, hbool_t print_header)
+#else  /* H5C_COLLECT_CACHE_STATS */
+H5C__image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
+#endif /* H5C_COLLECT_CACHE_STATS */
+{
+#if H5C_COLLECT_CACHE_STATS
+    int     i;
+    int64_t total_hits   = 0;
+    int64_t total_misses = 0;
+    double  hit_rate;
+    double  prefetch_use_rate;
+#endif                          /* H5C_COLLECT_CACHE_STATS */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (!cache_ptr || cache_ptr->magic != H5C__H5C_T_MAGIC)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
+
+#if H5C_COLLECT_CACHE_STATS
+    for (i = 0; i <= cache_ptr->max_type_id; i++) {
+        total_hits += cache_ptr->hits[i];
+        total_misses += cache_ptr->misses[i];
+    } /* end for */
+
+    if ((total_hits > 0) || (total_misses > 0))
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+    else
+        hit_rate = 0.0;
+
+    if (cache_ptr->prefetches > 0)
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+    else
+        prefetch_use_rate = 0.0;
+
+    if (print_header) {
+        HDfprintf(stdout, "\nhit     prefetches      prefetch              image  pf hit\n");
+        HDfprintf(stdout, "rate:   total:  dirty:  hits:  flshs:  evct:  size:  rate:\n");
+    } /* end if */
+
+    HDfprintf(stdout, "%3.1lf    %5lld   %5lld   %5lld  %5lld   %5lld   %5lld   %3.1lf\n", hit_rate,
+              (long long)(cache_ptr->prefetches), (long long)(cache_ptr->dirty_prefetches),
+              (long long)(cache_ptr->prefetch_hits),
+              (long long)(cache_ptr->flushes[H5AC_PREFETCHED_ENTRY_ID]),
+              (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]),
+              (long long)(cache_ptr->last_image_size), prefetch_use_rate);
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__image_stats() */
+

@@ -78,8 +78,10 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SOURCES}" )
 set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5C.c
     ${HDF5_SRC_DIR}/H5Cdbg.c
+    ${HDF5_SRC_DIR}/H5Centry.c
     ${HDF5_SRC_DIR}/H5Cepoch.c
     ${HDF5_SRC_DIR}/H5Cimage.c
+    ${HDF5_SRC_DIR}/H5Cint.c
     ${HDF5_SRC_DIR}/H5Clog.c
     ${HDF5_SRC_DIR}/H5Clog_json.c
     ${HDF5_SRC_DIR}/H5Clog_trace.c
