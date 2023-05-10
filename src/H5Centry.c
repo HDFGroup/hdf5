@@ -80,9 +80,8 @@ static void H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t *entry,
 #endif
 static herr_t H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_entry_ptr,
                                                      H5C_cache_entry_t **fd_children);
-static herr_t H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t * cache_ptr,
-    H5C_cache_entry_t** entry_ptr_ptr, const H5C_class_t * type, haddr_t addr,
-    void * udata);
+static herr_t H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t **entry_ptr_ptr,
+                                                const H5C_class_t *type, haddr_t addr, void *udata);
 
 /*********************/
 /* Package Variables */
@@ -1677,11 +1676,11 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
 {
     H5C_cache_entry_t *entry_ptr;
 #ifndef NDEBUG
-    unsigned           entries_visited   = 0;
+    unsigned entries_visited = 0;
 #endif
-    int                fd_children_found = 0;
-    hbool_t            found;
-    herr_t             ret_value = SUCCEED; /* Return value */
+    int     fd_children_found = 0;
+    hbool_t found;
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3933,7 +3932,7 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
         for (u = 0; u < child_entry->flush_dep_nparents; u++)
             HDassert(child_entry->flush_dep_parent[u] != parent_entry);
-    }  /* end block */
+    } /* end block */
 #endif
 
     /* More sanity checks */
@@ -4362,4 +4361,3 @@ H5C_remove_entry(void *_entry)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__remove_entry() */
-

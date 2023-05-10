@@ -1493,4 +1493,3 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_cork() */
-

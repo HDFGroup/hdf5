@@ -79,10 +79,9 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag,
-    H5C_tag_iter_cb_t cb, void *cb_ctx);
+static herr_t H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, void *cb_ctx);
 static herr_t H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag);
-static herr_t H5C__flush_marked_entries(H5F_t * f);
+static herr_t H5C__flush_marked_entries(H5F_t *f);
 
 /*********************/
 /* Package Variables */

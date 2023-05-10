@@ -137,11 +137,11 @@ static herr_t H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_p
 static herr_t H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr);
 static herr_t H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr);
 static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **buf);
-static herr_t H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create);
-static herr_t H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr);
-static herr_t H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr);
-static herr_t H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr);
-static herr_t H5C__free_image_entries_array(H5C_t *cache_ptr);
+static herr_t             H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create);
+static herr_t             H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr);
+static herr_t             H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr);
+static herr_t             H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr);
+static herr_t             H5C__free_image_entries_array(H5C_t *cache_ptr);
 
 /*********************/
 /* Package Variables */

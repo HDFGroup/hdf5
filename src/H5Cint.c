@@ -68,7 +68,6 @@ static herr_t H5C__serialize_ring(H5F_t *f, H5C_ring_t ring);
 /* Local Variables */
 /*******************/
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5C__auto_adjust_cache_size
  *
@@ -1901,9 +1900,9 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     H5C_cache_entry_t *prev_ptr;
     H5C_cache_entry_t *next_ptr;
 #ifndef NDEBUG
-    uint32_t           num_corked_entries = 0;
+    uint32_t num_corked_entries = 0;
 #endif
-    herr_t             ret_value          = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2577,4 +2576,3 @@ done:
     HDassert(cache_ptr->serialization_in_progress);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__serialize_ring() */
-
