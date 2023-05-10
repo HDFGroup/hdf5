@@ -1710,7 +1710,7 @@ test_create_dataset_enum_types(void)
     hid_t       enum_native = H5I_INVALID_HID, enum_non_native = H5I_INVALID_HID;
     const char *enum_type_test_table[] = {"RED",    "GREEN",  "BLUE",   "BLACK", "WHITE",
                                           "PURPLE", "ORANGE", "YELLOW", "BROWN"};
-    const int name_buf_len  = 15;
+    const int   name_buf_len           = 15;
 
     TESTING("dataset creation with enum types");
 
