@@ -25468,7 +25468,7 @@ link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t 
         SKIPPED();
         HDprintf("    API functions for external links aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
