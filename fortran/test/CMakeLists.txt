@@ -224,7 +224,7 @@ if(MSVC)
 endif()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
-  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -233,7 +233,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (testhdf5_fortran ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
-  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -263,7 +263,7 @@ if(MSVC)
 endif()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (testhdf5_fortran_1_8 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
-  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (testhdf5_fortran_1_8 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -272,7 +272,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (testhdf5_fortran_1_8 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (testhdf5_fortran_1_8 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
-  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (testhdf5_fortran_1_8 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -304,7 +304,7 @@ if(MSVC)
 endif()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (fortranlib_test_F03 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
-  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -313,7 +313,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (fortranlib_test_F03 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (fortranlib_test_F03 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
-  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -336,7 +336,7 @@ if(MSVC)
 endif()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fflush1 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -345,7 +345,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (fflush1 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fflush1 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -368,7 +368,7 @@ if(MSVC)
 endif()
 if (NOT BUILD_SHARED_LIBS)
   target_include_directories (fflush2 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fflush2 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -377,7 +377,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_dependencies (fflush2 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
   target_include_directories (fflush2 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
+  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<PLATFORM_ID:Windows>:ws2_32.lib>")
   set_target_properties (fflush2 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
