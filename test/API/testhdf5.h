@@ -343,6 +343,9 @@ void cleanup_sohm(void);
 void cleanup_misc(void);
 void cleanup_unicode(void);
 
+/* Extern global variables */
+extern uint64_t vol_cap_flags_g;
+
 #ifdef __cplusplus
 }
 #endif

@@ -1123,7 +1123,7 @@ test_group_property_lists(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, property list, creation order aren't supported "
+        HDprintf("    API functions for basic file, group, property list, or creation order aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -1714,7 +1714,7 @@ test_get_group_info(void)
         PART_BEGIN(H5Gget_info_by_idx_name_order_decreasing)
         {
             TESTING_2("H5Gget_info_by_idx by alphabetical order in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             for (i = 0; i < GROUP_GET_INFO_TEST_GROUP_NUMB; i++) {
                 memset(&group_info, 0, sizeof(group_info));
 
@@ -1728,14 +1728,15 @@ test_get_group_info(void)
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%lld' doesn't match expected value '%lld'\n",
+                    HDprintf("    group's number of links '%" PRIuHSIZE
+                             "' doesn't match expected value '%d'\n",
                              group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
+                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
                              (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
@@ -1759,10 +1760,6 @@ test_get_group_info(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Gget_info_by_idx_name_order_decreasing);
-#endif
         }
         PART_END(H5Gget_info_by_idx_name_order_decreasing);
     }
@@ -1814,7 +1811,7 @@ test_get_group_info_invalid_params(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
+        HDprintf("    API functions for basic file, more group, or creation order aren't supported with this "
                  "connector\n");
         return 0;
     }
@@ -2172,7 +2169,7 @@ test_flush_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, more group, creation order aren't supported with this "
+        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
                  "connector\n");
         return 0;
     }
@@ -2280,8 +2277,8 @@ test_refresh_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or refresh aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
+                 "connector\n");
         return 0;
     }
 

@@ -871,7 +871,6 @@ test_vl_rewrite(void)
 static void
 test_write_same_element(void)
 {
-#ifndef NO_WRITE_SAME_ELEMENT_TWICE
     hid_t       file1, dataset1;
     hid_t       mspace, fspace, dtype;
     hsize_t     fdim[]             = {SPACE1_DIM1};
@@ -880,86 +879,85 @@ test_write_same_element(void)
     hsize_t     marray[]           = {NUMP};
     hsize_t     coord[SPACE1_RANK][NUMP];
     herr_t      ret;
-#endif
 
     MESSAGE(
         5,
         ("Testing writing to same element of VL string dataset twice - SKIPPED for now due to no support\n"));
-#ifndef NO_WRITE_SAME_ELEMENT_TWICE
-    file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(file1, FAIL, "H5Fcreate");
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+        file1 = H5Fcreate(DATAFILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(file1, FAIL, "H5Fcreate");
 
-    dtype = H5Tcopy(H5T_C_S1);
-    CHECK(dtype, FAIL, "H5Tcopy");
+        dtype = H5Tcopy(H5T_C_S1);
+        CHECK(dtype, FAIL, "H5Tcopy");
 
-    ret = H5Tset_size(dtype, H5T_VARIABLE);
-    CHECK(ret, FAIL, "H5Tset_size");
+        ret = H5Tset_size(dtype, H5T_VARIABLE);
+        CHECK(ret, FAIL, "H5Tset_size");
 
-    fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
-    CHECK(fspace, FAIL, "H5Screate_simple");
+        fspace = H5Screate_simple(SPACE1_RANK, fdim, NULL);
+        CHECK(fspace, FAIL, "H5Screate_simple");
 
-    dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dcreate");
+        dataset1 = H5Dcreate2(file1, DATASET, dtype, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset1, FAIL, "H5Dcreate");
 
-    ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-    CHECK(ret, FAIL, "H5Dwrite");
+        ret = H5Dwrite(dataset1, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Dclose(dataset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Dclose(dataset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Tclose(dtype);
-    CHECK(ret, FAIL, "H5Tclose");
+        ret = H5Tclose(dtype);
+        CHECK(ret, FAIL, "H5Tclose");
 
-    ret = H5Sclose(fspace);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Sclose(fspace);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    ret = H5Fclose(file1);
-    CHECK(ret, FAIL, "H5Fclose");
+        ret = H5Fclose(file1);
+        CHECK(ret, FAIL, "H5Fclose");
 
-    /*
-     * Open the file.  Select the same points, write values to those point locations.
-     */
-    file1 = H5Fopen(DATAFILE3, H5F_ACC_RDWR, H5P_DEFAULT);
-    CHECK(file1, FAIL, "H5Fopen");
+        /*
+         * Open the file.  Select the same points, write values to those point locations.
+         */
+        file1 = H5Fopen(DATAFILE3, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(file1, FAIL, "H5Fopen");
 
-    dataset1 = H5Dopen2(file1, DATASET, H5P_DEFAULT);
-    CHECK(dataset1, FAIL, "H5Dopen");
+        dataset1 = H5Dopen2(file1, DATASET, H5P_DEFAULT);
+        CHECK(dataset1, FAIL, "H5Dopen");
 
-    fspace = H5Dget_space(dataset1);
-    CHECK(fspace, FAIL, "H5Dget_space");
+        fspace = H5Dget_space(dataset1);
+        CHECK(fspace, FAIL, "H5Dget_space");
 
-    dtype = H5Dget_type(dataset1);
-    CHECK(dtype, FAIL, "H5Dget_type");
+        dtype = H5Dget_type(dataset1);
+        CHECK(dtype, FAIL, "H5Dget_type");
 
-    mspace = H5Screate_simple(1, marray, NULL);
-    CHECK(mspace, FAIL, "H5Screate_simple");
+        mspace = H5Screate_simple(1, marray, NULL);
+        CHECK(mspace, FAIL, "H5Screate_simple");
 
-    coord[0][0] = 0;
-    coord[0][1] = 2;
-    coord[0][2] = 2;
-    coord[0][3] = 0;
+        coord[0][0] = 0;
+        coord[0][1] = 2;
+        coord[0][2] = 2;
+        coord[0][3] = 0;
 
-    ret = H5Sselect_elements(fspace, H5S_SELECT_SET, NUMP, (const hsize_t *)&coord);
-    CHECK(ret, FAIL, "H5Sselect_elements");
+        ret = H5Sselect_elements(fspace, H5S_SELECT_SET, NUMP, (const hsize_t *)&coord);
+        CHECK(ret, FAIL, "H5Sselect_elements");
 
-    ret = H5Dwrite(dataset1, dtype, mspace, fspace, H5P_DEFAULT, val);
-    CHECK(ret, FAIL, "H5Dwrite");
+        ret = H5Dwrite(dataset1, dtype, mspace, fspace, H5P_DEFAULT, val);
+        CHECK(ret, FAIL, "H5Dwrite");
 
-    ret = H5Tclose(dtype);
-    CHECK(ret, FAIL, "H5Tclose");
+        ret = H5Tclose(dtype);
+        CHECK(ret, FAIL, "H5Tclose");
 
-    ret = H5Dclose(dataset1);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Dclose(dataset1);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Sclose(fspace);
-    CHECK(ret, FAIL, "H5Dclose");
+        ret = H5Sclose(fspace);
+        CHECK(ret, FAIL, "H5Dclose");
 
-    ret = H5Sclose(mspace);
-    CHECK(ret, FAIL, "H5Sclose");
+        ret = H5Sclose(mspace);
+        CHECK(ret, FAIL, "H5Sclose");
 
-    ret = H5Fclose(file1);
-    CHECK(ret, FAIL, "H5Fclose");
-#endif
+        ret = H5Fclose(file1);
+        CHECK(ret, FAIL, "H5Fclose");
+    }
 } /* test_write_same_element */
 
 /****************************************************************
