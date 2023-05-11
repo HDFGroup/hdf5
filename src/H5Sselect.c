@@ -523,10 +523,10 @@ H5S_select_valid(const H5S_t *space)
 herr_t
 H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
 {
-    uint32_t sel_type;         /* Pointer to the selection type */
-    herr_t   ret_value = FAIL; /* Return value */
-    const uint8_t  *p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
-    hbool_t skip = (p_size == SIZE_MAX ? TRUE : FALSE); /* If p_size is unknown, skip buffer checks */
+    uint32_t       sel_type;                                   /* Pointer to the selection type */
+    herr_t         ret_value = FAIL;                           /* Return value */
+    const uint8_t *p_end     = *p + p_size - 1;                /* Pointer to last valid byte in buffer */
+    hbool_t        skip = (p_size == SIZE_MAX ? TRUE : FALSE); /* If p_size is unknown, skip buffer checks */
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);

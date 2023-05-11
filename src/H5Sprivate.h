@@ -190,7 +190,7 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_SHAPE_SAME(S1, S2)             (H5S_select_shape_same(S1, S2))
 #define H5S_SELECT_INTERSECT_BLOCK(S, START, END) (H5S_select_intersect_block(S, START, END))
 #define H5S_SELECT_RELEASE(S)                     (H5S_select_release(S))
-#define H5S_SELECT_DESERIALIZE(S, BUF, BUF_SIZE)            (H5S_select_deserialize(S, BUF, BUF_SIZE))
+#define H5S_SELECT_DESERIALIZE(S, BUF, BUF_SIZE)  (H5S_select_deserialize(S, BUF, BUF_SIZE))
 
 /* Forward declaration of structs used below */
 struct H5O_t;

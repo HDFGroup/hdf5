@@ -327,7 +327,7 @@
  */
 #define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
 
-/* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode() 
+/* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
  * that don't take a size parameter, where we need to skip the bounds checks.
  *
  * This is a separate macro since we don't want to inflict that behavior on

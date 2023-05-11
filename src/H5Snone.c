@@ -595,11 +595,11 @@ H5S__none_serialize(H5S_t *space, uint8_t **p)
 static herr_t
 H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
 {
-    H5S_t *tmp_space = NULL;      /* Pointer to actual dataspace to use,
-                                     either *space or a newly allocated one */
-    uint32_t version;             /* Version number */
-    herr_t   ret_value = SUCCEED; /* return value */
-    const uint8_t    *p_end = *p + p_size - 1; /* Pointer to last valid byte in buffer */
+    H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
+                                                   either *space or a newly allocated one */
+    uint32_t       version;                     /* Version number */
+    herr_t         ret_value = SUCCEED;         /* return value */
+    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 
     FUNC_ENTER_PACKAGE
 
