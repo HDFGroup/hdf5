@@ -1,0 +1,34 @@
+name: Spack Ubuntu hdf5@develop+mpi+fortran
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    branches: [ develop ]
+    paths-ignore:
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
+  cancel-in-progress: true
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout spack
+      uses: actions/checkout@v3
+      with:
+        repository: spack/spack
+        path: ./spack      
+    - name: Run a multi-line script
+      run: |
+        . ./spack/share/spack/setup-env.sh
+        spack spec hdf5@develop+mpi+fortran
+        spack install hdf5@develop+mpi+fortran
