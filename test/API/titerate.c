@@ -149,7 +149,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         5, ("Testing Group Iteration Functionality - SKIPPED for now due to no iteration restart support\n"));
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) &&
-        (H5VL_CAP_FLAG_STORED_DATATYPES) && (H5VL_CAP_FLAG_GROUP_MORE) && (H5VL_CAP_FLAG_LINK_MORE)) {
+        (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) &&
+        (vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE)) {
         /* Create the test file with the datasets */
         file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
         CHECK(file, FAIL, "H5Fcreate");

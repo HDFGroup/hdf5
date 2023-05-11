@@ -25533,7 +25533,7 @@ link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *in
         SKIPPED();
         HDprintf("    API functions for external or user-defined link aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
@@ -25622,7 +25622,7 @@ link_iter_idx_saving_cb(hid_t group_id, const char *name, const H5L_info2_t *inf
         SKIPPED();
         HDprintf("    API functions for external or user-defined link aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
@@ -25907,7 +25907,7 @@ link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name, const H
         SKIPPED();
         HDprintf("    API functions for external links aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
@@ -26022,7 +26022,7 @@ link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_
         SKIPPED();
         HDprintf("    API functions for external or user-defined link aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
@@ -26394,7 +26394,7 @@ link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_
         SKIPPED();
         HDprintf("    API functions for external links aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
@@ -26509,7 +26509,7 @@ link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_inf
         SKIPPED();
         HDprintf("    API functions for external or user-defined link aren't supported with this "
                  "connector\n");
-        return 0;
+        return 1;
     }
 
     UNUSED(group_id);
