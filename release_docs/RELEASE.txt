@@ -404,7 +404,7 @@ Bug Fixes since HDF5-1.12.2 release
     -------------
     - Fixed syntax of generator expressions used by CMake
 
-      Add quotes around the generator expression should allow CMake to
+      Adding quotes around the generator expression should allow CMake to
       correctly parse the expression. Generator expressions are typically
       parsed after command arguments. If a generator expression contains
       spaces, new lines, semicolons or other characters that may be
