@@ -1,6 +1,8 @@
-HDF5 version 1.14.1 released on 2023-05-05
+HDF5 version 1.14.1-2 released on 2023-05-11
 ================================================================================
-
+HDF5 1.14.1-2 is a patch release for HDF5 1.14.1. The only change in the patch
+release is that Autoconf 2.71 was used to generate the Autotools build files,
+which allows building with Intel's oneAPI.
 
 INTRODUCTION
 ============
