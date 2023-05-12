@@ -654,8 +654,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                                         "buffer overflow while decoding layout")
 
                         if (H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_dset.virtual_select,
-                                                   &heap_block_p,
-                                                   (size_t)(avail_buffer_space)) < 0)
+                                                   &heap_block_p, (size_t)(avail_buffer_space)) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL,
                                         "can't decode virtual space selection")
 
