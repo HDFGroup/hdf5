@@ -241,8 +241,8 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* verify that we can access the internal version of the cache config */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) ||
-            (cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER)) {
+        if (cache_ptr == NULL ||
+            cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
             pass         = FALSE;
             failure_mssg = "Can't access cache resize_ctl.\n";
@@ -385,8 +385,8 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     /* verify that we can access the internal version of the cache config */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) ||
-            (cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER)) {
+        if (cache_ptr == NULL ||
+            cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
             pass         = FALSE;
             failure_mssg = "Can't access cache resize_ctl.\n";

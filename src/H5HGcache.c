@@ -411,7 +411,6 @@ H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(heap->cache_info.type == H5AC_GHEAP);
     HDassert(heap->size >= H5HG_MINSIZE);
     HDassert(image_len);
@@ -442,7 +441,6 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
     HDassert(f);
     HDassert(image);
     HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(heap->cache_info.type == H5AC_GHEAP);
     HDassert(heap->size == len);
     HDassert(heap->chunk);
@@ -458,10 +456,6 @@ H5HG__cache_heap_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image, si
  *
  * Purpose:     Free the in memory representation of the supplied global heap.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -474,7 +468,6 @@ H5HG__cache_heap_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     HDassert(heap);
-    HDassert(heap->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(heap->cache_info.type == H5AC_GHEAP);
 
     /* Destroy global heap collection */

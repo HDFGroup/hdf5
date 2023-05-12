@@ -158,8 +158,6 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
      * the fields.
      */
 
-    cache_ptr->magic = H5C__H5C_T_MAGIC;
-
     cache_ptr->flush_in_progress = FALSE;
 
     if (NULL == (cache_ptr->log_info = (H5C_log_info_t *)H5MM_calloc(sizeof(H5C_log_info_t))))
@@ -313,7 +311,6 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     /* Set non-zero/FALSE/NULL fields for epoch markers */
     for (i = 0; i < H5C__MAX_EPOCH_MARKERS; i++) {
-        ((cache_ptr->epoch_markers)[i]).magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
         ((cache_ptr->epoch_markers)[i]).addr  = (haddr_t)i;
         ((cache_ptr->epoch_markers)[i]).type  = H5AC_EPOCH_MARKER;
     }
@@ -376,7 +373,6 @@ done:
             if (cache_ptr->log_info != NULL)
                 H5MM_xfree(cache_ptr->log_info);
 
-            cache_ptr->magic = 0;
             cache_ptr        = H5FL_FREE(H5C_t, cache_ptr);
         }
     }
@@ -413,7 +409,6 @@ H5C_prep_for_file_close(H5F_t *f)
     HDassert(f->shared->cache);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
@@ -501,7 +496,6 @@ H5C_dest(H5F_t *f)
 
     /* Sanity check */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
 
 #if H5AC_DUMP_IMAGE_STATS_ON_CLOSE
@@ -542,15 +536,11 @@ H5C_dest(H5F_t *f)
     if (cache_ptr->log_info != NULL)
         H5MM_xfree(cache_ptr->log_info);
 
-#ifndef NDEBUG
 #ifdef H5C_DO_SANITY_CHECKS
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0)
         HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                   cache_ptr->get_entry_ptr_from_addr_counter);
 #endif /* H5C_DO_SANITY_CHECKS */
-
-    cache_ptr->magic = 0;
-#endif
 
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
 
@@ -648,7 +638,6 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
 #ifdef H5C_DO_SANITY_CHECKS
@@ -778,11 +767,8 @@ H5C_flush_to_min_clean(H5F_t *f)
 
     HDassert(f);
     HDassert(f->shared);
-
     cache_ptr = f->shared->cache;
-
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (cache_ptr->check_write_permitted != NULL) {
         if ((cache_ptr->check_write_permitted)(f, &write_permitted) < 0)
@@ -819,7 +805,7 @@ H5C_reset_cache_hit_rate_stats(H5C_t *cache_ptr)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
 
     cache_ptr->cache_hits     = 0;
@@ -857,7 +843,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "bad cache_ptr on entry")
     if (config_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL config_ptr on entry")
@@ -1045,7 +1031,7 @@ H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
 
     /* There is no fundamental reason why we should not permit
@@ -1128,7 +1114,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
 
     if (slist_enabled) {
@@ -1145,7 +1131,6 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
         /* scan the index list and insert all dirty entries in the slist */
         entry_ptr = cache_ptr->il_head;
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             if (entry_ptr->is_dirty)
                 H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
             entry_ptr = entry_ptr->il_next;
@@ -1226,7 +1211,6 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
     HDassert(f->shared->cache);
     HDassert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
     cache_ptr = f->shared->cache;
-    HDassert(H5C__H5C_T_MAGIC == cache_ptr->magic);
 
     switch (ring) {
         case H5C_RING_RDFSM:

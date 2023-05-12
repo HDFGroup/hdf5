@@ -73,10 +73,6 @@
 #define H5C__MDCI_MAX_FD_CHILDREN USHRT_MAX
 #define H5C__MDCI_MAX_FD_PARENTS  USHRT_MAX
 
-/* Values for image entry magic field */
-#define H5C_IMAGE_ENTRY_T_MAGIC     0x005CAC08
-#define H5C_IMAGE_ENTRY_T_BAD_MAGIC 0xBeefDead
-
 /* Maximum ring allowed in image */
 #define H5C_MAX_RING_IN_IMAGE H5C_RING_MDFSM
 
@@ -183,7 +179,6 @@ H5C_cache_image_pending(const H5C_t *cache_ptr)
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     ret_value = (cache_ptr->load_image && !cache_ptr->image_loaded);
 
@@ -224,7 +219,6 @@ H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *write_ci_ptr)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(load_ci_ptr);
     HDassert(write_ci_ptr);
 
@@ -265,7 +259,6 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
     HDassert(f->shared);
     HDassert(cache_ptr == f->shared->cache);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->image_ctl.generate_image);
     HDassert(cache_ptr->num_entries_in_image > 0);
@@ -311,7 +304,6 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
 
         fake_cache_ptr = (H5C_t *)H5MM_malloc(sizeof(H5C_t));
         HDassert(fake_cache_ptr);
-        fake_cache_ptr->magic = H5C__H5C_T_MAGIC;
 
         /* needed for sanity checks */
         fake_cache_ptr->image_len = cache_ptr->image_len;
@@ -327,7 +319,6 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
         HDassert(fake_cache_ptr->image_entries);
 
         for (u = 0; u < fake_cache_ptr->num_entries_in_image; u++) {
-            fake_cache_ptr->image_entries[u].magic     = H5C_IMAGE_ENTRY_T_MAGIC;
             fake_cache_ptr->image_entries[u].image_ptr = NULL;
 
             /* touch up f->shared->cache to satisfy sanity checks... */
@@ -420,7 +411,6 @@ H5C__generate_cache_image(H5F_t *f, H5C_t *cache_ptr)
     HDassert(f->shared);
     HDassert(cache_ptr == f->shared->cache);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Construct cache image */
     if (H5C__construct_cache_image_buffer(f, cache_ptr) < 0)
@@ -470,7 +460,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->image_ctl.generate_image);
     HDassert(cache_ptr->index_len == 0);
@@ -487,7 +476,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 
             /* Sanity checks */
             HDassert(ie_ptr);
-            HDassert(ie_ptr->magic == H5C_IMAGE_ENTRY_T_MAGIC);
             HDassert(ie_ptr->image_ptr);
 
             /* Free the parent addrs array if appropriate */
@@ -501,9 +489,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 
             /* Free the image */
             ie_ptr->image_ptr = H5MM_xfree(ie_ptr->image_ptr);
-
-            /* Set magic field to bad magic so we can detect freed entries */
-            ie_ptr->magic = H5C_IMAGE_ENTRY_T_BAD_MAGIC;
         } /* end for */
 
         /* Free the image entries array */
@@ -534,7 +519,7 @@ H5C__get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *confi
 
     FUNC_ENTER_PACKAGE
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache_ptr on entry")
     if (config_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad config_ptr on entry")
@@ -577,8 +562,7 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
         H5AC_aux_t *aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
         int         mpi_result;
 
-        if ((NULL == aux_ptr) || (aux_ptr->mpi_rank == 0)) {
-            HDassert((NULL == aux_ptr) || (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC));
+        if (NULL == aux_ptr || aux_ptr->mpi_rank == 0) {
 #endif /* H5_HAVE_PARALLEL */
 
             /* Read the buffer (if serial access, or rank 0 of parallel access) */
@@ -642,7 +626,6 @@ H5C__load_cache_image(H5F_t *f)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* If the image address is defined, load the image, decode it,
      * and insert its contents into the metadata cache.
@@ -737,7 +720,6 @@ H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Set information needed to load cache image */
     cache_ptr->image_addr   = addr;
@@ -866,7 +848,6 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
     HDassert(f->shared->cache);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(image_generated);
 
     /* If the file is opened and closed without any access to
@@ -1149,7 +1130,7 @@ H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl
     HDassert(f->shared->cache == f->shared->cache);
 
     /* Check arguments */
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+    if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache_ptr on entry")
 
     /* Validate the config: */
@@ -1347,7 +1328,6 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(buf);
     HDassert(*buf);
 
@@ -1447,13 +1427,11 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
     HDassert(f->shared);
     HDassert(cache_ptr == f->shared->cache);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(buf);
     HDassert(*buf);
     HDassert(entry_num < cache_ptr->num_entries_in_image);
     ie_ptr = &(cache_ptr->image_entries[entry_num]);
     HDassert(ie_ptr);
-    HDassert(ie_ptr->magic == H5C_IMAGE_ENTRY_T_MAGIC);
 
     /* Get pointer to buffer */
     p = *buf;
@@ -1588,7 +1566,6 @@ H5C__encode_cache_image_header(const H5F_t *f, const H5C_t *cache_ptr, uint8_t *
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->image_ctl.generate_image);
     HDassert(cache_ptr->index_len == 0);
@@ -1667,7 +1644,6 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf, unsigne
     HDassert(f->shared);
     HDassert(cache_ptr == f->shared->cache);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->image_ctl.generate_image);
     HDassert(cache_ptr->index_len == 0);
@@ -1675,7 +1651,6 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf, unsigne
     HDassert(*buf);
     HDassert(entry_num < cache_ptr->num_entries_in_image);
     ie_ptr = &(cache_ptr->image_entries[entry_num]);
-    HDassert(ie_ptr->magic == H5C_IMAGE_ENTRY_T_MAGIC);
 
     /* Get pointer to buffer to encode into */
     p = *buf;
@@ -1811,7 +1786,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
 
     /* sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Remove from the cache image all dirty entries that are
      * flush dependency children of dirty entries that are not in the
@@ -1825,8 +1799,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
         done      = TRUE;
         entry_ptr = cache_ptr->il_head;
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
             /* Should this entry be in the image */
             if (entry_ptr->image_dirty && entry_ptr->include_in_image && (entry_ptr->fd_parent_count > 0)) {
                 HDassert(entry_ptr->flush_dep_parent != NULL);
@@ -1834,7 +1806,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                     parent_ptr = entry_ptr->flush_dep_parent[u];
 
                     /* Sanity check parent */
-                    HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     HDassert(entry_ptr->ring == parent_ptr->ring);
 
                     if (parent_ptr->is_dirty && !parent_ptr->include_in_image &&
@@ -1873,7 +1844,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                 parent_ptr = entry_ptr->flush_dep_parent[u];
 
                 /* Sanity check parent */
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(entry_ptr->ring == parent_ptr->ring);
 
                 if (parent_ptr->include_in_image) {
@@ -1902,7 +1872,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
                 parent_ptr = entry_ptr->flush_dep_parent[u];
 
                 /* Sanity check parent */
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(entry_ptr->ring == parent_ptr->ring);
 
                 if (!parent_ptr->include_in_image) {
@@ -1971,7 +1940,6 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
             for (u = 0; u < entry_ptr->fd_parent_count; u++) {
                 parent_ptr = entry_ptr->flush_dep_parent[u];
 
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 if (parent_ptr->include_in_image && parent_ptr->image_fd_height <= 0)
                     H5C__prep_for_file_close__compute_fd_heights_real(parent_ptr, 1);
             } /* end for */
@@ -2039,7 +2007,6 @@ H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, 
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(entry_ptr->include_in_image);
     HDassert((entry_ptr->image_fd_height == 0) || (entry_ptr->image_fd_height < fd_height));
     HDassert(((fd_height == 0) && (entry_ptr->fd_child_count == 0)) ||
@@ -2054,7 +2021,6 @@ H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, 
             H5C_cache_entry_t *parent_ptr;
 
             parent_ptr = entry_ptr->flush_dep_parent[u];
-            HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
             if (parent_ptr->include_in_image && parent_ptr->image_fd_height <= fd_height)
                 H5C__prep_for_file_close__compute_fd_heights_real(parent_ptr, fd_height + 1);
@@ -2093,7 +2059,6 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->pl_len == 0);
     HDassert(cache_ptr->num_entries_in_image > 0);
@@ -2106,7 +2071,6 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
 
     /* Initialize (non-zero/NULL/FALSE) fields */
     for (u = 0; u <= cache_ptr->num_entries_in_image; u++) {
-        image_entries[u].magic   = H5C_IMAGE_ENTRY_T_MAGIC;
         image_entries[u].addr    = HADDR_UNDEF;
         image_entries[u].ring    = H5C_RING_UNDEFINED;
         image_entries[u].type_id = -1;
@@ -2116,8 +2080,6 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
     u         = 0;
     entry_ptr = cache_ptr->il_head;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         if (entry_ptr->include_in_image) {
             /* Since we have already serialized the cache, the following
              * should hold.
@@ -2243,7 +2205,6 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     HDassert(f->shared);
     HDassert(f->shared->sblock);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
     HDassert(cache_ptr->pl_len == 0);
 
@@ -2256,8 +2217,6 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     /* Scan each entry on the index list */
     entry_ptr = cache_ptr->il_head;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         /* Since we have already serialized the cache, the following
          * should hold.
          */
@@ -2382,8 +2341,6 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
 #endif
     entry_ptr = cache_ptr->il_head;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         if (entry_ptr->include_in_image) {
             if (entry_ptr->fd_parent_count > 0)
                 fd_parents_list_len = (size_t)(H5F_SIZEOF_ADDR(f) * entry_ptr->fd_parent_count);
@@ -2430,7 +2387,6 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
      */
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->type != NULL);
 
         /* to avoid confusion, don't set lru_rank on epoch markers.
@@ -2495,7 +2451,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     HDassert(f->shared);
     HDassert(cache_ptr == f->shared->cache);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->image_buffer);
     HDassert(cache_ptr->image_len > 0);
 
@@ -2553,7 +2508,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "fd parent not in cache?!?")
 
             /* Sanity checks */
-            HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(parent_ptr->addr == pf_entry_ptr->fd_parent_addrs[v]);
             HDassert(parent_ptr->lru_rank == -1);
 
@@ -2579,7 +2533,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
      */
     pf_entry_ptr = cache_ptr->il_head;
     while (pf_entry_ptr != NULL) {
-        HDassert(pf_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert((pf_entry_ptr->prefetched && pf_entry_ptr->type == H5AC_PREFETCHED_ENTRY) ||
                  (!pf_entry_ptr->prefetched && pf_entry_ptr->type != H5AC_PREFETCHED_ENTRY));
         if (pf_entry_ptr->type == H5AC_PREFETCHED_ENTRY)
@@ -2588,7 +2541,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
         for (v = 0; v < pf_entry_ptr->fd_parent_count; v++) {
             parent_ptr = pf_entry_ptr->flush_dep_parent[v];
             HDassert(parent_ptr);
-            HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(pf_entry_ptr->fd_parent_addrs);
             HDassert(pf_entry_ptr->fd_parent_addrs[v] == parent_ptr->addr);
             HDassert(parent_ptr->flush_dep_nchildren > 0);
@@ -2613,7 +2565,6 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
         i         = -1;
         entry_ptr = cache_ptr->LRU_head_ptr;
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->type != NULL);
 
             if (entry_ptr->prefetched) {
@@ -2696,7 +2647,6 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->num_entries_in_image > 0);
     HDassert(buf && *buf);
 
@@ -2813,7 +2763,6 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
 
     /* Initialize the rest of the fields in the prefetched entry */
     /* (Only need to set non-zero/NULL/FALSE fields, due to calloc() above) */
-    pf_entry_ptr->magic            = H5C__H5C_CACHE_ENTRY_T_MAGIC;
     pf_entry_ptr->cache_ptr        = cache_ptr;
     pf_entry_ptr->image_up_to_date = TRUE;
     pf_entry_ptr->type             = H5AC_PREFETCHED_ENTRY;
@@ -2870,7 +2819,6 @@ H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
     HDassert(f->shared->cache);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->close_warning_received);
 
     /* Write data into the metadata cache image superblock extension message.
@@ -2883,7 +2831,6 @@ H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
         H5AC_aux_t *aux_ptr;
 
         aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
-        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
         mdci_msg.size = aux_ptr->p0_image_len;
     } /* end if */
     else
@@ -2930,8 +2877,7 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
     {
         H5AC_aux_t *aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
 
-        if ((NULL == aux_ptr) || (aux_ptr->mpi_rank == 0)) {
-            HDassert((NULL == aux_ptr) || (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC));
+        if (NULL == aux_ptr || aux_ptr->mpi_rank == 0) {
 #endif /* H5_HAVE_PARALLEL */
 
             /* Write the buffer (if serial access, or rank 0 for parallel access) */

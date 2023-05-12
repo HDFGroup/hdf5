@@ -278,7 +278,6 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr = H5FL_CALLOC(H5AC_aux_t)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxiliary structure")
 
-        aux_ptr->magic                   = H5AC__H5AC_AUX_T_MAGIC;
         aux_ptr->mpi_comm                = mpi_comm;
         aux_ptr->mpi_rank                = mpi_rank;
         aux_ptr->mpi_size                = mpi_size;
@@ -392,7 +391,6 @@ done:
                 H5SL_close(aux_ptr->c_slist_ptr);
             if (aux_ptr->candidate_slist_ptr != NULL)
                 H5SL_close(aux_ptr->candidate_slist_ptr);
-            aux_ptr->magic = 0;
             aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
     }     /* end if */
@@ -458,9 +456,6 @@ H5AC_dest(H5F_t *f)
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if (aux_ptr) {
-        /* Sanity check */
-        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-
         /* If the file was opened R/W, attempt to flush all entries
          * from rank 0 & Bcast clean list to other ranks.
          *
@@ -516,7 +511,6 @@ H5AC_dest(H5F_t *f)
             H5SL_close(aux_ptr->candidate_slist_ptr);
         } /* end if */
 
-        aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
@@ -1688,15 +1682,6 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *
     if ((cache_ptr == NULL) || (config_ptr == NULL) ||
         (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or config_ptr on entry")
-#ifdef H5_HAVE_PARALLEL
-    {
-        H5AC_aux_t *aux_ptr;
-
-        aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr on entry")
-    }
-#endif /* H5_HAVE_PARALLEL */
 
     /* Retrieve the configuration */
     if (H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr, &internal_config) < 0)
@@ -1887,15 +1872,6 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *
 
     if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry")
-#ifdef H5_HAVE_PARALLEL
-    {
-        H5AC_aux_t *aux_ptr;
-
-        aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad aux_ptr on entry")
-    }
-#endif /* H5_HAVE_PARALLEL */
 
     /* Validate external configuration */
     if (H5AC_validate_config(config_ptr) != SUCCEED)
@@ -2123,8 +2099,6 @@ H5AC__check_if_write_permitted(const H5F_t
     HDassert(f->shared->cache != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if (aux_ptr != NULL) {
-        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-
         if ((aux_ptr->mpi_rank == 0) ||
             (aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED))
             write_permitted = aux_ptr->write_permitted;

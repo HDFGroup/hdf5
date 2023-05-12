@@ -1334,9 +1334,7 @@ free_icr(test_entry_t *entry, int32_t H5_ATTR_NDEBUG_UNUSED entry_type)
     HDassert(entry == &(entries[entry->type][entry->index]));
     HDassert(entry == entry->self);
     HDassert(entry->cache_ptr != NULL);
-    HDassert(entry->cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert((entry->header.destroy_in_progress) || (entry->header.addr == entry->addr));
-    HDassert(entry->header.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(entry->header.size == entry->size);
     HDassert((entry->type == VARIABLE_ENTRY_TYPE) || (entry->size == entry_sizes[entry->type]));
     HDassert(entry->header.tl_next == NULL);
@@ -1674,7 +1672,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     HDassert(file_ptr);
     cache_ptr = file_ptr->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(entry_ptr != NULL);
     HDassert(entry_ptr == entry_ptr->self);
     HDassert(entry_ptr->header.addr == entry_ptr->addr);
@@ -4960,16 +4957,6 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
         }
     }
 
-    /* verify that we can access the cache data structure */
-    if (pass) {
-
-        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-
-            pass         = FALSE;
-            failure_mssg = "Can't access cache resize_ctl.";
-        }
-    }
-
     /* compare the cache's internal configuration with the expected value */
     if (pass) {
 
@@ -5086,16 +5073,6 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
                 pass         = FALSE;
                 failure_mssg = "NULL cache pointer";
             }
-        }
-    }
-
-    /* verify that we can access the cache data structure */
-    if (pass) {
-
-        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-
-            pass         = FALSE;
-            failure_mssg = "Can't access cache data structure.";
         }
     }
 
@@ -5256,8 +5233,8 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
     /* verify that we can access the internal version of the cache config */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) ||
-            (cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER)) {
+        if (cache_ptr == NULL ||
+            cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Can't access cache resize_ctl #%d.", test_num);
@@ -5340,7 +5317,6 @@ dump_LRU(H5F_t * file_ptr)
     H5C_t *cache_ptr = file_ptr->shared->cache;
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     entry_ptr = cache_ptr->LRU_head_ptr;
 

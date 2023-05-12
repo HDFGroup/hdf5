@@ -606,7 +606,6 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(image_len);
 
@@ -648,7 +647,6 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
     /* Sanity checks */
     HDassert(f);
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(H5F_addr_defined(addr));
     HDassert(addr == hdr->heap_addr);
@@ -736,7 +734,6 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     HDassert(f);
     HDassert(image);
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(len == hdr->heap_size);
 
@@ -828,10 +825,6 @@ done:
  *		This routine also does not free the file space that may
  *		be allocated to the header.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -850,7 +843,6 @@ H5HF__cache_hdr_free_icr(void *_thing)
 
     /* Sanity checks */
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(hdr->rc == 0);
 
@@ -1147,7 +1139,6 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(image_len);
 
@@ -1189,7 +1180,6 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     /* Sanity checks */
     HDassert(f);
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->cache_info.size == iblock->size);
     HDassert(H5F_addr_defined(addr));
@@ -1199,7 +1189,6 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     HDassert(flags);
     hdr = iblock->hdr;
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
 #ifndef NDEBUG
@@ -1318,7 +1307,6 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     HDassert(f);
     HDassert(image);
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->cache_info.size == iblock->size);
     HDassert(len == iblock->size);
@@ -1431,7 +1419,6 @@ H5HF__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->hdr);
 
@@ -1508,10 +1495,6 @@ done:
  * Purpose:	Unlink the supplied instance of H5HF_indirect_t from the
  *		fractal heap and free its memory.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -1530,7 +1513,6 @@ H5HF__cache_iblock_free_icr(void *thing)
 
     /* Sanity checks */
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->rc == 0);
     HDassert(iblock->hdr);
@@ -1757,7 +1739,6 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     HDassert(par_info);
     hdr = par_info->hdr;
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(dirty);
 
@@ -1928,7 +1909,6 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(image_len);
 
@@ -2071,7 +2051,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     /* Sanity checks */
     HDassert(f);
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(dblock->write_buf == NULL);
     HDassert(dblock->write_size == 0);
@@ -2089,7 +2068,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     hdr->f = (H5F_t *)f;
 
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
     if (dblock->parent) {
@@ -2102,7 +2080,6 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
         par_iblock = dblock->parent;
         par_entry  = dblock->par_entry;
 
-        HDassert(par_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(par_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
         HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
     } /* end if */
@@ -2437,7 +2414,6 @@ H5HF__cache_dblock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
     HDassert(image);
     HDassert(len > 0);
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert((dblock->blk != dblock->write_buf) || (dblock->cache_info.size == dblock->size));
     HDassert(dblock->write_buf);
@@ -2485,7 +2461,6 @@ H5HF__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(dblock->hdr);
 
@@ -2532,10 +2507,6 @@ done:
  * Purpose:	Free the in core memory allocated to the supplied direct
  *		block.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -2554,7 +2525,6 @@ H5HF__cache_dblock_free_icr(void *_thing)
 
     /* Sanity checks */
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
 
     /* Destroy fractal heap direct block */
@@ -2589,7 +2559,6 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 
     /* Sanity checks */
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(dblock->file_size > 0);
     HDassert(fsf_size);
@@ -2677,7 +2646,6 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
     /* Sanity checks */
     HDassert(f);
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(fd_clean);
     HDassert(clean);
@@ -2884,7 +2852,6 @@ H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, H5HF_hdr_t *hdr, hbool_t *fd_
              * in memory for the duration of the call.  Do some sanity checks,
              * and then call H5HF__cache_verify_iblock_descendants_clean().
              */
-            HDassert(root_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(root_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
 
             if (H5HF__cache_verify_iblock_descendants_clean(f, hdr->heap_addr, root_iblock,
@@ -3042,7 +3009,6 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     HDassert(f);
     HDassert(H5F_addr_defined(fd_parent_addr));
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock_status);
     HDassert(fd_clean);
@@ -3161,7 +3127,6 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
     HDassert(f);
     HDassert(H5F_addr_defined(fd_parent_addr));
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(fd_clean);
     HDassert(*fd_clean);
@@ -3326,7 +3291,6 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     HDassert(f);
     HDassert(H5F_addr_defined(fd_parent_addr));
     HDassert(iblock);
-    HDassert(iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(fd_clean);
     HDassert(*fd_clean);
@@ -3479,7 +3443,6 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
                      * that we have the correct one.
                      */
                     HDassert(child_iblock);
-                    HDassert(child_iblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     HDassert(child_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
                     HDassert(child_iblock->addr == child_iblock_addr);
 
