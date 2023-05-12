@@ -174,8 +174,10 @@ main(int argc, char **argv)
 {
     const char *vol_connector_name;
     unsigned    seed;
-    hid_t       fapl_id = H5I_INVALID_HID;
-    int         required = MPI_THREAD_MULTIPLE;
+    hid_t       fapl_id           = H5I_INVALID_HID;
+    hid_t       default_con_id    = H5I_INVALID_HID;
+    hid_t       registered_con_id = H5I_INVALID_HID;
+    int         required          = MPI_THREAD_MULTIPLE;
     int         provided;
 
     /*
@@ -183,7 +185,7 @@ main(int argc, char **argv)
      * that require that level of threading support in MPI
      */
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
-        HDprintf("MPI_Init_thread failed\n");
+        HDfprintf(stderr, "MPI_Init_thread failed\n");
         HDexit(EXIT_FAILURE);
     }
 
@@ -224,7 +226,7 @@ main(int argc, char **argv)
     if (mpi_size > 1) {
         if (MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("Couldn't broadcast test seed\n");
+                HDfprintf(stderr, "Couldn't broadcast test seed\n");
             goto error;
         }
     }
@@ -252,17 +254,74 @@ main(int argc, char **argv)
         HDprintf("\n\n");
     }
 
+    BEGIN_INDEPENDENT_OP(create_fapl)
+    {
+        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
+            if (MAINPROCESS)
+                HDfprintf(stderr, "Unable to create FAPL\n");
+            INDEPENDENT_OP_ERROR(create_fapl);
+        }
+    }
+    END_INDEPENDENT_OP(create_fapl);
+
+    BEGIN_INDEPENDENT_OP(check_vol_register)
+    {
+        /*
+         * If using a VOL connector other than the native
+         * connector, check whether the VOL connector was
+         * successfully registered before running the tests.
+         * Otherwise, HDF5 will default to running the tests
+         * with the native connector, which could be misleading.
+         */
+        if (0 != HDstrcmp(vol_connector_name, "native")) {
+            htri_t is_registered;
+
+            if ((is_registered = H5VLis_connector_registered_by_name(vol_connector_name)) < 0) {
+                if (MAINPROCESS)
+                    HDfprintf(stderr, "Unable to determine if VOL connector is registered\n");
+                INDEPENDENT_OP_ERROR(check_vol_register);
+            }
+
+            if (!is_registered) {
+                if (MAINPROCESS)
+                    HDfprintf(stderr, "Specified VOL connector '%s' wasn't correctly registered!\n",
+                              vol_connector_name);
+                INDEPENDENT_OP_ERROR(check_vol_register);
+            }
+            else {
+                /*
+                 * If the connector was successfully registered, check that
+                 * the connector ID set on the default FAPL matches the ID
+                 * for the registered connector before running the tests.
+                 */
+                if (H5Pget_vol_id(fapl_id, &default_con_id) < 0) {
+                    if (MAINPROCESS)
+                        HDfprintf(stderr, "Couldn't retrieve ID of VOL connector set on default FAPL\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+
+                if ((registered_con_id = H5VLget_connector_id_by_name(vol_connector_name)) < 0) {
+                    if (MAINPROCESS)
+                        HDfprintf(stderr, "Couldn't retrieve ID of registered VOL connector\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+
+                if (default_con_id != registered_con_id) {
+                    if (MAINPROCESS)
+                        HDfprintf(stderr,
+                                  "VOL connector set on default FAPL didn't match specified VOL connector\n");
+                    INDEPENDENT_OP_ERROR(check_vol_register);
+                }
+            }
+        }
+    }
+    END_INDEPENDENT_OP(check_vol_register);
+
     /* Retrieve the VOL cap flags - work around an HDF5
      * library issue by creating a FAPL
      */
     BEGIN_INDEPENDENT_OP(get_capability_flags)
     {
-        if ((fapl_id = create_mpi_fapl(MPI_COMM_WORLD, MPI_INFO_NULL, FALSE)) < 0) {
-            if (MAINPROCESS)
-                HDfprintf(stderr, "Unable to create FAPL\n");
-            INDEPENDENT_OP_ERROR(get_capability_flags);
-        }
-
         vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
         if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0) {
             if (MAINPROCESS)
@@ -280,7 +339,8 @@ main(int argc, char **argv)
     {
         if (MAINPROCESS) {
             if (create_test_container(H5_api_test_parallel_filename, vol_cap_flags_g) < 0) {
-                HDprintf("    failed to create testing container file '%s'\n", H5_api_test_parallel_filename);
+                HDfprintf(stderr, "    failed to create testing container file '%s'\n",
+                          H5_api_test_parallel_filename);
                 INDEPENDENT_OP_ERROR(create_test_container);
             }
         }
@@ -329,9 +389,19 @@ main(int argc, char **argv)
         }
     }
 
+    if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
+        if (MAINPROCESS)
+            HDfprintf(stderr, "    failed to close VOL connector ID\n");
+    }
+
+    if (registered_con_id >= 0 && H5VLclose(registered_con_id) < 0) {
+        if (MAINPROCESS)
+            HDfprintf(stderr, "    failed to close VOL connector ID\n");
+    }
+
     if (fapl_id >= 0 && H5Pclose(fapl_id) < 0) {
         if (MAINPROCESS)
-            HDprintf("    failed to close MPI FAPL\n");
+            HDfprintf(stderr, "    failed to close MPI FAPL\n");
     }
 
     H5close();
@@ -343,6 +413,8 @@ main(int argc, char **argv)
 error:
     H5E_BEGIN_TRY
     {
+        H5VLclose(default_con_id);
+        H5VLclose(registered_con_id);
         H5Pclose(fapl_id);
     }
     H5E_END_TRY;
