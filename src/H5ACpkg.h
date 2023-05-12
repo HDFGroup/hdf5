@@ -348,12 +348,12 @@ H5FL_EXTERN(H5AC_aux_t);
 
 typedef struct H5AC_aux_t {
     MPI_Comm mpi_comm;
-    int mpi_rank;
-    int mpi_size;
+    int      mpi_rank;
+    int      mpi_size;
 
     hbool_t write_permitted;
-    size_t dirty_bytes_threshold;
-    size_t dirty_bytes;
+    size_t  dirty_bytes_threshold;
+    size_t  dirty_bytes;
     int32_t metadata_write_strategy;
 
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION

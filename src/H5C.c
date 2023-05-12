@@ -311,8 +311,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     /* Set non-zero/FALSE/NULL fields for epoch markers */
     for (i = 0; i < H5C__MAX_EPOCH_MARKERS; i++) {
-        ((cache_ptr->epoch_markers)[i]).addr  = (haddr_t)i;
-        ((cache_ptr->epoch_markers)[i]).type  = H5AC_EPOCH_MARKER;
+        ((cache_ptr->epoch_markers)[i]).addr = (haddr_t)i;
+        ((cache_ptr->epoch_markers)[i]).type = H5AC_EPOCH_MARKER;
     }
 
     /* Initialize cache image generation on file close related fields.
@@ -373,7 +373,7 @@ done:
             if (cache_ptr->log_info != NULL)
                 H5MM_xfree(cache_ptr->log_info);
 
-            cache_ptr        = H5FL_FREE(H5C_t, cache_ptr);
+            cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
         }
     }
 

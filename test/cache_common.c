@@ -5233,8 +5233,7 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
     /* verify that we can access the internal version of the cache config */
     if (pass) {
 
-        if (cache_ptr == NULL ||
-            cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
+        if (cache_ptr == NULL || cache_ptr->resize_ctl.version != H5C__CURR_AUTO_SIZE_CTL_VER) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Can't access cache resize_ctl #%d.", test_num);

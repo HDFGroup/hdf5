@@ -2830,7 +2830,7 @@ H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
     if (cache_ptr->aux_ptr) { /* we have multiple processes */
         H5AC_aux_t *aux_ptr;
 
-        aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
+        aux_ptr       = (H5AC_aux_t *)cache_ptr->aux_ptr;
         mdci_msg.size = aux_ptr->p0_image_len;
     } /* end if */
     else

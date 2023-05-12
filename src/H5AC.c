@@ -391,7 +391,7 @@ done:
                 H5SL_close(aux_ptr->c_slist_ptr);
             if (aux_ptr->candidate_slist_ptr != NULL)
                 H5SL_close(aux_ptr->candidate_slist_ptr);
-            aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+            aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
     }     /* end if */
 #endif    /* H5_HAVE_PARALLEL */
@@ -511,7 +511,7 @@ H5AC_dest(H5F_t *f)
             H5SL_close(aux_ptr->candidate_slist_ptr);
         } /* end if */
 
-        aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+        aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
