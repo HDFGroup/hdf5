@@ -50,7 +50,7 @@ static herr_t   H5S__none_release(H5S_t *space);
 static htri_t   H5S__none_is_valid(const H5S_t *space);
 static hssize_t H5S__none_serial_size(H5S_t *space);
 static herr_t   H5S__none_serialize(H5S_t *space, uint8_t **p);
-static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p);
+static herr_t   H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip);
 static herr_t   H5S__none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__none_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__none_unlim_dim(const H5S_t *space);
@@ -593,12 +593,13 @@ H5S__none_serialize(H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__none_deserialize(H5S_t **space, const uint8_t **p)
+H5S__none_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hbool_t skip)
 {
-    H5S_t *tmp_space = NULL;      /* Pointer to actual dataspace to use,
-                                     either *space or a newly allocated one */
-    uint32_t version;             /* Version number */
-    herr_t   ret_value = SUCCEED; /* return value */
+    H5S_t *tmp_space = NULL;                    /* Pointer to actual dataspace to use,
+                                                   either *space or a newly allocated one */
+    uint32_t       version;                     /* Version number */
+    herr_t         ret_value = SUCCEED;         /* return value */
+    const uint8_t *p_end     = *p + p_size - 1; /* Pointer to last valid byte in buffer */
 
     FUNC_ENTER_PACKAGE
 
@@ -618,12 +619,16 @@ H5S__none_deserialize(H5S_t **space, const uint8_t **p)
         tmp_space = *space;
 
     /* Decode version */
+    if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection version")
     UINT32DECODE(*p, version);
 
     if (version < H5S_NONE_VERSION_1 || version > H5S_NONE_VERSION_LATEST)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for none selection")
 
     /* Skip over the remainder of the header */
+    if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, 8, p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection header")
     *p += 8;
 
     /* Change to "none" selection */
