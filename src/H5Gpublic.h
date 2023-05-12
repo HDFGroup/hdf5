@@ -1002,9 +1002,13 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *
  *          examine the members of \c subgroup_a. When recursive iteration is
  *          required, the application must handle the recursion, explicitly
  *          calling H5Giterate() on discovered subgroups.
-
+ * 
+ * \warning  Adding or removing members to the group during iteration
+ *           will lead to undefined behavior.
+ * 
  * \version 1.8.0 Function deprecated in this release.
  *
+ * 
  */
 H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx, H5G_iterate_t op, void *op_data);
 /**

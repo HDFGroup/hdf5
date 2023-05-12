@@ -1286,6 +1286,8 @@ H5_DLL herr_t H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset,
  *            be restarted at the point of exit; a second H5Diterate()
  *            call will always restart at the beginning.
  *
+ * \warning   Adding or removing elements to the dataspace during iteration
+ *            will lead to undefined behavior. 
  *
  * \since 1.10.2
  *

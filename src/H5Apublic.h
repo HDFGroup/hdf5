@@ -664,6 +664,9 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  *
  * \note This function is also available through the H5Aiterate() macro.
  *
+ * \warning   Adding or removing attributes to the object during iteration
+ *            will lead to undefined behavior. 
+ * 
  * \since 1.8.0
  *
  */
@@ -720,7 +723,10 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to access
  *          the object, \p obj_name.
- *
+ * 
+ * \warning   Adding or removing attributes to the object during iteration
+ *            will lead to undefined behavior.
+ * 
  * \since 1.8.0
  *
  */
@@ -1188,6 +1194,9 @@ H5_DLL int H5Aget_num_attrs(hid_t loc_id);
  *          \p op, is returned in \p idx. If \p idx is the null pointer,
  *          then all attributes are processed.
  *
+ * \warning   Adding or removing attributes to the object during iteration
+ *            will lead to undefined behavior.
+ * 
  * \version 1.8.0 The function \p H5Aiterate was renamed to H5Aiterate1()
  *                and deprecated in this release.
  * \since 1.0.0
