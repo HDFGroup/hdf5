@@ -207,7 +207,6 @@ done:
 } /* H5C_get_cache_hit_rate() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_get_entry_status
  *
  * Purpose:     This function is used to determine whether the cache

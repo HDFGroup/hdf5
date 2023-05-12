@@ -299,6 +299,16 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
 #define H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr) \
     (cache_ptr)->unpins[(entry_ptr)->type->id]++;
 
+#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty) \
+{                                                        \
+    (cache_ptr)->prefetches++;                           \
+    if (dirty)                                           \
+        (cache_ptr)->dirty_prefetches++;                 \
+}
+
+#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr) \
+    (cache_ptr)->prefetch_hits++;
+
 #define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr) \
     (cache_ptr)->slist_scan_restarts++;
 
@@ -512,6 +522,8 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
 #define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 #define H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+#define H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, dirty)
+#define H5C__UPDATE_STATS_FOR_PREFETCH_HIT(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
 #define H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
@@ -3256,19 +3268,22 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated);
-H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t * cache_ptr,
-    H5C_cache_entry_t** entry_ptr_ptr, const H5C_class_t * type, haddr_t addr,
-    void * udata);
 
 /* General routines */
+H5_DLL herr_t H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted);
+H5_DLL herr_t H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr);
+H5_DLL herr_t H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t new_entry_size);
+H5_DLL herr_t H5C__flush_invalidate_cache(H5F_t *f, unsigned flags);
+H5_DLL herr_t H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags);
 H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr,
     unsigned flags);
 H5_DLL herr_t H5C__generate_cache_image(H5F_t *f, H5C_t *cache_ptr);
 H5_DLL herr_t H5C__load_cache_image(H5F_t *f);
 H5_DLL herr_t H5C__make_space_in_cache(H5F_t * f, size_t space_needed,
     hbool_t write_permitted);
-H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f);
 H5_DLL herr_t H5C__serialize_cache(H5F_t *f);
+H5_DLL herr_t H5C__serialize_single_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
 
@@ -3276,10 +3291,14 @@ H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_
 H5_DLL herr_t H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr);
 H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 
+/* Routines for operating on cache images */
+H5_DLL herr_t H5C__get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
+H5_DLL herr_t H5C__image_stats(H5C_t *cache_ptr, hbool_t print_header);
+
+/* Debugging routines */
 #ifdef H5C_DO_SLIST_SANITY_CHECKS
 H5_DLL hbool_t H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr);
 #endif
-
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
 H5_DLL herr_t H5C__validate_lru_list(H5C_t *cache_ptr);
 H5_DLL herr_t H5C__validate_pinned_entry_list(H5C_t *cache_ptr);

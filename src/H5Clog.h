@@ -132,7 +132,7 @@ H5_DLL herr_t H5C_log_write_remove_entry_msg(H5C_t *cache, const H5C_cache_entry
                                              herr_t fxn_ret_value);
 
 /* Logging-specific setup functions */
-H5_DLL herr_t H5C_log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
-H5_DLL herr_t H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
+H5_DLL herr_t H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
+H5_DLL herr_t H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
 
 #endif /* H5Clog_H */
