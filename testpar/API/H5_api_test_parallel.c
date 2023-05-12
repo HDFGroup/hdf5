@@ -175,10 +175,25 @@ main(int argc, char **argv)
     const char *vol_connector_name;
     unsigned    seed;
     hid_t       fapl_id = H5I_INVALID_HID;
+    int         required = MPI_THREAD_MULTIPLE;
+    int         provided;
 
-    MPI_Init(&argc, &argv);
+    /*
+     * Attempt to initialize with MPI_THREAD_MULTIPLE for VOL connectors
+     * that require that level of threading support in MPI
+     */
+    if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
+        HDprintf("MPI_Init_thread failed\n");
+        HDexit(EXIT_FAILURE);
+    }
+
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    if (provided < required) {
+        if (MAINPROCESS)
+            HDprintf("** INFO: couldn't initialize with MPI_THREAD_MULTIPLE threading support **\n");
+    }
 
     /* Simple argument checking, TODO can improve that later */
     if (argc > 1) {
