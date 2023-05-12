@@ -56,13 +56,13 @@ macro (ADD_H5P_EXE file)
     TARGET_C_PROPERTIES (${file} STATIC)
     target_link_libraries (${file}
         PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
-                $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
+                "$<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>"
     )
   else ()
     TARGET_C_PROPERTIES (${file} SHARED)
     target_link_libraries (${file}
         PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
-                $<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>
+                "$<$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:MinGW>>:ws2_32.lib>"
     )
   endif ()
   set_target_properties (${file} PROPERTIES FOLDER test/par)

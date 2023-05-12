@@ -77,7 +77,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
     if (${target_type} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
     else ()
-      get_property (target_name TARGET ${libtarget} PROPERTY $<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
+      get_property (target_name TARGET ${libtarget} PROPERTY "$<IF:$<CONFIG:Debug>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>")
       set (targetfilename $<TARGET_FILE_DIR:${libtarget}>/${target_name}.pdb)
     endif ()
     install (
@@ -211,8 +211,8 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (TARGET_C_PROPERTIES wintarget libtype)
   target_compile_options(${wintarget} PRIVATE
-      $<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
-      $<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
+      "$<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
+      "$<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
   )
   if(MSVC)
     set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
