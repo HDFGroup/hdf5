@@ -985,7 +985,7 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  *          links in the group change during the iteration, the function’s
  *          behavior is undefined. Note, however, that objects pointed to by the
  *          links can be modified.
- * 
+ *
  * \note H5Literate_by_name2() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name2() does not examine the members of \c subgroup_a.
@@ -1731,7 +1731,7 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *          links in the group change during the iteration, the function’s
  *          behavior is undefined. Note, however, that objects pointed to by the
  *          links can be modified.
- * 
+ *
  * \note H5Literate_by_name1() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name1() does not examine the members of \c subgroup_a.
