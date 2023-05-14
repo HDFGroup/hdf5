@@ -17,6 +17,8 @@
  *          defined in H5config.h which is included by H5public.h.
  */
 
+#define _GNU_SOURCE
+
 #ifndef H5private_H
 #define H5private_H
 
