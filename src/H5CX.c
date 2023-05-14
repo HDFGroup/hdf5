@@ -307,7 +307,8 @@ typedef struct H5CX_t {
 
     uint32_t
             actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
-    hbool_t actual_selection_io_mode_set; /* Whether actual selection I/O mode is set */
+    hbool_t actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
+    hbool_t actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
 
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
@@ -2667,6 +2668,43 @@ H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_no_selection_io_cause() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_get_no_selection_io_cause
+ *
+ * Purpose:     Retrieves the cause for not performing selection I/O
+ *              for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              April 15, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(actual_selection_io_mode);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                                 actual_selection_io_mode)
+
+    /* Get the value */
+    *actual_selection_io_mode = (*head)->ctx.actual_selection_io_mode;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_actual_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_modify_write_buf

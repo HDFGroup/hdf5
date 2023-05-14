@@ -178,7 +178,7 @@
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
 /* Definitions for actual selection I/O mode property */
 #define H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE sizeof(uint32_t)
-#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF  H5D_SCALAR_IO
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF  0
 /* Definitions for modify write buffer property */
 #define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE

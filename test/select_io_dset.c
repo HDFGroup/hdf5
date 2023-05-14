@@ -143,6 +143,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     int         rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
     const char *expr = "2*x";
+    uint32_t no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -199,8 +200,12 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
@@ -210,8 +215,13 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    no_selection_io_cause = 0;
+    if (H5Pget_no_selection_io_cause(ntrans_dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(ntrans_dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -288,6 +298,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     char   *wbuf_bak = NULL;
     char   *rbuf     = NULL;
     char    dset_name[DSET_NAME_LEN];
+    uint32_t no_selection_io_cause = 0;
 
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
@@ -345,8 +356,12 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Dwrite(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
@@ -356,8 +371,13 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
     if (H5Dread(did, H5T_STD_I32LE, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    no_selection_io_cause = 0;
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+    
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Verify data read little endian */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -445,6 +465,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     long long   rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
     const char *expr = "5 * (10 - x)";
+    uint32_t    no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -501,8 +522,12 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     if (H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
@@ -512,8 +537,13 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     if (H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    no_selection_io_cause = 0;
+    if (H5Pget_no_selection_io_cause(ntrans_dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(ntrans_dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -593,6 +623,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     short       rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
     const char *expr = "2 * (10 + x)";
+    uint32_t    no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -650,8 +681,12 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     if (H5Dwrite(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Restore wbuf from backup if the library modified it */
     if (mwbuf)
@@ -661,8 +696,13 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     if (H5Dread(did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, ntrans_dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
+    no_selection_io_cause = 0;
+    if (H5Pget_no_selection_io_cause(ntrans_dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(ntrans_dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
 
     /* Verify data or transformed data read */
     for (i = 0; i < DSET_SELECT_DIM; i++)
@@ -1099,6 +1139,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
     const char *expr = "2*x";
+    uint32_t    no_selection_io_cause;
 
     ndsets = MAX(MULTI_MIN_DSETS, MULTI_NUM_DSETS);
 
@@ -1210,6 +1251,13 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
     if (mwbuf)
         HDmemcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
 
+    if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+        FAIL_STACK_ERROR;
+
+    if (!no_selection_io_cause)
+        if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+            TEST_ERROR;
+
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, ntrans_dxpl, rbufs) < 0)
         TEST_ERROR;
@@ -1229,6 +1277,14 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         /* Read the data from the dataset with data transform set in dxpl */
         if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
             TEST_ERROR;
+
+        no_selection_io_cause = 0;
+        if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause) < 0)
+            FAIL_STACK_ERROR;
+
+        if (!no_selection_io_cause)
+            if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
+                TEST_ERROR;
 
         /* Verify */
         for (i = 0; i < (int)ndsets; i++)
@@ -3026,9 +3082,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
             FAIL_STACK_ERROR;
     }
 
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
-
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         TEST_ERROR;
 
@@ -3046,9 +3099,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
     if (H5Dread(did, tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         FAIL_STACK_ERROR;
-
-    if (check_actual_selection_io_mode(dxpl, H5D_SCALAR_IO) < 0)
-        TEST_ERROR;
 
     /* Verify causes of no selection I/O for write is as expected */
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_read) < 0)
