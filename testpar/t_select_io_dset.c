@@ -3510,7 +3510,7 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
         P_TEST_ERROR;
 
     if (!(test_mode & TEST_DISABLE_BY_API || test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET ||
-        ((test_mode & TEST_TCONV_BUF_TOO_SMALL) && !(test_mode & TEST_IN_PLACE_TCONV))))
+          ((test_mode & TEST_TCONV_BUF_TOO_SMALL) && !(test_mode & TEST_IN_PLACE_TCONV))))
         check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
