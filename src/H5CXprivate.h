@@ -117,6 +117,7 @@ H5_DLL herr_t H5CX_get_vlen_alloc_info(H5T_vlen_alloc_info_t *vl_alloc_info);
 H5_DLL herr_t H5CX_get_dt_conv_cb(H5T_conv_cb_t *cb_struct);
 H5_DLL herr_t H5CX_get_selection_io_mode(H5D_selection_io_mode_t *selection_io_mode);
 H5_DLL herr_t H5CX_get_no_selection_io_cause(uint32_t *no_selection_io_cause);
+H5_DLL herr_t H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode);
 H5_DLL herr_t H5CX_get_modify_write_buf(hbool_t *modify_write_buf);
 
 /* "Getter" routines for LCPL properties cached in API context */
