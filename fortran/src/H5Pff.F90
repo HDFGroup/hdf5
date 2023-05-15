@@ -4825,7 +4825,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    TYPE(C_PTR), INTENT(OUT) :: value
+    TYPE(C_PTR), INTENT(INOUT) :: value
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: name_len
 
@@ -5090,19 +5090,19 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
   SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)                :: fapl_id
-    TYPE(C_PTR)    , INTENT(OUT), DIMENSION(*) :: buf_ptr
-    INTEGER(SIZE_T), INTENT(OUT)               :: buf_len_ptr
-    INTEGER        , INTENT(OUT)               :: hdferr
+    INTEGER(HID_T) , INTENT(IN)                  :: fapl_id
+    TYPE(C_PTR)    , INTENT(INOUT), DIMENSION(*) :: buf_ptr
+    INTEGER(SIZE_T), INTENT(OUT)                 :: buf_len_ptr
+    INTEGER        , INTENT(OUT)                 :: hdferr
 
     INTERFACE
        INTEGER FUNCTION h5pget_file_image_c(fapl_id, buf_ptr, buf_len_ptr) &
             BIND(C, NAME='h5pget_file_image_c')
          IMPORT :: c_ptr
          IMPORT :: HID_T, SIZE_T
-         INTEGER(HID_T), INTENT(IN) :: fapl_id
-         TYPE(C_PTR), DIMENSION(*), INTENT(OUT)  :: buf_ptr
-         INTEGER(SIZE_T), INTENT(OUT)  :: buf_len_ptr
+         INTEGER(HID_T) :: fapl_id
+         TYPE(C_PTR), DIMENSION(*) :: buf_ptr
+         INTEGER(SIZE_T) :: buf_len_ptr
        END FUNCTION h5pget_file_image_c
     END INTERFACE
 
