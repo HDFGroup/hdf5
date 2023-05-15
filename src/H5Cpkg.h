@@ -42,11 +42,8 @@
 /* Number of epoch markers active */
 #define H5C__MAX_EPOCH_MARKERS                  10
 
-
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
-#define H5C__H5C_T_MAGIC    0x005CAC0E
-
 
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
@@ -548,7 +545,7 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
      (entry_ptr)->ht_prev != NULL                                   \
 )
 #define H5C__PRE_HT_SEARCH_SC_CMP(cache_ptr, entry_addr)                  \
-((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||         \
+((cache_ptr) == NULL ||                                                   \
     (cache_ptr)->index_size !=                                            \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) || \
     !H5F_addr_defined(entry_addr) ||                                      \
@@ -556,8 +553,7 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
     H5C__HASH_FCN(entry_addr) >= H5C__HASH_TABLE_LEN                      \
 )
 #define H5C__POST_SUC_HT_SEARCH_SC_CMP(cache_ptr, entry_ptr, k)               \
-((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||             \
-    (cache_ptr)->index_len < 1 ||                                             \
+((cache_ptr) == NULL || (cache_ptr)->index_len < 1 ||                         \
     (entry_ptr) == NULL ||                                                    \
     (cache_ptr)->index_size < (entry_ptr)->size ||                            \
     (cache_ptr)->index_size !=                                                \
@@ -573,7 +569,7 @@ if ((new_size) > (dll_size) || ((dll_len) == 1 && (new_size) != (dll_size))) { \
 #ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)           \
-if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||    \
+if ((cache_ptr) == NULL ||                                              \
      (entry_ptr) == NULL || !H5F_addr_defined((entry_ptr)->addr) ||     \
      (entry_ptr)->ht_next != NULL || (entry_ptr)->ht_prev != NULL ||    \
      (entry_ptr)->size <= 0 ||                                          \
@@ -597,7 +593,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||    \
 }
 
 #define H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)          \
-if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||    \
+if ((cache_ptr) == NULL ||                                              \
      (cache_ptr)->index_size !=                                         \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) || \
      (cache_ptr)->index_size < (cache_ptr)->clean_index_size ||         \
@@ -615,8 +611,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||    \
 }
 
 #define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)           \
-if ( (cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||   \
-     (cache_ptr)->index_len < 1 ||                                      \
+if ( (cache_ptr) == NULL || (cache_ptr)->index_len < 1 ||               \
      (entry_ptr) == NULL ||                                             \
      (cache_ptr)->index_size < (entry_ptr)->size ||                     \
      !H5F_addr_defined((entry_ptr)->addr) ||                            \
@@ -648,7 +643,7 @@ if ( (cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||   \
 }
 
 #define H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)            \
-if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||      \
+if ((cache_ptr) == NULL ||                                                \
      (entry_ptr) == NULL || !H5F_addr_defined((entry_ptr)->addr) ||       \
      (entry_ptr)->size <= 0 ||                                            \
      (entry_ptr)->ht_next != NULL ||                                      \
@@ -735,8 +730,7 @@ if ((cache_ptr) == NULL ||                                                  \
 }
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr, fail_val) \
-if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||          \
-    (cache_ptr)->index_len <= 0 ||                                            \
+if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
     (entry_ptr) == NULL || (entry_ptr)->is_dirty != FALSE ||                  \
     (cache_ptr)->index_size < (entry_ptr)->size ||                            \
     (cache_ptr)->dirty_index_size < (entry_ptr)->size ||                      \
@@ -756,8 +750,7 @@ if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||          \
 }
 
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr, fail_val) \
-if ((cache_ptr) == NULL || (cache_ptr)->magic != H5C__H5C_T_MAGIC ||          \
-    (cache_ptr)->index_len <= 0 ||                                            \
+if ((cache_ptr) == NULL || (cache_ptr)->index_len <= 0 ||                     \
     (entry_ptr) == NULL || (entry_ptr)->is_dirty != TRUE ||                   \
     (cache_ptr)->index_size < (entry_ptr)->size ||                            \
     (cache_ptr)->clean_index_size < (entry_ptr)->size ||                      \
@@ -1031,7 +1024,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
     HDassert(cache_ptr);                                                       \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                          \
                                                                                \
     if((cache_ptr)->slist_enabled) {                                           \
         HDassert(entry_ptr);                                                   \
@@ -1082,7 +1074,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, fail_val) \
 {                                                                              \
     HDassert(cache_ptr);                                                       \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                          \
                                                                                \
     if((cache_ptr)->slist_enabled) {                                           \
         HDassert(entry_ptr);                                                   \
@@ -1135,7 +1126,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
 {                                                                             \
     HDassert(cache_ptr);                                                      \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                         \
                                                                               \
     if((cache_ptr)->slist_enabled) {                                          \
         HDassert((old_size) > 0);                                             \
@@ -1396,7 +1386,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, fail_val)          \
 {                                                                            \
     HDassert(cache_ptr);                                                     \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                        \
     HDassert(entry_ptr);                                                     \
     HDassert(!(entry_ptr)->is_protected);                                    \
     HDassert(!(entry_ptr)->is_read_only);                                    \
@@ -1429,7 +1418,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_FLUSH(cache_ptr, entry_ptr, fail_val)            \
 {                                                                           \
     HDassert(cache_ptr);                                                    \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                       \
     HDassert(entry_ptr);                                                    \
     HDassert(!(entry_ptr)->is_protected);                                   \
     HDassert(!(entry_ptr)->is_read_only);                                   \
@@ -1475,7 +1463,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, entry_ptr, fail_val)   \
 {                                                                          \
     HDassert(cache_ptr);                                                   \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                      \
     HDassert(entry_ptr);                                                   \
     HDassert(!(entry_ptr)->is_protected);                                  \
     HDassert(!(entry_ptr)->is_read_only);                                  \
@@ -1515,7 +1502,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, fail_val)        \
 {                                                                           \
     HDassert(cache_ptr);                                                    \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                       \
     HDassert(entry_ptr);                                                    \
     HDassert(!(entry_ptr)->is_protected);                                   \
     HDassert(!(entry_ptr)->is_read_only);                                   \
@@ -1561,7 +1547,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, fail_val)        \
 {                                                                         \
     HDassert(cache_ptr);                                                  \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                     \
     HDassert(entry_ptr);                                                  \
     HDassert(!(entry_ptr)->is_protected);                                 \
     HDassert(!(entry_ptr)->is_read_only);                                 \
@@ -1609,7 +1594,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val)   \
 {                                                                            \
     HDassert(cache_ptr);                                                     \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                        \
     HDassert(entry_ptr);                                                     \
     HDassert(!(entry_ptr)->is_read_only);                                    \
     HDassert((entry_ptr)->ro_ref_count == 0);                                \
@@ -1678,7 +1662,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, entry_ptr, new_size, fail_val)    \
 {                                                                         \
     HDassert(cache_ptr);                                                  \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                     \
     HDassert(entry_ptr);                                                  \
     HDassert(!(entry_ptr)->is_protected);                                 \
     HDassert(!(entry_ptr)->is_read_only);                                 \
@@ -1726,7 +1709,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, fail_val)       \
 {                                                                      \
     HDassert(cache_ptr);                                               \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                  \
     HDassert(entry_ptr);                                               \
     HDassert(!(entry_ptr)->is_protected);                              \
     HDassert(!(entry_ptr)->is_read_only);                              \
@@ -1771,7 +1753,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
 {                                                                          \
     HDassert(cache_ptr);                                                   \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                      \
     HDassert(entry_ptr);                                                   \
     HDassert((entry_ptr)->is_protected);                                   \
     HDassert((entry_ptr)->size > 0);                                       \
@@ -1824,7 +1805,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)        \
 {                                                                       \
     HDassert(cache_ptr);                                                \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC );                  \
     HDassert(entry_ptr);                                                \
                                                                         \
     /* Insert the entry at the head of the list. */                     \
@@ -1849,7 +1829,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, fail_val)      \
 {                                                                       \
     HDassert(cache_ptr);                                                \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                   \
     HDassert(entry_ptr);                                                \
                                                                         \
     /* Remove the entry from the list. */                               \
@@ -1874,7 +1853,6 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 #define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
 {                                                                       \
     HDassert(cache_ptr);                                                \
-    HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                   \
     HDassert(entry_ptr);                                                \
                                                                         \
     /* Remove entry and insert at the head of the list. */              \
@@ -1947,9 +1925,6 @@ typedef struct H5C_tag_info_t {
  * The cache has a hash table in which all entries are stored.  Given the
  * advantages of flushing entries in increasing address order, a skip list
  * is used to track dirty entries.
- *
- * magic:    Unsigned 32 bit integer always set to H5C__H5C_T_MAGIC.
- *        This field is used to validate pointers to instances of H5C_t.
  *
  * flush_in_progress: Boolean flag indicating whether a flush is in progress.
  *
@@ -3017,9 +2992,7 @@ typedef struct H5C_tag_info_t {
  *        NDEBUG is not #defined.
  *
  ****************************************************************************/
-
 struct H5C_t {
-    uint32_t            magic;
     hbool_t             flush_in_progress;
     H5C_log_info_t *    log_info;
     void *              aux_ptr;

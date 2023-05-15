@@ -105,7 +105,6 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
 
     HDassert(f);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->cache_accesses >= cache_ptr->resize_ctl.epoch_length);
     HDassert(0.0 <= cache_ptr->resize_ctl.min_clean_fraction);
     HDassert(cache_ptr->resize_ctl.min_clean_fraction <= 100.0);
@@ -354,7 +353,6 @@ H5C__autoadjust__ageout(H5F_t *f, double hit_rate, enum H5C_resize_status *statu
 
     HDassert(f);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert((status_ptr) && (*status_ptr == in_spec));
     HDassert((new_max_cache_size_ptr) && (*new_max_cache_size_ptr == 0));
 
@@ -433,7 +431,6 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (cache_ptr->epoch_markers_active <= 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "No active epoch markers on entry?!?!?")
@@ -528,7 +525,6 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
 
     HDassert(f);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* if there is a limit on the amount that the cache size can be decrease
      * in any one round of the cache size reduction algorithm, load that
@@ -548,7 +544,6 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *f, hbool_t write_permitte
                bytes_evicted < eviction_size_limit) {
             hbool_t skipping_entry = FALSE;
 
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(!(entry_ptr->is_protected));
             HDassert(!(entry_ptr->is_read_only));
             HDassert((entry_ptr->ro_ref_count) == 0);
@@ -701,7 +696,6 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (cache_ptr->epoch_markers_active >= cache_ptr->resize_ctl.epochs_before_eviction)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Already have a full complement of markers")
@@ -758,7 +752,6 @@ H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     while (cache_ptr->epoch_markers_active > 0) {
         /* get the index of the last epoch marker in the LRU list
@@ -823,7 +816,6 @@ H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (cache_ptr->epoch_markers_active <= cache_ptr->resize_ctl.epochs_before_eviction)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "no excess markers on entry")
@@ -896,7 +888,6 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->flash_size_increase_possible);
     HDassert(new_entry_size > cache_ptr->flash_size_increase_threshold);
     HDassert(old_entry_size < new_entry_size);
@@ -1030,7 +1021,6 @@ H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
     HDassert(cache_ptr->slist_enabled);
 
@@ -1189,11 +1179,8 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
     HDassert(f);
     HDassert(f->shared);
-
     cache_ptr = f->shared->cache;
-
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_enabled);
     HDassert(cache_ptr->slist_ptr);
     HDassert(ring > H5C_RING_UNDEFINED);
@@ -1237,7 +1224,6 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     entry_ptr        = cache_ptr->pel_head_ptr;
     cur_ring_pel_len = 0;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->ring >= ring);
         if (entry_ptr->ring == ring)
             cur_ring_pel_len++;
@@ -1304,7 +1290,6 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                 if (NULL == next_entry_ptr)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 
-                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(next_entry_ptr->is_dirty);
                 HDassert(next_entry_ptr->in_slist);
                 HDassert(next_entry_ptr->ring >= ring);
@@ -1324,7 +1309,6 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
              * sanity checking just in case.
              */
             HDassert(entry_ptr != NULL);
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->in_slist);
             HDassert(entry_ptr->is_dirty);
             HDassert(entry_ptr->ring >= ring);
@@ -1338,7 +1322,6 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                 if (NULL == next_entry_ptr)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 
-                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(next_entry_ptr->is_dirty);
                 HDassert(next_entry_ptr->in_slist);
                 HDassert(next_entry_ptr->ring >= ring);
@@ -1446,11 +1429,9 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         next_entry_ptr = cache_ptr->il_head;
         while (next_entry_ptr != NULL) {
             entry_ptr = next_entry_ptr;
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->ring >= ring);
 
             next_entry_ptr = entry_ptr->il_next;
-            HDassert((next_entry_ptr == NULL) || (next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC));
 
             if (((!entry_ptr->flush_me_last) ||
                  (entry_ptr->flush_me_last && (cache_ptr->num_last_entries >= cache_ptr->slist_len))) &&
@@ -1540,7 +1521,6 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         cur_ring_pel_len = 0;
 
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->ring >= ring);
 
             if (entry_ptr->ring == ring)
@@ -1640,7 +1620,6 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_enabled);
     HDassert(cache_ptr->slist_ptr);
     HDassert((flags & H5C__FLUSH_INVALIDATE_FLAG) == 0);
@@ -1737,7 +1716,6 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                 if (NULL == next_entry_ptr)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 
-                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(next_entry_ptr->is_dirty);
                 HDassert(next_entry_ptr->in_slist);
             } /* end if */
@@ -1761,7 +1739,6 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
              * with, we do a bit of extra sanity checking on
              * entry_ptr.
              */
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->in_slist);
             HDassert(entry_ptr->is_dirty);
 
@@ -1777,7 +1754,6 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                 if (NULL == next_entry_ptr)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 
-                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(next_entry_ptr->is_dirty);
                 HDassert(next_entry_ptr->in_slist);
 
@@ -1909,7 +1885,6 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
     /* Sanity checks */
     HDassert(f);
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->index_size == (cache_ptr->clean_index_size + cache_ptr->dirty_index_size));
 
     /* check to see if cache_ptr->msic_in_progress is TRUE.  If it, this
@@ -1937,7 +1912,6 @@ H5C__make_space_in_cache(H5F_t *f, size_t space_needed, hbool_t write_permitted)
         while ((((cache_ptr->index_size + space_needed) > cache_ptr->max_cache_size) ||
                 ((empty_space + cache_ptr->clean_index_size) < (cache_ptr->min_clean_size))) &&
                (entries_examined <= (2 * initial_list_len)) && (entry_ptr != NULL)) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(!(entry_ptr->is_protected));
             HDassert(!(entry_ptr->is_read_only));
             HDassert((entry_ptr->ro_ref_count) == 0);
@@ -2194,7 +2168,6 @@ H5C__serialize_cache(H5F_t *f)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
 #ifdef H5C_DO_SANITY_CHECKS
@@ -2242,7 +2215,6 @@ H5C__serialize_cache(H5F_t *f)
 
         scan_ptr = cache_ptr->il_head;
         while (scan_ptr != NULL) {
-            HDassert(scan_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             scan_ptr->serialization_count = 0;
             scan_ptr                      = scan_ptr->il_next;
         } /* end while */
@@ -2307,7 +2279,6 @@ H5C__serialize_cache(H5F_t *f)
 
         scan_ptr = cache_ptr->il_head;
         while (scan_ptr != NULL) {
-            HDassert(scan_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(scan_ptr->serialization_count <= 1);
 
             scan_ptr = scan_ptr->il_next;
@@ -2364,7 +2335,6 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(ring > H5C_RING_UNDEFINED);
     HDassert(ring < H5C_RING_NTYPES);
 
@@ -2457,8 +2427,6 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
         done      = TRUE; /* set to FALSE if any activity in inner loop */
         entry_ptr = cache_ptr->il_head;
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
             /* Verify that either the entry is already serialized, or
              * that it is assigned to either the target or an inner
              * ring.
@@ -2532,7 +2500,6 @@ H5C__serialize_ring(H5F_t *f, H5C_ring_t ring)
      */
     entry_ptr = cache_ptr->il_head;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->ring > H5C_RING_UNDEFINED);
         HDassert(entry_ptr->ring < H5C_RING_NTYPES);
         HDassert((entry_ptr->ring >= ring) || (entry_ptr->image_up_to_date));

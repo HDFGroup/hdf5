@@ -24795,17 +24795,6 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
     if (pass) {
 
-        result = H5C_get_cache_auto_resize_config((const H5C_t *)&test_auto_size_ctl, &test_auto_size_ctl);
-
-        if (result != FAIL) {
-
-            pass         = FALSE;
-            failure_mssg = "H5C_get_cache_auto_resize_config accepted bad cache_ptr.\n";
-        }
-    }
-
-    if (pass) {
-
         result = H5C_get_cache_auto_resize_config(cache_ptr, NULL);
 
         if (result != FAIL) {
@@ -33917,13 +33906,6 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
 
             if (verbose)
                 HDfprintf(stdout, "%s: H5C_create() failed.\n", __func__);
-        }
-        else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-            pass         = FALSE;
-            failure_mssg = "Bad cache_ptr magic.";
-
-            if (verbose)
-                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", __func__);
         }
     }
 

@@ -87,10 +87,6 @@
 #define H5C__DEFAULT_MAX_CACHE_SIZE ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE ((size_t)(2 * 1024 * 1024))
 
-/* Values for cache entry magic field */
-#define H5C__H5C_CACHE_ENTRY_T_MAGIC     0x005CAC0A
-#define H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC 0xDeadBeef
-
 /* Cache configuration validation definitions */
 #define H5C_RESIZE_CFG__VALIDATE_GENERAL      0x1
 #define H5C_RESIZE_CFG__VALIDATE_INCREMENT    0x2
@@ -976,25 +972,6 @@ typedef int H5C_ring_t;
  *
  * The fields of this structure are discussed individually below:
  *
- * magic:    Unsigned 32 bit integer that must always be set to
- *              H5C__H5C_CACHE_ENTRY_T_MAGIC when the entry is valid.
- *              The field must be set to H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC
- *              just before the entry is freed.
- *
- *              This is necessary, as the LRU list can be changed out
- *              from under H5C__make_space_in_cache() by the serialize
- *              callback which may change the size of an existing entry,
- *              and/or load a new entry while serializing the target entry.
- *
- *              This in turn can cause a recursive call to
- *              H5C__make_space_in_cache() which may either flush or evict
- *              the next entry that the first invocation of that function
- *              was about to examine.
- *
- *              The magic field allows H5C__make_space_in_cache() to
- *              detect this case, and re-start its scan from the bottom
- *              of the LRU when this situation occurs.
- *
  * cache_ptr:    Pointer to the cache that this entry is contained within.
  *
  * addr:    Base address of the cache entry on disk.
@@ -1570,7 +1547,6 @@ typedef int H5C_ring_t;
  *
  ****************************************************************************/
 typedef struct H5C_cache_entry_t {
-    uint32_t           magic;
     H5C_t             *cache_ptr;
     haddr_t            addr;
     size_t             size;
@@ -1667,11 +1643,6 @@ typedef struct H5C_cache_entry_t {
  * of H5C_cache_entry_t.
  *
  * The fields of this structure are discussed individually below:
- *
- * magic:    Unsigned 32 bit integer that must always be set to
- *              H5C_IMAGE_ENTRY_T_MAGIC when the entry is valid.
- *              The field must be set to H5C_IMAGE_ENTRY_T_BAD_MAGIC
- *              just before the entry is freed.
  *
  * addr:    Base address of the cache entry on disk.
  *
@@ -1796,11 +1767,8 @@ typedef struct H5C_cache_entry_t {
  *               callbacks must be used to update this image before it is
  *               written to disk
  *
- *
  ****************************************************************************/
-
 typedef struct H5C_image_entry_t {
-    uint32_t   magic;
     haddr_t    addr;
     size_t     size;
     H5C_ring_t ring;

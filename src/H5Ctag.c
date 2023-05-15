@@ -126,7 +126,6 @@ H5C_ignore_tags(H5C_t *cache)
 
     /* Assertions */
     HDassert(cache != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Set variable to ignore tag values upon assignment */
     cache->ignore_tags = TRUE;
@@ -153,7 +152,6 @@ H5C_get_ignore_tags(const H5C_t *cache)
 
     /* Sanity checks */
     HDassert(cache);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Return ignore tag value */
     FUNC_LEAVE_NOAPI(cache->ignore_tags)
@@ -177,7 +175,6 @@ H5C_get_num_objs_corked(const H5C_t *cache)
 
     /* Sanity checks */
     HDassert(cache);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Return value for num_objs_corked */
     FUNC_LEAVE_NOAPI(cache->num_objs_corked)
@@ -210,7 +207,6 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     /* Assertions */
     HDassert(cache != NULL);
     HDassert(entry != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Get the tag */
     tag = H5CX_get_tag();
@@ -293,7 +289,6 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     /* Assertions */
     HDassert(cache != NULL);
     HDassert(entry != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Get the entry's tag info struct */
     if (NULL != (tag_info = entry->tag_info)) {
@@ -350,7 +345,6 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
 
     /* Sanity checks */
     HDassert(cache != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Search the list of tagged object addresses in the cache */
     HASH_FIND(hh, cache->tag_list, &tag, sizeof(haddr_t), tag_info);
@@ -405,7 +399,6 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global, H5C_ta
 
     /* Sanity checks */
     HDassert(cache != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate over the entries for this tag */
     if (H5C__iter_tagged_entries_real(cache, tag, cb, cb_ctx) < 0)
@@ -503,7 +496,6 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
     HDassert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
     HDassert(cache != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Construct context for iterator callbacks */
     ctx.f = f;
@@ -606,7 +598,6 @@ H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
 
     /* Sanity check */
     HDassert(cache);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Iterate through hash table entries, marking those with specified tag, as
      * well as any major global entries which should always be flushed
@@ -875,7 +866,6 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     HDassert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
     HDassert(cache != NULL);
-    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Construct context for iterator callbacks */
     ctx.f       = f;

@@ -86,7 +86,6 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
 
     /* Sanity check */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_name != NULL);
 
     /* First, create a skip list */
@@ -101,7 +100,6 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
         entry_ptr = cache_ptr->index[i];
 
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             if (H5SL_insert(slist_ptr, entry_ptr, &(entry_ptr->addr)) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "can't insert entry in skip list")
 
@@ -131,8 +129,6 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
     i         = 0;
     entry_ptr = (H5C_cache_entry_t *)H5SL_remove_first(slist_ptr);
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         /* Print entry */
         HDfprintf(stdout, "%s%5d ", cache_ptr->prefix, i);
         HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->addr));
@@ -193,7 +189,6 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 
     /* Sanity check */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_name != NULL);
 
     HDfprintf(stdout, "\n\nDump of metadata cache LRU \"%s\"\n", cache_name);
@@ -218,8 +213,6 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         /* Print entry */
         HDfprintf(stdout, "%s%5d ", cache_ptr->prefix, i);
         HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->addr));
@@ -272,7 +265,6 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     FUNC_ENTER_NOAPI_NOERR
 
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
@@ -296,7 +288,6 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
             entry_ptr = NULL;
 
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDfprintf(stdout, "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n", cache_ptr->prefix, i,
                       (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
                       (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
@@ -340,8 +331,7 @@ H5C_set_prefix(H5C_t *cache_ptr, char *prefix)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) || (prefix == NULL) ||
-        (HDstrlen(prefix) >= H5C__PREFIX_LEN))
+    if (cache_ptr == NULL || prefix == NULL || HDstrlen(prefix) >= H5C__PREFIX_LEN)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry")
 
     HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
@@ -415,12 +405,7 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ((NULL == cache_ptr) || (cache_ptr->magic != H5C__H5C_T_MAGIC) || (NULL == cache_name))
+    if (NULL == cache_ptr || NULL == cache_name)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or cache_name")
 
 #if H5C_COLLECT_CACHE_STATS
@@ -722,7 +707,6 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
 #if H5C_COLLECT_CACHE_STATS
     for (i = 0; i <= cache_ptr->max_type_id; i++) {
@@ -846,7 +830,6 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(H5F_addr_defined(parent_addr));
     HDassert(H5F_addr_defined(child_addr));
     HDassert(fd_exists_ptr);
@@ -855,9 +838,6 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
     H5C__SEARCH_INDEX(cache_ptr, child_addr, child_ptr, FAIL)
 
     if (parent_ptr && child_ptr) {
-        HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-        HDassert(child_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
         if (child_ptr->flush_dep_nparents > 0) {
             unsigned u; /* Local index variable */
 
@@ -916,7 +896,6 @@ H5C_validate_index_list(H5C_t *cache_ptr)
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     for (i = 0; i < H5C_RING_NTYPES; i++) {
         index_ring_len[i]        = 0;
@@ -1042,7 +1021,6 @@ H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(H5F_addr_defined(addr));
     HDassert(entry_ptr_ptr);
 
@@ -1086,7 +1064,6 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
 
     /* Sanity check */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     FUNC_LEAVE_NOAPI(cache_ptr->serialization_in_progress)
 } /* H5C_get_serialization_in_progress() */
@@ -1119,7 +1096,6 @@ H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(inner_ring >= H5C_RING_USER);
     HDassert(inner_ring <= H5C_RING_SB);
 
@@ -1171,7 +1147,6 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(H5F_addr_defined(addr));
     HDassert(expected_type);
     HDassert(in_cache_ptr);
@@ -1224,7 +1199,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                             size_t new_max_cache_size, size_t old_min_clean_size, size_t new_min_clean_size)
 {
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(version == H5C__CURR_AUTO_RESIZE_RPT_FCN_VER);
 
     switch (status) {
@@ -1355,7 +1329,6 @@ H5C__validate_lru_list(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_tail_ptr == NULL)) &&
         (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
@@ -1428,7 +1401,6 @@ H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_tail_ptr == NULL)) &&
         (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
@@ -1504,7 +1476,6 @@ H5C__validate_protected_entry_list(H5C_t *cache_ptr)
     FUNC_ENTER_PACKAGE
 
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if (((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_tail_ptr == NULL)) &&
         (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
@@ -1578,7 +1549,6 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 
     /* Assertions */
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
     node_ptr = H5SL_first(cache_ptr->slist_ptr);
@@ -1589,7 +1559,6 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
         entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
         HDassert(entry_ptr);
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->is_dirty);
         HDassert(entry_ptr->in_slist);
 
@@ -1637,7 +1606,7 @@ H5C__image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (!cache_ptr || cache_ptr->magic != H5C__H5C_T_MAGIC)
+    if (NULL == cache_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
 
 #if H5C_COLLECT_CACHE_STATS

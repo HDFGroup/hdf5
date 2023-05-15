@@ -184,7 +184,6 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(num_candidates > 0);
     HDassert((!cache_ptr->slist_enabled) || (num_candidates <= cache_ptr->slist_len));
     HDassert(candidates_list_ptr != NULL);
@@ -306,7 +305,6 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry is protected?!?!?")
 
         /* Sanity checks */
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->ring >= H5C_RING_USER);
         HDassert(entry_ptr->ring <= H5C_RING_SB);
         HDassert(!entry_ptr->flush_immediately);
@@ -422,7 +420,6 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* As a sanity check, set space needed to the dirty_index_size.  This
      * should be the sum total of the sizes of all the dirty entries
@@ -533,7 +530,6 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* compute the number of bytes (if any) that must be flushed to get the
      * cache back within its min clean constraints.
@@ -652,7 +648,6 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     HDassert(ce_array_len > 0);
     HDassert(ce_array_ptr != NULL);
@@ -1055,11 +1050,8 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
 
     HDassert(f);
     HDassert(f->shared);
-
     cache_ptr = f->shared->cache;
-
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
     HDassert(entries_to_flush[H5C_RING_UNDEFINED] == 0);
@@ -1178,7 +1170,6 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
     HDassert(ring > H5C_RING_UNDEFINED);
     HDassert(ring < H5C_RING_NTYPES);
