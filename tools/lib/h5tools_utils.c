@@ -1028,9 +1028,10 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out)
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out,
+                              char *token_out)
 {
-    const char *ccred[3];
+    const char *ccred[4];
     unsigned    nelems     = 0;
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
@@ -1041,14 +1042,20 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
         H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
 
     /* Sanity-check tuple count */
-    if (nelems != 3)
+    if (nelems != 3 && nelems != 4)
         H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
     ccred[0] = (const char *)s3cred[0];
     ccred[1] = (const char *)s3cred[1];
     ccred[2] = (const char *)s3cred[2];
+    if (nelems == 3) {
+        ccred[3] = "";
+    }
+    else {
+        ccred[3] = (const char *)s3cred[3];
+    }
 
-    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, token_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
@@ -1093,29 +1100,30 @@ done:
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
  *                    before error occurs.
- *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, ...})
+ *         * NULL value strings: (&fa, {NULL?, NULL? NULL?, NULL?, ...})
  *         * Incomplete fapl info:
- *             * empty region, non-empty id, key either way
- *                 * (&fa, {"", "...", "?"})
- *             * empty id, non-empty region, key either way
- *                 * (&fa, {"...", "", "?"})
- *             * "non-empty key and either id or region empty
- *                 * (&fa, {"",    "",    "...")
- *                 * (&fa, {"",    "...", "...")
- *                 * (&fa, {"...", "",    "...")
+ *             * empty region, non-empty id, key either way, token either way
+ *                 * (&fa, token, {"", "...", "?", "?"})
+ *             * empty id, non-empty region, key either way, token either way
+ *                 * (&fa, token,  {"...", "", "?", "?"})
+ *             * "non-empty key, token either way and either id or region empty
+ *                 * (&fa, token, {"",    "",    "...", "?")
+ *                 * (&fa, token, {"",    "...", "...", "?")
+ *                 * (&fa, token, {"...", "",    "...", "?")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
  *     1 (success)
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
- *                 * (&fa, NULL)
- *             * first three strings in `values` are empty ("")
- *                 * (&fa, {"", "", "", ...}
+ *                 * (&fa, token, NULL)
+ *             * first four strings in `values` are empty ("")
+ *                 * (&fa, token,  {"", "", "", "", ...})
  *         * Authenticating fapl
- *             * region, id, and optional key provided
- *                 * (&fa, {"...", "...", ""})
- *                 * (&fa, {"...", "...", "..."})
+ *             * region, id, optional key and option session token provided
+ *                 * (&fa, token, {"...", "...", "", ""})
+ *                 * (&fa, token, {"...", "...", "...", ""})
+ *                 * (&fa, token, {"...", "...", "...", "..."})
  *
  * Programmer: Jacob Smith
  *             2017-11-13
@@ -1123,7 +1131,7 @@ done:
  *----------------------------------------------------------------------------
  */
 int
-h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **values)
 {
     int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
@@ -1141,6 +1149,14 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
         goto done;
     }
 
+    if (token == NULL) {
+        if (show_progress) {
+            HDprintf("  ERROR: null pointer to token\n");
+        }
+        ret_value = 0;
+        goto done;
+    }
+
     if (show_progress) {
         HDprintf("  preset fapl with default values\n");
     }
@@ -1149,6 +1165,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
     *(fa->aws_region) = '\0';
     *(fa->secret_id)  = '\0';
     *(fa->secret_key) = '\0';
+    *token            = '\0';
 
     /* sanity-check supplied values
      */
@@ -1170,6 +1187,13 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
         if (values[2] == NULL) {
             if (show_progress) {
                 HDprintf("  ERROR: secret_key value cannot be NULL\n");
+            }
+            ret_value = 0;
+            goto done;
+        }
+        if (values[3] == NULL) {
+            if (show_progress) {
+                HDprintf("  ERROR: token value cannot be NULL\n");
             }
             ret_value = 0;
             goto done;
@@ -1215,12 +1239,24 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 HDprintf("  secret_key set\n");
             }
 
+            if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SECRET_TOK_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: token value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(token, values[3], (HDstrlen(values[3]) + 1));
+            if (show_progress) {
+                HDprintf("  token set\n");
+            }
+
             fa->authenticate = TRUE;
             if (show_progress) {
                 HDprintf("  set to authenticate\n");
             }
         }
-        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0') {
+        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0' || *values[3] != '\0') {
             if (show_progress) {
                 HDprintf("  ERROR: invalid assortment of empty/non-empty values\n");
             }

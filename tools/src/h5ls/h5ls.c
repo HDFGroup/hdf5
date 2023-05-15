@@ -2663,7 +2663,8 @@ main(int argc, char *argv[])
         "",    /* Access Key ID     */
         "",    /* Secret Access Key */
     };
-#endif /* H5_HAVE_ROS3_VFD */
+    char token[H5FD_ROS3_MAX_SECRET_TOK_LEN]; /* Session/security token */
+#endif                                        /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
     /* "Default" HDFS configuration */
@@ -2847,13 +2848,14 @@ main(int argc, char *argv[])
             }
             start++;
 
-            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa, token) < 0) {
                 HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
-            vfd_info.info = &ros3_fa;
+            vfd_info.info  = &ros3_fa;
+            vfd_info.token = token;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();

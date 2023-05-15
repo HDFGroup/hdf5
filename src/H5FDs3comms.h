@@ -478,6 +478,7 @@ typedef struct {
     char          *region;
     char          *secret_id;
     unsigned char *signing_key;
+    char          *token;
 } s3r_t;
 
 #define S3COMMS_S3R_MAGIC 0x44d8d79
@@ -509,7 +510,7 @@ H5_DLL herr_t H5FD_s3comms_s3r_close(s3r_t *handle);
 H5_DLL size_t H5FD_s3comms_s3r_get_filesize(s3r_t *handle);
 
 H5_DLL s3r_t *H5FD_s3comms_s3r_open(const char url[], const char region[], const char id[],
-                                    const unsigned char signing_key[]);
+                                    const unsigned char signing_key[], const char token[]);
 
 H5_DLL herr_t H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest);
 

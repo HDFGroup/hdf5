@@ -384,6 +384,7 @@ static int     s3_test_credentials_loaded               = 0;
 static char    s3_test_aws_region[16]                   = "";
 static char    s3_test_aws_access_key_id[64]            = "";
 static char    s3_test_aws_secret_access_key[128]       = "";
+static char    s3_test_aws_security_token[1024]         = "";
 static char    s3_test_bucket_url[S3_TEST_MAX_URL_SIZE] = "";
 static hbool_t s3_test_bucket_defined                   = FALSE;
 
@@ -1788,7 +1789,7 @@ test_s3r_get_filesize(void)
 
     JSVERIFY(0, H5FD_s3comms_s3r_get_filesize(NULL), "filesize of the null handle should be 0")
 
-    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
     FAIL_IF(handle == NULL)
 
     JSVERIFY(6464, H5FD_s3comms_s3r_get_filesize(handle), NULL)
@@ -1898,14 +1899,14 @@ test_s3r_open(void)
 
     /* attempt anonymously
      */
-    handle = H5FD_s3comms_s3r_open(url_missing, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_missing, NULL, NULL, NULL, NULL);
     FAIL_IF(handle != NULL);
 
     /* attempt with authentication
      */
-    handle =
-        H5FD_s3comms_s3r_open(url_missing, (const char *)s3_test_aws_region,
-                              (const char *)s3_test_aws_access_key_id, (const unsigned char *)signing_key);
+    handle = H5FD_s3comms_s3r_open(
+        url_missing, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
+        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
     FAIL_IF(handle != NULL);
 
     /*************************
@@ -1914,7 +1915,7 @@ test_s3r_open(void)
 
 #if S3_TEST_RUN_TIMEOUT
     HDprintf("Opening on inactive port may hang for a minute; waiting for timeout\n");
-    handle = H5FD_s3comms_s3r_open(url_raven_badport, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_raven_badport, NULL, NULL, NULL, NULL);
     FAIL_IF(handle != NULL);
 #endif
 
@@ -1924,20 +1925,21 @@ test_s3r_open(void)
 
     /* anonymous access on restricted file
      */
-    handle = H5FD_s3comms_s3r_open(url_shakespeare, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_shakespeare, NULL, NULL, NULL, NULL);
     FAIL_IF(handle != NULL);
 
     /* passed in a bad ID
      */
-    handle = H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region, "I_MADE_UP_MY_ID",
-                                   (const unsigned char *)signing_key);
+    handle =
+        H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region, "I_MADE_UP_MY_ID",
+                              (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
     FAIL_IF(handle != NULL);
 
     /* using an invalid signing key
      */
-    handle =
-        H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region,
-                              (const char *)s3_test_aws_access_key_id, (const unsigned char *)EMPTY_SHA256);
+    handle = H5FD_s3comms_s3r_open(
+        url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
+        (const unsigned char *)EMPTY_SHA256, (const char *)s3_test_aws_security_token);
     FAIL_IF(handle != NULL);
 
     /*******************************
@@ -1946,7 +1948,7 @@ test_s3r_open(void)
 
     /* anonymous
      */
-    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
     FAIL_IF(handle == NULL);
     JSVERIFY(6464, H5FD_s3comms_s3r_get_filesize(handle), "did not get expected filesize")
     JSVERIFY(SUCCEED, H5FD_s3comms_s3r_close(handle), "unable to close file")
@@ -1954,9 +1956,9 @@ test_s3r_open(void)
 
     /* using authentication on anonymously-accessible file?
      */
-    handle =
-        H5FD_s3comms_s3r_open(url_raven, (const char *)s3_test_aws_region,
-                              (const char *)s3_test_aws_access_key_id, (const unsigned char *)signing_key);
+    handle = H5FD_s3comms_s3r_open(
+        url_raven, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
+        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
     FAIL_IF(handle == NULL);
     JSVERIFY(6464, H5FD_s3comms_s3r_get_filesize(handle), NULL)
     JSVERIFY(SUCCEED, H5FD_s3comms_s3r_close(handle), "unable to close file")
@@ -1964,9 +1966,9 @@ test_s3r_open(void)
 
     /* authenticating
      */
-    handle =
-        H5FD_s3comms_s3r_open(url_shakespeare, (const char *)s3_test_aws_region,
-                              (const char *)s3_test_aws_access_key_id, (const unsigned char *)signing_key);
+    handle = H5FD_s3comms_s3r_open(
+        url_shakespeare, (const char *)s3_test_aws_region, (const char *)s3_test_aws_access_key_id,
+        (const unsigned char *)signing_key, (const char *)s3_test_aws_security_token);
     FAIL_IF(handle == NULL);
     JSVERIFY(5458199, H5FD_s3comms_s3r_get_filesize(handle), NULL)
     JSVERIFY(SUCCEED, H5FD_s3comms_s3r_close(handle), "unable to close file")
@@ -2055,7 +2057,7 @@ test_s3r_read(void)
 
     /* open file
      */
-    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL);
+    handle = H5FD_s3comms_s3r_open(url_raven, NULL, NULL, NULL, NULL);
     FAIL_IF(handle == NULL)
     JSVERIFY(6464, H5FD_s3comms_s3r_get_filesize(handle), NULL)
 

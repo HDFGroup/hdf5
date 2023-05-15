@@ -68,6 +68,13 @@
  *
  *     String: "Secret Access Key" associated with the ID and resource.
  *
+ * `secret_tok` (char[])
+ *
+ *     String: "Security/Session Token" associated with the ID and resource.
+ *
+ *     This secret_tok is only needed when you are using temporary security
+ *     credentials.
+ *
  ****************************************************************************/
 
 #define H5FD_CURR_ROS3_FAPL_T_VERSION 1
@@ -75,6 +82,7 @@
 #define H5FD_ROS3_MAX_REGION_LEN     32
 #define H5FD_ROS3_MAX_SECRET_ID_LEN  128
 #define H5FD_ROS3_MAX_SECRET_KEY_LEN 128
+#define H5FD_ROS3_MAX_SECRET_TOK_LEN 1024
 
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
@@ -103,6 +111,20 @@ H5_DLL herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out);
  * \todo Add missing documentation
  */
 H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token);
+
+/**
+ * \ingroup FAPL
+ *
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token);
 
 #ifdef __cplusplus
 }
