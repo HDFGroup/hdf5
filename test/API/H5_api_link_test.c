@@ -79,7 +79,6 @@ static herr_t link_iter_soft_links_cb(hid_t group_id, const char *name, const H5
                                       void *op_data);
 static herr_t link_iter_external_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                           void *op_data);
-static herr_t link_iter_ud_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info, void *op_data);
 static herr_t link_iter_mixed_links_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                        void *op_data);
 static herr_t link_iter_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
@@ -93,8 +92,6 @@ static herr_t link_visit_soft_links_no_cycles_cb(hid_t group_id, const char *nam
                                                  void *op_data);
 static herr_t link_visit_external_links_no_cycles_cb(hid_t group_id, const char *name,
                                                      const H5L_info2_t *info, void *op_data);
-static herr_t link_visit_ud_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-                                               void *op_data);
 static herr_t link_visit_mixed_links_no_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
 static herr_t link_visit_hard_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
@@ -103,8 +100,6 @@ static herr_t link_visit_soft_links_cycles_cb(hid_t group_id, const char *name, 
                                               void *op_data);
 static herr_t link_visit_external_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                   void *op_data);
-static herr_t link_visit_ud_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
-                                            void *op_data);
 static herr_t link_visit_mixed_links_cycles_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
                                                void *op_data);
 static herr_t link_visit_invalid_params_cb(hid_t group_id, const char *name, const H5L_info2_t *info,
@@ -20652,7 +20647,7 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
@@ -20669,10 +20664,6 @@ test_link_iterate_mixed_links(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Literate_link_name_decreasing);
-#endif
         }
         PART_END(H5Literate_link_name_decreasing);
 
@@ -20751,7 +20742,7 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
-#ifndef NO_DECREASING_ALPHA_ITER_ORDER
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
@@ -20770,10 +20761,6 @@ test_link_iterate_mixed_links(void)
             }
 
             PASSED();
-#else
-            SKIPPED();
-            PART_EMPTY(H5Literate_by_name_link_name_decreasing);
-#endif
         }
         PART_END(H5Literate_by_name_link_name_decreasing);
 
