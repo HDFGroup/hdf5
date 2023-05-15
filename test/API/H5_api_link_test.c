@@ -20504,7 +20504,7 @@ test_link_iterate_mixed_links(void)
         return 0;
     }
 
-if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
+#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -20652,6 +20652,7 @@ if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
