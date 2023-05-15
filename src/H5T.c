@@ -3911,7 +3911,9 @@ H5T_close_real(H5T_t *dt)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(dt && dt->shared);
+    if (!dt || !dt->shared) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "attempted to decode bad datatype");
+    }
 
     /* Clean up resources, depending on shared state */
     if (dt->shared->state != H5T_STATE_OPEN) {
