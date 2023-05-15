@@ -633,7 +633,6 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(sblock);
-    HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
     HDassert(image_len);
 
@@ -780,10 +779,6 @@ done:
  * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -796,7 +791,6 @@ H5F__cache_superblock_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     HDassert(sblock);
-    HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
 
     /* Destroy superblock */
@@ -933,7 +927,6 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(drvinfo);
-    HDassert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(drvinfo->cache_info.type == H5AC_DRVRINFO);
     HDassert(image_len);
 
@@ -965,7 +958,6 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBU
     HDassert(f);
     HDassert(image);
     HDassert(drvinfo);
-    HDassert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(drvinfo->cache_info.type == H5AC_DRVRINFO);
     HDassert(len == (size_t)(H5F_DRVINFOBLOCK_HDR_SIZE + drvinfo->len));
 
@@ -1001,10 +993,6 @@ done:
  * Purpose:     Destroy/release an "in core representation" of a data
  *              structure
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -1016,7 +1004,6 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(drvinfo);
-    HDassert(drvinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(drvinfo->cache_info.type == H5AC_DRVRINFO);
 
     /* Destroy driver info message */

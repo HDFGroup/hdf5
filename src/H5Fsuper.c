@@ -248,7 +248,6 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
     HDassert(f->shared);
     sblock = f->shared->sblock;
     HDassert(sblock);
-    HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
 
     /* Update the driver information message in the superblock extension
