@@ -416,9 +416,8 @@ Bug Fixes since HDF5-1.14.0 release
     -------------
     - Changed the default settings used by CMake for the SZIP and GZIP filters
 
-      The defaults for the options HDF5_ENABLE_SZIP_SUPPORT and HDF5_ENABLE_Z_LIB_SUPPORT were
-      OFF. Now the defaults are ON, including the HDF5_ENABLE_SZIP_ENCODING option. This was
-      done to match the defaults used by the autotools configure.ac.
+      The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
+      This was done to match the defaults used by the autotools configure.ac.
       In addition, the CMake message level for not finding a suitable filter library was
       changed from FATAL_ERROR (which would halt the build process) to WARNING (which
       will print a message to stderr). Associated files and documentation were changed to match.
