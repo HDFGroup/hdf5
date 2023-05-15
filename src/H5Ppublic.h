@@ -1459,7 +1459,7 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          and the pointer to the operator data passed in to H5Piterate(),
  *          \p iter_data.
  *
- *          H5Piterate() assumes that the properties in the object
+ * \warning H5Piterate() assumes that the properties in the object
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.

@@ -980,18 +980,18 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *
+ * \warning H5Literate_by_name2() assumes that the membership of the group being
+ *          iterated over remains unchanged through the iteration; if any of the
+ *          links in the group change during the iteration, the function’s
+ *          behavior is undefined. Note, however, that objects pointed to by the
+ *          links can be modified.
+ *
  * \note H5Literate_by_name2() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name2() does not examine the members of \c subgroup_a.
  *       When recursive iteration is required, the application must handle the
  *       recursion, explicitly calling H5Literate_by_name2() on discovered
  *       subgroups.
- *
- * \note H5Literate_by_name2() assumes that the membership of the group being
- *       iterated over remains unchanged through the iteration; if any of the
- *       links in the group change during the iteration, the function’s
- *       behavior is undefined. Note, however, that objects pointed to by the
- *       links can be modified.
  *
  * \note H5Literate_by_name2() is the same as H5Literate2(), except that
  *       H5Literate2() always proceeds in alphanumeric order.
@@ -1670,7 +1670,6 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          This does not limit the ability to change link destinations
  *          while iterating, but caution is advised.
  *
- *
  * \version 1.12.0 Function was deprecated in this release.
  * \since 1.8.0
  *
@@ -1727,18 +1726,18 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *
+ * \warning H5Literate_by_name1() assumes that the membership of the group being
+ *          iterated over remains unchanged through the iteration; if any of the
+ *          links in the group change during the iteration, the function’s
+ *          behavior is undefined. Note, however, that objects pointed to by the
+ *          links can be modified.
+ *
  * \note H5Literate_by_name1() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name1() does not examine the members of \c subgroup_a.
  *       When recursive iteration is required, the application must handle the
  *       recursion, explicitly calling H5Literate_by_name1() on discovered
  *       subgroups.
- *
- * \note H5Literate_by_name1() assumes that the membership of the group being
- *       iterated over remains unchanged through the iteration; if any of the
- *       links in the group change during the iteration, the function’s
- *       behavior is undefined. Note, however, that objects pointed to by the
- *       links can be modified.
  *
  * \note H5Literate_by_name1() is the same as H5Giterate(), except that
  *       H5Giterate() always proceeds in lexicographic order.
