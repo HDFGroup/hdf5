@@ -2086,7 +2086,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: attr_id
     INTEGER(HID_T), INTENT(IN)    :: mem_type_id
-    TYPE(C_PTR)   , INTENT(OUT) :: buf
+    TYPE(C_PTR)   , INTENT(INOUT) :: buf
     INTEGER(HID_T), INTENT(IN)    :: es_id
     INTEGER       , INTENT(OUT)   :: hdferr
     TYPE(C_PTR), OPTIONAL :: file
