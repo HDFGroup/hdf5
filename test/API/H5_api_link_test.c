@@ -3489,11 +3489,10 @@ test_delete_link(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, soft link, external link, or "
-                 "creation order aren't "
-                 "supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, hard link, soft link, or external link "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -3517,10 +3516,12 @@ test_delete_link(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_DELETE_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -3864,6 +3865,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_crt_order_increasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP5_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -4103,6 +4110,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_hard_crt_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on hard link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_hard_crt_order_decreasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP6_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -4824,6 +4837,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_crt_order_increasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP9_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -5066,6 +5085,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_soft_crt_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on soft link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_soft_crt_order_decreasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, LINK_DELETE_TEST_SUBGROUP10_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -5796,6 +5821,12 @@ test_delete_link(void)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_crt_order_increasing);
+            }
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -6071,6 +6102,12 @@ test_delete_link(void)
         PART_BEGIN(H5Ldelete_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Ldelete_by_idx on external link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Ldelete_by_idx_external_crt_order_decreasing);
+            }
 
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
@@ -7833,19 +7870,22 @@ test_copy_link(void)
                 PART_ERROR(H5Lcopy_hard_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
-                         "'corder_valid' field\n");
-                PART_ERROR(H5Lcopy_hard_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
+                             "'corder_valid' field\n");
+                    PART_ERROR(H5Lcopy_hard_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    copied link's creation order value %" PRId64
-                         " doesn't match original link's creation order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lcopy_hard_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    copied link's creation order value %" PRId64
+                             " doesn't match original link's creation order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lcopy_hard_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -8168,19 +8208,22 @@ test_copy_link(void)
                 PART_ERROR(H5Lcopy_soft_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
-                         "'corder_valid' field\n");
-                PART_ERROR(H5Lcopy_soft_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
+                             "'corder_valid' field\n");
+                    PART_ERROR(H5Lcopy_soft_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    copied link's creation order value %" PRId64
-                         " doesn't match original link's creation order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lcopy_soft_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    copied link's creation order value %" PRId64
+                             " doesn't match original link's creation order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lcopy_soft_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -8575,20 +8618,23 @@ test_copy_link(void)
                 PART_ERROR(H5Lcopy_external_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
-                         "'corder_valid' field\n");
-                PART_ERROR(H5Lcopy_external_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf("    copied link's 'corder_valid' field doesn't match original link's "
+                             "'corder_valid' field\n");
+                    PART_ERROR(H5Lcopy_external_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    copied link's creation order value %" PRId64
-                         " doesn't match original link's creation "
-                         "order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lcopy_external_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    copied link's creation order value %" PRId64
+                             " doesn't match original link's creation "
+                             "order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lcopy_external_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -9482,19 +9528,23 @@ test_move_link(void)
                 PART_ERROR(H5Lmove_hard_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
-                         "field\n");
-                PART_ERROR(H5Lmove_hard_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf(
+                        "    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
+                        "field\n");
+                    PART_ERROR(H5Lmove_hard_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    moved link's creation order value %" PRId64
-                         " doesn't match original link's creation order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lmove_hard_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    moved link's creation order value %" PRId64
+                             " doesn't match original link's creation order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lmove_hard_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -9892,19 +9942,23 @@ test_move_link(void)
                 PART_ERROR(H5Lmove_soft_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
-                         "field\n");
-                PART_ERROR(H5Lmove_soft_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf(
+                        "    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
+                        "field\n");
+                    PART_ERROR(H5Lmove_soft_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    moved link's creation order value %" PRId64
-                         " doesn't match original link's creation order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lmove_soft_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    moved link's creation order value %" PRId64
+                             " doesn't match original link's creation order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lmove_soft_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -10371,20 +10425,24 @@ test_move_link(void)
                 PART_ERROR(H5Lmove_external_check);
             }
 
-            if (new_info.corder_valid != orig_info.corder_valid) {
-                H5_FAILED();
-                HDprintf("    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
-                         "field\n");
-                PART_ERROR(H5Lmove_external_check);
-            }
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (new_info.corder_valid != orig_info.corder_valid) {
+                    H5_FAILED();
+                    HDprintf(
+                        "    moved link's 'corder_valid' field doesn't match original link's 'corder_valid' "
+                        "field\n");
+                    PART_ERROR(H5Lmove_external_check);
+                }
 
-            if (new_info.corder_valid && orig_info.corder_valid && (new_info.corder != orig_info.corder)) {
-                H5_FAILED();
-                HDprintf("    moved link's creation order value %" PRId64
-                         " doesn't match original link's creation "
-                         "order value %" PRId64 "\n",
-                         new_info.corder, orig_info.corder);
-                PART_ERROR(H5Lmove_external_check);
+                if (new_info.corder_valid && orig_info.corder_valid &&
+                    (new_info.corder != orig_info.corder)) {
+                    H5_FAILED();
+                    HDprintf("    moved link's creation order value %" PRId64
+                             " doesn't match original link's creation "
+                             "order value %" PRId64 "\n",
+                             new_info.corder, orig_info.corder);
+                    PART_ERROR(H5Lmove_external_check);
+                }
             }
 
             if (new_info.cset != orig_info.cset) {
@@ -11572,7 +11630,6 @@ test_get_link_val(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, link, soft link, external link, or creation "
@@ -11600,10 +11657,12 @@ test_get_link_val(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, GET_LINK_VAL_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -11835,6 +11894,12 @@ test_get_link_val(void)
 
             TESTING_2("H5Lget_val_by_idx on soft link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_val_by_idx_soft_crt_order_increasing);
+            }
+
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_VAL_TEST_SUBGROUP4_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -12022,6 +12087,12 @@ test_get_link_val(void)
                                         "/" GET_LINK_VAL_TEST_SUBGROUP5_NAME "C";
 
             TESTING_2("H5Lget_val_by_idx on soft link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_val_by_idx_soft_crt_order_decreasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_VAL_TEST_SUBGROUP5_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -12584,6 +12655,12 @@ test_get_link_val(void)
 
             TESTING_2("H5Lget_val_by_idx on external link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_val_by_idx_external_crt_order_increasing);
+            }
+
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
 
@@ -12827,6 +12904,12 @@ test_get_link_val(void)
             const char *ext_obj_name_c = "/C";
 
             TESTING_2("H5Lget_val_by_idx on external link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_val_by_idx_external_crt_order_decreasing);
+            }
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -13165,7 +13248,7 @@ test_get_link_val(void)
             link_val_size = 1 + strlen(ext_link_filename) + 1 + strlen(ext_obj_name_a) + 1;
             if (link_info.u.val_size != link_val_size) {
                 H5_FAILED();
-                HDprintf("    link value size %zu for link at index %d did not match expected size of %zud\n",
+                HDprintf("    link value size %zu for link at index %d did not match expected size of %zu\n",
                          link_info.u.val_size, 0, link_val_size);
                 PART_ERROR(H5Lget_val_by_idx_external_name_order_increasing);
             }
@@ -13669,7 +13752,7 @@ test_get_link_val_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
         HDprintf("    API functions for basic file, group, link, soft link, external link, or creation "
                  "order aren't supported with this connector\n");
@@ -13693,12 +13776,6 @@ test_get_link_val_invalid_params(void)
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create a GCPL\n");
-        goto error;
-    }
-
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
         goto error;
     }
 
@@ -13827,8 +13904,8 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(H5I_INVALID_HID, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0,
-                                            link_val_buf, link_val_buf_size, H5P_DEFAULT);
+                err_ret = H5Lget_val_by_idx(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
+                                            link_val_buf_size, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -13848,7 +13925,7 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(group_id, NULL, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, link_val_buf,
+                err_ret = H5Lget_val_by_idx(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
             H5E_END_TRY;
@@ -13861,7 +13938,7 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(group_id, "", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, link_val_buf,
+                err_ret = H5Lget_val_by_idx(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
             H5E_END_TRY;
@@ -13916,8 +13993,8 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_UNKNOWN, 0,
-                                            link_val_buf, link_val_buf_size, H5P_DEFAULT);
+                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, link_val_buf,
+                                            link_val_buf_size, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -13930,7 +14007,7 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_N, 0, link_val_buf,
+                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, link_val_buf,
                                             link_val_buf_size, H5P_DEFAULT);
             }
             H5E_END_TRY;
@@ -13951,7 +14028,7 @@ test_get_link_val_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, link_val_buf,
+                err_ret = H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, link_val_buf,
                                             link_val_buf_size, H5I_INVALID_HID);
             }
             H5E_END_TRY;
@@ -14026,10 +14103,10 @@ test_get_link_info(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, hard link, external link, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, soft link, hard link, or external link "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -14053,10 +14130,12 @@ test_get_link_info(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, GET_LINK_INFO_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -14115,11 +14194,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_hard);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_hard);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_hard);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -14196,11 +14277,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_soft);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_soft);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_soft);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -14289,11 +14372,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_external);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_external);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_external);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -14336,6 +14421,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_hard_crt_order_increasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on hard link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_hard_crt_order_increasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP5_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -14493,6 +14584,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_hard_crt_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on hard link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_hard_crt_order_decreasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP6_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -14738,11 +14835,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -14759,11 +14858,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -14780,11 +14881,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_increasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -14895,11 +14998,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -14916,11 +15021,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -14937,11 +15044,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_hard_name_order_decreasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -14964,6 +15073,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_soft_crt_order_increasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on soft link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_soft_crt_order_increasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP9_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -15157,6 +15272,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_soft_crt_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on soft link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_soft_crt_order_decreasing);
+            }
 
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_INFO_TEST_SUBGROUP10_NAME, H5P_DEFAULT, gcpl_id,
                                           H5P_DEFAULT)) < 0) {
@@ -15454,11 +15575,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -15485,11 +15608,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -15516,11 +15641,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_increasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -15647,11 +15774,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -15678,11 +15807,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -15709,11 +15840,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_soft_name_order_decreasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -15736,6 +15869,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_increasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_external_crt_order_increasing);
+            }
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -15935,6 +16074,12 @@ test_get_link_info(void)
         PART_BEGIN(H5Lget_info_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Lget_info_by_idx2 on external link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_info_by_idx_external_crt_order_decreasing);
+            }
 
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -16246,11 +16391,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -16275,11 +16422,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -16304,11 +16453,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_increasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -16445,11 +16596,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 0)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)0);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 0)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)0);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -16474,11 +16627,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 1)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)1);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 1)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)1);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+                }
             }
 
             HDmemset(&link_info, 0, sizeof(link_info));
@@ -16503,11 +16658,13 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
             }
 
-            if (link_info.corder_valid && (link_info.corder != 2)) {
-                H5_FAILED();
-                HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
-                         (long long)link_info.corder, (long long)2);
-                PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+                if (link_info.corder_valid && (link_info.corder != 2)) {
+                    H5_FAILED();
+                    HDprintf("    link's creation order value '%lld' did not match expected value '%lld'\n",
+                             (long long)link_info.corder, (long long)2);
+                    PART_ERROR(H5Lget_info_by_idx_external_name_order_decreasing);
+                }
             }
 
             if (H5Gclose(subgroup_id) < 0) {
@@ -16644,10 +16801,10 @@ test_get_link_info_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, or hard link "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -16668,12 +16825,6 @@ test_get_link_info_invalid_params(void)
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create a GCPL\n");
-        goto error;
-    }
-
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
         goto error;
     }
 
@@ -16795,8 +16946,8 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(H5I_INVALID_HID, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0,
-                                              &link_info, H5P_DEFAULT);
+                err_ret = H5Lget_info_by_idx2(H5I_INVALID_HID, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
+                                              H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -16816,7 +16967,7 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(group_id, NULL, H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
+                err_ret = H5Lget_info_by_idx2(group_id, NULL, H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                               H5P_DEFAULT);
             }
             H5E_END_TRY;
@@ -16829,8 +16980,8 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(group_id, "", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
-                                              H5P_DEFAULT);
+                err_ret =
+                    H5Lget_info_by_idx2(group_id, "", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -16884,8 +17035,8 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_UNKNOWN, 0,
-                                              &link_info, H5P_DEFAULT);
+                err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_UNKNOWN, 0, &link_info,
+                                              H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -16898,8 +17049,8 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_N, 0, &link_info,
-                                              H5P_DEFAULT);
+                err_ret =
+                    H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_N, 0, &link_info, H5P_DEFAULT);
             }
             H5E_END_TRY;
 
@@ -16919,7 +17070,7 @@ test_get_link_info_invalid_params(void)
 
             H5E_BEGIN_TRY
             {
-                err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &link_info,
+                err_ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &link_info,
                                               H5I_INVALID_HID);
             }
             H5E_END_TRY;
@@ -16986,10 +17137,10 @@ test_get_link_name(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, hard link, external link, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, soft link, hard link, or external link "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -17013,10 +17164,12 @@ test_get_link_name(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, GET_LINK_NAME_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -17033,6 +17186,12 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_hard_crt_order_increasing)
         {
             TESTING_2("H5Lget_name_by_idx on hard link by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_hard_crt_order_increasing);
+            }
 
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_HARD_SUBGROUP_NAME, H5P_DEFAULT,
@@ -17195,6 +17354,12 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_hard_crt_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on hard link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_hard_crt_order_decreasing);
+            }
 
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_HARD_SUBGROUP_NAME2, H5P_DEFAULT,
@@ -17682,6 +17847,12 @@ test_get_link_name(void)
         {
             TESTING_2("H5Lget_name_by_idx on soft link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_soft_crt_order_increasing);
+            }
+
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_SOFT_SUBGROUP_NAME, H5P_DEFAULT,
                                           gcpl_id, H5P_DEFAULT)) < 0) {
@@ -17843,6 +18014,12 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_soft_crt_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on soft link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_soft_crt_order_decreasing);
+            }
 
             /* Create group to hold some links */
             if ((subgroup_id = H5Gcreate2(group_id, GET_LINK_NAME_TEST_SOFT_SUBGROUP_NAME2, H5P_DEFAULT,
@@ -18330,6 +18507,12 @@ test_get_link_name(void)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_external_crt_order_increasing);
+            }
+
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
                        EXTERNAL_LINK_TEST_FILE_NAME);
@@ -18512,6 +18695,12 @@ test_get_link_name(void)
         PART_BEGIN(H5Lget_name_by_idx_external_crt_order_decreasing)
         {
             TESTING_2("H5Lget_name_by_idx on external link by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lget_name_by_idx_external_crt_order_decreasing);
+            }
 
             /* Create file for external link to reference */
             HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s",
@@ -19173,8 +19362,9 @@ test_get_link_name_invalid_params(void)
     htri_t  link_exists;
     size_t  link_name_buf_size = 0;
     hid_t   file_id            = H5I_INVALID_HID;
-    hid_t   container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    char   *link_name_buf = NULL;
+    hid_t   container_group    = H5I_INVALID_HID;
+    hid_t   group_id           = H5I_INVALID_HID;
+    char   *link_name_buf      = NULL;
 
     TESTING_MULTIPART("link name retrieval with invalid parameters");
 
@@ -19182,10 +19372,10 @@ test_get_link_name_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, hard link, external link, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, soft link, hard link, or external link "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -19450,11 +19640,10 @@ test_link_iterate_hard_links(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link, iterate, or creation order aren't "
-                 "supported with "
-                 "this connector\n");
+        HDprintf("    API functions for basic file, group, dataset, link, or iterate aren't "
+                 "supported with this connector\n");
         return 0;
     }
 
@@ -19478,10 +19667,12 @@ test_link_iterate_hard_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_HARD_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -19569,6 +19760,7 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19591,6 +19783,12 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_link_creation_increasing)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_increasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
@@ -19615,6 +19813,12 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_link_creation_decreasing)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
@@ -19689,6 +19893,12 @@ test_link_iterate_hard_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -19713,6 +19923,12 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_by_name_creation_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
@@ -19793,9 +20009,9 @@ test_link_iterate_soft_links(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, soft link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -19820,10 +20036,12 @@ test_link_iterate_soft_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_SOFT_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -19924,6 +20142,12 @@ test_link_iterate_soft_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -19947,6 +20171,12 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_link_creation_decreasing)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
@@ -20021,6 +20251,12 @@ test_link_iterate_soft_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20045,6 +20281,12 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_by_name_creation_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
@@ -20119,10 +20361,10 @@ test_link_iterate_external_links(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, external link, iterate, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, external link, or iterate "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -20157,10 +20399,12 @@ test_link_iterate_external_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_EXT_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -20260,6 +20504,12 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20283,6 +20533,12 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_link_creation_decreasing)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
@@ -20358,6 +20614,12 @@ test_link_iterate_external_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
 
@@ -20383,6 +20645,12 @@ test_link_iterate_external_links(void)
         PART_BEGIN(H5Literate_by_name_creation_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_EXT_LINKS_TEST_NUM_LINKS;
@@ -20490,12 +20758,10 @@ test_link_iterate_mixed_links(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, link, soft link, external link, iterate, or creation "
-            "order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, link, soft link, external link, or iterate "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -20530,10 +20796,12 @@ test_link_iterate_mixed_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_MIXED_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -20670,6 +20938,12 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
@@ -20693,6 +20967,12 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_link_creation_decreasing)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
@@ -20767,6 +21047,12 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
@@ -20792,6 +21078,12 @@ test_link_iterate_mixed_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_creation_decreasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS;
 
@@ -20816,6 +21108,12 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_index_saving_increasing)
         {
             TESTING_2("H5Literate2 index-saving capabilities in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_index_saving_increasing);
+            }
 
             /* Test the H5Literate2 index-saving capabilities */
             saved_idx = 0;
@@ -20848,6 +21146,12 @@ test_link_iterate_mixed_links(void)
         PART_BEGIN(H5Literate_index_saving_decreasing)
         {
             TESTING_2("H5Literate2 index-saving capabilities in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_index_saving_decreasing);
+            }
 
             saved_idx = LINK_ITER_MIXED_LINKS_TEST_NUM_LINKS - 1;
             halted    = 0;
@@ -20940,12 +21244,11 @@ test_link_iterate_invalid_params(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
         HDprintf(
-            "    API functions for basic file, group, dataset, link, soft link, external link, iterate, or "
-            "creation order aren't supported with this connector\n");
+            "    API functions for basic file, group, dataset, link, soft link, external link, or iterate "
+            "aren't supported with this connector\n");
         return 0;
     }
 
@@ -20974,20 +21277,8 @@ test_link_iterate_invalid_params(void)
         goto error;
     }
 
-    if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't create GCPL for link creation order tracking\n");
-        goto error;
-    }
-
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
-    }
-
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME, H5P_DEFAULT,
-                               gcpl_id, H5P_DEFAULT)) < 0) {
+                               H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
         HDprintf("    couldn't create container subgroup '%s'\n",
                  LINK_ITER_INVALID_PARAMS_TEST_SUBGROUP_NAME);
@@ -21360,9 +21651,9 @@ test_link_iterate_0_links(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, iterate, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or iterate aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -21387,10 +21678,12 @@ test_link_iterate_0_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set link creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set link creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_ITER_0_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -21437,6 +21730,12 @@ test_link_iterate_0_links(void)
         {
             TESTING_2("H5Literate2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_0_links_creation_increasing);
+            }
+
             if (H5Literate2(group_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, NULL, link_iter_0_links_cb, NULL) <
                 0) {
                 H5_FAILED();
@@ -21451,6 +21750,12 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_0_links_creation_decreasing)
         {
             TESTING_2("H5Literate2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_0_links_creation_decreasing);
+            }
 
             if (H5Literate2(group_id, H5_INDEX_CRT_ORDER, H5_ITER_DEC, NULL, link_iter_0_links_cb, NULL) <
                 0) {
@@ -21499,6 +21804,12 @@ test_link_iterate_0_links(void)
         {
             TESTING_2("H5Literate_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_0_links_creation_increasing);
+            }
+
             if (H5Literate_by_name2(
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_0_LINKS_TEST_SUBGROUP_NAME,
                     H5_INDEX_CRT_ORDER, H5_ITER_INC, NULL, link_iter_0_links_cb, NULL, H5P_DEFAULT) < 0) {
@@ -21514,6 +21825,12 @@ test_link_iterate_0_links(void)
         PART_BEGIN(H5Literate_by_name_0_links_creation_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Literate_by_name_0_links_creation_decreasing);
+            }
 
             if (H5Literate_by_name2(
                     file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_ITER_0_LINKS_TEST_SUBGROUP_NAME,
@@ -21582,12 +21899,10 @@ test_link_visit_hard_links_no_cycles(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link iterate, or creation order aren't "
-                 "supported "
-                 "with this connector\n");
+        HDprintf("    API functions for basic file, group, dataset, or link iterate aren't "
+                 "supported with this connector\n");
         return 0;
     }
 
@@ -21611,10 +21926,12 @@ test_link_visit_hard_links_no_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_SUBGROUP_NAME,
@@ -21749,6 +22066,12 @@ test_link_visit_hard_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -21772,6 +22095,12 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -21847,6 +22176,12 @@ test_link_visit_hard_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -21872,6 +22207,12 @@ test_link_visit_hard_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_HARD_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -21956,9 +22297,9 @@ test_link_visit_soft_links_no_cycles(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, soft link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -21983,10 +22324,12 @@ test_link_visit_soft_links_no_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_SUBGROUP_NAME,
@@ -22110,6 +22453,12 @@ test_link_visit_soft_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22133,6 +22482,12 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -22207,6 +22562,12 @@ test_link_visit_soft_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22232,6 +22593,12 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -22310,9 +22677,9 @@ test_link_visit_external_links_no_cycles(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, external link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, external link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -22348,10 +22715,12 @@ test_link_visit_external_links_no_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -22475,6 +22844,12 @@ test_link_visit_external_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22498,6 +22873,12 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -22575,6 +22956,12 @@ test_link_visit_external_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -22600,6 +22987,12 @@ test_link_visit_external_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_EXT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -22711,11 +23104,11 @@ test_link_visit_mixed_links_no_cycles(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
         HDprintf(
-            "    API functions for basic file, group, link, hard link, soft link, external link, iterate, or "
-            "creation order aren't supported with this connector\n");
+            "    API functions for basic file, group, link, hard link, soft link, external link, or iterate "
+            "aren't supported with this connector\n");
         return 0;
     }
 
@@ -22750,10 +23143,12 @@ test_link_visit_mixed_links_no_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_SUBGROUP_NAME,
@@ -22954,6 +23349,12 @@ test_link_visit_mixed_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
 
@@ -22977,6 +23378,12 @@ test_link_visit_mixed_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
@@ -23051,6 +23458,12 @@ test_link_visit_mixed_links_no_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
 
@@ -23076,6 +23489,12 @@ test_link_visit_mixed_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_no_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_no_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_MIXED_LINKS_NO_CYCLE_TEST_NUM_LINKS;
@@ -23164,9 +23583,9 @@ test_link_visit_hard_links_cycles(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, hard link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, hard link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -23191,10 +23610,12 @@ test_link_visit_hard_links_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_HARD_LINKS_CYCLE_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -23315,6 +23736,12 @@ test_link_visit_hard_links_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23338,6 +23765,12 @@ test_link_visit_hard_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -23412,6 +23845,12 @@ test_link_visit_hard_links_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23436,6 +23875,12 @@ test_link_visit_hard_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_HARD_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -23511,9 +23956,9 @@ test_link_visit_soft_links_cycles(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, soft link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, soft link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -23538,10 +23983,12 @@ test_link_visit_soft_links_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_SOFT_LINKS_CYCLE_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -23667,6 +24114,12 @@ test_link_visit_soft_links_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23690,6 +24143,12 @@ test_link_visit_soft_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -23765,6 +24224,12 @@ test_link_visit_soft_links_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -23789,6 +24254,12 @@ test_link_visit_soft_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_SOFT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -23865,9 +24336,9 @@ test_link_visit_external_links_cycles(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link, external link, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, link, external link, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -23892,10 +24363,12 @@ test_link_visit_external_links_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_EXT_LINKS_CYCLE_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -24024,6 +24497,12 @@ test_link_visit_external_links_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24047,6 +24526,12 @@ test_link_visit_external_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -24122,6 +24607,12 @@ test_link_visit_external_links_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
 
@@ -24147,6 +24638,12 @@ test_link_visit_external_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_EXT_LINKS_CYCLE_TEST_NUM_LINKS_PER_TEST;
@@ -24249,12 +24746,11 @@ test_link_visit_mixed_links_cycles(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_HARD_LINKS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_SOFT_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_UD_LINKS)) {
         SKIPPED();
         HDprintf(
             "    API functions for basic file, group, link, hard link, soft link, external link, iterate, "
-            "creation order, or user defined link aren't supported with this connector\n");
+            "or user defined link aren't supported with this connector\n");
         return 0;
     }
 
@@ -24289,10 +24785,12 @@ test_link_visit_mixed_links_cycles(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_MIXED_LINKS_CYCLE_TEST_SUBGROUP_NAME, H5P_DEFAULT,
@@ -24462,6 +24960,12 @@ test_link_visit_mixed_links_cycles(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
 
@@ -24485,6 +24989,12 @@ test_link_visit_mixed_links_cycles(void)
         PART_BEGIN(H5Lvisit_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
@@ -24559,6 +25069,12 @@ test_link_visit_mixed_links_cycles(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             i = 2 * LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
 
@@ -24583,6 +25099,12 @@ test_link_visit_mixed_links_cycles(void)
         PART_BEGIN(H5Lvisit_by_name_cycles_link_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_cycles_link_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             i = 3 * LINK_VISIT_MIXED_LINKS_CYCLE_TEST_NUM_LINKS;
@@ -24663,11 +25185,10 @@ test_link_visit_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_EXTERNAL_LINKS) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, link, external link, iterate, or "
-                 "creation order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, dataset, link, external link, or iterate "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -25121,9 +25642,9 @@ test_link_visit_0_links(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, link iterate, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or link iterate aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -25148,10 +25669,12 @@ test_link_visit_0_links(void)
         goto error;
     }
 
-    if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, LINK_VISIT_0_LINKS_TEST_SUBGROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -25197,6 +25720,12 @@ test_link_visit_0_links(void)
         {
             TESTING_2("H5Lvisit2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_0_links_creation_increasing);
+            }
+
             if (H5Lvisit2(group_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, link_visit_0_links_cb, NULL) < 0) {
                 H5_FAILED();
                 HDprintf("    H5Lvisit2 by index type creation order in increasing order failed\n");
@@ -25210,6 +25739,12 @@ test_link_visit_0_links(void)
         PART_BEGIN(H5Lvisit_0_links_creation_decreasing)
         {
             TESTING_2("H5Lvisit2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_0_links_creation_decreasing);
+            }
 
             if (H5Lvisit2(group_id, H5_INDEX_CRT_ORDER, H5_ITER_DEC, link_visit_0_links_cb, NULL) < 0) {
                 H5_FAILED();
@@ -25255,6 +25790,12 @@ test_link_visit_0_links(void)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_0_links_creation_increasing);
+            }
+
             if (H5Lvisit_by_name2(file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_0_LINKS_TEST_SUBGROUP_NAME,
                                   H5_INDEX_CRT_ORDER, H5_ITER_INC, link_visit_0_links_cb, NULL,
                                   H5P_DEFAULT) < 0) {
@@ -25270,6 +25811,12 @@ test_link_visit_0_links(void)
         PART_BEGIN(H5Lvisit_by_name_0_links_creation_decreasing)
         {
             TESTING_2("H5Lvisit_by_name2 by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Lvisit_by_name_0_links_creation_decreasing);
+            }
 
             if (H5Lvisit_by_name2(file_id, "/" LINK_TEST_GROUP_NAME "/" LINK_VISIT_0_LINKS_TEST_SUBGROUP_NAME,
                                   H5_INDEX_CRT_ORDER, H5_ITER_DEC, link_visit_0_links_cb, NULL,

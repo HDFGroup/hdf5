@@ -6452,6 +6452,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
     MESSAGE(5, ("Testing Deleting Attribute By Index\n"))
 
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        MESSAGE(5, ("    SKIPPED\n"))
+        return;
+    }
+
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
@@ -6505,19 +6510,12 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (use_index) {
-                            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                                MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
-                                            "w/Creation Order Index\n"))
-                            }
-                            else {
-                                continue;
-                            }
-                        }
-                        else {
+                        if (use_index)
+                            MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
+                                        "w/Creation Order Index\n"))
+                        else
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
-                        }
                     }
                 } /* end else */
 
@@ -7460,6 +7458,10 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value        */
 
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        return;
+    }
+
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
@@ -7519,20 +7521,12 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "w/o Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (use_index) {
-                            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                                MESSAGE(
-                                    5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
+                        if (use_index)
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
                                         "w/Creation Order Index\n"))
-                            }
-                            else {
-                                continue;
-                            }
-                        }
-                        else {
+                        else
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
                                         "w/o Creation Order Index\n"))
-                        }
                     } /* end else */
                 }     /* end else */
 
@@ -7878,6 +7872,10 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hid_t           ret_id;                  /* Generic hid_t return value    */
     herr_t          ret;                     /* Generic return value        */
 
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        return;
+    }
+
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
@@ -7931,19 +7929,12 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                                         "Creation Order Index\n"))
                     } /* end if */
                     else {
-                        if (use_index) {
-                            if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
-                                MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
-                                            "w/Creation Order Index\n"))
-                            }
-                            else {
-                                continue;
-                            }
-                        }
-                        else {
+                        if (use_index)
+                            MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
+                                        "w/Creation Order Index\n"))
+                        else
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
                                         "Creation Order Index\n"))
-                        }
                     } /* end else */
                 }     /* end else */
 

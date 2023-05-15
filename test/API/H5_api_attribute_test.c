@@ -1398,9 +1398,9 @@ test_open_attribute(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, attribute, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or attribute aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -1425,10 +1425,12 @@ test_open_attribute(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -1525,6 +1527,12 @@ test_open_attribute(void)
         {
             TESTING_2("H5Aopen_by_idx by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking is not supported with this VOL connector\n");
+                PART_EMPTY(H5Aopen_by_idx_crt_order_increasing);
+            }
+
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
                                           H5_ITER_INC, 0, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 H5_FAILED();
@@ -1577,6 +1585,12 @@ test_open_attribute(void)
         PART_BEGIN(H5Aopen_by_idx_crt_order_decreasing)
         {
             TESTING_2("H5Aopen_by_idx by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking is not supported with this VOL connector\n");
+                PART_EMPTY(H5Aopen_by_idx_crt_order_decreasing);
+            }
 
             if ((attr_id = H5Aopen_by_idx(container_group, ATTRIBUTE_OPEN_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
                                           H5_ITER_DEC, 2, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
@@ -3931,10 +3945,9 @@ test_get_attribute_name(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, attribute, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or attribute aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -3959,10 +3972,12 @@ test_get_attribute_name(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -4106,6 +4121,12 @@ test_get_attribute_name(void)
         {
             TESTING_2("H5Aget_name_by_idx by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aget_name_by_idx_crt_order_increasing);
+            }
+
             *name_buf = '\0';
             if (H5Aget_name_by_idx(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
                                    H5_ITER_INC, 0, name_buf, (size_t)name_buf_size, H5P_DEFAULT) < 0) {
@@ -4167,6 +4188,12 @@ test_get_attribute_name(void)
         PART_BEGIN(H5Aget_name_by_idx_crt_order_decreasing)
         {
             TESTING_2("H5Aget_name_by_idx by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aget_name_by_idx_crt_order_decreasing);
+            }
 
             *name_buf = '\0';
             if (H5Aget_name_by_idx(container_group, ATTRIBUTE_GET_NAME_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
@@ -4785,10 +4812,9 @@ test_get_attribute_info(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, attribute, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or attribute aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -4813,10 +4839,12 @@ test_get_attribute_info(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_GET_INFO_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -5036,6 +5064,12 @@ test_get_attribute_info(void)
         {
             TESTING_2("H5Aget_info_by_idx by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aget_info_by_idx_crt_order_increasing);
+            }
+
             HDmemset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &attr_info,
                                    H5P_DEFAULT) < 0) {
@@ -5118,6 +5152,12 @@ test_get_attribute_info(void)
         PART_BEGIN(H5Aget_info_by_idx_crt_order_decreasing)
         {
             TESTING_2("H5Aget_info_by_idx by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aget_info_by_idx_crt_order_decreasing);
+            }
 
             HDmemset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &attr_info,
@@ -6475,10 +6515,9 @@ test_attribute_iterate_group(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, attribute, iterate, or creation order aren't "
+        HDprintf("    API functions for basic file, group, attribute, or iterate aren't "
                  "supported with this connector\n");
         return 0;
     }
@@ -6503,10 +6542,12 @@ test_attribute_iterate_group(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_ITERATE_TEST_GRP_SUBGROUP_NAME, H5P_DEFAULT,
@@ -6623,6 +6664,12 @@ test_attribute_iterate_group(void)
         {
             TESTING_2("H5Aiterate by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -6648,6 +6695,12 @@ test_attribute_iterate_group(void)
         PART_BEGIN(H5Aiterate2_creation_decreasing)
         {
             TESTING_2("H5Aiterate by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -6729,6 +6782,12 @@ test_attribute_iterate_group(void)
         {
             TESTING_2("H5Aiterate_by_name by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -6756,6 +6815,12 @@ test_attribute_iterate_group(void)
         PART_BEGIN(H5Aiterate_by_name_creation_decreasing)
         {
             TESTING_2("H5Aiterate_by_name by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -6846,10 +6911,9 @@ test_attribute_iterate_dataset(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, attribute, iterate, or creation order "
+        HDprintf("    API functions for basic file, group, dataset, attribute, or iterate "
                  "aren't supported with this connector\n");
         return 0;
     }
@@ -6881,10 +6945,12 @@ test_attribute_iterate_dataset(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((dset_dtype = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
@@ -7007,6 +7073,12 @@ test_attribute_iterate_dataset(void)
         {
             TESTING_2("H5Aiterate by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -7032,6 +7104,12 @@ test_attribute_iterate_dataset(void)
         PART_BEGIN(H5Aiterate2_creation_decreasing)
         {
             TESTING_2("H5Aiterate by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -7117,6 +7195,12 @@ test_attribute_iterate_dataset(void)
         {
             TESTING_2("H5Aiterate_by_name by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -7145,6 +7229,12 @@ test_attribute_iterate_dataset(void)
         PART_BEGIN(H5Aiterate_by_name_creation_decreasing)
         {
             TESTING_2("H5Aiterate_by_name by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -7243,11 +7333,10 @@ test_attribute_iterate_datatype(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, stored datatype, attribute, iterate, or creation "
-                 "order aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, stored datatype, attribute, or iterate "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -7278,10 +7367,12 @@ test_attribute_iterate_datatype(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(tcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(tcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((type_id = generate_random_datatype(H5T_NO_CLASS, FALSE)) < 0)
@@ -7401,6 +7492,12 @@ test_attribute_iterate_datatype(void)
         {
             TESTING_2("H5Aiterate by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -7426,6 +7523,12 @@ test_attribute_iterate_datatype(void)
         PART_BEGIN(H5Aiterate2_creation_decreasing)
         {
             TESTING_2("H5Aiterate by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate2_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -7511,6 +7614,12 @@ test_attribute_iterate_datatype(void)
         {
             TESTING_2("H5Aiterate_by_name by creation order in increasing order");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_increasing);
+            }
+
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 2 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
 
@@ -7540,6 +7649,12 @@ test_attribute_iterate_datatype(void)
         PART_BEGIN(H5Aiterate_by_name_creation_decreasing)
         {
             TESTING_2("H5Aiterate_by_name by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Aiterate_by_name_creation_decreasing);
+            }
 
             /* Reset the counter to the appropriate value for the next test */
             link_counter = 3 * ATTRIBUTE_ITERATE_TEST_NUM_ATTRS;
@@ -8065,12 +8180,10 @@ test_attribute_iterate_0_attributes(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, attribute, iterate, or creation order "
-                 "aren't supported "
-                 "with this connector\n");
+        HDprintf("    API functions for basic file, group, dataset, attribute, or iterate "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -8255,9 +8368,9 @@ test_delete_attribute(void)
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, attribute, or creation order aren't supported "
+        HDprintf("    API functions for basic file, group, or attribute aren't supported "
                  "with this connector\n");
         return 0;
     }
@@ -8282,10 +8395,12 @@ test_delete_attribute(void)
         goto error;
     }
 
-    if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
-        H5_FAILED();
-        HDprintf("    couldn't set attribute creation order tracking\n");
-        goto error;
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
+        if (H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) {
+            H5_FAILED();
+            HDprintf("    couldn't set attribute creation order tracking\n");
+            goto error;
+        }
     }
 
     if ((group_id = H5Gcreate2(container_group, ATTRIBUTE_DELETION_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
@@ -8439,6 +8554,12 @@ test_delete_attribute(void)
         PART_BEGIN(H5Adelete_by_idx_crt_order_increasing)
         {
             TESTING_2("H5Adelete_by_idx by creation order in increasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Adelete_by_idx_crt_order_increasing);
+            }
 
             /* Create several attributes */
             if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_DELETION_TEST_ATTR_NAME, attr_dtype, space_id,
@@ -8684,6 +8805,12 @@ test_delete_attribute(void)
         PART_BEGIN(H5Adelete_by_idx_crt_order_decreasing)
         {
             TESTING_2("H5Adelete_by_idx by creation order in decreasing order");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                PART_EMPTY(H5Adelete_by_idx_crt_order_decreasing);
+            }
 
             /* Create several attributes */
             if ((attr_id = H5Acreate2(group_id, ATTRIBUTE_DELETION_TEST_ATTR_NAME, attr_dtype, space_id,

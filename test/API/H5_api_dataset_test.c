@@ -2060,13 +2060,11 @@ test_create_dataset_creation_properties(void)
     TESTING_MULTIPART("dataset creation properties");
 
     /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) || !(vol_cap_flags_g & H5VL_CAP_FLAG_TRACK_TIMES) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, creation order, track time, or filter "
-                 "pipeline aren't supported with this connector\n");
+        HDprintf("    API functions for basic file, group, or dataset "
+                 "aren't supported with this connector\n");
         return 0;
     }
 
@@ -2188,6 +2186,12 @@ test_create_dataset_creation_properties(void)
                                           H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED};
 
             TESTING_2("attribute creation order property for DCPL");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
+                SKIPPED();
+                HDprintf("    creation order tracking is not supported by this VOL connector\n");
+                PART_EMPTY(DCPL_attr_crt_order_test);
+            }
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
@@ -2391,6 +2395,12 @@ test_create_dataset_creation_properties(void)
         {
             TESTING_2("dataset filters");
 
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILTERS)) {
+                SKIPPED();
+                HDprintf("    dataset filters are not supported by this VOL connector\n");
+                PART_EMPTY(DCPL_filters_test);
+            }
+
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
                 HDprintf("    couldn't create DCPL\n");
@@ -2570,6 +2580,12 @@ test_create_dataset_creation_properties(void)
         PART_BEGIN(DCPL_track_obj_times_test)
         {
             TESTING_2("object time tracking property for DCPL");
+
+            if (!(vol_cap_flags_g & H5VL_CAP_FLAG_TRACK_TIMES)) {
+                SKIPPED();
+                HDprintf("    object time tracking is not supported by this VOL connector\n");
+                PART_EMPTY(DCPL_track_obj_times_test);
+            }
 
             if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
                 H5_FAILED();
