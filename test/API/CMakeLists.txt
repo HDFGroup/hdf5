@@ -161,6 +161,21 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_h5_api_test_FORMAT h5_api_test)
 endif ()
 
+if (HDF5_TEST_API_INSTALL)
+  install (
+    TARGETS
+      h5_api_test
+    EXPORT
+      ${HDF5_EXPORTED_TARGETS}
+    DESTINATION
+      ${HDF5_INSTALL_BIN_DIR}
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    COMPONENT
+      tests
+  )
+endif ()
+
 #-----------------------------------------------------------------------------
 # Build the ported HDF5 test executables
 #-----------------------------------------------------------------------------
@@ -231,6 +246,21 @@ foreach (api_test_extra ${HDF5_API_TESTS_EXTRA})
   # Add Target to clang-format
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TEST_h5_api_test_${api_test_extra}_FORMAT h5_api_test_${api_test_extra})
+  endif ()
+
+  if (HDF5_TEST_API_INSTALL)
+    install (
+      TARGETS
+        h5_api_test_${api_test_extra}
+      EXPORT
+        ${HDF5_EXPORTED_TARGETS}
+      DESTINATION
+        ${HDF5_INSTALL_BIN_DIR}
+      PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+      COMPONENT
+        tests
+    )
   endif ()
 endforeach ()
 

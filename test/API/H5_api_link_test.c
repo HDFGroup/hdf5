@@ -21231,11 +21231,11 @@ test_link_iterate_invalid_params(void)
     size_t i;
     htri_t link_exists;
     hid_t  file_id         = H5I_INVALID_HID;
-    hid_t  container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
-    hid_t  gcpl_id     = H5I_INVALID_HID;
-    hid_t  dset_id     = H5I_INVALID_HID;
-    hid_t  dset_dtype  = H5I_INVALID_HID;
-    hid_t  dset_dspace = H5I_INVALID_HID;
+    hid_t  container_group = H5I_INVALID_HID;
+    hid_t  group_id        = H5I_INVALID_HID;
+    hid_t  dset_id         = H5I_INVALID_HID;
+    hid_t  dset_dtype      = H5I_INVALID_HID;
+    hid_t  dset_dspace     = H5I_INVALID_HID;
     char   ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link iteration with invalid parameters");
@@ -21607,8 +21607,6 @@ test_link_iterate_invalid_params(void)
         TEST_ERROR;
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR;
-    if (H5Pclose(gcpl_id) < 0)
-        TEST_ERROR;
     if (H5Gclose(group_id) < 0)
         TEST_ERROR;
     if (H5Gclose(container_group) < 0)
@@ -21626,7 +21624,6 @@ error:
         H5Sclose(dset_dspace);
         H5Tclose(dset_dtype);
         H5Dclose(dset_id);
-        H5Pclose(gcpl_id);
         H5Gclose(group_id);
         H5Gclose(container_group);
         H5Fclose(file_id);
