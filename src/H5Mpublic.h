@@ -542,6 +542,9 @@ H5_DLL herr_t H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hb
  *
  *          Any further options can be specified through the property list \p dxpl_id.
  *
+ *  \warning Adding or removing key-value pairs to the map during iteration
+ *           will lead to undefined behavior.
+ *
  * \since 1.12.0
  *
  */
@@ -582,6 +585,9 @@ H5_DLL herr_t H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_
  *          error. A return value of zero allows iteration to continue.
  *
  *          Any further options can be specified through the property list \p dxpl_id.
+ *
+ *  \warning Adding or removing key-value pairs to the map during iteration
+ *           will lead to undefined behavior.
  *
  * \since 1.12.0
  *
