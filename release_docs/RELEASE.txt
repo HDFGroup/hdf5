@@ -414,7 +414,7 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
-    - Changed the default settings used by CMake for the SZIP and GZIP filters
+    - Changed the default settings used by CMake for the GZIP filter
 
       The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
       This was done to match the defaults used by the autotools configure.ac.
