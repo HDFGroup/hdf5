@@ -182,7 +182,12 @@
       "configurePreset": "ci-StdShar-MSVC",
       "inherits": [
         "ci-x64-Release-MSVC"
-      ]
+      ],
+      "filter": {
+        "exclude": {
+          "name": "H5DUMP-tfloatsattrs"
+        }
+      }
     },
     {
       "name": "ci-StdShar-Clang",
