@@ -123,7 +123,8 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, hbool_t skip, const uint8_t *p_end)
+H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t *dt, hbool_t skip,
+                        const uint8_t *p_end)
 {
     unsigned flags, version;
     htri_t   ret_value = FALSE; /* Return value */
@@ -132,10 +133,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
 
     /* check args */
     HDassert(pp && *pp);
-
-    if (!dt || !dt->shared) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "attempted to decode bad datatype");
-    }
+    HDassert(dt && dt->shared);
 
     /* XXX NOTE!
      *
@@ -170,7 +168,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
     /* Check for invalid datatype size */
     if (dt->shared->size == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid datatype size")
-        
+
     switch (dt->shared->type) {
         case H5T_INTEGER:
             /*
@@ -692,7 +690,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
             break;
 
         case H5T_ARRAY:
-                        /*
+            /*
              * Array datatypes...
              */
             /* Decode the number of dimensions */
@@ -754,14 +752,6 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
     } /* end switch */
 
 done:
-    if (ret_value < 0) {
-        if (dt != NULL) {
-            if (dt->shared != NULL)
-                dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
-            dt = H5FL_FREE(H5T_t, dt);
-        } /* end if */
-    }     /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_decode_helper() */
 
@@ -1322,14 +1312,11 @@ H5O_dtype_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
 done:
     /* Cleanup on error */
-    if (!ret_value)
-        /* Free dt */
-        if (H5T_close_real(dt) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't release datatype info")
-
+    if (!ret_value) {
+        H5T_close_real(dt);
+    }
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dtype_decode() */
-
 
 /*--------------------------------------------------------------------------
  NAME

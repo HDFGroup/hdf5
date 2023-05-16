@@ -1276,7 +1276,6 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
     if (version < H5S_POINT_VERSION_1 || version > H5S_POINT_VERSION_LATEST)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for point selection")
 
-
     /* Skip over the remainder of the header */
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, 8, p_end))
         HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection headers")
@@ -1305,45 +1304,21 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
                         "rank of serialized selection does not match dataspace")
 
     /* decode the number of points */
-    switch (enc_size) {
-        case H5S_SELECT_INFO_ENC_SIZE_4:
-            if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding number of points")
+    if (enc_size != H5S_SELECT_INFO_ENC_SIZE_4)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
 
-            UINT32DECODE(pp, num_elem);
-            break;
-        case H5S_SELECT_INFO_ENC_SIZE_8:
-            if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint64_t), p_end))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-                            "buffer overflow while decoding number of points")
+    if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
+            "buffer overflow while decoding number of points")
 
-            UINT64DECODE(pp, num_elem);
-            break;
-        default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
-            break;
-    } /* end switch */
-
+        UINT32DECODE(pp, num_elem);
+    
     /* Allocate space for the coordinates */
     if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information")
 
     /* Determine necessary size of buffer for coordinates */
-    size_t enc_type_size = 0;
-
-    switch (enc_size) {
-        case H5S_SELECT_INFO_ENC_SIZE_4:
-            enc_type_size = sizeof(uint32_t);
-            break;
-        case H5S_SELECT_INFO_ENC_SIZE_8:
-            enc_type_size = sizeof(uint64_t);
-            break;
-        default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
-            break;
-    }
-
+    size_t enc_type_size = sizeof(uint32_t);
     size_t coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
@@ -1352,17 +1327,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
     /* Retrieve the coordinates from the buffer */
     for (tcoord = coord, i = 0; i < num_elem; i++)
         for (j = 0; j < (unsigned)rank; j++, tcoord++)
-            switch (enc_size) {
-                case H5S_SELECT_INFO_ENC_SIZE_4:
-                    UINT32DECODE(pp, *tcoord);
-                    break;
-                case H5S_SELECT_INFO_ENC_SIZE_8:
-                    UINT64DECODE(pp, *tcoord);
-                    break;
-                default:
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
-                    break;
-            } /* end switch */
+            UINT32DECODE(pp, *tcoord);
 
     /* Select points */
     if (H5S_select_elements(tmp_space, H5S_SELECT_SET, num_elem, (const hsize_t *)coord) < 0)
