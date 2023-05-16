@@ -1,4 +1,4 @@
-name: hdf5 dev tarball
+name: hdf5 1.14 tarball
 
 # Controls when the action will run. Triggers the workflow on a schedule
 on:
