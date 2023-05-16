@@ -229,14 +229,14 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: acpl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: aapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL. INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL. INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
-    TYPE(C_PTR) :: file_default = C_NULL_PTR
-    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    TYPE(C_PTR), INTENT(IN) :: file_default = C_NULL_PTR
+    TYPE(C_PTR), INTENT(IN) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
     
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
@@ -622,8 +622,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -797,8 +797,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)    :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -908,8 +908,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
     INTEGER(HID_T) :: aapl_id_default
@@ -1178,8 +1178,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
     INTEGER(HID_T) :: aapl_id_default
@@ -1534,8 +1534,8 @@ CONTAINS
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: acpl_id
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: aapl_id
     INTEGER(HID_T),   INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: acpl_id_default
@@ -1657,11 +1657,11 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: obj_id
     CHARACTER(LEN=*), INTENT(IN)  :: attr_name
-    TYPE(C_PTR)     , INTENT(INOUT) :: attr_exists
+    TYPE(C_PTR)     , INTENT(IN)  :: attr_exists
     INTEGER(HID_T)  , INTENT(IN)  :: es_id
     INTEGER         , INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
@@ -1774,12 +1774,12 @@ CONTAINS
     INTEGER  (HID_T), INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: obj_name
     CHARACTER(LEN=*), INTENT(IN)            :: attr_name
-    TYPE(C_PTR)     , INTENT(INOUT)         :: attr_exists
+    TYPE(C_PTR)     , INTENT(IN)            :: attr_exists
     INTEGER  (HID_T), INTENT(IN)            :: es_id
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER  (HID_T), INTENT(IN) , OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -1912,8 +1912,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: aapl_id_default
@@ -2026,8 +2026,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -2084,13 +2084,13 @@ CONTAINS
 
   SUBROUTINE h5aread_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)    :: attr_id
-    INTEGER(HID_T), INTENT(IN)    :: mem_type_id
-    TYPE(C_PTR)   , INTENT(OUT) :: buf
-    INTEGER(HID_T), INTENT(IN)    :: es_id
-    INTEGER       , INTENT(OUT)   :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: mem_type_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -2140,11 +2140,11 @@ CONTAINS
 
   SUBROUTINE h5awrite_async_f(attr_id, mem_type_id, buf, es_id, hdferr, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)    :: attr_id
-    INTEGER(HID_T), INTENT(IN)    :: mem_type_id
-    TYPE(C_PTR)   , INTENT(IN)    :: buf
-    INTEGER(HID_T), INTENT(IN)    :: es_id
-    INTEGER       , INTENT(OUT)   :: hdferr
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: mem_type_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
     TYPE(C_PTR), OPTIONAL :: file
     TYPE(C_PTR), OPTIONAL :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
@@ -2239,10 +2239,10 @@ CONTAINS
 !! See C API: @ref H5Aread()
 !!
   SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
-    INTEGER(HID_T), INTENT(IN)    :: attr_id
-    INTEGER(HID_T), INTENT(IN)    :: memtype_id
-    TYPE(C_PTR)   , INTENT(INOUT) :: buf
-    INTEGER       , INTENT(OUT)   :: hdferr
+    INTEGER(HID_T), INTENT(IN)  :: attr_id
+    INTEGER(HID_T), INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER       , INTENT(OUT) :: hdferr
   END SUBROUTINE h5aread_f
 
 !>
