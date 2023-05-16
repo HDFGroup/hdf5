@@ -20499,7 +20499,6 @@ test_link_iterate_mixed_links(void)
         return 0;
     }
 
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
     TESTING_2("test setup");
 
     HDsnprintf(ext_link_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s", EXTERNAL_LINK_TEST_FILE_NAME);
@@ -20845,6 +20844,7 @@ test_link_iterate_mixed_links(void)
             PASSED();
         }
         PART_END(H5Literate_index_saving_increasing);
+#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
 
         PART_BEGIN(H5Literate_index_saving_decreasing)
         {
@@ -20876,6 +20876,7 @@ test_link_iterate_mixed_links(void)
             PASSED();
         }
         PART_END(H5Literate_index_saving_decreasing);
+#endif
     }
     END_MULTIPART;
 
@@ -20914,10 +20915,6 @@ error:
     H5E_END_TRY;
 
     return 1;
-#else
-    SKIPPED();
-    return 0;
-#endif
 }
 
 /*
