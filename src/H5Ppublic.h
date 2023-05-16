@@ -8420,7 +8420,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *      I/O.  However, there are conditions that can cause HDF5 to forgo
  *      selection or vector I/O and perform legacy (scalar) I/O instead.
  *
- * \details H5Pget_actual_selection_io_mode() allows the user to determine which 
+ * \details H5Pget_actual_selection_io_mode() allows the user to determine which
  *          type or types of I/O were actually performed.
  *          This property is set after all I/O is completed;
  *          if I/O fails, it will not be set.
