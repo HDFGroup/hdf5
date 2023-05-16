@@ -210,10 +210,10 @@ Notes: This short set of instructions is written for users who want to
       5. Configure the C library, tools and tests with one of the following commands:
 
          On Windows 32 bit
-           cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.15."X"
+           cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.14."X"
 
          On Windows 64 bit
-           cmake -G "Visual Studio 16 2019 Win64" -A x64 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.15."X"
+           cmake -G "Visual Studio 16 2019 Win64" -A x64 -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.14."X"
 
          On Linux and Mac
            cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5-1.14."X"
