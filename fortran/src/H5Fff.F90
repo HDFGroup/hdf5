@@ -992,7 +992,7 @@ CONTAINS
   SUBROUTINE h5fget_file_image_f(file_id, buf_ptr, buf_len, hdferr, buf_size)
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)              :: file_id
-    TYPE(C_PTR)    , INTENT(IN)              :: buf_ptr
+    TYPE(C_PTR)    , INTENT(INOUT)           :: buf_ptr
     INTEGER(SIZE_T), INTENT(IN)              :: buf_len
     INTEGER        , INTENT(OUT)             :: hdferr
     INTEGER(SIZE_T), INTENT(OUT)  , OPTIONAL :: buf_size

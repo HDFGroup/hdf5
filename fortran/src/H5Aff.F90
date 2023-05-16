@@ -229,14 +229,14 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: acpl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: aapl_id
-    TYPE(C_PTR), OPTIONAL. INTENT(IN) :: file
-    TYPE(C_PTR), OPTIONAL. INTENT(IN) :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
-    TYPE(C_PTR), INTENT(IN) :: file_default = C_NULL_PTR
-    TYPE(C_PTR), INTENT(IN) :: func_default = C_NULL_PTR
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
     
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
