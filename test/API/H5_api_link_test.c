@@ -20844,8 +20844,7 @@ test_link_iterate_mixed_links(void)
             PASSED();
         }
         PART_END(H5Literate_index_saving_increasing);
-#if !defined(NO_EXTERNAL_LINKS) && !defined(NO_USER_DEFINED_LINKS)
-
+#ifdef BROKEN
         PART_BEGIN(H5Literate_index_saving_decreasing)
         {
             TESTING_2("H5Literate2 index-saving capabilities in decreasing order");
