@@ -47,6 +47,48 @@ New Features
 
     Configuration:
     -------------
+    - Added new CMake options for building and running HDF5 API tests
+      (Experimental)
+
+      HDF5 API tests are an experimental feature, primarily targeted
+      toward HDF5 VOL connector authors, that is currently being developed.
+      These tests exercise the HDF5 API and are being integrated back
+      into the HDF5 library from the HDF5 VOL tests repository
+      (https://github.com/HDFGroup/vol-tests). To support this feature,
+      the following new options have been added to CMake:
+
+        * HDF5_TEST_API: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 API tests will be built. These tests
+          will only be run during testing of HDF5 if the HDF5_TEST_SERIAL
+          (for serial tests) and HDF5_TEST_PARALLEL (for parallel tests)
+          options are enabled.
+
+        * HDF5_TEST_API_INSTALL: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 API test executables will be installed
+          on the system alongside the HDF5 library. This option is currently
+          not functional.
+
+        * HDF5_TEST_API_ENABLE_ASYNC: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 Async API tests will be built. These
+          tests will only be run if the VOL connector used supports Async
+          operations.
+
+        * HDF5_TEST_API_ENABLE_DRIVER: ON/OFF (Default: OFF)
+
+          Controls whether to build the HDF5 API test driver program. This
+          test driver program is useful for VOL connectors that use a
+          client/server model where the server needs to be up and running
+          before the VOL connector can function. This option is currently
+          not functional.
+
+        * HDF5_TEST_API_SERVER: String (Default: "")
+
+          Used to specify a path to the server executable that the test
+          driver program should execute.
+
     - Added support for CMake presets file.
 
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
@@ -60,6 +102,8 @@ New Features
 
       LIBAEC library has been used in HDF5 binaries as the szip library of choice
       for a few years. We are removing the options for using the old SZIP library.
+
+      Also removed the config/cmake/FindSZIP.cmake file.
 
     - Enabled instrumentation of the library by default in CMake for parallel
       debug builds
@@ -370,6 +414,19 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - Fixed syntax of generator expressions used by CMake
+
+      Add quotes around the generator expression should allow CMake to
+      correctly parse the expression. Generator expressions are typically
+      parsed after command arguments. If a generator expression contains
+      spaces, new lines, semicolons or other characters that may be
+      interpreted as command argument separators, the whole expression
+      should be surrounded by quotes when passed to a command. Failure to
+      do so may result in the expression being split and it may no longer
+      be recognized as a generator expression.
+
+      Fixes GitHub issue #2906
+
     - Fixed improper include of Subfiling VFD build directory
 
       With the release of the Subfiling Virtual File Driver feature, compiler
@@ -400,6 +457,12 @@ Bug Fixes since HDF5-1.14.0 release
       be used for building projects with CMake.
 
       Fixes GitHub issues #1546 and #2259
+
+    - Force lowercase Fortran module file names
+
+      The Cray Fortran compiler  uses  uppercase Fortran module file names, which
+      caused CMake installs to fail. A compiler option was added to use lowercase
+      instead.
 
 
     Tools

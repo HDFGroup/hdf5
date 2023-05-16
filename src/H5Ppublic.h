@@ -17,21 +17,18 @@
 #ifndef H5Ppublic_H
 #define H5Ppublic_H
 
-/* System headers needed by this file */
-
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5ACpublic.h" /* Metadata Cache                           */
 #include "H5Dpublic.h"  /* Datasets                                 */
 #include "H5Fpublic.h"  /* Files                                    */
-#include "H5FDpublic.h" /* File drivers                             */
-#include "H5Ipublic.h"  /* ID management                            */
+#include "H5FDpublic.h" /* (Virtual) File Drivers                   */
+#include "H5Ipublic.h"  /* Identifiers                              */
 #include "H5Lpublic.h"  /* Links                                    */
-#include "H5MMpublic.h" /* Memory management                        */
-#include "H5Opublic.h"  /* Object headers                           */
+#include "H5MMpublic.h" /* Memory Management                        */
+#include "H5Opublic.h"  /* Object Headers                           */
 #include "H5Spublic.h"  /* Dataspaces                               */
 #include "H5Tpublic.h"  /* Datatypes                                */
-#include "H5Zpublic.h"  /* Data filters                             */
+#include "H5Zpublic.h"  /* Data Filters                             */
 
 /*****************/
 /* Public Macros */
@@ -1462,7 +1459,7 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          and the pointer to the operator data passed in to H5Piterate(),
  *          \p iter_data.
  *
- *          H5Piterate() assumes that the properties in the object
+ * \warning H5Piterate() assumes that the properties in the object
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.

@@ -344,7 +344,6 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(oh->cache_info.type == H5AC_OHDR);
     HDassert(image_len);
 
@@ -375,7 +374,6 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     HDassert(f);
     HDassert(image);
     HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(oh->cache_info.type == H5AC_OHDR);
     HDassert(oh->chunk[0].size == len);
 #ifdef H5O_DEBUG
@@ -534,7 +532,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
             for (u = 0; u < oh->nmesgs; u++)
                 if (oh->mesg[u].chunkno == 0)
                     oh->mesg[u].dirty = FALSE;
-#ifdef H5O_DEBUG
+#ifndef NDEBUG
             /* Reset the number of messages dirtied by decoding */
             oh->ndecode_dirtied = 0;
 #endif
@@ -568,10 +566,6 @@ done:
  *
  * Purpose:     Free the in core representation of the supplied object header.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -584,7 +578,6 @@ H5O__cache_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     HDassert(oh);
-    HDassert(oh->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(oh->cache_info.type == H5AC_OHDR);
 
     /* Destroy object header */
@@ -749,7 +742,6 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
     HDassert(chk_proxy->oh);
     HDassert(image_len);
@@ -781,7 +773,6 @@ H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
     HDassert(f);
     HDassert(image);
     HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
     HDassert(chk_proxy->oh);
     HDassert(chk_proxy->oh->chunk[chk_proxy->chunkno].size == len);
@@ -825,8 +816,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Add flush dependency on chunk with continuation, if one exists */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                             H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                              (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
@@ -883,8 +872,6 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 /* Remove flush dependency on parent object header chunk, if one is set */
                 if (chk_proxy->fd_parent) {
                     /* Sanity checks */
-                    HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->magic ==
-                             H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type);
                     HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_ID) ||
                              (((H5C_cache_entry_t *)(chk_proxy->fd_parent))->type->id == H5AC_OHDR_CHK_ID));
@@ -919,10 +906,6 @@ done:
  * Purpose:     Free the in core memory associated with the supplied object
  *              header continuation chunk.
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -935,7 +918,6 @@ H5O__cache_chk_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     HDassert(chk_proxy);
-    HDassert(chk_proxy->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(chk_proxy->cache_info.type == H5AC_OHDR_CHK);
 
     /* Destroy object header chunk proxy */

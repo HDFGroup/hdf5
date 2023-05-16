@@ -216,7 +216,6 @@ H5G__cache_node_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(sym);
-    HDassert(sym->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sym->cache_info.type == H5AC_SNODE);
     HDassert(image_len);
 
@@ -248,7 +247,6 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing
     HDassert(f);
     HDassert(image);
     HDassert(sym);
-    HDassert(sym->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sym->cache_info.type == H5AC_SNODE);
     HDassert(len == sym->node_size);
 
@@ -281,10 +279,6 @@ done:
  *
  * Purpose:     Destroy a symbol table node in memory
  *
- * Note:        The metadata cache sets the object's cache_info.magic to
- *              H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *              callback (checked in assert).
- *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
@@ -297,7 +291,6 @@ H5G__cache_node_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     HDassert(sym);
-    HDassert(sym->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(sym->cache_info.type == H5AC_SNODE);
 
     /* Destroy symbol table node */

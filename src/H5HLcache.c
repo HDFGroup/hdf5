@@ -505,7 +505,6 @@ H5HL__cache_prefix_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
     HDassert(image_len);
 
@@ -551,7 +550,6 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     HDassert(f);
     HDassert(image);
     HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
     HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
     HDassert(prfx->heap);
@@ -626,10 +624,6 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
  *		from a failed speculative load attempt.  See comments below for
  *		details.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -648,7 +642,6 @@ H5HL__cache_prefix_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(prfx);
-    HDassert(prfx->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
     HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
 
@@ -778,7 +771,6 @@ H5HL__cache_datablock_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
     HDassert(dblk->heap);
     HDassert(dblk->heap->dblk_size > 0);
@@ -816,7 +808,6 @@ H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *imag
     HDassert(f);
     HDassert(image);
     HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
     HDassert(dblk->heap);
     heap = dblk->heap;
@@ -909,10 +900,6 @@ done:
  *
  * Purpose:	Free the in memory representation of the supplied local heap data block.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -931,7 +918,6 @@ H5HL__cache_datablock_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(dblk);
-    HDassert(dblk->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(dblk->cache_info.type == H5AC_LHEAP_DBLK);
 
     /* Destroy the data block */

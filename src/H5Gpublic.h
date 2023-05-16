@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Gpublic.h
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5G package
  *
@@ -23,14 +21,10 @@
 #ifndef H5Gpublic_H
 #define H5Gpublic_H
 
-/* System headers needed by this file */
-#include <sys/types.h>
-
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions			*/
-#include "H5Lpublic.h" /* Links                                */
-#include "H5Opublic.h" /* Object headers			*/
-#include "H5Tpublic.h" /* Datatypes				*/
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Lpublic.h" /* Links                                    */
+#include "H5Opublic.h" /* Object Headers                           */
 
 /*****************/
 /* Public Macros */
@@ -1008,7 +1002,10 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *
  *          examine the members of \c subgroup_a. When recursive iteration is
  *          required, the application must handle the recursion, explicitly
  *          calling H5Giterate() on discovered subgroups.
-
+ *
+ * \warning  Adding or removing members to the group during iteration
+ *           will lead to undefined behavior.
+ *
  * \version 1.8.0 Function deprecated in this release.
  *
  */

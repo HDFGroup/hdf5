@@ -728,10 +728,10 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
      */
     if (pass) {
 
-        if (H5C_get_cache_image_config(cache_ptr, &image_ctl) < 0) {
+        if (H5C__get_cache_image_config(cache_ptr, &image_ctl) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "error returned by H5C_get_cache_image_config().";
+            failure_mssg = "error returned by H5C__get_cache_image_config().";
         }
     }
 
@@ -7659,7 +7659,6 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     if (verbose) {
 
         HDassert(cache_ptr);
-        HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
         HDfprintf(stdout, "index size / index dirty size = %lld / %lld\n", (long long)(cache_ptr->index_size),
                   (long long)(cache_ptr->dirty_index_size));

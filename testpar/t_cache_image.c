@@ -1135,10 +1135,10 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
      */
     if (pass) {
 
-        if (H5C_get_cache_image_config(cache_ptr, &image_ctl) < 0) {
+        if (H5C__get_cache_image_config(cache_ptr, &image_ctl) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "error returned by H5C_get_cache_image_config().";
+            failure_mssg = "error returned by H5C__get_cache_image_config().";
         }
     }
 
