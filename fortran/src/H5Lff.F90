@@ -196,8 +196,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -318,8 +318,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
@@ -451,8 +451,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
@@ -664,8 +664,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -779,12 +779,12 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    TYPE(C_PTR)     , INTENT(INOUT) :: link_exists
+    TYPE(C_PTR)     , INTENT(IN) :: link_exists
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: lapl_id_default
@@ -1388,8 +1388,8 @@ CONTAINS
     INTEGER         , INTENT(OUT)   :: return_value
     INTEGER(HID_T)  , INTENT(IN)    :: es_id
     INTEGER         , INTENT(OUT)   :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
