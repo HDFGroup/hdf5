@@ -283,8 +283,8 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(IN)  :: es_id
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -368,8 +368,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: object_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER       , INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -516,8 +516,8 @@ CONTAINS
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
@@ -867,8 +867,8 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(IN)           :: es_id
     INTEGER         , INTENT(OUT)          :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: lapl_id_default
@@ -1026,8 +1026,8 @@ CONTAINS
     INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
 
-    TYPE(C_FUNPTR):: op
-    TYPE(C_PTR)   :: op_data
+    TYPE(C_FUNPTR), INTENT(IN) :: op
+    TYPE(C_PTR), INTENT(IN)   :: op_data
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER, INTENT(IN), OPTIONAL  :: fields
@@ -1133,13 +1133,13 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: name
-    TYPE(C_PTR)     , INTENT(INOUT)         :: object_info
+    TYPE(C_PTR)     , INTENT(IN)            :: object_info
     INTEGER(HID_T)  , INTENT(IN)            :: es_id
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL :: fields
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
@@ -1326,8 +1326,8 @@ CONTAINS
     INTEGER         , INTENT(IN)             :: index_type
     INTEGER         , INTENT(IN)             :: order
 
-    TYPE(C_FUNPTR)                           :: op
-    TYPE(C_PTR)                              :: op_data
+    TYPE(C_FUNPTR)  , INTENT(IN)             :: op
+    TYPE(C_PTR)     , INTENT(IN)             :: op_data
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
