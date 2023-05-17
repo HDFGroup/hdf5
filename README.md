@@ -1,4 +1,4 @@
-HDF5 version 1.14.1-1 currently under development
+HDF5 version 1.14.2-1 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
