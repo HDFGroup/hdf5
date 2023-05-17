@@ -5097,7 +5097,7 @@ help(char *name)
 void
 usage(char *name)
 {
-    (void)HDfprintf(stdout, "\nUsage:\t%s -h[elp], OR\n", name);
+    (void)HDfprintf(stdout, "\nusage:\t%s -h[elp], OR\n", name);
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);
