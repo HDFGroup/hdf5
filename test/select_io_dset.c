@@ -106,6 +106,21 @@ typedef enum {
 #define TEST_TCONV_BUF_TOO_SMALL               0x100
 #define TEST_IN_PLACE_TCONV                    0x200
 
+static herr_t
+check_actual_selection_io_mode(hid_t dxpl, uint32_t sel_io_mode_expected)
+{
+    uint32_t actual_sel_io_mode;
+
+    if (H5Pget_actual_selection_io_mode(dxpl, &actual_sel_io_mode) < 0)
+        FAIL_STACK_ERROR;
+    if (actual_sel_io_mode != sel_io_mode_expected)
+        TEST_ERROR;
+
+    return SUCCEED;
+error:
+    return FAIL;
+}
+
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
  *  --create dataset with H5T_NATIVE_INT
@@ -127,7 +142,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     int         trans_wbuf[DSET_SELECT_DIM];
     int         rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr = "2*x";
+    const char *expr                  = "2*x";
+    uint32_t    no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -256,17 +272,18 @@ error:
 static herr_t
 test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
-    int     i;
-    hid_t   did  = H5I_INVALID_HID;
-    hid_t   sid  = H5I_INVALID_HID;
-    hid_t   dcpl = H5I_INVALID_HID;
-    hid_t   dxpl = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    char   *wbuf     = NULL;
-    char   *wbuf_bak = NULL;
-    char   *rbuf     = NULL;
-    char    dset_name[DSET_NAME_LEN];
+    int      i;
+    hid_t    did  = H5I_INVALID_HID;
+    hid_t    sid  = H5I_INVALID_HID;
+    hid_t    dcpl = H5I_INVALID_HID;
+    hid_t    dxpl = H5I_INVALID_HID;
+    hsize_t  dims[1];
+    hsize_t  cdims[1];
+    char    *wbuf     = NULL;
+    char    *wbuf_bak = NULL;
+    char    *rbuf     = NULL;
+    char     dset_name[DSET_NAME_LEN];
+    uint32_t no_selection_io_cause = 0;
 
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
@@ -417,7 +434,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     long        trans_wbuf[DSET_SELECT_DIM];
     long long   rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr = "5 * (10 - x)";
+    const char *expr                  = "5 * (10 - x)";
+    uint32_t    no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -559,7 +577,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     short       trans_wbuf[DSET_SELECT_DIM];
     short       rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr = "2 * (10 + x)";
+    const char *expr                  = "2 * (10 + x)";
+    uint32_t    no_selection_io_cause = 0;
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -1060,6 +1079,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
     const char *expr = "2*x";
+    uint32_t    no_selection_io_cause;
 
     ndsets = MAX(MULTI_MIN_DSETS, MULTI_NUM_DSETS);
 
@@ -2886,9 +2906,6 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
 
-    /* If default mode, 1st write will trigger cb, 2nd write will trigger sieve */
-    /* If on mode, will trigger nothing because the on mode path is different */
-    /* Need 2 writes */
     if (test_mode & TEST_CONTIGUOUS_SIEVE_BUFFER) {
         no_selection_io_cause_write_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;
         no_selection_io_cause_read_expected |= H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER;

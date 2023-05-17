@@ -176,6 +176,9 @@
 /* Definitions for cause of no selection I/O property */
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE sizeof(uint32_t)
 #define H5D_XFER_NO_SELECTION_IO_CAUSE_DEF  0
+/* Definitions for actual selection I/O mode property */
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE sizeof(uint32_t)
+#define H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF  0
 /* Definitions for modify write buffer property */
 #define H5D_XFER_MODIFY_WRITE_BUF_SIZE sizeof(hbool_t)
 #define H5D_XFER_MODIFY_WRITE_BUF_DEF  FALSE
@@ -296,7 +299,8 @@ static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 static const H5D_selection_io_mode_t H5D_def_selection_io_mode_g     = H5D_XFER_SELECTION_IO_MODE_DEF;
 static const uint32_t                H5D_def_no_selection_io_cause_g = H5D_XFER_NO_SELECTION_IO_CAUSE_DEF;
-static const hbool_t                 H5D_def_modify_write_buf_g      = H5D_XFER_MODIFY_WRITE_BUF_DEF;
+static const uint32_t H5D_def_actual_selection_io_mode_g             = H5D_XFER_ACTUAL_SELECTION_IO_MODE_DEF;
+static const hbool_t  H5D_def_modify_write_buf_g                     = H5D_XFER_MODIFY_WRITE_BUF_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -471,6 +475,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if (H5P__register_real(pclass, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, H5D_XFER_NO_SELECTION_IO_CAUSE_SIZE,
                            &H5D_def_no_selection_io_cause_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the actual selection I/O mode property */
+    /* (Note: this property should not have an encode/decode callback) */
+    if (H5P__register_real(pclass, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                           H5D_XFER_ACTUAL_SELECTION_IO_MODE_SIZE, &H5D_def_actual_selection_io_mode_g, NULL,
+                           NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the modify write buffer property */
@@ -2562,7 +2573,7 @@ H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode /
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*DC", plist_id, selection_io_mode);
+    H5TRACE2("e", "ix", plist_id, selection_io_mode);
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
@@ -2609,6 +2620,39 @@ H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause /*o
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_no_selection_io_cause() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_actual_selection_io_mode
+ *
+ * Purpose:	    Retrieves actual selection I/O mode
+ *
+ * Return:	    Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              April 27, 2023
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_actual_selection_io_mode(hid_t plist_id, uint32_t *actual_selection_io_mode /*out*/)
+{
+    H5P_genplist_t *plist;
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", plist_id, actual_selection_io_mode);
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if (actual_selection_io_mode)
+        if (H5P_get(plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME, actual_selection_io_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get actual_selection_io_mode value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_actual_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_modify_write_buf_enc

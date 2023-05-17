@@ -154,7 +154,7 @@ set_dxpl(hid_t dxpl, H5D_selection_io_mode_t select_io_mode, H5FD_mpio_xfer_t mp
 } /* set_dxpl() */
 
 /*
- * Helper routine to check actual I/O mode on a dxpl
+ * Helper routine to check actual parallel I/O mode on a dxpl
  */
 static void
 check_io_mode(hid_t dxpl, unsigned chunked)
@@ -180,6 +180,20 @@ check_io_mode(hid_t dxpl, unsigned chunked)
     }
 
 } /* check_io_mode() */
+
+/*
+ * Helper routine to check actual selection I/O mode on a dxpl
+ */
+static void
+check_actual_selection_io_mode(hid_t dxpl, uint32_t sel_io_mode_expected)
+{
+    uint32_t actual_sel_io_mode;
+
+    if (H5Pget_actual_selection_io_mode(dxpl, &actual_sel_io_mode) < 0)
+        P_TEST_ERROR;
+    if (actual_sel_io_mode != sel_io_mode_expected)
+        P_TEST_ERROR;
+}
 
 /*
  *  Case 1: single dataset read/write, no type conversion (null case)
@@ -280,6 +294,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread(did, H5T_NATIVE_INT, mspace_id, fspace_id, ntrans_dxpl, rbuf) < 0)
@@ -426,6 +441,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         HDmemcpy(wbuf, wbuf_bak, (size_t)(4 * DSET_SELECT_DIM));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read the data from the dataset with little endian */
     if (H5Dread(did, H5T_STD_I32LE, mspace_id, fspace_id, dxpl, rbuf) < 0)
@@ -578,6 +594,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread(did, H5T_NATIVE_LLONG, mspace_id, fspace_id, ntrans_dxpl, rbuf) < 0)
@@ -727,6 +744,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
         HDmemcpy(wbuf, wbuf_bak, sizeof(wbuf));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread(did, H5T_NATIVE_SHORT, mspace_id, fspace_id, ntrans_dxpl, rbuf) < 0)
@@ -918,6 +936,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         HDmemcpy(s1_wbuf, s1_wbuf_bak, sizeof(s1_t) * DSET_SELECT_DIM);
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read all the data from the dataset */
     HDmemset(s1_rbuf, 0, sizeof(s1_t) * DSET_SELECT_DIM);
@@ -1224,6 +1243,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
         HDmemcpy(lwbuf, lwbuf_bak, sizeof(lwbuf));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read the data from the dataset: type conversion int-->long */
     /* If dtrans, without data transform set in dxpl */
@@ -1552,6 +1572,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         HDmemcpy(total_wbuf, total_wbuf_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, ntrans_dxpl, rbufs) < 0)
@@ -1856,6 +1877,7 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
         P_TEST_ERROR;
@@ -2297,6 +2319,7 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Read data from the dataset */
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, dxpl, rbufs) < 0)
@@ -2766,6 +2789,7 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
         HDmemcpy(total_wbuf, total_wbuf_bak, buf_size);
 
     check_io_mode(dxpl, chunked);
+    check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
@@ -3243,6 +3267,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                 P_TEST_ERROR;
 
             check_io_mode(dxpl, chunked);
+            check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
             /* Verify result read */
             /* for i ndsets */
@@ -3418,6 +3443,8 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         P_TEST_ERROR;
 
+    set_dxpl(dxpl, H5D_SELECTION_IO_MODE_ON, H5FD_MPIO_COLLECTIVE, H5FD_MPIO_COLLECTIVE_IO, false);
+
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         P_TEST_ERROR;
 
@@ -3481,6 +3508,10 @@ test_no_selection_io_cause_mode(const char *filename, hid_t fapl, uint32_t test_
 
     if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, dxpl, wbuf) < 0)
         P_TEST_ERROR;
+
+    if (!(test_mode & TEST_DISABLE_BY_API || test_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET ||
+          ((test_mode & TEST_TCONV_BUF_TOO_SMALL) && !(test_mode & TEST_IN_PLACE_TCONV))))
+        check_actual_selection_io_mode(dxpl, H5D_VECTOR_IO);
 
     if (H5Pget_no_selection_io_cause(dxpl, &no_selection_io_cause_write) < 0)
         P_TEST_ERROR;

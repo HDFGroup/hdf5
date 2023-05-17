@@ -305,6 +305,11 @@ typedef struct H5CX_t {
     hbool_t no_selection_io_cause_set;   /* Whether reason for not performing selection I/O is set */
     hbool_t no_selection_io_cause_valid; /* Whether reason for not performing selection I/O is valid */
 
+    uint32_t
+            actual_selection_io_mode; /* Actual selection I/O mode used (H5D_ACTUAL_SELECTION_IO_MODE_NAME) */
+    hbool_t actual_selection_io_mode_set;   /* Whether actual selection I/O mode is set */
+    hbool_t actual_selection_io_mode_valid; /* Whether actual selection I/O mode is valid */
+
     /* Cached LCPL properties */
     H5T_cset_t encoding;                 /* Link name character encoding */
     hbool_t    encoding_valid;           /* Whether link name character encoding is valid */
@@ -386,6 +391,8 @@ typedef struct H5CX_dxpl_cache_t {
     H5D_selection_io_mode_t selection_io_mode;     /* Selection I/O mode (H5D_XFER_SELECTION_IO_MODE_NAME) */
     uint32_t                no_selection_io_cause; /* Reasons for not performing selection I/O
                                                             (H5D_XFER_NO_SELECTION_IO_CAUSE_NAME) */
+    uint32_t actual_selection_io_mode;             /* Actual selection I/O mode
+                                                         (H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME) */
     hbool_t modify_write_buf;                      /* Whether the library can modify write buffers */
 } H5CX_dxpl_cache_t;
 
@@ -576,12 +583,17 @@ H5CX_init(void)
 
     /* Get the selection I/O mode */
     if (H5P_get(dx_plist, H5D_XFER_SELECTION_IO_MODE_NAME, &H5CX_def_dxpl_cache.selection_io_mode) < 0)
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve parallel transfer method")
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve selection I/O mode")
 
     /* Get the local & global reasons for breaking selection I/O values */
     if (H5P_get(dx_plist, H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, &H5CX_def_dxpl_cache.no_selection_io_cause) <
         0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve cause for no selection I/O")
+
+    /* Get the actual selection I/O mode */
+    if (H5P_get(dx_plist, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                &H5CX_def_dxpl_cache.actual_selection_io_mode) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve actual selection I/O mode")
 
     /* Get the modify write buffer property */
     if (H5P_get(dx_plist, H5D_XFER_MODIFY_WRITE_BUF_NAME, &H5CX_def_dxpl_cache.modify_write_buf) < 0)
@@ -2658,6 +2670,43 @@ done:
 } /* end H5CX_get_no_selection_io_cause() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5CX_get_no_selection_io_cause
+ *
+ * Purpose:     Retrieves the cause for not performing selection I/O
+ *              for the current API call context.
+ *
+ * Return:      Non-negative on success / Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              April 15, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_get_actual_selection_io_mode(uint32_t *actual_selection_io_mode)
+{
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(actual_selection_io_mode);
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert(H5P_DEFAULT != (*head)->ctx.dxpl_id);
+
+    H5CX_RETRIEVE_PROP_VALID_SET(dxpl, H5P_DATASET_XFER_DEFAULT, H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME,
+                                 actual_selection_io_mode)
+
+    /* Get the value */
+    *actual_selection_io_mode = (*head)->ctx.actual_selection_io_mode;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_get_actual_selection_io_mode() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5CX_get_modify_write_buf
  *
  * Purpose:     Retrieves the modify write buffer property for the current API call context.
@@ -3702,7 +3751,42 @@ H5CX_set_no_selection_io_cause(uint32_t no_selection_io_cause)
     } /* end if */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5CX_set_no_selectiion_io_cause() */
+} /* end H5CX_set_no_selection_io_cause() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_set_actual_selecction_io_mode
+ *
+ * Purpose:     Sets the actual selection I/O mode for the current API
+ *              call context.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Vailin Choi
+ *              April 15, 2023
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5CX_set_actual_selection_io_mode(uint32_t actual_selection_io_mode)
+{
+    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    HDassert(head && *head);
+    HDassert((*head)->ctx.dxpl_id != H5P_DEFAULT);
+
+    /* If we're using the default DXPL, don't modify it */
+    if ((*head)->ctx.dxpl_id != H5P_DATASET_XFER_DEFAULT) {
+        /* Cache the value for later, marking it to set in DXPL when context popped */
+        (*head)->ctx.actual_selection_io_mode     = actual_selection_io_mode;
+        (*head)->ctx.actual_selection_io_mode_set = TRUE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5CX_set_actual_selection_io_mode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_get_ohdr_flags
@@ -3766,6 +3850,7 @@ H5CX__pop_common(hbool_t update_dxpl_props)
     /* Check for cached DXPL properties to return to application */
     if (update_dxpl_props) {
         H5CX_SET_PROP(H5D_XFER_NO_SELECTION_IO_CAUSE_NAME, no_selection_io_cause)
+        H5CX_SET_PROP(H5D_XFER_ACTUAL_SELECTION_IO_MODE_NAME, actual_selection_io_mode)
 #ifdef H5_HAVE_PARALLEL
         H5CX_SET_PROP(H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_NAME, mpio_actual_chunk_opt)
         H5CX_SET_PROP(H5D_MPIO_ACTUAL_IO_MODE_NAME, mpio_actual_io_mode)
