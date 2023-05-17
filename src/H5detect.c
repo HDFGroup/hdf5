@@ -48,8 +48,8 @@ static const char *FileHeader = "\n\
 #include "H5Rpublic.h"
 
 #if defined(__has_attribute)
-#if __has_attribute(no_sanitize_address)
-#define HDF_NO_UBSAN __attribute__((no_sanitize_address))
+#if __has_attribute(no_sanitize)
+#define HDF_NO_UBSAN __attribute__((no_sanitize("undefined")))
 #else
 #define HDF_NO_UBSAN
 #endif
