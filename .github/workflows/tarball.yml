@@ -11,6 +11,9 @@ on:
         description: "The common base name of the source tarballs"
         value: ${{ jobs.create_tarball.outputs.file_base }}
 
+permissions:
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel
 jobs:

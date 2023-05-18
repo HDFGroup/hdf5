@@ -20,6 +20,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
