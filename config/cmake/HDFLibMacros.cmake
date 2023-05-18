@@ -17,6 +17,7 @@ macro (ORIGINAL_ZLIB_LIBRARY compress_type)
         GIT_TAG ${ZLIB_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter ZLIB file ${ZLIB_URL}")
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""
@@ -51,6 +52,7 @@ macro (ORIGINAL_SZIP_LIBRARY compress_type encoding)
         GIT_TAG ${SZIP_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter SZIP file ${SZIP_URL}")
     FetchContent_Declare (SZIP
         URL ${SZIP_URL}
         URL_HASH ""

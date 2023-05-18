@@ -32,12 +32,6 @@ set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
 
 set (HDF5_BUILD_GENERATORS ON CACHE BOOL "Build Test Generators" FORCE)
 
-set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
-
-set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
-
-set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
-
 set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
 
 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
@@ -61,14 +55,14 @@ set (ZLIB_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for ZLIB FetchContent"
 
 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
-set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original location" FORCE)
-set (LIBAEC_TGZ_ORIGNAME "libaec-v1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
+set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6" CACHE STRING "Use LIBAEC from original location" FORCE)
+set (LIBAEC_TGZ_ORIGNAME "libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
 set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
 
 ########################
 # API test options
 ########################
-set (KWSYS_TGZ_ORIGPATH "https://gitlab.kitware.com/utils/kwsys/-/archive/master/kwsys-master.tar.gz" CACHE STRING "Use KWSYS from original location" FORCE)
+set (KWSYS_TGZ_ORIGPATH "https://gitlab.kitware.com/utils/kwsys/-/archive/master" CACHE STRING "Use KWSYS from original location" FORCE)
 set (KWSYS_TGZ_ORIGNAME "kwsys-master.tar.gz" CACHE STRING "Use KWSYS from original compressed file" FORCE)
 set (KWSYS_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for KWSYS FetchContent" FORCE)
 
