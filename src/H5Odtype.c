@@ -752,6 +752,13 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
     } /* end switch */
 
 done:
+    /* Cleanup on error */
+    if (ret_value < 0)
+        /* Release (reset) dt but do not free it - leave it as an empty datatype as was the case on
+         * function entry */
+        if (H5T__free(dt) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_decode_helper() */
 
@@ -1312,9 +1319,11 @@ H5O_dtype_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
 done:
     /* Cleanup on error */
-    if (!ret_value) {
-        H5T_close_real(dt);
-    }
+    if (!ret_value)
+        /* Free dt */
+        if (H5T_close_real(dt) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't release datatype info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dtype_decode() */
 
