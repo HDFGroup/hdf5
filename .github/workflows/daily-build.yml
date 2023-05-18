@@ -4,7 +4,7 @@ name: hdf5 1.12 daily build
 on:
   workflow_dispatch:
   schedule:
-    - cron: "6 0 * * *"
+    - cron: "8 0 * * *"
 
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel.
