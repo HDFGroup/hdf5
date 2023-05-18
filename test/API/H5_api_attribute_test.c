@@ -1131,6 +1131,8 @@ test_create_attribute_invalid_params(void)
 
             PASSED();
 #endif
+            SKIPPED();
+            PART_EMPTY(H5Acreate_invalid_aapl);
         }
         PART_END(H5Acreate_invalid_aapl);
 
