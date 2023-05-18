@@ -75,4 +75,5 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           export SYCL_DEVICE_FILTER=opencl.cpu
           ctest --test-dir build --output-on-failure
+          cd build
           sudo cmake --install .
