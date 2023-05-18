@@ -62,7 +62,8 @@ scripts on compute nodes and to cross-compile for compute node hardware using
 a cross-compiling emulator.  The setup steps will make default settings for
 parallel or serial only builds available to the CMake command.
 
-    1. The "hdf5" directory should be renamed hdf5-<version string> (see section II).
+    1. The "hdf5" directory should be renamed hdf5-<version string>.  For 
+       further explanation see section II.
 
     2. Three cmake script files need to be copied to the working directory, or
        have symbolic links to them, created in the working directory:
@@ -141,7 +142,8 @@ cori, another CrayXC40, that line is replaced by "#SBATCH -C knl,quad,cache".
 For cori (and other machines), the values in LOCAL_BATCH_SCRIPT_NAME and
 LOCAL_BATCH_SCRIPT_PARALLEL_NAME in the config/cmake/scripts/HPC/sbatch-HDF5options.cmake
 file can be replaced by cori_knl_ctestS.sl and cori_knl_ctestS.sl, or the lines
-can be edited in the batch files in hdf5-<version string(see section II)>/bin/batch.
+can be edited in the batch files in hdf5-<version string>/bin/batch (see section II
+for version string explanation).
 
 ========================================================================
 V. Manual alternatives
