@@ -1027,7 +1027,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: order
 
     TYPE(C_FUNPTR), INTENT(IN) :: op
-    TYPE(C_PTR), INTENT(IN)   :: op_data
+    TYPE(C_PTR), INTENT(IN)    :: op_data
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER, INTENT(IN), OPTIONAL  :: fields
@@ -1039,12 +1039,12 @@ CONTAINS
          IMPORT :: C_FUNPTR, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
+         INTEGER(HID_T):: object_id
+         INTEGER :: index_type
+         INTEGER :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR), VALUE :: op_data
-         INTEGER, INTENT(IN) :: fields
+         INTEGER :: fields
        END FUNCTION h5ovisit_c
     END INTERFACE
 
@@ -1343,15 +1343,15 @@ CONTAINS
          IMPORT :: C_CHAR, C_PTR, C_FUNPTR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: object_name
-         INTEGER(SIZE_T)              :: namelen
-         INTEGER         , INTENT(IN) :: index_type
-         INTEGER         , INTENT(IN) :: order
-         TYPE(C_FUNPTR)  , VALUE      :: op
-         TYPE(C_PTR)     , VALUE      :: op_data
-         INTEGER(HID_T)  , INTENT(IN) :: lapl_id
-         INTEGER         , INTENT(IN) :: fields
+         INTEGER(HID_T)  :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name
+         INTEGER(SIZE_T) :: namelen
+         INTEGER         :: index_type
+         INTEGER         :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(HID_T)  :: lapl_id
+         INTEGER         :: fields
        END FUNCTION h5ovisit_by_name_c
     END INTERFACE
 

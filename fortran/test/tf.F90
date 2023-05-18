@@ -69,8 +69,10 @@ CONTAINS
 
     CHARACTER(LEN=*), INTENT(IN) :: title_header ! test name
     INTEGER, PARAMETER :: width = TAB_SPACE+10
-    CHARACTER(LEN=2*width) ::title_centered =" "
+    CHARACTER(LEN=2*width) ::title_centered
     INTEGER :: len, i
+
+    title_centered(:) = " "
 
     len=LEN_TRIM(title_header)
     title_centered(1:3) ="| |"
