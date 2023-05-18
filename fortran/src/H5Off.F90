@@ -1041,7 +1041,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(HID_T):: object_id
          INTEGER :: index_type
-         INTEGER, :: order
+         INTEGER :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR), VALUE :: op_data
          INTEGER :: fields
