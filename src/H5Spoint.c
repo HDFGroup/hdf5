@@ -1308,17 +1308,16 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
         HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown point info size")
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, sizeof(uint32_t), p_end))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL,
-            "buffer overflow while decoding number of points")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding number of points")
 
-        UINT32DECODE(pp, num_elem);
-    
+    UINT32DECODE(pp, num_elem);
+
     /* Allocate space for the coordinates */
     if (NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information")
 
     /* Determine necessary size of buffer for coordinates */
-    size_t enc_type_size = sizeof(uint32_t);
+    size_t enc_type_size                 = sizeof(uint32_t);
     size_t coordinate_buffer_requirement = num_elem * rank * enc_type_size;
 
     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, pp, coordinate_buffer_requirement, p_end))
