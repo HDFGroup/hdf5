@@ -3,10 +3,745 @@ HDF5 History
 
 This file contains development history of the HDF5 1.14 branch
 
+02.      Release Information for hdf5-1.14.1
 01.      Release Information for hdf5-1.14.0
 
 [Search on the string '%%%%' for section breaks of each release.]
 
+%%%%1.14.1%%%%
+
+HDF5 version 1.14.1-2 released on 2023-05-11
+================================================================================
+HDF5 1.14.1-2 is a patch release for HDF5 1.14.1. The only change in the patch
+release is that Autoconf 2.71 was used to generate the Autotools build files,
+which allows building with Intel's oneAPI.
+
+
+INTRODUCTION
+============
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from release to release and new features in the HDF5-1.14.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.14.0
+- Platforms Tested
+- Known Problems
+- CMake vs. Autotools installations
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Added new CMake options for building and running HDF5 API tests
+      (Experimental)
+
+      HDF5 API tests are an experimental feature, primarily targeted
+      toward HDF5 VOL connector authors, that is currently being developed.
+      These tests exercise the HDF5 API and are being integrated back
+      into the HDF5 library from the HDF5 VOL tests repository
+      (https://github.com/HDFGroup/vol-tests). To support this feature,
+      the following new options have been added to CMake:
+
+        * HDF5_TEST_API: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 API tests will be built. These tests
+          will only be run during testing of HDF5 if the HDF5_TEST_SERIAL
+          (for serial tests) and HDF5_TEST_PARALLEL (for parallel tests)
+          options are enabled.
+
+        * HDF5_TEST_API_INSTALL: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 API test executables will be installed
+          on the system alongside the HDF5 library. This option is currently
+          not functional.
+
+        * HDF5_TEST_API_ENABLE_ASYNC: ON/OFF (Default: OFF)
+
+          Controls whether the HDF5 Async API tests will be built. These
+          tests will only be run if the VOL connector used supports Async
+          operations.
+
+        * HDF5_TEST_API_ENABLE_DRIVER: ON/OFF (Default: OFF)
+
+          Controls whether to build the HDF5 API test driver program. This
+          test driver program is useful for VOL connectors that use a
+          client/server model where the server needs to be up and running
+          before the VOL connector can function. This option is currently
+          not functional.
+
+        * HDF5_TEST_API_SERVER: String (Default: "")
+
+          Used to specify a path to the server executable that the test
+          driver program should execute.
+
+    - Added support for CMake presets file.
+
+      CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+      that allow users to specify common configure options and share them with others.
+      HDF added a CMakePresets.json file of a typical configuration and support
+      file, config/cmake-presets/hidden-presets.json. 
+      Also added a section to INSTALL_CMake.txt with very basic explanation of the
+      process to use CMakePresets.
+
+    - Deprecated and removed old SZIP library in favor of LIBAEC library
+
+      LIBAEC library has been used in HDF5 binaries as the szip library of choice
+      for a few years. We are removing the options for using the old SZIP library.
+
+      Also removed the config/cmake/FindSZIP.cmake file.
+
+    - Enabled instrumentation of the library by default in CMake for parallel
+      debug builds
+
+      HDF5 can be configured to instrument portions of the parallel library to
+      aid in debugging. Autotools builds of HDF5 turn this capability on by
+      default for parallel debug builds and off by default for other build types.
+      CMake has been updated to match this behavior.
+
+    - Added new option to build libaec and zlib inline with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      The HDF options (and defaults) for using this are:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
+          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
+          ZLIB_USE_LOCALCONTENT:BOOL=OFF
+
+      The CMake variables to control the path and file names:
+          LIBAEC_TGZ_ORIGPATH:STRING
+          LIBAEC_TGZ_ORIGNAME:STRING
+          ZLIB_TGZ_ORIGPATH:STRING
+          ZLIB_TGZ_ORIGNAME:STRING
+
+      See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
+
+
+    Library:
+    --------
+    - Added a Subfiling VFD configuration file prefix environment variable
+
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
+
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
+
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
+
+
+    Parallel Library:
+    -----------------
+    -
+
+
+    Fortran Library:
+    ----------------
+    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
+
+    - Added Fortran APIs:
+      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
+
+    C++ Library:
+    ------------
+    -
+
+
+    Java Library:
+    -------------
+    -
+
+
+    Tools:
+    ------
+    -
+
+
+    High-Level APIs:
+    ----------------
+    -
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    - Ported the existing VOL Connector Author Guide document to doxygen.
+
+      Added new dox file, VOLConnGuide.dox.
+
+
+Support for new platforms, languages and compilers
+==================================================
+    -
+
+
+Bug Fixes since HDF5-1.14.0 release
+===================================
+    Library
+    -------
+    - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
+
+      H5Ocopy was missing a check to determine whether the new object's
+      object header version is greater than version 1. Without this check,
+      copying of objects with object headers that are smaller than a
+      certain size would cause H5Ocopy to create an object header for the
+      new object that has a gap in the header data. According to the
+      HDF5 File Format Specification, this is not allowed for version
+      1 of the object header format.
+
+      Fixes GitHub issue #2653
+
+    - Fixed H5Pget_vol_cap_flags and H5Pget_vol_id to accept H5P_DEFAULT
+
+      H5Pget_vol_cap_flags and H5Pget_vol_id were updated to correctly
+      accept H5P_DEFAULT for the 'plist_id' FAPL parameter. Previously,
+      they would fail if provided with H5P_DEFAULT as the FAPL.
+
+    - Fixed ROS3 VFD anonymous credential usage with h5dump and h5ls
+
+      ROS3 VFD anonymous credential functionality became broken in h5dump
+      and h5ls in the HDF5 1.14.0 release with the added support for VFD
+      plugins, which changed the way that the tools handled setting of
+      credential information that the VFD uses. The tools could be
+      provided the command-line option of "--s3-cred=(,,)" as a workaround
+      for anonymous credential usage, but the documentation for this
+      option stated that anonymous credentials could be used by simply
+      omitting the option. The latter functionality has been restored.
+
+      Fixes GitHub issue #2406
+
+    - Fixed memory leaks when processing malformed object header continuation messages
+
+      Malformed object header continuation messages can result in a too-small
+      buffer being passed to the decode function, which could lead to reading
+      past the end of the buffer. Additionally, errors in processing these
+      malformed messages can lead to allocated memory not being cleaned up.
+
+      This fix adds bounds checking and cleanup code to the object header
+      continuation message processing.
+
+      Fixes GitHub issue #2604
+
+    - Fixed memory leaks, aborts, and overflows in H5O EFL decode
+
+      The external file list code could call assert(), read past buffer
+      boundaries, and not properly clean up resources when parsing malformed
+      external data files messages.
+
+      This fix cleans up allocated memory, adds buffer bounds checks, and
+      converts asserts to HDF5 error checking.
+
+      Fixes GitHub issue #2605
+
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      Fixes GitHub issue #2603
+
+    - Memory leak
+
+      Memory leak was detected when running h5dump with "pov".  The memory was allocated
+      via H5FL__malloc() in hdf5/src/H5FL.c
+
+      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
+      When deserializing the object header chunks for the file, memory is allocated for the
+      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
+      As error is encountered in loading the illegal message, the memory allocated for
+      cont_msg_info->msgs needs to be freed.
+
+      Fixes GitHub issue #2599
+
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
+
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information threw an error, which is due to the memory that was 
+      allocated for pline and efl not being properly cleaned up on error.  
+
+      Fixes GitHub issue #2602
+
+    - Fixed potential heap buffer overrun in group info header decoding from malformed file
+
+      H5O__ginfo_decode could sometimes read past allocated memory when parsing a
+      group info message from the header of a malformed file.
+  
+      It now checks buffer size before each read to properly throw an error in these cases.
+  
+      Fixes GitHub issue #2601
+      
+    - Fixed potential buffer overrun issues in some object header decode routines
+
+      Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
+      ensure that memory buffers don't get overrun when decoding buffers read from
+      a (possibly corrupted) HDF5 file.
+
+    - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
+      or SELECT_IOC_TOTAL I/O concentrator selection strategies
+
+      Multiple bugs involving these I/O concentrator selection strategies
+      were fixed, including:
+
+        * A bug that caused the selection strategy to be altered when
+          criteria for the strategy was specified in the
+          H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variable as
+          a single value, rather than in the old and undocumented
+          'integer:integer' format
+        * Two bugs which caused a request for 'N' I/O concentrators to
+          result in 'N - 1' I/O concentrators being assigned, which also
+          lead to issues if only 1 I/O concentrator was requested
+
+      Also added a regression test for these two I/O concentrator selection
+      strategies to prevent future issues. 
+
+    - Fixed a heap buffer overflow that occurs when reading from
+      a dataset with a compact layout within a malformed HDF5 file
+
+      During opening of a dataset that has a compact layout, the
+      library allocates a buffer that stores the dataset's raw data.
+      The dataset's object header that gets written to the file
+      contains information about how large of a buffer the library
+      should allocate. If this object header is malformed such that
+      it causes the library to allocate a buffer that is too small
+      to hold the dataset's raw data, future I/O to the dataset can
+      result in heap buffer overflows. To fix this issue, an extra
+      check is now performed for compact datasets to ensure that
+      the size of the allocated buffer matches the expected size
+      of the dataset's raw data (as calculated from the dataset's
+      dataspace and datatype information). If the two sizes do not
+      match, opening of the dataset will fail.
+
+      Fixes GitHub issue #2606
+
+    - Fixed a memory corruption issue that can occur when reading
+      from a dataset using a hyperslab selection in the file
+      dataspace and a point selection in the memory dataspace
+
+      When reading from a dataset using a hyperslab selection in
+      the dataset's file dataspace and a point selection in the
+      dataset's memory dataspace where the file dataspace's "rank"
+      is greater than the memory dataspace's "rank", memory corruption
+      could occur due to an incorrect number of selection points
+      being copied when projecting the point selection onto the
+      hyperslab selection's dataspace.
+
+    - Fixed an issue with collective metadata writes of global heap data
+
+      New test failures in parallel netCDF started occurring with debug
+      builds of HDF5 due to an assertion failure and this was reported in
+      GitHub issue #2433. The assertion failure began happening after the
+      collective metadata write pathway in the library was updated to use
+      vector I/O so that parallel-enabled HDF5 Virtual File Drivers (other
+      than the existing MPI I/O VFD) can support collective metadata writes.
+
+      The assertion failure was fixed by updating collective metadata writes
+      to treat global heap metadata as raw data, as done elsewhere in the
+      library. 
+
+      Fixes GitHub issue #2433
+
+    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
+
+      Check for overflow when calculating on-disk attribute data size.
+
+      A bogus hdf5 file may contain dataspace messages with sizes
+      which lead to the on-disk data sizes to exceed what is addressable.
+      When calculating the size, make sure, the multiplication does not
+      overflow.
+      The test case was crafted in a way that the overflow caused the
+      size to be 0.
+
+      Fixes GitHub issue #2458
+
+    - Fixed buffer overflow error in image decoding function.
+
+      The error occurred in the function for decoding address from the specified
+      buffer, which is called many times from the function responsible for image
+      decoding. The length of the buffer is known in the image decoding function,
+      but no checks are produced, so the buffer overflow can occur in many places,
+      including callee functions for address decoding. 
+
+      The error was fixed by inserting corresponding checks for buffer overflow.
+
+      Fixes GitHub issue #2432
+
+
+    Java Library
+    ------------
+    -
+
+
+    Configuration
+    -------------
+    - Fixed syntax of generator expressions used by CMake
+
+      Add quotes around the generator expression should allow CMake to
+      correctly parse the expression. Generator expressions are typically
+      parsed after command arguments. If a generator expression contains
+      spaces, new lines, semicolons or other characters that may be
+      interpreted as command argument separators, the whole expression
+      should be surrounded by quotes when passed to a command. Failure to
+      do so may result in the expression being split and it may no longer
+      be recognized as a generator expression.
+
+      Fixes GitHub issue #2906
+
+    - Fixed improper include of Subfiling VFD build directory
+
+      With the release of the Subfiling Virtual File Driver feature, compiler
+      flags were added to the Autotools build's CPPFLAGS and AM_CPPFLAGS
+      variables to always include the Subfiling VFD source code directory,
+      regardless of whether the VFD is enabled and built or not. These flags
+      are needed because the header files for the VFD contain macros that are
+      assumed to always be available, such as H5FD_SUBFILING_NAME, so the
+      header files are unconditionally included in the HDF5 library. However,
+      these flags are only needed when building HDF5, so they belong in the
+      H5_CPPFLAGS variable instead. Inclusion in the CPPFLAGS and AM_CPPFLAGS
+      variables would export these flags to the h5cc and h5c++ wrapper scripts,
+      as well as the libhdf5.settings file, which would break builds of software
+      that use HDF5 and try to use or parse information out of these files after
+      deleting temporary HDF5 build directories.
+
+      Fixes GitHub issues #2422 and #2621
+
+    - Correct the CMake generated pkg-config file
+
+      The pkg-config file generated by CMake had the order and placement of the
+      libraries wrong. Also added support for debug library names.
+
+      Changed the order of Libs.private libraries so that dependencies come after
+      dependents. Did not move the compression libraries into Requires.private
+      because there was not a way to determine if the compression libraries had
+      supported pkconfig files. Still recommend that the CMake config file method
+      be used for building projects with CMake.
+
+      Fixes GitHub issues #1546 and #2259
+
+    - Force lowercase Fortran module file names
+
+      The Cray Fortran compiler  uses  uppercase Fortran module file names, which
+      caused CMake installs to fail. A compiler option was added to use lowercase
+      instead.
+
+
+    Tools
+    -----
+    - Names of objects with square brackets will have trouble without the
+      special argument, --no-compact-subset, on the h5dump command line.
+
+      h5diff did not have this option and now it has been added.
+
+      Fixes GitHub issue #2682
+
+    - In the tools traverse function - an error in either visit call
+      will bypass the cleanup of the local data variables.
+
+      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
+
+      Fixes GitHub issue #2598
+
+
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    -----------
+    -
+
+    High-Level Library
+    ------------------
+    -
+
+
+    Fortran High-Level APIs
+    -----------------------
+    -
+
+
+    Documentation
+    -------------
+    -
+
+
+    F90 APIs
+    --------
+    -
+
+
+    C++ APIs
+    --------
+    - 
+
+
+    Testing
+    -------
+    -
+
+
+Platforms Tested
+===================
+
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
+                                     (cmake and autotools)
+
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+                                     (cmake and autotools)
+
+    Linux 5.3.18-150300-cray_shasta_c cray-mpich/8.1.16
+    #1 SMP x86_64 GNU/Linux              Cray clang 14.0.0
+    (crusher)                            GCC 11.2.0
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
+    #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
+    (stria)                              GCC 7.2.0 (Spack GCC)
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1
+    (vortex)                             GCC 8.3.1
+                                         XL 16.1.1
+                                     (cmake)
+
+    Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021,09.22, 2022.08.05
+                                     (cmake)
+
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
+
+    Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+
+    Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                         Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                     Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                     compilers:
+                                         Version 17.0.0.098 Build 20160721
+                                     GNU C (gcc) and C++ (g++) 4.8.5 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     MPICH 3.3 compiled with GCC 7.2.0
+                                     OpenMPI 2.1.6 compiled with icc 18.0.1
+                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+                                     (autotools and cmake)
+
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
+    #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
+    (quartz)                             GCC 7.3.0, 8.1.0
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
+
+    Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (skybridge)                          Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.66.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (attaway)                            Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.59.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1
+    (chama)                          (cmake)
+
+    macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
+    Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
+
+    macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
+    Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+    (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
+
+    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                           Intel icc/icpc/ifort version 17.0.2
+
+    Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                           gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
+
+
+    Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos6                              Version 4.4.7 20120313
+    (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+
+    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
+                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ clang 12.0.0
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2022 w/ clang 15.0.1
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+
+
+Known Problems
+==============
+
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
+
+    Several tests currently fail on certain platforms:
+        MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
+
+        MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
+        cray-mpich on theta and with XL compilers on ppc64le platforms.
+
+        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and are avoided by not building
+the gif tool by default. Enable building the High-Level tools with these options:
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
+
+    
 %%%%1.14.0%%%%
 
 HDF5 version 1.14.0 released on 2022-12-28
