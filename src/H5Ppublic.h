@@ -9584,10 +9584,10 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *                    committed datatype.
  *                    If copied in a single H5Ocopy() operation, objects
  *                    that share a committed datatype in the source will
- *                    share an anonymous committed dataype in the
+ *                    share an anonymous committed datatype in the
  *                    destination copy. Subsequent H5Ocopy() operations,
  *                    however, will be unaware of prior anonymous committed
- *                    dataypes and will create new ones.
+ *                    datatypes and will create new ones.
  *
  *                    See the “See Also” section immediately below for
  *                    functions related to the use of this flag.</td>

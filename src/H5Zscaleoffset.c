@@ -326,7 +326,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     {                                                                                                        \
         if (sizeof(type) <= sizeof(long long))                                                               \
             H5Z_scaleoffset_get_filval_1(type, cd_values, filval) else HGOTO_ERROR(                          \
-                H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                         \
+                H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                        \
     }
 
 /* Find maximum and minimum values of a buffer with fill value defined for integer type */
@@ -445,7 +445,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             }                                                                                                \
         }                                                                                                    \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Precompress for unsigned integer type */
@@ -553,7 +553,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                                                                   min * pow_fun((type)10, (type)D_val));     \
             }                                                                                                \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Modify values of data in precompression if fill value undefined for floating-point type */
@@ -572,7 +572,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 *(long long *)((void *)&buf[i]) = llround_fun(buf[i] * pow_fun((type)10, (type)D_val) -      \
                                                               min * pow_fun((type)10, (type)D_val));         \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Save the minimum value for floating-point type */
@@ -590,7 +590,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 H5MM_memcpy(((char *)minval) + (sizeof(long long) - sizeof(type)), &min, sizeof(type));      \
             } /* end else */                                                                                 \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Precompress for floating-point type using variable-minimum-bits method */
@@ -674,7 +674,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 H5MM_memcpy(&min, ((char *)&minval) + (sizeof(long long) - sizeof(type)), sizeof(type));     \
             } /* end else */                                                                                 \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Modify values of data in postdecompression if fill value defined for floating-point type */
@@ -701,7 +701,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                                : (type)(*(long long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) +  \
                                      min);                                                                   \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Modify values of data in postdecompression if fill value undefined for floating-point type */
@@ -717,7 +717,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             for (i = 0; i < d_nelmts; i++)                                                                   \
                 buf[i] = ((type)(*(long long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);   \
         else                                                                                                 \
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer datatype")                \
     }
 
 /* Postdecompress for floating-point type using variable-minimum-bits method */
@@ -827,7 +827,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
                 type = t_ulong_long;
 #endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
             else
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
         }
 
         if (dtype_sign == H5Z_SCALEOFFSET_SGN_2) { /* signed integer */
@@ -844,7 +844,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
                 type = t_long_long;
 #endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
             else
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
         }
     }
 
@@ -854,7 +854,7 @@ H5Z__scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dt
         else if (dtype_size == sizeof(double))
             type = t_double;
         else
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory dataype")
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, t_bad, "cannot find matched memory datatype")
     }
 
     /* Set return value */
