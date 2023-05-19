@@ -23,7 +23,7 @@ jobs:
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
-    needs: call-workflow-ctest
+    needs: [call-workflow-tarball, call-workflow-ctest]
     uses: ./.github/workflows/release.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
