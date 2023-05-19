@@ -6,7 +6,7 @@ Values from 32768 to 65535 are reserved for non-distributed uses (e.g., internal
 
 Please contact the maintainer of a filter for help with the plugin.
 
-| WARNING: be aware that compression filters require that the library not use `H5_MEMORY_ALLOC_SANITY_CHECK`.  Building in debug mode automatically enables this feature in earlier releases, which causes memory allocation and free problems in filter applications. Future versions of HDF5 will not enable this feature. |
+| WARNING: be aware that compression filters require that the library not use `H5_MEMORY_ALLOC_SANITY_CHECK`.  Building in debug mode automatically enables this feature in earlier releases, which causes memory allocation and free problems in filter applications. Current versions of HDF5 do not enable this feature. |
 | :--- |
 
 | Filter | ID  | Description | URL | Contact |
