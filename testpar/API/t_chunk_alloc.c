@@ -84,6 +84,18 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf("    API functions for basic file or dataset aren't supported with this "
+                   "connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     /* Only MAINPROCESS should create the file.  Others just wait. */
     if (MAINPROCESS) {
         nchunks = chunk_factor * mpi_size;
