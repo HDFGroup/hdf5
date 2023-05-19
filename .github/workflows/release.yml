@@ -8,10 +8,28 @@ on:
         description: "The common base name of the source tarballs"
         required: true
         type: string
+      file_sha:
+        description: "The sha for the source tarballs"
+        required: true
+        type: string
 
-# A workflow run is made up of one or more jobs that can run sequentially or
-# in parallel
+# Previous workflows must pass to get here so tag the commit that created the files
 jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          commit_sha: file_sha
+          tag: "snapshot"
+          force_push_tag: false
+          message: "Latest snapshot"
+
+      # Print result using the action output.
+      - run: |
+          echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
+
   getfiles:
     runs-on: ubuntu-latest
     steps:
@@ -57,9 +75,9 @@ jobs:
 
   PreRelease:
     runs-on: ubuntu-latest
-    needs: getfiles
+    needs: [create-tag, getfiles]
     steps:
-      - name: PreRelease tgz-tarball
+      - name: PreRelease tag
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
