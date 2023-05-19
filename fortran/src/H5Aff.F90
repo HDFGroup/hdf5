@@ -238,7 +238,6 @@ CONTAINS
     TYPE(C_PTR) :: file_default = C_NULL_PTR
     TYPE(C_PTR) :: func_default = C_NULL_PTR
     INTEGER(KIND=C_INT) :: line_default = 0
-    
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE

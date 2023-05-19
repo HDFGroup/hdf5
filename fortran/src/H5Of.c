@@ -132,50 +132,6 @@ done:
     return ret_value;
 }
 
-/****if* H5Of/h5ovisit_c
- * NAME
- *  h5ovisit_c
- * PURPOSE
- *  Calls H5Ovisit
- * INPUTS
- *  object_id - Identifier specifying subject group
- *  index_type - Type of index which determines the order
- *  order - Order within index
- *  idx - Iteration position at which to start
- *  op - Callback function passing data regarding the link to the calling application
- *  op_data - User-defined pointer to data required by the application for its processing of the link
- *  fields - Flags specifying the fields to include in object_info.
- *
- * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted
- *
- * RETURNS
- *     >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  November 19, 2008
- * SOURCE
- */
-int_f
-h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate2_t op, void *op_data,
-           int_f *fields)
-/******/
-{
-    int_f  ret_value = -1; /* Return value */
-    herr_t func_ret_value; /* H5Linterate return value */
-
-    /*
-     * Call H5Ovisit
-     */
-
-    func_ret_value = H5Ovisit3((hid_t)*group_id, (H5_index_t)*index_type, (H5_iter_order_t)*order, op,
-                               op_data, (unsigned)*fields);
-
-    ret_value = (int_f)func_ret_value;
-
-    return ret_value;
-}
-
 /****if* H5Of/h5oopen_by_token_c
  * NAME
  *  h5oopen_by_token_c
@@ -355,59 +311,6 @@ h5oget_info_c(hid_t_f *object_id, H5O_info_t_f *object_info, int_f *fields)
     ret_value = fill_h5o_info_t_f(Oinfo, object_info);
 
 done:
-    return ret_value;
-}
-
-/****if* H5Of/h5ovisit_by_name_c
- * NAME
- *  h5ovisit_by_name_c
- * PURPOSE
- *  Calls H5Ovisit_by_name
- * INPUTS
- *  object_id - Identifier specifying subject group.
- *  index_type - Type of index which determines the order.
- *  order - Order within index.
- *  idx - Iteration position at which to start.
- *  op - Callback function passing data regarding the link to the calling application.
- *  op_data - User-defined pointer to data required by the application for its processing of the link.
- *  fields - Flags specifying the fields to include in object_info.
- *
- * OUTPUTS
- *  idx - Position at which an interrupted iteration may be restarted.
- *
- * RETURNS
- *  >0 on success, 0< on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  May 16, 2012
- * SOURCE
- */
-int_f
-h5ovisit_by_name_c(hid_t_f *loc_id, _fcd object_name, size_t_f *namelen, int_f *index_type, int_f *order,
-                   H5O_iterate2_t op, void *op_data, hid_t_f *lapl_id, int_f *fields)
-/******/
-{
-    int_f  ret_value = -1;       /* Return value */
-    herr_t func_ret_value;       /* H5Linterate return value */
-    char  *c_object_name = NULL; /* Buffer to hold C string */
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    if ((c_object_name = HD5f2cstring(object_name, (size_t)*namelen)) == NULL)
-        HGOTO_DONE(FAIL);
-
-    /*
-     * Call H5Ovisit_by_name
-     */
-    func_ret_value =
-        H5Ovisit_by_name3((hid_t)*loc_id, c_object_name, (H5_index_t)*index_type, (H5_iter_order_t)*order, op,
-                          op_data, (unsigned)*fields, (hid_t)*lapl_id);
-    ret_value = (int_f)func_ret_value;
-
-done:
-    if (c_object_name)
-        HDfree(c_object_name);
     return ret_value;
 }
 
