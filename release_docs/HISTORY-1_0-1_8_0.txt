@@ -8448,7 +8448,7 @@ C. Changes Since Version 1.0.1
      -------------------
   H5Tget_super         - return the base datatype from which a
                          datatype is derived
-  H5Tvlen_create       - creates a new variable-length dataype
+  H5Tvlen_create       - creates a new variable-length datatype
   H5Tenum_create       - creates a new enumeration datatype
   H5Tenum_insert       - inserts a new enumeration datatype member
   H5Tenum_nameof       - returns the symbol name corresponding to a
@@ -8944,7 +8944,7 @@ Datatypes
    H5Tset_strpad    - set string padding
  + H5Tget_super         - return the base datatype from which a
                           datatype is derived
- + H5Tvlen_create       - creates a new variable-length dataype
+ + H5Tvlen_create       - creates a new variable-length datatype
  + H5Tenum_create       - creates a new enumeration datatype
  + H5Tenum_insert       - inserts a new enumeration datatype member
  + H5Tenum_nameof       - returns the symbol name corresponding to a
