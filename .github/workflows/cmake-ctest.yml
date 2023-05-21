@@ -1,0 +1,217 @@
+name: hdf5 1.10 ctest runs
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    inputs:
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel
+jobs:
+  build_and_test_win:
+  # Windows w/ MSVC + CMake
+  #
+    name: "Windows MSVC CTest"
+    runs-on: windows-latest
+    steps:
+      - name: Install Dependencies (Windows)
+        run: choco install ninja
+
+      - name: Enable Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+
+      - name: Set file base name (Windows)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+        shell: bash
+
+      # Get files created by release script
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      - name: using powershell
+        shell: pwsh
+        run: Get-Location
+
+      - name: List files for the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      - name: Uncompress source (Windows)
+        working-directory: ${{ github.workspace }}
+        run: 7z x ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+        shell: bash
+
+      - name: Run ctest (Windows)
+        run: |
+          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-MSVC --fresh
+        shell: bash
+
+      - name: Publish binary (Windows)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/hdfsrc/README.md -Destination ${{ runner.workspace }}/build/hdf5/
+          Copy-Item -Path ${{ runner.workspace }}/hdf5/build/ci-StdShar-MSVC/* -Destination ${{ runner.workspace }}/build/hdf5/ -Include *.zip
+          cd "${{ runner.workspace }}/build"
+          7z a -tzip ${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip hdf5
+        shell: pwsh
+
+      - name: List files in the space (Windows)
+        run: |
+              Get-ChildItem -Path ${{ github.workspace }}
+              Get-ChildItem -Path ${{ runner.workspace }}
+        shell: pwsh
+
+      # Save files created by ctest script
+      - name: Save published binary (Windows)
+        uses: actions/upload-artifact@v3
+        with:
+              name: zip-vs2022-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_linux:
+  # Linux (Ubuntu) w/ gcc + CMake
+  #
+    name: "Ubuntu gcc CMake"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install CMake Dependencies (Linux)
+        run: sudo apt-get install ninja-build
+
+      - name: Set file base name (Linux)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (Linux)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (Linux)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (Linux)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      - name: Run ctest (Linux)
+        run: |
+          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-GNUC --fresh
+        shell: bash
+
+      - name: Publish binary (Linux)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-GNUC/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz hdf5
+        shell: bash
+
+      - name: List files in the space (Linux)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      # Save files created by ctest script
+      - name: Save published binary (Linux)
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-ubuntu-2204-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+  build_and_test_mac:
+  # MacOS w/ Clang + CMake
+  #
+    name: "MacOS Clang CMake"
+    runs-on: macos-11
+    steps:
+      - name: Install Dependencies (MacOS)
+        run: brew install ninja
+
+      - name: Set file base name (MacOS)
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by release script
+      - name: Get tgz-tarball (MacOS)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: List files for the space (MacOS)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      - name: Uncompress source (MacOS)
+        run: tar -zxvf ${{ github.workspace }}/${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+
+      # symlinks the compiler executables to a common location 
+      - name: Setup GNU Fortran
+        uses: modflowpy/install-gfortran-action@v1
+  
+      - name: Run ctest (MacOS)
+        id: run-ctest
+        run: |
+          cd "${{ runner.workspace }}/hdf5/hdfsrc"
+          cmake --workflow --preset=ci-StdShar-Clang --fresh
+        shell: bash
+
+      - name: Publish binary (MacOS)
+        id: publish-ctest-binary
+        run: |
+          mkdir "${{ runner.workspace }}/build"
+          mkdir "${{ runner.workspace }}/build/hdf5"
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/COPYING_LBNL_HDF5 ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/hdfsrc/README.md ${{ runner.workspace }}/build/hdf5
+          cp ${{ runner.workspace }}/hdf5/build/ci-StdShar-Clang/*.tar.gz ${{ runner.workspace }}/build/hdf5
+          cd "${{ runner.workspace }}/build"
+          tar -zcvf ${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz hdf5
+        shell: bash
+
+      - name: List files in the space (MacOS)
+        run: |
+              ls ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+      # Save files created by ctest script
+      - name: Save published binary (MacOS)
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-osx12-binary
+              path: ${{ runner.workspace }}/build/${{ steps.set-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
