@@ -35,6 +35,8 @@
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/tudfilter.h5_ERR.txt
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_plugin_fail_ERR.out.h5.txt
       ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_plugin_test.out.h5.txt
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_help1.ddl
+      ${HDF5_TOOLS_TEST_H5COPY_SOURCE_DIR}/testfiles/h5copy_help2.ddl
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -393,6 +395,32 @@
     endif ()
   endmacro ()
 
+  macro (ADD_SIMPLE_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5COPY-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5copy${tgt_file_ext}> ${ARGN})
+      if (${resultcode})
+        set_tests_properties (H5COPY-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+    else (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (
+          NAME H5COPY-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5copy${tgt_file_ext}>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_OUTPUT=./testfiles/${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=./testfiles/${resultfile}.ddl"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
+      )
+    endif ()
+    set_tests_properties (H5COPY-${resultfile} PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    )
+  endmacro ()
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -419,6 +447,10 @@
   if (H5_HAVE_FILTER_SZIP)
     set (USE_FILTER_SZIP "true")
   endif ()
+
+# Test for help flag
+  ADD_SIMPLE_TEST (h5copy_help1 0 -h)
+  ADD_SIMPLE_TEST (h5copy_help2 0 --help)
 
   # "Test copying various forms of datasets"
   ADD_H5_TEST (simple 0 ${HDF_FILE1}.h5 -v -s simple -d simple)

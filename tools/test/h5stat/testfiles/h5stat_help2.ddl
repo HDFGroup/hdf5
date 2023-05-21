@@ -1,4 +1,4 @@
-Usage: h5stat [OPTIONS] file
+usage: h5stat [OPTIONS] file
 
       ERROR
      --enable-error-stack  Prints messages from the HDF5 error stack as they occur
