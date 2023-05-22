@@ -1025,33 +1025,35 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
-
     TYPE(C_FUNPTR), INTENT(IN) :: op
-    TYPE(C_PTR), INTENT(IN)    :: op_data
+    TYPE(C_PTR), INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER, INTENT(IN), OPTIONAL  :: fields
-    INTEGER :: fields_c
+    INTEGER, INTENT(IN), OPTIONAL :: fields
+
+    INTEGER(C_INT) :: fields_c
+    INTEGER(C_INT) :: return_value_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data, fields) &
-            BIND(C, NAME='h5ovisit_c')
-         IMPORT :: C_FUNPTR, C_PTR
+       INTEGER(C_INT) FUNCTION H5Ovisit3(object_id, index_type, order, op, op_data, fields) &
+            BIND(C, NAME='H5Ovisit3')
+         IMPORT :: C_FUNPTR, C_PTR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T):: object_id
-         INTEGER :: index_type
-         INTEGER :: order
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: index_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-         INTEGER :: fields
-       END FUNCTION h5ovisit_c
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+       END FUNCTION H5Ovisit3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F,C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields,C_INT)
 
-    return_value = h5ovisit_c(object_id, index_type, order, op, op_data, fields_c)
+    return_value_c = H5Ovisit3(object_id, INT(index_type,C_INT), INT(order, C_INT), op, op_data, fields_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -1327,44 +1329,44 @@ CONTAINS
     INTEGER         , INTENT(IN)             :: order
 
     TYPE(C_FUNPTR)  , INTENT(IN)             :: op
-    TYPE(C_PTR)     , INTENT(IN)             :: op_data
+    TYPE(C_PTR)     , INTENT(INOUT)          :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL  :: fields
 
-    INTEGER(SIZE_T) :: namelen
-    INTEGER(HID_T)  :: lapl_id_default
-    INTEGER :: fields_c
+    INTEGER(HID_T)  :: lapl_id_c
+    INTEGER(C_INT)  :: fields_c
+    INTEGER(C_INT)  :: return_value_c
+    CHARACTER(LEN=LEN_TRIM(object_name)+1,KIND=C_CHAR) :: object_name_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-            op, op_data, lapl_id, fields) BIND(C, NAME='h5ovisit_by_name_c')
-         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+       INTEGER(C_INT) FUNCTION H5Ovisit_by_name3(loc_id, object_name, index_type, order, &
+            op, op_data, fields, lapl_id) BIND(C, NAME='H5Ovisit_by_name3')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR, C_INT
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T)  :: loc_id
+         INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name
-         INTEGER(SIZE_T) :: namelen
-         INTEGER         :: index_type
-         INTEGER         :: order
+         INTEGER(C_INT), VALUE  :: index_type
+         INTEGER(C_INT), VALUE  :: order
          TYPE(C_FUNPTR), VALUE :: op
          TYPE(C_PTR)   , VALUE :: op_data
-         INTEGER(HID_T)  :: lapl_id
-         INTEGER         :: fields
-       END FUNCTION h5ovisit_by_name_c
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Ovisit_by_name3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    object_name_c = TRIM(object_name)//C_NULL_CHAR
 
-    namelen = LEN(object_name)
+    lapl_id_c = INT(H5P_DEFAULT_F, C_INT)
+    IF(PRESENT(lapl_id)) lapl_id_c = INT(lapl_id, C_INT)
 
-    lapl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-
-    return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-         op, op_data, lapl_id_default, fields_c)
+    return_value_c = H5Ovisit_by_name3(loc_id, object_name_c, INT(index_type, C_INT), INT(order, C_INT), &
+         op, op_data, fields_c, lapl_id_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
