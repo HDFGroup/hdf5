@@ -422,6 +422,12 @@ Bug Fixes since HDF5-1.14.0 release
       changed from FATAL_ERROR (which would halt the build process) to WARNING (which
       will print a message to stderr). Associated files and documentation were changed to match.
 
+      In addition, the default settings in the config/cmake/cacheinit.cmake file were changed to
+      allow CMake to disable building the filters if the tgz file could not be found. The option
+      to allow CMake to download the file from the original Github location requires setting
+      the ZLIB_USE_LOCALCONTENT option to OFF for gzip. And setting the LIBAEC_USE_LOCALCONTENT
+      option to OFF for libaec (szip).
+
       Fixes GitHub issue #2926
 
     - Fixed syntax of generator expressions used by CMake
