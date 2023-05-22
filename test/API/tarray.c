@@ -104,7 +104,6 @@ test_array_atomic_1d(void)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Atomic Datatypes Functionality\n"));
-    
 
     /* Allocate and initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
