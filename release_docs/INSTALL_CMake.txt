@@ -325,7 +325,7 @@ IV. Further considerations
             ZLIB_TGZ_ORIGPATH:STRING="some_location"
 
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
-         where "some_location" is the URLand by setting
+         where "some_location" is the URL and by setting
             ZLIB_USE_LOCALCONTENT:BOOL=OFF
             LIBAEC_USE_LOCALCONTENT:BOOL=OFF
          or full path to the compressed file and ext is the type of compression file.
