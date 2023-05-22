@@ -82,7 +82,9 @@ jobs:
             fortran: OFF
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
@@ -99,7 +101,9 @@ jobs:
             fortran: ON
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
@@ -158,7 +162,9 @@ jobs:
             fortran: OFF
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
@@ -499,7 +505,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (! matrix.thread_safe.enabled)
 
