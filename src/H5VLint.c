@@ -1028,7 +1028,7 @@ H5VL_object_inc_rc(H5VL_object_t *vol_obj)
     HDassert(vol_obj);
 
     /* Increment refcount for object and return */
-    FUNC_LEAVE_NOAPI(++vol_obj->rc)
+    FUNC_LEAVE_NOAPI_NOFS(++vol_obj->rc)
 } /* end H5VL_object_inc_rc() */
 
 /*-------------------------------------------------------------------------
