@@ -1643,7 +1643,9 @@ CONTAINS
 !!
 !! \param obj_id      Object identifier
 !! \param attr_name   Attribute name
-!! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
+!! \param attr_exists Pointer to attribute exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param file        \fortran_file
