@@ -706,7 +706,7 @@ done:
  *              target file when merging committed datatypes during H5Ocopy
  *              (i.e. when using the H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG flag
  *              as set by H5Pset_copy_object).  If the source named
- *              dataype is not found in the list of paths created by this
+ *              datatype is not found in the list of paths created by this
  *              function, the entire file will be searched.
  *
  * Usage:       H5Padd_merge_committed_dtype_path(plist_id, path)
