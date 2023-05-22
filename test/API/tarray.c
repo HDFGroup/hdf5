@@ -89,22 +89,8 @@ test_array_atomic_1d(void)
     int     i, j;                 /* counting variables           */
     herr_t  ret;                  /* Generic return value         */
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Atomic Datatypes Functionality\n"));
-    
 
     /* Allocate and initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
@@ -294,19 +280,6 @@ test_array_atomic_3d(void)
     int     i, j, k, l;           /* counting variables           */
     herr_t  ret;                  /* Generic return value         */
 
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 3-D Array of Atomic Datatypes Functionality\n"));
 
@@ -441,19 +414,6 @@ test_array_array_atomic(void)
     hsize_t rdims2[H5S_MAX_RANK]; /* Array dimensions for reading */
     int     i, j, k, l;           /* counting variables           */
     herr_t  ret;                  /* Generic return value         */
-
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array 2-D Arrays of Atomic Datatypes Functionality\n"));
@@ -623,19 +583,6 @@ test_array_compound_atomic(void)
     hid_t   mtid;                 /* Datatype ID for field        */
     int     i, j;                 /* counting variables           */
     herr_t  ret;                  /* Generic return value         */
-
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Compound Atomic Datatypes Functionality\n"));
@@ -849,19 +796,6 @@ test_array_compound_array(void)
     H5T_class_t mclass;               /* Datatype class for field     */
     int         i, j, k;              /* counting variables           */
     herr_t      ret;                  /* Generic return value         */
-
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Compound Array Datatypes Functionality\n"));
@@ -1195,19 +1129,6 @@ test_array_vlen_atomic(void)
     size_t      mem_used = 0;         /* Memory used during allocation    */
     int         i, j, k;              /* counting variables               */
     herr_t      ret;                  /* Generic return value             */
-
-    /* Make sure the connector supports the API functions being tested */
-    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
-        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
-        if (MAINPROCESS) {
-            puts("SKIPPED");
-            printf("    API functions for basic file, dataset or dataset more aren't supported with this "
-                   "connector\n");
-            fflush(stdout);
-        }
-
-        return;
-    }
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Atomic Variable-Length Datatypes Functionality\n"));
