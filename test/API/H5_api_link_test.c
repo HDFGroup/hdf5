@@ -14088,13 +14088,13 @@ static int
 test_get_link_info(void)
 {
     H5L_info2_t link_info;
+    const char *ext_objname = "/";
     htri_t      link_exists;
     size_t      link_val_size;
     hid_t       file_id = H5I_INVALID_HID, ext_file_id = H5I_INVALID_HID;
     hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t       subgroup_id = H5I_INVALID_HID;
     hid_t       gcpl_id     = H5I_INVALID_HID;
-    const char *ext_objname;
     char        ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link info retrieval");
@@ -14331,7 +14331,6 @@ test_get_link_info(void)
                 PART_ERROR(H5Lget_info_external);
             }
 
-            ext_objname = "/";
             if (H5Lcreate_external(ext_link_filename, ext_objname, subgroup_id,
                                    GET_LINK_INFO_TEST_EXT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -15899,7 +15898,6 @@ test_get_link_info(void)
             }
 
             /* Create several external links */
-            ext_objname = "/";
             if (H5Lcreate_external(ext_link_filename, ext_objname, subgroup_id,
                                    GET_LINK_INFO_TEST_EXT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16104,7 +16102,6 @@ test_get_link_info(void)
             }
 
             /* Create several external links */
-            ext_objname = "/";
             if (H5Lcreate_external(ext_link_filename, ext_objname, subgroup_id,
                                    GET_LINK_INFO_TEST_EXT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16303,7 +16300,6 @@ test_get_link_info(void)
             }
 
             /* Create several external links */
-            ext_objname = "/";
             if (H5Lcreate_external(ext_link_filename, ext_objname, subgroup_id,
                                    GET_LINK_INFO_TEST_EXT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -16508,7 +16504,6 @@ test_get_link_info(void)
             }
 
             /* Create several external links */
-            ext_objname = "/";
             if (H5Lcreate_external(ext_link_filename, ext_objname, subgroup_id,
                                    GET_LINK_INFO_TEST_EXT_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -19868,6 +19863,7 @@ test_link_iterate_hard_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_HARD_LINKS_TEST_NUM_LINKS;
 
@@ -20119,6 +20115,7 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_link_name_decreasing)
         {
             TESTING_2("H5Literate2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -20226,6 +20223,7 @@ test_link_iterate_soft_links(void)
         PART_BEGIN(H5Literate_by_name_link_name_decreasing)
         {
             TESTING_2("H5Literate_by_name2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_ITER_SOFT_LINKS_TEST_NUM_LINKS;
 
@@ -22427,6 +22425,7 @@ test_link_visit_soft_links_no_cycles(void)
         PART_BEGIN(H5Lvisit_no_cycles_link_name_decreasing)
         {
             TESTING_2("H5Lvisit2 by link name in decreasing order");
+
             /* Reset the counter to the appropriate value for the next test */
             i = LINK_VISIT_SOFT_LINKS_NO_CYCLE_TEST_NUM_LINKS_PER_TEST;
 

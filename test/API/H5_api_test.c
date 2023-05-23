@@ -116,12 +116,15 @@ H5_api_test_run(void)
 int
 main(int argc, char **argv)
 {
+    const char *vol_connector_string;
     const char *vol_connector_name;
     unsigned    seed;
-    hid_t       fapl_id           = H5I_INVALID_HID;
-    hid_t       default_con_id    = H5I_INVALID_HID;
-    hid_t       registered_con_id = H5I_INVALID_HID;
-    hbool_t     err_occurred      = FALSE;
+    hid_t       fapl_id                   = H5I_INVALID_HID;
+    hid_t       default_con_id            = H5I_INVALID_HID;
+    hid_t       registered_con_id         = H5I_INVALID_HID;
+    char       *vol_connector_string_copy = NULL;
+    char       *vol_connector_info        = NULL;
+    hbool_t     err_occurred              = FALSE;
 
     /* Simple argument checking, TODO can improve that later */
     if (argc > 1) {
@@ -158,12 +161,35 @@ main(int argc, char **argv)
     HDsnprintf(H5_api_test_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
                TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
         HDprintf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
+        vol_connector_info = NULL;
+    }
+    else {
+        char *token;
+
+        if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+            HDfprintf(stderr, "Unable to copy VOL connector string\n");
+            err_occurred = TRUE;
+            goto done;
+        }
+
+        if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+            HDfprintf(stderr, "Error while parsing VOL connector string\n");
+            err_occurred = TRUE;
+            goto done;
+        }
+
+        vol_connector_name = token;
+
+        if (NULL != (token = HDstrtok(NULL, " "))) {
+            vol_connector_info = token;
+        }
     }
 
-    HDprintf("Running API tests with VOL connector '%s'\n\n", vol_connector_name);
+    HDprintf("Running API tests with VOL connector '%s' and info string '%s'\n\n", vol_connector_name,
+             vol_connector_info ? vol_connector_info : "");
     HDprintf("Test parameters:\n");
     HDprintf("  - Test file name: '%s'\n", H5_api_test_filename);
     HDprintf("  - Test seed: %u\n", seed);
@@ -262,6 +288,8 @@ main(int argc, char **argv)
     }
 
 done:
+    HDfree(vol_connector_string_copy);
+
     if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
         HDfprintf(stderr, "Unable to close VOL connector ID\n");
         err_occurred = TRUE;

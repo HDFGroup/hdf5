@@ -172,12 +172,15 @@ error:
 int
 main(int argc, char **argv)
 {
+    const char *vol_connector_string;
     const char *vol_connector_name;
     unsigned    seed;
-    hid_t       fapl_id           = H5I_INVALID_HID;
-    hid_t       default_con_id    = H5I_INVALID_HID;
-    hid_t       registered_con_id = H5I_INVALID_HID;
-    int         required          = MPI_THREAD_MULTIPLE;
+    hid_t       fapl_id                   = H5I_INVALID_HID;
+    hid_t       default_con_id            = H5I_INVALID_HID;
+    hid_t       registered_con_id         = H5I_INVALID_HID;
+    char       *vol_connector_string_copy = NULL;
+    char       *vol_connector_info        = NULL;
+    int         required                  = MPI_THREAD_MULTIPLE;
     int         provided;
 
     /*
@@ -239,14 +242,45 @@ main(int argc, char **argv)
     HDsnprintf(H5_api_test_parallel_filename, H5_API_TEST_FILENAME_MAX_LENGTH, "%s%s", test_path_prefix,
                PARALLEL_TEST_FILE_NAME);
 
-    if (NULL == (vol_connector_name = HDgetenv(HDF5_VOL_CONNECTOR))) {
+    if (NULL == (vol_connector_string = HDgetenv(HDF5_VOL_CONNECTOR))) {
         if (MAINPROCESS)
             HDprintf("No VOL connector selected; using native VOL connector\n");
         vol_connector_name = "native";
+        vol_connector_info = NULL;
+    }
+    else {
+        char *token = NULL;
+
+        BEGIN_INDEPENDENT_OP(copy_connector_string)
+        {
+            if (NULL == (vol_connector_string_copy = HDstrdup(vol_connector_string))) {
+                if (MAINPROCESS)
+                    HDfprintf(stderr, "Unable to copy VOL connector string\n");
+                INDEPENDENT_OP_ERROR(copy_connector_string);
+            }
+        }
+        END_INDEPENDENT_OP(copy_connector_string);
+
+        BEGIN_INDEPENDENT_OP(get_connector_name)
+        {
+            if (NULL == (token = HDstrtok(vol_connector_string_copy, " "))) {
+                if (MAINPROCESS)
+                    HDfprintf(stderr, "Error while parsing VOL connector string\n");
+                INDEPENDENT_OP_ERROR(get_connector_name);
+            }
+        }
+        END_INDEPENDENT_OP(get_connector_name);
+
+        vol_connector_name = token;
+
+        if (NULL != (token = HDstrtok(NULL, " "))) {
+            vol_connector_info = token;
+        }
     }
 
     if (MAINPROCESS) {
-        HDprintf("Running parallel API tests with VOL connector '%s'\n\n", vol_connector_name);
+        HDprintf("Running parallel API tests with VOL connector '%s' and info string '%s'\n\n",
+                 vol_connector_name, vol_connector_info ? vol_connector_info : "");
         HDprintf("Test parameters:\n");
         HDprintf("  - Test file name: '%s'\n", H5_api_test_parallel_filename);
         HDprintf("  - Number of MPI ranks: %d\n", mpi_size);
@@ -411,6 +445,8 @@ main(int argc, char **argv)
     HDexit(EXIT_SUCCESS);
 
 error:
+    HDfree(vol_connector_string_copy);
+
     H5E_BEGIN_TRY
     {
         H5VLclose(default_con_id);

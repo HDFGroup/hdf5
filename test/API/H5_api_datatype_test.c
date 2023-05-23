@@ -2304,6 +2304,7 @@ test_resurrect_datatype(void)
     hid_t container_group = H5I_INVALID_HID;
     hid_t group_id        = H5I_INVALID_HID;
     hid_t type_id         = H5I_INVALID_HID;
+
     TESTING("resurrecting datatype after deletion");
 
     /* Make sure the connector supports the API functions being tested */
@@ -2355,6 +2356,7 @@ test_resurrect_datatype(void)
         HDprintf("    failed to delete datatype\n");
         goto error;
     }
+
     /* Check that datatype name is NULL */
     if (H5Iget_name(type_id, NULL, (size_t)0) != 0) {
         H5_FAILED();
@@ -2416,6 +2418,7 @@ test_resurrect_datatype(void)
         TEST_ERROR;
 
     PASSED();
+
     return 0;
 
 error:

@@ -21,7 +21,6 @@
 /* #include "h5test.h" */
 #include "hdf5.h"
 #include "H5private.h"
-#include "H5_api_tests_disabled.h"
 
 #define VERBO_NONE 0 /* None    */
 #define VERBO_DEF  3 /* Default */

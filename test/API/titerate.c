@@ -141,12 +141,10 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     iter_info  info;                  /* Custom iteration information */
     H5G_info_t ginfo;                 /* Buffer for querying object's info */
     herr_t     ret;                   /* Generic return value */
-    (void)fapl;
-    (void)new_format;
 
     /* Output message about test being performed */
-    MESSAGE(
-        5, ("Testing Group Iteration Functionality - SKIPPED for now due to no iteration restart support\n"));
+    MESSAGE(5, ("Testing Group Iteration Functionality\n"));
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) &&
@@ -440,11 +438,10 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     char     *anames[NATTR]; /* Names of the attributes created */
     iter_info info;          /* Custom iteration information */
     herr_t    ret;           /* Generic return value        */
-    (void)fapl;
-    (void)new_format;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Iteration Functionality\n"));
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         HDmemset(&info, 0, sizeof(iter_info));
@@ -677,9 +674,10 @@ test_iter_group_large(hid_t fapl)
     /* Allocate & initialize array */
     names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
     CHECK_PTR(names, "HDcalloc");
-    (void)fapl;
+
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES)) {

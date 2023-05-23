@@ -252,6 +252,7 @@ test_h5s_basic(void)
     CHECK(sid1, FAIL, "H5Screate");
     sid2 = H5Screate_simple(1, dims1, dims1);
     CHECK(sid2, FAIL, "H5Screate");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         /* This dataset's space has no extent; it should not be created */
         H5E_BEGIN_TRY
@@ -262,6 +263,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(dset1, FAIL, "H5Dcreate2");
     }
+
     dset1 = H5Dcreate2(fid1, BASICDATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dcreate2");
 
@@ -272,6 +274,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         H5E_BEGIN_TRY
         {
@@ -287,6 +290,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dwrite");
     }
+
     /* Try to iterate using the bad dataspace */
     H5E_BEGIN_TRY
     {
@@ -302,6 +306,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dfill");
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         /* Now use the bad dataspace as the space for an attribute */
         H5E_BEGIN_TRY
@@ -311,6 +316,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(aid1, FAIL, "H5Acreate2");
     }
+
     /* Make sure that dataspace reads using the bad dataspace fail */
     H5E_BEGIN_TRY
     {
@@ -318,6 +324,7 @@ test_h5s_basic(void)
     }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
         H5E_BEGIN_TRY
         {
@@ -333,6 +340,7 @@ test_h5s_basic(void)
         H5E_END_TRY
         VERIFY(ret, FAIL, "H5Dread");
     }
+
     /* Clean up */
     ret = H5Dclose(dset1);
     CHECK(ret, FAIL, "H5Dclose");
@@ -740,6 +748,7 @@ test_h5s_zero_dim(void)
                 }
             }
         }
+
         if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
             /* Select a hyperslab beyond its current dimension sizes, then try to write
              * the data.  It should fail. */
@@ -753,9 +762,11 @@ test_h5s_zero_dim(void)
             H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Dwrite");
         }
+
         /* Change to "none" selection */
         ret = H5Sselect_none(sid1);
         CHECK(ret, FAIL, "H5Sselect_none");
+
         if (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) {
             /* Select a point beyond the dimension size, then try to write the data.
              * It should fail. */
@@ -772,6 +783,7 @@ test_h5s_zero_dim(void)
             H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Dwrite");
         }
+
         /* Restore the selection to all */
         ret = H5Sselect_all(sid1);
         CHECK(ret, FAIL, "H5Sselect_all");

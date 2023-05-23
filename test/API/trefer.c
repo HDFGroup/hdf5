@@ -2026,7 +2026,8 @@ test_reference_obj_deleted(void)
     H5O_type_t obj_type; /* Object type              */
     herr_t     ret;      /* Generic return value     */
 
-    MESSAGE(5, ("Testing References to Deleted Objects - SKIPPED for now due to no support\n"));
+    MESSAGE(5, ("Testing References to Deleted Objects\n"));
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_REF_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         /* Create file */

@@ -1114,7 +1114,7 @@ test_create_attribute_invalid_params(void)
         PART_BEGIN(H5Acreate_invalid_aapl)
         {
             TESTING_2("H5Acreate with an invalid AAPL");
-#ifdef BROKEN
+
             H5E_BEGIN_TRY
             {
                 attr_id = H5Acreate2(group_id, ATTRIBUTE_CREATE_INVALID_PARAMS_ATTR_NAME, attr_dtype,
@@ -1130,9 +1130,6 @@ test_create_attribute_invalid_params(void)
             }
 
             PASSED();
-#endif
-            SKIPPED();
-            PART_EMPTY(H5Acreate_invalid_aapl);
         }
         PART_END(H5Acreate_invalid_aapl);
 
@@ -1305,6 +1302,7 @@ test_create_attribute_invalid_params(void)
         PART_BEGIN(H5Acreate_by_name_invalid_aapl)
         {
             TESTING_2("H5Acreate_by_name with invalid AAPL");
+
             H5E_BEGIN_TRY
             {
                 attr_id = H5Acreate_by_name(container_group, ATTRIBUTE_CREATE_INVALID_PARAMS_GROUP_NAME,

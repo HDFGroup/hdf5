@@ -250,6 +250,7 @@ test_attr_basic_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -259,6 +260,7 @@ test_attr_basic_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -396,6 +398,7 @@ test_attr_basic_write(hid_t fapl)
     attr_size = H5Aget_storage_size(attr);
     VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5Aget_storage_size");
 #endif
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -405,6 +408,7 @@ test_attr_basic_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -553,6 +557,7 @@ test_attr_flush(hid_t fapl)
 
     att = H5Acreate2(set, ATTR1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILL_VALUES) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
@@ -571,8 +576,9 @@ test_attr_flush(hid_t fapl)
             TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
     }
     else {
-        HDprintf("** SKIPPED attribute pre-read temporarily until attribute fill values supported **\n");
+        HDprintf("** SKIPPED attribute pre-read due to fill values not being supported **\n");
     }
+
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");
 
@@ -773,6 +779,7 @@ test_attr_compound_write(hid_t fapl)
     /* Create complex attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -782,6 +789,7 @@ test_attr_compound_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write complex attribute data */
     ret = H5Awrite(attr, tid1, attr_data4);
     CHECK(ret, FAIL, "H5Awrite");
@@ -998,6 +1006,7 @@ test_attr_scalar_write(hid_t fapl)
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1007,6 +1016,7 @@ test_attr_scalar_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_FLOAT, &attr_data5);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1145,6 +1155,7 @@ test_attr_mult_write(hid_t fapl)
     /* Create 1st attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1154,6 +1165,7 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write 1st attribute data */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1173,6 +1185,7 @@ test_attr_mult_write(hid_t fapl)
     /* Create 2nd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1182,6 +1195,7 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write 2nd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1201,6 +1215,7 @@ test_attr_mult_write(hid_t fapl)
     /* Create 3rd attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to create the same attribute again (should fail) */
         H5E_BEGIN_TRY
@@ -1210,6 +1225,7 @@ test_attr_mult_write(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret_id, FAIL, "H5Acreate2");
     }
+
     /* Write 3rd attribute information */
     ret = H5Awrite(attr, H5T_NATIVE_DOUBLE, attr_data3);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1599,6 +1615,7 @@ test_attr_delete(hid_t fapl)
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info3");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Try to delete bogus attribute */
         H5E_BEGIN_TRY
@@ -1608,6 +1625,7 @@ test_attr_delete(hid_t fapl)
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Adelete");
     }
+
     /* Verify the correct number of attributes */
     ret = H5Oget_info3(dataset, &oinfo, H5O_INFO_NUM_ATTRS);
     CHECK(ret, FAIL, "H5Oget_info3");
@@ -1716,9 +1734,10 @@ test_attr_dtype_shared(hid_t fapl)
     h5_stat_size_t filesize;             /* Size of file after modifications */
 #endif
     herr_t ret; /* Generic return value        */
+
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Shared Datatypes with Attributes - SKIPPED for now due to no support for shared "
-                "datatypes\n"));
+    MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
+
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_STORED_DATATYPES) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC)) {
         /* Create a file */
         file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -2303,6 +2322,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     /* Close attribute */
     ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
+
     if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC) {
         /* Attempt to add attribute again, which should fail */
         H5E_BEGIN_TRY
@@ -2312,6 +2332,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
         H5E_END_TRY;
         VERIFY(attr, FAIL, "H5Acreate2");
     }
+
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
@@ -7619,6 +7640,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     is_dense = H5O__is_attr_dense_test(my_dataset);
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 #endif
+
                     if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
                         /* Check for out of bound iteration */
                         idx = u;
@@ -7720,6 +7742,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         VERIFY(name_count, (max_compact * 2), "H5O__attr_dense_info_test");
                     }
 #endif
+
                     if (vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) {
                         /* Check for out of bound iteration */
                         idx = u;

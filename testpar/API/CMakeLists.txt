@@ -259,7 +259,7 @@ if (HDF5_TEST_PARALLEL)
       )
     endif ()
 
-    set(last_api_test "")
+    set (last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_parallel_${api_test}"
@@ -270,9 +270,9 @@ if (HDF5_TEST_PARALLEL)
         ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
 
-      set_tests_properties("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+      set_tests_properties ("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
 
-      set(last_api_test "h5_api_test_parallel_${api_test}")
+      set (last_api_test "h5_api_test_parallel_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
@@ -297,8 +297,99 @@ if (HDF5_TEST_PARALLEL)
         ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
       )
     endforeach ()
+
+    # Add tests for each external VOL connector that was built
+    foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+      # Determine whether connector should be tested with parallel tests
+      get_target_property (vol_test_parallel "${external_vol_tgt}" HDF5_VOL_TEST_PARALLEL)
+      if (${vol_test_parallel})
+        # Determine environment variables that need to be set for testing
+        set (vol_test_env "")
+        set (vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+
+        get_target_property (vol_test_string "${external_vol_tgt}" HDF5_VOL_NAME)
+        list (APPEND vol_test_env "HDF5_VOL_CONNECTOR=${vol_test_string}")
+
+        get_target_property (vol_lib_targets "${external_vol_tgt}" HDF5_VOL_TARGETS)
+        foreach (lib_target ${vol_lib_targets})
+          get_target_property (lib_target_output_dir "${lib_target}" LIBRARY_OUTPUT_DIRECTORY)
+          if (NOT "${lib_target_output_dir}" STREQUAL "lib_target_output_dir-NOTFOUND"
+              AND NOT "${lib_target_output_dir}" STREQUAL ""
+              AND NOT "${lib_target_output_dir}" STREQUAL "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+            set (vol_plugin_paths "${vol_plugin_paths}${CMAKE_SEP}${lib_target_output_dir}")
+          endif ()
+        endforeach ()
+
+        list (APPEND vol_test_env "HDF5_PLUGIN_PATH=${vol_plugin_paths}")
+
+        # Add main API tests
+        set (last_api_test "")
+        foreach (api_test ${HDF5_API_TESTS})
+          add_test (
+            NAME "${external_vol_tgt}-h5_api_test_parallel_${api_test}"
+            COMMAND $<TARGET_FILE:h5_api_test_driver>
+            --server ${HDF5_TEST_API_SERVER}
+            --client $<TARGET_FILE:h5_api_test_parallel> "${api_test}"
+            --serial
+            ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
+          )
+          set_tests_properties (
+            "${external_vol_tgt}-h5_api_test_parallel_${api_test}"
+            PROPERTIES
+              ENVIRONMENT
+                "${vol_test_env}"
+              WORKING_DIRECTORY
+                "${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}"
+              DEPENDS
+                "${last_api_test}"
+          )
+
+          set (last_api_test "${external_vol_tgt}-h5_api_test_parallel_${api_test}")
+        endforeach ()
+
+        # Add any extra HDF5 tests
+        foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
+          add_test (
+            NAME "${external_vol_tgt}-h5_api_test_parallel_${hdf5_test}"
+            COMMAND $<TARGET_FILE:h5_api_test_driver>
+            --server ${HDF5_TEST_API_SERVER}
+            --client $<TARGET_FILE:h5_api_test_parallel_${hdf5_test}>
+            --serial
+            ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
+          )
+          set_tests_properties (
+            "${external_vol_tgt}-h5_api_test_parallel_${hdf5_test}"
+            PROPERTIES
+              ENVIRONMENT
+                "${vol_test_env}"
+              WORKING_DIRECTORY
+                "${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}"
+          )
+        endforeach ()
+
+        # Hook external tests to same test suite
+        foreach (ext_api_test ${HDF5_API_EXT_PARALLEL_TESTS})
+          add_test (
+            NAME "${external_vol_tgt}-h5_api_ext_test_parallel_${ext_api_test}"
+            COMMAND $<TARGET_FILE:h5_api_test_driver>
+            --server ${HDF5_TEST_API_SERVER}
+            --client $<TARGET_FILE:${ext_api_test}>
+            --serial
+            ${HDF5_TEST_API_DRIVER_EXTRA_FLAGS}
+          )
+          set_tests_properties (
+            "${external_vol_tgt}-h5_api_ext_test_parallel_${ext_api_test}"
+            PROPERTIES
+              ENVIRONMENT
+                "${vol_test_env}"
+              WORKING_DIRECTORY
+                "${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}"
+          )
+        endforeach ()
+      endif ()
+    endforeach ()
   else ()
-    set(last_api_test "")
+    set (last_api_test "")
     foreach (api_test ${HDF5_API_TESTS})
       add_test (
         NAME "h5_api_test_parallel_${api_test}"
@@ -307,9 +398,9 @@ if (HDF5_TEST_PARALLEL)
           ${MPIEXEC_POSTFLAGS}
       )
 
-      set_tests_properties("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
+      set_tests_properties ("h5_api_test_parallel_${api_test}" PROPERTIES DEPENDS "${last_api_test}")
 
-      set(last_api_test "h5_api_test_parallel_${api_test}")
+      set (last_api_test "h5_api_test_parallel_${api_test}")
     endforeach ()
 
     foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
@@ -319,6 +410,73 @@ if (HDF5_TEST_PARALLEL)
           ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5_api_test_parallel_${hdf5_test}>
           ${MPIEXEC_POSTFLAGS}
       )
+    endforeach ()
+
+    # Add tests for each external VOL connector that was built
+    foreach (external_vol_tgt ${HDF5_EXTERNAL_VOL_TARGETS})
+      # Determine whether connector should be tested with parallel tests
+      get_target_property (vol_test_parallel "${external_vol_tgt}" HDF5_VOL_TEST_PARALLEL)
+      if (${vol_test_parallel})
+        # Determine environment variables that need to be set for testing
+        set (vol_test_env "")
+        set (vol_plugin_paths "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+
+        get_target_property (vol_test_string "${external_vol_tgt}" HDF5_VOL_NAME)
+        list (APPEND vol_test_env "HDF5_VOL_CONNECTOR=${vol_test_string}")
+
+        get_target_property (vol_lib_targets "${external_vol_tgt}" HDF5_VOL_TARGETS)
+        foreach (lib_target ${vol_lib_targets})
+          get_target_property (lib_target_output_dir "${lib_target}" LIBRARY_OUTPUT_DIRECTORY)
+          if (NOT "${lib_target_output_dir}" STREQUAL "lib_target_output_dir-NOTFOUND"
+              AND NOT "${lib_target_output_dir}" STREQUAL ""
+              AND NOT "${lib_target_output_dir}" STREQUAL "${CMAKE_BINARY_DIR}/${HDF5_INSTALL_BIN_DIR}")
+            set (vol_plugin_paths "${vol_plugin_paths}${CMAKE_SEP}${lib_target_output_dir}")
+          endif ()
+        endforeach ()
+
+        list (APPEND vol_test_env "HDF5_PLUGIN_PATH=${vol_plugin_paths}")
+
+        # Add main API tests
+        set (last_api_test "")
+        foreach (api_test ${HDF5_API_TESTS})
+          add_test (
+            NAME "${external_vol_tgt}-h5_api_test_parallel_${api_test}"
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
+              ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5_api_test_parallel> "${api_test}"
+              ${MPIEXEC_POSTFLAGS}
+          )
+          set_tests_properties (
+            "${external_vol_tgt}-h5_api_test_parallel_${api_test}"
+            PROPERTIES
+              ENVIRONMENT
+                "${vol_test_env}"
+              WORKING_DIRECTORY
+                "${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}"
+              DEPENDS
+                "${last_api_test}"
+          )
+
+          set (last_api_test "${external_vol_tgt}-h5_api_test_parallel_${api_test}")
+        endforeach ()
+
+        # Add any extra HDF5 tests
+        foreach (hdf5_test ${HDF5_API_PAR_TESTS_EXTRA})
+          add_test (
+            NAME "${external_vol_tgt}-h5_api_test_parallel_${hdf5_test}"
+            COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
+              ${MPIEXEC_PREFLAGS} $<TARGET_FILE:h5_api_test_parallel_${hdf5_test}>
+              ${MPIEXEC_POSTFLAGS}
+          )
+          set_tests_properties (
+            "${external_vol_tgt}-h5_api_test_parallel_${hdf5_test}"
+            PROPERTIES
+              ENVIRONMENT
+                "${vol_test_env}"
+              WORKING_DIRECTORY
+                "${HDF5_TEST_BINARY_DIR}/${external_vol_tgt}"
+          )
+        endforeach ()
+      endif ()
     endforeach ()
   endif ()
 endif ()
