@@ -14017,7 +14017,7 @@ test_get_link_info(void)
     hid_t       container_group = H5I_INVALID_HID, group_id = H5I_INVALID_HID;
     hid_t       subgroup_id = H5I_INVALID_HID;
     hid_t       gcpl_id     = H5I_INVALID_HID;
-    char       *ext_objname;
+    const char       *ext_objname;
     char        ext_link_filename[H5_API_TEST_FILENAME_MAX_LENGTH];
 
     TESTING_MULTIPART("link info retrieval");
