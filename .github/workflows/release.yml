@@ -26,12 +26,10 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v3
         with:
-#          ref: ${{ inputs.file_branch }}/${{ inputs.file_sha }}
-          path: hdfsrc
           fetch-depth: 0
 
       - run: |
-          cd hdfsrc && git checkout ${{ inputs.file_sha }} && cd ..
+          git checkout ${{ inputs.file_sha }}
 
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
