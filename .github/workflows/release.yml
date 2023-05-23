@@ -89,6 +89,8 @@ jobs:
   PreRelease:
     runs-on: ubuntu-latest
     needs: [create-tag, getfiles]
+    permissions:
+        contents: write # In order to allow tag creation
     steps:
       - name: PreRelease tag
         uses: softprops/action-gh-release@v1
