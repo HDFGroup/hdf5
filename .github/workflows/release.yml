@@ -26,7 +26,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.file_branch }}/${{ inputs.file_sha }}
+#          ref: ${{ inputs.file_branch }}/${{ inputs.file_sha }}
           path: hdfsrc
           fetch-depth: 0
 
