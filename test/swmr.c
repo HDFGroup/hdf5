@@ -7728,12 +7728,15 @@ error:
 int
 main(void)
 {
-    int     nerrors      = 0;             /* The # of errors */
-    hid_t   fapl         = -1;            /* File access property list ID */
-    char   *driver       = NULL;          /* VFD string (from env variable) */
-    char   *lock_env_var = NULL;          /* file locking env var pointer */
-    hbool_t use_file_locking;             /* read from env var */
-    hbool_t file_locking_enabled = FALSE; /* Checks if the file system supports locks */
+    int     nerrors      = 0;               /* The # of errors */
+    hid_t   fapl         = H5I_INVALID_HID; /* File access property list ID */
+    char   *driver       = NULL;            /* VFD string (from env variable) */
+    char   *lock_env_var = NULL;            /* file locking env var pointer */
+    hbool_t use_file_locking;               /* read from env var */
+    hbool_t file_locking_enabled = FALSE;   /* Checks if the file system supports locks */
+
+    /* Testing setup */
+    h5_reset();
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -7742,7 +7745,7 @@ main(void)
     if (!H5FD__supports_swmr_test(driver)) {
         HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
-    } /* end if */
+    }
 
     /* Check the environment variable that determines if we care
      * about file locking. File locking should be used unless explicitly
@@ -7760,9 +7763,6 @@ main(void)
             HDprintf("Error when determining if file locks are enabled\n");
             return EXIT_FAILURE;
         }
-
-    /* Set up */
-    h5_reset();
 
     /* Get file access property list */
     fapl = h5_fileaccess();
@@ -7822,7 +7822,7 @@ main(void)
          */
         nerrors += test_file_lock_swmr_same(fapl);
         nerrors += test_file_lock_swmr_concur(fapl);
-    } /* end if */
+    }
 
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
