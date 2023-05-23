@@ -21,7 +21,7 @@ jobs:
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
-          commit_sha: file_sha
+          commit_sha: ${{ inputs.file_sha }}
           tag: "snapshot"
           force_push_tag: false
           message: "Latest snapshot"
