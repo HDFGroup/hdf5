@@ -462,7 +462,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-13-xl'
+        if: matrix.os == 'macos-latest-xl'
 
       - name: Set environment for MSVC (Windows)
         run: |
