@@ -530,7 +530,12 @@ jobs:
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ matrix.build_mode.cmake }}
         working-directory: ${{ runner.workspace }}/build
-        if: matrix.generator != 'autogen'
+        if: (matrix.generator != 'autogen') && (matrix.name != 'MacOS Clang CMake')
+
+      - name: CMake Build (macOS)
+        run: cmake --build . --parallel 13 --config ${{ matrix.build_mode.cmake }}
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator != 'autogen') && (matrix.name == 'MacOS Clang CMake')
 
       #
       # RUN TESTS
@@ -545,7 +550,13 @@ jobs:
         run: ctest --build . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.name != 'MacOS Clang CMake') && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+
+      - name: CMake Run Tests (macOS)
+        run: ctest --build . --parallel 12 -C ${{ matrix.build_mode.cmake }} -V
+        working-directory: ${{ runner.workspace }}/build
+        # Skip Debug MSVC while we investigate H5L Java test timeouts
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.name == 'MacOS Clang CMake')
 
       #
       # INSTALL (note that this runs even when we don't run the tests)
