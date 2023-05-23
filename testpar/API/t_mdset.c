@@ -1037,6 +1037,19 @@ independent_group_read(void)
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
+    /* Make sure the connector supports the API functions being tested */
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
+        !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
+        if (MAINPROCESS) {
+            puts("SKIPPED");
+            printf(
+                "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+            fflush(stdout);
+        }
+
+        return;
+    }
+
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     H5Pset_all_coll_metadata_ops(plist, FALSE);
 
