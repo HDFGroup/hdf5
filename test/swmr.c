@@ -7739,7 +7739,6 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv(HDF5_DRIVER);
-
     if (!H5FD__supports_swmr_test(driver)) {
         HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
