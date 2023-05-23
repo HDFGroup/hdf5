@@ -57,7 +57,7 @@ main(void)
      * by the environment variable.
      */
     driver = HDgetenv(HDF5_DRIVER);
-    H5open();
+
     if (!H5FD__supports_swmr_test(driver))
         return EXIT_SUCCESS;
 
