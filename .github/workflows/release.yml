@@ -30,9 +30,8 @@ jobs:
           path: hdfsrc
           fetch-depth: 0
 
-      - name: Checkout Commit
-          run:
-            cd hdfsrc && git checkout ${{ inputs.file_sha }} && cd ..
+      - run: |
+          cd hdfsrc && git checkout ${{ inputs.file_sha }} && cd ..
 
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
