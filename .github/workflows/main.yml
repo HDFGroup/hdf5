@@ -157,7 +157,7 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang CMake"
-            os: macos-13-xl
+            os: macos-13
             cpp: ON
             fortran: OFF
             java: ON
@@ -462,7 +462,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-13-xl'
+        if: matrix.os == 'macos-13'
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -530,12 +530,7 @@ jobs:
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ matrix.build_mode.cmake }}
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.generator != 'autogen') && (matrix.name != 'MacOS Clang CMake')
-
-      - name: CMake Build (macOS)
-        run: cmake --build . --parallel 13 --config ${{ matrix.build_mode.cmake }}
-        working-directory: ${{ runner.workspace }}/build
-        if: (matrix.generator != 'autogen') && (matrix.name == 'MacOS Clang CMake')
+        if: (matrix.generator != 'autogen')
 
       #
       # RUN TESTS
@@ -550,13 +545,7 @@ jobs:
         run: ctest --build . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.name != 'MacOS Clang CMake') && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
-
-      - name: CMake Run Tests (macOS)
-        run: ctest --build . --parallel 12 -C ${{ matrix.build_mode.cmake }} -V
-        working-directory: ${{ runner.workspace }}/build
-        # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.name == 'MacOS Clang CMake')
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
 
       #
       # INSTALL (note that this runs even when we don't run the tests)
