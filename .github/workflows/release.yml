@@ -38,7 +38,7 @@ jobs:
         with:
           commit_sha: ${{ inputs.file_sha }}
           tag: "snapshot"
-          force_push_tag: false
+          force_push_tag: true
           message: "Latest snapshot"
 
       # Print result using the action output.
