@@ -198,8 +198,8 @@ CONTAINS
     CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
     CALL check("H5Screate_f", hdferror, total_error)
 
-    f_ptr1 = C_LOC(app_file)
-    f_ptr2 = C_LOC(app_func)
+    f_ptr1 = C_LOC(app_file(1:1))
+    f_ptr2 = C_LOC(app_func(1:1))
     CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id0, es_id, hdferror, &
          file=f_ptr1, func=f_ptr2, line=app_line)
     CALL check("h5acreate_f",hdferror,total_error)
