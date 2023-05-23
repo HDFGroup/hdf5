@@ -8,6 +8,10 @@ on:
         description: "The common base name of the source tarballs"
         required: true
         type: string
+      file_branch:
+        description: "The branch name for the source tarballs"
+        required: true
+        type: string
       file_sha:
         description: "The sha for the source tarballs"
         required: true
@@ -22,7 +26,7 @@ jobs:
       - name: Get Sources
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.file_sha }}
+          ref: ${{ inputs.file_branch }}/${{ inputs.file_sha }}
           fetch-depth: 0
 
       - uses: rickstaa/action-create-tag@v1
