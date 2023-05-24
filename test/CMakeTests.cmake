@@ -370,6 +370,18 @@ foreach (h5_test ${H5_TESTS})
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
       )
     endif ()
+
+    # Set the library path
+    #
+    # Necessary (on macOS, at least) since we copy certain executables to
+    # a test directory before calling fork(). Could be extended to Windows
+    # and POSIX systems that use LD_LIBRARY_PATH if needed, but that doesn't
+    # seem to be necessary at this time.
+    if (APPLE)
+      set_tests_properties (H5TEST-${h5_test} PROPERTIES
+        ENVIRONMENT "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+      )
+    endif ()
   endif ()
 endforeach ()
 
