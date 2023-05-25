@@ -266,7 +266,7 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Path to the object, relative to loc_id.
 !! \param obj_id  Object identifier for the opened object.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Access property list identifier for the link pointing to the object.
 !! \param file    \fortran_file
@@ -357,11 +357,14 @@ CONTAINS
 !!
 !! \brief Asynchronously closes an object in an HDF5 file.
 !!
-!! \param object_id Object identifier.
-!! \param es_id     \es_id
+!! \param object_id Object identifier
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
 !!
-!! See C API: @ref H5Oclose_async_f()
+!! See C API: @ref H5Oclose_async()
 !!
   SUBROUTINE h5oclose_async_f(object_id, es_id, hdferr, file, func, line)
     IMPLICIT NONE
@@ -370,7 +373,7 @@ CONTAINS
     INTEGER       , INTENT(OUT) :: hdferr
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
     TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
-    INTEGER    , INTENT(IN), OPTIONAL :: line
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
     TYPE(C_PTR) :: func_default = C_NULL_PTR
@@ -497,7 +500,7 @@ CONTAINS
 !! \param dst_name   Name to be assigned to the new copy.
 !! \param ocpypl_id  Object copy property list.
 !! \param lcpl_id    Link creation property list for the new hard link.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -845,7 +848,7 @@ CONTAINS
 !! \param order      Order of iteration within index, NOTE: zero-based.
 !! \param n          Object to open.
 !! \param obj_id     An object identifier for the opened object.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !!
 !! \param lapl_id    Link access property list.
@@ -1118,7 +1121,7 @@ CONTAINS
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
 !! \param object_info Pointer to buffer returning object information, points to variable of datatype TYPE(C_H5O_INFO_T).
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !! \param fields      Flags specifying the fields to include in object_info.

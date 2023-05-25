@@ -384,4 +384,6 @@ ALIASES += fortran_file="Pointer to filename the async subroutine is being calle
 ALIASES += fortran_func="Pointer to function name the async subroutine is being called in, func must be null character terminated"
 ALIASES += fortran_line="Line number the async subroutine is being called at"
 ALIASES += fortran_plist_id="Property list identifier"
+ALIASES += fortran_es_id="Event set identifier"
+ALIASES += fortran_vol_name="Connector name"
 

@@ -127,7 +127,7 @@ CONTAINS
 !!                     \li H5F_ACC_TRUNC_F
 !!                     \li H5F_ACC_EXCL_F
 !! \param file_id      File identifier
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param creation_prp File creation property list identifier
 !! \param access_prp   File access property list identifier
@@ -234,7 +234,7 @@ CONTAINS
 !! \param scope     Specifies the scope of the flushing action. Possible values are:
 !!                  \li H5F_SCOPE_GLOBAL_F
 !!                  \li H5F_SCOPE_LOCAL_F
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
@@ -418,7 +418,7 @@ CONTAINS
 !!                     \li H5F_ACC_RDWR_F
 !!                     \li H5F_ACC_RDONLY_F
 !! \param file_id      File identifier
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param access_prp   File access property list identifier
 !! \param file         \fortran_file
@@ -515,7 +515,7 @@ CONTAINS
 !!
 !! \param file_id     Identifier of a file for which an additional identifier is required.
 !! \param ret_file_id New file identifier.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param file        \fortran_file
 !! \param func        \fortran_func
@@ -724,7 +724,7 @@ CONTAINS
 !! \brief Asynchronously closes HDF5 file.
 !!
 !! \param file_id File identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
