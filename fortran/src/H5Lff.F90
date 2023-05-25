@@ -765,7 +765,9 @@ CONTAINS
 !!
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
-!! \param link_exists Pointer to Link exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
+!! \param link_exists Pointer to link exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
 !! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.

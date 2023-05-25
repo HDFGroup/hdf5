@@ -4839,7 +4839,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR1_LEN);
@@ -4865,7 +4865,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
@@ -4935,7 +4935,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR3_LEN);
@@ -4981,7 +4981,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);
@@ -5043,7 +5043,7 @@ test_misc25a(void)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     CHECK(tid, FAIL, "H5Tcopy");
     ret = H5Tset_size(tid, (size_t)MISC25A_ATTR2_LEN);

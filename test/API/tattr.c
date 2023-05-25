@@ -11767,7 +11767,7 @@ test_attr(void)
             test_attr_delete(my_fapl);     /* Test H5A code for deleting attributes */
 
             /* This next test uses its own file information */
-            test_attr_dtype_shared(my_fapl); /* Test using shared dataypes in attributes */
+            test_attr_dtype_shared(my_fapl); /* Test using shared datatypes in attributes */
 
             /* This next test uses its own file information */
             test_attr_duplicate_ids(my_fapl);

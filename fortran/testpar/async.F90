@@ -26,6 +26,10 @@ MODULE test_async_APIs
   LOGICAL :: async_enabled = .TRUE.
   LOGICAL :: mpi_thread_mult = .TRUE.
 
+  INTEGER(C_INT), PARAMETER :: logical_true = 1
+  INTEGER(C_INT), PARAMETER :: logical_false = 0
+  
+
   ! Custom group iteration callback data
   TYPE, bind(c) ::  iter_info
      CHARACTER(KIND=C_CHAR), DIMENSION(1:12) :: name !  The name of the object
@@ -174,7 +178,7 @@ CONTAINS
     INTEGER(HID_T) :: space_id
     INTEGER(HID_T) :: attr_id0, attr_id1, attr_id2
     LOGICAL :: exists
-    LOGICAL(C_BOOL), TARGET :: exists0 = .FALSE., exists1 = .FALSE., exists2 = .FALSE., exists3 = .FALSE.
+    INTEGER(C_INT), TARGET :: exists0=logical_false, exists1=logical_false, exists2=logical_false, exists3=logical_false
     TYPE(C_PTR) :: f_ptr, f_ptr1, f_ptr2
 
     CALL H5EScreate_f(es_id, hdferror)
@@ -194,8 +198,8 @@ CONTAINS
     CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
     CALL check("H5Screate_f", hdferror, total_error)
 
-    f_ptr1 = C_LOC(app_file)
-    f_ptr2 = C_LOC(app_func)
+    f_ptr1 = C_LOC(app_file(1:1))
+    f_ptr2 = C_LOC(app_func(1:1))
     CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id0, es_id, hdferror, &
          file=f_ptr1, func=f_ptr2, line=app_line)
     CALL check("h5acreate_f",hdferror,total_error)
@@ -300,10 +304,10 @@ CONTAINS
     CALL check("H5ESwait_f", hdferror, total_error)
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
 
-    CALL VERIFY("H5Aexists_async_f", LOGICAL(exists0), .TRUE., total_error)
-    CALL VERIFY("H5Aexists_async_f", LOGICAL(exists1), .TRUE., total_error)
-    CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists2), .TRUE., total_error)
-    CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists3), .TRUE., total_error)
+    CALL VERIFY("H5Aexists_async_f", exists0, logical_true, total_error)
+    CALL VERIFY("H5Aexists_async_f", exists1, logical_true, total_error)
+    CALL VERIFY("H5Aexists_by_name_async_f", exists2, logical_true, total_error)
+    CALL VERIFY("H5Aexists_by_name_async_f", exists3, logical_true, total_error)
 
     CALL VERIFY("H5Aread_async_f", attr_rdata0, attr_data0, total_error)
     CALL VERIFY("H5Aread_async_f", attr_rdata1, attr_data1, total_error)
@@ -784,7 +788,7 @@ CONTAINS
     INTEGER(hid_t)  :: sid = -1  ! Dataspace ID
     CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME  = "corder_group"
     CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME2 = "corder_grp00"
-    LOGICAL(C_BOOL), TARGET :: exists1, exists2
+    INTEGER(C_INT), TARGET :: exists1, exists2
     LOGICAL :: exists
     TYPE(C_PTR) :: f_ptr
 
@@ -911,12 +915,12 @@ CONTAINS
     CALL H5Fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
     CALL check("h5fopen_async_f",hdferror,total_error)
 
-    exists1 = .FALSE.
+    exists1 = logical_false
     f_ptr = C_LOC(exists1)
     CALL H5Lexists_async_f(file_id, "hard_zero", f_ptr, es_id, hdferror)
     CALL check("H5Lexists_async_f",hdferror,total_error)
 
-    exists2 = .FALSE.
+    exists2 = logical_false
     f_ptr = C_LOC(exists2)
     CALL H5Lexists_async_f(file_id, "hard_two", f_ptr, es_id, hdferror)
     CALL check("H5Lexists_async_f",hdferror,total_error)
@@ -931,8 +935,8 @@ CONTAINS
     CALL check("H5ESwait_f", hdferror, total_error)
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
 
-    CALL VERIFY("H5Lexists_async_f", LOGICAL(exists1), .TRUE., total_error)
-    CALL VERIFY("H5Lexists_async_f", LOGICAL(exists2), .TRUE., total_error)
+    CALL VERIFY("H5Lexists_async_f", exists1, logical_true, total_error)
+    CALL VERIFY("H5Lexists_async_f", exists2, logical_true, total_error)
 
     CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id )
     CALL check("h5fopen_f",hdferror, total_error)
