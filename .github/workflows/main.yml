@@ -444,7 +444,7 @@ jobs:
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
            sudo apt install libaec0 libaec-dev
-        if: (matrix.generator == 'autogen')
+        if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
 
       - name: Install Autotools Dependencies (Linux, parallel)
         run: |
