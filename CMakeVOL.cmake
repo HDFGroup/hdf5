@@ -11,7 +11,6 @@
 #
 
 #TODOs:
-# Format URL index numbers with 0-prefix so they come in order
 # Document expected format for connector URLS (HTTPS git repo)
 # Document setting branch name for FetchContent
 # Document setting VOL name for testing (including escaping semicolons)
@@ -52,19 +51,29 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
   set (HDF5_EXTERNAL_VOL_TARGETS "")
 
   foreach (vol_idx RANGE 1 ${HDF5_MAX_EXTERNAL_VOLS})
-    set (HDF5_VOL_URL${vol_idx} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
-    mark_as_advanced (HDF5_VOL_URL${vol_idx})
+    # Generate fixed-width index number prepended with 0s
+    # so URLs come in order from 1 - HDF5_MAX_EXTERNAL_VOLS
+    set (vol_idx_num_digits 2) # Based on HDF5_MAX_EXTERNAL_VOLS
+    set (vol_idx_fixed "${vol_idx}")
+    string (LENGTH "${vol_idx_fixed}" vol_idx_len)
+    while (vol_idx_len LESS vol_idx_num_digits)
+      string (PREPEND vol_idx_fixed "0")
+      math (EXPR vol_idx_len "${vol_idx_len}+1")
+    endwhile ()
 
-    if (NOT "${HDF5_VOL_URL${vol_idx}}" STREQUAL "")
+    set (HDF5_VOL_URL${vol_idx_fixed} "" CACHE STRING "Git repository URL of an external HDF5 VOL connector to build")
+    mark_as_advanced (HDF5_VOL_URL${vol_idx_fixed})
+
+    if (NOT "${HDF5_VOL_URL${vol_idx_fixed}}" STREQUAL "")
       # Extract the name of the VOL connector
-      string (FIND "${HDF5_VOL_URL${vol_idx}}" "/" hdf5_vol_name_pos REVERSE)
+      string (FIND "${HDF5_VOL_URL${vol_idx_fixed}}" "/" hdf5_vol_name_pos REVERSE)
       if (hdf5_vol_name_pos EQUAL -1)
-        message (SEND_ERROR "Invalid URL '${HDF5_VOL_URL${vol_idx}}' specified for HDF5_VOL_URL${vol_idx}")
+        message (SEND_ERROR "Invalid URL '${HDF5_VOL_URL${vol_idx_fixed}}' specified for HDF5_VOL_URL${vol_idx_fixed}")
       endif ()
 
       math (EXPR hdf5_vol_name_pos "${hdf5_vol_name_pos}+1")
 
-      string (SUBSTRING "${HDF5_VOL_URL${vol_idx}}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
+      string (SUBSTRING "${HDF5_VOL_URL${vol_idx_fixed}}" ${hdf5_vol_name_pos} -1 hdf5_vol_name)
       string (REPLACE ".git" "" hdf5_vol_name "${hdf5_vol_name}")
       string (STRIP "${hdf5_vol_name}" hdf5_vol_name)
       string (TOUPPER "${hdf5_vol_name}" hdf5_vol_name_upper)
@@ -79,6 +88,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
 
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_NAME")
       mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_BRANCH")
+      mark_as_advanced ("HDF5_VOL_${hdf5_vol_name_upper}_TEST_PARALLEL")
 
       if (HDF5_TEST_API)
         if ("${HDF5_VOL_${hdf5_vol_name_upper}_NAME}" STREQUAL "")
@@ -91,7 +101,7 @@ if (HDF5_VOL_ALLOW_EXTERNAL)
       endif ()
 
       FetchContent_Declare (HDF5_VOL_${hdf5_vol_name_lower}
-        GIT_REPOSITORY "${HDF5_VOL_URL${vol_idx}}"
+        GIT_REPOSITORY "${HDF5_VOL_URL${vol_idx_fixed}}"
         GIT_TAG "${HDF5_VOL_${hdf5_vol_name_upper}_BRANCH}"
       )
 
