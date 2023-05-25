@@ -521,11 +521,12 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize(H5S_t **space, const uint8_t **p)
+H5S_select_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size)
 {
-    uint32_t sel_type;         /* Pointer to the selection type */
-    herr_t   ret_value = FAIL; /* Return value */
-
+    uint32_t       sel_type;                                   /* Pointer to the selection type */
+    herr_t         ret_value = FAIL;                           /* Return value */
+    const uint8_t *p_end     = *p + p_size - 1;                /* Pointer to last valid byte in buffer */
+    hbool_t        skip = (p_size == SIZE_MAX ? TRUE : FALSE); /* If p_size is unknown, skip buffer checks */
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
@@ -533,24 +534,26 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     /* Selection-type specific coding is moved to the callbacks. */
 
     /* Decode selection type */
+    if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *p, sizeof(uint32_t), p_end))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_OVERFLOW, FAIL, "buffer overflow while decoding selection type")
     UINT32DECODE(*p, sel_type);
 
     /* Make routine for selection type */
     switch (sel_type) {
         case H5S_SEL_POINTS: /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(space, p);
+            ret_value = (*H5S_sel_point->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
             break;
 
         case H5S_SEL_HYPERSLABS: /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(space, p);
+            ret_value = (*H5S_sel_hyper->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
             break;
 
         case H5S_SEL_ALL: /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(space, p);
+            ret_value = (*H5S_sel_all->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
             break;
 
         case H5S_SEL_NONE: /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(space, p);
+            ret_value = (*H5S_sel_none->deserialize)(space, p, p_size - sizeof(uint32_t), skip);
             break;
 
         default:
@@ -2865,9 +2868,9 @@ done:
     herr_t H5Ssel_iter_get_seq_list(sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len)
         hid_t   sel_iter_id;  IN: ID of the dataspace selection iterator to retrieve sequence from
         size_t  maxseq;       IN: Max. # of sequences to retrieve
-        size_t  maxbytes;     IN: Max. # of bytes to retrieve in sequences
+        size_t  maxelmts;     IN: Max. # of elements to retrieve in sequences
         size_t *nseq;         OUT: # of sequences retrieved
-        size_t *nbytes;       OUT: # of bytes retrieved, in all sequences
+        size_t *nelmts;       OUT: # of elements retrieved, in all sequences
         hsize_t *off;         OUT: Array of sequence offsets
         size_t *len;          OUT: Array of sequence lengths
  RETURNS
@@ -2882,8 +2885,8 @@ done:
     selections is "in order selected", unless the H5S_SEL_ITER_GET_SEQ_LIST_SORTED
     flag is passed to H5Sset_iter_create for a point selection.
 
-    MAXSEQ and MAXBYTES specify the most sequences or bytes possible to
-    place into the OFF and LEN arrays. *NSEQ and *NBYTES return the actual
+    MAXSEQ and MAXELMTS specify the most sequences or bytes possible to
+    place into the OFF and LEN arrays. *NSEQ and *NELMTS return the actual
     number of sequences and bytes put into the arrays.
 
     Each call to H5Ssel_iter_get_seq_list() will retrieve the next set
@@ -2894,7 +2897,7 @@ done:
     of elements selected in the dataspace the iterator was created from
     (which can be retrieved with H5Sget_select_npoints).  When there are no
     further sequences of elements to retrieve, calls to this routine will
-    set *NSEQ and *NBYTES to zero.
+    set *NSEQ and *NELMTS to zero.
  PROGRAMMER
     Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
@@ -2903,21 +2906,21 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size_t *nseq /*out*/,
-                         size_t *nbytes /*out*/, hsize_t *off /*out*/, size_t *len /*out*/)
+H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size_t *nseq /*out*/,
+                         size_t *nelmts /*out*/, hsize_t *off /*out*/, size_t *len /*out*/)
 {
     H5S_sel_iter_t *sel_iter;            /* Dataspace selection iterator to operate on */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "izzxxxx", sel_iter_id, maxseq, maxbytes, nseq, nbytes, off, len);
+    H5TRACE7("e", "izzxxxx", sel_iter_id, maxseq, maxelmts, nseq, nelmts, off, len);
 
     /* Check args */
     if (NULL == (sel_iter = (H5S_sel_iter_t *)H5I_object_verify(sel_iter_id, H5I_SPACE_SEL_ITER)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "not a dataspace selection iterator")
     if (NULL == nseq)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "'nseq' pointer is NULL")
-    if (NULL == nbytes)
+    if (NULL == nelmts)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "'nbytes' pointer is NULL")
     if (NULL == off)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "offset array pointer is NULL")
@@ -2925,16 +2928,93 @@ H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "length array pointer is NULL")
 
     /* Get the sequences of bytes */
-    if (maxseq > 0 && maxbytes > 0 && sel_iter->elmt_left > 0) {
-        if (H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxbytes, nseq, nbytes, off, len) < 0)
+    if (maxseq > 0 && maxelmts > 0 && sel_iter->elmt_left > 0) {
+        if (H5S_SELECT_ITER_GET_SEQ_LIST(sel_iter, maxseq, maxelmts, nseq, nelmts, off, len) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "sequence length generation failed")
     } /* end if */
     else
-        *nseq = *nbytes = 0;
+        *nseq = *nelmts = 0;
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ssel_iter_get_seq_list() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_contig_block
+
+ PURPOSE
+    Determines if a selection is a single contiguous block, and returns the
+    offset and length (in elements) if it is
+
+ USAGE
+    herr_t H5S_select_contig_block(space, is_contig, off, len)
+        H5S_t   *space;      IN: Selection to check
+        hbool_t *is_contig;  OUT: Whether the selection is contiguous
+        hsize_t *off;        OUT: Offset of selection
+        size_t  *len;        OUT: Length of selection
+
+ RETURNS
+    Non-negative on success/Negative on failure.
+
+ DESCRIPTION
+    Determines if a selection is a single contiguous block, and returns the
+    offset and length (in elements) if it is.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_contig_block(H5S_t *space, hbool_t *is_contig, hsize_t *off, size_t *len)
+{
+    H5S_sel_iter_t *iter      = NULL;  /* Selection iterator */
+    hbool_t         iter_init = FALSE; /* Selection iteration info has been initialized */
+    size_t          nseq_tmp;
+    size_t          nelem_tmp;
+    hsize_t         sel_off;
+    size_t          sel_len;
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(space);
+
+    /* Allocate and initialize the iterator */
+    if (NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate iterator")
+    if (H5S_select_iter_init(iter, space, 1, 0) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
+    iter_init = TRUE;
+
+    /* Get list of sequences for selection, to check if it is contiguous */
+    if (H5S_SELECT_ITER_GET_SEQ_LIST(iter, (size_t)1, (size_t)-1, &nseq_tmp, &nelem_tmp, &sel_off, &sel_len) <
+        0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "sequence length generation failed")
+
+    /* If the first sequence includes all the elements selected in this piece, it it contiguous */
+    H5_CHECK_OVERFLOW(space->select.num_elem, hsize_t, size_t);
+    if (sel_len == (size_t)space->select.num_elem) {
+        if (is_contig)
+            *is_contig = TRUE;
+        if (off)
+            *off = sel_off;
+        if (len)
+            *len = sel_len;
+    }
+    else if (is_contig)
+        *is_contig = FALSE;
+
+done:
+    if (iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if (iter)
+        iter = H5FL_FREE(H5S_sel_iter_t, iter);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_select_contig_block() */
 
 /*--------------------------------------------------------------------------
  NAME

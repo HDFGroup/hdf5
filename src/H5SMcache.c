@@ -324,7 +324,6 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     HDassert(table);
-    HDassert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
     HDassert(image_len);
 
@@ -361,7 +360,6 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
     HDassert(f);
     HDassert(image);
     HDassert(table);
-    HDassert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
     HDassert(table->table_size == len);
 
@@ -423,10 +421,6 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
  *
  * Purpose:	Free memory used by the SOHM table.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -445,7 +439,6 @@ H5SM__cache_table_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(table);
-    HDassert(table->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
 
     /* Destroy Shared Object Header Message table */
@@ -639,7 +632,6 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     HDassert(list);
-    HDassert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(list->cache_info.type == H5AC_SOHM_LIST);
     HDassert(list->header);
     HDassert(image_len);
@@ -680,7 +672,6 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     HDassert(f);
     HDassert(image);
     HDassert(list);
-    HDassert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(list->cache_info.type == H5AC_SOHM_LIST);
     HDassert(list->header);
     HDassert(list->header->list_size == len);
@@ -727,10 +718,6 @@ done:
  *
  * Purpose:	Free all memory used by the list.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -749,7 +736,6 @@ H5SM__cache_list_free_icr(void *_thing)
 
     /* Check arguments */
     HDassert(list);
-    HDassert(list->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(list->cache_info.type == H5AC_SOHM_LIST);
 
     /* Destroy Shared Object Header Message list */

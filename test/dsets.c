@@ -1633,7 +1633,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Function:  can_apply_bogus
  *
  * Purpose:   A bogus 'can apply' callback that returns 0 for H5T_NATIVE_DOUBLE
- *            dataype, but returns 1 for all other datatypes
+ *            datatype, but returns 1 for all other datatypes
  *
  * Return:    Success:    Described above
  *            Failure:    0

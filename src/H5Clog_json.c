@@ -181,7 +181,7 @@ done:
 } /* H5C__json_write_log_message() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_log_json_set_up
+ * Function:    H5C__log_json_set_up
  *
  * Purpose:     Setup for metadata cache logging.
  *
@@ -205,14 +205,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
+H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
 {
     H5C_log_json_udata_t *json_udata = NULL;
     char                 *file_name  = NULL;
     size_t                n_chars;
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(log_info);
@@ -271,7 +271,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_log_json_set_up() */
+} /* H5C__log_json_set_up() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C__json_tear_down_logging

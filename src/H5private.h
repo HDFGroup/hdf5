@@ -327,6 +327,15 @@
  */
 #define H5_IS_BUFFER_OVERFLOW(ptr, size, buffer_end) (((ptr) + (size)-1) > (buffer_end))
 
+/* Variant of H5_IS_BUFFER_OVERFLOW, used with functions such as H5Tdecode()
+ * that don't take a size parameter, where we need to skip the bounds checks.
+ *
+ * This is a separate macro since we don't want to inflict that behavior on
+ * the entire library.
+ */
+#define H5_IS_KNOWN_BUFFER_OVERFLOW(skip, ptr, size, buffer_end)                                             \
+    (skip ? FALSE : ((ptr) + (size)-1) > (buffer_end))
+
 /*
  * HDF Boolean type.
  */
@@ -1964,14 +1973,6 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
 #endif /* H5_HAVE_THREADSAFE */
-
-/* Extern global to determine if we should use selection I/O if available (this
- * variable should be removed once selection I/O performs as well as the
- * previous scalar I/O implementation
- *
- * NOTE: Must be exposed via H5_DLLVAR so parallel tests pass on Windows.
- */
-H5_DLLVAR hbool_t H5_use_selection_io_g;
 
 #ifdef H5_HAVE_CODESTACK
 

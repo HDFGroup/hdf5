@@ -43,6 +43,7 @@ MODULE H5F
   ! Number of objects opened in H5open_f
   INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
 
+
 #ifndef H5_DOXYGEN
   INTERFACE
      INTEGER(C_INT) FUNCTION h5fis_accessible(name, &
@@ -81,46 +82,127 @@ CONTAINS
     INTEGER, INTENT(IN) :: access_flags
     INTEGER(HID_T), INTENT(OUT) :: file_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: creation_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
+
     INTEGER(HID_T) :: creation_prp_default
     INTEGER(HID_T) :: access_prp_default
-    INTEGER :: namelen ! Length of the name character string
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5fcreate_c(name, namelen, access_flags, &
-            creation_prp_default, access_prp_default, file_id) BIND(C,NAME='h5fcreate_c')
+       INTEGER(HID_T) FUNCTION H5Fcreate(name, access_flags, &
+            creation_prp_default, access_prp_default) BIND(C,NAME='H5Fcreate')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER, INTENT(IN) :: access_flags
-         INTEGER(HID_T), INTENT(OUT) :: file_id
-         INTEGER(HID_T), INTENT(IN) :: creation_prp_default
-         INTEGER(HID_T), INTENT(IN) :: access_prp_default
-         INTEGER :: namelen
-       END FUNCTION h5fcreate_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER, VALUE :: access_flags
+         INTEGER(HID_T), VALUE :: creation_prp_default
+         INTEGER(HID_T), VALUE :: access_prp_default
+       END FUNCTION H5Fcreate
     END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
 
     creation_prp_default = H5P_DEFAULT_F
     access_prp_default = H5P_DEFAULT_F
 
     IF (PRESENT(creation_prp)) creation_prp_default = creation_prp
     IF (PRESENT(access_prp))   access_prp_default   = access_prp
-    namelen = LEN_TRIM(name)
-    hdferr = h5fcreate_c(name, namelen, access_flags, &
-         creation_prp_default, access_prp_default, file_id)
+
+    file_id = h5fcreate(c_name, access_flags, &
+         creation_prp_default, access_prp_default)
+
+    hdferr = 0
+    IF(file_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5fcreate_f
+
 !>
 !! \ingroup FH5F
 !!
-!! \brief Flushes all buffers associated with a file to disk
+!! \brief Asynchronously creates HDF5 files.
 !!
-!! \param object_id    Identifier of object used to identify the file.
-!! \param scope        Specifies the scope of the flushing action. Possible values are:
-!!                     \li H5F_SCOPE_GLOBAL_F
-!!                     \li H5F_SCOPE_LOCAL_F
+!! \param name         Name of the file to create
+!! \param access_flags File access flags. Allowable values are:
+!!                     \li H5F_ACC_TRUNC_F
+!!                     \li H5F_ACC_EXCL_F
+!! \param file_id      File identifier
+!! \param es_id        \es_id
 !! \param hdferr       \fortran_error
+!! \param creation_prp File creation property list identifier
+!! \param access_prp   File access property list identifier
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
+!!
+!! See C API: @ref H5Fcreate_async()
+!!
+  SUBROUTINE h5fcreate_async_f(name, access_flags, file_id, es_id, hdferr, &
+       creation_prp, access_prp, file, func, line)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER, INTENT(IN) :: access_flags
+    INTEGER(HID_T), INTENT(OUT) :: file_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: creation_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: creation_prp_default
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Fcreate_async(file, func, line, name, access_flags, &
+            creation_prp_default, access_prp_default, es_id) BIND(C,NAME='H5Fcreate_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER, VALUE :: access_flags
+         INTEGER(HID_T), VALUE :: creation_prp_default
+         INTEGER(HID_T), VALUE :: access_prp_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Fcreate_async
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    creation_prp_default = H5P_DEFAULT_F
+    access_prp_default = H5P_DEFAULT_F
+
+    IF(PRESENT(creation_prp)) creation_prp_default = creation_prp
+    IF(PRESENT(access_prp))   access_prp_default   = access_prp
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    file_id = H5Fcreate_async(file_default, func_default, line_default, &
+         c_name, access_flags, creation_prp_default, access_prp_default, es_id)
+
+    hdferr = 0
+    IF(file_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5fcreate_async_f
+!>
+!! \ingroup FH5F
+!!
+!! \brief Flushes all buffers associated with a file to disk.
+!!
+!! \param object_id Identifier of object used to identify the file.
+!! \param scope     Specifies the scope of the flushing action. Possible values are:
+!!                  \li H5F_SCOPE_GLOBAL_F
+!!                  \li H5F_SCOPE_LOCAL_F
+!! \param hdferr    \fortran_error
 !!
 !! See C API: @ref H5Fflush()
 !!
@@ -131,17 +213,72 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION h5fflush_c(object_id, scope) BIND(C,NAME='h5fflush_c')
+       INTEGER FUNCTION H5Fflush(object_id, scope) BIND(C,NAME='H5Fflush')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-         INTEGER, INTENT(IN) :: scope
-       END FUNCTION h5fflush_c
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: scope
+       END FUNCTION H5Fflush
     END INTERFACE
 
-    hdferr = h5fflush_c(object_id, scope)
+    hdferr = H5Fflush(object_id, INT(scope, C_INT))
 
   END SUBROUTINE h5fflush_f
+!>
+!! \ingroup FH5F
+!!
+!! \brief Asynchronously flushes all buffers associated with a file to disk.
+!!
+!! \param object_id Identifier of object used to identify the file.
+!! \param scope     Specifies the scope of the flushing action. Possible values are:
+!!                  \li H5F_SCOPE_GLOBAL_F
+!!                  \li H5F_SCOPE_LOCAL_F
+!! \param es_id     \es_id
+!! \param hdferr    \fortran_error
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Fflush_async()
+!!
+  SUBROUTINE h5fflush_async_f(object_id, scope, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: object_id
+    INTEGER, INTENT(IN) :: scope
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER FUNCTION H5Fflush_async(file, func, line, object_id, scope, es_id) &
+            BIND(C,NAME='H5Fflush_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: scope
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Fflush_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Fflush_async(file_default, func_default, line_default, &
+         object_id, INT(scope, C_INT), es_id)
+
+  END SUBROUTINE h5fflush_async_f
 !>
 !! \ingroup FH5F
 !!
@@ -161,7 +298,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: child_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
     INTEGER(HID_T) :: access_prp_default
     INTEGER :: namelen ! Length of the name character string
 
@@ -219,6 +356,7 @@ CONTAINS
     hdferr = h5funmount_c(loc_id, name, namelen)
 
   END SUBROUTINE h5funmount_f
+
 !>
 !! \ingroup FH5F
 !!
@@ -240,30 +378,106 @@ CONTAINS
     INTEGER, INTENT(IN) :: access_flags
     INTEGER(HID_T), INTENT(OUT) :: file_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
+
     INTEGER(HID_T) :: access_prp_default
-    INTEGER :: namelen ! Length of the name character string
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5fopen_c(name, namelen, access_flags, &
-            access_prp_default, file_id) BIND(C,NAME='h5fopen_c')
-         IMPORT :: C_CHAR
+       INTEGER(HID_T) FUNCTION H5Fopen(name, access_flags, access_prp_default) &
+            BIND(C,NAME='H5Fopen')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER, INTENT(IN) :: access_flags
-         INTEGER(HID_T), INTENT(IN) :: access_prp_default
-         INTEGER(HID_T), INTENT(OUT) :: file_id
-       END FUNCTION h5fopen_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(C_INT), VALUE :: access_flags
+         INTEGER(HID_T), VALUE :: access_prp_default
+       END FUNCTION H5Fopen
     END INTERFACE
 
+    c_name  = TRIM(name)//C_NULL_CHAR
+
     access_prp_default = H5P_DEFAULT_F
-    IF (PRESENT(access_prp))   access_prp_default   = access_prp
-    namelen = LEN_TRIM(name)
-    hdferr = h5fopen_c(name, namelen, access_flags, &
-                               access_prp_default, file_id)
+
+    IF(PRESENT(access_prp)) access_prp_default = access_prp
+
+    file_id = H5Fopen(c_name, INT(access_flags, C_INT), access_prp_default)
+
+    hdferr = 0
+    IF(file_id.LT.0) hdferr = -1
+
   END SUBROUTINE h5fopen_f
+
+!>
+!! \ingroup FH5F
+!!
+!! \brief Asynchronously opens HDF5 file.
+!!
+!! \param name         Name of the file to acecss.
+!! \param access_flags File access flags. Allowable values are:
+!!                     \li H5F_ACC_RDWR_F
+!!                     \li H5F_ACC_RDONLY_F
+!! \param file_id      File identifier
+!! \param es_id        \es_id
+!! \param hdferr       \fortran_error
+!! \param access_prp   File access property list identifier
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
+!!
+!! See C API: @ref H5Fopen_async()
+!!
+  SUBROUTINE h5fopen_async_f(name, access_flags, file_id, es_id, hdferr, &
+       access_prp, file, func, line)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER, INTENT(IN) :: access_flags
+    INTEGER(HID_T), INTENT(OUT) :: file_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: access_prp_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Fopen_async(file, func, line, name, access_flags, access_prp_default, es_id) &
+            BIND(C,NAME='H5Fopen_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(C_INT), VALUE :: access_flags
+         INTEGER(HID_T), VALUE :: access_prp_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Fopen_async
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    access_prp_default = H5P_DEFAULT_F
+
+    IF(PRESENT(access_prp)) access_prp_default = access_prp
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    file_id = H5Fopen_async(file_default, func_default, line_default, &
+         c_name, INT(access_flags, C_INT), access_prp_default, es_id)
+
+    hdferr = 0
+    IF(file_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5fopen_async_f
 !>
 !! \ingroup FH5F
 !!
@@ -281,17 +495,72 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: ret_file_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5freopen_c(file_id, ret_file_id) BIND(C,NAME='h5freopen_c')
+       INTEGER(HID_T) FUNCTION H5Freopen(file_id) BIND(C,NAME='H5Freopen')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: file_id
-         INTEGER(HID_T), INTENT(OUT) :: ret_file_id
-       END FUNCTION h5freopen_c
+         INTEGER(HID_T), VALUE :: file_id
+       END FUNCTION H5Freopen
     END INTERFACE
 
-    hdferr = h5freopen_c(file_id, ret_file_id)
+    ret_file_id = h5freopen(file_id)
+
+    hdferr = 0
+    IF(ret_file_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5freopen_f
+!>
+!! \ingroup FH5F
+!!
+!! \brief  Asynchronously reopens HDF5 file.
+!!
+!! \param file_id     Identifier of a file for which an additional identifier is required.
+!! \param ret_file_id New file identifier.
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Freopen_async()
+!!
+  SUBROUTINE h5freopen_async_f(file_id, ret_file_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: file_id
+    INTEGER(HID_T), INTENT(OUT) :: ret_file_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Freopen_async(file, func, line, file_id, es_id) &
+            BIND(C,NAME='H5Freopen_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: file_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Freopen_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    ret_file_id = h5freopen_async(file_default, func_default, line_default, file_id, es_id)
+
+    hdferr = 0
+    IF(ret_file_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5freopen_async_f
 !>
 !! \ingroup FH5F
 !!
@@ -366,7 +635,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     LOGICAL, INTENT(OUT) :: status
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
 
     INTEGER(HID_T) :: access_prp_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
@@ -437,16 +706,66 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: file_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5fclose_c(file_id) BIND(C,NAME='h5fclose_c')
+       INTEGER(C_INT) FUNCTION H5Fclose(file_id) BIND(C,NAME='H5Fclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: file_id
-       END FUNCTION h5fclose_c
+         INTEGER(HID_T), VALUE :: file_id
+       END FUNCTION H5Fclose
     END INTERFACE
 
-    hdferr = h5fclose_c(file_id)
+    hdferr = INT(H5Fclose(file_id))
 
   END SUBROUTINE h5fclose_f
+
+!>
+!! \ingroup FH5F
+!!
+!! \brief Asynchronously closes HDF5 file.
+!!
+!! \param file_id File identifier
+!! \param es_id   \es_id
+!! \param hdferr  \fortran_error
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Fclose_async()
+!!
+  SUBROUTINE h5fclose_async_f(file_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: file_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Fclose_async(file, func, line, file_id, es_id) &
+            BIND(C,NAME='H5Fclose_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: file_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Fclose_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Fclose_async(file_default, func_default, line_default, file_id, es_id))
+
+  END SUBROUTINE h5fclose_async_f
 
 !>
 !! \ingroup FH5F

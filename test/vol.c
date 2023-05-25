@@ -2076,10 +2076,11 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
     char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
@@ -2104,11 +2105,11 @@ test_async_vol_props(void)
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
      */
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) > 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
         TEST_ERROR;
 
     /* Close FAPL */
@@ -2129,12 +2130,12 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Reset environment variable & re-init default connector */
@@ -2155,12 +2156,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
@@ -2170,12 +2171,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Unregister the fake async VOL ID */
@@ -2224,12 +2225,14 @@ error:
 static herr_t
 test_vol_cap_flags(void)
 {
-    hid_t                    fapl_id       = H5I_INVALID_HID;
-    hid_t                    vol_id        = H5I_INVALID_HID;
-    uint64_t                 vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    hid_t                    fapl_id = H5I_INVALID_HID;
+    hid_t                    vol_id  = H5I_INVALID_HID;
+    char                    *vol_env = NULL;
     H5VL_pass_through_info_t passthru_info;
 
-    TESTING("VOL capacity flags");
+    TESTING("VOL capability flags");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Register a fake VOL */
     if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
@@ -2242,14 +2245,37 @@ test_vol_cap_flags(void)
         TEST_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
+
+    /* If using the native VOL by default, check flags again with H5P_DEFAULT */
+    vol_env = HDgetenv(HDF5_VOL_CONNECTOR);
+    if (!vol_env || (0 == HDstrcmp(vol_env, "native"))) {
+        H5VL_class_t *cls;
+        hid_t         connector_id;
+
+        if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
+            TEST_ERROR;
+        if (NULL == (cls = H5I_object(connector_id)))
+            TEST_ERROR;
+
+        vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+        if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0)
+            TEST_ERROR;
+
+        if (vol_cap_flags_g != cls->cap_flags)
+            TEST_ERROR;
+
+        if (H5VLclose(connector_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Stack the [internal] passthrough VOL connector on top of the fake connector */
     passthru_info.under_vol_id   = vol_id;
@@ -2259,15 +2285,15 @@ test_vol_cap_flags(void)
         FAIL_STACK_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)

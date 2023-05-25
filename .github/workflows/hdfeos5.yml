@@ -16,8 +16,11 @@ on:
 
 # Using concurrency to cancel any in-progress job or run
 concurrency:
-  group: hdfeos5-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build:

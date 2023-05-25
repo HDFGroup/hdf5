@@ -1407,7 +1407,7 @@ Known Problems
   for your installation.
 
   Observe that the basic idea is to insert the script as the first item
-  on the command line which executes the the test.  The script then
+  on the command line which executes the test.  The script then
   executes the test and filters out the offending text before passing
   it on.
 
@@ -8448,7 +8448,7 @@ C. Changes Since Version 1.0.1
      -------------------
   H5Tget_super         - return the base datatype from which a
                          datatype is derived
-  H5Tvlen_create       - creates a new variable-length dataype
+  H5Tvlen_create       - creates a new variable-length datatype
   H5Tenum_create       - creates a new enumeration datatype
   H5Tenum_insert       - inserts a new enumeration datatype member
   H5Tenum_nameof       - returns the symbol name corresponding to a
@@ -8944,7 +8944,7 @@ Datatypes
    H5Tset_strpad    - set string padding
  + H5Tget_super         - return the base datatype from which a
                           datatype is derived
- + H5Tvlen_create       - creates a new variable-length dataype
+ + H5Tvlen_create       - creates a new variable-length datatype
  + H5Tenum_create       - creates a new enumeration datatype
  + H5Tenum_insert       - inserts a new enumeration datatype member
  + H5Tenum_nameof       - returns the symbol name corresponding to a

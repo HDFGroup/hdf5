@@ -1374,7 +1374,7 @@ SUBROUTINE t_enum(total_error)
   INTEGER(SIZE_T)  , PARAMETER :: NAME_BUF_SIZE = 16
 
 ! Enumerated type
-  INTEGER, PARAMETER :: SOLID=0, LIQUID=1, GAS=2, PLASMA=3
+  INTEGER, PARAMETER :: SOLID=0, PLASMA=3
 
   INTEGER(HID_T) :: file, filetype, memtype, space, dset ! Handles
 
@@ -3598,32 +3598,26 @@ SUBROUTINE multiple_dset_rw(total_error)
   CALL check("h5dread_multi_f", error, total_error)
 
   ! check the written and read in values
+  error = 0
   DO i = 1, rdim
-     IF(rbuf_real(i).NE.wbuf_real(i))THEN
-        total_error = total_error + 1
-     END IF
+     CALL VERIFY("h5dread_multi_f",rbuf_real(i), wbuf_real(i), error)
   END DO
+  total_error = total_error + error
   DO i = 1, idim
-     IF(rbuf_int(i).NE.wbuf_int(i))THEN
-        total_error = total_error + 1
-     END IF
+     CALL VERIFY("h5dread_multi_f",rbuf_int(i),wbuf_int(i), error)
   END DO
+  total_error = total_error + error
   DO i = 1, cdim
-     IF(rbuf_chr(i).NE.wbuf_chr(i))THEN
-        total_error = total_error + 1
-     END IF
+     CALL VERIFY("h5dread_multi_f",rbuf_chr(i),wbuf_chr(i), error)
   END DO
+  total_error = total_error + error
+  error = 0
   DO i = 1, ddim
-     IF(rbuf_derived(i)%r.NE.wbuf_derived(i)%r)THEN
-        total_error = total_error + 1
-     END IF
-     IF(rbuf_derived(i)%i.NE.wbuf_derived(i)%i)THEN
-        total_error = total_error + 1
-     END IF
-     IF(rbuf_derived(i)%c.NE.wbuf_derived(i)%c)THEN
-        total_error = total_error + 1
-     END IF
+     CALL VERIFY("h5dread_multi_f",rbuf_derived(i)%r,wbuf_derived(i)%r,error)
+     CALL VERIFY("h5dread_multi_f",rbuf_derived(i)%i,wbuf_derived(i)%i,error)
+     CALL VERIFY("h5dread_multi_f",rbuf_derived(i)%c,wbuf_derived(i)%c,error)
   END DO
+  total_error = total_error + error
   DO i = 1, idim
      DO j = 1, idim2
         DO k = 1, idim3

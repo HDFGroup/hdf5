@@ -13,7 +13,7 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 
 ## AC_INIT takes the name of the package, the version number, and an
 ## email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
@@ -1155,7 +1155,7 @@ AC_SUBST([HDF5_TOOLS])
 ## Default is to build tests and tools
 HDF5_TOOLS=yes
 
-AC_MSG_CHECKING([if building tools is disabled])
+AC_MSG_CHECKING([if building tools is enabled])
 
 AC_ARG_ENABLE([tools],
               [AS_HELP_STRING([--enable-tools],

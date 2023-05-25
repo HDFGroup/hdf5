@@ -1011,8 +1011,11 @@ test_corrupted_attnamelen(void)
     hbool_t        driver_is_default_compatible;
     const char    *testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
-    const char *err_message = "attribute name has different length than stored length";
-    /* the error message produced when the failure occurs */
+    /* The error message produced when the failure occurs
+     *
+     * FIXME: This is incredibly fragile!
+     */
+    const char *err_message = "ran off end of input buffer while decoding";
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));

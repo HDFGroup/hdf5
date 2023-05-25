@@ -862,8 +862,19 @@ parse_start:
             case 'f':
                 vfd_info_g.type   = VFD_BY_NAME;
                 vfd_info_g.u.name = H5_optarg;
-                vfd_info_g.info   = NULL;
                 use_custom_vfd_g  = TRUE;
+
+#ifdef H5_HAVE_ROS3_VFD
+                if (0 == HDstrcmp(vfd_info_g.u.name, drivernames[ROS3_VFD_IDX]))
+                    if (!vfd_info_g.info)
+                        vfd_info_g.info = &ros3_fa_g;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+                if (0 == HDstrcmp(vfd_info_g.u.name, drivernames[HDFS_VFD_IDX]))
+                    if (!vfd_info_g.info)
+                        vfd_info_g.info = &hdfs_fa_g;
+#endif
+
                 break;
             case 'g':
                 dump_opts.display_all = 0;

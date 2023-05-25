@@ -81,7 +81,7 @@ main()
     sid = H5Screate(H5S_SCALAR);
     assert(sid > 0);
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     assert(tid > 0);
     ret = H5Tset_size(tid, ATTR1_LEN);
@@ -107,7 +107,7 @@ main()
     sid = H5Screate(H5S_SCALAR);
     assert(sid > 0);
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     assert(tid > 0);
     ret = H5Tset_size(tid, ATTR2_LEN);
@@ -177,7 +177,7 @@ main()
     sid = H5Screate(H5S_SCALAR);
     assert(sid > 0);
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     assert(tid > 0);
     ret = H5Tset_size(tid, ATTR3_LEN);
@@ -223,7 +223,7 @@ main()
     sid = H5Screate(H5S_SCALAR);
     assert(sid > 0);
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     assert(tid > 0);
     ret = H5Tset_size(tid, ATTR2_LEN);
@@ -285,7 +285,7 @@ main()
     sid = H5Screate(H5S_SCALAR);
     assert(sid > 0);
 
-    /* Create dataype for attribute */
+    /* Create datatype for attribute */
     tid = H5Tcopy(H5T_C_S1);
     assert(tid > 0);
     ret = H5Tset_size(tid, ATTR2_LEN);

@@ -10,10 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:      Robb Matzke
- *                  Friday, July 24, 1998
- *
- * Purpose:         The object modification time message.
+/*
+ * Purpose:         The object modification time message
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
@@ -93,46 +91,49 @@ const H5O_msg_class_t H5O_MSG_MTIME_NEW[1] = {{
 H5FL_DEFINE(time_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__mtime_new_decode
+ * Function:    H5O__mtime_new_decode
  *
  * Purpose:     Decode a new modification time message and return a pointer to
  *              a new time_t value.
  *
+ *              This version of the modification time was used in HDF5
+ *              1.6.1 and later.
+ *
  *              The new modification time message format was added due to the
  *              performance overhead of the old format.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Jan  3 2002
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
-                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                      size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__mtime_new_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                      const uint8_t *p)
 {
-    time_t  *mesg;
-    uint32_t tmp_time;         /* Temporary copy of the time */
-    void    *ret_value = NULL; /* Return value */
+    const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
+    time_t        *mesg  = NULL;
+    uint32_t       tmp_time;         /* Temporary copy of the time */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_MTIME_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for mtime message");
 
     /* Skip reserved bytes */
+    if (H5_IS_BUFFER_OVERFLOW(p, 3, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     p += 3;
 
     /* Get the time_t from the file */
+    if (H5_IS_BUFFER_OVERFLOW(p, 4, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     UINT32DECODE(p, tmp_time);
 
     /* The return value */
@@ -153,35 +154,36 @@ done:
  * Purpose:     Decode a modification time message and return a pointer to a
  *              new time_t value.
  *
+ *              This version of the modification time was used in HDF5
+ *              1.6.0 and earlier.
+ *
  *              The new modification time message format was added due to the
  *              performance overhead of the old format.
  *
- * Return:	Success:	Ptr to new message in native struct.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Jul 24 1998
- *
+ * Return:      Success:    Pointer to new message in native struct
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__mtime_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                  const uint8_t *p)
 {
-    time_t   *mesg, the_time;
-    struct tm tm;
-    int       i;                /* Local index variable */
-    void     *ret_value = NULL; /* Return value */
+    const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
+    time_t        *mesg  = NULL;
+    time_t         the_time;
+    struct tm      tm;
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
-    for (i = 0; i < 14; i++)
+    /* Buffer should have 14 message bytes and 2 reserved bytes */
+    if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
+    for (int i = 0; i < 14; i++)
         if (!HDisdigit(p[i]))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 

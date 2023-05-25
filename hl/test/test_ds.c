@@ -3673,7 +3673,7 @@ out:
  * Function: match_dim_scale
  *
  * Purpose: example operator function used by H5DSiterate_scales, used
- *  to verify the the DSID scale size matches the dataset DIM size
+ *  to verify the DSID scale size matches the dataset DIM size
  *
  * Return:
  * The return values from an operator are:

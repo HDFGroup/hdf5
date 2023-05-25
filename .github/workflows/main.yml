@@ -20,6 +20,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.sha || github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel. We just have one job, but the matrix items defined below will
 # run in parallel.
@@ -79,7 +82,9 @@ jobs:
             fortran: OFF
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: OFF
             direct_vfd: OFF
@@ -96,7 +101,9 @@ jobs:
             fortran: ON
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
@@ -150,12 +157,14 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang CMake"
-            os: macos-11
+            os: macos-13
             cpp: ON
             fortran: OFF
             java: ON
             libaecfc: ON
+            localaec: OFF
             zlibfc: ON
+            localzlib: OFF
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: OFF
@@ -453,7 +462,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-11'
+        if: matrix.os == 'macos-13'
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -496,7 +505,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (! matrix.thread_safe.enabled)
 
@@ -505,7 +514,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_HL_LIB:BOOL=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_HL_LIB:BOOL=OFF -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (matrix.thread_safe.enabled)
 
@@ -521,7 +530,7 @@ jobs:
       - name: CMake Build
         run: cmake --build . --parallel 3 --config ${{ matrix.build_mode.cmake }}
         working-directory: ${{ runner.workspace }}/build
-        if: matrix.generator != 'autogen'
+        if: (matrix.generator != 'autogen')
 
       #
       # RUN TESTS

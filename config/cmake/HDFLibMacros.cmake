@@ -17,6 +17,7 @@ macro (ORIGINAL_ZLIB_LIBRARY compress_type)
         GIT_TAG ${ZLIB_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter ZLIB file ${ZLIB_URL}")
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""
@@ -51,6 +52,7 @@ macro (ORIGINAL_SZIP_LIBRARY compress_type encoding)
         GIT_TAG ${SZIP_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter SZIP file ${SZIP_URL}")
     FetchContent_Declare (SZIP
         URL ${SZIP_URL}
         URL_HASH ""
@@ -66,7 +68,6 @@ macro (ORIGINAL_SZIP_LIBRARY compress_type encoding)
     add_subdirectory(${szip_SOURCE_DIR} ${szip_BINARY_DIR})
   endif()
 
-  set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
   add_library (${HDF_PACKAGE_NAMESPACE}szaec-static ALIAS szaec-static)
   add_library (${HDF_PACKAGE_NAMESPACE}aec-static ALIAS aec-static)
   set (SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szaec-static;${HDF_PACKAGE_NAMESPACE}aec-static")
@@ -89,7 +90,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
             -DBUILD_SHARED_LIBS:BOOL=OFF
             -DSZIP_PACKAGE_EXT:STRING=${HDF_PACKAGE_EXT}
             -DSZIP_EXTERNALLY_CONFIGURED:BOOL=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_BUILD_TYPE:STRING=${HDF_CFG_NAME}
             -DCMAKE_DEBUG_POSTFIX:STRING=${CMAKE_DEBUG_POSTFIX}
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -111,7 +112,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
             -DBUILD_SHARED_LIBS:BOOL=OFF
             -DSZIP_PACKAGE_EXT:STRING=${HDF_PACKAGE_EXT}
             -DSZIP_EXTERNALLY_CONFIGURED:BOOL=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_BUILD_TYPE:STRING=${HDF_CFG_NAME}
             -DCMAKE_DEBUG_POSTFIX:STRING=${CMAKE_DEBUG_POSTFIX}
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -127,47 +128,30 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   endif ()
   externalproject_get_property (SZIP BINARY_DIR SOURCE_DIR)
 #
-##include (${BINARY_DIR}/${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
+##include (${BINARY_DIR}/${LIBAEC_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target szip-static
-  if (USE_LIBAEC)
-    add_library(${HDF_PACKAGE_NAMESPACE}szaec-static STATIC IMPORTED)
-    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}szaec-static "szaec" STATIC "")
-    add_dependencies (${HDF_PACKAGE_NAMESPACE}szaec-static SZIP)
-    add_library(${HDF_PACKAGE_NAMESPACE}aec-static STATIC IMPORTED)
-    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}aec-static "aec" STATIC "")
-    add_dependencies (${HDF_PACKAGE_NAMESPACE}aec-static SZIP)
-    set (SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szaec-static;${HDF_PACKAGE_NAMESPACE}aec-static")
-  else ()
-    add_library(${HDF_PACKAGE_NAMESPACE}szip-static STATIC IMPORTED)
-    HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}szip-static "szip" STATIC "")
-    add_dependencies (${HDF_PACKAGE_NAMESPACE}szip-static SZIP)
-    set (SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szip-static")
-  endif ()
+  add_library(${HDF_PACKAGE_NAMESPACE}szaec-static STATIC IMPORTED)
+  HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}szaec-static "szaec" STATIC "")
+  add_dependencies (${HDF_PACKAGE_NAMESPACE}szaec-static SZIP)
+  add_library(${HDF_PACKAGE_NAMESPACE}aec-static STATIC IMPORTED)
+  HDF_IMPORT_SET_LIB_OPTIONS (${HDF_PACKAGE_NAMESPACE}aec-static "aec" STATIC "")
+  add_dependencies (${HDF_PACKAGE_NAMESPACE}aec-static SZIP)
+  set (SZIP_STATIC_LIBRARY "${HDF_PACKAGE_NAMESPACE}szaec-static;${HDF_PACKAGE_NAMESPACE}aec-static")
   set (SZIP_LIBRARIES ${SZIP_STATIC_LIBRARY})
 
   set (SZIP_INCLUDE_DIR_GEN "${BINARY_DIR}")
-  if (USE_LIBAEC)
-    set (SZIP_INCLUDE_DIR "${SOURCE_DIR}/include")
-  else ()
-    set (SZIP_INCLUDE_DIR "${SOURCE_DIR}/src")
-  endif ()
+  set (SZIP_INCLUDE_DIR "${SOURCE_DIR}/include")
   set (SZIP_FOUND 1)
   set (SZIP_INCLUDE_DIRS ${SZIP_INCLUDE_DIR_GEN} ${SZIP_INCLUDE_DIR})
 endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (PACKAGE_SZIP_LIBRARY compress_type)
-  set (SZIP_HDR "SZconfig")
-  if (USE_LIBAEC)
-    set (SZIP_HDR "aec_config")
-  else ()
-    set (SZIP_HDR "libaec_Export")
-  endif ()
   add_custom_target (SZIP-GenHeader-Copy ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_INCLUDE_DIR_GEN}/${SZIP_HDR}.h ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-      COMMENT "Copying ${SZIP_INCLUDE_DIR_GEN}/${SZIP_HDR}.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SZIP_INCLUDE_DIR_GEN}/aec_config.h ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+      COMMENT "Copying ${SZIP_INCLUDE_DIR_GEN}/aec_config.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
   )
-  set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${SZIP_HDR}.h)
+  set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/aec_config.h)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (SZIP-GenHeader-Copy SZIP)
   endif ()
@@ -184,7 +168,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
             -DBUILD_SHARED_LIBS:BOOL=OFF
             -DZLIB_PACKAGE_EXT:STRING=${HDF_PACKAGE_EXT}
             -DZLIB_EXTERNALLY_CONFIGURED:BOOL=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_BUILD_TYPE:STRING=${HDF_CFG_NAME}
             -DCMAKE_DEBUG_POSTFIX:STRING=${CMAKE_DEBUG_POSTFIX}
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -205,7 +189,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
             -DBUILD_SHARED_LIBS:BOOL=OFF
             -DZLIB_PACKAGE_EXT:STRING=${HDF_PACKAGE_EXT}
             -DZLIB_EXTERNALLY_CONFIGURED:BOOL=OFF
-            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+            -DCMAKE_BUILD_TYPE:STRING=${HDF_CFG_NAME}
             -DCMAKE_DEBUG_POSTFIX:STRING=${CMAKE_DEBUG_POSTFIX}
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}

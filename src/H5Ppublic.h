@@ -17,21 +17,18 @@
 #ifndef H5Ppublic_H
 #define H5Ppublic_H
 
-/* System headers needed by this file */
-
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5public.h"   /* Generic Functions                        */
+#include "H5ACpublic.h" /* Metadata Cache                           */
 #include "H5Dpublic.h"  /* Datasets                                 */
 #include "H5Fpublic.h"  /* Files                                    */
-#include "H5FDpublic.h" /* File drivers                             */
-#include "H5Ipublic.h"  /* ID management                            */
+#include "H5FDpublic.h" /* (Virtual) File Drivers                   */
+#include "H5Ipublic.h"  /* Identifiers                              */
 #include "H5Lpublic.h"  /* Links                                    */
-#include "H5MMpublic.h" /* Memory management                        */
-#include "H5Opublic.h"  /* Object headers                           */
+#include "H5MMpublic.h" /* Memory Management                        */
+#include "H5Opublic.h"  /* Object Headers                           */
 #include "H5Spublic.h"  /* Dataspaces                               */
 #include "H5Tpublic.h"  /* Datatypes                                */
-#include "H5Zpublic.h"  /* Data filters                             */
+#include "H5Zpublic.h"  /* Data Filters                             */
 
 /*****************/
 /* Public Macros */
@@ -328,7 +325,6 @@ typedef enum H5D_mpio_actual_io_mode_t {
     H5D_MPIO_CHUNK_MIXED = 0x1 | 0x2,
     /**< HDF5 performed one the chunk collective optimization schemes and some
          chunks were accessed independently, some collectively. */
-    /** \internal The contiguous case is separate from the bit field. */
     H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
     /**< Collective I/O was performed on a contiguous dataset */
 } H5D_mpio_actual_io_mode_t;
@@ -344,7 +340,8 @@ typedef enum H5D_mpio_no_collective_cause_t {
     H5D_MPIO_SET_INDEPENDENT = 0x01,
     /**< Collective I/O was not performed because independent I/O was requested */
     H5D_MPIO_DATATYPE_CONVERSION = 0x02,
-    /**< Collective I/O was not performed because datatype conversions were required */
+    /**< Collective I/O was not performed because datatype conversions were required and selection I/O was not
+       possible (see below) */
     H5D_MPIO_DATA_TRANSFORMS = 0x04,
     /**< Collective I/O was not performed because data transforms needed to be applied */
     H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED = 0x08,
@@ -357,10 +354,71 @@ typedef enum H5D_mpio_no_collective_cause_t {
     /**< Collective I/O was not performed because parallel filtered writes are disabled */
     H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE = 0x80,
     /**< Error */
-    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x100
+    H5D_MPIO_NO_SELECTION_IO = 0x100,
+    /**< Collective I/O would be supported by selection or vector I/O but that feature was disabled
+       (see causes via H5Pget_no_selection_io_cause()) */
+    H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE = 0x200
     /**< Sentinel */
 } H5D_mpio_no_collective_cause_t;
 //! <!-- [H5D_mpio_no_collective_cause_t_snip] -->
+
+/**
+ * Causes for H5Pget_no_selection_io_cause() property
+ */
+#define H5D_SEL_IO_DISABLE_BY_API                                                                            \
+    (0x0001u) /**< Selection I/O was not performed because                                                   \
+                 the feature was disabled by the API */
+#define H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET                                                         \
+    (0x0002u) /**< Selection I/O was not performed because the                                               \
+                 dataset was neither contiguous nor chunked */
+#define H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER                                                                   \
+    (0x0004u) /**< Selection I/O was not performed because of                                                \
+                 sieve buffer for contiguous dataset */
+#define H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB                                                              \
+    (0x0008u) /**< Selection I/O was not performed because the VFD                                           \
+                 does not have vector or selection I/O callback */
+#define H5D_SEL_IO_PAGE_BUFFER                                                                               \
+    (0x0010u) /**< Selection I/O was not performed because of                                                \
+                 page buffer */
+#define H5D_SEL_IO_DATASET_FILTER                                                                            \
+    (0x0020u) /**< Selection I/O was not performed because of                                                \
+                 dataset filters */
+#define H5D_SEL_IO_CHUNK_CACHE                                                                               \
+    (0x0040u) /**< Selection I/O was not performed because of                                                \
+                 chunk cache */
+#define H5D_SEL_IO_TCONV_BUF_TOO_SMALL                                                                       \
+    (0x0080u) /**< Selection I/O was not performed because the                                               \
+                 type conversion buffer is too small */
+#define H5D_SEL_IO_BKG_BUF_TOO_SMALL                                                                         \
+    (0x0100u) /**< Selection I/O was not performed because the                                               \
+                 type conversion background buffer is too small */
+#define H5D_SEL_IO_DEFAULT_OFF                                                                               \
+    (0x0200u) /**< Selection I/O was not performed because the                                               \
+                   selection I/O mode is DEFAULT and the library                                             \
+                   chose it to be off for this case */
+
+/* Causes for H5D_MPIO_NO_SELECTION_IO */
+#define H5D_MPIO_NO_SELECTION_IO_CAUSES                                                                      \
+    (H5D_SEL_IO_DISABLE_BY_API | H5D_SEL_IO_TCONV_BUF_TOO_SMALL | H5D_SEL_IO_BKG_BUF_TOO_SMALL |             \
+     H5D_SEL_IO_DATASET_FILTER | H5D_SEL_IO_CHUNK_CACHE)
+
+//! <!--[H5D_selection_io_mode_t_snip] -->
+/**
+ * Selection I/O mode property
+ *
+ * \details The default value, #H5D_SELECTION_IO_MODE_DEFAULT,
+ *          indicates selection I/O can be ON or OFF as
+ *          determined by library internal.
+ */
+typedef enum H5D_selection_io_mode_t {
+    H5D_SELECTION_IO_MODE_DEFAULT = 0,
+    /**< Default selection I/O mode. */
+    H5D_SELECTION_IO_MODE_OFF,
+    /**< Selection I/O is off. */
+    H5D_SELECTION_IO_MODE_ON
+    /**< Selection I/O is on. */
+} H5D_selection_io_mode_t;
+//! <!--[H5D_selection_io_mode_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -1401,7 +1459,7 @@ H5_DLL htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id);
  *          and the pointer to the operator data passed in to H5Piterate(),
  *          \p iter_data.
  *
- *          H5Piterate() assumes that the properties in the object
+ * \warning H5Piterate() assumes that the properties in the object
  *          identified by \p id remain unchanged through the iteration.
  *          If the membership changes during the iteration, the function's
  *          behavior is undefined.
@@ -8205,6 +8263,191 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
                                                     const hsize_t count[], const hsize_t block[]);
 
 /**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets the selection I/O mode
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] selection_io_mode    The selection I/O mode to be set
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_selection_io() sets the selection I/O mode
+ *          \p selection_io_mode in the dataset transfer property
+ *          list \p plist_id.
+ *
+ *          This can be used to enable collective I/O with type conversion, or
+ *          with custom VFDs that support vector or selection I/O.
+ *
+ *          Values that can be set in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
+ *
+ *          When used with type conversion, selection I/O requires the type
+ *          conversion buffer (and the background buffer if applicable) be large
+ *          enough to hold the entirety of the data involved in the I/O.  For
+ *          read operations, the library will use the application's read buffer
+ *          as the type conversion buffer if the memory type is not smaller than
+ *          the file type, eliminating the need for a separate type conversion
+ *          buffer (a background buffer may still be required).  For write
+ *          operations, the library will similarly use the write buffer as a
+ *          type conversion buffer, but only if H5Pset_modify_write_buf() is
+ *          used to allow the library to modify the contents of the write
+ *          buffer.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_selection_io(hid_t plist_id, H5D_selection_io_mode_t selection_io_mode);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the selection I/O mode
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] selection_io_mode   The selection I/O mode
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_selection_io() queries the selection I/O mode set in
+ *          in the dataset transfer property list \p plist_id.
+ *
+ *          Values returned in \p selection_io_mode:
+ *          \snippet this H5D_selection_io_mode_t_snip
+ *          \click4more
+ *
+ * \note    The library may not perform selection I/O as it asks for if the
+ *          layout callback determines that it is not feasible to do so.  Please
+ *          refer to H5Pget_no_selection_io_cause() for details.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_selection_io(hid_t plist_id, H5D_selection_io_mode_t *selection_io_mode);
+
+/**
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the cause for not performing selection or vector I/O on the
+ *        last parallel I/O call
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] no_selection_io_cause A bitwise set value indicating the relevant
+ *                                   causes that prevented selection I/O from
+ *                                   being performed
+ * \return \herr_t
+ *
+ * \par Motivation:
+ *      A user can request selection I/O to be performed via a data transfer
+ *      property list (DXPL).  This can be used to enable collective I/O with
+ *      type conversion, or with custom VFDs that support vector or selection
+ *      I/O.  However, there are conditions that can cause HDF5 to forgo
+ *      selection or vector I/O and perform legacy (scalar) I/O instead.
+ *
+ * \details H5Pget_no_selection_io_cause() can be used to determine whether
+ *          selection or vector I/O was applied for the last preceding I/O call.
+ *          If selection or vector I/O was not used, this function retrieves the
+ *          cause(s) that prevent selection or vector I/O to be performed on
+ *          that I/O call.  The properties retrieved by this function are set
+ *          before I/O takes place and are retained even when I/O fails.
+ *
+ *          If a selection I/O request falls back to vector I/O, that is not
+ *          considered "breaking" selection I/O by this function, since vector
+ *          I/O still passes all information to the file driver in a single
+ *          callback.
+ *
+ *          Valid values returned in \p no_selection_io_cause are listed
+ *          as follows. If there are multiple causes, it is a bitwise OR of
+ *          the relevant causes.
+ *
+ *          - #H5D_SEL_IO_DISABLE_BY_API
+ *          Selection I/O was not performed because the feature was disabled by the API
+ *          - #H5D_SEL_IO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET
+ *          Selection I/O was not performed because the dataset was neither contiguous nor chunked
+ *          - #H5D_SEL_IO_CONTIGUOUS_SIEVE_BUFFER
+ *          Selection I/O was not performed because of sieve buffer for contiguous dataset
+ *          - #H5D_SEL_IO_NO_VECTOR_OR_SELECTION_IO_CB
+ *          Selection I/O was not performed because the VFD does not have vector or selection I/O callback
+ *          - #H5D_SEL_IO_PAGE_BUFFER
+ *          Selection I/O was not performed because of page buffer
+ *          - #H5D_SEL_IO_DATASET_FILTER
+ *          Selection I/O was not performed because of dataset filters
+ *          - #H5D_SEL_IO_CHUNK_CACHE
+ *          Selection I/O was not performed because of chunk cache
+ *          - #H5D_SEL_IO_TCONV_BUF_TOO_SMALL
+ *          Selection I/O was not performed because the type conversion buffer is too small
+ *          - #H5D_SEL_IO_BKG_BUF_TOO_SMALL
+ *          Selection I/O was not performed because the type conversion background buffer is too small
+ *          - #H5D_SEL_IO_DEFAULT_OFF
+ *          Selection I/O was not performed because the selection I/O mode is DEFAULT and the library chose it
+ * to be off for this case
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selection_io_cause);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Allows the library to modify the contents of the write buffer
+ *
+ * \dxpl_id{plist_id}
+ * \param[in] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_modify_write_buf() sets whether the library is allowed to
+ *          modify the contents of write buffers passed to HDF5 API routines
+ *          that are passed the dataset transfer property list \p plist_id.  The
+ *          default value for modify_write_buf is FALSE.
+ *
+ *          This function can be used to allow the library to perform in-place
+ *          type conversion on write operations to save memory space.  This is
+ *          currently only used for selection I/O operations, which are used for
+ *          collective I/O with type conversion.  After making an API call with
+ *          this parameter set to TRUE, the contents of the write buffer are
+ *          undefined.
+ *
+ * \note    When modify_write_buf is set to TRUE the library may violate the
+ *          const qualifier on the API parameter for the write buffer.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pset_modify_write_buf(hid_t plist_id, hbool_t modify_write_buf);
+
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Retrieves the "modify write buffer" property
+ *
+ * \dxpl_id{plist_id}
+ * \param[out] modify_write_buf   Whether the library can modify the contents of the write buffer
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_modify_write_buf() gets the "modify write buffer" property
+ *          from the dataset transfer property list \p plist_id.  This property
+ *          determines whether the library is allowed to  modify the contents of
+ *          write buffers passed to HDF5 API routines that are passed
+ *          \p plist_id.  The default value for modify_write_buf is FALSE.
+ *
+ * \since 1.14.1
+ *
+ */
+H5_DLL herr_t H5Pget_modify_write_buf(hid_t plist_id, hbool_t *modify_write_buf);
+
+/**
  * \ingroup LCPL
  *
  * \brief Determines whether property is set to enable creating missing
@@ -9341,10 +9584,10 @@ H5_DLL herr_t H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, 
  *                    committed datatype.
  *                    If copied in a single H5Ocopy() operation, objects
  *                    that share a committed datatype in the source will
- *                    share an anonymous committed dataype in the
+ *                    share an anonymous committed datatype in the
  *                    destination copy. Subsequent H5Ocopy() operations,
  *                    however, will be unaware of prior anonymous committed
- *                    dataypes and will create new ones.
+ *                    datatypes and will create new ones.
  *
  *                    See the “See Also” section immediately below for
  *                    functions related to the use of this flag.</td>

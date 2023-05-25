@@ -2293,13 +2293,11 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
-    HDassert(f->shared->cache->magic == H5C__H5C_T_MAGIC);
     HDassert(f->shared->cache->aux_ptr);
 
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
 
     HDassert(aux_ptr);
-    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     entry_ptr->aux_ptr = aux_ptr;
 
@@ -2526,7 +2524,6 @@ datum_notify(H5C_notify_action_t action, void *thing)
             }
 
             HDassert(entry_ptr->aux_ptr);
-            HDassert(entry_ptr->aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
             aux_ptr            = entry_ptr->aux_ptr;
             entry_ptr->aux_ptr = NULL;
 
@@ -2898,8 +2895,7 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
             aux_ptr = ((H5AC_aux_t *)(cache_ptr->aux_ptr));
 
-            if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                  (aux_ptr->dirty_bytes == 0))) {
+            if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                 nerrors++;
                 if (verbose) {
@@ -3525,8 +3521,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 
                 aux_ptr = ((H5AC_aux_t *)(file_ptr->shared->cache->aux_ptr));
 
-                if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                      (aux_ptr->dirty_bytes == 0))) {
+                if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                     nerrors++;
                     if (verbose) {
@@ -3750,12 +3745,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             HDfprintf(stdout, "%d:%s: Can't get cache_ptr.\n", world_mpi_rank, __func__);
         }
     }
-    else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-        nerrors++;
-        if (verbose) {
-            HDfprintf(stdout, "%d:%s: Bad cache_ptr magic.\n", world_mpi_rank, __func__);
-        }
-    }
     else {
         cache_ptr->ignore_tags = TRUE;
         *fid_ptr               = fid;
@@ -3803,14 +3792,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: cache_ptr->aux_ptr == NULL.\n", world_mpi_rank, __func__);
-            }
-        }
-        else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC) {
-
-            nerrors++;
-            if (verbose) {
-                HDfprintf(stdout, "%d:%s: cache_ptr->aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC.\n",
-                          world_mpi_rank, __func__);
             }
         }
         else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy != metadata_write_strategy) {
