@@ -21,7 +21,7 @@ macro (SET_HDF_BUILD_TYPE)
       set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
     else ()
       # set the default to the MultiConfig variable
-      set (HDF_CFG_NAME ${CMAKE_CFG_INTDIR})
+      set (HDF_CFG_NAME "$<CONFIG>")
     endif ()
   else ()
     set (HDF_CFG_BUILD_TYPE ".")
