@@ -414,6 +414,14 @@ Bug Fixes since HDF5-1.14.0 release
 
     Configuration
     -------------
+    - The accum test now passes on macOS 12+ (Monterey) w/ CMake
+
+      Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
+      started failing on macOS 12+ when building with CMake. CMake has been
+      updated to set DYLD_LIBRARY_PATH on macOS and the test now passes.
+
+      Fixes GitHub #2994, #2261, and #1289
+
     - Changed the default settings used by CMake for the GZIP filter
 
       The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
