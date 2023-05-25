@@ -4982,9 +4982,11 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
                 wbufs[i][j] += 2 * SEL_IO_DIM0 * SEL_IO_DIM1;
 
     /* Issue write call */
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
                             (const void **)wbufs) < 0)
         TEST_ERROR;
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     return 0;
 
