@@ -4957,10 +4957,6 @@ error:
  *
  * Return:      Success:        TRUE
  *              Failure:        FALSE
- *
- * Programmer:  Neil Fortner
- *              7/1/21
- *
  *-------------------------------------------------------------------------
  */
 /* Array dimensions, used for all selection I/O tests.  Currently both must be
@@ -4972,21 +4968,22 @@ static herr_t
 test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
                         haddr_t offsets[], size_t element_sizes[], int *wbufs[])
 {
-    int i;
-    int j;
+    const void *bufs[count]; /* Avoid cranky compiler cast warnings */
+    int         i;
+    int         j;
 
     /* Update write buffer */
-    for (i = 0; i < (int)count; i++)
+    for (i = 0; i < (int)count; i++) {
         if (wbufs[i] && (i == 0 || wbufs[i] != wbufs[i - 1]))
             for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
                 wbufs[i][j] += 2 * SEL_IO_DIM0 * SEL_IO_DIM1;
+        bufs[i] = wbufs[i];
+    }
 
     /* Issue write call */
-    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
-                            (const void **)wbufs) < 0)
+                            bufs) < 0)
         TEST_ERROR;
-    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     return 0;
 
