@@ -546,8 +546,7 @@ jobs:
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
-        # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
 
       # THREAD-SAFE
 
