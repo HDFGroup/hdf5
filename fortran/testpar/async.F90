@@ -1304,6 +1304,7 @@ PROGRAM async_test
   CALL H5VLis_connector_registered_by_name_f("async", registered,  hdferror)
   CALL check("H5VLis_connector_registered_by_name_f", hdferror, total_error)
 
+  IF(mpi_rank==0) WRITE(*,'(A)', ADVANCE="NO") "VOL CONNECTOR TESTED: "
   IF(.NOT.registered)THEN
 
      ! (2) check if the DAOS VOL is available
@@ -1313,12 +1314,15 @@ PROGRAM async_test
      IF(.NOT.registered)THEN
         ! No async compatible VOL found
         async_enabled = .FALSE.
+        IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
      ELSE
+        IF(mpi_rank==0) WRITE(*,'(A,/)') "DAOS"
         CALL H5Vlregister_connector_by_name_f("daos", vol_id, hdferror)
         CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
      ENDIF
 
   ELSE
+     IF(mpi_rank==0) WRITE(*,'(A,/)') "ASYNC"
      CALL H5Vlregister_connector_by_name_f("async", vol_id, hdferror)
      CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
   ENDIF
