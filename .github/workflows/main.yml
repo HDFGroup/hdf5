@@ -536,37 +536,32 @@ jobs:
       # RUN TESTS
       #
 
-      #
       # NORMAL
-      #
 
       - name: Autotools Run Tests
         run: make check -j2
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.generator == 'autogen') && (matrix.run_tests) && ! (matrix.thread_safe.enabled)
+        if: (matrix.generator == 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
 
       - name: CMake Run Tests
         run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safe.enabled) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
 
-      #
       # THREAD-SAFE
-      #
 
       - name: Autotools Run Thread-Safe Tests
         run: |
           cd test
           ./ttsafe
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.generator == 'autogen') && (matrix.run_tests) && (matrix.thread_safe.enabled)
+        if: (matrix.generator == 'autogen') && (matrix.run_tests) && (matrix.thread_safety.enabled)
 
       - name: CMake Run Thread-Safe Tests
         run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V -R ttsafe
         working-directory: ${{ runner.workspace }}/build
-        # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.thread_safe.enabled) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.thread_safety.enabled)
 
       #
       # INSTALL (note that this runs even when we don't run the tests)
