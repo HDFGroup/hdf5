@@ -4968,9 +4968,12 @@ static herr_t
 test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
                         haddr_t offsets[], size_t element_sizes[], int *wbufs[])
 {
-    const void *bufs[count]; /* Avoid cranky compiler cast warnings */
-    int         i;
-    int         j;
+    const void **bufs; /* Avoids cast/const warnings */
+    int          i;
+    int          j;
+
+    if (NULL == (bufs = HDcalloc(count, sizeof(void *))))
+        TEST_ERROR;
 
     /* Update write buffer */
     for (i = 0; i < (int)count; i++) {
@@ -4985,9 +4988,12 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
                             bufs) < 0)
         TEST_ERROR;
 
+    HDfree(bufs);
+
     return 0;
 
 error:
+    HDfree(bufs);
     return -1;
 } /* end test_selection_io_write() */
 
