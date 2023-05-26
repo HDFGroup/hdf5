@@ -438,40 +438,43 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
             break;
 
         case H5T_ENUM: {
-            void *value = NULL;
+            void          *value      = NULL;
+            unsigned char  tmp_uchar  = 0;
+            unsigned short tmp_ushort = 0;
+            unsigned int   tmp_uint   = 0;
+#if H5_SIZEOF_LONG != H5_SIZEOF_INT
+            unsigned long tmp_ulong = 0;
+#endif
+#if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+            unsigned long long tmp_ullong = 0;
+#endif
 
             token = HDstrtok(this_str, delimiter);
 
             switch (typeSize) {
                 case sizeof(char): {
-                    unsigned char tmp_uchar = 0;
-                    value                   = &tmp_uchar;
+                    value = &tmp_uchar;
                     break;
                 }
 
                 case sizeof(short): {
-                    unsigned short tmp_ushort = 0;
-                    value                     = &tmp_ushort;
+                    value = &tmp_ushort;
                     break;
                 }
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
                 case sizeof(long): {
-                    unsigned long tmp_ulong = 0;
-                    value                   = &tmp_ulong;
+                    value = &tmp_ulong;
                     break;
                 }
 #endif
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
                 case sizeof(long long): {
-                    unsigned long long tmp_ullong = 0;
-                    value                         = &tmp_ullong;
+                    value = &tmp_ullong;
                     break;
                 }
 #endif
-
                 default: {
-                    unsigned int tmp_uint = 0;
-                    value                 = &tmp_uint;
+                    value = &tmp_uint;
                     break;
                 }
             }
