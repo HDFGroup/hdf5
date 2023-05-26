@@ -24,7 +24,7 @@ macro (ORIGINAL_ZLIB_LIBRARY compress_type)
     )
   endif ()
   FetchContent_GetProperties(HDF5_ZLIB)
-  if(NOT zlib_POPULATED)
+  if(NOT hdf5_zlib_POPULATED)
     FetchContent_Populate(HDF5_ZLIB)
 
     # Copy an additional/replacement files into the populated source
