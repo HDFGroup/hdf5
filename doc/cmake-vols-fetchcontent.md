@@ -93,10 +93,10 @@ previously-mentioned VOL connector:
 
 **NOTE**
 If a VOL connector requires extra information to be passed in its
-HDF5_VOL_<VOL name>_NAME variable and that information contains any semi-colons,
-those semi-colons should be escaped with a single backslash so that CMake
+HDF5_VOL_<VOL name>_NAME variable and that information contains any semicolons,
+those semicolons should be escaped with a single backslash so that CMake
 doesn't parse the string as a list. If `cmake` is run from a shell, extra care
-may need to be taken when escaping the semi-colons depending on how the
+may need to be taken when escaping the semicolons depending on how the
 shell interprets backslashes.
 
 ### Example - Build and test HDF5 Asynchronous I/O VOL connector
