@@ -8,13 +8,9 @@
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
- * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Jacob Smith
- *              2018-04-23
- *
  * Purpose:    The public header file for the hdfs driver.
  */
 
@@ -90,11 +86,6 @@ extern "C" {
  *     Size (in bytes) of the file read stream buffer.
  *
  *     TBD: If -1, relies on a default value.
- *
- *
- *
- * Programmer: Jacob Smith
- *             2018-04-23
  *
  ****************************************************************************/
 

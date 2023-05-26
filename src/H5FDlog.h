@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, April 17, 2000
- *
  * Purpose:	The public header file for the log driver.
  */
 #ifndef H5FDlog_H

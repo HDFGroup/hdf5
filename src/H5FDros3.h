@@ -13,9 +13,6 @@
 /*
  * Read-Only S3 Virtual File Driver (VFD)
  *
- * Programmer:  John Mainzer
- *              2017-10-10
- *
  * Purpose:    The public header file for the ros3 driver.
  */
 #ifndef H5FDros3_H

@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5G package.  Including this header means that the source file
- *		is part of the H5G package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5G package.  Including this header means that the source file
+ *          is part of the H5G package.
  */
 #ifndef H5Gmodule_H
 #define H5Gmodule_H
@@ -886,24 +883,24 @@
  *          objects appear in at least one group (with the possible exception of
  *          the root object) and since objects can have names in more than one
  *          group, the set of all objects in an HDF5 file is a directed
- *          graph. The internal nodes (nodes with out-degree greater than zero)
- *          must be groups while the leaf nodes (nodes with out-degree zero) are
+ *          graph. The internal nodes (nodes with an out-degree greater than zero)
+ *          must be groups, while the leaf nodes (nodes with an out-degree zero) are
  *          either empty groups or objects of some other type. Exactly one
  *          object in every non-empty file is the root object. The root object
  *          always has a positive in-degree because it is pointed to by the file
- *          super block.
+ *          superblock.
  *
  *          \Bold{Locating objects in the HDF5 file hierarchy:} An object name
  *          consists of one or more components separated from one another by
- *          slashes. An absolute name begins with a slash and the object is
+ *          slashes. An absolute name begins with a slash, and the object is
  *          located by looking for the first component in the root object, then
  *          looking for the second component in the first object, etc., until
  *          the entire name is traversed. A relative name does not begin with a
- *          slash and the traversal begins at the location specified by the
+ *          slash, and the traversal begins at the location specified by the
  *          create or access function.
  *
  *          \Bold{Group implementations in HDF5:} The original HDF5 group
- *          implementation provided a single indexed structure for link
+ *          implementation provided a single-indexed structure for link
  *          storage. A new group implementation, in HDF5 Release 1.8.0, enables
  *          more efficient compact storage for very small groups, improved link
  *          indexing for large groups, and other advanced features.

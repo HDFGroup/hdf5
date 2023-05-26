@@ -133,8 +133,6 @@ static off_t  sqrto(off_t);
  * Purpose:         PIO Engine where Parallel IO are executed.
  * Return:          results
  * Programmer:      Albert Cheng, Bill Wendling 2001/12/12
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 results
 do_pio(parameters param)
@@ -382,7 +380,6 @@ done:
  *              USER or LOGIN are specified in the environment.
  * Return:      Pointer to filename or NULL
  * Programmer:  Bill Wendling, 21. November 2001
- * Modifications:
  */
 static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
@@ -497,26 +494,24 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Purpose:         Write the required amount of data to the file.
  * Return:          SUCCESS or FAIL
  * Programmer:      Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
          void *buffer)
 {
     int            ret_code = SUCCESS;
-    int            rc; /*routine return code                   */
+    int            rc; /* Return code */
     long           ndset;
     size_t         blk_size;            /* The block size to subdivide the xfer buffer into */
     off_t          nbytes_xfer;         /* Total number of bytes transferred so far */
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square  */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer     */
@@ -1514,8 +1509,6 @@ sqrto(off_t x)
  * Purpose:         read the required amount of data from the file.
  * Return:          SUCCESS or FAIL
  * Programmer:      Albert Cheng 2001/12/13
- * Modifications:
- *  Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
@@ -1530,11 +1523,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer    */
@@ -2497,7 +2490,6 @@ done:
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
  * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
  */
 static herr_t
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
@@ -2607,7 +2599,6 @@ done:
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
  * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
- * Modifications:
  */
 static herr_t
 do_fclose(iotype iot, file_descr *fd /*out*/)
@@ -2664,7 +2655,6 @@ done:
  *      Other processes just return.
  * Return:      void
  * Programmer:  Albert Cheng 2001/12/12
- * Modifications:
  */
 static void
 do_cleanupfile(iotype iot, char *fname)

@@ -343,7 +343,6 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
 
     /* Check arguments */
     HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(image_len);
 
@@ -394,7 +393,6 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     /* Sanity check */
     HDassert(f);
     HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(H5F_addr_defined(addr));
     HDassert(new_addr);
@@ -435,7 +433,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          *        H5F_addr_defined(fspace->addr)
          *
-         *    will both be TRUE.  If this contition does not hold, then
+         *    will both be TRUE.  If this condition does not hold, then
          *    either the free space info is not persistent
          *    (!H5F_addr_defined(fspace->addr)???) or the section info
          *    contains no free space data that must be written to file
@@ -693,7 +691,6 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     HDassert(f);
     HDassert(image);
     HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(fspace->hdr_size == len);
 
@@ -833,10 +830,6 @@ done:
  *
  * Purpose:	Destroys a free space header in memory.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -855,7 +848,6 @@ H5FS__cache_hdr_free_icr(void *_thing)
 
     /* Sanity checks */
     HDassert(fspace);
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
 
     /* We should not still be holding on to the free space section info */
@@ -1124,10 +1116,8 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
 
     /* Sanity checks */
     HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
     HDassert(sinfo->fspace);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(image_len);
 
@@ -1167,10 +1157,8 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     /* Sanity checks */
     HDassert(f);
     HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
     fspace = sinfo->fspace;
-    HDassert(fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(fspace->cache_info.is_pinned);
     HDassert(H5F_addr_defined(addr));
@@ -1253,9 +1241,7 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len, void *_thi
     HDassert(f);
     HDassert(image);
     HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(sinfo->fspace->cache_info.is_pinned);
     HDassert(sinfo->fspace->sect_size == len);
@@ -1373,10 +1359,6 @@ done:
  * Purpose:	Free the memory used for the in core representation of the
  *		free space manager section info.
  *
- * Note:	The metadata cache sets the object's cache_info.magic to
- *		H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC before calling a free_icr
- *		callback (checked in assert).
- *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
@@ -1395,9 +1377,7 @@ H5FS__cache_sinfo_free_icr(void *_thing)
 
     /* Sanity checks */
     HDassert(sinfo);
-    HDassert(sinfo->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(sinfo->cache_info.type == H5AC_FSPACE_SINFO);
-    HDassert(sinfo->fspace->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(sinfo->fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(sinfo->fspace->cache_info.is_pinned);
 

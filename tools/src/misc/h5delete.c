@@ -25,7 +25,7 @@ static void usage(void);
 static void
 usage(void)
 {
-    HDfprintf(stderr, "Usage: h5delete [-f] <filename>\n");
+    HDfprintf(stderr, "usage: h5delete [-f] <filename>\n");
 }
 
 int

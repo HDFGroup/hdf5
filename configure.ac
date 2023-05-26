@@ -13,7 +13,7 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 
 ## AC_INIT takes the name of the package, the version number, and an
 ## email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
@@ -1155,7 +1155,7 @@ AC_SUBST([HDF5_TOOLS])
 ## Default is to build tests and tools
 HDF5_TOOLS=yes
 
-AC_MSG_CHECKING([if building tools is disabled])
+AC_MSG_CHECKING([if building tools is enabled])
 
 AC_ARG_ENABLE([tools],
               [AS_HELP_STRING([--enable-tools],
@@ -1265,7 +1265,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
-  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD'
+  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD H5_HAVE_MIRROR_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
@@ -2332,7 +2332,7 @@ AC_ARG_ENABLE([optimization],
                                details.
                                Alternatively, optimization options can
                                be specified directly by specifying them as a
-                               string value. These custom optimzation flags will
+                               string value. These custom optimization flags will
                                completely replace all other optimization flags.
                                [default depends on build mode: debug=debug,
                                 production=high, clean=none]
@@ -3012,8 +3012,7 @@ SUBFILING_VFD=no
 HAVE_MERCURY="no"
 
 ## Always include subfiling directory so public header files are available
-CPPFLAGS="$CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
-AM_CPPFLAGS="$AM_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+H5_CPPFLAGS="$H5_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
 
 AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
 
@@ -3061,8 +3060,7 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
     mercury_inc="$mercury_dir/src/util"
 
-    CPPFLAGS="$CPPFLAGS -I$mercury_inc"
-    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
+    H5_CPPFLAGS="$H5_CPPFLAGS -I$mercury_inc"
 
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])

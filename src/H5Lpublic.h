@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Lpublic.h
- *                      Dec 1 2005
- *                      James Laird
  *
  * Purpose:             Public declarations for the H5L package (links)
  *
@@ -23,11 +21,10 @@
 #ifndef H5Lpublic_H
 #define H5Lpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions            */
-#include "H5Ipublic.h" /* IDs                      */
-#include "H5Opublic.h" /* Object Headers            */
-#include "H5Tpublic.h" /* Datatypes                */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
+#include "H5Opublic.h" /* Object Headers                           */
+#include "H5Tpublic.h" /* Datatypes                                */
 
 /*****************/
 /* Public Macros */
@@ -209,7 +206,7 @@ H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
  *
  *          H5Lcopy() retains the creation time and the target of the original
  *          link. However, since the link may be renamed, the character
- *          encoding is that specified in \p lcpl_id rather than that of the
+ *          encoding is specified in \p lcpl_id rather than in that of the
  *          original link. Other link creation properties are ignored.
  *
  *          If the link is a soft link, also known as a symbolic link, its
@@ -337,7 +334,7 @@ H5_DLL herr_t H5Lcreate_hard_async(hid_t cur_loc_id, const char *cur_name, hid_t
  *
  *          For instance, if target_path is \c ./foo, \p link_loc_id specifies
  *          \c ./x/y/bar, and the name of the new link is \c new_link, then a
- *          subsequent request for \c ./x/y/bar/new_link will return same the
+ *          subsequent request for \c ./x/y/bar/new_link will return the same
  *          object as would be found at \c ./foo.
  *
  * \note H5Lcreate_soft() is for use only if the target object is in the
@@ -480,7 +477,7 @@ H5_DLL herr_t H5Ldelete_by_idx_async(hid_t loc_id, const char *group_name, H5_in
  *
  * \return \herr_t
  *
- * \details H5Lget_val() returns the value of link \p name. For smbolic links,
+ * \details H5Lget_val() returns the value of link \p name. For symbolic links,
  *          this is the path to which the link points, including the null
  *          terminator. For external and user-defined links, it is the link
  *          buffer.
@@ -607,7 +604,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          the link \c datasetD in the \c group group1/group2/softlink_to_group3/,
  *          where \c group1 is a member of the group specified by \c loc_id:
  *
- *          1. First use H5Lexists() to verify that \c group1 exists.
+ *          1. First, use H5Lexists() to verify that the \c group1 exists.
  *          2. If \c group1 exists, use H5Lexists() again, this time with name
  *             set to \c group1/group2, to verify that \c group2 exists.
  *          3. If \c group2 exists, use H5Lexists() with name set to
@@ -624,7 +621,7 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *          \c /group1/group2/softlink_to_group3, the first call to H5Lexists()
  *          would have name set to \c /group1.
  *
- *          Note that this is an outline and does not include all necessary
+ *          Note that this is an outline and does not include all the necessary
  *          details. Depending on circumstances, for example, you may need to
  *          verify that an intermediate link points to a group and that a soft
  *          link points to an existing target.
@@ -713,7 +710,7 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          There will be additional valid values if user-defined links have
  *          been registered.
  *
- *          \p corder specifies the link’s creation order position while
+ *          \p corder specifies the link’s creation order position, while
  *          \p corder_valid indicates whether the value in corder is valid.
  *
  *          If \p corder_valid is \c TRUE, the value in \p corder is known to
@@ -732,7 +729,7 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          This value is set with #H5Pset_char_encoding.
  *
  *          \c token is the location that a hard link points to, and
- *          \c val_size is the size of a soft link or user defined link value.
+ *          \c val_size is the size of a soft link or user-defined link value.
  *          H5O_token_t is used in the VOL layer. It is defined in H5public.h
  *          as:
  *          \snippet H5public.h H5O_token_t_snip
@@ -884,10 +881,12 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is
@@ -981,18 +980,18 @@ H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_orde
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *
+ * \warning H5Literate_by_name2() assumes that the membership of the group being
+ *          iterated over remains unchanged through the iteration; if any of the
+ *          links in the group change during the iteration, the function’s
+ *          behavior is undefined. Note, however, that objects pointed to by the
+ *          links can be modified.
+ *
  * \note H5Literate_by_name2() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name2() does not examine the members of \c subgroup_a.
  *       When recursive iteration is required, the application must handle the
  *       recursion, explicitly calling H5Literate_by_name2() on discovered
  *       subgroups.
- *
- * \note H5Literate_by_name2() assumes that the membership of the group being
- *       iterated over remains unchanged through the iteration; if any of the
- *       links in the group change during the iteration, the function’s
- *       behavior is undefined. Note, however, that objects pointed to by the
- *       links can be modified.
  *
  * \note H5Literate_by_name2() is the same as H5Literate2(), except that
  *       H5Literate2() always proceeds in alphanumeric order.
@@ -1116,7 +1115,7 @@ H5_DLL herr_t H5Lvisit2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          (with an absolute name based in the file’s root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
- *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          (a dot). (Note that when \p loc_id fully specifies the group
  *          that is to serve as the root of the iteration, the user may wish to
  *          consider using H5Lvisit2() instead of H5Lvisit_by_name2().)
  *
@@ -1361,7 +1360,7 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *            If that target file does not exist, the new \p file_name after
  *            stripping will be \c A.h5.
  *          - For Windows, there are 6 cases:
- *            -# \p file_name is an absolute drive with absolute pathname.
+ *            -# \p file_name is an absolute drive with an absolute pathname.
  *               For example, consider a \p file_name of \c /tmp/A.h5. If that
  *               target file does not exist, the new \p file_name after
  *               stripping will be \c A.h5.
@@ -1369,16 +1368,16 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *               name. For example, consider a \p file_name of \c /tmp/A.h5.
  *               If that target file does not exist, the new \p file_name after
  *               stripping will be \c A.h5.
- *            -# \p file_name is an absolute drive with relative pathname.
+ *            -# \p file_name is an absolute drive with a relative pathname.
  *               For example, consider a \p file_name of \c /tmp/A.h5. If that
  *               target file does not exist, the new \p file_name after
  *               stripping will be \c tmp\A.h5.
  *            -# \p file_name is in UNC (Uniform Naming Convention) format with
- *               server name, share name, and pathname. For example, consider
+ *               a server name, share name, and pathname. For example, consider
  *               a \p file_name of \c /tmp/A.h5. If that target file does not
  *               exist, the new \p file_name after stripping will be \c A.h5.
  *            -# \p file_name is in Long UNC (Uniform Naming Convention) format
- *               with server name, share name, and pathname. For example,
+ *               with a server name, share name, and pathname. For example,
  *               consider a \p file_name of \c /tmp/A.h5. If that target file
  *               does not exist, the new \p file_name after stripping will be
  *               \c A.h5.
@@ -1388,7 +1387,7 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  *               does not exist, the new \p file_name after stripping will be
  *               \c A.h5.
  *
- *          The library opens target file \p file_name with the file access
+ *          The library opens the target file \p file_name with the file access
  *          property list that is set via H5Pset_elink_fapl() when the external
  *          link link_name is accessed. If no such property list is set, the
  *          library uses the file access property list associated with the file
@@ -1641,10 +1640,12 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is
@@ -1668,7 +1669,6 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          membership of \p group_id changes during the iteration.
  *          This does not limit the ability to change link destinations
  *          while iterating, but caution is advised.
- *
  *
  * \version 1.12.0 Function was deprecated in this release.
  * \since 1.8.0
@@ -1726,18 +1726,18 @@ H5_DLL herr_t H5Literate1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *
+ * \warning H5Literate_by_name1() assumes that the membership of the group being
+ *          iterated over remains unchanged through the iteration; if any of the
+ *          links in the group change during the iteration, the function’s
+ *          behavior is undefined. Note, however, that objects pointed to by the
+ *          links can be modified.
+ *
  * \note H5Literate_by_name1() is not recursive. In particular, if a member of
  *       \p group_name is found to be a group, call it \c subgroup_a,
  *       H5Literate_by_name1() does not examine the members of \c subgroup_a.
  *       When recursive iteration is required, the application must handle the
  *       recursion, explicitly calling H5Literate_by_name1() on discovered
  *       subgroups.
- *
- * \note H5Literate_by_name1() assumes that the membership of the group being
- *       iterated over remains unchanged through the iteration; if any of the
- *       links in the group change during the iteration, the function’s
- *       behavior is undefined. Note, however, that objects pointed to by the
- *       links can be modified.
  *
  * \note H5Literate_by_name1() is the same as H5Giterate(), except that
  *       H5Giterate() always proceeds in lexicographic order.
@@ -1875,7 +1875,7 @@ H5_DLL herr_t H5Lvisit1(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order
  *          (with an absolute name based in the file’s root group) or a group
  *          relative to \p loc_id. If \p loc_id fully specifies the group that
  *          is to serve as the root of the iteration, group_name should be '.'
- *          (a dot). (Note that when \p loc_id fully specifies the the group
+ *          (a dot). (Note that when \p loc_id fully specifies the group
  *          that is to serve as the root of the iteration, the user may wish to
  *          consider using H5Lvisit1() instead of H5Lvisit_by_name1().)
  *

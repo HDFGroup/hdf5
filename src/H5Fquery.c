@@ -1372,3 +1372,30 @@ H5F_get_file_locking(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->use_file_locking)
 } /* end H5F_get_file_locking */
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_has_vector_select_io
+ *
+ * Purpose:  Determine if vector or selection I/O is supported by this file
+ *
+ * Return:   TRUE/FALSE
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_has_vector_select_io(const H5F_t *f, hbool_t is_write)
+{
+    hbool_t ret_value; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    if (is_write)
+        ret_value = (f->shared->lf->cls->write_vector != NULL || f->shared->lf->cls->write_selection != NULL);
+    else
+        ret_value = (f->shared->lf->cls->read_vector != NULL || f->shared->lf->cls->read_selection != NULL);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_has_vector_select_io */

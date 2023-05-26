@@ -11,18 +11,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: John Mainzer -- 4/19/06
+ * Purpose: This file contains declarations which are normally visible
+ *          only within the H5AC package (just H5AC.c at present).
  *
- * Purpose:     This file contains declarations which are normally visible
- *              only within the H5AC package (just H5AC.c at present).
+ *          Source files outside the H5AC package should include
+ *          H5ACprivate.h instead.
  *
- *		Source files outside the H5AC package should include
- *		H5ACprivate.h instead.
- *
- *		The one exception to this rule is testpar/t_cache.c.  The
- *		test code is easier to write if it can look at H5AC_aux_t.
- *		Indeed, this is the main reason why this file was created.
- *
+ *          The one exception to this rule is testpar/t_cache.c.  The
+ *          test code is easier to write if it can look at H5AC_aux_t.
+ *          Indeed, this is the main reason why this file was created.
  */
 
 #if !(defined H5AC_FRIEND || defined H5AC_MODULE)
@@ -167,10 +164,6 @@ H5FL_EXTERN(H5AC_aux_t);
  *	should still be around.
  *
  *						JRM -- 1/6/15
- *
- * magic:       Unsigned 32 bit integer always set to
- *		H5AC__H5AC_AUX_T_MAGIC.  This field is used to validate
- *		pointers to instances of H5AC_aux_t.
  *
  * mpi_comm:	MPI communicator associated with the file for which the
  *		cache has been created.
@@ -353,52 +346,34 @@ H5FL_EXTERN(H5AC_aux_t);
 
 #ifdef H5_HAVE_PARALLEL
 
-#define H5AC__H5AC_AUX_T_MAGIC (unsigned)0x00D0A01
-
 typedef struct H5AC_aux_t {
-    uint32_t magic;
-
     MPI_Comm mpi_comm;
-
-    int mpi_rank;
-
-    int mpi_size;
+    int      mpi_rank;
+    int      mpi_size;
 
     hbool_t write_permitted;
-
-    size_t dirty_bytes_threshold;
-
-    size_t dirty_bytes;
-
+    size_t  dirty_bytes_threshold;
+    size_t  dirty_bytes;
     int32_t metadata_write_strategy;
 
 #ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
-
     unsigned dirty_bytes_propagations;
-
     size_t   unprotect_dirty_bytes;
     unsigned unprotect_dirty_bytes_updates;
-
     size_t   insert_dirty_bytes;
     unsigned insert_dirty_bytes_updates;
-
     size_t   move_dirty_bytes;
     unsigned move_dirty_bytes_updates;
-
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
     H5SL_t *d_slist_ptr;
-
     H5SL_t *c_slist_ptr;
-
     H5SL_t *candidate_slist_ptr;
 
     void (*write_done)(void);
-
     void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl);
 
     unsigned p0_image_len;
-
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
 /* Typedefs for debugging function pointers */

@@ -14,25 +14,22 @@
 macro (SET_HDF_BUILD_TYPE)
   get_property (_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if (_isMultiConfig)
-    set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
-    set (HDF_BUILD_TYPE ${CMAKE_CFG_INTDIR})
+    # HDF_CFG_BUILD_TYPE is used in the Fortran install commands for the build location of the .mod files
     set (HDF_CFG_BUILD_TYPE \${CMAKE_INSTALL_CONFIG_NAME})
+    if (CMAKE_BUILD_TYPE)
+      # set the default to the specified command line define
+      set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
+    else ()
+      # set the default to the MultiConfig variable
+      set (HDF_CFG_NAME "$<CONFIG>")
+    endif ()
   else ()
     set (HDF_CFG_BUILD_TYPE ".")
     if (CMAKE_BUILD_TYPE)
       set (HDF_CFG_NAME ${CMAKE_BUILD_TYPE})
-      set (HDF_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     else ()
       set (HDF_CFG_NAME "Release")
-      set (HDF_BUILD_TYPE "Release")
     endif ()
-  endif ()
-  if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message (VERBOSE "Setting build type to 'RelWithDebInfo' as none was specified.")
-    set (CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
-    # Set the possible values of build type for cmake-gui
-    set_property (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-      "MinSizeRel" "RelWithDebInfo" "Developer")
   endif ()
 endmacro ()
 
@@ -73,12 +70,14 @@ endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
+  option (DISABLE_PDB_FILES "Do not install PDB files" OFF)
+  mark_as_advanced (DISABLE_PDB_FILES)
   if (WIN32 AND MSVC AND NOT DISABLE_PDB_FILES)
     get_target_property (target_type ${libtarget} TYPE)
-    if (${libtype} MATCHES "SHARED")
+    if (${target_type} MATCHES "SHARED")
       set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
     else ()
-      get_property (target_name TARGET ${libtarget} PROPERTY $<IF:$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>)
+      get_property (target_name TARGET ${libtarget} PROPERTY "$<IF:$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>,OUTPUT_NAME_DEBUG,OUTPUT_NAME_RELWITHDEBINFO>")
       set (targetfilename $<TARGET_FILE_DIR:${libtarget}>/${target_name}.pdb)
     endif ()
     install (
@@ -173,8 +172,8 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
         )
       else ()
         set_target_properties (${libtarget} PROPERTIES
-            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
-            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
+            IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
         )
       endif ()
     else ()
@@ -199,7 +198,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
   else ()
     if (WIN32 AND NOT MINGW)
       set_target_properties (${libtarget} PROPERTIES
-          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_BUILD_TYPE}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+          IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${HDF_CFG_NAME}/${IMPORT_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
           IMPORTED_LINK_INTERFACE_LANGUAGES "C"
       )
     else ()
@@ -214,8 +213,8 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (TARGET_C_PROPERTIES wintarget libtype)
   target_compile_options(${wintarget} PRIVATE
-      $<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
-      $<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>
+      "$<$<C_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
+      "$<$<CXX_COMPILER_ID:MSVC>:${WIN_COMPILE_FLAGS}>"
   )
   if(MSVC)
     set_property(TARGET ${wintarget} APPEND PROPERTY LINK_FLAGS "${WIN_LINK_FLAGS}")
@@ -453,7 +452,7 @@ macro (HDF_DIR_PATHS package_prefix)
     )
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
-      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+      set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${HDF_CFG_NAME})
       set (CMAKE_PDB_OUTPUT_DIRECTORY
           ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
       )
@@ -479,7 +478,10 @@ macro (HDF_DIR_PATHS package_prefix)
         CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
       set (CMAKE_GENERIC_PROGRAM_FILES)
     endif ()
+    set (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 0 CACHE PATH "" FORCE)
   endif ()
+
+  include (FetchContent)
 endmacro ()
 
 macro (ADD_H5_FLAGS h5_flag_var infile)

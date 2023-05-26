@@ -1,0 +1,114 @@
+name: hdf5 dev tarball
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    outputs:
+      has_changes:
+        description: "Whether there were changes the previous day"
+        value: ${{ jobs.check_commits.outputs.has_changes }}
+      file_base:
+        description: "The common base name of the source tarballs"
+        value: ${{ jobs.create_tarball.outputs.file_base }}
+      file_branch:
+        description: "The branch used for the source tarballs"
+        value: ${{ jobs.check_commits.outputs.branch_ref }}
+      file_sha:
+        description: "The sha used for the source tarballs"
+        value: ${{ jobs.check_commits.outputs.branch_sha }}
+
+permissions:
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel
+jobs:
+  check_commits:
+    name: Check for recent commits
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check-new-commits.outputs.has-new-commits }}
+      branch_ref: ${{ steps.get-branch-name.outputs.BRANCH_REF }}
+      branch_sha: ${{ steps.get-branch-sha.outputs.BRANCH_SHA }}
+    steps:
+    - name: Get branch name
+      id: get-branch-name
+      env:
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+        GITHUB_HEAD_REF: ${{ github.head_ref }}
+      #run: echo "${{ env.GITHUB_REF_NAME }} | grep -P '[0-9]+/merge' &> /dev/null && BRANCH_REF=${{ env.GITHUB_HEAD_REF }} || BRANCH_REF=${{ env.GITHUB_REF_NAME }}" >> $GITHUB_OUTPUT
+      run: echo "BRANCH_REF=${{ env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME }}" >> $GITHUB_OUTPUT
+
+    - name: Get branch sha
+      id: get-branch-sha
+      env:
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_WF_SHA: ${{ github.workflow_sha }}
+      run: |
+        SHORT_SHA=$(echo "${{ env.GITHUB_WF_SHA }}" | cut -c1-7)
+        echo "BRANCH_SHA=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+    - name: Check for changed source
+      id: check-new-commits
+      uses: adriangl/check-new-commits-action@v1
+      with:
+        seconds: 86400 # One day in seconds
+        branch: '${{ steps.get-branch-name.outputs.branch_ref }}'
+
+    - run: echo "You have ${{ steps.check-new-commits.outputs.new-commits-number }} new commit(s) in ${{ steps.get-branch-name.outputs.BRANCH_REF }} ✅!"
+      if: ${{ steps.check-new-commits.outputs.has-new-commits == 'true' }}
+
+    - run: echo "Short commit sha is ${{ steps.get-branch-sha.outputs.BRANCH_SHA }}!"
+
+  create_tarball:
+    name: Create a source tarball
+    runs-on: ubuntu-latest
+    needs: check_commits
+    if: ${{ needs.check_commits.outputs.has_changes == 'true' }}
+    outputs:
+      file_base: ${{ steps.set-file-base.outputs.FILE_BASE }}
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+        with:
+          path: hdfsrc
+
+      - name: Install Autotools Dependencies (Linux, serial)
+        run: |
+             sudo apt update
+             sudo apt install automake autoconf libtool libtool-bin gzip dos2unix
+
+      - name: Set file base name
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: Run release script
+        id: run-release-script
+        run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
+          bin/bbrelease -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
+        shell: bash
+
+      - name: List files in the repository
+        run: |
+              ls ${{ github.workspace }}
+              ls $GITHUB_WORKSPACE
+
+      # Save files created by release script
+      - name: Save tgz-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.tar.gz
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Save zip-tarball
+        uses: actions/upload-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ steps.set-file-base.outputs.FILE_BASE }}.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`

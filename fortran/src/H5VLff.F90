@@ -52,10 +52,10 @@ CONTAINS
 !!
 !! \brief Registers a new VOL connector as a member of the virtual object layer class by name.
 !!
-!! \param name    Connector name.
-!! \param vol_id  VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
+!! \param name    \fortran_vol_name
+!! \param vol_id  VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F
 !! \param hdferr  \fortran_error
-!! \param vipl_id VOL initialization property list identifier.
+!! \param vipl_id VOL initialization property list identifier
 !!
 !! See C API: @ref H5VLregister_connector_by_name()
 !!
@@ -64,7 +64,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: vol_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: vipl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: vipl_id
+
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTEGER(HID_T) :: vipl_id_default
 
@@ -73,8 +74,8 @@ CONTAINS
             BIND(C,NAME='H5VLregister_connector_by_name')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T), INTENT(IN), VALUE :: vipl_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: vipl_id
        END FUNCTION H5VLregister_connector_by_name
     END INTERFACE
 
@@ -93,10 +94,10 @@ CONTAINS
 !!
 !! \brief Registers a new VOL connector by value.
 !!
-!! \param connector_value Connector value.
-!! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
+!! \param connector_value Connector value
+!! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F
 !! \param hdferr          \fortran_error
-!! \param vipl_id         VOL initialization property list identifier.
+!! \param vipl_id         VOL initialization property list identifier
 !!
 !! See C API: @ref H5VLregister_connector_by_value()
 !!
@@ -105,7 +106,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: connector_value
     INTEGER(HID_T), INTENT(OUT) :: vol_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: vipl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: vipl_id
     INTEGER(HID_T) :: vipl_id_default
 
     INTERFACE
@@ -114,7 +115,7 @@ CONTAINS
          IMPORT :: HID_T
          IMPORT :: C_INT
          INTEGER(C_INT), VALUE :: connector_value
-         INTEGER(HID_T), INTENT(IN), VALUE :: vipl_id
+         INTEGER(HID_T), VALUE :: vipl_id
        END FUNCTION H5VLregister_connector_by_value
     END INTERFACE
 
@@ -133,8 +134,8 @@ CONTAINS
 !!
 !! \brief Determines whether a VOL class has been registered or not ccording to a specified connector name.
 !!
-!! \param name       Connector name.
-!! \param registered State of VOL class registration.
+!! \param name       \fortran_vol_name
+!! \param registered State of VOL class registration
 !! \param hdferr     \fortran_error
 !!
 !! See C API: @ref H5VLis_connector_registered_by_name()
@@ -151,7 +152,7 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5VLis_connector_registered_by_name(name) BIND(C,NAME='H5VLis_connector_registered_by_name')
          IMPORT :: C_CHAR
          IMPORT :: C_INT
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
        END FUNCTION H5VLis_connector_registered_by_name
     END INTERFACE
 
@@ -170,9 +171,9 @@ CONTAINS
 !!
 !! \brief Determines whether a VOL class has been registered or not according to a specified connector value (ID).
 !!
-!! \param value ConneConnector value.
-!! \param registered State of VOL class registration.
-!! \param hdferr Retu\fortran_error
+!! \param value      Connector value
+!! \param registered State of VOL class registration
+!! \param hdferr     \fortran_error
 !!
 !! See C API: @ref H5VLis_connector_registered_by_value()
 !!
@@ -204,7 +205,7 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param obj_id Object id.
+!! \param obj_id Object id
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
@@ -219,7 +220,7 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5VLget_connector_id(obj_id) BIND(C,NAME='H5VLget_connector_id')
          IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN) :: obj_id
+         INTEGER(HID_T), VALUE :: obj_id
        END FUNCTION H5VLget_connector_id
     END INTERFACE
 
@@ -237,7 +238,7 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param name   Connector name.
+!! \param name   \fortran_vol_name
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
@@ -254,7 +255,7 @@ CONTAINS
        INTEGER(HID_T) FUNCTION H5VLget_connector_id_by_name(name) BIND(C,NAME='H5VLget_connector_id_by_name')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
        END FUNCTION H5VLget_connector_id_by_name
     END INTERFACE
 
@@ -274,8 +275,8 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param value CConnector value.
-!! \param vol_id Connector id.
+!! \param value  Connector value
+!! \param vol_id Connector id
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5VLget_connector_id_by_value()
@@ -307,10 +308,10 @@ CONTAINS
 !!
 !! \brief Retrieves a connector name for a VOL.
 !!
-!! \param obj_id   Object identifier or file identifier.
-!! \param name     Connector name.
+!! \param obj_id   Object identifier or file identifier
+!! \param name     \fortran_vol_name
 !! \param hdferr   \fortran_error
-!! \param name_len Maximum length of the name to retrieve.
+!! \param name_len Maximum length of the name to retrieve
 !!
 !! See C API: @ref H5VLget_connector_name()
 !!
@@ -327,9 +328,9 @@ CONTAINS
        INTEGER(SIZE_T) FUNCTION H5VLget_connector_name(obj_id, name, size) BIND(C,NAME='H5VLget_connector_name')
          IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
          IMPLICIT NONE
-         INTEGER(HID_T) , INTENT(IN), VALUE :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
-         INTEGER(SIZE_T), INTENT(IN), VALUE :: size
+         INTEGER(HID_T) , VALUE :: obj_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(SIZE_T), VALUE :: size
        END FUNCTION H5VLget_connector_name
     END INTERFACE
 
@@ -354,7 +355,7 @@ CONTAINS
 !!
 !! \brief Closes a VOL connector ID.
 !!
-!! \param vol_id A valid identifier of the connectory to unregister.
+!! \param vol_id A valid identifier of the connectory to unregister
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5VLclose()
@@ -367,7 +368,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5VLclose(vol_id) BIND(C, NAME='H5VLclose')
          IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN), VALUE :: vol_id
+         INTEGER(HID_T), VALUE :: vol_id
        END FUNCTION H5VLclose
     END INTERFACE
 
@@ -380,8 +381,8 @@ CONTAINS
 !!
 !! \brief Removes a VOL connector ID from the library.
 !!
-!! \param plugin_id A valid identifier of the connector to unregister..
-!! \param hdferr Ret\fortran_error
+!! \param plugin_id A valid identifier of the connector to unregister
+!! \param hdferr    \fortran_error
 !!
 !! See C API: @ref H5VLunregister_connector()
 !!
@@ -393,7 +394,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5VLunregister_connector(plugin_id) BIND(C, NAME='H5VLunregister_connector')
          IMPORT :: HID_T
-         INTEGER(HID_T), INTENT(IN), VALUE :: plugin_id
+         INTEGER(HID_T), VALUE :: plugin_id
        END FUNCTION H5VLunregister_connector
     END INTERFACE
 

@@ -142,7 +142,7 @@ install (
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)
   configure_file (
-      ${HDF_RESOURCES_DIR}/HDF5_Examples.cmake.in
+      ${HDF_RESOURCES_DIR}/examples/HDF5_Examples.cmake.in
       ${HDF5_BINARY_DIR}/HDF5_Examples.cmake @ONLY
   )
   install (
@@ -150,17 +150,54 @@ if (HDF5_PACK_EXAMPLES)
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+
+  option (EXAMPLES_USE_RELEASE_NAME "Use the released examples artifact name" OFF)
+  option (EXAMPLES_DOWNLOAD "Download to use released examples files" OFF)
+  if (EXAMPLES_DOWNLOAD)
+    if (NOT EXAMPLES_USE_LOCALCONTENT)
+      set (EXAMPLES_URL ${EXAMPLES_TGZ_ORIGPATH}/${EXAMPLES_TGZ_ORIGNAME})
+    else ()
+      set (EXAMPLES_URL ${TGZPATH}/${EXAMPLES_TGZ_ORIGNAME})
+    endif ()
+    message (VERBOSE "Examples file is ${EXAMPLES_URL}")
+    file (DOWNLOAD ${EXAMPLES_URL} ${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED})
+    if (EXISTS "${HDF5_BINARY_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+      execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED}
+          WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+          COMMAND_ECHO STDOUT
+      )
+    endif ()
+    set (EXAMPLES_USE_RELEASE_NAME ON CACHE BOOL "" FORCE)
+  else ()
+    if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+      execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
+          WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+          COMMAND_ECHO STDOUT
+      )
+    endif ()
+  endif ()
+  if (EXAMPLES_USE_RELEASE_NAME)
+    get_filename_component (EX_LAST_EXT ${HDF5_EXAMPLES_COMPRESSED} LAST_EXT)
+    if (${EX_LAST_EXT} STREQUAL ".zip")
+      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+    else ()
+      get_filename_component (EX_DIR_NAME ${HDF5_EXAMPLES_COMPRESSED} NAME_WLE)
+      get_filename_component (EX_DIR_NAME ${EX_DIR_NAME} NAME_WLE)
+    endif ()
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
-    )
-    install (
-      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
-      DESTINATION ${HDF5_INSTALL_DATA_DIR}
-      USE_SOURCE_PERMISSIONS
-      COMPONENT hdfdocuments
+        COMMAND ${CMAKE_COMMAND} -E rename ${EX_DIR_NAME} HDF5Examples
+        WORKING_DIRECTORY ${HDF5_BINARY_DIR}
+        COMMAND_ECHO STDOUT
     )
   endif ()
+  install (
+    DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
+    DESTINATION ${HDF5_INSTALL_DATA_DIR}
+    USE_SOURCE_PERMISSIONS
+    COMPONENT hdfdocuments
+  )
   install (
       FILES
           ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
@@ -169,13 +206,13 @@ if (HDF5_PACK_EXAMPLES)
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/CTestScript.cmake
+          ${HDF_RESOURCES_DIR}/examples/CTestScript.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
   install (
       FILES
-          ${HDF_RESOURCES_DIR}/HDF5_Examples_options.cmake
+          ${HDF_RESOURCES_DIR}/examples/HDF5_Examples_options.cmake
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
@@ -395,24 +432,29 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
 
-    list (APPEND CPACK_GENERATOR "DEB")
-    set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
-    set (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
+    find_program (DPKGSHLIB_EXE dpkg-shlibdeps)
+    if (DPKGSHLIB_EXE)
+      list (APPEND CPACK_GENERATOR "DEB")
+      set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
+      set (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
+    endif ()
 
-    list (APPEND CPACK_GENERATOR "RPM")
-    set (CPACK_RPM_PACKAGE_RELEASE "1")
-    set (CPACK_RPM_PACKAGE_RELEASE_DIST ON)
-    set (CPACK_RPM_COMPONENT_INSTALL ON)
-    set (CPACK_RPM_PACKAGE_RELOCATABLE ON)
-    set (CPACK_RPM_FILE_NAME "RPM-DEFAULT")
-    set (CPACK_RPM_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
-    set (CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
-    set (CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
-    set (CPACK_RPM_PACKAGE_LICENSE "BSD-style")
-    set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
-    set (CPACK_RPM_PACKAGE_URL "${HDF5_PACKAGE_URL}")
-    set (CPACK_RPM_PACKAGE_SUMMARY "HDF5 is a unique technology suite that makes possible the management of extremely large and complex data collections.")
-    set (CPACK_RPM_PACKAGE_DESCRIPTION
+    find_program (RPMBUILD_EXE rpmbuild)
+    if (RPMBUILD_EXE)
+      list (APPEND CPACK_GENERATOR "RPM")
+      set (CPACK_RPM_PACKAGE_RELEASE "1")
+      set (CPACK_RPM_PACKAGE_RELEASE_DIST ON)
+      set (CPACK_RPM_COMPONENT_INSTALL ON)
+      set (CPACK_RPM_PACKAGE_RELOCATABLE ON)
+      set (CPACK_RPM_FILE_NAME "RPM-DEFAULT")
+      set (CPACK_RPM_PACKAGE_NAME "${CPACK_PACKAGE_NAME}")
+      set (CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
+      set (CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
+      set (CPACK_RPM_PACKAGE_LICENSE "BSD-style")
+      set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
+      set (CPACK_RPM_PACKAGE_URL "${HDF5_PACKAGE_URL}")
+      set (CPACK_RPM_PACKAGE_SUMMARY "HDF5 is a unique technology suite that makes possible the management of extremely large and complex data collections.")
+      set (CPACK_RPM_PACKAGE_DESCRIPTION
         "The HDF5 technology suite includes:
 
     * A versatile data model that can represent very complex data objects and a wide variety of metadata.
@@ -427,13 +469,14 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 
 The HDF5 data model, file format, API, library, and tools are open and distributed without charge.
 "
-    )
+      )
 
-    #-----------------------------------------------------------------------------
-    # Configure the spec file for the install RPM
-    #-----------------------------------------------------------------------------
-#    configure_file ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
-#    set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
+      #-----------------------------------------------------------------------------
+      # Configure the spec file for the install RPM
+      #-----------------------------------------------------------------------------
+#      configure_file ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
+#      set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
+    endif ()
   endif ()
 
   # By default, do not warn when built on machines using only VS Express:

@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Thursday, April 16, 1998
- */
-
 #ifndef H5Zprivate_H
 #define H5Zprivate_H
 

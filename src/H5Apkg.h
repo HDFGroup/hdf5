@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, Apr 20
- *
  * Purpose:     This file contains declarations which are visible only within
  *              the H5A package.  Source files outside the H5A package should
  *              include H5Aprivate.h instead.

@@ -36,7 +36,6 @@
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Friday, September 13, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 nh5_fixname_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl, _fcd full_name, size_t_f *full_namelen)
@@ -78,7 +77,6 @@ done:
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Thursday, September 19, 2002
- * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl)
@@ -128,7 +126,6 @@ DONE:
  * Returns:     none
  * Programmer:  Quincey Koziol
  *              Tuesday, December 14, 2004
- * Modifications:
  *---------------------------------------------------------------------------*/
 void
 nh5_exit_c(int_f *status)
@@ -145,7 +142,6 @@ nh5_exit_c(int_f *status)
  * Returns:     none
  * Programmer:  M.S. Breitenfeld
  *              September 30, 2008
- * Modifications:
  *---------------------------------------------------------------------------*/
 void
 nh5_env_nocleanup_c(int_f *status)

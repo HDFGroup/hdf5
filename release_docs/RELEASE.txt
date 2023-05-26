@@ -21,7 +21,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from Release to Release and New Features in the HDF5-1.13.x release series
+Changes from Release to Release and New Features in the HDF5-1.16.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.13.3
+- Bug Fixes since HDF5-1.14.0
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,108 +47,118 @@ New Features
 
     Configuration:
     -------------
-    - Removal of MPE support
+    - Added new CMake options for building and running HDF5 API tests
+      (Experimental)
 
-      The ability to build with MPE instrumentation has been removed along with
-      the following configure options:
+      HDF5 API tests are an experimental feature, primarily targeted
+      toward HDF5 VOL connector authors, that is currently being developed.
+      These tests exercise the HDF5 API and are being integrated back
+      into the HDF5 library from the HDF5 VOL tests repository
+      (https://github.com/HDFGroup/vol-tests). To support this feature,
+      the following new options have been added to CMake:
 
-      Autotools:
-          --with-mpe=
+        * HDF5_TEST_API: ON/OFF (Default: OFF)
 
-      CMake has never supported building with MPE support.
+          Controls whether the HDF5 API tests will be built. These tests
+          will only be run during testing of HDF5 if the HDF5_TEST_SERIAL
+          (for serial tests) and HDF5_TEST_PARALLEL (for parallel tests)
+          options are enabled.
 
-      (DER - 2022/11/08)
+        * HDF5_TEST_API_INSTALL: ON/OFF (Default: OFF)
 
-     - Removal of dmalloc support
+          Controls whether the HDF5 API test executables will be installed
+          on the system alongside the HDF5 library. This option is currently
+          not functional.
 
-      The ability to build with dmalloc support has been removed along with
-      the following configure options:
+        * HDF5_TEST_API_ENABLE_ASYNC: ON/OFF (Default: OFF)
 
-      Autotools:
-          --with-dmalloc=
+          Controls whether the HDF5 Async API tests will be built. These
+          tests will only be run if the VOL connector used supports Async
+          operations.
 
-      CMake:
-          HDF5_ENABLE_USING_DMALLOC
+        * HDF5_TEST_API_ENABLE_DRIVER: ON/OFF (Default: OFF)
 
-      (DER - 2022/11/08)
-      
-    - Removal of memory allocation sanity checks configure options
+          Controls whether to build the HDF5 API test driver program. This
+          test driver program is useful for VOL connectors that use a
+          client/server model where the server needs to be up and running
+          before the VOL connector can function. This option is currently
+          not functional.
 
-      With the removal of the memory allocation sanity checks feature, the
-      following configure options are no longer necessary and have been
-      removed:
+        * HDF5_TEST_API_SERVER: String (Default: "")
 
-      Autotools:
-          --enable-memory-alloc-sanity-check
+          Used to specify a path to the server executable that the test
+          driver program should execute.
 
-      CMake:
-          HDF5_MEMORY_ALLOC_SANITY_CHECK
-          HDF5_ENABLE_MEMORY_STATS
+    - Added support for CMake presets file.
 
-      (DER - 2022/11/03)
+      CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
+      that allow users to specify common configure options and share them with others.
+      HDF added a CMakePresets.json file of a typical configuration and support
+      file, config/cmake-presets/hidden-presets.json. 
+      Also added a section to INSTALL_CMake.txt with very basic explanation of the
+      process to use CMakePresets.
+
+    - Deprecated and removed old SZIP library in favor of LIBAEC library
+
+      LIBAEC library has been used in HDF5 binaries as the szip library of choice
+      for a few years. We are removing the options for using the old SZIP library.
+
+      Also removed the config/cmake/FindSZIP.cmake file.
+
+    - Enabled instrumentation of the library by default in CMake for parallel
+      debug builds
+
+      HDF5 can be configured to instrument portions of the parallel library to
+      aid in debugging. Autotools builds of HDF5 turn this capability on by
+      default for parallel debug builds and off by default for other build types.
+      CMake has been updated to match this behavior.
+
+    - Added new option to build libaec and zlib inline with CMake.
+
+      Using the CMake FetchContent module, the external filters can populate
+      content at configure time via any method supported by the ExternalProject
+      module. Whereas ExternalProject_Add() downloads at build time, the
+      FetchContent module makes content available immediately, allowing the
+      configure step to use the content in commands like add_subdirectory(),
+      include() or file() operations.
+
+      The HDF options (and defaults) for using this are:
+          BUILD_SZIP_WITH_FETCHCONTENT:BOOL=OFF
+          LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+          BUILD_ZLIB_WITH_FETCHCONTENT:BOOL=OFF
+          ZLIB_USE_LOCALCONTENT:BOOL=OFF
+
+      The CMake variables to control the path and file names:
+          LIBAEC_TGZ_ORIGPATH:STRING
+          LIBAEC_TGZ_ORIGNAME:STRING
+          ZLIB_TGZ_ORIGPATH:STRING
+          ZLIB_TGZ_ORIGNAME:STRING
+
+      See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
+
 
     Library:
     --------
-    - Overhauled the Virtual Object Layer (VOL)
+    - Added a Subfiling VFD configuration file prefix environment variable
 
-      The virtual object layer (VOL) was added in HDF5 1.12.0 but the initial
-      implementation required API-breaking changes to better support optional
-      operations and pass-through VOL connectors. The original VOL API is
-      now considered deprecated and VOL users and connector authors should
-      target the 1.14 VOL API.
+      The Subfiling VFD now checks for values set in a new environment
+      variable "H5FD_SUBFILING_CONFIG_FILE_PREFIX" to determine if the
+      application has specified a pathname prefix to apply to the file
+      path for its configuration file. For example, this can be useful
+      for cases where the application wishes to write subfiles to a
+      machine's node-local storage while placing the subfiling configuration
+      file on a file system readable by all machine nodes.
 
-      The specific changes are too extensive to document in a release note, so
-      VOL users and connector authors should consult the updated VOL connector
-      author's guide and the 1.12-1.14 VOL migration guide.
+    - Added H5Pset_selection_io(), H5Pget_selection_io(), and
+      H5Pget_no_selection_io_cause() API functions to manage the selection I/O
+      feature.  This can be used to enable collective I/O with type conversion,
+      or it can be used with custom VFDs that support vector or selection I/O.
 
-      (DER - 2022/12/28)
+    - Added H5Pset_modify_write_buf() and H5Pget_modify_write_buf() API
+      functions to allow the library to modify the contents of write buffers, in
+      order to avoid malloc/memcpy.  Currently only used for type conversion
+      with selection I/O.
 
-    - H5VLquery_optional() signature change
-
-      The last parameter of this API call has changed from a pointer to hbool_t
-      to a pointer to uint64_t. Due to the changes in how optional operations
-      are handled in the 1.14 VOL API, we cannot make the old API call work
-      with the new scheme, so there is no API compatibility macro for it.
-
-      (DER - 2022/12/28)
-
-    - H5I_free_t callback signature change
-
-      In order to support asynchronous operations and future IDs, the signature
-      of the H5I_free_t callback has been modified to take a second 'request'
-      parameter. Due to the nature of the internal library changes, no API
-      compatibility macro is available for this change.
-
-      (DER - 2022/12/28)
-
-    - Fix for CVE-2019-8396
-
-      Malformed HDF5 files may have truncated content which does not match
-      the expected size. When H5O__pline_decode() attempts to decode these it
-      may read past the end of the allocated space leading to heap overflows
-      as bounds checking is incomplete.
-
-      The fix ensures each element is within bounds before reading.
-
-      (2022/11/09 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
-
-    - Removal of memory allocation sanity checks feature
-
-      This feature added heap canaries and statistics tracking for internal
-      library memory operations. Unfortunately, the heap canaries caused
-      problems when library memory operations were mixed with standard C
-      library memory operations (such as in the filter pipeline, where
-      buffers may have to be reallocated). Since any platform with a C
-      compiler also usually has much more sophisticated memory sanity
-      checking tools than the HDF5 library provided (e.g., valgrind), we
-      have decided to to remove the feature entirely.
-
-      In addition to the configure changes described above, this also removes
-      the following from the public API:
-          H5get_alloc_stats()
-          H5_alloc_stats_t
-
-      (DER - 2022/11/03)
 
     Parallel Library:
     -----------------
@@ -157,8 +167,11 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
+    - Added Fortran APIs:
+      h5pset_selection_io_f, h5pget_selection_io_f
+      h5pset_modify_write_buf_f, h5pget_modify_write_buf_f
 
     C++ Library:
     ------------
@@ -199,131 +212,199 @@ Support for new platforms, languages and compilers
 ==================================================
     -
     
-Bug Fixes since HDF5-1.13.3 release
+Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
-    - Seg fault on file close
+    - Fixed a bug in H5Ocopy that could generate invalid HDF5 files
 
-      h5debug fails at file close with core dump on a file that has an
-      illegal file size in its cache image.  In H5F_dest(), the library
-      performs all the closing operations for the file and keeps track of
-      the error encountered when reading the file cache image.  
-      At the end of the routine, it frees the file's file structure and 
-      returns error.  Due to the error return, the file object is not removed 
-      from the ID node table.  This eventually causes assertion failure in 
-      H5VL__native_file_close() when the library finally exits and tries to 
-      access that file object in the table for closing.
+      H5Ocopy was missing a check to determine whether the new object's
+      object header version is greater than version 1. Without this check,
+      copying of objects with object headers that are smaller than a
+      certain size would cause H5Ocopy to create an object header for the
+      new object that has a gap in the header data. According to the
+      HDF5 File Format Specification, this is not allowed for version
+      1 of the object header format.
 
-      The closing routine, H5F_dest(), will not free the file structure if
-      there is error, keeping a valid file structure in the ID node table.
-      It will be freed later in H5VL__native_file_close() when the
-      library exits and terminates the file package.
+      Fixes GitHub issue #2653
 
-      (VC - 2022/12/14, HDFFV-11052, CVE-2020-10812)
+    - Fixed H5Pget_vol_cap_flags and H5Pget_vol_id to accept H5P_DEFAULT
 
-    - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
- 
-      Validate location (offset) of the accumulated metadata when comparing.
+      H5Pget_vol_cap_flags and H5Pget_vol_id were updated to correctly
+      accept H5P_DEFAULT for the 'plist_id' FAPL parameter. Previously,
+      they would fail if provided with H5P_DEFAULT as the FAPL.
 
-      Initially, the accumulated metadata location is initialized to HADDR_UNDEF
-      - the highest available address. Bogus input files may provide a location
-      or size matching this value. Comparing this address against such bogus
-      values may provide false positives. Thus make sure, the value has been
-      initialized or fail the comparison early and let other parts of the
-      code deal with the bogus address/size.
-      Note: To avoid unnecessary checks, it is assumed that if the 'dirty'
-      member in the same structure is true the location is valid.
+    - Fixed ROS3 VFD anonymous credential usage with h5dump and h5ls
 
-      (EFE - 2022/10/10 GH-2230)
+      ROS3 VFD anonymous credential functionality became broken in h5dump
+      and h5ls in the HDF5 1.14.0 release with the added support for VFD
+      plugins, which changed the way that the tools handled setting of
+      credential information that the VFD uses. The tools could be
+      provided the command-line option of "--s3-cred=(,,)" as a workaround
+      for anonymous credential usage, but the documentation for this
+      option stated that anonymous credentials could be used by simply
+      omitting the option. The latter functionality has been restored.
+
+      Fixes GitHub issue #2406
+
+    - Fixed memory leaks when processing malformed object header continuation messages
+
+      Malformed object header continuation messages can result in a too-small
+      buffer being passed to the decode function, which could lead to reading
+      past the end of the buffer. Additionally, errors in processing these
+      malformed messages can lead to allocated memory not being cleaned up.
+
+      This fix adds bounds checking and cleanup code to the object header
+      continuation message processing.
+
+      Fixes GitHub issue #2604
+
+    - Fixed memory leaks, aborts, and overflows in H5O EFL decode
+
+      The external file list code could call assert(), read past buffer
+      boundaries, and not properly clean up resources when parsing malformed
+      external data files messages.
+
+      This fix cleans up allocated memory, adds buffer bounds checks, and
+      converts asserts to HDF5 error checking.
+
+      Fixes GitHub issue #2605
+
+    - Fixed potential heap buffer overflow in decoding of link info message
+
+      Detections of buffer overflow were added for decoding version, index
+      flags, link creation order value, and the next three addresses.  The
+      checkings will remove the potential invalid read of any of these
+      values that could be triggered by a malformed file.
+
+      Fixes GitHub issue #2603
+
+    - Memory leak
+
+      Memory leak was detected when running h5dump with "pov".  The memory was allocated
+      via H5FL__malloc() in hdf5/src/H5FL.c
+
+      The fuzzed file "pov" was an HDF5 file containing an illegal continuation message.
+      When deserializing the object header chunks for the file, memory is allocated for the
+      array of continuation messages (cont_msg_info->msgs) in continuation message info struct.
+      As error is encountered in loading the illegal message, the memory allocated for
+      cont_msg_info->msgs needs to be freed.
+
+      Fixes GitHub issue #2599
+
+    - Fixed memory leaks that could occur when reading a dataset from a
+      malformed file
+
+      When attempting to read layout, pline, and efl information for a
+      dataset, memory leaks could occur if attempting to read pline/efl
+      information threw an error, which is due to the memory that was 
+      allocated for pline and efl not being properly cleaned up on error.  
+
+      Fixes GitHub issue #2602
+
+    - Fixed potential heap buffer overrun in group info header decoding from malformed file
+
+      H5O__ginfo_decode could sometimes read past allocated memory when parsing a
+      group info message from the header of a malformed file.
+  
+      It now checks buffer size before each read to properly throw an error in these cases.
+  
+      Fixes GitHub issue #2601
       
-    - Fix CVE-2018-16438 / GHSA-9xmm-cpf8-rgmx
+    - Fixed potential buffer overrun issues in some object header decode routines
 
-      Make sure info block for external links has at least 3 bytes.
-    
-      According to the specification, the information block for external links
-      contains 1 byte of version/flag information and two 0 terminated strings
-      for the object linked to and the full path.
-      Although not very useful, the minimum string length for each (with
-      terminating 0) would be one byte.
-      Checking this helps to avoid SEGVs triggered by bogus files.
+      Several checks were added to H5O__layout_decode and H5O__sdspace_decode to
+      ensure that memory buffers don't get overrun when decoding buffers read from
+      a (possibly corrupted) HDF5 file.
 
-      (EFE - 2022/10/09 GH-2233)
+    - Fixed a heap buffer overflow that occurs when reading from
+      a dataset with a compact layout within a malformed HDF5 file
 
-    - CVE-2021-46244 / GHSA-vrxh-5gxg-rmhm
+      During opening of a dataset that has a compact layout, the
+      library allocates a buffer that stores the dataset's raw data.
+      The dataset's object header that gets written to the file
+      contains information about how large of a buffer the library
+      should allocate. If this object header is malformed such that
+      it causes the library to allocate a buffer that is too small
+      to hold the dataset's raw data, future I/O to the dataset can
+      result in heap buffer overflows. To fix this issue, an extra
+      check is now performed for compact datasets to ensure that
+      the size of the allocated buffer matches the expected size
+      of the dataset's raw data (as calculated from the dataset's
+      dataspace and datatype information). If the two sizes do not
+      match, opening of the dataset will fail.
 
-      Compound datatypes may not have members of size 0
- 
-      A member size of 0 may lead to an FPE later on as reported in
-      CVE-2021-46244. To avoid this, check for this as soon as the
-      member is decoded.
+      Fixes GitHub issue #2606
 
-      (EFE - 2022/10/05 GEH-2242)
+    - Fixed a memory corruption issue that can occur when reading
+      from a dataset using a hyperslab selection in the file
+      dataspace and a point selection in the memory dataspace
 
+      When reading from a dataset using a hyperslab selection in
+      the dataset's file dataspace and a point selection in the
+      dataset's memory dataspace where the file dataspace's "rank"
+      is greater than the memory dataspace's "rank", memory corruption
+      could occur due to an incorrect number of selection points
+      being copied when projecting the point selection onto the
+      hyperslab selection's dataspace.
 
-    - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
+    - Fixed issues in the Subfiling VFD when using the SELECT_IOC_EVERY_NTH_RANK
+      or SELECT_IOC_TOTAL I/O concentrator selection strategies
 
-      Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
+      Multiple bugs involving these I/O concentrator selection strategies
+      were fixed, including:
 
-      When decoding a file space info message in H5O__fsinfo_decode()  make
-      sure each element to be decoded is still within the message. Malformed
-      hdf5 files may have trunkated content which does not match the
-      expected size. Checking this will prevent attempting to decode
-      unrelated data and heap overflows. So far, only free space manager
-      address data was checked before decoding.
+        * A bug that caused the selection strategy to be altered when
+          criteria for the strategy was specified in the
+          H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variable as
+          a single value, rather than in the old and undocumented
+          'integer:integer' format
+        * Two bugs which caused a request for 'N' I/O concentrators to
+          result in 'N - 1' I/O concentrators being assigned, which also
+          lead to issues if only 1 I/O concentrator was requested
 
-      (EFE - 2022/10/05 GH-2228)
+      Also added a regression test for these two I/O concentrator selection
+      strategies to prevent future issues. 
 
-    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
+    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
 
-      When evicting driver info block, NULL the corresponding entry.
+      Check for overflow when calculating on-disk attribute data size.
 
-      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
-      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
-      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
-      used in other functions (like  H5F__dest()) - as other places will check
-      whether the pointer is initialized before using its value.
+      A bogus hdf5 file may contain dataspace messages with sizes
+      which lead to the on-disk data sizes to exceed what is addressable.
+      When calculating the size, make sure, the multiplication does not
+      overflow.
+      The test case was crafted in a way that the overflow caused the
+      size to be 0.
 
-      (EFE - 2022/09/29 GH-2254)
+      Fixes GitHub #2458
 
-    - Fix CVE-2021-45833 / GHSA-x57p-jwp6-4v79
+    - Fixed an issue with collective metadata writes of global heap data
 
-      Report error if dimensions of chunked storage in data layout < 2
-    
-      For Data Layout Messages version 1 & 2 the specification state
-      that the value stored in the data field is 1 greater than the
-      number of dimensions in the dataspace. For version 3 this is
-      not explicitly stated but the implementation suggests it to be
-      the case.
-      Thus the set value needs to be at least 2. For dimensionality
-      < 2 an out-of-bounds access occurs.
- 
-      (EFE - 2022/09/28 GH-2240)
-      
-    - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
+      New test failures in parallel netCDF started occurring with debug
+      builds of HDF5 due to an assertion failure and this was reported in
+      GitHub issue #2433. The assertion failure began happening after the
+      collective metadata write pathway in the library was updated to use
+      vector I/O so that parallel-enabled HDF5 Virtual File Drivers (other
+      than the existing MPI I/O VFD) can support collective metadata writes.
 
-      Parent of enum datatype message must have the same size as the
-      enum datatype message itself.
-      Functions accessing the enumeration values use the size of the
-      enumeration datatype to determine the size of each element and
-      how much data to copy.
-      Thus the size of the enumeration and its parent need to match.
-      Check in H5O_dtype_decode_helper()  to avoid unpleasant surprises
-      later.
+      The assertion failure was fixed by updating collective metadata writes
+      to treat global heap metadata as raw data, as done elsewhere in the
+      library. 
 
-      (EFE - 2022/09/28 GH-2236)
+      Fixes GitHub issue #2433
 
-    - Fix CVE-2018-17439 / GHSA-vcxv-vp43-rch7
+    - Fixed buffer overflow error in image decoding function.
 
-      H5IMget_image_info(): Make sure to not exceed local array size
+      The error occurred in the function for decoding address from the specified
+      buffer, which is called many times from the function responsible for image
+      decoding. The length of the buffer is known in the image decoding function,
+      but no checks are produced, so the buffer overflow can occur in many places,
+      including callee functions for address decoding. 
 
-      Malformed hdf5 files may provide more dimensions than the array dim[] in
-      H5IMget_image_info() is able to hold. Check number of elements first by calling
-      H5Sget_simple_extent_dims() with NULL for both 'dims' and 'maxdims' arguments.
-      This will cause the function to return only the number of dimensions.
-      The fix addresses a stack overflow on write.
+      The error was fixed by inserting corresponding checks for buffer overflow.
 
-      (EFE - 2022/09/27 HDFFV-10589, GH-2226)
+      Fixes GitHub issue #2432
 
 
     Java Library
@@ -333,49 +414,96 @@ Bug Fixes since HDF5-1.13.3 release
 
     Configuration
     -------------
-    - Remove Javadoc generation
+    - The accum test now passes on macOS 12+ (Monterey) w/ CMake
 
-      The use of doxygen now supersedes the requirement to build javadocs. We do not
-      have the resources to continue to support two documentation methods and have
-      chosen doxygen as our standard.
+      Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
+      started failing on macOS 12+ when building with CMake. CMake has been
+      updated to set DYLD_LIBRARY_PATH on macOS and the test now passes.
 
-      (ADB - 2022/12/19)
+      Fixes GitHub #2994, #2261, and #1289
 
-    - Change the default for building the high-level tools
+    - Changed the default settings used by CMake for the GZIP filter
 
-      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
-      in a future release. The default build setting for them have been changed from enabled
-      to disabled. A user can enable the build of these tools if needed.
-          autotools:   --enable-hlgiftools
-          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+      The default for the option HDF5_ENABLE_Z_LIB_SUPPORT was OFF. Now the default is ON.
+      This was done to match the defaults used by the autotools configure.ac.
+      In addition, the CMake message level for not finding a suitable filter library was
+      changed from FATAL_ERROR (which would halt the build process) to WARNING (which
+      will print a message to stderr). Associated files and documentation were changed to match.
 
-      (ADB - 2022/12/16)
+      In addition, the default settings in the config/cmake/cacheinit.cmake file were changed to
+      allow CMake to disable building the filters if the tgz file could not be found. The option
+      to allow CMake to download the file from the original Github location requires setting
+      the ZLIB_USE_LOCALCONTENT option to OFF for gzip. And setting the LIBAEC_USE_LOCALCONTENT
+      option to OFF for libaec (szip).
 
-    - Change the settings of the *pc files to use the correct format
+      Fixes GitHub issue #2926
 
-      The pkg-config files generated by CMake uses incorrect syntax for the 'Requires'
-      settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
-      fixes the issue
+    - Fixed syntax of generator expressions used by CMake
 
-      (ADB - 2022/12/06 HDFFV-11355)
+      Add quotes around the generator expression should allow CMake to
+      correctly parse the expression. Generator expressions are typically
+      parsed after command arguments. If a generator expression contains
+      spaces, new lines, semicolons or other characters that may be
+      interpreted as command argument separators, the whole expression
+      should be surrounded by quotes when passed to a command. Failure to
+      do so may result in the expression being split and it may no longer
+      be recognized as a generator expression.
 
-    - Move MPI libraries link from PRIVATE to PUBLIC
+      Fixes GitHub issue #2906
 
-      The install dependencies were not including the need for MPI libraries when
-      an application or library was built with the C library. Also updated the
-      CMake target link command to use the newer style MPI::MPI_C link variable.
+    - Fixed improper include of Subfiling VFD build directory
 
-      (ADB - 2022/10/27)
+      With the release of the Subfiling Virtual File Driver feature, compiler
+      flags were added to the Autotools build's CPPFLAGS and AM_CPPFLAGS
+      variables to always include the Subfiling VFD source code directory,
+      regardless of whether the VFD is enabled and built or not. These flags
+      are needed because the header files for the VFD contain macros that are
+      assumed to always be available, such as H5FD_SUBFILING_NAME, so the
+      header files are unconditionally included in the HDF5 library. However,
+      these flags are only needed when building HDF5, so they belong in the
+      H5_CPPFLAGS variable instead. Inclusion in the CPPFLAGS and AM_CPPFLAGS
+      variables would export these flags to the h5cc and h5c++ wrapper scripts,
+      as well as the libhdf5.settings file, which would break builds of software
+      that use HDF5 and try to use or parse information out of these files after
+      deleting temporary HDF5 build directories.
+
+      Fixes GitHub issue #2621
+
+    - Correct the CMake generated pkg-config file
+
+      The pkg-config file generated by CMake had the order and placement of the
+      libraries wrong. Also added support for debug library names.
+
+      Changed the order of Libs.private libraries so that dependencies come after
+      dependents. Did not move the compression libraries into Requires.private
+      because there was not a way to determine if the compression libraries had
+      supported pkconfig files. Still recommend that the CMake config file method
+      be used for building projects with CMake.
+
+      Fixes GitHub issues #1546 and #2259
+
+    - Force lowercase Fortran module file names
+
+      The Cray Fortran compiler  uses  uppercase Fortran module file names, which
+      caused CMake installs to fail. A compiler option was added to use lowercase
+      instead.
 
 
     Tools
     -----
-    - Fix h5repack to only print output when verbose option is selected
+    - Names of objects with square brackets will have trouble without the
+      special argument, --no-compact-subset, on the h5dump command line.
 
-      When timing option was added to h5repack, the check for verbose was
-      incorrectly implemented.
+      h5diff did not have this option and now it has been added.
 
-      (ADB -  2022/12/02, GH #2270)
+      Fixes GitHub issue #2682
+
+    - In the tools traverse function - an error in either visit call
+      will bypass the cleanup of the local data variables.
+
+      Replaced the H5TOOLS_GOTO_ERROR with just H5TOOLS_ERROR.
+
+      Fixes GitHub issue #2598
 
 
     Performance
@@ -545,26 +673,6 @@ Platforms Tested
 
 Known Problems
 ==============
-
-       ************************************************************
-       *                                  _                       *
-       *                                 (_)                      *
-       *        __      ____ _ _ __ _ __  _ _ __   __ _           *
-       *        \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |          *
-       *         \ V  V / (_| | |  | | | | | | | | (_| |          *
-       *          \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |          *
-       *                                           __/ |          *
-       *                                          |___/           *
-       *                                                          *
-       *  Please refrain from running any program (including      *
-       *  HDF5 tests) which uses the subfiling VFD on Perlmutter  *
-       *  at the National Energy Research Scientific Computing    *
-       *  Center, NERSC.                                          *
-       *  Doing so may cause a system disruption due to subfiling *
-       *  crashing Lustre. The sytem's Lustre bug is expected     *
-       *  to be resolved by 2023.                                 *
-       *                                                          *
-       ************************************************************
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces

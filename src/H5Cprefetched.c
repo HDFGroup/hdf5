@@ -211,7 +211,6 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(entry_ptr->prefetched);
 
     switch (action) {
@@ -235,7 +234,6 @@ H5C__prefetched_entry_notify(H5C_notify_action_t action, void *_thing)
                 HDassert(entry_ptr->flush_dep_parent);
                 parent_ptr = entry_ptr->flush_dep_parent[u];
                 HDassert(parent_ptr);
-                HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(parent_ptr->flush_dep_nchildren > 0);
 
                 /* Destroy flush dependency with flush dependency parent */
@@ -289,7 +287,6 @@ H5C__prefetched_entry_free_icr(void *_thing)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC);
     HDassert(entry_ptr->prefetched);
 
     /* Release array for flush dependency parent addresses */

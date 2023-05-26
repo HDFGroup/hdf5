@@ -278,7 +278,6 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr = H5FL_CALLOC(H5AC_aux_t)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate H5AC auxiliary structure")
 
-        aux_ptr->magic                   = H5AC__H5AC_AUX_T_MAGIC;
         aux_ptr->mpi_comm                = mpi_comm;
         aux_ptr->mpi_rank                = mpi_rank;
         aux_ptr->mpi_size                = mpi_size;
@@ -312,7 +311,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cleaned entry list")
         } /* end if */
 
-        /* construct the candidate slist for all processes.
+        /* construct the candidate skip list for all processes.
          * when the distributed strategy is selected as all processes
          * will use it in the case of a flush.
          */
@@ -392,8 +391,7 @@ done:
                 H5SL_close(aux_ptr->c_slist_ptr);
             if (aux_ptr->candidate_slist_ptr != NULL)
                 H5SL_close(aux_ptr->candidate_slist_ptr);
-            aux_ptr->magic = 0;
-            aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+            aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
     }     /* end if */
 #endif    /* H5_HAVE_PARALLEL */
@@ -412,14 +410,6 @@ done:
  *
  * Programmer:  Robb Matzke
  *              Jul  9 1997
- *
- * Changes:
- *
- *             In the parallel case, added code to setup the MDC slist
- *             before the call to H5AC__flush_entries() and take it down
- *             afterwards.
- *
- *                                            JRM -- 7/29/20
  *
  *-------------------------------------------------------------------------
  */
@@ -447,37 +437,25 @@ H5AC_dest(H5F_t *f)
 
     /* Check if log messages are being emitted */
     if (H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
-    if (log_enabled && curr_logging) {
-
-        if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
-
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
-    }
 
     /* Tear down logging */
     if (log_enabled) {
+        if (curr_logging)
+            if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
         if (H5C_log_tear_down(f->shared->cache) < 0)
-
-            HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
-    }
+            HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "metadata cache logging tear-down failed")
+    } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-
     /* destroying the cache, so clear all collective entries */
     if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't clear collective entries")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-
     if (aux_ptr) {
-
-        /* Sanity check */
-        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-
         /* If the file was opened R/W, attempt to flush all entries
          * from rank 0 & Bcast clean list to other ranks.
          *
@@ -488,7 +466,7 @@ H5AC_dest(H5F_t *f)
          * H5AC__flush_entries() and disable it afterwards, as the
          * skip list will be disabled after the previous flush.
          *
-         * Note that H5C_dest() does slist setup and take down as well.
+         * Note that H5C_dest() does skip list setup and take down as well.
          * Unfortunately, we can't do the setup and take down just once,
          * as H5C_dest() is called directly in the test code.
          *
@@ -496,59 +474,44 @@ H5AC_dest(H5F_t *f)
          * point, so the overhead should be minimal.
          */
         if (H5F_ACC_RDWR & H5F_INTENT(f)) {
-
-            /* enable and load the slist */
+            /* enable and load the skip list */
             if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list")
 
             if (H5AC__flush_entries(f) < 0)
-
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
 
-            /* disable the slist -- should be empty */
+            /* disable the skip list -- should be empty */
             if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
-
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
-        }
-    }
-#endif /* H5_HAVE_PARALLEL */
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list")
+        } /* end if */
+    }     /* end if */
+#endif    /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
 
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
-
     if (aux_ptr != NULL) {
-
         if (aux_ptr->d_slist_ptr != NULL) {
-
             HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
-
         } /* end if */
 
         if (aux_ptr->c_slist_ptr != NULL) {
-
             HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
-
         } /* end if */
 
         if (aux_ptr->candidate_slist_ptr != NULL) {
-
             HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
-
         } /* end if */
 
-        aux_ptr->magic = 0;
-        aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
-
+        aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1191,13 +1154,12 @@ done:
  *
  * Function:    H5AC_prep_for_file_flush
  *
- * Purpose:     This function should be called just prior to the first
+ * Purpose:     Handle any setup required prior to metadata cache flush.
+ *
+ *              This function should be called just prior to the first
  *              call to H5AC_flush() during a file flush.
  *
- *              Its purpose is to handly any setup required prior to
- *              metadata cache flush.
- *
- *              Initially, this means setting up the slist prior to the
+ *              Initially, this means setting up the skip list prior to the
  *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
@@ -1208,8 +1170,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/5/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1226,13 +1186,10 @@ H5AC_prep_for_file_flush(H5F_t *f)
     HDassert(f->shared->cache);
 
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_prep_for_file_flush() */
 
 /*-------------------------------------------------------------------------
@@ -1242,14 +1199,11 @@ done:
  * Purpose:     This function should be called just after the last
  *              call to H5AC_flush() during a file flush.
  *
- *              Its purpose is to perform any necessary cleanup after the
- *              metadata cache flush.
- *
  *              The objective of the call is to allow the metadata cache
  *              to do any necessary necessary cleanup work after a cache
  *              flush.
  *
- *              Initially, this means taking down the slist after the
+ *              Initially, this means taking down the skip list after the
  *              flush.  We do this in a separate call because
  *              H5F__flush_phase2() make repeated calls to H5AC_flush().
  *              Handling this detail in separate calls allows us to avoid
@@ -1260,8 +1214,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              5/5/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1278,13 +1230,10 @@ H5AC_secure_from_file_flush(H5F_t *f)
     HDassert(f->shared->cache);
 
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_secure_from_file_flush() */
 
 /*-------------------------------------------------------------------------
@@ -1474,24 +1423,6 @@ H5AC_resize_entry(void *thing, size_t new_size)
      *    amounts of dirty metadata creation in other areas -- which will
      *    cause aux_ptr->dirty_bytes to be incremented.
      *
-     *    The bottom line is that this code is probably OK, but the above
-     *    points should be kept in mind.
-     *
-     * One final observation:  This comment is occasioned by a bug caused
-     * by moving the call to H5AC__log_dirtied_entry() after the call to
-     * H5C_resize_entry(), and then only calling H5AC__log_dirtied_entry()
-     * if entry_ptr->is_dirty was false.
-     *
-     * Since H5C_resize_entry() marks the target entry dirty unless there
-     * is not change in size, this had the effect of not calling
-     * H5AC__log_dirtied_entry() when it should be, and corrupting
-     * the cleaned and dirtied lists used by rank 0 in the parallel
-     * version of the metadata cache.
-     *
-     * The point here is that you should be very careful when working with
-     * this code, and not modify it unless you fully understand it.
-     *
-     *                                          JRM -- 2/28/22
      */
 
     if ((!entry_ptr->is_dirty) && (entry_ptr->size != new_size)) {
@@ -1751,15 +1682,6 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr, H5AC_cache_config_t *
     if ((cache_ptr == NULL) || (config_ptr == NULL) ||
         (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or config_ptr on entry")
-#ifdef H5_HAVE_PARALLEL
-    {
-        H5AC_aux_t *aux_ptr;
-
-        aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr on entry")
-    }
-#endif /* H5_HAVE_PARALLEL */
 
     /* Retrieve the configuration */
     if (H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr, &internal_config) < 0)
@@ -1950,15 +1872,6 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *
 
     if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry")
-#ifdef H5_HAVE_PARALLEL
-    {
-        H5AC_aux_t *aux_ptr;
-
-        aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
-        if ((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad aux_ptr on entry")
-    }
-#endif /* H5_HAVE_PARALLEL */
 
     /* Validate external configuration */
     if (H5AC_validate_config(config_ptr) != SUCCEED)
@@ -2186,8 +2099,6 @@ H5AC__check_if_write_permitted(const H5F_t
     HDassert(f->shared->cache != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if (aux_ptr != NULL) {
-        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-
         if ((aux_ptr->mpi_rank == 0) ||
             (aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED))
             write_permitted = aux_ptr->write_permitted;

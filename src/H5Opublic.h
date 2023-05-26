@@ -13,21 +13,17 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Opublic.h
- *                      Aug  5 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5O (object header)
- *                      package.
+ *                      package
  *
  *-------------------------------------------------------------------------
  */
 #ifndef H5Opublic_H
 #define H5Opublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"  /* Generic Functions            */
-#include "H5Ipublic.h" /* IDs                          */
-#include "H5Lpublic.h" /* Links                        */
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /*****************/
 /* Public Macros */
@@ -246,7 +242,7 @@ extern "C" {
  *
  *          H5Oopen() cannot be used to open a dataspace, attribute, property list, or file.
  *
- *          Once an object of unknown type has been opened with H5Oopen(),
+ *          Once an object of an unknown type has been opened with H5Oopen(),
  *          the type of that object can be determined by means of an H5Iget_type() call.
  *
  *          \p loc_id may be a file, group, dataset, named datatype, or attribute.
@@ -384,7 +380,7 @@ H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_inde
  *         the \p loc_id and \p name combination exists.
  * \return Returns 0 if the object pointed to by
  *         the \p loc_id and \p name combination does not exist.
- * \return Returns a negatvie value when the function fails.
+ * \return Returns a negative value when the function fails.
  *
  * \details H5Oexists_by_name() allows an application to determine whether
  *          the link \p name in the group or file specified with \p loc_id
@@ -408,22 +404,22 @@ H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_inde
  *          where \c group1 is a member of the group specified by \c loc_id:
  *
  * \par
- *      - First use H5Lexists() to verify that a link named \c group1 exists.
+ *      - First, use H5Lexists() to verify that a link named \c group1 exists.
  *      - If \c group1 exists, use H5Oexists_by_name() to verify that the
  *        link \c group1 resolves to an object.
- *      - If \c group1 exists, use H5Lexists() again, this time with name
+ *      - If \c group1 exists, use H5Lexists() again, this time with the name
  *        set to \c group1/group2, to verify that the link \c group2 exists
  *        in \c group1.
  *      - If the \c group2 link exists, use H5Oexists_by_name() to verify
  *        that \c group1/group2 resolves to an object.
- *      - If \c group2 exists, use  H5Lexists() again, this time with name
+ *      - If \c group2 exists, use  H5Lexists() again, this time with the name
  *        set to \c group1/group2/softlink_to_group3, to verify that the
  *        link \c softlink_to_group3 exists in \c group2.
  *      - If the \c softlink_to_group3 link exists, use H5Oexists_by_name()
  *        to verify that \c group1/group2/softlink_to_group3 resolves to
  *        an object.
  *      - If \c softlink_to_group3 exists, you can now safely use H5Lexists
- *        with name set to \c group1/group2/softlink_to_group3/datasetD to
+ *        with the name set to \c group1/group2/softlink_to_group3/datasetD to
  *        verify that the target link, \c datasetD, exists.
  *      - And finally, if the link \c datasetD exists, use H5Oexists_by_name
  *        to verify that \c group1/group2/softlink_to_group3/datasetD
@@ -437,12 +433,12 @@ H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_inde
  *          H5Lexists() would have name set to \c /group1.
  *
  * \par
- *          Note that this is an outline and does not include all necessary
+ *          Note that this is an outline and does not include all the necessary
  *          details. Depending on circumstances, for example, an application
  *          may need to verify the type of an object also.
  *
  * \warning \Bold{Failure Modes:}
- * \warning If \p loc_id and \p name both exist but the combination does not
+ * \warning If \p loc_id and \p name both exist, but the combination does not
  *          resolve to an object, the function will return 0 (zero);
  *          the function does not fail in this case.
  * \warning If either the location or the link specified by the \p loc_id
@@ -492,7 +488,7 @@ H5_DLL htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
  * \note If you are iterating through a lot of different objects to
  *       retrieve information via the H5Oget_info() family of routines,
  *       you may see memory building up. This can be due to memory
- *       allocation for metadata such as object headers and messages
+ *       allocation for metadata, such as object headers and messages,
  *       when the iterated objects are put into the metadata cache.
  * \note
  *       If the memory buildup is not desirable, you can configure a
@@ -722,7 +718,7 @@ H5_DLL herr_t H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5
  *
  * \details H5Olink() creates a new hard link to an object in an HDF5 file.
  *          \p new_loc_id and \p \p new_link_name specify the location and name of the
- *          new link while \p object_id identifies the object that the link
+ *          new link, while \p object_id identifies the object that the link
  *          points to.
  *
  *          H5Olink() is designed for two purposes:
@@ -792,7 +788,7 @@ H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_
  *          An object’s reference count is the number of hard links in the
  *          file that point to that object. See the “Programming Model”
  *          section of the HDF5 Groups chapter in the -- <em>\ref UG</em>
- *          for a more complete discussion of reference counts.
+ *          for a complete discussion of reference counts.
  *
  *          If a user application needs to determine an object’s reference
  *          count, an H5Oget_info() call is required; the reference count
@@ -965,7 +961,7 @@ H5_DLL herr_t H5Ocopy_async(hid_t src_loc_id, const char *src_name, hid_t dst_lo
  *          is overwritten.
  *
  *          The target object is specified by an identifier, \p obj_id.
- *          If \p comment is the empty string or a null pointer, any existing
+ *          If \p comment is an empty string or a null pointer, any existing
  *          comment message is removed from the object.
  *
  *          Comments should be relatively short, null-terminated, ASCII strings.
@@ -1010,7 +1006,7 @@ H5_DLL herr_t H5Oset_comment(hid_t obj_id, const char *comment);
  *          - An absolute name of the object, starting from \c /, the file’s root group
  *          - A dot (\c .), if \p loc_id fully specifies the object
  *
- *          If \p comment is the empty string or a null pointer, any existing
+ *          If \p comment is an empty string or a null pointer, any existing
  *          comment message is removed from the object.
  *
  *          Comments should be relatively short, null-terminated, ASCII strings.
@@ -1064,7 +1060,7 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name, const char 
  *          only \p bufsize bytes of the comment, without a \c NULL terminator,
  *          are returned in \p comment.
  *
- *          If an object does not have a comment, the empty string is
+ *          If an object does not have a comment, an empty string is
  *          returned in \p comment.
  *
  * \version 1.8.11 Fortran subroutine introduced in this release.
@@ -1112,7 +1108,7 @@ H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
  *          only \p bufsize bytes of the comment, without a \c NULL terminator,
  *          are returned in \p comment.
  *
- *          If an object does not have a comment, the empty string is
+ *          If an object does not have a comment, an empty string is
  *          returned in \p comment.
  *
  *          \p lapl_id contains a link access property list identifier. A
@@ -1259,7 +1255,7 @@ H5_DLL herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          a file or an object in a file;  if \p loc_id is an attribute identifier,
  *          the object where the attribute is attached will be used.
  *          \p obj_name specifies either an object in the file (with an absolute
- *          name based in the file’s root group) or an object name relative
+ *          name based on the file’s root group) or an object name relative
  *          to \p loc_id. If \p loc_id fully specifies the object that is to serve
  *          as the root of the iteration, \p obj_name should be '\c .' (a dot).
  *          (Note that when \p loc_id fully specifies the object that is to serve
@@ -1374,7 +1370,7 @@ H5_DLL herr_t H5Oclose_async(hid_t object_id, hid_t es_id);
  *          flushed to disk without removing the data from the cache.
  *
  *          The object associated with \p object_id can be any named object in an
- *          HDF5 file including a dataset, a group, or a committed datatype.
+ *          HDF5 file, including a dataset, a group, or a committed datatype.
  *
  * \warning H5Oflush doesn't work correctly with parallel. It causes an assertion
  *          failure in metadata cache during H5Fclose().
@@ -1781,7 +1777,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  *
  *          The object’s address within the file, \p addr, is the byte offset of the first byte
  *          of the object header from the beginning of the HDF5 file space, i.e., from the
- *          beginning of the super block (see the “HDF5 Storage Model” section of the The
+ *          beginning of the superblock (see the “HDF5 Storage Model” section of the The
  *          HDF5 Data Model and File Structure chapter of the <em>HDF5 User's Guide</em>.)
  *
  *          \p addr can be obtained via either of two function calls. H5Gget_objinfo() returns
@@ -1800,7 +1796,7 @@ typedef herr_t (*H5O_iterate1_t)(hid_t obj, const char *name, const H5O_info1_t 
  *          overcome by retrieving the object address with H5Gget_objinfo() or H5Lget_info()
  *          immediately before calling H5Oopen_by_addr(). The immediacy of the operation can be
  *          important; if time has elapsed and the object has been deleted from the file,
- *          the address will be invalid and file corruption can result.
+ *          the address will be invalid, and file corruption can result.
  *
  * \version 1.8.4 Fortran subroutine added in this release.
  *
@@ -1829,7 +1825,7 @@ H5_DLL hid_t H5Oopen_by_addr(hid_t loc_id, haddr_t addr);
  * \note If you are iterating through a lot of different objects to
  *       retrieve information via the H5Oget_info() family of routines,
  *       you may see memory building up. This can be due to memory
- *       allocation for metadata such as object headers and messages
+ *       allocation for metadata, such as object headers and messages,
  *       when the iterated objects are put into the metadata cache.
  * \note
  *       If the memory buildup is not desirable, you can configure a
@@ -1967,7 +1963,7 @@ H5_DLL herr_t H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  * \note If you are iterating through a lot of different objects to
  *       retrieve information via the H5Oget_info() family of routines,
  *       you may see memory building up. This can be due to memory
- *       allocation for metadata such as object headers and messages
+ *       allocation for metadata, such as object headers and messages,
  *       when the iterated objects are put into the metadata cache.
  * \note
  *       If the memory buildup is not desirable, you can configure a
@@ -2197,7 +2193,7 @@ H5_DLL herr_t H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *          a file or an object in a file;  if \p loc_id is an attribute identifier,
  *          the object where the attribute is attached will be used.
  *          \p obj_name specifies either an object in the file (with an absolute
- *          name based in the file’s root group) or an object name relative
+ *          name based on the file’s root group) or an object name relative
  *          to \p loc_id. If \p loc_id fully specifies the object that is to serve
  *          as the root of the iteration, \p obj_name should be '\c .' (a dot).
  *          (Note that when \p loc_id fully specifies the object that is to serve

@@ -1633,7 +1633,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Function:  can_apply_bogus
  *
  * Purpose:   A bogus 'can apply' callback that returns 0 for H5T_NATIVE_DOUBLE
- *            dataype, but returns 1 for all other datatypes
+ *            datatype, but returns 1 for all other datatypes
  *
  * Return:    Success:    Described above
  *            Failure:    0
@@ -2495,11 +2495,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters(hid_t file, hid_t
-#ifndef H5_HAVE_FILTER_SZIP
-                             H5_ATTR_UNUSED
-#endif /* H5_HAVE_FILTER_SZIP */
-                                 fapl)
+test_filters(hid_t file)
 {
     hid_t         dc; /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2}; /* Chunk dimensions */
@@ -15728,7 +15724,7 @@ main(void)
                 nerrors += (test_compact_open_close_dirty(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_conv_buffer(file) < 0 ? 1 : 0);
                 nerrors += (test_tconv(file) < 0 ? 1 : 0);
-                nerrors += (test_filters(file, my_fapl) < 0 ? 1 : 0);
+                nerrors += (test_filters(file) < 0 ? 1 : 0);
                 nerrors += (test_onebyte_shuffle(file) < 0 ? 1 : 0);
                 nerrors += (test_nbit_int(file) < 0 ? 1 : 0);
                 nerrors += (test_nbit_float(file) < 0 ? 1 : 0);

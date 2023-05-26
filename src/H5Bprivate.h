@@ -82,16 +82,16 @@ typedef int (*H5B_operator_t)(H5F_t *f, const void *_lt_key, haddr_t addr, const
  * the instances of nodes in that B-tree.
  */
 typedef struct H5B_shared_t {
-    const struct H5B_class_t *type;         /* Type of tree			     */
-    unsigned                  two_k;        /* 2*"K" value for tree's nodes      */
-    size_t                    sizeof_rkey;  /* Size of raw (disk) key	     */
-    size_t                    sizeof_rnode; /* Size of raw (disk) node	     */
-    size_t                    sizeof_keys;  /* Size of native (memory) key node  */
-    size_t                    sizeof_addr;  /* Size of file address (in bytes)   */
-    size_t                    sizeof_len;   /* Size of file lengths (in bytes)   */
+    const struct H5B_class_t *type;         /* Type of tree */
+    unsigned                  two_k;        /* 2*"K" value for tree's nodes */
+    size_t                    sizeof_rkey;  /* Size of raw (disk) key */
+    size_t                    sizeof_rnode; /* Size of raw (disk) node */
+    size_t                    sizeof_keys;  /* Size of native (memory) key node */
+    size_t                    sizeof_addr;  /* Size of file address (in bytes) */
+    size_t                    sizeof_len;   /* Size of file lengths (in bytes) */
     uint8_t                  *page;         /* Disk page */
     size_t                   *nkey;         /* Offsets of each native key in native key buffer */
-    void                     *udata;        /* 'Local' info for a B-tree         */
+    void                     *udata;        /* 'Local' info for a B-tree */
 } H5B_shared_t;
 
 /*
@@ -101,7 +101,6 @@ typedef struct H5B_shared_t {
  * has an array of K values indexed by the `id' class field below.  The
  * array is initialized with the HDF5_BTREE_K_DEFAULT macro.
  */
-
 typedef struct H5B_class_t {
     H5B_subid_t id;                                     /*id as found in file*/
     size_t      sizeof_nkey;                            /*size of native (memory) key*/

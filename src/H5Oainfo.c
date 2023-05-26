@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Oainfo.c
- *                      Mar  6 2007
- *                      Quincey Koziol
  *
  * Purpose:             Attribute Information messages.
  *
@@ -88,27 +86,28 @@ H5FL_DEFINE_STATIC(H5O_ainfo_t);
  *
  * Return:      Success:        Ptr to new message in native form.
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_ainfo_t  *ainfo = NULL;     /* Attribute info */
-    unsigned char flags;            /* Flags for encoding attribute info */
-    void         *ret_value = NULL; /* Return value */
+    const uint8_t *p_end = p + p_size - 1; /* End of input buffer */
+    H5O_ainfo_t   *ainfo = NULL;           /* Attribute info */
+    unsigned char  flags;                  /* Flags for encoding attribute info */
+    uint8_t        sizeof_addr;            /* Size of addresses in this file */
+    void          *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
+    sizeof_addr = H5F_sizeof_addr(f);
+
     /* Version of message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     if (*p++ != H5O_AINFO_VERSION)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
@@ -117,6 +116,8 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Get the flags for the message */
+    if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     flags = *p++;
     if (flags & ~H5O_AINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
@@ -127,20 +128,30 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     ainfo->nattrs = HSIZET_MAX;
 
     /* Max. creation order value for the object */
-    if (ainfo->track_corder)
+    if (ainfo->track_corder) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         UINT16DECODE(p, ainfo->max_crt_idx)
+    }
     else
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
     /* Address of fractal heap to store "dense" attributes */
+    if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(ainfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of attributes (names are always indexed) */
+    if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(ainfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
-    if (ainfo->index_corder)
+    if (ainfo->index_corder) {
+        if (H5_IS_BUFFER_OVERFLOW(p, sizeof_addr, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
         H5F_addr_decode(f, &p, &(ainfo->corder_bt2_addr));
+    }
     else
         ainfo->corder_bt2_addr = HADDR_UNDEF;
 

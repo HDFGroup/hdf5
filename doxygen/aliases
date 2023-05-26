@@ -15,7 +15,7 @@ ALIASES += Code{1}="<tt>\1</tt>"
 ALIASES += success{1}="\Bold{Success:} \1"
 ALIASES += failure{1}="\Bold{Failure:} \1"
 
-ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
+ALIASES += herr_t="Returns a non-negative value if successful; otherwise, returns a negative value."
 ALIASES += herr_t_iter="\li Zero causes the iterator to continue, returning zero when the iteration is complete. \li A positive value causes the iterator to immediately return that positive value, indicating short-circuit success. \li A negative value causes the iterator to immediately return that value, indicating failure."
 ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
@@ -75,7 +75,7 @@ ALIASES += space_id="\param[in] space_id Dataspace identifier"
 ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
 
 ################################################################################
-# Dataypes
+# Datatypes
 ################################################################################
 
 ALIASES += type_id="\param[in] type_id Datatype identifier"
@@ -380,3 +380,10 @@ ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td
 ALIASES += fortran_error="Returns 0 if successful and -1 if it fails."
 ALIASES += fortran_approved="The preferred API, Fortran 2003 version."
 ALIASES += fortran_obsolete="Obsolete API, use the Fortran 2003 version instead."
+ALIASES += fortran_file="Pointer to filename the async subroutine is being called from, filename must be null character terminated"
+ALIASES += fortran_func="Pointer to function name the async subroutine is being called in, func must be null character terminated"
+ALIASES += fortran_line="Line number the async subroutine is being called at"
+ALIASES += fortran_plist_id="Property list identifier"
+ALIASES += fortran_es_id="Event set identifier"
+ALIASES += fortran_vol_name="Connector name"
+

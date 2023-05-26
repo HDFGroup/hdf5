@@ -13,19 +13,16 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5ACpublic.h
- *                      Jul 10 1997
- *                      Robb Matzke
  *
- * Purpose:             Public include file for cache functions.
+ * Purpose:             Public include file for cache functions
  *
  *-------------------------------------------------------------------------
  */
 #ifndef H5ACpublic_H
 #define H5ACpublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Cpublic.h"
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Cpublic.h" /* Cache                                    */
 
 /****************************************************************************
  *
@@ -466,7 +463,7 @@ typedef struct H5AC_cache_config_t {
     /* general configuration fields: */
     //! <!-- [H5AC_cache_config_t_general_snip] -->
     int version;
-    /**< Integer field indicating the the version of the H5AC_cache_config_t
+    /**< Integer field indicating the version of the H5AC_cache_config_t
      * in use. This field should be set to #H5AC__CURR_CACHE_CONFIG_VERSION
      * (defined in H5ACpublic.h). */
 

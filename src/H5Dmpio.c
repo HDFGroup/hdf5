@@ -626,13 +626,17 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if (!H5FD_mpi_opt_types_g)
             local_cause[0] |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
-        /* Don't allow collective operations if datatype conversions need to happen */
-        if (!type_info->is_conv_noop)
-            local_cause[0] |= H5D_MPIO_DATATYPE_CONVERSION;
+        /* Datatype conversions and transformations are allowed with selection I/O.  If the selection I/O mode
+         * is auto (default), disable collective for now and re-enable later if we can */
+        if (io_info->use_select_io != H5D_SELECTION_IO_MODE_ON) {
+            /* Don't allow collective operations if datatype conversions need to happen */
+            if (!type_info->is_conv_noop)
+                local_cause[0] |= H5D_MPIO_DATATYPE_CONVERSION;
 
-        /* Don't allow collective operations if data transform operations should occur */
-        if (!type_info->is_xform_noop)
-            local_cause[0] |= H5D_MPIO_DATA_TRANSFORMS;
+            /* Don't allow collective operations if data transform operations should occur */
+            if (!type_info->is_xform_noop)
+                local_cause[0] |= H5D_MPIO_DATA_TRANSFORMS;
+        }
 
         /* Check whether these are both simple or scalar dataspaces */
         if (!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) ||
@@ -661,6 +665,15 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if (io_info->op_type == H5D_IO_OP_WRITE && dset->shared->dcpl_cache.pline.nused > 0)
             local_cause[0] |= H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED;
 #endif
+
+        /* Check if we would be able to perform collective if we could use selection I/O.  If so add reasons
+         * for not using selection I/O to local_cause[0] */
+        if ((io_info->use_select_io == H5D_SELECTION_IO_MODE_OFF) && local_cause[0] &&
+            !(local_cause[0] &
+              ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
+            HDassert(io_info->no_selection_io_cause & H5D_MPIO_NO_SELECTION_IO_CAUSES);
+            local_cause[0] |= H5D_MPIO_NO_SELECTION_IO;
+        }
 
         /* Check if we are able to do a MPI_Bcast of the data from one rank
          * instead of having all the processes involved in the collective I/O call.
@@ -722,6 +735,25 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
 
+    /* If the selection I/O mode is default (auto), decide here whether it should be on or off */
+    if (io_info->use_select_io == H5D_SELECTION_IO_MODE_DEFAULT) {
+        /* If the only reason(s) we've disabled collective are type conversions and/or transforms, enable
+         * selection I/O and re-enable collective I/O since it's supported by selection I/O */
+        if (global_cause[0] && !(global_cause[0] & ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION |
+                                                     (unsigned)H5D_MPIO_DATA_TRANSFORMS))) {
+            HDassert(!(local_cause[0] &
+                       ~((unsigned)H5D_MPIO_DATATYPE_CONVERSION | (unsigned)H5D_MPIO_DATA_TRANSFORMS)));
+            local_cause[0]         = 0;
+            global_cause[0]        = 0;
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_ON;
+        }
+        else {
+            /* Otherwise, there's currently no benefit to selection I/O, so leave it off */
+            io_info->use_select_io = H5D_SELECTION_IO_MODE_OFF;
+            io_info->no_selection_io_cause |= H5D_SEL_IO_DEFAULT_OFF;
+        }
+    }
+
     /* Set the local & global values of no-collective-cause in the API context */
     H5CX_set_mpio_local_no_coll_cause(local_cause[0]);
     H5CX_set_mpio_global_no_coll_cause(global_cause[0]);
@@ -774,7 +806,7 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
      * Use compile-time assertion so this routine is updated
      * when any new "no collective cause" values are added
      */
-    HDcompile_assert(H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE == (H5D_mpio_no_collective_cause_t)256);
+    HDcompile_assert(H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE == (H5D_mpio_no_collective_cause_t)0x200);
 
     /* Initialize output buffers */
     if (local_cause)
@@ -827,6 +859,11 @@ H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, c
             case H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE:
                 cause_str = "an error occurred while checking if collective I/O was possible";
                 break;
+            case H5D_MPIO_NO_SELECTION_IO:
+                cause_str = "collective I/O may be supported by selection or vector I/O but that feature was "
+                            "not possible (see causes via H5Pget_no_selection_io_cause())";
+                break;
+
             case H5D_MPIO_COLLECTIVE:
             case H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE:
             default:
@@ -1404,7 +1441,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
+#ifdef H5Dmpio_DEBUG
 H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
+#else
+H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_rank)
+#endif
 {
     MPI_Datatype  chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
     hbool_t       chunk_final_mtype_is_derived = FALSE;
@@ -1434,13 +1475,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
         HDassert(io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused == 0);
         if (io_info->dsets_info[i].layout->type == H5D_CHUNKED)
             actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
-        else if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
+        else if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS)
             actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-
-            /* if only single-dset */
-            if (1 == io_info->count)
-                actual_chunk_opt_mode = H5D_MPIO_NO_CHUNK_OPTIMIZATION;
-        }
         else
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
     }
@@ -4697,8 +4733,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
             /* Find the chunk entry according to its chunk index */
             HASH_FIND(hh, chunk_hash_table, &chunk_idx, sizeof(hsize_t), chunk_entry);
-            HDassert(chunk_entry);
-            HDassert(mpi_rank == chunk_entry->new_owner);
+            if (chunk_entry == NULL)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find chunk entry")
+            if (mpi_rank != chunk_entry->new_owner)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk owner set to incorrect MPI rank")
 
             /*
              * Only process the chunk if its data buffer is allocated.

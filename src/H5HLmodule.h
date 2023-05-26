@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5HL package.  Including this header means that the source file
- *		is part of the H5HL package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5HL package.  Including this header means that the source file
+ *          is part of the H5HL package.
  */
 #ifndef H5HLmodule_H
 #define H5HLmodule_H

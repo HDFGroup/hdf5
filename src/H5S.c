@@ -1609,7 +1609,7 @@ H5S_decode(const unsigned char **p)
 {
     H5F_t               *f = NULL;         /* Fake file structure*/
     H5S_t               *ds;               /* Decoded dataspace */
-    H5S_extent_t        *extent;           /* Entent of decoded dataspace */
+    H5S_extent_t        *extent;           /* Extent of decoded dataspace */
     const unsigned char *pp = (*p);        /* Local pointer for decoding */
     size_t               extent_size;      /* size of the extent message*/
     uint8_t              sizeof_size;      /* 'Size of sizes' for file */
@@ -1655,9 +1655,10 @@ H5S_decode(const unsigned char **p)
     if (H5S_select_all(ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
-    /* Decode the select part of dataspace.  I believe this part always exists. */
+    /* Decode the select part of dataspace.
+     *  Because size of buffer is unknown, assume arbitrarily large buffer to allow decoding. */
     *p = pp;
-    if (H5S_SELECT_DESERIALIZE(&ds, p) < 0)
+    if (H5S_SELECT_DESERIALIZE(&ds, p, SIZE_MAX) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */

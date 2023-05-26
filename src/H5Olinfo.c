@@ -13,16 +13,14 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Olinfo.c
- *                      Aug 23 2005
- *                      Quincey Koziol
  *
- * Purpose:             Link Information messages.
+ * Purpose:             Link information messages
  *
  *-------------------------------------------------------------------------
  */
 
-#define H5G_FRIEND     /*suppress error about including H5Gpkg   */
-#define H5L_FRIEND     /*suppress error about including H5Lpkg	  */
+#define H5G_FRIEND     /* Suppress error about including H5Gpkg */
+#define H5L_FRIEND     /* Suppress error about including H5Lpkg */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -95,27 +93,28 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *
  * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native form.
+ * Return:      Success:        Pointer to new message in native form
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              Aug 23 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_linfo_t  *linfo = NULL;     /* Link info */
-    unsigned char index_flags;      /* Flags for encoding link index info */
-    void         *ret_value = NULL; /* Return value */
+    const uint8_t *p_end = p + p_size - 1;         /* End of the p buffer */
+    H5O_linfo_t   *linfo = NULL;                   /* Link info */
+    unsigned char  index_flags;                    /* Flags for encoding link index info */
+    uint8_t        addr_size = H5F_SIZEOF_ADDR(f); /* Temp var */
+    void          *ret_value = NULL;               /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
+
+    /* Check input buffer before decoding version and index flags */
+    if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
     /* Version of message */
     if (*p++ != H5O_LINFO_VERSION)
@@ -136,10 +135,17 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     linfo->nlinks = HSIZET_MAX;
 
     /* Max. link creation order value for the group, if tracked */
-    if (linfo->track_corder)
+    if (linfo->track_corder) {
+        if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         INT64DECODE(p, linfo->max_corder)
+    }
     else
         linfo->max_corder = 0;
+
+    /* Check input buffer before decoding the next two addresses */
+    if (H5_IS_BUFFER_OVERFLOW(p, addr_size + addr_size, p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_decode(f, &p, &(linfo->fheap_addr));
@@ -148,8 +154,11 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     H5F_addr_decode(f, &p, &(linfo->name_bt2_addr));
 
     /* Address of v2 B-tree to index creation order of links, if there is one */
-    if (linfo->index_corder)
+    if (linfo->index_corder) {
+        if (H5_IS_BUFFER_OVERFLOW(p, addr_size, p_end))
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
         H5F_addr_decode(f, &p, &(linfo->corder_bt2_addr));
+    }
     else
         linfo->corder_bt2_addr = HADDR_UNDEF;
 

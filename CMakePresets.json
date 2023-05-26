@@ -1,0 +1,250 @@
+{
+  "version": 6,
+  "include": [
+    "config/cmake-presets/hidden-presets.json"
+  ],
+  "configurePresets": [
+    {
+      "name": "ci-base-tgz",
+      "hidden": true,
+      "inherits": "ci-base",
+      "cacheVariables": {
+        "HDF5_ALLOW_EXTERNAL_SUPPORT": "NO",
+        "TGZPATH": {"type": "STRING", "value": "${sourceParentDir}/temp"}
+      }
+    },
+    {
+      "name": "ci-StdCompression",
+      "hidden": true,
+      "inherits": "ci-base-tgz",
+      "cacheVariables": {
+        "BUILD_ZLIB_WITH_FETCHCONTENT": "ON",
+        "ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
+        "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/madler/zlib/releases/download/v1.2.13"},
+        "ZLIB_TGZ_ORIGNAME": {"type": "STRING", "value": "zlib-1.2.13.tar.gz"},
+        "ZLIB_USE_LOCALCONTENT": "OFF",
+        "BUILD_SZIP_WITH_FETCHCONTENT": "ON",
+        "LIBAEC_PACKAGE_NAME": {"type": "STRING", "value": "libaec"},
+        "LIBAEC_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6"},
+        "LIBAEC_TGZ_ORIGNAME": {"type": "STRING", "value": "libaec-1.0.6.tar.gz"},
+        "LIBAEC_USE_LOCALCONTENT": "OFF"
+      }
+    },
+    {
+      "name": "ci-base-plugins",
+      "hidden": true,
+      "inherits": "ci-base-tgz",
+      "cacheVariables": {
+        "PLUGIN_TGZ_NAME": {"type": "STRING", "value": "hdf5_plugins-1.14.0.tar.gz"},
+        "PLUGIN_PACKAGE_NAME": {"type": "STRING", "value": "pl"},
+        "BSHUF_TGZ_NAME": {"type": "STRING", "value": "bitshuffle.tar.gz"},
+        "BSHUF_PACKAGE_NAME": {"type": "STRING", "value": "bshuf"},
+        "BLOSC_TGZ_NAME": {"type": "STRING", "value": "c-blosc.tar.gz"},
+        "BLOSC_PACKAGE_NAME": {"type": "STRING", "value": "blosc"},
+        "BLOSC_ZLIB_TGZ_NAME": {"type": "STRING", "value": "ZLib.tar.gz"},
+        "BLOSC_ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
+        "BZ2_TGZ_NAME": {"type": "STRING", "value": "BZ2.tar.gz"},
+        "BZ2_PACKAGE_NAME": {"type": "STRING", "value": "bz2"},
+        "FPZIP_TGZ_NAME": {"type": "STRING", "value": "fpzip.tar.gz"},
+        "FPZIP_PACKAGE_NAME": {"type": "STRING", "value": "fpzip"},
+        "JPEG_TGZ_NAME": {"type": "STRING", "value": "JPEG.tar.gz"},
+        "JPEG_PACKAGE_NAME": {"type": "STRING", "value": "jpeg"},
+        "BUILD_LZ4_LIBRARY_SOURCE": "ON",
+        "LZ4_TGZ_NAME": {"type": "STRING", "value": "lz4.tar.gz"},
+        "LZ4_PACKAGE_NAME": {"type": "STRING", "value": "lz4"},
+        "LZF_TGZ_NAME": {"type": "STRING", "value": "lzf.tar.gz"},
+        "LZF_PACKAGE_NAME": {"type": "STRING", "value": "lzf"},
+        "SZ_TGZ_NAME": {"type": "STRING", "value": "szf.tar.gz"},
+        "SZ_PACKAGE_NAME": {"type": "STRING", "value": "SZ"},
+        "ZFP_TGZ_NAME": {"type": "STRING", "value": "zfp.tar.gz"},
+        "ZFP_PACKAGE_NAME": {"type": "STRING", "value": "zfp"},
+        "ZSTD_TGZ_NAME": {"type": "STRING", "value": "zstd.tar.gz"},
+        "ZSTD_PACKAGE_NAME": {"type": "STRING", "value": "zstd"}
+      }
+    },
+    {
+      "name": "ci-StdPlugins",
+      "hidden": true,
+      "inherits": ["ci-base-plugins", "ci-base-tgz"],
+      "cacheVariables": {
+        "HDF5_ENABLE_PLUGIN_SUPPORT": "ON",
+        "PLUGIN_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5_plugins/archive/refs/tags"},
+        "PLUGIN_TGZ_ORIGNAME": {"type": "STRING", "value": "hdf5_plugins-1.14.0.tar.gz"}
+      }
+    },
+     {
+      "name": "ci-StdExamples",
+      "hidden": true,
+      "inherits": "ci-base",
+      "cacheVariables": {
+        "HDF5_PACK_EXAMPLES": "ON",
+        "HDF5_EXAMPLES_COMPRESSED": {"type": "STRING", "value": "hdf5-examples-2.0.3.tar.gz"},
+        "HDF5_EXAMPLES_COMPRESSED_DIR": {"type": "STRING", "value": "${sourceParentDir}/temp"},
+        "EXAMPLES_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/HDFGroup/hdf5-examples/archive/refs/tags/"},
+        "EXAMPLES_TGZ_ORIGNAME": {"type": "STRING", "value": "2.0.3.tar.gz"},
+        "EXAMPLES_DOWNLOAD": "ON"
+      }
+    },
+   {
+      "name": "ci-StdShar",
+      "hidden": true,
+      "inherits": "ci-StdCompression",
+      "cacheVariables": {
+        "HDF_PACKAGE_NAMESPACE": {"type": "STRING", "value": "hdf5::"},
+        "HDF5_INSTALL_MOD_FORTRAN": "NO",
+        "HDF5_BUILD_GENERATORS": "ON",
+        "HDF5_ENABLE_ALL_WARNINGS": "ON",
+        "HDF5_MINGW_STATIC_GCC_LIBS": "ON",
+        "HDF_TEST_EXPRESS": "2"
+      }
+    },
+    {
+      "name": "ci-StdShar-MSVC",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-StdExamples"
+      ]
+    },
+    {
+      "name": "ci-StdShar-MSVC-Fortran",
+      "description": "MSVC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-MSVC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-StdExamples"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "description": "Clang Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-Clang",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-StdExamples"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "description": "GNUC Standard Config for x64 (Release)",
+      "inherits": [
+        "ci-x64-Release-GNUC",
+        "ci-CPP",
+        "ci-Fortran",
+        "ci-Java",
+        "ci-StdShar",
+        "ci-StdExamples"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "description": "MSVC Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "description": "Clang Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "description": "GNUC Standard Build for x64 (Release)",
+      "configurePreset": "ci-StdShar-GNUC",
+      "verbose": false,
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "configurePreset": "ci-StdShar-MSVC",
+      "inherits": [
+        "ci-x64-Release-MSVC"
+      ],
+      "filter": {
+        "exclude": {
+          "name": "H5DUMP-tfloatsattrs"
+        }
+      }
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": [
+        "ci-x64-Release-Clang"
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "configurePreset": "ci-StdShar-GNUC",
+      "inherits": [
+        "ci-x64-Release-GNUC"
+      ]
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "configurePreset": "ci-StdShar-MSVC",
+      "inherits": "ci-x64-Release-MSVC"
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "configurePreset": "ci-StdShar-Clang",
+      "inherits": "ci-x64-Release-Clang"
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "configurePreset": "ci-StdShar-GNUC",
+      "inherits": "ci-x64-Release-GNUC"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-StdShar-MSVC",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-MSVC"},
+        {"type": "build", "name": "ci-StdShar-MSVC"},
+        {"type": "test", "name": "ci-StdShar-MSVC"},
+        {"type": "package", "name": "ci-StdShar-MSVC"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-Clang",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-Clang"},
+        {"type": "build", "name": "ci-StdShar-Clang"},
+        {"type": "test", "name": "ci-StdShar-Clang"},
+        {"type": "package", "name": "ci-StdShar-Clang"}
+      ]
+    },
+    {
+      "name": "ci-StdShar-GNUC",
+      "steps": [
+        {"type": "configure", "name": "ci-StdShar-GNUC"},
+        {"type": "build", "name": "ci-StdShar-GNUC"},
+        {"type": "test", "name": "ci-StdShar-GNUC"},
+        {"type": "package", "name": "ci-StdShar-GNUC"}
+      ]
+    }
+  ]
+}

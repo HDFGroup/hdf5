@@ -4305,7 +4305,8 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0) {
-        HDprintf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
+        if (MAINPROCESS)
+            HDprintf("%d: Failed to turn off atexit processing. Continue.\n", mpi_rank);
     };
     H5open();
     h5_show_hostname();

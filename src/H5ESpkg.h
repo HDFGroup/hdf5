@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5ES package.  Source files outside the H5ES package should
- *		include H5ESprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5ES package.  Source files outside the H5ES package should
+ *          include H5ESprivate.h instead.
  */
 #if !(defined H5ES_FRIEND || defined H5ES_MODULE)
 #error "Do not include this file outside the H5ES package!"
