@@ -10,13 +10,6 @@
 # help@hdfgroup.org.
 #
 
-#TODOs:
-# Document expected format for connector URLS (HTTPS git repo)
-# Document setting branch name for FetchContent
-# Document setting VOL name for testing (including escaping semicolons)
-# Document setting HDF5_VOL_${hdf5_vol_name_upper}_PARALLEL option
-# Explain needing to set LD_LIBRARY_PATH for testing if dependencies are in non-standard location
-
 include (FetchContent)
 
 # Function to retrieve all of the CMake targets generated
