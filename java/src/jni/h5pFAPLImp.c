@@ -1252,11 +1252,10 @@ Java_hdf_hdf5lib_H5_H5Pget_1cache(JNIEnv *env, jclass clss, jlong plist, jintArr
     if (NULL != rdcc_nbytes)
         PIN_LONG_ARRAY(ENVONLY, rdcc_nbytes, nbytesArray, &isCopy,
                        "H5Pget_cache: nbytesArray array not pinned");
+    if (NULL == nbytesArray)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "nbytesArray should not be NULL after pinning");
 
     {
-        if (NULL == nbytesArray)
-            H5_NULL_ARGUMENT_ERROR(ENVONLY, "nbytesArray should not be NULL after pinning");
-
         /* direct cast (size_t *)variable fails on 32-bit environment */
         long long rdcc_nelmts_temp = *rdcc_nelmtsArray;
         long long nbytes_temp      = *nbytesArray;
