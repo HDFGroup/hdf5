@@ -287,7 +287,7 @@ CONTAINS
 !! \param type_id  Dataset datatype identifier
 !! \param space_id Dataset dataspace identifier
 !! \param dset_id  Dataset identifier
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param hdferr   \fortran_error
 !! \param dcpl_id  Dataset creation property list
 !! \param lcpl_id  Link creation property list
@@ -422,7 +422,7 @@ CONTAINS
 !! \param loc_id  File or group identifier
 !! \param name    Dataset name
 !! \param dset_id Dataset identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param dapl_id Dataset access property list
 !! \param file    \fortran_file
@@ -515,7 +515,7 @@ CONTAINS
 !! \brief Asynchronously closes a dataset.
 !!
 !! \param dset_id Dataset identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
@@ -659,7 +659,7 @@ CONTAINS
 !!
 !! \param dataset_id Dataset identifier
 !! \param fsize      Array containing the new magnitude of each dimension
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -1363,7 +1363,7 @@ CONTAINS
 !!
 !! \param dataset_id   Dataset identifier.
 !! \param dataspace_id Dataspace identifier.
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param file         \fortran_file
 !! \param func         \fortran_func
@@ -1485,7 +1485,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer to receive data read from file.
-!! \param es_id         \es_id
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
@@ -1552,7 +1552,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer with data to be written to the file.
-!! \param es_id         \es_id
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
