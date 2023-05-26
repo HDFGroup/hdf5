@@ -258,18 +258,20 @@ test_file_create(void)
     /* Create with H5F_ACC_EXCL */
     fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
-#ifndef NO_TRUNCATE_OPEN_FILE
-    /*
-     * try to create the same file with H5F_ACC_TRUNC. This should fail
-     * because fid1 is the same file and is currently open.
-     */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) {
+        /*
+         * try to create the same file with H5F_ACC_TRUNC. This should fail
+         * because fid1 is the same file and is currently open.
+         */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(fid2, FAIL, "H5Fcreate");
     }
-    H5E_END_TRY;
-    VERIFY(fid2, FAIL, "H5Fcreate");
-#endif
+
     /* Close all files */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
@@ -295,18 +297,20 @@ test_file_create(void)
     /* Test create with H5F_ACC_TRUNC. This will truncate the existing file. */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
-#ifndef NO_TRUNCATE_OPEN_FILE
-    /*
-     * Try to truncate first file again. This should fail because fid1 is the
-     * same file and is currently open.
-     */
-    H5E_BEGIN_TRY
-    {
-        fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) {
+        /*
+         * Try to truncate first file again. This should fail because fid1 is the
+         * same file and is currently open.
+         */
+        H5E_BEGIN_TRY
+        {
+            fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        VERIFY(fid2, FAIL, "H5Fcreate");
     }
-    H5E_END_TRY;
-    VERIFY(fid2, FAIL, "H5Fcreate");
-#endif
+
     /*
      * Try with H5F_ACC_EXCL. This should fail too because the file already
      * exists.
@@ -1283,30 +1287,31 @@ test_get_obj_ids(void)
 
     /* Close the file first */
     H5Fclose(fid);
-#ifndef WRONG_DATATYPE_OBJ_COUNT
-    /* Get the number of all opened objects */
-    oid_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL);
-    CHECK(oid_count, FAIL, "H5Fget_obj_count");
-    VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
 
-    oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
-    CHECK_PTR(oid_list, "HDcalloc");
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE) {
+        /* Get the number of all opened objects */
+        oid_count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL);
+        CHECK(oid_count, FAIL, "H5Fget_obj_count");
+        VERIFY(oid_count, NDSETS, "H5Fget_obj_count");
 
-    /* Get the list of all opened objects */
-    ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
-    CHECK(ret_count, FAIL, "H5Fget_obj_ids");
-    VERIFY(ret_count, NDSETS, "H5Fget_obj_ids");
+        oid_list = (hid_t *)HDcalloc((size_t)oid_count, sizeof(hid_t));
+        CHECK_PTR(oid_list, "HDcalloc");
 
-    H5E_BEGIN_TRY
-    {
-        /* Close all open objects with H5Oclose */
-        for (n = 0; n < oid_count; n++)
-            H5Oclose(oid_list[n]);
+        /* Get the list of all opened objects */
+        ret_count = H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
+        CHECK(ret_count, FAIL, "H5Fget_obj_ids");
+        VERIFY(ret_count, NDSETS, "H5Fget_obj_ids");
+
+        H5E_BEGIN_TRY
+        {
+            /* Close all open objects with H5Oclose */
+            for (n = 0; n < oid_count; n++)
+                H5Oclose(oid_list[n]);
+        }
+        H5E_END_TRY;
+
+        HDfree(oid_list);
     }
-    H5E_END_TRY;
-
-    HDfree(oid_list);
-#endif
 }
 
 /****************************************************************
@@ -2342,11 +2347,13 @@ test_file_open_overlap(void)
     /* Create dataset in group w/first file ID */
     did1 = H5Dcreate2(gid, DSET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(did1, FAIL, "H5Dcreate2");
-#ifndef WRONG_DATATYPE_OBJ_COUNT
-    /* Check number of objects opened in first file */
-    nobjs = H5Fget_obj_count(fid1, H5F_OBJ_LOCAL | H5F_OBJ_ALL);
-    VERIFY(nobjs, 3, "H5Fget_obj_count"); /* 3 == file, dataset & group */
-#endif
+
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE) {
+        /* Check number of objects opened in first file */
+        nobjs = H5Fget_obj_count(fid1, H5F_OBJ_LOCAL | H5F_OBJ_ALL);
+        VERIFY(nobjs, 3, "H5Fget_obj_count"); /* 3 == file, dataset & group */
+    }
+
     /* Close dataset */
     ret = H5Dclose(did1);
     CHECK(ret, FAIL, "H5Dclose");
