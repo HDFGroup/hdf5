@@ -1,4 +1,4 @@
-name: Linux autoconf icx
+name: Ubuntu icx Autotools
 
 on:
   workflow_dispatch:
@@ -24,11 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Dependencies
+      - name: install dependencies
         run:  |
           sudo apt-get update
           sudo apt-get install autoconf automake libtool libtool-bin
-      - name: Add oneAPI to apt
+      - name: add oneAPI to apt
         shell: bash
         run: |
           cd /tmp
@@ -37,7 +37,7 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
           sudo add-apt-repository -y "deb https://apt.repos.intel.com/oneapi all main"
       
-      - name: Install oneAPI dpcpp and fortran compiler
+      - name: install oneAPI dpcpp and fortran compiler
         shell: bash
         run: |
           sudo apt update
@@ -45,28 +45,18 @@ jobs:
           sudo apt install -y intel-oneapi-compiler-fortran
           sudo apt install -y intel-oneapi-mpi-devel
 
-      - name: Install oneAPI MKL library
+      - name: install oneAPI MKL library
         shell: bash
         run: |
           sudo apt install -y intel-oneapi-mkl-devel
 
-      - name: Test serial
+      - name: configure & build & check & install & uninstall
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
+          export PATH=$PATH:/opt/intel/oneapi/mpi/2021.9.0/bin:/opt/intel/oneapi/compiler/2023.1.0/linux/bin          
           ./autogen.sh
-          ./configure --enable-fortran CXX=dpcpp CC=icx FC=ifx
-          make -j
-          make check -j
-          sudo make install
-          sudo make uninstall
-          
-      - name: Test parallel
-        shell: bash
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          ./autogen.sh
-          ./configure --enable-fortran --enable-parallel CXX=mpiicpc CC=mpiicc FC=mpiifort
+          ./configure  --enable-fortran --enable-parallel CXX="$(which mpiicpc) -cc=$(which icpx)" CC="$(which mpiicc) -cc=$(which icx)" FC="$(which mpiifort) -fc=$(which ifx)" LDFLAGS="-L/opt/intel/oneapi/mpi/2021.9.0/lib -L/opt/intel/oneapi/mpi/2021.9.0/lib/release/"
           make -j
           make check -j 
           sudo make install

@@ -1,4 +1,4 @@
-name: linux CMake icx
+name: Ubuntu icx CMake 
 
 on:
   workflow_dispatch:
@@ -69,7 +69,7 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           cmake --build build
 
-      - name: test
+      - name: test & install
         shell: bash
         run: |
           source /opt/intel/oneapi/setvars.sh
