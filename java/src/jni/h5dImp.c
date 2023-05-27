@@ -1134,7 +1134,6 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    jboolean    readBufIsCopy;
     jbyte      *readBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
@@ -1195,7 +1194,6 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                                jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    jboolean    writeBufIsCopy;
     jbyte      *writeBuf = NULL;
     size_t      typeSize;
     H5T_class_t type_class;
@@ -1680,20 +1678,23 @@ H5DwriteVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_si
             continue;
         }
 
-        /*
-         * length = ENVPTR->GetStringUTFLength(ENVONLY, jstr);
-         * CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-         */
-
         PIN_JAVA_STRING(ENVONLY, jstr, utf8, NULL, "H5DwriteVL_asstr: failed to pin string buffer");
 
         /*
-         * TODO: If the string isn't a copy, we should probably make
-         * one before destroying it with h5str_convert.
+         * Make a copy of the string since h5str_convert uses strtok.
          */
+        char *utf8_copy = NULL;
 
-        if (!h5str_convert(ENVONLY, (char **)&utf8, did, tid, &(((char *)writeBuf)[i * typeSize]), 0))
+        jsize length = ENVPTR->GetStringUTFLength(ENVONLY, jstr);
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        if (NULL == (utf8_copy = HDstrndup(utf8, (size_t)length)))
+            H5_LIBRARY_ERROR(ENVONLY);
+
+        if (!h5str_convert(ENVONLY, &utf8_copy, did, tid, &(((char *)writeBuf)[i * typeSize]), 0))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        HDfree(utf8_copy);
 
         UNPIN_JAVA_STRING(ENVONLY, jstr, utf8);
         utf8 = NULL;

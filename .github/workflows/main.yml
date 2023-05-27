@@ -319,11 +319,12 @@ jobs:
               cmake: "Debug"
               autotools: "debug"
 
+          # Debug -Werror
           - name: "Ubuntu gcc Autotools -Werror (build only)"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
-            java: disable
+            java: enable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
@@ -342,11 +343,12 @@ jobs:
               cmake: "Debug"
               autotools: "debug"
 
+          # Production/Release -Werror
           - name: "Ubuntu gcc Autotools -Werror (build only)"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
-            java: disable
+            java: enable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
