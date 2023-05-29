@@ -806,14 +806,20 @@ H5F_t *
 H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const char *prop_prefix,
                      const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
-    H5F_t *src_file         = NULL; /* Source file */
-    char  *full_name        = NULL; /* File name with prefix */
-    char  *actual_file_name = NULL; /* File's actual name */
-    char  *temp_file_name   = NULL; /* Temporary pointer to file name */
-    size_t temp_file_name_len;      /* Length of temporary file name */
-    H5F_t *ret_value = NULL;        /* Return value  */
+    H5F_t     *src_file         = NULL; /* Source file */
+    H5F_efc_t *efc              = NULL; /* External file cache */
+    char      *full_name        = NULL; /* File name with prefix */
+    char      *actual_file_name = NULL; /* File's actual name */
+    char      *temp_file_name   = NULL; /* Temporary pointer to file name */
+    size_t     temp_file_name_len;      /* Length of temporary file name */
+    H5F_t     *ret_value = NULL;        /* Return value  */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(primary_file);
+    HDassert(primary_file->shared);
+
+    efc = primary_file->shared->efc;
 
     /* Simplify intent flags for open calls */
     file_intent &= (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ);
@@ -826,7 +832,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -849,7 +855,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     }     /* end if */
     else if (H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(efc, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -895,7 +901,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
 
                     /* Try opening file */
                     src_file =
-                        H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                        H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
                     /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
@@ -922,7 +928,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
 
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
@@ -943,7 +949,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
 
             /* Try opening file */
-            src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+            src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
             /* Release name */
             full_name = (char *)H5MM_xfree(full_name);
@@ -958,7 +964,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(efc, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
         /* Check for file not opened */
         if (NULL == src_file)
@@ -986,7 +992,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
