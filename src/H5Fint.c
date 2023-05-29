@@ -900,8 +900,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     } /* end if */
 
                     /* Try opening file */
-                    src_file =
-                        H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                    src_file = H5F__efc_open(efc, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
 
                     /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
