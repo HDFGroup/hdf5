@@ -96,8 +96,8 @@ CONTAINS
     ENDDO
     WRITE(*,'("| |")')
 
-    WRITE(*,'(A)') title_centered
-
+    WRITE(*,'(A)') TRIM(title_centered)
+  
     WRITE(*,'("| |")', ADVANCE="NO")
     DO i = 1, width-5
        WRITE(*,'(1X)', ADVANCE="NO")

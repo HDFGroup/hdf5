@@ -585,7 +585,8 @@ H5_FCDLL int_f h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f 
                               int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags, hid_t_f *h5p_flags,
                               int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
                               hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, int_f *h5t_flags,
-                              int_f *h5z_flags, int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags);
+                              int_f *h5vl_flags, uint64_t *h5vl_int64_flags, int_f *h5z_flags,
+                              int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags);
 H5_FCDLL int_f h5init1_flags_c(int_f *h5lib_flags);
 H5_FCDLL int_f h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
 H5_FCDLL int_f h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum);
