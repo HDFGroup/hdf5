@@ -499,7 +499,8 @@ Bug Fixes since HDF5-1.14.0 release
 
     Fortran API
     -----------
-    -
+    - Added h5pget_vol_cap_flags_f and related  Fortran VOL 
+      capability definitions.
 
     High-Level Library
     ------------------

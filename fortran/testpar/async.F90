@@ -1309,7 +1309,7 @@ PROGRAM async_test
   CALL get_environment_variable("HDF5_VOL_CONNECTOR", VALUE=vol_connector_string, LENGTH=len)
   IF(len .EQ. 0)THEN
 
-     ! No VOL connector selected; using native VOL connector
+     ! No VOL connector set; using native VOL connector
      async_enabled = .FALSE.
      IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
 
@@ -1334,7 +1334,7 @@ PROGRAM async_test
         CALL check("h5pget_vol_cap_flags_f", hdferror, total_error)
         CALL h5pclose_f(plist_id, hdferror)
         CALL check("h5pcreate_f", hdferror, total_error)
-        IF(H5VL_CAP_FLAG_ASYNC_F.EQ.1_C_INT64_T) async_enabled = .true.
+        IF(H5VL_CAP_FLAG_ASYNC_F.EQ.1_C_INT64_T) async_enabled = .TRUE.
         IF(async_enabled .EQV. .FALSE.)THEN
            ! No async compatible VOL found
            IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
@@ -1353,12 +1353,6 @@ PROGRAM async_test
         CALL MPI_Finalize(mpierror)
         STOP
      ENDIF
-  ENDIF
-
-  IF(total_error.LT.0)THEN
-     IF(mpi_rank==0) CALL write_test_status(total_error, &
-          'Testing async APIs', total_error)
-     STOP
   ENDIF
 
   ! H5ES API TESTING
