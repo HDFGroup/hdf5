@@ -49,5 +49,5 @@ jobs:
         cat libnetcdf.settings
         CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make -j
         CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check TESTS="" -j
-        LD_LIBRARY_PATH="/home/runner/work/hdf5/hdf5/netcdf-c/liblib/.libs:${LD_LIBRARY_PATH}"
+        LD_LIBRARY_PATH="/home/runner/work/hdf5/hdf5/netcdf-c/liblib/.libs:/usr/local/lib:${LD_LIBRARY_PATH}"
         CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} LD_LIBRARY_PATH=${LD_LIBRARY_PATH} make check -j
