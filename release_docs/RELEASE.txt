@@ -167,6 +167,9 @@ New Features
 
     Fortran Library:
     ----------------
+    - Added h5pget_vol_cap_flags_f and related Fortran VOL
+      capability definitions.
+
     - Fortran async APIs H5A, H5D, H5ES, H5G, H5F, H5L and H5O were added.
 
     - Added Fortran APIs:
@@ -499,8 +502,7 @@ Bug Fixes since HDF5-1.14.0 release
 
     Fortran API
     -----------
-    - Added h5pget_vol_cap_flags_f and related  Fortran VOL 
-      capability definitions.
+    -
 
     High-Level Library
     ------------------
