@@ -51,7 +51,7 @@
 
 /* toggle debugging (enable with 1)
  */
-#define S3COMMS_DEBUG 0
+#define S3COMMS_DEBUG 1
 
 /* manipulate verbosity of CURL output
  * operates separately from S3COMMS_DEBUG
@@ -61,7 +61,7 @@
  * 2 -> in addition to above, print information for all performs; sets all
  *      curl handles with CURLOPT_VERBOSE
  */
-#define S3COMMS_CURL_VERBOSITY 0
+#define S3COMMS_CURL_VERBOSITY 2
 
 /* size to allocate for "bytes=<first_byte>[-<last_byte>]" HTTP Range value
  */
@@ -1460,7 +1460,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (p_status != CURLE_OK) {
             if (CURLE_OK != curl_easy_getinfo(curlh, CURLINFO_RESPONSE_CODE, &httpcode))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem getting response code")
-            HDfprintf(stderr, "CURL ERROR CODE: %d\nHTTP CODE: %d\n", p_status, httpcode);
+            HDfprintf(stderr, "CURL ERROR CODE: %d\nHTTP CODE: %ld\n", p_status, httpcode);
             HDfprintf(stderr, "%s\n", curl_easy_strerror(p_status));
             HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "problem while performing request.");
         }
@@ -1481,7 +1481,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (sds == NULL)
             HDfprintf(stderr, "sds is NULL!\n");
         else {
-            HDfprintf(stderr, "sds: 0x%lx\n", (long long)sds);
+            HDfprintf(stderr, "sds: 0x%lx\n", (unsigned long)sds);
             HDfprintf(stderr, "sds->size: %d\n", (int)sds->size);
             if (len > sds->size)
                 HDfprintf(stderr, "buffer overwrite\n");

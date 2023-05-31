@@ -40,11 +40,11 @@
 
 /* toggle function call prints: 1 turns on
  */
-#define ROS3_DEBUG 0
+#define ROS3_DEBUG 1
 
 /* toggle stats collection and reporting
  */
-#define ROS3_STATS 0
+#define ROS3_STATS 1
 
 /* The driver identification number, initialized at runtime
  */
@@ -622,7 +622,7 @@ H5FD__ros3_fapl_free(void *_fa)
  *----------------------------------------------------------------------------
  */
 static herr_t
-ros3_reset_stats(H5FD_ros3_t *file)
+H5FD__ros3_reset_stats(H5FD_ros3_t *file)
 {
     unsigned i         = 0;
     herr_t   ret_value = SUCCEED;
@@ -630,7 +630,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDprintf("ros3_reset_stats() called\n");
+    HDprintf("H5FD__ros3_reset_stats() called\n");
 #endif
 
     if (file == NULL)
@@ -758,7 +758,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
 
 #if ROS3_STATS
-    if (FAIL == ros3_reset_stats(file))
+    if (FAIL == H5FD__ros3_reset_stats(file))
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics")
 #endif /* ROS3_STATS */
 
@@ -833,7 +833,7 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
+H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 {
     herr_t             ret_value    = SUCCEED;
     parsed_url_t      *purl         = NULL;
@@ -914,7 +914,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      * PRINT OVERVIEW *
      ******************/
 
-    HDfprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
+    HDfprintf(stream, "TOTAL READS: %lu  (%lu meta, %lu raw)\n", count_raw + count_meta, count_meta,
               count_raw);
     HDfprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
               bytes_raw);
@@ -1039,7 +1039,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
             re_dub /= 1024.0;
         HDassert(suffix_i < sizeof(suffixes));
 
-        HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+        HDfprintf(stream, " %8.3f%c %7llu %7llu %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                   suffixes[suffix_i], /* bin ceiling      */
                   m->count,           /* metadata reads   */
                   r->count,           /* raw data reads    */
@@ -1090,16 +1090,16 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     HDassert(file != NULL);
     HDassert(file->s3r_handle != NULL);
 
+#if ROS3_STATS
+    /* TODO: mechanism to re-target stats printout */
+    if (H5FD__ros3_fprint_stats(stdout, file) == FAIL)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics")
+#endif /* ROS3_STATS */
+
     /* Close the underlying request handle
      */
     if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle))
         HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle")
-
-#if ROS3_STATS
-    /* TODO: mechanism to re-target stats printout */
-    if (ros3_fprint_stats(stdout, file) == FAIL)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics")
-#endif /* ROS3_STATS */
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_ros3_t, file);
