@@ -887,7 +887,7 @@ done:                                                                           
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST)                                                                         \
     {                                                                                                        \
-        H5MM_memcpy(&src_aligned, src, sizeof(ST));                                                          \
+        H5MM_memcpy(&src_aligned, (uint8_t *)src, sizeof(ST));                                               \
     }
 
 /* Macro defining action on source data which doesn't need to be aligned (before main action) */
@@ -919,7 +919,7 @@ done:                                                                           
 /* Macro defining action on destination data which needs to be aligned (after main action) */
 #define H5T_CONV_LOOP_POST_DALIGN(DT)                                                                        \
     {                                                                                                        \
-        H5MM_memcpy(dst, &dst_aligned, sizeof(DT));                                                          \
+        H5MM_memcpy((uint8_t *)dst, &dst_aligned, sizeof(DT));                                               \
     }
 
 /* Macro defining action on destination data which doesn't need to be aligned (after main action) */
