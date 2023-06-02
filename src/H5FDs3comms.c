@@ -791,6 +791,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     curl_easy_cleanup(handle->curlhandle);
 
     H5MM_xfree(handle->secret_id);
+    H5MM_xfree(handle->session_token);
     H5MM_xfree(handle->region);
     H5MM_xfree(handle->signing_key);
 
@@ -1023,7 +1024,8 @@ done:
  *----------------------------------------------------------------------------
  */
 s3r_t *
-H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const unsigned char *signing_key)
+H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const char *session_token,
+                      const unsigned char *signing_key)
 {
     size_t        tmplen    = 0;
     CURL         *curlh     = NULL;
@@ -1051,13 +1053,15 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     if (handle == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "could not malloc space for handle.");
 
-    handle->magic       = S3COMMS_S3R_MAGIC;
-    handle->purl        = purl;
-    handle->filesize    = 0;
-    handle->region      = NULL;
-    handle->secret_id   = NULL;
-    handle->signing_key = NULL;
-    handle->httpverb    = NULL;
+    handle->magic         = S3COMMS_S3R_MAGIC;
+    handle->purl          = purl;
+    handle->filesize      = 0;
+    handle->region        = NULL;
+    handle->secret_id     = NULL;
+    handle->session_token = NULL;
+    handle->signing_key   = NULL;
+    handle->session_token = NULL;
+    handle->httpverb      = NULL;
 
     /*************************************
      * RECORD AUTHENTICATION INFORMATION *
@@ -1085,6 +1089,12 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         if (handle->secret_id == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for handle ID copy.");
         H5MM_memcpy(handle->secret_id, id, tmplen);
+
+        tmplen                = HDstrlen(session_token) + 1;
+        handle->session_token = (char *)H5MM_malloc(sizeof(char) * tmplen);
+        if (handle->session_token == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "could not malloc space for session token copy.");
+        H5MM_memcpy(handle->session_token, session_token, tmplen);
 
         tmplen              = SHA256_DIGEST_LENGTH;
         handle->signing_key = (unsigned char *)H5MM_malloc(sizeof(unsigned char) * tmplen);
@@ -1151,6 +1161,7 @@ done:
         if (handle != NULL) {
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
+            H5MM_xfree(handle->session_token);
             H5MM_xfree(handle->signing_key);
             if (handle->httpverb != NULL)
                 H5MM_xfree(handle->httpverb);
@@ -1336,6 +1347,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null region.");
         if (handle->secret_id == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null secret_id.");
+        if (handle->session_token == NULL)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null session_token.");
         if (handle->signing_key == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle must have non-null signing_key.");
         if (handle->httpverb == NULL)
@@ -1368,6 +1381,15 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
         HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+
+        if (handle->session_token[0] != '\0') {
+            if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "x-amz-security-token",
+                                                  (const char *)handle->session_token))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-session-token header")
+            if (headers == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
+            HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+        }
 
         if (rangebytesstr != NULL) {
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Range", rangebytesstr))

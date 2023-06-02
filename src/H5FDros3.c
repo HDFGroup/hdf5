@@ -737,10 +737,10 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key")
 
         handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
-                                       (const unsigned char *)signing_key);
+                                       (const char *)fa.session_token, (const unsigned char *)signing_key);
     }
     else
-        handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL);
+        handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL, NULL);
 
     if (handle == NULL)
         /* If we want to check CURL's say on the matter in a controlled
