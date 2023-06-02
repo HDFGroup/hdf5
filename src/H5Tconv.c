@@ -887,6 +887,10 @@ done:                                                                           
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST)                                                                         \
     {                                                                                                        \
+        /* The uint8_t * cast is required to avoid assumptions about alignment on some                       \
+         * platforms, particularly on macOS with long doubles. Alignment shouldn't matter on                 \
+         * x86_64 platforms, but SSE optimizations *do* have alignment restrictions.                         \
+         */                                                                                                  \
         H5MM_memcpy(&src_aligned, (uint8_t *)src, sizeof(ST));                                               \
     }
 
@@ -919,6 +923,10 @@ done:                                                                           
 /* Macro defining action on destination data which needs to be aligned (after main action) */
 #define H5T_CONV_LOOP_POST_DALIGN(DT)                                                                        \
     {                                                                                                        \
+        /* The uint8_t * cast is required to avoid assumptions about alignment on some                       \
+         * platforms, particularly on macOS with long doubles. Alignment shouldn't matter on                 \
+         * x86_64 platforms, but SSE optimizations *do* have alignment restrictions.                         \
+         */                                                                                                  \
         H5MM_memcpy((uint8_t *)dst, &dst_aligned, sizeof(DT));                                               \
     }
 
