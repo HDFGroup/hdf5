@@ -819,7 +819,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5PL__find_plugin_in_path
  *
- * Purpose:     Given a path, this function opens the directory and envokes
+ * Purpose:     Given a path, this function opens the directory and invokes
  *              another function to go through all files to find the right
  *              plugin library. Two function definitions are for Unix and
  *              Windows.
@@ -854,7 +854,8 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory: %s", dir)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory (%s). Please verify its existence",
+                    dir)
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {

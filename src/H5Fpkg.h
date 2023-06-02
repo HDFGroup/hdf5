@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, September 28, 2000
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5F package.  Source files outside the H5F package should
- *		include H5Fprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5F package.  Source files outside the H5F package should
+ *          include H5Fprivate.h instead.
  */
 #if !(defined H5F_FRIEND || defined H5F_MODULE)
 #error "Do not include this file outside the H5F package!"
@@ -455,7 +452,7 @@ H5_DLL herr_t H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
-H5_DLL H5F_t   *H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL H5F_t   *H5F__efc_open(H5F_efc_t *efc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL unsigned H5F__efc_max_nfiles(H5F_efc_t *efc);
 H5_DLL herr_t   H5F__efc_release(H5F_efc_t *efc);
 H5_DLL herr_t   H5F__efc_destroy(H5F_efc_t *efc);

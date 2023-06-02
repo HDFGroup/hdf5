@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Monday, April  6, 2020
- *
  * Purpose:     This file contains declarations which define macros for the
  *              H5ES package.  Including this header means that the source file
  *              is part of the H5ES package.
@@ -120,7 +117,7 @@
  *
  * \brief Event Set Interface
  *
- * \details \Bold{This interface can be only used with the HDF5 VOL connectors that
+ * \details \Bold{This interface can only be used with the HDF5 VOL connectors that
  *          enable the asynchronous feature in HDF5.} The native HDF5 library has
  *          only synchronous operations.
  *

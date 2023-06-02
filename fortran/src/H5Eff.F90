@@ -58,7 +58,7 @@ CONTAINS
   SUBROUTINE h5eclear_f(hdferr, estack_id)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: estack_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: estack_id
     INTEGER(HID_T) :: estack_id_default
 
     INTERFACE
@@ -86,7 +86,7 @@ CONTAINS
 !! See C API: @ref H5Eprint2()
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
-    CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: namelen
 

@@ -8,7 +8,7 @@ add_executable (testh5repack_detect_szip ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/
 target_include_directories (testh5repack_detect_szip
     PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   TARGET_C_PROPERTIES (testh5repack_detect_szip STATIC)
   target_link_libraries (testh5repack_detect_szip PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 else ()
@@ -31,7 +31,7 @@ add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_TEST_H5REPACK
 target_include_directories (h5repacktest
     PRIVATE "${HDF5_TOOLS_SRC_H5REPACK_SOURCE_DIR};${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
-if (NOT ONLY_SHARED_LIBS)
+if (BUILD_STATIC_LIBS)
   TARGET_C_PROPERTIES (h5repacktest STATIC)
   target_link_libraries (h5repacktest PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 else ()
@@ -97,7 +97,7 @@ endif ()
 # --------------------------------------------------------------------
 # Add the h5repack test executable
 # --------------------------------------------------------------------
-if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
+if (HDF5_BUILD_GENERATORS AND BUILD_STATIC_LIBS)
   add_executable (h5repackgentest ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/h5repackgentest.c)
   target_include_directories (h5repackgentest PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5repackgentest STATIC)

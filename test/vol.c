@@ -28,7 +28,7 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {"native_vol_test", NULL};
+const char *FILENAME[] = {"vol_test_file", NULL};
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -174,6 +174,9 @@ static const H5VL_class_t reg_opt_vol_g = {
 };
 
 static herr_t fake_get_cap_flags(const void *info, uint64_t *cap_flags);
+static herr_t fake_vol_info_to_str(const void *info, char **str);
+static herr_t fake_vol_str_to_info(const char *str, void **info);
+static herr_t fake_vol_free_info(void *info);
 
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
@@ -193,12 +196,12 @@ static const H5VL_class_t fake_vol_g = {
     NULL,                /* terminate    */
     {
         /* info_cls */
-        (size_t)0, /* size    */
-        NULL,      /* copy    */
-        NULL,      /* compare */
-        NULL,      /* free    */
-        NULL,      /* to_str  */
-        NULL,      /* from_str */
+        (size_t)0,            /* size    */
+        NULL,                 /* copy    */
+        NULL,                 /* compare */
+        fake_vol_free_info,   /* free    */
+        fake_vol_info_to_str, /* to_str  */
+        fake_vol_str_to_info, /* from_str */
     },
     {
         /* wrap_cls */
@@ -557,6 +560,77 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 
     return ret_value;
 } /* end reg_opt_datatype_get() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_info_to_str
+ *
+ * Purpose:     Convert the fake VOL info to a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_info_to_str(const void *info, char **str)
+{
+    herr_t    ret_value = SUCCEED; /* Return value */
+    const int val       = *(const int *)info;
+    const int str_size  = 16; /* The size of the string */
+
+    /* Verify the info is correct before continuing */
+    if (val != INT_MAX) {
+        HDprintf("The value of info (%d) is incorrect\n", val);
+        return FAIL;
+    }
+
+    /* Allocate the string long enough for the info */
+    *str = (char *)malloc(str_size);
+
+    HDsnprintf(*str, str_size, "%d", *((const int *)info));
+
+    return ret_value;
+} /* end fake_vol_info_to_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_str_to_info
+ *
+ * Purpose:     Convert a string to a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_str_to_info(const char *str, void **info /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    *((int **)info) = (int *)malloc(sizeof(int));
+
+    **((int **)info) = atoi(str);
+
+    return ret_value;
+} /* end fake_vol_str_to_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    fake_vol_free_info
+ *
+ * Purpose:     Free the memory of a VOL info
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_vol_free_info(void *info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    if (info)
+        HDfree(info);
+
+    return ret_value;
+} /* end fake_vol_free_info() */
 
 /*-------------------------------------------------------------------------
  * Function:    fake_get_cap_flags
@@ -1664,7 +1738,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The first optional operation registered should be at the lower limit) */
-    if (op_val != H5VL_RESERVED_NATIVE_OPTIONAL)
+    if (op_val < H5VL_RESERVED_NATIVE_OPTIONAL)
         TEST_ERROR;
 
     /* Look up 1st registered optional operation */
@@ -1683,7 +1757,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The 2nd optional operation registered should be at the lower limit + 1) */
-    if (op_val2 != (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
+    if (op_val2 < (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
         TEST_ERROR;
 
     /* Look up 2nd registered optional operation */
@@ -2002,10 +2076,11 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
     char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Retrieve the file access property for testing */
     fapl_id = h5_fileaccess();
@@ -2030,11 +2105,11 @@ test_async_vol_props(void)
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
      */
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) > 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) == 0)
         TEST_ERROR;
 
     /* Close FAPL */
@@ -2055,12 +2130,12 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Reset environment variable & re-init default connector */
@@ -2081,12 +2156,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Stack the [internal] passthrough VOL connector on top of the fake async connector */
@@ -2096,12 +2171,12 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = H5VL_CAP_FLAG_NONE;
-    if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         FAIL_STACK_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC) == 0)
         TEST_ERROR;
-    if ((cap_flags & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
+    if ((vol_cap_flags_g & H5VL_CAP_FLAG_NATIVE_FILES) > 0)
         TEST_ERROR;
 
     /* Unregister the fake async VOL ID */
@@ -2150,12 +2225,14 @@ error:
 static herr_t
 test_vol_cap_flags(void)
 {
-    hid_t                    fapl_id       = H5I_INVALID_HID;
-    hid_t                    vol_id        = H5I_INVALID_HID;
-    uint64_t                 vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    hid_t                    fapl_id = H5I_INVALID_HID;
+    hid_t                    vol_id  = H5I_INVALID_HID;
+    char                    *vol_env = NULL;
     H5VL_pass_through_info_t passthru_info;
 
-    TESTING("VOL capacity flags");
+    TESTING("VOL capability flags");
+
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
     /* Register a fake VOL */
     if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
@@ -2168,14 +2245,37 @@ test_vol_cap_flags(void)
         TEST_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
+
+    /* If using the native VOL by default, check flags again with H5P_DEFAULT */
+    vol_env = HDgetenv(HDF5_VOL_CONNECTOR);
+    if (!vol_env || (0 == HDstrcmp(vol_env, "native"))) {
+        H5VL_class_t *cls;
+        hid_t         connector_id;
+
+        if (H5Pget_vol_id(H5P_DEFAULT, &connector_id) < 0)
+            TEST_ERROR;
+        if (NULL == (cls = H5I_object(connector_id)))
+            TEST_ERROR;
+
+        vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
+
+        if (H5Pget_vol_cap_flags(H5P_DEFAULT, &vol_cap_flags_g) < 0)
+            TEST_ERROR;
+
+        if (vol_cap_flags_g != cls->cap_flags)
+            TEST_ERROR;
+
+        if (H5VLclose(connector_id) < 0)
+            TEST_ERROR;
+    }
 
     /* Stack the [internal] passthrough VOL connector on top of the fake connector */
     passthru_info.under_vol_id   = vol_id;
@@ -2185,15 +2285,15 @@ test_vol_cap_flags(void)
         FAIL_STACK_ERROR;
 
     /* Verify the correctness of the VOL capacity flags */
-    vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    vol_cap_flags_g = H5VL_CAP_FLAG_NONE;
 
-    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags_g) < 0)
         TEST_ERROR;
 
-    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+    if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC))
         TEST_ERROR;
 
-    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+    if (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
@@ -2242,10 +2342,9 @@ test_get_vol_name(void)
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
-    if (HDstrcmp(conn_env_str, "native") &&
-        HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
+    if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or pass_through connector\n");
+        HDprintf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2262,8 +2361,7 @@ test_get_vol_name(void)
 
     /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
     if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
-        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) &&
-         HDstrcmp(vol_name, "pass_through")))
+        (!HDstrcmp(conn_env_str, "pass_through") && HDstrcmp(vol_name, "pass_through")))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2287,7 +2385,7 @@ error:
     H5E_END_TRY;
 
     return FAIL;
-} /* end test_vol_cap_flags() */
+} /* end test_get_vol_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_wrap_register()
@@ -2365,6 +2463,156 @@ error:
 } /* end test_wrap_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_info_to_str()
+ *
+ * Purpose:     Tests the conversion between a VOL info and a string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_info_to_str(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t vol_id   = H5I_INVALID_HID;
+    int   info     = INT_MAX;
+    char *ret_str  = NULL;
+    int  *ret_info = NULL;
+
+    TESTING("conversion between a VOL info and a string");
+
+    /* Register a fake VOL */
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_vol(fapl_id, vol_id, NULL) < 0)
+        TEST_ERROR;
+
+    /* Serialize the VOL info into a string */
+    if (H5VLconnector_info_to_str(&info, vol_id, &ret_str) < 0)
+        TEST_ERROR;
+
+    /* Parse the string and construct it into a VOL info */
+    if (H5VLconnector_str_to_info(ret_str, vol_id, (void **)(&ret_info)) < 0)
+        TEST_ERROR;
+
+    if (*ret_info != info)
+        FAIL_PUTS_ERROR("the returned VOL info doesn't match the original info");
+
+    /* Free the VOL info being returned */
+    if (H5VLfree_connector_info(vol_id, ret_info) < 0)
+        TEST_ERROR;
+
+    /* Free the string being returned */
+    if (ret_str)
+        HDfree(ret_str);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Unregister the fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_info_to_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_query_optional
+ *
+ * Purpose:     Tests the bug fix (HDFFV-11208) that a committed datatype
+ *              triggered an assertion failure in H5VLquery_optional
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_query_optional(void)
+{
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    hid_t    file_id  = H5I_INVALID_HID;
+    hid_t    group_id = H5I_INVALID_HID;
+    hid_t    dtype_id = H5I_INVALID_HID;
+    char     filename[NAME_LEN];
+    uint64_t supported = 0;
+
+    TESTING("H5VLquery_optional");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a group */
+    if (H5VLquery_optional(group_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if ((dtype_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Commit the datatype into the file */
+    if (H5Tcommit2(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a committed datatype where the assertion failure happened in the past */
+    if (H5VLquery_optional(dtype_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(dtype_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Tclose(dtype_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_query_optional() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2402,6 +2650,8 @@ main(void)
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
     nerrors += test_wrap_register() < 0 ? 1 : 0;
+    nerrors += test_info_to_str() < 0 ? 1 : 0;
+    nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

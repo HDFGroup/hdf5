@@ -1900,7 +1900,6 @@ H5EA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 
     /* Check arguments */
     HDassert(dblock);
-    HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_EARRAY_DBLOCK);
     HDassert(fsf_size);
 

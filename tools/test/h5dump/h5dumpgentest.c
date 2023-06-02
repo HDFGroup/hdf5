@@ -7175,10 +7175,6 @@ gent_fs_strategy_threshold(void)
  * Create one dataset with (set_chunk, fixed dims, fixed max. dims)
  *    so that Fixed Array indexing will be used.
  *
- * Modifications:
- *    Fixed Array indexing will be used for chunked dataset
- *    with fixed max. dims setting.
- *
  */
 static void
 gent_dataset_idx(void)

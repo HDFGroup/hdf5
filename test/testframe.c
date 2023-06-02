@@ -126,9 +126,6 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
  * private_parser: Optional routine provided by test program to parse the
  *      private options.  Default to NULL which means none is provided.
  *
- * Modifications:
- *         Albert Cheng 2004/08/17
- *         Added the ProgName, private_usage and private_parser arguments.
  */
 void
 TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))

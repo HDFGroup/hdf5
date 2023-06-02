@@ -4043,10 +4043,6 @@ error:
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4148,10 +4144,6 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
  *
  * Programmer:  John Mainzer
  *              3/10/21
- *
- * Modifications:
- *
- *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4286,10 +4278,6 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4341,10 +4329,6 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
  * Programmer:  John Mainzer
  *              6/21/20
  *
- * Modifications:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4393,8 +4377,6 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
  *
  * Programmer:  John Mainzer
  *              6/21/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4464,8 +4446,6 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
  *
  * Programmer:  John Mainzer
  *              6/21/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4540,8 +4520,6 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
  *
  * Programmer:  John Mainzer
  *              6/20/20
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -4979,12 +4957,6 @@ error:
  *
  * Return:      Success:        TRUE
  *              Failure:        FALSE
- *
- * Programmer:  Neil Fortner
- *              7/1/21
- *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 /* Array dimensions, used for all selection I/O tests.  Currently both must be
@@ -4996,23 +4968,32 @@ static herr_t
 test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
                         haddr_t offsets[], size_t element_sizes[], int *wbufs[])
 {
-    int i;
-    int j;
+    const void **bufs; /* Avoids cast/const warnings */
+    int          i;
+    int          j;
+
+    if (NULL == (bufs = HDcalloc(count, sizeof(void *))))
+        TEST_ERROR;
 
     /* Update write buffer */
-    for (i = 0; i < (int)count; i++)
+    for (i = 0; i < (int)count; i++) {
         if (wbufs[i] && (i == 0 || wbufs[i] != wbufs[i - 1]))
             for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
                 wbufs[i][j] += 2 * SEL_IO_DIM0 * SEL_IO_DIM1;
+        bufs[i] = wbufs[i];
+    }
 
     /* Issue write call */
     if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
-                            (const void **)wbufs) < 0)
+                            bufs) < 0)
         TEST_ERROR;
+
+    HDfree(bufs);
 
     return 0;
 
 error:
+    HDfree(bufs);
     return -1;
 } /* end test_selection_io_write() */
 
@@ -5029,8 +5010,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              7/1/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -5105,8 +5084,6 @@ error:
  *
  * Programmer:  Neil Fortner
  *              7/1/21
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */

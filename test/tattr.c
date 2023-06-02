@@ -247,7 +247,11 @@ test_attr_basic_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write attribute information */
@@ -388,7 +392,11 @@ test_attr_basic_write(hid_t fapl)
     VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5Aget_storage_size");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write attribute information */
@@ -541,7 +549,7 @@ test_attr_flush(hid_t fapl)
     CHECK(att, FAIL, "H5Acreate2");
 
     ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
-    CHECK(ret, FAIL, "H5Awrite");
+    CHECK(ret, FAIL, "H5Aread");
 
     if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
@@ -757,7 +765,11 @@ test_attr_compound_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR4_NAME, tid1, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write complex attribute data */
@@ -978,7 +990,11 @@ test_attr_scalar_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR5_NAME, H5T_NATIVE_FLOAT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write attribute information */
@@ -1121,7 +1137,11 @@ test_attr_mult_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write 1st attribute data */
@@ -1145,7 +1165,11 @@ test_attr_mult_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write 2nd attribute information */
@@ -1169,7 +1193,11 @@ test_attr_mult_write(hid_t fapl)
     CHECK(attr, FAIL, "H5Acreate2");
 
     /* Try to create the same attribute again (should fail) */
-    ret_id = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret_id = H5Acreate2(dataset, ATTR3_NAME, H5T_NATIVE_DOUBLE, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret_id, FAIL, "H5Acreate2");
 
     /* Write 3rd attribute information */
@@ -1547,7 +1575,7 @@ test_attr_delete(hid_t fapl)
     herr_t      ret;                      /* Generic return value        */
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Basic Attribute Functions\n"));
+    MESSAGE(5, ("Testing Basic Attribute Deletion Functions\n"));
 
     /* Open file */
     fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
@@ -1563,7 +1591,11 @@ test_attr_delete(hid_t fapl)
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info3");
 
     /* Try to delete bogus attribute */
-    ret = H5Adelete(dataset, "Bogus");
+    H5E_BEGIN_TRY
+    {
+        ret = H5Adelete(dataset, "Bogus");
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Adelete");
 
     /* Verify the correct number of attributes */
@@ -2254,7 +2286,11 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Attempt to add attribute again, which should fail */
-    attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(attr, FAIL, "H5Acreate2");
 
     /* Close dataspace */
@@ -4200,7 +4236,11 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get number of attributes with bad ID */
-    ret = H5Aget_num_attrs((hid_t)-1);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aget_num_attrs((hid_t)-1);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aget_num_attrs");
 
     /* Get number of attributes */
@@ -4408,7 +4448,11 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
     VERIFY(crt_order_flags, 0, "H5Pget_attr_creation_order");
 
     /* Setting invalid combination of a attribute order creation order indexing on should fail */
-    ret = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_INDEXED);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_INDEXED);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_attr_creation_order");
     ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
     CHECK(ret, FAIL, "H5Pget_attr_creation_order");
@@ -5459,13 +5503,9 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     hsize_t  corder_count;            /* # of records in creation order index */
     unsigned reopen_file;             /* Whether to re-open the file before deleting group */
     char     attrname[NAME_BUF_SIZE]; /* Name of attribute */
-#ifdef LATER
-    h5_stat_size_t empty_size; /* Size of empty file */
-    h5_stat_size_t file_size;  /* Size of file after operating on it */
-#endif                         /* LATER */
-    unsigned curr_dset;        /* Current dataset to work on */
-    unsigned u;                /* Local index variable */
-    herr_t   ret;              /* Generic return value        */
+    unsigned curr_dset;               /* Current dataset to work on */
+    unsigned u;                       /* Local index variable */
+    herr_t   ret;                     /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Object w/Dense Attribute Storage and Creation Order Info\n"));
@@ -5491,24 +5531,6 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     /* Query the attribute creation properties */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
-
-/* XXX: Try to find a way to resize dataset's object header so that the object
- *      header can have one chunk, then retrieve "empty" file size and check
- *      that size after everything is deleted -QAK
- */
-#ifdef LATER
-    /* Create empty file */
-    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
-    CHECK(fid, FAIL, "H5Fcreate");
-
-    /* Close file */
-    ret = H5Fclose(fid);
-    CHECK(ret, FAIL, "H5Fclose");
-
-    /* Get the size of an empty file */
-    empty_size = h5_get_file_size(FILENAME);
-    CHECK(empty_size, FAIL, "h5_get_file_size");
-#endif /* LATER */
 
     /* Loop to leave file open when deleting dataset, or to close & re-open file
      *  before deleting dataset */
@@ -5622,13 +5644,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Fclose");
         } /* end if */
 
-#ifdef LATER
-        /* Get the size of the file now */
-        file_size = h5_get_file_size(FILENAME);
-        CHECK(file_size, FAIL, "h5_get_file_size");
-        VERIFY(file_size, empty_size, "h5_get_file_size");
-#endif /* LATER */
-    }  /* end for */
+    } /* end for */
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -5886,11 +5902,19 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
             /* Check for query on non-existent attribute */
-            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo,
-                                     H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo,
+                                         H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
-                                             tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
+                                                 tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
             /* Create attributes, up to limit of compact form */
@@ -5923,14 +5947,26 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
             /* Check for out of bound offset queries */
-            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo,
-                                     H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo,
+                                         H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo,
-                                     H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo,
+                                         H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
-                                             tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
+                                                 tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
             /* Create more attributes, to push into dense form */
@@ -5976,14 +6012,26 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             } /* end if */
 
             /* Check for out of bound offset queries */
-            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo,
-                                     H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &ainfo,
+                                         H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo,
-                                     H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo,
+                                         H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
-                                             tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
+                                                 tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
         } /* end for */
 
@@ -6267,6 +6315,8 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     unsigned        u;                       /* Local index variable */
     herr_t          ret;                     /* Generic return value        */
 
+    MESSAGE(5, ("Testing Deleting Attribute By Index\n"))
+
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
@@ -6374,7 +6424,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
                     /* Check for deleting non-existent attribute */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
 
                     /* Create attributes, up to limit of compact form */
@@ -6408,7 +6462,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
                     /* Check for out of bound deletions */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
                 } /* end for */
 
@@ -6536,7 +6594,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     } /* end if */
 
                     /* Check for out of bound deletion */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
                 } /* end for */
 
@@ -6600,7 +6662,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_empty, TRUE, "H5O__is_attr_empty_test");
 
                     /* Check for deletion on empty attribute storage again */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
                 } /* end for */
 
@@ -6767,7 +6833,11 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_empty, TRUE, "H5O__is_attr_empty_test");
 
                     /* Check for deletion on empty attribute storage again */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Adelete_by_idx");
                 } /* end for */
 
@@ -7012,7 +7082,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate2");
+        VERIFY(nvisit, max_attrs, "H5Aiterate2");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7043,7 +7113,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
     /* Skip over some attributes on object */
@@ -7074,7 +7144,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate_by_name");
+        VERIFY(nvisit, max_attrs, "H5Aiterate_by_name");
     } /* end else */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -7106,7 +7176,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
+        VERIFY(nvisit, max_attrs, "H5Aiterate1");
     }  /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -7162,15 +7232,29 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
 
     /* Check for iteration routine indicating failure */
     skip = 0;
-    ret  = H5Aiterate2(obj_id, idx_type, order, &skip, attr_iterate2_fail_cb, NULL);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(obj_id, idx_type, order, &skip, attr_iterate2_fail_cb, NULL);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     skip = 0;
-    ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &skip, attr_iterate2_fail_cb, NULL, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &skip, attr_iterate2_fail_cb, NULL,
+                                 H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
     skip = 0;
-    ret  = H5Aiterate_by_name(obj_id, ".", idx_type, order, &skip, attr_iterate2_fail_cb, NULL, H5P_DEFAULT);
+    H5E_BEGIN_TRY
+    {
+        ret =
+            H5Aiterate_by_name(obj_id, ".", idx_type, order, &skip, attr_iterate2_fail_cb, NULL, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
     /* Retrieve current # of errors */
@@ -7373,17 +7457,29 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                     /* Check for out of bound iteration */
                     idx = u;
-                    ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate2");
 
                     idx = u;
-                    ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                             H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
+                                                 H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
                     idx = u;
-                    ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                             H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
+                                                 NULL, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
                     /* Test iteration over attributes stored compactly */
@@ -7460,17 +7556,29 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                     /* Check for out of bound iteration */
                     idx = u;
-                    ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate2(my_dataset, idx_type, order, &idx, attr_iterate2_cb, NULL);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate2");
 
                     idx = u;
-                    ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                             H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate_by_name(fid, dsetname, idx_type, order, &idx, attr_iterate2_cb, NULL,
+                                                 H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
                     idx = u;
-                    ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL,
-                                             H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret = H5Aiterate_by_name(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb,
+                                                 NULL, H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret, FAIL, "H5Aiterate_by_name");
 
                     /* Test iteration over attributes stored densely */
@@ -7701,8 +7809,12 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
                     /* Check for opening an attribute on an object with no attributes */
-                    ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT,
-                                            H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT,
+                                                H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret_id, FAIL, "H5Aopen_by_idx");
 
                     /* Create attributes, up to limit of compact form */
@@ -7736,8 +7848,12 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
                     /* Check for out of bound opening an attribute on an object */
-                    ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT,
-                                            H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT,
+                                                H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret_id, FAIL, "H5Aopen_by_idx");
 
                     /* Test opening attributes by index stored compactly */
@@ -7810,8 +7926,12 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     } /* end if */
 
                     /* Check for out of bound opening an attribute on an object */
-                    ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT,
-                                            H5P_DEFAULT);
+                    H5E_BEGIN_TRY
+                    {
+                        ret_id = H5Aopen_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT,
+                                                H5P_DEFAULT);
+                    }
+                    H5E_END_TRY;
                     VERIFY(ret_id, FAIL, "H5Aopen_by_idx");
 
                     /* Test opening attributes by index stored compactly */
@@ -8029,13 +8149,25 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
             /* Check for opening a non-existent attribute on an object with no attributes */
-            ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen");
 
-            ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
-            ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
             /* Create attributes, up to limit of compact form */
@@ -8068,13 +8200,25 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(is_dense, FALSE, "H5O__is_attr_dense_test");
 
             /* Check for opening a non-existent attribute on an object with compact attribute storage */
-            ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen");
 
-            ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
-            ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
             /* Test opening attributes stored compactly */
@@ -8149,13 +8293,25 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
             } /* end if */
 
             /* Check for opening a non-existent attribute on an object with dense attribute storage */
-            ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen(my_dataset, "foo", H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen");
 
-            ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(my_dataset, ".", "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
-            ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            H5E_BEGIN_TRY
+            {
+                ret_id = H5Aopen_by_name(fid, dsetname, "foo", H5P_DEFAULT, H5P_DEFAULT);
+            }
+            H5E_END_TRY;
             VERIFY(ret_id, FAIL, "H5Aopen_by_name");
 
             /* Test opening attributes stored compactly */
@@ -10898,8 +11054,8 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     hsize_t     dims = 256; /* Attribute dimensions */
     H5O_info2_t oinfo;      /* Object info */
     H5A_info_t  ainfo;      /* Attribute info */
-    haddr_t     root_addr;  /* Root group address */
-    haddr_t     link_addr;  /* Link (to root group) address */
+    H5O_token_t root_token; /* Root group token */
+    int         cmp_value;  /* Result from H5Otoken_cmp */
     herr_t      ret;        /* Generic return status */
 
     /* Output message about test being performed */
@@ -10913,11 +11069,10 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(gid, FAIL, "H5Gcreate2");
 
-    /* Get root group address */
+    /* Get root group token */
     ret = H5Oget_info3(fid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5VLnative_token_to_addr(fid, oinfo.token, &root_addr);
-    CHECK(ret, FAIL, "H5VLnative_token_to_addr");
+    root_token = oinfo.token;
 
     /*
      * Create link to root group
@@ -10942,11 +11097,9 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(oid, FAIL, "H5Oopen");
     ret = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5VLnative_token_to_addr(fid, oinfo.token, &link_addr);
-    CHECK(ret, FAIL, "H5VLnative_token_to_addr");
-    if (link_addr != root_addr)
-        TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n",
-                      (long long unsigned)link_addr, (long long unsigned)root_addr);
+    ret = H5Otoken_cmp(oid, &oinfo.token, &root_token, &cmp_value);
+    CHECK(ret, FAIL, "H5Otoken_cmp");
+    VERIFY(cmp_value, 0, "H5Otoken_cmp");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -10990,11 +11143,9 @@ test_attr_bug8(hid_t fcpl, hid_t fapl)
     CHECK(oid, FAIL, "H5Oopen");
     ret = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5VLnative_token_to_addr(fid, oinfo.token, &link_addr);
-    CHECK(ret, FAIL, "H5VLnative_token_to_addr");
-    if (link_addr != root_addr)
-        TestErrPrintf("incorrect link target address: addr: %llu, expected: %llu\n",
-                      (long long unsigned)link_addr, (long long unsigned)root_addr);
+    ret = H5Otoken_cmp(oid, &oinfo.token, &root_token, &cmp_value);
+    CHECK(ret, FAIL, "H5Otoken_cmp");
+    VERIFY(cmp_value, 0, "H5Otoken_cmp");
     ret = H5Aget_info_by_name(gid, ".", ATTR1_NAME, &ainfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_info_by_name");
     if (ainfo.data_size != dims)
@@ -11358,7 +11509,7 @@ test_attr(void)
             test_attr_delete(my_fapl);     /* Test H5A code for deleting attributes */
 
             /* This next test uses its own file information */
-            test_attr_dtype_shared(my_fapl); /* Test using shared dataypes in attributes */
+            test_attr_dtype_shared(my_fapl); /* Test using shared datatypes in attributes */
 
             /* This next test uses its own file information */
             test_attr_duplicate_ids(my_fapl);
@@ -11504,12 +11655,14 @@ test_attr(void)
  * Programmer:    Albert Cheng
  *              July 2, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void
 cleanup_attr(void)
 {
-    HDremove(FILENAME);
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(FILENAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

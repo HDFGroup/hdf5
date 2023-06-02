@@ -475,10 +475,6 @@ static hbool_t trace_file_check(int metadata_write_strategy);
  *
  * Programmer:  JRM -- 4/17/06
  *
- * Modifications:
- *
- *              None.
- *
  *****************************************************************************/
 
 static void
@@ -506,10 +502,6 @@ print_stats(void)
  * Return:    void
  *
  * Programmer:    JRM -- 4/17/06
- *
- * Modifications:
- *
- *        None.
  *
  *****************************************************************************/
 
@@ -546,10 +538,6 @@ reset_stats(void)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 11/16/05
- *
- * Modifications:
- *
- *        None.
  *
  *****************************************************************************/
 
@@ -964,10 +952,6 @@ get_max_nerrors(void)
  *
  * Programmer:    JRM -- 12/22/05
  *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Added mssg_tag_offset parameter and supporting code.
  *
  *****************************************************************************/
 
@@ -1042,11 +1026,6 @@ recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 12/22/05
- *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Added the add_req_to_tag parameter and supporting code.
  *
  *****************************************************************************/
 static hbool_t
@@ -1299,11 +1278,6 @@ reset_server_counters(void)
  *        Failure:    FALSE
  *
  * Programmer:    JRM -- 12/22/05
- *
- * Modifications:
- *
- *         JRM -- 5/10/06
- *        Updated for sync message.
  *
  *****************************************************************************/
 static hbool_t
@@ -2319,13 +2293,11 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
-    HDassert(f->shared->cache->magic == H5C__H5C_T_MAGIC);
     HDassert(f->shared->cache->aux_ptr);
 
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
 
     HDassert(aux_ptr);
-    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     entry_ptr->aux_ptr = aux_ptr;
 
@@ -2552,7 +2524,6 @@ datum_notify(H5C_notify_action_t action, void *thing)
             }
 
             HDassert(entry_ptr->aux_ptr);
-            HDassert(entry_ptr->aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
             aux_ptr            = entry_ptr->aux_ptr;
             entry_ptr->aux_ptr = NULL;
 
@@ -2876,13 +2847,6 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
  * Programmer:  John Mainzer
  *              01/04/06
  *
- * Modifications:
- *
- *              JRM -- 8/11/06
- *              Updated code to reflect the fact that entries can now be
- *              inserted pinned.  Note that since all inserts are dirty,
- *              any pins must be global pins.
- *
  *****************************************************************************/
 static void
 insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
@@ -2931,8 +2895,7 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
             aux_ptr = ((H5AC_aux_t *)(cache_ptr->aux_ptr));
 
-            if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                  (aux_ptr->dirty_bytes == 0))) {
+            if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                 nerrors++;
                 if (verbose) {
@@ -3244,12 +3207,6 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
  *
  * Programmer:  John Mainzer
  *              1/4/06
- *
- * Modifications:
- *
- *         JRM -- 7/11/06
- *         Modified asserts to handle the new local_len field in
- *         datum.
  *
  *****************************************************************************/
 static void
@@ -3564,8 +3521,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 
                 aux_ptr = ((H5AC_aux_t *)(file_ptr->shared->cache->aux_ptr));
 
-                if (!((aux_ptr != NULL) && (aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC) &&
-                      (aux_ptr->dirty_bytes == 0))) {
+                if (!(aux_ptr != NULL && aux_ptr->dirty_bytes == 0)) {
 
                     nerrors++;
                     if (verbose) {
@@ -3789,12 +3745,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             HDfprintf(stdout, "%d:%s: Can't get cache_ptr.\n", world_mpi_rank, __func__);
         }
     }
-    else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
-        nerrors++;
-        if (verbose) {
-            HDfprintf(stdout, "%d:%s: Bad cache_ptr magic.\n", world_mpi_rank, __func__);
-        }
-    }
     else {
         cache_ptr->ignore_tags = TRUE;
         *fid_ptr               = fid;
@@ -3842,14 +3792,6 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: cache_ptr->aux_ptr == NULL.\n", world_mpi_rank, __func__);
-            }
-        }
-        else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC) {
-
-            nerrors++;
-            if (verbose) {
-                HDfprintf(stdout, "%d:%s: cache_ptr->aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC.\n",
-                          world_mpi_rank, __func__);
             }
         }
         else if (((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy != metadata_write_strategy) {
@@ -4088,11 +4030,6 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
  * Return:    void.
  *
  * Programmer:    JRM -- 1/12/06
- *
- * Modifications:
- *
- *        JRM -- 5/9/06
- *        Modified function to facilitate setting predefined seeds.
  *
  *****************************************************************************/
 static void
@@ -4617,11 +4554,6 @@ verify_total_writes(unsigned expected_total_writes)
  * Programmer:  John Mainzer
  *              1/4/06
  *
- * Modifications:
- *
- *         7/11/06
- *         Updated for the new local_len field in datum.
- *
  *****************************************************************************/
 static void
 unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
@@ -4691,11 +4623,6 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
  *
  * Programmer:  John Mainzer
  *              4/12/06
- *
- * Modifications:
- *
- *         JRM -- 8/15/06
- *         Added assertion that entry is pinned on entry.
  *
  *****************************************************************************/
 static void

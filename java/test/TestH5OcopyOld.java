@@ -249,7 +249,7 @@ public class TestH5OcopyOld {
 
         try {
             // create new file
-            H5fid2 = H5.H5Fcreate("copy.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
+            H5fid2 = H5.H5Fcreate("copy_old.h5", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
                                   HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5OcopyRefsDatasettodiffFile.H5Fcreate: ", H5fid2 >= 0);
             H5.H5Fflush(H5fid2, HDF5Constants.H5F_SCOPE_LOCAL);
@@ -288,7 +288,7 @@ public class TestH5OcopyOld {
             catch (Exception ex) {
             }
         }
-        _deleteFile("copy.h5");
+        _deleteFile("copy_old.h5");
     }
 
     @Test

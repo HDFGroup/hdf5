@@ -85,8 +85,6 @@ CONTAINS
 ! * Programmer:	M. Scot Breitenfeld
 ! *             June 24, 2008
 ! *
-! * Modifications:
-! *
 ! *-------------------------------------------------------------------------
 !
 
@@ -534,6 +532,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   INTEGER(hid_t) :: dset=-1   ! dataset
   INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
   INTEGER(size_t) :: i, j     ! miscellaneous counters
+  INTEGER :: k
   CHARACTER(LEN=180) :: filename   ! file names
   INTEGER, DIMENSION(1:25) :: part
   INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers
@@ -600,8 +599,9 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=space, file_space_id=space)
   CALL check("h5dread_f", error, total_error)
 
-  DO i = 1, 100
-     IF(whole(i) .NE. i-1)THEN
+  DO k = 1, 100
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT
@@ -621,8 +621,10 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
   CALL h5sclose_f(hs_space, error)
   CALL check("h5sclose_f", error, total_error)
-  DO i = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
-     IF(whole(i) .NE. i-1)THEN
+
+  DO k = INT(hs_start(1))+1, INT(hs_start(1)+hs_count(1))
+     CALL verify("h5dread_f", whole(k), k-1, error)
+     IF(error .NE. 0)THEN
         WRITE(*,*) "Incorrect value(s) read."
         total_error =  total_error + 1
         EXIT

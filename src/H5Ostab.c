@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Ostab.c
- *                      Aug  6 1997
- *                      Robb Matzke
  *
- * Purpose:             Symbol table messages.
+ * Purpose:             Symbol table messages
  *
  *-------------------------------------------------------------------------
  */
@@ -78,41 +76,39 @@ H5FL_DEFINE_STATIC(H5O_stab_t);
  * Purpose:     Decode a symbol table message and return a pointer to
  *              a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native order.
- *
- *              Failure:        NULL
- *
- * Programmer:  Robb Matzke
- *              Aug  6 1997
- *
+ * Return:      Success:    Pointer to new message in native order
+ *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
 static void *
 H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                 unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_stab_t *stab      = NULL;
-    void       *ret_value = NULL; /* Return value */
+    H5O_stab_t    *stab      = NULL;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
-    /* check args */
     HDassert(f);
     HDassert(p);
 
-    /* decode */
     if (NULL == (stab = H5FL_CALLOC(H5O_stab_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(stab->btree_addr));
+
+    if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
+        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(stab->heap_addr));
 
-    /* Set return value */
     ret_value = stab;
 
 done:
-    if (ret_value == NULL)
-        if (stab != NULL)
-            stab = H5FL_FREE(H5O_stab_t, stab);
+    if (!ret_value && stab)
+        H5FL_FREE(H5O_stab_t, stab);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__stab_decode() */

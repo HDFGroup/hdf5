@@ -46,8 +46,6 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -97,8 +95,6 @@ coll_chunk1(void)
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -147,8 +143,6 @@ coll_chunk2(void)
  *
  * Programmer:	Unknown
  *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -202,8 +196,6 @@ coll_chunk3(void)
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -253,8 +245,6 @@ coll_chunk4(void)
  *
  * Programmer:	Unknown
  *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -308,8 +298,6 @@ coll_chunk5(void)
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -359,8 +347,6 @@ coll_chunk6(void)
  *
  * Programmer:	Unknown
  *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -412,8 +398,6 @@ coll_chunk7(void)
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -463,8 +447,6 @@ coll_chunk8(void)
  *
  * Programmer:	Unknown
  *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -516,8 +498,6 @@ coll_chunk9(void)
  * Programmer:	Unknown
  *		July 12th, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
@@ -559,25 +539,15 @@ coll_chunk10(void)
  * Function:	coll_chunktest
  *
  * Purpose:     The real testing routine for regular selection of collective
-                chunking storage
-                testing both write and read,
-                If anything fails, it may be read or write. There is no
-                separation test between read and write.
+ *              chunking storage testing both write and read,
+ *              If anything fails, it may be read or write. There is no
+ *              separation test between read and write.
  *
  * Return:	Success:	0
- *
  *		Failure:	-1
- *
- * Modifications:
- *   Remove invalid temporary property checkings for API_LINK_HARD and
- *   API_LINK_TRUE cases.
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
  *
  * Programmer:	Unknown
  *		July 12th, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -596,7 +566,8 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    unsigned prop_value;
+    unsigned                prop_value;
+    H5D_selection_io_mode_t selection_io_mode;
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     int mpi_size, mpi_rank;
@@ -834,7 +805,11 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     /* Only check chunk optimization mode if selection I/O is not being used -
      * selection I/O bypasses this IO mode decision - it's effectively always
      * multi chunk currently */
-    if (facc_type == FACC_MPIO && !H5_use_selection_io_g) {
+
+    status = H5Pget_selection_io(xfer_plist, &selection_io_mode);
+    VRFY((status >= 0), "testing property list get succeeded");
+
+    if (facc_type == FACC_MPIO && (selection_io_mode != H5D_SELECTION_IO_MODE_ON)) {
         switch (api_option) {
             case API_LINK_HARD:
                 status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);

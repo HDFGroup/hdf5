@@ -77,7 +77,7 @@ MODULE H5LIB
   !
   ! H5D flags declaration
   !
-  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 29
+  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 32
   INTEGER, DIMENSION(1:H5D_FLAGS_LEN) :: H5D_flags
   INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
   INTEGER(SIZE_T), DIMENSION(1:H5D_SIZE_FLAGS_LEN) :: H5D_size_flags
@@ -88,6 +88,13 @@ MODULE H5LIB
   INTEGER, DIMENSION(1:H5E_FLAGS_LEN) :: H5E_flags
   INTEGER, PARAMETER :: H5E_HID_FLAGS_LEN = 1
   INTEGER(HID_T), DIMENSION(1:H5E_HID_FLAGS_LEN) :: H5E_hid_flags
+  !
+  ! H5ES flags declaration
+  !
+  INTEGER, PARAMETER :: H5ES_FLAGS_LEN = 4
+  INTEGER, DIMENSION(1:H5ES_FLAGS_LEN) :: H5ES_flags
+  INTEGER, PARAMETER :: H5ES_HID_FLAGS_LEN = 1
+  INTEGER(HID_T), DIMENSION(1:H5ES_HID_FLAGS_LEN) :: H5ES_hid_flags
   !
   ! H5FD flags declaration
   !
@@ -186,6 +193,8 @@ CONTAINS
             i_H5D_size_flags,&
             i_H5E_flags, &
             i_H5E_hid_flags, &
+            i_H5ES_flags, &
+            i_H5ES_hid_flags, &
             i_H5F_flags, &
             i_H5FD_flags, &
             i_H5FD_hid_flags, &
@@ -207,6 +216,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
          IMPORT :: H5D_FLAGS_LEN, H5D_SIZE_FLAGS_LEN, &
               H5E_FLAGS_LEN, H5E_HID_FLAGS_LEN, &
+              H5ES_FLAGS_LEN, H5ES_HID_FLAGS_LEN, &
               H5F_FLAGS_LEN, H5G_FLAGS_LEN, H5FD_FLAGS_LEN, &
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
@@ -217,6 +227,8 @@ CONTAINS
          INTEGER(SIZE_T) , DIMENSION(1:H5D_SIZE_FLAGS_LEN)        :: i_H5D_size_flags
          INTEGER         , DIMENSION(1:H5E_FLAGS_LEN)             :: i_H5E_flags
          INTEGER(HID_T)  , DIMENSION(1:H5E_HID_FLAGS_LEN)         :: i_H5E_hid_flags
+         INTEGER         , DIMENSION(1:H5ES_FLAGS_LEN)            :: i_H5ES_flags
+         INTEGER(HID_T)  , DIMENSION(1:H5ES_HID_FLAGS_LEN)        :: i_H5ES_hid_flags
          INTEGER         , DIMENSION(1:H5F_FLAGS_LEN)             :: i_H5F_flags
          INTEGER         , DIMENSION(1:H5G_FLAGS_LEN)             :: i_H5G_flags
          INTEGER         , DIMENSION(1:H5FD_FLAGS_LEN)            :: i_H5FD_flags
@@ -244,7 +256,7 @@ CONTAINS
        END FUNCTION h5init1_flags_c
 
     END INTERFACE
-
+    error = 0
     ! Check if H5open_f has already been called. If so, skip doing it again.
     IF(H5OPEN_NUM_OBJ .NE. 0) RETURN
 
@@ -303,6 +315,8 @@ CONTAINS
          H5D_size_flags, &
          H5E_flags, &
          H5E_hid_flags, &
+         H5ES_flags, &
+         H5ES_hid_flags, &
          H5F_flags, &
          H5FD_flags, &
          H5FD_hid_flags, &
@@ -380,35 +394,38 @@ CONTAINS
     !
     ! H5D flags
     !
-    H5D_COMPACT_F                  = H5D_flags(1)
-    H5D_CONTIGUOUS_F               = H5D_flags(2)
-    H5D_CHUNKED_F                  = H5D_flags(3)
-    H5D_ALLOC_TIME_ERROR_F         = H5D_flags(4)
-    H5D_ALLOC_TIME_DEFAULT_F       = H5D_flags(5)
-    H5D_ALLOC_TIME_EARLY_F         = H5D_flags(6)
-    H5D_ALLOC_TIME_LATE_F          = H5D_flags(7)
-    H5D_ALLOC_TIME_INCR_F          = H5D_flags(8)
-    H5D_SPACE_STS_ERROR_F          = H5D_flags(9)
-    H5D_SPACE_STS_NOT_ALLOCATED_F  = H5D_flags(10)
-    H5D_SPACE_STS_PART_ALLOCATED_F = H5D_flags(11)
-    H5D_SPACE_STS_ALLOCATED_F      = H5D_flags(12)
-    H5D_FILL_TIME_ERROR_F          = H5D_flags(13)
-    H5D_FILL_TIME_ALLOC_F          = H5D_flags(14)
-    H5D_FILL_TIME_NEVER_F          = H5D_flags(15)
-    H5D_FILL_VALUE_ERROR_F         = H5D_flags(16)
-    H5D_FILL_VALUE_UNDEFINED_F     = H5D_flags(17)
-    H5D_FILL_VALUE_DEFAULT_F       = H5D_flags(18)
-    H5D_FILL_VALUE_USER_DEFINED_F  = H5D_flags(19)
-    H5D_CHUNK_CACHE_W0_DFLT_F      = H5D_flags(20)
-    H5D_MPIO_NO_COLLECTIVE_F       = H5D_flags(21)
-    H5D_MPIO_CHUNK_INDEPENDENT_F   = H5D_flags(22)
-    H5D_MPIO_CHUNK_COLLECTIVE_F    = H5D_flags(23)
-    H5D_MPIO_CHUNK_MIXED_F         = H5D_flags(24)
-    H5D_MPIO_CONTIG_COLLECTIVE_F   = H5D_flags(25)
-    H5D_VDS_ERROR_F                = H5D_flags(26)
-    H5D_VDS_FIRST_MISSING_F        = H5D_flags(27)
-    H5D_VDS_LAST_AVAILABLE_F       = H5D_flags(28)
-    H5D_VIRTUAL_F                  = H5D_flags(29)
+    H5D_COMPACT_F                   = H5D_flags(1)
+    H5D_CONTIGUOUS_F                = H5D_flags(2)
+    H5D_CHUNKED_F                   = H5D_flags(3)
+    H5D_ALLOC_TIME_ERROR_F          = H5D_flags(4)
+    H5D_ALLOC_TIME_DEFAULT_F        = H5D_flags(5)
+    H5D_ALLOC_TIME_EARLY_F          = H5D_flags(6)
+    H5D_ALLOC_TIME_LATE_F           = H5D_flags(7)
+    H5D_ALLOC_TIME_INCR_F           = H5D_flags(8)
+    H5D_SPACE_STS_ERROR_F           = H5D_flags(9)
+    H5D_SPACE_STS_NOT_ALLOCATED_F   = H5D_flags(10)
+    H5D_SPACE_STS_PART_ALLOCATED_F  = H5D_flags(11)
+    H5D_SPACE_STS_ALLOCATED_F       = H5D_flags(12)
+    H5D_FILL_TIME_ERROR_F           = H5D_flags(13)
+    H5D_FILL_TIME_ALLOC_F           = H5D_flags(14)
+    H5D_FILL_TIME_NEVER_F           = H5D_flags(15)
+    H5D_FILL_VALUE_ERROR_F          = H5D_flags(16)
+    H5D_FILL_VALUE_UNDEFINED_F      = H5D_flags(17)
+    H5D_FILL_VALUE_DEFAULT_F        = H5D_flags(18)
+    H5D_FILL_VALUE_USER_DEFINED_F   = H5D_flags(19)
+    H5D_CHUNK_CACHE_W0_DFLT_F       = H5D_flags(20)
+    H5D_MPIO_NO_COLLECTIVE_F        = H5D_flags(21)
+    H5D_MPIO_CHUNK_INDEPENDENT_F    = H5D_flags(22)
+    H5D_MPIO_CHUNK_COLLECTIVE_F     = H5D_flags(23)
+    H5D_MPIO_CHUNK_MIXED_F          = H5D_flags(24)
+    H5D_MPIO_CONTIG_COLLECTIVE_F    = H5D_flags(25)
+    H5D_VDS_ERROR_F                 = H5D_flags(26)
+    H5D_VDS_FIRST_MISSING_F         = H5D_flags(27)
+    H5D_VDS_LAST_AVAILABLE_F        = H5D_flags(28)
+    H5D_VIRTUAL_F                   = H5D_flags(29)
+    H5D_SELECTION_IO_MODE_DEFAULT_F = H5D_flags(30)
+    H5D_SELECTION_IO_MODE_OFF_F     = H5D_flags(31)
+    H5D_SELECTION_IO_MODE_ON_F      = H5D_flags(32)
 
     H5D_CHUNK_CACHE_NSLOTS_DFLT_F = H5D_size_flags(1)
     H5D_CHUNK_CACHE_NBYTES_DFLT_F = H5D_size_flags(2)
@@ -421,6 +438,19 @@ CONTAINS
     H5E_MINOR_F         = H5E_flags(2)
     H5E_WALK_UPWARD_F   = H5E_flags(3)
     H5E_WALK_DOWNWARD_F = H5E_flags(4)
+    !
+    ! H5ES flags
+    !
+    H5ES_NONE_F = H5ES_hid_flags(1)
+
+    H5ES_STATUS_IN_PROGRESS_F = INT(H5ES_flags(1))
+    H5ES_STATUS_SUCCEED_F     = INT(H5ES_flags(2))
+    H5ES_STATUS_CANCELED_F    = INT(H5ES_flags(3))
+    H5ES_STATUS_FAIL_F        = INT(H5ES_flags(4))
+
+    H5ES_WAIT_FOREVER_F = HUGE(0_C_INT64_T)
+    H5ES_WAIT_NONE_F    = 0_C_INT64_T
+
     !
     ! H5FD flags
     !

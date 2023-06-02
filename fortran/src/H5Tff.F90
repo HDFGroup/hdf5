@@ -80,7 +80,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER :: namelen                  ! Name length
     INTEGER(HID_T) :: tapl_id_default
 
@@ -126,9 +126,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
 
     INTEGER :: namelen          ! Name length
 
@@ -1793,8 +1793,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER(HID_T), INTENT(IN) :: dtype_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER(HID_T) :: tcpl_id_default
     INTEGER(HID_T) :: tapl_id_default
 
@@ -2040,13 +2040,13 @@ CONTAINS
 !!
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)               :: src_id
-    INTEGER(HID_T) , INTENT(IN)               :: dst_id
-    INTEGER(SIZE_T), INTENT(IN)               :: nelmts
-    TYPE(C_PTR)    , INTENT(INOUT)            :: buf
-    INTEGER        , INTENT(OUT)              :: hdferr
-    TYPE(C_PTR)    , INTENT(INOUT), OPTIONAL  :: background
-    INTEGER(HID_T) , INTENT(IN)   , OPTIONAL  :: plist_id
+    INTEGER(HID_T) , INTENT(IN)            :: src_id
+    INTEGER(HID_T) , INTENT(IN)            :: dst_id
+    INTEGER(SIZE_T), INTENT(IN)            :: nelmts
+    TYPE(C_PTR)    , INTENT(IN)            :: buf
+    INTEGER        , INTENT(OUT)           :: hdferr
+    TYPE(C_PTR)    , INTENT(IN), OPTIONAL  :: background
+    INTEGER(HID_T) , INTENT(IN), OPTIONAL  :: plist_id
     INTEGER(HID_T) :: plist_id_default
     TYPE(C_PTR) :: background_default
 

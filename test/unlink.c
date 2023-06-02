@@ -78,8 +78,6 @@ const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    
  * Programmer:    Robb Matzke
  *              Friday, September 25, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -154,8 +152,6 @@ error:
  *
  * Programmer:    Robb Matzke
  *              Friday, September 25, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -309,8 +305,6 @@ error:
  * Programmer:    Robb Matzke
  *              Friday, September 25, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -374,8 +368,6 @@ error:
  *
  * Programmer:  Raymond Lu
  *              Thursday, April 25, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -478,8 +470,6 @@ error:
  * Programmer:  Raymond Lu
  *              Thursday, April 25, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -539,8 +529,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Saturday, March 22, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1480,8 +1468,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Friday, April 11, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1545,8 +1531,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 16, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1626,8 +1610,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Saturday, August 16, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1740,8 +1722,6 @@ delete_node(hid_t pid, hid_t id)
  * Programmer:  Quincey Koziol
  *              Monday, January 19, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1828,8 +1808,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Monday, January 19, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1920,8 +1898,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Monday, January 19, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2299,8 +2275,6 @@ error:
  * Programmer:  Quincey Koziol
  *              Wednesday, July 14, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2384,8 +2358,6 @@ error:
  * Programmer:  James Laird
  *              Wednesday, July 28, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2466,8 +2438,6 @@ error:
  * Programmer:  James Laird
  *              Wednesday, July 28, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2544,8 +2514,6 @@ error:
  *
  * Programmer:  Quincey Koziol
  *              Monday, September 27, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

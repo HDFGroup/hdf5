@@ -887,16 +887,20 @@ done:
 static herr_t
 H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
 {
+    int    mpi_finalized;
+    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     HDassert(file_ptr);
 
+    if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
+
     if (file_ptr->context_id >= 0) {
         subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
-        int                  mpi_code;
 
         /* Don't allow IOC threads to be finalized until everyone gets here */
-        if (file_ptr->mpi_size > 1)
+        if (!mpi_finalized && (file_ptr->mpi_size > 1))
             if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
@@ -911,10 +915,12 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         file_ptr->context_id = -1;
     }
 
-    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
-    if (H5_mpi_info_free(&file_ptr->info) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    if (!mpi_finalized) {
+        if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+        if (H5_mpi_info_free(&file_ptr->info) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    }
 
 done:
     HDfree(file_ptr->file_path);
@@ -1455,6 +1461,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
     if (mpi_rank == 0) {
         int64_t read_n_subfiles = 0;
         int32_t n_subfiles      = 0;
+        char   *prefix_env      = NULL;
         int     num_digits      = 0;
 
         if (HDstat(name, &st) < 0)
@@ -1470,9 +1477,13 @@ H5FD__ioc_del(const char *name, hid_t fapl)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate config file name buffer");
 
+        /* Check if a prefix has been set for the configuration file name */
+        prefix_env = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX);
+
         /* TODO: No support for subfile directory prefix currently */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, file_dirname,
-                   base_filename, (uint64_t)st.st_ino);
+        /* TODO: Possibly try loading config file prefix from file before deleting */
+        HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
+                   prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {

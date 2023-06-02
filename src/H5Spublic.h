@@ -16,14 +16,34 @@
 #ifndef H5Spublic_H
 #define H5Spublic_H
 
-/* Public headers needed by this file */
-#include "H5public.h"
-#include "H5Ipublic.h"
+#include "H5public.h"  /* Generic Functions                        */
+#include "H5Ipublic.h" /* Identifiers                              */
 
 /* Define special dataspaces for dataset I/O operations */
-#define H5S_ALL   0 /* (hid_t) */
-#define H5S_BLOCK 1 /* (hid_t) */
-#define H5S_PLIST 2 /* (hid_t) */
+
+/**
+ * Used with @ref H5Dread and @ref H5Dwrite to indicate that the entire
+ * dataspace will be selected. In the case of a file dataspace, this means
+ * that the entire file dataspace, as defined by the dataset's dimensions,
+ * will be selected. In the case of a memory dataspace, this means that
+ * the specified file dataspace will also be used for the memory dataspace.
+ * Used in place of a file or memory dataspace @ref hid_t value.
+ */
+#define H5S_ALL 0
+
+/**
+ * Indicates that the buffer provided in a call to @ref H5Dread or @ref H5Dwrite
+ * is a single contiguous block of memory, with the same number of elements
+ * as the file dataspace. Used in place of a memory dataspace @ref hid_t value.
+ */
+#define H5S_BLOCK 1
+
+/**
+ * Used with @ref H5Dread and @ref H5Dwrite to indicate that the file dataspace
+ * selection was set via @ref H5Pset_dataset_io_hyperslab_selection calls.
+ * Used in place of a file dataspace @ref hid_t value.
+ */
+#define H5S_PLIST 2
 
 #define H5S_UNLIMITED HSIZE_UNDEF /**< Value for 'unlimited' dimensions */
 
@@ -864,9 +884,9 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *
  * \space_id{sel_iter_id}
  * \param[in]  maxseq   Maximum number of sequences to retrieve
- * \param[in]  maxbytes Maximum number of bytes to retrieve in sequences
+ * \param[in]  maxelmts Maximum number of elements to retrieve in sequences
  * \param[out] nseq     Number of sequences retrieved
- * \param[out] nbytes   Number of bytes retrieved, in all sequences
+ * \param[out] nelmts   Number of elements retrieved, in all sequences
  * \param[out] off      Array of sequence offsets
  * \param[out] len      Array of sequence lengths
  *
@@ -883,9 +903,9 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *          #H5S_SEL_ITER_GET_SEQ_LIST_SORTED flag is passed to
  *          H5Ssel_iter_create() for a point selection.
  *
- *          \p maxseq and \p maxbytes specify the most sequences or bytes
+ *          \p maxseq and \p maxelmts specify the most sequences or elements
  *          possible to place into the \p off and \p len arrays. \p nseq and
- *          \p nbytes return the actual number of sequences and bytes put
+ *          \p nelmts return the actual number of sequences and elements put
  *          into the arrays.
  *
  *          Each call to H5Ssel_iter_get_seq_list() will retrieve the next
@@ -897,13 +917,13 @@ H5_DLL hid_t H5Ssel_iter_create(hid_t spaceid, size_t elmt_size, unsigned flags)
  *          the iterator was created from (which can be retrieved with
  *          H5Sget_select_npoints().  When there are no further sequences of
  *          elements to retrieve, calls to this routine will set \p nseq
- *          and \p nbytes to zero.
+ *          and \p nelmts to zero.
  *
  * \since 1.12.0
  *
  */
-H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxbytes, size_t *nseq,
-                                       size_t *nbytes, hsize_t *off, size_t *len);
+H5_DLL herr_t H5Ssel_iter_get_seq_list(hid_t sel_iter_id, size_t maxseq, size_t maxelmts, size_t *nseq,
+                                       size_t *nelmts, hsize_t *off, size_t *len);
 /**
  * \ingroup H5S
  *
@@ -1006,7 +1026,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *          The \p coord parameter is a pointer to a buffer containing a
  *          serialized 2-dimensional array of size \p num_elements by the
  *          rank of the dataspace. The array lists dataset elements in the
- *          point selection; that is, it’s a list of of zero-based values
+ *          point selection; that is, it’s a list of zero-based values
  *          specifying the coordinates in the dataset of the selected
  *          elements. The order of the element coordinates in the \p coord
  *          array specifies the order in which the array elements are
@@ -1048,7 +1068,7 @@ H5_DLL herr_t H5Sselect_copy(hid_t dst_id, hid_t src_id);
  *
  *          In the 1D case, we will be selecting five points and a 1D
  *          dataspace has rank 1, so the selection will be described in a
- *          5-by-1 array. To select the 1st, 14th, 17th, 23rd, 8th elements
+ *          5-by-1 array. To select the 1st, 14th, 17th, 23rd and 8th elements
  *          of the dataset, the selection array would be as follows
  *          (remembering that point coordinates are zero-based):
  *          \n      0
@@ -1320,9 +1340,9 @@ H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
  * \details H5Sset_extent_simple() sets or resets the size of an existing
  *          dataspace.
  *
- *          \p dims is an array of size \p rank which contains the new size
+ *          \p dims is an array of size \p rank that contains the new size
  *          of each dimension in the dataspace. \p max is an array of size
- *          \p rank which contains the maximum size of each dimension in
+ *          \p rank that contains the maximum size of each dimension in
  *          the dataspace.
  *
  *          Any previous extent is removed from the dataspace, the dataspace

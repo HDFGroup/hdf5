@@ -159,10 +159,12 @@ herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    unsigned           first_entry_to_flush;
-    unsigned           last_entry_to_flush;
-    unsigned           total_entries_to_clear     = 0;
-    unsigned           total_entries_to_flush     = 0;
+    unsigned first_entry_to_flush;
+    unsigned last_entry_to_flush;
+#ifndef NDEBUG
+    unsigned total_entries_to_clear = 0;
+    unsigned total_entries_to_flush = 0;
+#endif
     unsigned          *candidate_assignment_table = NULL;
     unsigned           entries_to_flush[H5C_RING_NTYPES];
     unsigned           entries_to_clear[H5C_RING_NTYPES];
@@ -182,7 +184,6 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(num_candidates > 0);
     HDassert((!cache_ptr->slist_enabled) || (num_candidates <= cache_ptr->slist_len));
     HDassert(candidates_list_ptr != NULL);
@@ -212,7 +213,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
         /* Create skip list of entries for collective write */
         if (NULL == (cache_ptr->coll_write_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
     } /* end if */
 
     n = num_candidates / (unsigned)mpi_size;
@@ -220,8 +221,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     if (NULL ==
         (candidate_assignment_table = (unsigned *)H5MM_malloc(sizeof(unsigned) * (size_t)(mpi_size + 1))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                    "memory allocation failed for candidate assignment table")
+        HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "memory allocation failed for candidate assignment table")
 
     candidate_assignment_table[0]        = 0;
     candidate_assignment_table[mpi_size] = num_candidates;
@@ -305,7 +305,6 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry is protected?!?!?")
 
         /* Sanity checks */
-        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
         HDassert(entry_ptr->ring >= H5C_RING_USER);
         HDassert(entry_ptr->ring <= H5C_RING_SB);
         HDassert(!entry_ptr->flush_immediately);
@@ -317,12 +316,16 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
          * markings.
          */
         if (u >= first_entry_to_flush && u <= last_entry_to_flush) {
+#ifndef NDEBUG
             total_entries_to_flush++;
+#endif
             entries_to_flush[entry_ptr->ring]++;
             entry_ptr->flush_immediately = TRUE;
         } /* end if */
         else {
+#ifndef NDEBUG
             total_entries_to_clear++;
+#endif
             entries_to_clear[entry_ptr->ring]++;
             entry_ptr->clear_on_unprotect = TRUE;
         } /* end else */
@@ -392,7 +395,6 @@ done:
 } /* H5C_apply_candidate_list() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_construct_candidate_list__clean_cache
  *
  * Purpose:     Construct the list of entries that should be flushed to
@@ -402,21 +404,10 @@ done:
  *              shouldn't be used elsewhere.
  *
  * Return:      Success:        SUCCEED
- *
  *              Failure:        FAIL
  *
  * Programmer:  John Mainzer
  *              3/17/10
- *
- * Changes:     With the slist optimization, the slist is not maintained
- *              unless a flush is in progress.  Thus we can not longer use
- *              cache_ptr->slist_size to determine the total size of
- *              the entries we must insert in the candidate list.
- *
- *              To address this, we now use cache_ptr->dirty_index_size
- *              instead.
- *
- *                                              JRM -- 7/27/20
  *
  *-------------------------------------------------------------------------
  */
@@ -429,7 +420,6 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* As a sanity check, set space needed to the dirty_index_size.  This
      * should be the sum total of the sizes of all the dirty entries
@@ -440,16 +430,14 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
 
     HDassert((!cache_ptr->slist_enabled) || (space_needed == cache_ptr->slist_size));
 
-    /* Recall that while we shouldn't have any protected entries at this
-     * point, it is possible that some dirty entries may reside on the
-     * pinned list at this point.
+    /* We shouldn't have any protected entries at this point, but it is
+     * possible that some dirty entries may reside on the pinned list.
      */
     HDassert(cache_ptr->dirty_index_size <= (cache_ptr->dLRU_list_size + cache_ptr->pel_size));
     HDassert((!cache_ptr->slist_enabled) ||
              (cache_ptr->slist_len <= (cache_ptr->dLRU_list_len + cache_ptr->pel_len)));
 
-    if (space_needed > 0) { /* we have work to do */
-
+    if (space_needed > 0) {
         H5C_cache_entry_t *entry_ptr;
         unsigned           nominated_entries_count = 0;
         size_t             nominated_entries_size  = 0;
@@ -461,11 +449,9 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
          * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
-
         while ((nominated_entries_size < space_needed) &&
                ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL)) {
-
             HDassert(!(entry_ptr->is_protected));
             HDassert(!(entry_ptr->is_read_only));
             HDassert(entry_ptr->ro_ref_count == 0);
@@ -473,15 +459,13 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
             HDassert((!cache_ptr->slist_enabled) || (entry_ptr->in_slist));
 
             nominated_addr = entry_ptr->addr;
-
             if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
-
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
             nominated_entries_size += entry_ptr->size;
             nominated_entries_count++;
-            entry_ptr = entry_ptr->aux_prev;
 
+            entry_ptr = entry_ptr->aux_prev;
         } /* end while */
 
         HDassert(entry_ptr == NULL);
@@ -490,13 +474,10 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
          * protected entry list as well -- scan it too if necessary
          */
         entry_ptr = cache_ptr->pel_head_ptr;
-
         while ((nominated_entries_size < space_needed) &&
                ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL)) {
-
             if (entry_ptr->is_dirty) {
-
                 HDassert(!(entry_ptr->is_protected));
                 HDassert(!(entry_ptr->is_read_only));
                 HDassert(entry_ptr->ro_ref_count == 0);
@@ -504,29 +485,22 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
                 HDassert(entry_ptr->in_slist);
 
                 nominated_addr = entry_ptr->addr;
-
                 if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
-
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
                 nominated_entries_size += entry_ptr->size;
                 nominated_entries_count++;
-
             } /* end if */
 
             entry_ptr = entry_ptr->next;
-
         } /* end while */
 
         HDassert((!cache_ptr->slist_enabled) || (nominated_entries_count == cache_ptr->slist_len));
         HDassert(nominated_entries_size == space_needed);
-
     } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_construct_candidate_list__clean_cache() */
 
 /*-------------------------------------------------------------------------
@@ -545,12 +519,6 @@ done:
  * Programmer:  John Mainzer
  *              3/17/10
  *
- * Changes:     With the slist optimization, the slist is not maintained
- *              unless a flush is in progress.  Updated sanity checks to
- *              reflect this.
- *
- *                                              JRM -- 7/27/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -562,7 +530,6 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* compute the number of bytes (if any) that must be flushed to get the
      * cache back within its min clean constraints.
@@ -570,30 +537,20 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
     if (cache_ptr->max_cache_size > cache_ptr->index_size) {
 
         if (((cache_ptr->max_cache_size - cache_ptr->index_size) + cache_ptr->cLRU_list_size) >=
-            cache_ptr->min_clean_size) {
-
+            cache_ptr->min_clean_size)
             space_needed = 0;
-        }
-        else {
-
+        else
             space_needed = cache_ptr->min_clean_size -
                            ((cache_ptr->max_cache_size - cache_ptr->index_size) + cache_ptr->cLRU_list_size);
-        }
     } /* end if */
     else {
-
-        if (cache_ptr->min_clean_size <= cache_ptr->cLRU_list_size) {
-
+        if (cache_ptr->min_clean_size <= cache_ptr->cLRU_list_size)
             space_needed = 0;
-        }
-        else {
-
+        else
             space_needed = cache_ptr->min_clean_size - cache_ptr->cLRU_list_size;
-        }
     } /* end else */
 
     if (space_needed > 0) { /* we have work to do */
-
         H5C_cache_entry_t *entry_ptr;
         unsigned           nominated_entries_count = 0;
         size_t             nominated_entries_size  = 0;
@@ -604,11 +561,9 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
          * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
-
         while ((nominated_entries_size < space_needed) &&
                ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL) && (!entry_ptr->flush_me_last)) {
-
             haddr_t nominated_addr;
 
             HDassert(!(entry_ptr->is_protected));
@@ -618,15 +573,13 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
             HDassert((!cache_ptr->slist_enabled) || (entry_ptr->in_slist));
 
             nominated_addr = entry_ptr->addr;
-
             if (H5AC_add_candidate((H5AC_t *)cache_ptr, nominated_addr) < 0)
-
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_add_candidate() failed")
 
             nominated_entries_size += entry_ptr->size;
             nominated_entries_count++;
-            entry_ptr = entry_ptr->aux_prev;
 
+            entry_ptr = entry_ptr->aux_prev;
         } /* end while */
 
         HDassert((!cache_ptr->slist_enabled) || (nominated_entries_count <= cache_ptr->slist_len));
@@ -639,7 +592,6 @@ done:
 } /* H5C_construct_candidate_list__min_clean() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_mark_entries_as_clean
  *
  * Purpose:     When the H5C code is used to implement the metadata caches
@@ -696,14 +648,13 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     HDassert(ce_array_len > 0);
     HDassert(ce_array_ptr != NULL);
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
-    if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
-        H5C_validate_lru_list(cache_ptr) < 0)
+    if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
+        H5C__validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -721,8 +672,8 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
         } /* end else */
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
-        if (H5C_validate_protected_entry_list(cache_ptr) < 0 ||
-            H5C_validate_pinned_entry_list(cache_ptr) < 0 || H5C_validate_lru_list(cache_ptr) < 0)
+        if (H5C__validate_protected_entry_list(cache_ptr) < 0 ||
+            H5C__validate_pinned_entry_list(cache_ptr) < 0 || H5C__validate_lru_list(cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed in for loop")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -785,14 +736,8 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
      * resizes, or removals of other entries can occur as
      * a side effect of the flush.  Hence, there is no need
      * for the checks for entry removal / status change
-     * that I ported to H5C_apply_candidate_list().
+     * that are in H5C_apply_candidate_list().
      *
-     * However, if (in addition to allowing such operations
-     * in the parallel case), we allow such operations outside
-     * of the pre_serialize / serialize routines, this may
-     * cease to be the case -- requiring a review of this
-     * point.
-     *                                  JRM -- 4/7/15
      */
     entries_cleared  = 0;
     entries_examined = 0;
@@ -857,10 +802,8 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
     u         = 0;
     entry_ptr = cache_ptr->pl_head_ptr;
     while (entry_ptr != NULL) {
-        if (entry_ptr->clear_on_unprotect) {
-
+        if (entry_ptr->clear_on_unprotect)
             u++;
-        }
         entry_ptr = entry_ptr->next;
     }
     HDassert((entries_cleared + u) == ce_array_len);
@@ -868,16 +811,15 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
 done:
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
-    if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
-        H5C_validate_lru_list(cache_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
+    if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
+        H5C__validate_lru_list(cache_ptr) < 0)
+        HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_mark_entries_as_clean() */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C_clear_coll_entries
  *
  * Purpose:     Clear half or the entire list of collective entries and
@@ -929,7 +871,6 @@ done:
 } /* H5C_clear_coll_entries */
 
 /*-------------------------------------------------------------------------
- *
  * Function:    H5C__collective_write
  *
  * Purpose:     Perform a collective write of a list of metadata entries.
@@ -1003,6 +944,10 @@ H5C__collective_write(H5F_t *f)
         bufs[0]  = base_buf;
         types[0] = entry_ptr->type->mem_type;
 
+        /* Treat global heap as raw data */
+        if (types[0] == H5FD_MEM_GHEAP)
+            types[0] = H5FD_MEM_DRAW;
+
         node = H5SL_next(node);
         i    = 1;
         while (node) {
@@ -1015,6 +960,10 @@ H5C__collective_write(H5F_t *f)
             sizes[i] = entry_ptr->size;
             bufs[i]  = entry_ptr->image_ptr;
             types[i] = entry_ptr->type->mem_type;
+
+            /* Treat global heap as raw data */
+            if (types[i] == H5FD_MEM_GHEAP)
+                types[i] = H5FD_MEM_DRAW;
 
             /* Advance to next node & array location */
             node = H5SL_next(node);
@@ -1078,8 +1027,6 @@ done:
  * Programmer:  John Mainzer
  *              2/10/17
  *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1103,11 +1050,8 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
 
     HDassert(f);
     HDassert(f->shared);
-
     cache_ptr = f->shared->cache;
-
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
     HDassert(entries_to_flush[H5C_RING_UNDEFINED] == 0);
@@ -1140,8 +1084,8 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
-    if (H5C_validate_protected_entry_list(cache_ptr) < 0 || H5C_validate_pinned_entry_list(cache_ptr) < 0 ||
-        H5C_validate_lru_list(cache_ptr) < 0)
+    if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
+        H5C__validate_lru_list(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1226,14 +1170,13 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     HDassert(f->shared);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
     HDassert(ring > H5C_RING_UNDEFINED);
     HDassert(ring < H5C_RING_NTYPES);
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
-    if ((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
-        (H5C_validate_pinned_entry_list(cache_ptr) < 0) || (H5C_validate_lru_list(cache_ptr) < 0))
+    if ((H5C__validate_protected_entry_list(cache_ptr) < 0) ||
+        (H5C__validate_pinned_entry_list(cache_ptr) < 0) || (H5C__validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -1456,12 +1399,8 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                     cache_ptr->entries_removed_counter = 0;
                     cache_ptr->last_entry_removed_ptr  = NULL;
 
-                    /* Add this entry to the list of entries to collectively write
-                     *
-                     * This comment is misleading -- the entry will be added to the
-                     * collective write list only if said list exists.
-                     *
-                     *                                    JRM -- 2/9/17
+                    /* Add this entry to the list of entries to collectively
+                     * write, if the list exists.
                      */
                     if (H5C__flush_single_entry(f, op_ptr, op_flags) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush entry")
@@ -1483,12 +1422,6 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                  entry_ptr->is_protected || !entry_ptr->is_pinned)) {
                 /* Something has happened to the pinned entry list -- start
                  * over from the head.
-                 *
-                 * Recall that this code should be un-reachable at present,
-                 * as all the operations by entries on flush that could cause
-                 * it to be reachable are disallowed in the parallel case at
-                 * present.  Hence the following assertion which should be
-                 * removed if the above changes.
                  */
 
                 HDassert(!restart_scan);
@@ -1497,7 +1430,13 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
                 HDassert(!entry_ptr->is_protected);
                 HDassert(entry_ptr->is_pinned);
 
-                HDassert(FALSE); /* see comment above */
+                /* This code should be un-reachable at present,
+                 * as all the operations by entries on flush that could cause
+                 * it to be reachable are disallowed in the parallel case at
+                 * present.  Hence the following assertion which should be
+                 * removed if the above changes.
+                 */
+                HDassert(FALSE);
 
                 restart_scan = FALSE;
 

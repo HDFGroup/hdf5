@@ -94,7 +94,6 @@ The release note entry syntax is shown below.
 
       Problem/Solution
 
-      Signature
 ```
 
 * **Entry Elements** - The elements of the entry - title, problem, solution, and signature - are described in more detail in the table
@@ -112,10 +111,6 @@ You might also consider the following as you describe the solution:
         * What is the functional impact?
         * Is there a workaround – a way for users design their software so as not to encounter the issue? If so, what is the workaround?
         * For a performance fix, how has the performance improved? Links to published documentation would be good.
-    * **Signature** - Each entry must be signed with the initials of the author, the date in YYYY/MM/DD format, and the JIRA ticket number. The
-following is an example entry written by developer Xavier Zolo on April 16, 2014 about JIRA ticket HDFFV-5555: (XYZ - 2014/04/16, HDFFV-5555). The
-signature is enclosed in parentheses. JIRA or Github numbers should not be used in the description of the problem or the solution. They are like
-abbreviations that customers and external users will not be able to interpret.
 
 # Checklist <A NAME="checklist"></A>
 
@@ -130,7 +125,6 @@ Please make sure that you check the items applicable to your pull request:
   * [ ] Does the new feature require a change to an existing API? See "API Compatibility Macros" document (https://portal.hdfgroup.org/display/HDF5/API+Compatibility+Macros)
 * Documentation
   * [ ] Was the change described in the release_docs/RELEASE.txt file?
-  * [ ] Was MANIFEST updated if new files had been added to the source?
   * [ ] Was the new function documented in the corresponding public header file using [Doxygen](https://docs.hdfgroup.org/hdf5/develop/_r_m_t.html)?
   * [ ] Was new functionality documented for the HDF5 community (the level of documentation depends on the feature; ask us what would be appropriate)
 * Testing

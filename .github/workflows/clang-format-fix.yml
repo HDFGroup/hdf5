@@ -1,15 +1,28 @@
-name: clang-format Check
+# NOTE: This action requires write permissions to be set in your GitHub
+#       repo/fork for it to be able to commit changes.
+#
+# This is currently enabled via:
+#
+#   settings > Actions > General > Workflow permissions
+#
+# which you will need to set to "Read and write permissions"
+#
+name: clang-format Commit Changes
 on: 
   workflow_dispatch:
   push:
+permissions:
+  contents: read
 jobs:
   formatting-check:
-    name: Formatting Check
+    name: Commit Format Changes
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
+    permissions:
+        contents: write # In order to allow EndBug/add-and-commit to commit changes
     steps:
     - uses: actions/checkout@v3
-    - name: Run clang-format style check for C and Java programs.
+    - name: Fix C and Java formatting issues detected by clang-format
       uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: '.'
@@ -18,7 +31,7 @@ jobs:
         inplace: True
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'
-    - uses: EndBug/add-and-commit@v7
+    - uses: EndBug/add-and-commit@v9
       with:
           author_name: github-actions
           author_email: 41898282+github-actions[bot]@users.noreply.github.com

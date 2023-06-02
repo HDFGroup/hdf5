@@ -1755,7 +1755,7 @@ DONE:
  * INPUTS
  *  prp_id   - property list identifier
  * OUTPUTS
- *  nfilters - number of filters defined in the filter pipline
+ *  nfilters - number of filters defined in the filter pipeline
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1802,10 +1802,6 @@ h5pget_nfilters_c(hid_t_f *prp_id, int_f *nfilters)
  *  Returns:     0 on success, -1 on failure
  *  Programmer:  Xiangyang Su
  *  Friday, February 25, 2000
- *  Modifications:
- *  Since cd_nelmts has IN/OUT attributes, fixed the input and
- *  returned value of cd_nelmnts to satisfy this specification.
- *              MSB January 27, 2009
  *---------------------------------------------------------------------------*/
 int_f
 h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *flags, size_t_f *cd_nelmts, int_f *cd_values,
@@ -5262,7 +5258,6 @@ h5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  *  Returns:     0 on success, -1 on failure
  *  Programmer:  M. Scot Breitenfeld
  *  April 13, 2009
- *  Modifications:
  *---------------------------------------------------------------------------*/
 
 int_f
@@ -5295,7 +5290,6 @@ h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nby
  *  Returns:     0 on success, -1 on failure
  *  Programmer:  M. Scot Breitenfeld
  *  April 13, 2009
- *  Modifications:
  *---------------------------------------------------------------------------*/
 
 int_f

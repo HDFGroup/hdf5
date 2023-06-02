@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  * Purpose:	The public header file for the mpio driver.
  */
 #ifndef H5FDmpio_H

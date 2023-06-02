@@ -41,6 +41,7 @@ MODULE H5O
   USE H5GLOBAL
   IMPLICIT NONE
 
+
 !> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t
      INTEGER(C_LONG)     :: fileno     !< File number that object is located in
@@ -135,6 +136,24 @@ MODULE H5O
      TYPE(meta_size_t) :: meta_size
   END TYPE c_h5o_native_info_t
 
+  INTERFACE
+     INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, lapl_id_default, object_info, fields, &
+          es_id, file, func, line ) &
+          BIND(C, NAME='h5oget_info_by_name_c')
+       IMPORT :: C_CHAR, C_INT, C_PTR
+       IMPORT :: HID_T, SIZE_T
+       IMPLICIT NONE
+       INTEGER(HID_T)  :: loc_id
+       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+       INTEGER(HID_T)  :: lapl_id_default
+       TYPE(C_PTR), VALUE :: object_info
+       INTEGER         :: fields
+       INTEGER(HID_T)  :: es_id
+       TYPE(C_PTR), VALUE :: file
+       TYPE(C_PTR), VALUE :: func
+       INTEGER(C_INT)  :: line
+     END FUNCTION h5oget_info_by_name_c
+  END INTERFACE
 
 CONTAINS
 
@@ -212,30 +231,100 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(OUT) :: obj_id
     INTEGER         , INTENT(OUT) :: hdferr
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id) BIND(C,NAME='h5oopen_c')
+       INTEGER(HID_T) FUNCTION H5Oopen(loc_id, name, lapl_id_default) BIND(C,NAME='H5Oopen')
          IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: namelen
-         INTEGER(HID_T), INTENT(OUT) :: obj_id
-       END FUNCTION h5oopen_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Oopen
     END INTERFACE
 
-    namelen = LEN(name)
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
+    obj_id = H5Oopen(loc_id, c_name, lapl_id_default)
+    
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5oopen_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously opens an object in an HDF5 file by location identifier and path name.
+!!
+!! \param loc_id  File or group identifier.
+!! \param name    Path to the object, relative to loc_id.
+!! \param obj_id  Object identifier for the opened object.
+!! \param es_id   \fortran_es_id
+!! \param hdferr  \fortran_error
+!! \param lapl_id Access property list identifier for the link pointing to the object.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Oopen_async()
+!!
+  SUBROUTINE h5oopen_async_f(loc_id, name, obj_id, es_id, hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(HID_T)  , INTENT(OUT) :: obj_id
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Oopen_async(file, func, line, &
+            loc_id, name, lapl_id_default, es_id) BIND(C,NAME='H5Oopen_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oopen_async
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    obj_id = H5Oopen_async(file_default, func_default, line_default, &
+         loc_id, c_name, lapl_id_default, es_id)
+    
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5oopen_async_f
+
 !>
 !! \ingroup FH5O
 !!
@@ -248,18 +337,68 @@ CONTAINS
 !!
   SUBROUTINE h5oclose_f(object_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)   :: object_id
+    INTEGER(HID_T), INTENT(IN)  :: object_id
     INTEGER       , INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5oclose_c(object_id) BIND(C,NAME='h5oclose_c')
+       INTEGER(C_INT) FUNCTION H5Oclose(object_id) BIND(C,NAME='H5Oclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-       END FUNCTION h5oclose_c
+         INTEGER(HID_T), VALUE :: object_id
+       END FUNCTION H5Oclose
     END INTERFACE
 
-    hdferr = h5oclose_c(object_id)
+    hdferr = INT(H5Oclose(object_id))
+
   END SUBROUTINE h5oclose_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously closes an object in an HDF5 file.
+!!
+!! \param object_id Object identifier
+!! \param es_id     \fortran_es_id
+!! \param hdferr    \fortran_error
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Oclose_async()
+!!
+  SUBROUTINE h5oclose_async_f(object_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: object_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
+
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oclose_async(file, func, line, object_id, es_id) BIND(C,NAME='H5Oclose_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oclose_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Oclose_async(file_default, func_default, line_default, object_id, es_id))
+
+  END SUBROUTINE h5oclose_async_f
 
 !>
 !! \ingroup FH5O
@@ -318,39 +457,114 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
 
-    INTEGER(SIZE_T) :: src_name_len, dst_name_len
     INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
+    CHARACTER(LEN=LEN_TRIM(src_name)+1,KIND=C_CHAR) :: c_src_name
+    CHARACTER(LEN=LEN_TRIM(dst_name)+1,KIND=C_CHAR) :: c_dst_name
 
     INTERFACE
-       INTEGER FUNCTION h5ocopy_c(src_loc_id, src_name, src_name_len, &
-            dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default) &
-            BIND(C,NAME='h5ocopy_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Ocopy(src_loc_id, src_name, dst_loc_id, dst_name, &
+            ocpypl_id_default, lcpl_id_default) BIND(C,NAME='H5Ocopy')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: src_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
-         INTEGER(HID_T)  , INTENT(IN) :: dst_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: dst_name
-         INTEGER(HID_T)  , INTENT(IN) :: ocpypl_id_default
-         INTEGER(HID_T)  , INTENT(IN) :: lcpl_id_default
-         INTEGER(SIZE_T)              :: src_name_len, dst_name_len
-
-       END FUNCTION h5ocopy_c
+         INTEGER(HID_T)  , VALUE :: src_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: src_name
+         INTEGER(HID_T)  , VALUE :: dst_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: dst_name
+         INTEGER(HID_T)  , VALUE :: ocpypl_id_default
+         INTEGER(HID_T)  , VALUE :: lcpl_id_default
+       END FUNCTION H5Ocopy
     END INTERFACE
 
-    src_name_len = LEN(src_name)
-    dst_name_len = LEN(dst_name)
+    c_src_name = TRIM(src_name)//C_NULL_CHAR
+    c_dst_name = TRIM(dst_name)//C_NULL_CHAR
 
     ocpypl_id_default = H5P_DEFAULT_F
+    lcpl_id_default   = H5P_DEFAULT_F
     IF(PRESENT(ocpypl_id)) ocpypl_id_default = ocpypl_id
-    lcpl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
 
-    hdferr = h5ocopy_c(src_loc_id, src_name, src_name_len, &
-         dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default)
+    hdferr = INT(H5Ocopy(src_loc_id, c_src_name, &
+         dst_loc_id, c_dst_name, ocpypl_id_default, lcpl_id_default))
 
   END SUBROUTINE h5ocopy_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously copies an object in an HDF5 file.
+!!
+!! \param src_loc_id Object identifier indicating the location of the source object to be copied.
+!! \param src_name   Name of the source object to be copied.
+!! \param dst_loc_id Location identifier specifying the destination.
+!! \param dst_name   Name to be assigned to the new copy.
+!! \param ocpypl_id  Object copy property list.
+!! \param lcpl_id    Link creation property list for the new hard link.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Ocopy_async()
+!!
+  SUBROUTINE h5ocopy_async_f(src_loc_id, src_name, dst_loc_id, dst_name, es_id, hdferr, &
+       ocpypl_id, lcpl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: src_loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: src_name
+    INTEGER(HID_T)  , INTENT(IN)  :: dst_loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: dst_name
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: ocpypl_id
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lcpl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T)  :: ocpypl_id_default, lcpl_id_default
+    CHARACTER(LEN=LEN_TRIM(src_name)+1,KIND=C_CHAR) :: c_src_name
+    CHARACTER(LEN=LEN_TRIM(dst_name)+1,KIND=C_CHAR) :: c_dst_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ocopy_async(file, func, line, src_loc_id, src_name, dst_loc_id, dst_name, &
+            ocpypl_id_default, lcpl_id_default, es_id) BIND(C,NAME='H5Ocopy_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT)  , VALUE :: line
+         INTEGER(HID_T)  , VALUE :: src_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: src_name
+         INTEGER(HID_T)  , VALUE :: dst_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: dst_name
+         INTEGER(HID_T)  , VALUE :: ocpypl_id_default
+         INTEGER(HID_T)  , VALUE :: lcpl_id_default
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Ocopy_async
+    END INTERFACE
+
+    c_src_name = TRIM(src_name)//C_NULL_CHAR
+    c_dst_name = TRIM(dst_name)//C_NULL_CHAR
+
+    ocpypl_id_default = H5P_DEFAULT_F
+    lcpl_id_default   = H5P_DEFAULT_F
+    IF(PRESENT(ocpypl_id)) ocpypl_id_default = ocpypl_id
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Ocopy_async(file_default, func_default, line_default, &
+         src_loc_id, c_src_name, &
+         dst_loc_id, c_dst_name, ocpypl_id_default, lcpl_id_default, es_id))
+
+  END SUBROUTINE h5ocopy_async_f
 
 !>
 !! \ingroup FH5O
@@ -577,7 +791,6 @@ CONTAINS
 !! \param n          Object to open.
 !! \param obj_id     An object identifier for the opened object.
 !! \param hdferr     \fortran_error
-!!
 !! \param lapl_id    Link access property list.
 !!
 !! See C API: @ref H5Oopen_by_idx()
@@ -585,43 +798,123 @@ CONTAINS
   SUBROUTINE h5oopen_by_idx_f(loc_id, group_name, index_type, order, n, obj_id, &
        hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
-    CHARACTER(LEN=*), INTENT(IN)            :: group_name
-    INTEGER         , INTENT(IN)            :: index_type
-    INTEGER         , INTENT(IN)            :: order
-    INTEGER(HSIZE_T), INTENT(IN)            :: n
-    INTEGER(HID_T)  , INTENT(OUT)           :: obj_id
-    INTEGER         , INTENT(OUT)           :: hdferr
-    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
-    INTEGER(SIZE_T) :: group_namelen
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name
+    INTEGER         , INTENT(IN)           :: index_type
+    INTEGER         , INTENT(IN)           :: order
+    INTEGER(HSIZE_T), INTENT(IN)           :: n
+    INTEGER(HID_T)  , INTENT(OUT)          :: obj_id
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
 
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default) &
-            BIND(C,NAME='h5oopen_by_idx_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+       INTEGER(HID_T) FUNCTION H5Oopen_by_idx(loc_id, group_name, index_type, order, n, lapl_id_default) &
+            BIND(C,NAME='H5Oopen_by_idx')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN)  :: group_name
-         INTEGER(SIZE_T) , INTENT(IN)  :: group_namelen
-         INTEGER         , INTENT(IN)  :: index_type
-         INTEGER         , INTENT(IN)  :: order
-         INTEGER(HSIZE_T), INTENT(IN)  :: n
-         INTEGER(HID_T)  , INTENT(OUT) :: obj_id
-         INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-
-       END FUNCTION h5oopen_by_idx_c
+         INTEGER(HID_T)  , VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T)  , VALUE :: lapl_id_default
+       END FUNCTION H5Oopen_by_idx
     END INTERFACE
 
-    group_namelen = LEN(group_name)
+    c_group_name = TRIM(group_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default)
+    obj_id = H5Oopen_by_idx(loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default)
 
-  END SUBROUTINE H5Oopen_by_idx_f
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5oopen_by_idx_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously open the nth object in a group.
+!!
+!! \param loc_id     A file or group identifier.
+!! \param group_name Name of group, relative to loc_id, in which object is located.
+!! \param index_type Type of index by which objects are ordered.
+!! \param order      Order of iteration within index, NOTE: zero-based.
+!! \param n          Object to open.
+!! \param obj_id     An object identifier for the opened object.
+!! \param es_id      \fortran_es_id
+!! \param hdferr     \fortran_error
+!!
+!! \param lapl_id    Link access property list.
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Oopen_by_idx_async()
+!!
+  SUBROUTINE h5oopen_by_idx_async_f(loc_id, group_name, index_type, order, n, obj_id, es_id, &
+       hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name
+    INTEGER         , INTENT(IN)           :: index_type
+    INTEGER         , INTENT(IN)           :: order
+    INTEGER(HSIZE_T), INTENT(IN)           :: n
+    INTEGER(HID_T)  , INTENT(OUT)          :: obj_id
+    INTEGER(HID_T)  , INTENT(IN)           :: es_id
+    INTEGER         , INTENT(OUT)          :: hdferr
+    INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: lapl_id
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Oopen_by_idx_async(file, func, line, &
+            loc_id, group_name, index_type, order, n, lapl_id_default, es_id) &
+            BIND(C,NAME='H5Oopen_by_idx_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT)  , VALUE :: line
+         INTEGER(HID_T)  , VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T)  , VALUE :: lapl_id_default
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Oopen_by_idx_async
+    END INTERFACE
+
+    c_group_name = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    obj_id = H5Oopen_by_idx_async(file_default, func_default, line_default, &
+         loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default, es_id)
+
+    hdferr = 0
+    IF(obj_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5oopen_by_idx_async_f
 
 !>
 !! \ingroup FH5O
@@ -735,33 +1028,35 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type
     INTEGER, INTENT(IN) :: order
-
-    TYPE(C_FUNPTR):: op
-    TYPE(C_PTR)   :: op_data
+    TYPE(C_FUNPTR), INTENT(IN) :: op
+    TYPE(C_PTR), INTENT(INOUT) :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER, INTENT(OUT) :: return_value
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER, INTENT(IN), OPTIONAL  :: fields
-    INTEGER :: fields_c
+    INTEGER, INTENT(IN), OPTIONAL :: fields
+
+    INTEGER(C_INT) :: fields_c
+    INTEGER(C_INT) :: return_value_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data, fields) &
-            BIND(C, NAME='h5ovisit_c')
-         IMPORT :: C_FUNPTR, C_PTR
+       INTEGER(C_INT) FUNCTION H5Ovisit3(object_id, index_type, order, op, op_data, fields) &
+            BIND(C, NAME='H5Ovisit3')
+         IMPORT :: C_FUNPTR, C_PTR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: object_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
+         INTEGER(HID_T), VALUE :: object_id
+         INTEGER(C_INT), VALUE :: index_type
+         INTEGER(C_INT), VALUE :: order
          TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-         INTEGER, INTENT(IN) :: fields
-       END FUNCTION h5ovisit_c
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+       END FUNCTION H5Ovisit3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F,C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields,C_INT)
 
-    return_value = h5ovisit_c(object_id, index_type, order, op, op_data, fields_c)
+    return_value_c = H5Ovisit3(object_id, INT(index_type,C_INT), INT(order, C_INT), op, op_data, fields_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -794,39 +1089,104 @@ CONTAINS
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL :: fields
 
-    INTEGER(SIZE_T) :: namelen
     INTEGER(HID_T)  :: lapl_id_default
     TYPE(C_PTR)     :: ptr
     INTEGER :: fields_c
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
-    INTERFACE
-       INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info, fields) &
-            BIND(C, NAME='h5oget_info_by_name_c')
-         IMPORT :: c_char, c_ptr
-         IMPORT :: HID_T, SIZE_T
-         IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(SIZE_T) , INTENT(IN)  :: namelen
-         INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR), VALUE            :: object_info
-         INTEGER         , INTENT(IN)  :: fields
-       END FUNCTION h5oget_info_by_name_c
-    END INTERFACE
+    ! Async -- Not Used --
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    INTEGER(HID_T)      :: es_id = -1
 
     fields_c = H5O_INFO_ALL_F
     IF(PRESENT(fields)) fields_c = fields
 
-    namelen = LEN(name)
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     ptr = C_LOC(object_info)
 
-    hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr, fields_c)
+    hdferr = H5Oget_info_by_name_c(loc_id, c_name, lapl_id_default, ptr, fields_c, &
+         es_id, file_default, func_default, line_default)
 
   END SUBROUTINE H5Oget_info_by_name_f
+
+!>
+!! \ingroup FH5O
+!!
+!! \brief Asynchronously retrieves the metadata for an object, identifying the object by location and relative name.
+!!
+!! \param loc_id      File or group identifier specifying location of group in which object is located.
+!! \param name        Name of group, relative to loc_id.
+!! \param object_info Pointer to buffer returning object information, points to variable of datatype TYPE(C_H5O_INFO_T).
+!! \param es_id       \fortran_es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!! \param fields      Flags specifying the fields to include in object_info.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Oget_info_by_name_async()
+!!
+  SUBROUTINE h5oget_info_by_name_async_f(loc_id, name, object_info, es_id, hdferr, &
+       lapl_id, fields, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)            :: name
+    TYPE(C_PTR)     , INTENT(IN)            :: object_info
+    INTEGER(HID_T)  , INTENT(IN)            :: es_id
+    INTEGER         , INTENT(OUT)           :: hdferr
+    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
+    INTEGER         , INTENT(IN) , OPTIONAL :: fields
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
+
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    INTEGER(HID_T)  :: lapl_id_default
+    TYPE(C_PTR) :: file_default = C_NULL_PTR
+    TYPE(C_PTR) :: func_default = C_NULL_PTR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    INTEGER(C_INT) :: fields_c
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oget_info_by_name_async(file, func, line, &
+            loc_id, name, object_info, fields, lapl_id_default, es_id) BIND(C,NAME='H5Oget_info_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         TYPE(C_PTR), VALUE :: file
+         TYPE(C_PTR), VALUE :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE :: object_info
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oget_info_by_name_async
+    END INTERFACE
+
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    IF(PRESENT(file)) file_default = file
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    hdferr = H5Oget_info_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_name, object_info, fields_c, lapl_id_default, es_id)
+
+  END SUBROUTINE H5oget_info_by_name_async_f
 
 !>
 !! \ingroup FH5O
@@ -971,45 +1331,45 @@ CONTAINS
     INTEGER         , INTENT(IN)             :: index_type
     INTEGER         , INTENT(IN)             :: order
 
-    TYPE(C_FUNPTR)                           :: op
-    TYPE(C_PTR)                              :: op_data
+    TYPE(C_FUNPTR)  , INTENT(IN)             :: op
+    TYPE(C_PTR)     , INTENT(INOUT)          :: op_data ! Declare INOUT to bypass gfortran 4.8.5 issue
     INTEGER         , INTENT(OUT)            :: return_value
     INTEGER         , INTENT(OUT)            :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
     INTEGER         , INTENT(IN) , OPTIONAL  :: fields
 
-    INTEGER(SIZE_T) :: namelen
-    INTEGER(HID_T)  :: lapl_id_default
-    INTEGER :: fields_c
+    INTEGER(HID_T)  :: lapl_id_c
+    INTEGER(C_INT)  :: fields_c
+    INTEGER(C_INT)  :: return_value_c
+    CHARACTER(LEN=LEN_TRIM(object_name)+1,KIND=C_CHAR) :: object_name_c
 
     INTERFACE
-       INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-            op, op_data, lapl_id, fields) BIND(C, NAME='h5ovisit_by_name_c')
-         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+       INTEGER(C_INT) FUNCTION H5Ovisit_by_name3(loc_id, object_name, index_type, order, &
+            op, op_data, fields, lapl_id) BIND(C, NAME='H5Ovisit_by_name3')
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR, C_INT
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: object_name
-         INTEGER(SIZE_T)              :: namelen
-         INTEGER         , INTENT(IN) :: index_type
-         INTEGER         , INTENT(IN) :: order
-         TYPE(C_FUNPTR)  , VALUE      :: op
-         TYPE(C_PTR)     , VALUE      :: op_data
-         INTEGER(HID_T)  , INTENT(IN) :: lapl_id
-         INTEGER         , INTENT(IN) :: fields
-       END FUNCTION h5ovisit_by_name_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: object_name
+         INTEGER(C_INT), VALUE  :: index_type
+         INTEGER(C_INT), VALUE  :: order
+         TYPE(C_FUNPTR), VALUE :: op
+         TYPE(C_PTR)   , VALUE :: op_data
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id
+       END FUNCTION H5Ovisit_by_name3
     END INTERFACE
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
+    object_name_c = TRIM(object_name)//C_NULL_CHAR
 
-    namelen = LEN(object_name)
+    lapl_id_c = INT(H5P_DEFAULT_F, C_INT)
+    IF(PRESENT(lapl_id)) lapl_id_c = INT(lapl_id, C_INT)
 
-    lapl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-
-    return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
-         op, op_data, lapl_id_default, fields_c)
+    return_value_c = H5Ovisit_by_name3(loc_id, object_name_c, INT(index_type, C_INT), INT(order, C_INT), &
+         op, op_data, fields_c, lapl_id_c)
+    return_value = INT(return_value_c)
 
     IF(return_value.GE.0)THEN
        hdferr = 0

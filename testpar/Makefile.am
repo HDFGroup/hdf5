@@ -33,7 +33,7 @@ check_SCRIPTS = $(TEST_SCRIPT_PARA)
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_pmulti_dset t_shapesame t_filters_parallel t_2Gio t_vfd
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_pmulti_dset t_select_io_dset t_shapesame t_filters_parallel t_2Gio t_vfd
 
 if SUBFILING_VFD_CONDITIONAL
     TEST_PROG_PARA += t_subfiling_vfd
@@ -44,7 +44,7 @@ check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
 
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
-	t_prop.c t_coll_md_read.c t_oflush.c
+	t_prop.c t_coll_md.c t_oflush.c
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)
