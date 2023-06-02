@@ -401,14 +401,18 @@ static int  s3_test_credentials_loaded = 0;
 static char s3_test_aws_region[16];
 static char s3_test_aws_access_key_id[64];
 static char s3_test_aws_secret_access_key[128];
+static char s3_test_aws_session_token[128];
 
-H5FD_ros3_fapl_t restricted_access_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
-                                         TRUE,                          /* authenticate      */
-                                         "",                            /* aws region        */
-                                         "",                            /* access key id     */
-                                         ""};                           /* secret access key */
+H5FD_ros3_fapl_t restricted_access_fa = {
+    H5FD_CURR_ROS3_FAPL_T_VERSION, /* fapl version      */
+    TRUE,                          /* authenticate      */
+    "",                            /* aws region        */
+    "",                            /* access key id     */
+    "",                            /* secret access key */
+    "",                            /* session token     */
+};
 
-H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, FALSE, "", "", ""};
+H5FD_ros3_fapl_t anonymous_fa = {H5FD_CURR_ROS3_FAPL_T_VERSION, FALSE, "", "", "", ""};
 
 /*---------------------------------------------------------------------------
  *
@@ -470,6 +474,7 @@ test_fapl_config_validation(void)
                 "",                            /* aws_region   */
                 "",                            /* secret_id    */
                 "",                            /* secret_key   */
+                "",                            /* session_token   */
             },
         },
         {
@@ -478,6 +483,7 @@ test_fapl_config_validation(void)
             {
                 H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
+                "",
                 "",
                 "",
                 "",
@@ -492,6 +498,7 @@ test_fapl_config_validation(void)
                 "region",
                 "me",
                 "",
+                "",
             },
         },
         {
@@ -503,6 +510,7 @@ test_fapl_config_validation(void)
                 "",
                 "me",
                 "",
+                "",
             },
         },
         {
@@ -512,6 +520,7 @@ test_fapl_config_validation(void)
                 H5FD_CURR_ROS3_FAPL_T_VERSION,
                 TRUE,
                 "where",
+                "",
                 "",
                 "",
             },
@@ -525,6 +534,7 @@ test_fapl_config_validation(void)
                 "where",
                 "who",
                 "thisIsA GREAT seeeecrit",
+                "",
             },
         },
         {
@@ -533,6 +543,7 @@ test_fapl_config_validation(void)
             {
                 12345,
                 FALSE,
+                "",
                 "",
                 "",
                 "",
@@ -548,6 +559,7 @@ test_fapl_config_validation(void)
                 "someregion",
                 "someid",
                 "somekey",
+                "sometoken",
             },
         },
     };
@@ -605,6 +617,7 @@ test_fapl_config_validation(void)
             JSVERIFY_STR(config.aws_region, fa_fetch.aws_region, NULL)
             JSVERIFY_STR(config.secret_id, fa_fetch.secret_id, NULL)
             JSVERIFY_STR(config.secret_key, fa_fetch.secret_key, NULL)
+            JSVERIFY_STR(config.session_token, fa_fetch.session_token, NULL)
         }
 
         /*-----------------------------
@@ -671,6 +684,7 @@ test_ros3_fapl(void)
         "",                            /* aws_region    */
         "",                            /* secret_id     */
         "plugh",                       /* secret_key    */
+        "",                            /* session_token    */
     };
 
     TESTING("ROS3 fapl ");
@@ -1817,6 +1831,8 @@ main(void)
                   H5FD_ROS3_MAX_SECRET_ID_LEN);
         HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
                   H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        HDstrncpy(restricted_access_fa.session_token, (const char *)s3_test_aws_session_token,
+                  H5FD_ROS3_MAX_SESSION_TOKEN_LEN);
     }
 
     /******************
