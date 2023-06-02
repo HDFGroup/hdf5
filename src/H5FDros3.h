@@ -70,11 +70,12 @@
  *
  ****************************************************************************/
 
-#define H5FD_CURR_ROS3_FAPL_T_VERSION 1
+#define H5FD_CURR_ROS3_FAPL_T_VERSION 2
 
-#define H5FD_ROS3_MAX_REGION_LEN     32
-#define H5FD_ROS3_MAX_SECRET_ID_LEN  128
-#define H5FD_ROS3_MAX_SECRET_KEY_LEN 128
+#define H5FD_ROS3_MAX_REGION_LEN        32
+#define H5FD_ROS3_MAX_SECRET_ID_LEN     128
+#define H5FD_ROS3_MAX_SECRET_KEY_LEN    128
+#define H5FD_ROS3_MAX_SESSION_TOKEN_LEN 4096
 
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
@@ -82,6 +83,7 @@ typedef struct H5FD_ros3_fapl_t {
     char    aws_region[H5FD_ROS3_MAX_REGION_LEN + 1];
     char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
+    char    session_token[H5FD_ROS3_MAX_SESSION_TOKEN_LEN + 1];
 } H5FD_ros3_fapl_t;
 
 #ifdef __cplusplus
