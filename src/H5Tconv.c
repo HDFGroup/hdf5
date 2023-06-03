@@ -887,9 +887,15 @@ done:                                                                           
 /* Macro defining action on source data which needs to be aligned (before main action) */
 #define H5T_CONV_LOOP_PRE_SALIGN(ST)                                                                         \
     {                                                                                                        \
-        /* The uint8_t * cast is required to avoid assumptions about alignment on some                       \
-         * platforms, particularly on macOS with long doubles. Alignment shouldn't matter on                 \
-         * x86_64 platforms, but SSE optimizations *do* have alignment restrictions.                         \
+        /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
+         *                                                                                                   \
+         * The typed pointer arrives via a void pointer, which may have any alignement.                      \
+         * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
+         * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
+         * In the past this hasn't caused many problems, but in some cases (e.g.                             \
+         * converting long doubles on macOS), an optimizing compiler might do the                            \
+         * wrong thing (in the macOS case, the conversion uses SSE, which has stricter                       \
+         * requirements about alignment).                                                                    \
          */                                                                                                  \
         H5MM_memcpy(&src_aligned, (uint8_t *)src, sizeof(ST));                                               \
     }
@@ -923,9 +929,15 @@ done:                                                                           
 /* Macro defining action on destination data which needs to be aligned (after main action) */
 #define H5T_CONV_LOOP_POST_DALIGN(DT)                                                                        \
     {                                                                                                        \
-        /* The uint8_t * cast is required to avoid assumptions about alignment on some                       \
-         * platforms, particularly on macOS with long doubles. Alignment shouldn't matter on                 \
-         * x86_64 platforms, but SSE optimizations *do* have alignment restrictions.                         \
+        /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
+         *                                                                                                   \
+         * The typed pointer arrives via a void pointer, which may have any alignement.                      \
+         * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
+         * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
+         * In the past this hasn't caused many problems, but in some cases (e.g.                             \
+         * converting long doubles on macOS), an optimizing compiler might do the                            \
+         * wrong thing (in the macOS case, the conversion uses SSE, which has stricter                       \
+         * requirements about alignment).                                                                    \
          */                                                                                                  \
         H5MM_memcpy((uint8_t *)dst, &dst_aligned, sizeof(DT));                                               \
     }
