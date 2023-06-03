@@ -36,7 +36,7 @@
  * will prevent the compiler from doing things like using SSE for the
  * memcpy, which has strong alignment constraints.
  */
-#define H5MM_memcpy(D, S, N) HDmemcpy((void *)D, (void *)S, N)
+#define H5MM_memcpy(D, S, N) HDmemcpy((void *)D, (const void *)S, N)
 
 /*
  * Library prototypes...

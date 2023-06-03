@@ -897,7 +897,7 @@ done:                                                                           
          * wrong thing (in the macOS case, the conversion uses SSE, which has stricter                       \
          * requirements about alignment).                                                                    \
          */                                                                                                  \
-        H5MM_memcpy(&src_aligned, (uint8_t *)src, sizeof(ST));                                               \
+        H5MM_memcpy(&src_aligned, (const uint8_t *)src, sizeof(ST));                                         \
     }
 
 /* Macro defining action on source data which doesn't need to be aligned (before main action) */
