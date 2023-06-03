@@ -227,7 +227,7 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, haddr_t dblk_page_addr, size_t dblk_pag
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(dblk_page_addr));
+    HDassert(H5_addr_defined(dblk_page_addr));
 
     /* only the H5AC__READ_ONLY_FLAG is permitted */
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);

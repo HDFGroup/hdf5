@@ -223,10 +223,10 @@ TEST_sect_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_info_t
     HDassert(sect1);
     HDassert(sect2);
     HDassert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    HDassert(H5F_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    HDassert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
-    ret_value = H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
+    ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
     return ret_value;
 } /* TEST_sect_can_merge() */
@@ -250,7 +250,7 @@ TEST_sect_merging(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2, voi
     HDassert((sect2->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
              (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
              (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
-    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    HDassert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -488,7 +488,7 @@ test_fs_create(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
     if (frsp->nclasses != nclasses)
         TEST_ERROR;
@@ -513,7 +513,7 @@ test_fs_create(hid_t fapl)
                                   (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
     if (frsp->nclasses != nclasses)
         TEST_ERROR;
@@ -630,7 +630,7 @@ test_fs_sect_add(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
@@ -695,7 +695,7 @@ test_fs_sect_add(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /* Create free list section node */
@@ -770,7 +770,7 @@ test_fs_sect_add(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
@@ -840,7 +840,7 @@ test_fs_sect_add(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
@@ -963,7 +963,7 @@ test_fs_sect_find(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     HDmemset(&state, 0, sizeof(frspace_state_t));
@@ -994,7 +994,7 @@ test_fs_sect_find(hid_t fapl)
                                   (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
     if (frsp->nclasses != nclasses)
         TEST_ERROR;
@@ -1121,7 +1121,7 @@ test_fs_sect_find(hid_t fapl)
                                   (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
     if (frsp->nclasses != nclasses)
         TEST_ERROR;
@@ -1200,7 +1200,7 @@ test_fs_sect_find(hid_t fapl)
                                   (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
     if (frsp->nclasses != nclasses)
         TEST_ERROR;
@@ -1350,7 +1350,7 @@ test_fs_sect_merge(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -1479,7 +1479,7 @@ test_fs_sect_merge(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -1582,7 +1582,7 @@ test_fs_sect_merge(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -1828,7 +1828,7 @@ test_fs_sect_shrink(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -1930,7 +1930,7 @@ test_fs_sect_shrink(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2030,7 +2030,7 @@ test_fs_sect_shrink(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2172,7 +2172,7 @@ test_fs_sect_change_class(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2276,7 +2276,7 @@ test_fs_sect_change_class(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2460,7 +2460,7 @@ test_fs_sect_extend(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2537,7 +2537,7 @@ test_fs_sect_extend(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2611,7 +2611,7 @@ test_fs_sect_extend(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2686,7 +2686,7 @@ test_fs_sect_extend(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     /*
@@ -2819,7 +2819,7 @@ test_fs_sect_iterate(hid_t fapl)
                                     (hsize_t)FSPACE_THRHD_DEF, (hsize_t)FSPACE_ALIGN_DEF)))
         FAIL_STACK_ERROR;
 
-    if (!H5F_addr_defined(fs_addr))
+    if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
     for (i = 1; i <= NUM_SECTIONS; i++) {

@@ -415,7 +415,7 @@ H5G__dense_insert(H5F_t *f, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
     /* Check if we should create a creation order index v2 B-tree record */
     if (linfo->index_corder) {
         /* Open the creation order index v2 B-tree */
-        HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
+        HDassert(H5_addr_defined(linfo->corder_bt2_addr));
         if (NULL == (bt2_corder = H5B2_open(f, linfo->corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
@@ -663,13 +663,13 @@ H5G__dense_lookup_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type
      * use the B-tree for names instead of building a table to speed up the
      * process.
      */
-    if (order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+    if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
         bt2_addr = linfo->name_bt2_addr;
-        HDassert(H5F_addr_defined(bt2_addr));
+        HDassert(H5_addr_defined(bt2_addr));
     } /* end if */
 
     /* If there is an index defined for the field, use it */
-    if (H5F_addr_defined(bt2_addr)) {
+    if (H5_addr_defined(bt2_addr)) {
         H5G_bt2_ud_lbi_t udata; /* User data for v2 B-tree link lookup */
 
         /* Open the fractal heap */
@@ -958,8 +958,8 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
      * use the B-tree for names instead of building a table to speed up the
      * process.
      */
-    if (order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
-        HDassert(H5F_addr_defined(linfo->name_bt2_addr));
+    if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
+        HDassert(H5_addr_defined(linfo->name_bt2_addr));
         bt2_addr = linfo->name_bt2_addr;
     } /* end if */
 
@@ -968,7 +968,7 @@ H5G__dense_iterate(H5F_t *f, const H5O_linfo_t *linfo, H5_index_t idx_type, H5_i
         H5G_bt2_ud_it_t udata; /* User data for iterator callback */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(bt2_addr));
+        HDassert(H5_addr_defined(bt2_addr));
 
         /* Open the fractal heap */
         if (NULL == (fheap = H5HF_open(f, linfo->fheap_addr)))
@@ -1153,13 +1153,13 @@ H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5
      * use the B-tree for names instead of building a table to speed up the
      * process.
      */
-    if (order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+    if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
         bt2_addr = linfo->name_bt2_addr;
-        HDassert(H5F_addr_defined(bt2_addr));
+        HDassert(H5_addr_defined(bt2_addr));
     } /* end if */
 
     /* If there is an index defined for the field, use it */
-    if (H5F_addr_defined(bt2_addr)) {
+    if (H5_addr_defined(bt2_addr)) {
         H5G_bt2_ud_gnbi_t udata; /* User data for v2 B-tree callback */
 
         /* Open the fractal heap */
@@ -1243,7 +1243,7 @@ H5G__dense_remove_fh_cb(const void *obj, size_t obj_len, void *_udata)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Check for removing the link from the creation order index */
-    if (H5F_addr_defined(udata->corder_bt2_addr)) {
+    if (H5_addr_defined(udata->corder_bt2_addr)) {
         H5G_bt2_ud_common_t bt2_udata; /* Info for B-tree callbacks */
 
         /* Open the creation order index v2 B-tree */
@@ -1464,7 +1464,7 @@ H5G__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     HDassert(fh_udata.lnk);
 
     /* Check for removing the link from the "other" index (creation order, when name used and vice versa) */
-    if (H5F_addr_defined(bt2_udata->other_bt2_addr)) {
+    if (H5_addr_defined(bt2_udata->other_bt2_addr)) {
         H5G_bt2_ud_common_t other_bt2_udata; /* Info for B-tree callbacks */
 
         /* Determine the index being used */
@@ -1575,13 +1575,13 @@ H5G__dense_remove_by_idx(H5F_t *f, const H5O_linfo_t *linfo, H5RS_str_t *grp_ful
      * use the B-tree for names instead of building a table to speed up the
      * process.
      */
-    if (order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+    if (order == H5_ITER_NATIVE && !H5_addr_defined(bt2_addr)) {
         bt2_addr = linfo->name_bt2_addr;
-        HDassert(H5F_addr_defined(bt2_addr));
+        HDassert(H5_addr_defined(bt2_addr));
     } /* end if */
 
     /* If there is an index defined for the field, use it */
-    if (H5F_addr_defined(bt2_addr)) {
+    if (H5_addr_defined(bt2_addr)) {
         H5G_bt2_ud_rmbi_t udata; /* User data for v2 B-tree record removal */
 
         /* Open the fractal heap */
@@ -1696,13 +1696,13 @@ H5G__dense_delete(H5F_t *f, H5O_linfo_t *linfo, hbool_t adj_link)
     /* Check if we should delete the creation order index v2 B-tree */
     if (linfo->index_corder) {
         /* Delete the creation order index, without adjusting the ref. count on the links  */
-        HDassert(H5F_addr_defined(linfo->corder_bt2_addr));
+        HDassert(H5_addr_defined(linfo->corder_bt2_addr));
         if (H5B2_delete(f, linfo->corder_bt2_addr, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
         linfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
     else
-        HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
+        HDassert(!H5_addr_defined(linfo->corder_bt2_addr));
 
     /* Delete the fractal heap */
     if (H5HF_delete(f, linfo->fheap_addr) < 0)

@@ -1404,7 +1404,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 
     /* Assertions */
     HDassert(cache_ptr != NULL);
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(obj_addr));
     HDassert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */

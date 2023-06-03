@@ -234,7 +234,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, hbool_t *stats_chang
     ret_value = sblock_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (sblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -243,7 +243,7 @@ done:
                                 "unable to remove extensible array super block from cache")
 
             /* Release super block's disk space */
-            if (H5F_addr_defined(sblock->addr) &&
+            if (H5_addr_defined(sblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_SBLOCK, sblock->addr, (hsize_t)sblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
                             "unable to release extensible array super block")
@@ -281,7 +281,7 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, 
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(sblk_addr));
+    HDassert(H5_addr_defined(sblk_addr));
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -380,7 +380,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(sblk_addr));
+    HDassert(H5_addr_defined(sblk_addr));
 
     /* Protect super block */
     if (NULL == (sblock = H5EA__sblock_protect(hdr, parent, sblk_addr, sblk_idx, H5AC__NO_FLAGS_SET)))
@@ -391,7 +391,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, u
     /* Iterate over data blocks */
     for (u = 0; u < sblock->ndblks; u++) {
         /* Check for data block existing */
-        if (H5F_addr_defined(sblock->dblk_addrs[u])) {
+        if (H5_addr_defined(sblock->dblk_addrs[u])) {
             /* Delete data block */
             if (H5EA__dblock_delete(hdr, sblock, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
                 HGOTO_ERROR(H5E_EARRAY, H5E_CANTDELETE, FAIL, "unable to delete extensible array data block")

@@ -424,7 +424,7 @@ typedef struct test_entry_t {
         k           = H5C__HASH_FCN(Addr);                                                                   \
         (entry_ptr) = (cache_ptr)->index[k];                                                                 \
         while (entry_ptr) {                                                                                  \
-            if (H5F_addr_eq(Addr, (entry_ptr)->addr)) {                                                      \
+            if (H5_addr_eq(Addr, (entry_ptr)->addr)) {                                                       \
                 H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                     \
                 if ((entry_ptr) != (cache_ptr)->index[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \

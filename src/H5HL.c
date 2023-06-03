@@ -164,7 +164,7 @@ done:
         }
         else {
             if (heap) {
-                if (H5F_addr_defined(heap->prfx_addr))
+                if (H5_addr_defined(heap->prfx_addr))
                     if (FAIL == H5MF_xfree(f, H5FD_MEM_LHEAP, heap->prfx_addr, total_size))
                         HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "can't release heap data?");
                 if (FAIL == H5HL__dest(heap))
@@ -315,7 +315,7 @@ H5HL_protect(H5F_t *f, haddr_t addr, unsigned flags)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Only the H5AC__READ_ONLY_FLAG may appear in flags */
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -904,7 +904,7 @@ H5HL_delete(H5F_t *f, haddr_t addr)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Construct the user data for protect callback */
     prfx_udata.sizeof_size = H5F_SIZEOF_SIZE(f);
@@ -966,7 +966,7 @@ H5HL_get_size(H5F_t *f, haddr_t addr, size_t *size)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(size);
 
     /* Construct the user data for protect callback */
@@ -1018,7 +1018,7 @@ H5HL_heapsize(H5F_t *f, haddr_t addr, hsize_t *heap_size)
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(heap_size);
 
     /* Construct the user data for protect callback */

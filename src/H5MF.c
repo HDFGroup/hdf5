@@ -50,7 +50,7 @@
 #define H5MF_CHECK_FSM(FSM, CF)                                                                              \
     do {                                                                                                     \
         HDassert(*CF == FALSE);                                                                              \
-        if (!H5F_addr_defined(FSM->addr) || !H5F_addr_defined(FSM->sect_addr))                               \
+        if (!H5_addr_defined(FSM->addr) || !H5_addr_defined(FSM->sect_addr))                                 \
             *CF = TRUE;                                                                                      \
     } while (0)
 
@@ -319,7 +319,7 @@ H5MF__open_fstype(H5F_t *f, H5F_mem_page_t type)
         HDassert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
     } /* end else */
     HDassert(f->shared);
-    HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(H5_addr_defined(f->shared->fs_addr[type]));
     HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
     /* Set up the alignment and threshold to use depending on the manager type */
@@ -397,7 +397,7 @@ H5MF__create_fstype(H5F_t *f, H5F_mem_page_t type)
         HDassert((H5FD_mem_t)type != H5FD_MEM_NOLIST);
     } /* end else */
     HDassert(f->shared);
-    HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(!H5_addr_defined(f->shared->fs_addr[type]));
     HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
     /* Set the free space creation parameters */
@@ -474,7 +474,7 @@ H5MF__start_fstype(H5F_t *f, H5F_mem_page_t type)
     } /* end else */
 
     /* Check if the free space manager exists already */
-    if (H5F_addr_defined(f->shared->fs_addr[type])) {
+    if (H5_addr_defined(f->shared->fs_addr[type])) {
         /* Open existing free space manager */
         if (H5MF__open_fstype(f, type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space")
@@ -518,7 +518,7 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
         HDassert(type < H5F_MEM_PAGE_NTYPES);
     else
         HDassert((H5FD_mem_t)type < H5FD_MEM_NTYPES);
-    HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(H5_addr_defined(f->shared->fs_addr[type]));
 
     /* Put address into temporary variable and reset it */
     /* (Avoids loopback in file space freeing routine) */
@@ -550,7 +550,7 @@ H5MF__delete_fstype(H5F_t *f, H5F_mem_page_t type)
     f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
 
     /* Sanity check that the free space manager for this type wasn't started up again */
-    HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
+    HDassert(!H5_addr_defined(f->shared->fs_addr[type]));
 
 done:
     /* Reset the ring in the API context */
@@ -809,7 +809,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                         "attempt to notify cache that ring is unsettled failed")
 
         /* Check if the free space manager for the file has been initialized */
-        if (!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type])) {
+        if (!f->shared->fs_man[fs_type] && H5_addr_defined(f->shared->fs_addr[fs_type])) {
             /* Open the free-space manager */
             if (H5MF__open_fstype(f, fs_type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
@@ -823,7 +823,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     } /* end if */
 
     /* If no space is found from the free-space manager, continue further action */
-    if (!H5F_addr_defined(ret_value)) {
+    if (!H5_addr_defined(ret_value)) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: Check 2.0\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
@@ -838,7 +838,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed from aggr/vfd")
         } /* end else */
     }     /* end if */
-    HDassert(H5F_addr_defined(ret_value));
+    HDassert(H5_addr_defined(ret_value));
 #ifdef H5MF_ALLOC_DEBUG_MORE
     HDfprintf(stderr, "%s: Check 3.0\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
@@ -1051,7 +1051,7 @@ H5MF_alloc_tmp(H5F_t *f, hsize_t size)
     ret_value = f->shared->tmp_addr - size;
 
     /* Check for overlap into the actual allocated space in the file */
-    if (H5F_addr_le(ret_value, eoa))
+    if (H5_addr_le(ret_value, eoa))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
 
     /* Adjust temporary address allocator in the file */
@@ -1092,7 +1092,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 
     /* check arguments */
     HDassert(f);
-    if (!H5F_addr_defined(addr) || 0 == size)
+    if (!H5_addr_defined(addr) || 0 == size)
         HGOTO_DONE(SUCCEED)
     HDassert(addr != 0); /* Can't deallocate the superblock :-) */
 
@@ -1116,7 +1116,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
                         "attempt to notify cache that ring is unsettled failed")
 
     /* Check for attempting to free space that's a 'temporary' file address */
-    if (H5F_addr_le(f->shared->tmp_addr, addr))
+    if (H5_addr_le(f->shared->tmp_addr, addr))
         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
     /* If it's metadata, check if the space to free intersects with the file's
@@ -1138,7 +1138,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 #ifdef H5MF_ALLOC_DEBUG_MORE
         HDfprintf(stderr, "%s: fs_addr = %" PRIuHADDR "\n", __func__, f->shared->fs_addr[fs_type]);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-        if (!H5F_addr_defined(f->shared->fs_addr[fs_type])) {
+        if (!H5_addr_defined(f->shared->fs_addr[fs_type])) {
             htri_t status; /* "can absorb" status for section into */
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -1388,7 +1388,7 @@ H5MF_try_extend(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size, hsi
             udata.alloc_type = alloc_type;
 
             /* Check if the free space for the file has been initialized */
-            if (!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
+            if (!f->shared->fs_man[fs_type] && H5_addr_defined(f->shared->fs_addr[fs_type]))
                 /* Open the free-space manager */
                 if (H5MF__open_fstype(f, fs_type) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
@@ -1467,7 +1467,7 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->lf);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(size > 0);
 
     /* Set up free-space section class information */
@@ -1613,7 +1613,7 @@ H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type)
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* If there is free space manager info for this type, delete it */
-    if (H5F_addr_defined(f->shared->fs_addr[type]))
+    if (H5_addr_defined(f->shared->fs_addr[type]))
         if (H5MF__delete_fstype(f, type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't delete the free space manager")
 
@@ -1789,7 +1789,7 @@ H5MF__close_aggrfs(H5F_t *f)
         /* superblock extension and free space manager message should
          * exist at this point -- verify at least the former.
          */
-        HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
+        HDassert(H5_addr_defined(f->shared->sblock->ext_addr));
 
         /* file space for all non-empty free space managers should be
          * allocated at this point, and these free space managers should
@@ -1961,7 +1961,7 @@ H5MF__close_pagefs(H5F_t *f)
         /* superblock extension and free space manager message should
          * exist at this point -- verify at least the former.
          */
-        HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
+        HDassert(H5_addr_defined(f->shared->sblock->ext_addr));
 
         /* file space for all non-empty free space managers should be
          * allocated at this point, and these free space managers should
@@ -2039,7 +2039,7 @@ H5MF__close_pagefs(H5F_t *f)
          * it is ignored in the following assert.
          */
         HDassert((H5F_NULL_FSM_ADDR(f)) || (final_eoa == f->shared->eoa_fsm_fsalloc) ||
-                 ((H5F_addr_defined(f->shared->eoa_post_mdci_fsalloc)) &&
+                 ((H5_addr_defined(f->shared->eoa_post_mdci_fsalloc)) &&
                   (final_eoa == f->shared->eoa_post_mdci_fsalloc)));
     } /* end if */
     else {
@@ -2259,7 +2259,7 @@ H5MF_get_freespace(H5F_t *f, hsize_t *tot_space, hsize_t *meta_size)
         fs_started[type] = FALSE;
 
         /* Check if the free space for the file has been initialized */
-        if (!f->shared->fs_man[type] && H5F_addr_defined(f->shared->fs_addr[type])) {
+        if (!f->shared->fs_man[type] && H5_addr_defined(f->shared->fs_addr[type])) {
             if (H5MF__open_fstype(f, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
             HDassert(f->shared->fs_man[type]);
@@ -2412,7 +2412,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
             curr_ring = needed_ring;
         } /* end if */
 
-        if (!f->shared->fs_man[ty] && H5F_addr_defined(f->shared->fs_addr[ty])) {
+        if (!f->shared->fs_man[ty] && H5_addr_defined(f->shared->fs_addr[ty])) {
             if (H5MF__open_fstype(f, ty) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't open the free space manager")
             HDassert(f->shared->fs_man[ty]);
@@ -2751,7 +2751,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                      * space.
                      */
                     if (NULL == f->shared->fs_man[fsm_type]) {
-                        if (H5F_addr_defined(f->shared->fs_addr[fsm_type])) {
+                        if (H5_addr_defined(f->shared->fs_addr[fsm_type])) {
                             /* Sanity check */
                             HDassert(fsm_opened[fsm_type] == FALSE);
 
@@ -2779,7 +2779,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't get free-space info")
 
                         /* Check if the free space manager has space in the file */
-                        if (H5F_addr_defined(fs_stat.addr) || H5F_addr_defined(fs_stat.sect_addr)) {
+                        if (H5_addr_defined(fs_stat.addr) || H5_addr_defined(fs_stat.sect_addr)) {
                             /* Delete the free space manager in the file.  Will
                              * reallocate later if the free space manager contains
                              * any free space.
@@ -2809,7 +2809,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
          *            file space manager info message is guaranteed to exist.
          *            Leave it in for now, but consider removing it.
          */
-        if (H5F_addr_defined(f->shared->sblock->ext_addr))
+        if (H5_addr_defined(f->shared->sblock->ext_addr))
             if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
                             "error in removing message from superblock extension")
@@ -2928,7 +2928,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                              */
                             if (fs_stat.serial_sect_count > 0) {
                                 /* Sanity check */
-                                HDassert(!H5F_addr_defined(fs_stat.addr));
+                                HDassert(!H5_addr_defined(fs_stat.addr));
 
                                 /* Allocate FSM header */
                                 if (H5FS_alloc_hdr(f, f->shared->fs_man[fsm_type],
@@ -2937,7 +2937,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                                                 "can't allocated free-space header")
 
                                 /* Allocate FSM section info */
-                                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                                HDassert(!H5_addr_defined(fs_stat.sect_addr));
                                 HDassert(fs_stat.alloc_sect_size == 0);
                                 if (H5FS_alloc_sect(f, f->shared->fs_man[fsm_type]) < 0)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -2949,16 +2949,16 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
                                                 "can't get free-space info")
 
-                                HDassert(H5F_addr_defined(fs_stat.addr));
-                                HDassert(H5F_addr_defined(fs_stat.sect_addr));
+                                HDassert(H5_addr_defined(fs_stat.addr));
+                                HDassert(H5_addr_defined(fs_stat.sect_addr));
                                 HDassert(fs_stat.serial_sect_count > 0);
                                 HDassert(fs_stat.alloc_sect_size > 0);
                                 HDassert(fs_stat.alloc_sect_size == fs_stat.sect_size);
 #endif                        /* NDEBUG */
                             } /* end if */
                             else {
-                                HDassert(!H5F_addr_defined(fs_stat.addr));
-                                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                                HDassert(!H5_addr_defined(fs_stat.addr));
+                                HDassert(!H5_addr_defined(fs_stat.sect_addr));
                                 HDassert(fs_stat.serial_sect_count == 0);
                                 HDassert(fs_stat.alloc_sect_size == 0);
                             } /* end else */
@@ -3132,8 +3132,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         HDassert(sm_fssinfo_fs_type > H5F_MEM_PAGE_DEFAULT);
         HDassert(sm_fssinfo_fs_type < H5F_MEM_PAGE_LARGE_SUPER);
 
-        HDassert(!H5F_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]));
-        HDassert(!H5F_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]));
+        HDassert(!H5_addr_defined(f->shared->fs_addr[sm_fshdr_fs_type]));
+        HDassert(!H5_addr_defined(f->shared->fs_addr[sm_fssinfo_fs_type]));
 
         /* Note that in most cases, sm_hdr_fspace will equal sm_sinfo_fspace. */
         sm_hdr_fspace   = f->shared->fs_man[sm_fshdr_fs_type];
@@ -3151,8 +3151,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
             HDassert(lg_fssinfo_fs_type >= H5F_MEM_PAGE_LARGE_SUPER);
             HDassert(lg_fssinfo_fs_type < H5F_MEM_PAGE_NTYPES);
 
-            HDassert(!H5F_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]));
-            HDassert(!H5F_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]));
+            HDassert(!H5_addr_defined(f->shared->fs_addr[lg_fshdr_fs_type]));
+            HDassert(!H5_addr_defined(f->shared->fs_addr[lg_fssinfo_fs_type]));
 
             /* Note that in most cases, lg_hdr_fspace will equal lg_sinfo_fspace. */
             lg_hdr_fspace   = f->shared->fs_man[lg_fshdr_fs_type];
@@ -3171,8 +3171,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 if (H5FS_stat_info(f, sm_hdr_fspace, &fs_stat) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
 
-                HDassert(!H5F_addr_defined(fs_stat.addr));
-                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                HDassert(!H5_addr_defined(fs_stat.addr));
+                HDassert(!H5_addr_defined(fs_stat.sect_addr));
                 HDassert(fs_stat.alloc_sect_size == 0);
             } /* end if */
 
@@ -3182,8 +3182,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                 if (H5FS_stat_info(f, sm_sinfo_fspace, &fs_stat) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
 
-                HDassert(!H5F_addr_defined(fs_stat.addr));
-                HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                HDassert(!H5_addr_defined(fs_stat.addr));
+                HDassert(!H5_addr_defined(fs_stat.sect_addr));
                 HDassert(fs_stat.alloc_sect_size == 0);
             } /* end if */
 
@@ -3194,8 +3194,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                     if (H5FS_stat_info(f, lg_hdr_fspace, &fs_stat) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (3)")
 
-                    HDassert(!H5F_addr_defined(fs_stat.addr));
-                    HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                    HDassert(!H5_addr_defined(fs_stat.addr));
+                    HDassert(!H5_addr_defined(fs_stat.sect_addr));
                     HDassert(fs_stat.alloc_sect_size == 0);
                 } /* end if */
 
@@ -3207,8 +3207,8 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
                     if (H5FS_stat_info(f, lg_sinfo_fspace, &fs_stat) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info (4)")
 
-                    HDassert(!H5F_addr_defined(fs_stat.addr));
-                    HDassert(!H5F_addr_defined(fs_stat.sect_addr));
+                    HDassert(!H5_addr_defined(fs_stat.addr));
+                    HDassert(!H5_addr_defined(fs_stat.sect_addr));
                     HDassert(fs_stat.alloc_sect_size == 0);
                 } /* end if */
             }     /* end if */

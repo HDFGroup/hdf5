@@ -648,7 +648,7 @@ H5HF__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t len,
     HDassert(f);
     HDassert(hdr);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(addr == hdr->heap_addr);
     HDassert(new_addr);
     HDassert(new_len);
@@ -997,7 +997,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Address of heap that owns this block */
     H5F_addr_decode(udata->f, &image, &heap_addr);
-    if (H5F_addr_ne(heap_addr, hdr->heap_addr))
+    if (H5_addr_ne(heap_addr, hdr->heap_addr))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
 
     /* Address of parent block */
@@ -1065,8 +1065,8 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
                 /* (either both the address & size are defined or both are
                  *  not defined)
                  */
-                HDassert((H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
-                         (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
+                HDassert((H5_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
+                         (!H5_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
 
                 /* I/O filter mask for filtered direct block */
                 UINT32DECODE(image, iblock->filt_ents[u].filter_mask);
@@ -1074,7 +1074,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
         }     /* end if */
 
         /* Count child blocks */
-        if (H5F_addr_defined(iblock->ents[u].addr)) {
+        if (H5_addr_defined(iblock->ents[u].addr)) {
             iblock->nchildren++;
             iblock->max_child = u;
         } /* end if */
@@ -1182,8 +1182,8 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
     HDassert(iblock);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock->cache_info.size == iblock->size);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_eq(iblock->addr, addr));
+    HDassert(H5_addr_defined(addr));
+    HDassert(H5_addr_eq(iblock->addr, addr));
     HDassert(new_addr);
     HDassert(new_len);
     HDassert(flags);
@@ -1228,7 +1228,7 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
 
         /* Sanity check */
-        HDassert(!H5F_addr_eq(iblock->addr, iblock_addr));
+        HDassert(!H5_addr_eq(iblock->addr, iblock_addr));
 
         /* Let the metadata cache know the block moved */
         if (H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_IBLOCK, iblock->addr, iblock_addr) < 0)
@@ -1313,7 +1313,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
 
     /* Indirect block must be in 'normal' file space */
     HDassert(!H5F_IS_TMP_ADDR(f, iblock->addr));
-    HDassert(H5F_addr_eq(iblock->addr, iblock->cache_info.addr));
+    HDassert(H5_addr_eq(iblock->addr, iblock->cache_info.addr));
 
     /* Get the pointer to the shared heap header */
     hdr = iblock->hdr;
@@ -1354,8 +1354,8 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
                 /* (either both the address & size are defined or both are
                  *  not defined)
                  */
-                HDassert((H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
-                         (!H5F_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
+                HDassert((H5_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size) ||
+                         (!H5_addr_defined(iblock->ents[u].addr) && iblock->filt_ents[u].size == 0));
 
                 /* Size of filtered direct block */
                 H5F_ENCODE_LENGTH(f, image, iblock->filt_ents[u].size);
@@ -1367,7 +1367,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
 
 #ifndef NDEBUG
         /* Count child blocks */
-        if (H5F_addr_defined(iblock->ents[u].addr)) {
+        if (H5_addr_defined(iblock->ents[u].addr)) {
             nchildren++;
             if (u > max_child)
                 max_child = u;
@@ -1834,7 +1834,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
 
     /* Address of heap that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->f, &image, &heap_addr);
-    if (H5F_addr_ne(heap_addr, hdr->heap_addr))
+    if (H5_addr_ne(heap_addr, hdr->heap_addr))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "incorrect heap header address for direct block")
 
     /* Address of parent block */
@@ -2055,7 +2055,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     HDassert(dblock->write_buf == NULL);
     HDassert(dblock->write_size == 0);
     HDassert(dblock->cache_info.size == len);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(new_addr);
     HDassert(new_len);
     HDassert(flags);
@@ -2081,7 +2081,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
         par_entry  = dblock->par_entry;
 
         HDassert(par_iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
-        HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
+        HDassert(H5_addr_eq(par_iblock->ents[par_entry].addr, addr));
     } /* end if */
     else {
         /* the direct block is a root direct block -- just set par_iblock
@@ -2181,7 +2181,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
             hbool_t hdr_changed = FALSE; /* Whether the header info changed */
 
             /* Sanity check */
-            HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
+            HDassert(H5_addr_eq(hdr->man_dtable.table_addr, addr));
             HDassert(hdr->pline_root_direct_size > 0);
 
             /* Check if the filter mask changed */
@@ -2314,8 +2314,8 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
             /* Check for root direct block */
             if (NULL == dblock->parent) {
                 /* Sanity checks */
-                HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
-                HDassert(!H5F_addr_eq(hdr->man_dtable.table_addr, dblock_addr));
+                HDassert(H5_addr_eq(hdr->man_dtable.table_addr, addr));
+                HDassert(!H5_addr_eq(hdr->man_dtable.table_addr, dblock_addr));
 
                 /* Update information about direct block's location */
                 hdr->man_dtable.table_addr = dblock_addr;
@@ -2328,8 +2328,8 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 /* Sanity checks */
                 HDassert(par_iblock);
                 HDassert(par_iblock->ents);
-                HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
-                HDassert(!H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
+                HDassert(H5_addr_eq(par_iblock->ents[par_entry].addr, addr));
+                HDassert(!H5_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
 
                 /* Update information about direct block's location */
                 par_iblock->ents[par_entry].addr = dblock_addr;
@@ -2355,7 +2355,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
     dblock->write_size = write_size;
 
     /* finally, pass data back to the metadata cache as appropriate */
-    if (!H5F_addr_eq(addr, dblock_addr)) {
+    if (!H5_addr_eq(addr, dblock_addr)) {
         dblock_flags |= H5AC__SERIALIZE_MOVED_FLAG;
         *new_addr = dblock_addr;
     } /* end if */
@@ -3007,7 +3007,7 @@ H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, haddr_t fd_parent_addr, H5
 
     /* Sanity checks */
     HDassert(f);
-    HDassert(H5F_addr_defined(fd_parent_addr));
+    HDassert(H5_addr_defined(fd_parent_addr));
     HDassert(iblock);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(iblock_status);
@@ -3125,7 +3125,7 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
 
     /* Sanity checks */
     HDassert(f);
-    HDassert(H5F_addr_defined(fd_parent_addr));
+    HDassert(H5_addr_defined(fd_parent_addr));
     HDassert(iblock);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(fd_clean);
@@ -3138,13 +3138,13 @@ H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5HF_
     HDassert(num_direct_rows <= iblock->nrows);
     max_dblock_index = (num_direct_rows * iblock->hdr->man_dtable.cparam.width) - 1;
     iblock_addr      = iblock->addr;
-    HDassert(H5F_addr_defined(iblock_addr));
+    HDassert(H5_addr_defined(iblock_addr));
 
     while ((*fd_clean) && (i <= max_dblock_index)) {
         haddr_t dblock_addr;
 
         dblock_addr = iblock->ents[i].addr;
-        if (H5F_addr_defined(dblock_addr)) {
+        if (H5_addr_defined(dblock_addr)) {
             hbool_t in_cache;
             hbool_t type_ok;
 
@@ -3289,7 +3289,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
 
     /* Sanity checks */
     HDassert(f);
-    HDassert(H5F_addr_defined(fd_parent_addr));
+    HDassert(H5_addr_defined(fd_parent_addr));
     HDassert(iblock);
     HDassert(iblock->cache_info.type == H5AC_FHEAP_IBLOCK);
     HDassert(fd_clean);
@@ -3307,7 +3307,7 @@ H5HF__cache_verify_descendant_iblocks_clean(H5F_t *f, haddr_t fd_parent_addr, H5
     while ((*fd_clean) && (i <= last_iblock_index)) {
         haddr_t child_iblock_addr = iblock->ents[i].addr;
 
-        if (H5F_addr_defined(child_iblock_addr)) {
+        if (H5_addr_defined(child_iblock_addr)) {
             unsigned child_iblock_status = 0;
 
             if (H5AC_get_entry_status(f, child_iblock_addr, &child_iblock_status) < 0)

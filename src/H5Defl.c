@@ -253,7 +253,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
 
     /* Check args */
     HDassert(efl && efl->nused > 0);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
@@ -341,7 +341,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
 
     /* Check args */
     HDassert(efl && efl->nused > 0);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
@@ -582,7 +582,7 @@ H5D__efl_bh_info(H5F_t *f, H5O_efl_t *efl, hsize_t *heap_size)
     /* Check args */
     HDassert(f);
     HDassert(efl);
-    HDassert(H5F_addr_defined(efl->heap_addr));
+    HDassert(H5_addr_defined(efl->heap_addr));
     HDassert(heap_size);
 
     /* Get the size of the local heap for EFL's file list */

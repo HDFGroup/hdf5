@@ -967,7 +967,7 @@ H5O_link(const H5O_loc_t *loc, int adjust)
     /* check args */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5_addr_defined(loc->addr));
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -1021,7 +1021,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     HDassert((prot_flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Check for valid address */
-    if (!H5F_addr_defined(loc->addr))
+    if (!H5_addr_defined(loc->addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "address undefined")
 
     /* Check for write access on the file */
@@ -1551,7 +1551,7 @@ H5O_delete(H5F_t *f, haddr_t addr)
 
     /* Check args */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Set up the object location */
     loc.file         = f;

@@ -1575,7 +1575,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
         } /* end else */
 
         /* Extend the file to make sure it's large enough */
-        if (!H5F_addr_eq(file->eof, (haddr_t)new_eof)) {
+        if (!H5_addr_eq(file->eof, (haddr_t)new_eof)) {
             unsigned char *x; /* Pointer to new buffer for file data */
 
             /* (Re)allocate memory for the file buffer, using callback if available */

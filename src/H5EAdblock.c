@@ -213,7 +213,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, void *parent, hbool_t *stats_changed, hsize
     ret_value = dblock_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (dblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -222,7 +222,7 @@ done:
                                 "unable to remove extensible array data block from cache")
 
             /* Release data block's disk space */
-            if (H5F_addr_defined(dblock->addr) &&
+            if (H5_addr_defined(dblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dblock->addr, (hsize_t)dblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
                             "unable to release extensible array data block")
@@ -293,7 +293,7 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t db
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(dblk_addr));
+    HDassert(H5_addr_defined(dblk_addr));
     HDassert(dblk_nelmts);
 
     /* only the H5AC__READ_ONLY_FLAG may be set */
@@ -395,7 +395,7 @@ H5EA__dblock_delete(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t dbl
     /* Sanity check */
     HDassert(hdr);
     HDassert(parent);
-    HDassert(H5F_addr_defined(dblk_addr));
+    HDassert(H5_addr_defined(dblk_addr));
     HDassert(dblk_nelmts > 0);
 
     /* Protect data block */

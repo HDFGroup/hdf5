@@ -1000,7 +1000,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             check_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3));
         }
         H5E_END_TRY;
-        if (H5F_addr_defined(check_addr))
+        if (H5_addr_defined(check_addr))
             TEST_ERROR;
 
         /* Test that pushing normal space allocation into temporary space fails */
@@ -1009,7 +1009,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)(maxaddr / 3));
         }
         H5E_END_TRY;
-        if (H5F_addr_defined(check_addr))
+        if (H5_addr_defined(check_addr))
             TEST_ERROR;
 
         /* Free the normal block (so the file doesn't blow up to a huge size) */
@@ -6402,7 +6402,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6426,7 +6426,7 @@ test_mf_fs_persist_split(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (!H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_DRAW free-space manager */
@@ -6486,11 +6486,11 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is not there */
-    if (H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_SUPER is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6530,7 +6530,7 @@ test_mf_fs_persist_split(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6720,7 +6720,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the H5FD_MEM_SUPER free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6744,7 +6744,7 @@ test_mf_fs_persist_multi(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (!H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_DRAW free-space manager */
@@ -6802,7 +6802,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_SUPER is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[type]))
+    if (!H5_addr_defined(f->shared->fs_addr[type]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_SUPER free-space manager */
@@ -6824,11 +6824,11 @@ test_mf_fs_persist_multi(void)
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_DRAW is not there */
-    if (H5F_addr_defined(f->shared->fs_addr[stype]))
+    if (H5_addr_defined(f->shared->fs_addr[stype]))
         TEST_ERROR;
 
     /* Verify that the free-space manager for H5FD_MEM_BTREE is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[btype]))
+    if (!H5_addr_defined(f->shared->fs_addr[btype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_BTREE free-space manager */
@@ -6868,7 +6868,7 @@ test_mf_fs_persist_multi(void)
         FAIL_STACK_ERROR;
 
     /* If H5FD_MEM_SUPER is there, should not find block #1 & #3 */
-    if (H5F_addr_defined(f->shared->fs_addr[type])) {
+    if (H5_addr_defined(f->shared->fs_addr[type])) {
         /* Start up H5FD_MEM_SUPER free-space manager */
         if (H5MF__open_fstype(f, (H5F_mem_page_t)type) < 0)
             FAIL_STACK_ERROR;
@@ -6887,7 +6887,7 @@ test_mf_fs_persist_multi(void)
     }
 
     /* Verify that the H5FD_MEM_GHEAP free-space manager is there */
-    if (!H5F_addr_defined(f->shared->fs_addr[gtype]))
+    if (!H5_addr_defined(f->shared->fs_addr[gtype]))
         TEST_ERROR;
 
     /* Start up H5FD_MEM_GHEAP free-space manager */
@@ -7022,7 +7022,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE6, (H5F_mem_page_t *)&tt);
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[tt]))
+        if (!H5_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR;
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -7065,7 +7065,7 @@ test_mf_fs_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[tt]))
+        if (!H5_addr_defined(f->shared->fs_addr[tt]))
             TEST_ERROR;
 
         /* Retrieve block #5 from H5FD_MEM_SUPER free-space manager */
@@ -7200,7 +7200,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         H5MF__alloc_to_fs_type(f->shared, type, TBLOCK_SIZE4, (H5F_mem_page_t *)&fs_type);
 
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
-        if (H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Put block #3 to H5FD_MEM_SUPER free-space manager */
@@ -7219,7 +7219,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Verify that H5FD_MEM_SUPER free-space manager is there */
-        if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Start up H5FD_MEM_SUPER free-space manager */
@@ -7231,7 +7231,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if (H5FS_stat_info(f, f->shared->fs_man[fs_type], &fs_stat) < 0)
             FAIL_STACK_ERROR;
 
-        if (!H5F_addr_defined(fs_stat.addr))
+        if (!H5_addr_defined(fs_stat.addr))
             TEST_ERROR;
 
         if (fs_stat.tot_space < TBLOCK_SIZE3)
@@ -7259,7 +7259,7 @@ test_mf_fs_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         if (NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR;
         /* Verify that the H5FD_MEM_SUPER free-space manager is not there */
-        if (H5F_addr_defined(f->shared->fs_addr[fs_type]))
+        if (H5_addr_defined(f->shared->fs_addr[fs_type]))
             TEST_ERROR;
 
         /* Closing */
@@ -7428,7 +7428,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                     }
                 }
                 else {
-                    if (H5F_addr_defined(f->shared->fs_addr[tt]))
+                    if (H5_addr_defined(f->shared->fs_addr[tt]))
                         TEST_ERROR;
                 }
 
@@ -7618,7 +7618,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
 
             /* Free-space manager should be empty */
             if (!(fs_type == H5F_FSPACE_STRATEGY_PAGE && fs_persist))
-                if (H5F_addr_defined(f->shared->fs_addr[tt]))
+                if (H5_addr_defined(f->shared->fs_addr[tt]))
                     TEST_ERROR;
 
             /* Closing */
@@ -7936,13 +7936,13 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
 
                 /* Verify that the large generic manager is there */
                 H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_DRAW, TBLOCK_SIZE5000, (H5F_mem_page_t *)&fs_type);
-                if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+                if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR;
 
                 /* Verify that the small metadata manager is there */
                 H5MF__alloc_to_fs_type(f->shared, H5FD_MEM_OHDR, f->shared->fs_page_size - 1,
                                        (H5F_mem_page_t *)&fs_type);
-                if (!H5F_addr_defined(f->shared->fs_addr[fs_type]))
+                if (!H5_addr_defined(f->shared->fs_addr[fs_type]))
                     TEST_ERROR;
 
                 /* Set up to use the small metadata manager */
@@ -7960,7 +7960,7 @@ test_page_alloc_xfree(const char *env_h5_drvr, hid_t fapl)
                     TEST_ERROR;
 
                 /* Verify that the small raw data manager is there */
-                if (!H5F_addr_defined(f->shared->fs_addr[H5F_MEM_PAGE_DRAW]))
+                if (!H5_addr_defined(f->shared->fs_addr[H5F_MEM_PAGE_DRAW]))
                     TEST_ERROR;
 
                 /* Set up to use the small raw data manager */
@@ -8566,7 +8566,7 @@ test_page_large(const char *env_h5_drvr, hid_t fapl)
         /* Allocate a large data block with gaddr3--should be on another page */
         /* Allocate 2 pages + 3808 bytes; 288 bytes in free-space manager */
         gaddr3 = H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)TBLOCK_SIZE12000);
-        if (!H5F_addr_defined(gaddr3))
+        if (!H5_addr_defined(gaddr3))
             TEST_ERROR;
 
         /* Free the block with gaddr2 */

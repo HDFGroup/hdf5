@@ -126,14 +126,14 @@ H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
     HDassert(idx_info->layout->max_nchunks);
-    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr)); /* address of data shouldn't be defined */
+    HDassert(!H5_addr_defined(idx_info->storage->idx_addr)); /* address of data shouldn't be defined */
 
     /* Calculate size of max dataset chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
 
     /* Allocate space for max dataset chunks */
     addr = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, nbytes);
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "file allocation failed")
 
     /* This is the address of the dataset chunks */
@@ -162,7 +162,7 @@ H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     HDassert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__none_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -190,7 +190,7 @@ H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
     HDassert(udata);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Calculate the index of this chunk */
     udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks,
@@ -239,7 +239,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
     HDassert(idx_info->storage);
     HDassert(chunk_cb);
     HDassert(chunk_udata);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
     HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
@@ -336,7 +336,7 @@ H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info)
     HDassert(!idx_info->pline->nused); /* Shouldn't have filter defined on entering here */
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr)); /* should be defined */
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr)); /* should be defined */
 
     /* chunk size * max # of chunks */
     nbytes = idx_info->layout->max_nchunks * idx_info->layout->size;
@@ -375,7 +375,7 @@ H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_inf
     HDassert(!idx_info_src->pline->nused);
     HDassert(idx_info_src->layout);
     HDassert(idx_info_src->storage);
-    HDassert(H5F_addr_defined(idx_info_src->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info_src->storage->idx_addr));
 
     HDassert(idx_info_dst);
     HDassert(idx_info_dst->f);

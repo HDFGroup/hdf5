@@ -156,7 +156,7 @@ H5MF_sects_debug(H5F_t *f, haddr_t fs_addr, FILE *stream, int indent, int fwidth
     HDassert(fwidth >= 0);
 
     for (type = H5F_MEM_PAGE_DEFAULT; type < H5F_MEM_PAGE_NTYPES; type++)
-        if (H5F_addr_eq(f->shared->fs_addr[type], fs_addr)) {
+        if (H5_addr_eq(f->shared->fs_addr[type], fs_addr)) {
             if (!f->shared->fs_man[type])
                 if (H5MF__open_fstype(f, type) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")

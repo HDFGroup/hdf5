@@ -122,7 +122,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, const H5O_loc_t *ext_loc)
 
     HDassert(f);
     /* File should not already have a SOHM table */
-    HDassert(!H5F_addr_defined(H5F_SOHM_ADDR(f)));
+    HDassert(!H5_addr_defined(H5F_SOHM_ADDR(f)));
 
     /* Set the ring type in the DXPL */
     H5AC_set_ring(H5AC_RING_USER, &orig_ring);
@@ -351,7 +351,7 @@ H5SM_type_shared(H5F_t *f, unsigned type_id)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "can't map message type to flag")
 
     /* Look up the master SOHM table */
-    if (H5F_addr_defined(H5F_SOHM_ADDR(f))) {
+    if (H5_addr_defined(H5F_SOHM_ADDR(f))) {
         H5SM_table_cache_ud_t cache_udata; /* User-data for callback */
 
         /* Set up user data for callback */
@@ -911,7 +911,7 @@ H5SM__can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
-    if (!H5F_addr_defined(H5F_SOHM_ADDR(f)))
+    if (!H5_addr_defined(H5F_SOHM_ADDR(f)))
         HGOTO_DONE(FALSE)
 
     /* Type-specific check */
@@ -1571,7 +1571,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     FUNC_ENTER_NOAPI_TAG(H5AC__SOHM_TAG, FAIL)
 
     HDassert(f);
-    HDassert(H5F_addr_defined(H5F_SOHM_ADDR(f)));
+    HDassert(H5_addr_defined(H5F_SOHM_ADDR(f)));
     HDassert(sh_mesg);
 
     /* Get message type */
@@ -2003,7 +2003,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist)
         H5F_SET_SOHM_ADDR(f, sohm_table.addr);
         H5F_SET_SOHM_VERS(f, sohm_table.version);
         H5F_SET_SOHM_NINDEXES(f, sohm_table.nindexes);
-        HDassert(H5F_addr_defined(H5F_SOHM_ADDR(f)));
+        HDassert(H5_addr_defined(H5F_SOHM_ADDR(f)));
         HDassert(H5F_SOHM_NINDEXES(f) > 0 && H5F_SOHM_NINDEXES(f) <= H5O_SHMESG_MAX_NINDEXES);
 
         /* Set up user data for callback */
@@ -2650,7 +2650,7 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
     /* Determine which index the list is part of */
     index_num = table->num_indexes;
     for (x = 0; x < table->num_indexes; x++) {
-        if (H5F_addr_eq(table->indexes[x].index_addr, list_addr)) {
+        if (H5_addr_eq(table->indexes[x].index_addr, list_addr)) {
             index_num = x;
             break;
         } /* end if */
@@ -2669,7 +2669,7 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
     /* Open the heap, if one exists */
-    if (H5F_addr_defined(table->indexes[index_num].heap_addr))
+    if (H5_addr_defined(table->indexes[index_num].heap_addr))
         if (NULL == (fh = H5HF_open(f, table->indexes[index_num].heap_addr)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open SOHM heap")
 
@@ -2741,7 +2741,7 @@ H5SM_ih_size(H5F_t *f, hsize_t *hdr_size, H5_ih_info_t *ih_info)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(H5F_addr_defined(H5F_SOHM_ADDR(f)));
+    HDassert(H5_addr_defined(H5F_SOHM_ADDR(f)));
     HDassert(hdr_size);
     HDassert(ih_info);
 
@@ -2760,7 +2760,7 @@ H5SM_ih_size(H5F_t *f, hsize_t *hdr_size, H5_ih_info_t *ih_info)
     for (u = 0; u < table->num_indexes; u++) {
         /* Get index storage size (for either B-tree or list) */
         if (table->indexes[u].index_type == H5SM_BTREE) {
-            if (H5F_addr_defined(table->indexes[u].index_addr)) {
+            if (H5_addr_defined(table->indexes[u].index_addr)) {
                 /* Open the index v2 B-tree */
                 if (NULL == (bt2 = H5B2_open(f, table->indexes[u].index_addr, f)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
@@ -2780,7 +2780,7 @@ H5SM_ih_size(H5F_t *f, hsize_t *hdr_size, H5_ih_info_t *ih_info)
         } /* end else */
 
         /* Check for heap for this index */
-        if (H5F_addr_defined(table->indexes[u].heap_addr)) {
+        if (H5_addr_defined(table->indexes[u].heap_addr)) {
             /* Open the fractal heap for this index */
             if (NULL == (fheap = H5HF_open(f, table->indexes[u].heap_addr)))
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")

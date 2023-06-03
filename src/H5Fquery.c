@@ -1020,7 +1020,7 @@ H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
     HDassert(f);
     HDassert(f->shared);
 
-    FUNC_LEAVE_NOAPI(H5F_addr_le(f->shared->tmp_addr, addr))
+    FUNC_LEAVE_NOAPI(H5_addr_le(f->shared->tmp_addr, addr))
 } /* end H5F_is_tmp_addr() */
 
 /*-------------------------------------------------------------------------

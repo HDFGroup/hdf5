@@ -659,7 +659,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             TEST_ERROR;
         if (H5HF_get_heap_addr(*fh, fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(*fh_addr))
+        if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
         HDmemset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
@@ -704,7 +704,7 @@ open_heap(char *filename, hid_t fapl, const H5HF_create_t *cparam, const fheap_t
             TEST_ERROR;
         if (H5HF_get_heap_addr(*fh, fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(*fh_addr))
+        if (!H5_addr_defined(*fh_addr))
             TEST_ERROR;
         HDmemset(state, 0, sizeof(fheap_heap_state_t));
         if (check_stats(*fh, state))
@@ -857,7 +857,7 @@ del_objs_half_refill(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_he
     if (tparam->reopen_heap) {
         if (H5HF_get_heap_addr(*fh, &fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(fh_addr))
+        if (!H5_addr_defined(fh_addr))
             TEST_ERROR;
     } /* end if */
 
@@ -954,7 +954,7 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     if (tparam->reopen_heap) {
         if (H5HF_get_heap_addr(*fh, &fh_addr) < 0)
             FAIL_STACK_ERROR;
-        if (!H5F_addr_defined(fh_addr))
+        if (!H5_addr_defined(fh_addr))
             TEST_ERROR;
     } /* end if */
 
@@ -1857,7 +1857,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -1982,7 +1982,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -2137,7 +2137,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -2307,7 +2307,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -2814,7 +2814,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Close the fractal heap */
@@ -2928,7 +2928,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Get an empty heap's size */
@@ -3069,7 +3069,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam, hid_t fcpl)
     /* Get heap's address */
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
 
     /* Insert an object */
@@ -3202,7 +3202,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -3315,7 +3315,7 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -3416,7 +3416,7 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -3513,7 +3513,7 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -3612,7 +3612,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -3718,7 +3718,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -3825,7 +3825,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -3936,7 +3936,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4032,7 +4032,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4135,7 +4135,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4236,7 +4236,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4347,7 +4347,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4444,7 +4444,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4540,7 +4540,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4642,7 +4642,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4752,7 +4752,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4855,7 +4855,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -4966,7 +4966,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5070,7 +5070,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5172,7 +5172,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5281,7 +5281,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5384,7 +5384,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5494,7 +5494,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5605,7 +5605,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5713,7 +5713,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5822,7 +5822,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -5937,7 +5937,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -6058,7 +6058,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -6170,7 +6170,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -6284,7 +6284,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
 
@@ -6416,7 +6416,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -6575,7 +6575,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -6740,7 +6740,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -6934,7 +6934,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -7104,7 +7104,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -7345,7 +7345,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
@@ -7650,7 +7650,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR;
     if (H5HF_get_heap_addr(fh, &fh_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(fh_addr))
+    if (!H5_addr_defined(fh_addr))
         FAIL_STACK_ERROR;
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))

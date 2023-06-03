@@ -220,7 +220,7 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     if (linfo->index_corder)
         H5F_addr_encode(f, &p, linfo->corder_bt2_addr);
     else
-        HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
+        HDassert(!H5_addr_defined(linfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__linfo_encode() */
@@ -348,7 +348,7 @@ H5O__linfo_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     HDassert(linfo);
 
     /* If the group is using "dense" link storage, delete it */
-    if (H5F_addr_defined(linfo->fheap_addr))
+    if (H5_addr_defined(linfo->fheap_addr))
         if (H5G__dense_delete(f, linfo, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
 
@@ -406,7 +406,7 @@ H5O__linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fi
         /* (XXX: should probably get the "creation" parameters for the source group's
          *      dense link storage components and use those - QAK)
          */
-        if (H5F_addr_defined(linfo_src->fheap_addr)) {
+        if (H5_addr_defined(linfo_src->fheap_addr)) {
             /* Create the dense link storage */
             if (H5G__dense_create(file_dst, linfo_dst, udata->common.src_pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
@@ -502,7 +502,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
     HDassert(src_oloc && src_oloc->file);
     HDassert(linfo_src);
     HDassert(dst_oloc && dst_oloc->file);
-    HDassert(H5F_addr_defined(dst_oloc->addr));
+    HDassert(H5_addr_defined(dst_oloc->addr));
     HDassert(linfo_dst);
     HDassert(cpy_info);
 
@@ -511,7 +511,7 @@ H5O__linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_l
         HGOTO_DONE(SUCCEED)
 
     /* Check for copying dense link storage */
-    if (H5F_addr_defined(linfo_src->fheap_addr)) {
+    if (H5_addr_defined(linfo_src->fheap_addr)) {
         H5O_linfo_postcopy_ud_t udata; /* User data for iteration callback */
 
         /* Set up dense link iteration user data */

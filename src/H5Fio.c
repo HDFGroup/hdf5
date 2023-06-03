@@ -90,10 +90,10 @@ H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t 
     /* Sanity checks */
     HDassert(f_sh);
     HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
-    if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
+    if (H5_addr_le(f_sh->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
     /* Treat global heap as raw data */
@@ -133,10 +133,10 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /
     HDassert(f);
     HDassert(f->shared);
     HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
-    if (H5F_addr_le(f->shared->tmp_addr, (addr + size)))
+    if (H5_addr_le(f->shared->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
     /* Treat global heap as raw data */
@@ -176,10 +176,10 @@ H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t
     HDassert(f_sh);
     HDassert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
     HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
-    if (H5F_addr_le(f_sh->tmp_addr, (addr + size)))
+    if (H5_addr_le(f_sh->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
     /* Treat global heap as raw data */
@@ -220,10 +220,10 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void
     HDassert(f->shared);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
     HDassert(buf);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
-    if (H5F_addr_le(f->shared->tmp_addr, (addr + size)))
+    if (H5_addr_le(f->shared->tmp_addr, (addr + size)))
         HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
     /* Treat global heap as raw data */

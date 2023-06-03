@@ -1217,7 +1217,7 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
     if (type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file type")
-    if (!H5F_addr_defined(addr) || addr > file->maxaddr)
+    if (!H5_addr_defined(addr) || addr > file->maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")
 
     /* Call private function */
@@ -2307,7 +2307,7 @@ H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr)
 
     /* Sanity checks */
     HDassert(file);
-    HDassert(H5F_addr_defined(base_addr));
+    HDassert(H5_addr_defined(base_addr));
 
     /* Set the file's base address */
     file->base_addr = base_addr;
