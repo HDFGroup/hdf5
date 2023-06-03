@@ -889,7 +889,7 @@ done:                                                                           
     {                                                                                                        \
         /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
          *                                                                                                   \
-         * The typed pointer arrives via a void pointer, which may have any alignement.                      \
+         * The typed pointer arrives via a void pointer, which may have any alignment.                       \
          * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
          * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
          * In the past this hasn't caused many problems, but in some cases (e.g.                             \
@@ -931,7 +931,7 @@ done:                                                                           
     {                                                                                                        \
         /* The uint8_t * cast is required to avoid tripping over undefined behavior.                         \
          *                                                                                                   \
-         * The typed pointer arrives via a void pointer, which may have any alignement.                      \
+         * The typed pointer arrives via a void pointer, which may have any alignment.                       \
          * We then cast it to a pointer to a type that is assumed to be aligned, which                       \
          * is undefined behavior (section 6.3.2.3 paragraph 7 of the C99 standard).                          \
          * In the past this hasn't caused many problems, but in some cases (e.g.                             \
