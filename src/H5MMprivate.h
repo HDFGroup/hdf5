@@ -29,14 +29,7 @@
 #define H5MM_calloc(Z) HDcalloc(1, Z)
 #define H5MM_free(Z)   HDfree(Z)
 #define H5MM_malloc(Z) HDmalloc(Z)
-/* The casts are required to avoid tripping over undefined behavior if
- * we are copying to/from poorly aliased pointers. As an example, this can
- * happen in the type conversion code if a mis-aligned user buffer is passed
- * to H5Tconvert and then cast to a type that assumes alignment. The casts
- * will prevent the compiler from doing things like using SSE for the
- * memcpy, which has strong alignment constraints.
- */
-#define H5MM_memcpy(D, S, N) HDmemcpy((uint8_t *)D, (const uint8_t *)S, N)
+#define H5MM_memcpy(D, S, N) HDmemcpy(D, S, N)
 
 /*
  * Library prototypes...
