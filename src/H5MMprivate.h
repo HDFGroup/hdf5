@@ -26,9 +26,9 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5MM_calloc(Z)       HDcalloc(1, Z)
-#define H5MM_free(Z)         HDfree(Z)
-#define H5MM_malloc(Z)       HDmalloc(Z)
+#define H5MM_calloc(Z) HDcalloc(1, Z)
+#define H5MM_free(Z)   HDfree(Z)
+#define H5MM_malloc(Z) HDmalloc(Z)
 /* The void * casts are required to avoid tripping over undefined behavior if
  * we are copying to/from poorly aliased pointers. As an example, this can
  * happen in the type conversion code if a mis-aligned user buffer is passed
