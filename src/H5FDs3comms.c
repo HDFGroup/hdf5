@@ -51,7 +51,7 @@
 
 /* toggle debugging (enable with 1)
  */
-#define S3COMMS_DEBUG 1
+#define S3COMMS_DEBUG 0
 
 /* manipulate verbosity of CURL output
  * operates separately from S3COMMS_DEBUG
@@ -61,7 +61,7 @@
  * 2 -> in addition to above, print information for all performs; sets all
  *      curl handles with CURLOPT_VERBOSE
  */
-#define S3COMMS_CURL_VERBOSITY 2
+#define S3COMMS_CURL_VERBOSITY 0
 
 /* size to allocate for "bytes=<first_byte>[-<last_byte>]" HTTP Range value
  */
@@ -222,13 +222,13 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_hrb_node_set.");
-    HDprintf("NAME: %s\n", name);
-    HDprintf("VALUE: %s\n", value);
-    HDprintf("LIST:\n->");
+    HDfprintf(stdout, "called H5FD_s3comms_hrb_node_set.\n");
+    HDprintf("  NAME: %s\n", name);
+    HDprintf("  VALUE: %s\n", value);
+    HDprintf("  LIST:\n->");
     for (node_ptr = (*L); node_ptr != NULL; node_ptr = node_ptr->next)
-        HDfprintf(stdout, "{%s}\n->", node_ptr->cat);
-    HDprintf("(null)\n");
+        HDfprintf(stdout, "    {%s}\n->", node_ptr->cat);
+    HDprintf("    (null)\n");
     HDfflush(stdout);
     node_ptr = NULL;
 #endif
@@ -1060,7 +1060,6 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     handle->secret_id     = NULL;
     handle->session_token = NULL;
     handle->signing_key   = NULL;
-    handle->session_token = NULL;
     handle->httpverb      = NULL;
 
     /*************************************
@@ -1313,26 +1312,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         }
     }
     else {
-        /* authenticate request
-         */
-        char authorization[512 + 1];
-        /*   512 := approximate max length...
-         *    67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
-         *           "SignedHeaders=,Signature=")>
-         * +   8 <yyyyMMDD>
-         * +  64 <hex(sha256())>
-         * + 128 <max? len(secret_id)>
-         * +  20 <max? len(region)>
-         * + 128 <max? len(signed_headers)>
-         */
-        char buffer1[512 + 1]; /* -> Canonical Request -> Signature */
-        char buffer2[256 + 1]; /* -> String To Sign -> Credential */
+        char authorization[S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH + 1];
         char iso8601now[ISO8601_SIZE];
-        char signed_headers[48 + 1];
-        /* should be large enough for nominal listing:
-         * "host;range;x-amz-content-sha256;x-amz-date"
-         * + '\0', with "range;" possibly absent
-         */
+        char signed_headers[S3COMMS_MAX_SIGNED_HEADER_LENGTH + 1];
+        char buffer1[S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH + 1]; /* -> Canonical Request -> Signature */
+        char buffer2[256 + 1];                                     /* -> String To Sign -> Credential */
 
         /* zero start of strings */
         authorization[0]  = 0;
@@ -1410,7 +1394,9 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /**** COMPUTE AUTHORIZATION ****/
 
         /* buffer1 -> canonical request */
-        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, 512, signed_headers, 48, request))
+        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH + 1,
+                                                       signed_headers, S3COMMS_MAX_SIGNED_HEADER_LENGTH + 1,
+                                                       request))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad canonical request");
         /* buffer2->string-to-sign */
         if (FAIL == H5FD_s3comms_tostringtosign(buffer2, buffer1, iso8601now, handle->region))
@@ -1425,9 +1411,10 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret == 0 || ret >= S3COMMS_MAX_CREDENTIAL_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 
-        ret = HDsnprintf(authorization, 512, "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s",
-                         buffer2, signed_headers, buffer1);
-        if (ret <= 0 || ret >= 512)
+        ret = HDsnprintf(authorization, S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH,
+                         "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s", buffer2,
+                         signed_headers, buffer1);
+        if (ret <= 0 || ret >= S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 authorization string");
 
         /* append authorization header to http request buffer */
@@ -1640,8 +1627,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     size_t      sh_size      = (size_t)_sh_size;
     size_t      cr_len       = 0; /* working length of canonical request str */
     size_t      sh_len       = 0; /* working length of signed headers str */
-    char        tmpstr[256 + 1];
-    tmpstr[256] = 0; /* terminating NULL */
+    char        tmpstr[S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH + 1];
+    tmpstr[S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH] = 0; /* terminating NULL */
 
     /* "query params" refers to the optional element in the URL, e.g.
      *     http://bucket.aws.com/myfile.txt?max-keys=2&prefix=J
@@ -1686,8 +1673,9 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
 
         HDassert(node->magic == S3COMMS_HRB_NODE_MAGIC);
 
-        ret = HDsnprintf(tmpstr, 256, "%s:%s\n", node->lowername, node->value);
-        if (ret < 0 || ret >= 256)
+        ret = HDsnprintf(tmpstr, S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH, "%s:%s\n", node->lowername,
+                         node->value);
+        if (ret < 0 || ret >= S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to concatenate HTTP header %s:%s",
                         node->lowername, node->value);
         cr_len += HDstrlen(tmpstr);
@@ -1695,8 +1683,8 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not enough space in canonical request");
         HDstrcat(canonical_request_dest, tmpstr);
 
-        ret = HDsnprintf(tmpstr, 256, "%s;", node->lowername);
-        if (ret < 0 || ret >= 256)
+        ret = HDsnprintf(tmpstr, S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH, "%s;", node->lowername);
+        if (ret < 0 || ret >= S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to append semicolon to lowername %s",
                         node->lowername);
         sh_len += HDstrlen(tmpstr);

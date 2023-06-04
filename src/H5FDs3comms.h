@@ -76,6 +76,34 @@
  */
 #define RFC7231_SIZE 30
 
+/* maximum length of the ';'-separated list of signed headers
+ * should be large enough for nominal listing:
+ * "host;range;x-amz-content-sha256;x-amz-date;x-amz-security_token",
+ * with ";range" and ";x-amz-security-token" possibly absent
+ *
+ * !! actually one byte longer, because the implementation writes an extra ';'
+ * !! and truncates the string after it's formed
+ *
+ */
+#define S3COMMS_MAX_SIGNED_HEADER_LENGTH 64
+
+/* the Authorization header format is
+ *   Authorization: AWS4-HMAC-SHA256
+ *                  Credential=<secret_id>/<date>/<Region>/<Service>/aws4_request,
+ *                  SignedHeaders=<signed_headers>, Signature=<signature>,
+ *                  SessionToken=<session_token>
+ *  so:
+ *     86 : <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
+ *               "SignedHeaders=,Signature=,SessionToken=")>
+ * +  128 : <max? len(secret_id)>
+ * +    8 : <yyyyMMDD> for the date
+ * +   20 : <max? len(region)>
+ * +  128 : <max? len(signed_headers)>
+ * +   64 : <hex(sha256())> for the signature
+ * + 4096 : <max? len(session_token)>
+ */
+#define S3COMMS_MAX_AUTHORIZATION_HEADER_LENGTH (512 + (4 * 1024))
+
 /*---------------------------------------------------------------------------
  *
  * Macro: ISO8601NOW()
@@ -455,6 +483,13 @@ typedef struct {
  *     Pointer to NULL-terminated string for "secret" access id to S3 resource.
  *
  *     Required to authenticate.
+ *
+ * `session_token` (char *)
+ *
+ *     Pointer to NULL-terminated string for "session_toke" access id to S3 resource,
+ *     if this profile has temporary credentials
+ *
+ *     Required to authenticate users with temporary credentials
  *
  * `signing_key` (unsigned char *)
  *
