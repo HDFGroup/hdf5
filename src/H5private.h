@@ -2440,6 +2440,9 @@ typedef union {
     const void *cvp;
 } H5_flexible_const_ptr_t;
 
+/* File-independent encode/decode routines */
+#include "H5encode.h"
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void   H5_term_library(void);

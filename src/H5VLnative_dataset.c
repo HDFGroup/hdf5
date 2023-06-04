@@ -31,6 +31,7 @@
 #include "H5Fprivate.h"  /* Files                                    */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5Sprivate.h"  /* Dataspaces                               */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */

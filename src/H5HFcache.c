@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFcache.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
- * Purpose:		Implement fractal heap metadata cache methods.
+ * Purpose:		Implement fractal heap metadata cache methods
  *
  *-------------------------------------------------------------------------
  */

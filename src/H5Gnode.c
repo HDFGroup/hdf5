@@ -169,7 +169,7 @@ H5G__node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
     HDassert(raw);
     HDassert(key);
 
-    H5F_DECODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
+    H5_DECODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__node_decode_key() */
@@ -197,7 +197,7 @@ H5G__node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
     HDassert(raw);
     HDassert(key);
 
-    H5F_ENCODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
+    H5_ENCODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__node_encode_key() */

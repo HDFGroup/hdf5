@@ -26,6 +26,7 @@
 #include "H5ESprivate.h" /* Event Sets                               */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */

@@ -11,9 +11,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  Quincey Koziol
- *              Thursday, February  3, 2005
  *
- * Purpose:	v2 B-tree testing functions.
+ * Purpose:     v2 B-tree testing functions
  *
  */
 
@@ -27,9 +26,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5B2pkg.h"    /* v2 B-trees				*/
-#include "H5Eprivate.h" /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5B2pkg.h"     /* B-Trees (Version 2)                      */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
 
 /****************/
 /* Local Macros */
@@ -251,7 +253,7 @@ H5B2__test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    H5F_ENCODE_LENGTH_LEN(raw, *(const hsize_t *)nrecord, ctx->sizeof_size);
+    H5_ENCODE_LENGTH_LEN(raw, *(const hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_encode() */
@@ -279,7 +281,7 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    H5F_DECODE_LENGTH_LEN(raw, *(hsize_t *)nrecord, ctx->sizeof_size);
+    H5_DECODE_LENGTH_LEN(raw, *(hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_decode() */
@@ -379,8 +381,8 @@ H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
-    H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
+    H5_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
+    H5_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test2_encode() */
@@ -408,8 +410,8 @@ H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
-    H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
-    H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
+    H5_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
+    H5_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test2_decode() */

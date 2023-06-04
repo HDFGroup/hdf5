@@ -14,7 +14,7 @@
  *
  * Created:     H5Ocopy_ref.c
  *
- * Purpose:     Object with references copying routines.
+ * Purpose:     Object with references copying routines
  *
  *-------------------------------------------------------------------------
  */
@@ -30,6 +30,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File                                     */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */

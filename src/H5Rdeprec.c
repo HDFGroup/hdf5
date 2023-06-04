@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5Oprivate.h"  /* Object headers                           */
 #include "H5Rpkg.h"      /* References                               */
 #include "H5Sprivate.h"  /* Dataspaces                               */

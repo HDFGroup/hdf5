@@ -19,13 +19,14 @@
 #define H5F_FRIEND     /*suppress error about including H5Fpkg   */
 #define H5R_FRIEND     /*suppress error about including H5Rpkg   */
 
-#include "H5private.h"   /* Generic Functions    */
-#include "H5CXprivate.h" /* API Contexts         */
-#include "H5Eprivate.h"  /* Error handling       */
-#include "H5Iprivate.h"  /* IDs                  */
-#include "H5Fpkg.h"      /* File                 */
-#include "H5Rpkg.h"      /* References           */
-#include "H5Tpkg.h"      /* Datatypes            */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5Fpkg.h"      /* File                                     */
+#include "H5MMprivate.h" /* Memory management                        */
+#include "H5Rpkg.h"      /* References                               */
+#include "H5Tpkg.h"      /* Datatypes                                */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
