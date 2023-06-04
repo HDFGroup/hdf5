@@ -112,9 +112,9 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
     vers = *p++;
 
     if (vers == H5O_FSINFO_VERSION_0) {
-        H5F_file_space_type_t strategy;  /* Strategy */
-        hsize_t               threshold; /* Threshold */
-        H5FD_mem_t            type;      /* Memory type for iteration */
+        H5F_file_space_type_t strategy;      /* Strategy */
+        hsize_t               threshold = 0; /* Threshold */
+        H5FD_mem_t            type;          /* Memory type for iteration */
 
         fsinfo->persist             = H5F_FREE_SPACE_PERSIST_DEF;
         fsinfo->threshold           = H5F_FREE_SPACE_THRESHOLD_DEF;
