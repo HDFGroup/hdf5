@@ -314,18 +314,18 @@ H5FD_ros3_init(void)
         if (H5I_INVALID_HID == H5FD_ROS3_g) {
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register ros3");
         }
-    }
 
 #if ROS3_STATS
-    /* pre-compute statsbin boundaries
-     */
-    for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
-        unsigned long long value = 0;
+        /* pre-compute statsbin boundaries */
+        /* do it only during initial registration */
+        for (bin_i = 0; bin_i < ROS3_STATS_BIN_COUNT; bin_i++) {
+            unsigned long long value = 0;
 
-        ROS3_STATS_POW(bin_i, &value)
-        ros3_stats_boundaries[bin_i] = value;
-    }
+            ROS3_STATS_POW(bin_i, &value)
+            ros3_stats_boundaries[bin_i] = value;
+        }
 #endif
+    }
 
     ret_value = H5FD_ROS3_g;
 
