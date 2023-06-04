@@ -551,7 +551,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     uint8_t        heap_vers;
                     size_t         block_size = 0;
                     size_t         tmp_size;
-                    hsize_t        tmp_hsize;
+                    hsize_t        tmp_hsize = 0;
                     uint32_t       stored_chksum;
                     uint32_t       computed_chksum;
 
