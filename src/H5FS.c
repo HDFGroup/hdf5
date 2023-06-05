@@ -185,7 +185,7 @@ H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class
 #endif /* H5FS_DEBUG */
 
     /* Check arguments. */
-    HDassert(H5F_addr_defined(fs_addr));
+    HDassert(H5_addr_defined(fs_addr));
     HDassert(nclasses);
     HDassert(classes);
 
@@ -253,7 +253,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
 
     /* Check arguments. */
     HDassert(f);
-    HDassert(H5F_addr_defined(fs_addr));
+    HDassert(H5_addr_defined(fs_addr));
 
     /* Initialize user data for protecting the free space manager */
     /* (no class information necessary for delete) */
@@ -268,7 +268,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
         unsigned fspace_status = 0; /* Free space section info's status in the metadata cache */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(fs_addr));
+        HDassert(H5_addr_defined(fs_addr));
 
         /* Check the free space section info's status in the metadata cache */
         if (H5AC_get_entry_status(f, fs_addr, &fspace_status) < 0)
@@ -324,7 +324,7 @@ H5FS_delete(H5F_t *f, haddr_t fs_addr)
         unsigned sinfo_status = 0; /* Free space section info's status in the metadata cache */
 
         /* Sanity check */
-        HDassert(H5F_addr_defined(fspace->sect_addr));
+        HDassert(H5_addr_defined(fspace->sect_addr));
         HDassert(fspace->alloc_sect_size > 0);
 
         /* Check the free space section info's status in the metadata cache */
@@ -422,13 +422,13 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
 #endif /* H5FS_DEBUG */
         /* If there are sections to serialize, update them */
         /* (if the free space manager is persistent) */
-        if (fspace->serial_sect_count > 0 && H5F_addr_defined(fspace->addr)) {
+        if (fspace->serial_sect_count > 0 && H5_addr_defined(fspace->addr)) {
 #ifdef H5FS_DEBUG
             HDfprintf(stderr, "%s: Real sections to store in file\n", __func__);
 #endif /* H5FS_DEBUG */
             if (fspace->sinfo->dirty) {
                 /* Check if the section info is "floating" */
-                if (!H5F_addr_defined(fspace->sect_addr)) {
+                if (!H5_addr_defined(fspace->sect_addr)) {
                     /* Sanity check */
                     HDassert(fspace->sect_size > 0);
 
@@ -454,7 +454,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
             }     /* end if */
             else
                 /* Sanity check that section info has address */
-                HDassert(H5F_addr_defined(fspace->sect_addr));
+                HDassert(H5_addr_defined(fspace->sect_addr));
 
             /* Cache the free space section info */
             if (H5AC_insert_entry(f, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo,
@@ -466,10 +466,10 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
             HDfprintf(stderr, "%s: NOT storing section info in file\n", __func__);
 #endif /* H5FS_DEBUG */
             /* Check if space for the section info is allocated */
-            if (H5F_addr_defined(fspace->sect_addr)) {
+            if (H5_addr_defined(fspace->sect_addr)) {
                 /* Sanity check */
                 /* (section info should only be in the file if the header is */
-                HDassert(H5F_addr_defined(fspace->addr));
+                HDassert(H5_addr_defined(fspace->addr));
 
 #ifdef H5FS_DEBUG
                 HDfprintf(stderr, "%s: Section info allocated though\n", __func__);
@@ -567,7 +567,7 @@ H5FS_close(H5F_t *f, H5FS_t *fspace)
         /* Just sanity checks... */
         if (fspace->serial_sect_count > 0)
             /* Sanity check that section info has address */
-            HDassert(H5F_addr_defined(fspace->sect_addr));
+            HDassert(H5_addr_defined(fspace->sect_addr));
     } /* end else */
 
     /* Decrement the reference count on the free space manager header */
@@ -719,7 +719,7 @@ H5FS__incr(H5FS_t *fspace)
     HDassert(fspace);
 
     /* Check if we should pin the header in the cache */
-    if (fspace->rc == 0 && H5F_addr_defined(fspace->addr))
+    if (fspace->rc == 0 && H5_addr_defined(fspace->addr))
         if (H5AC_pin_protected_entry(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin free space header")
 
@@ -763,7 +763,7 @@ H5FS__decr(H5FS_t *fspace)
 
     /* Check if we should unpin the header in the cache */
     if (fspace->rc == 0) {
-        if (H5F_addr_defined(fspace->addr)) {
+        if (H5_addr_defined(fspace->addr)) {
             if (H5AC_unpin_entry(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
         } /* end if */
@@ -800,7 +800,7 @@ H5FS__dirty(H5FS_t *fspace)
     HDassert(fspace);
 
     /* Check if the free space manager is persistent */
-    if (H5F_addr_defined(fspace->addr))
+    if (H5_addr_defined(fspace->addr))
         /* Mark header as dirty in cache */
         if (H5AC_mark_entry_dirty(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
@@ -832,7 +832,7 @@ H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr)
     HDassert(f);
     HDassert(fspace);
 
-    if (!H5F_addr_defined(fspace->addr)) {
+    if (!H5_addr_defined(fspace->addr)) {
         /* Allocate space for the free space header */
         if (HADDR_UNDEF == (fspace->addr = H5MF_alloc(f, H5FD_MEM_FSPACE_HDR, (hsize_t)H5FS_HEADER_SIZE(f))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for free space header")
@@ -872,7 +872,7 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace)
     HDassert(f);
     HDassert(fspace);
 
-    if (!H5F_addr_defined(fspace->sect_addr) && fspace->sinfo && fspace->serial_sect_count > 0) {
+    if (!H5_addr_defined(fspace->sect_addr) && fspace->sinfo && fspace->serial_sect_count > 0) {
         if (HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for section info")
         fspace->alloc_sect_size = fspace->sect_size;
@@ -925,7 +925,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
     ;
 
     /* Free space for section info */
-    if (H5F_addr_defined(fspace->sect_addr)) {
+    if (H5_addr_defined(fspace->sect_addr)) {
         hsize_t  saved_size;       /* Size of previous section info */
         unsigned sinfo_status = 0; /* Section info cache status */
 
@@ -968,7 +968,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
     } /* end if */
 
     /* Free space for header */
-    if (H5F_addr_defined(fspace->addr)) {
+    if (H5_addr_defined(fspace->addr)) {
         unsigned hdr_status = 0; /* Header entry status */
 
         /* Check whether free-space manager header is in cache or not */

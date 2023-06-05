@@ -1023,7 +1023,7 @@ H5T__open_name(const H5G_loc_t *loc, const char *name)
 done:
     /* Error cleanup */
     if (NULL == ret_value)
-        if (obj_found && H5F_addr_defined(type_loc.oloc->addr))
+        if (obj_found && H5_addr_defined(type_loc.oloc->addr))
             if (H5G_loc_free(&type_loc) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, NULL, "can't free location")
 

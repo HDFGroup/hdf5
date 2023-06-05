@@ -107,7 +107,7 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
     /* Check if a new valid object is copied to the destination */
-    if (H5F_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
+    if (H5_addr_defined(dst_oloc->addr) && (ret_value > SUCCEED)) {
         char       tmp_obj_name[80];
         H5G_name_t new_path;
         H5O_loc_t  new_oloc;
@@ -134,7 +134,7 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert link")
 
         H5G_loc_free(&new_loc);
-    } /* if (H5F_addr_defined(dst_oloc.addr)) */
+    } /* if (H5_addr_defined(dst_oloc.addr)) */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -180,7 +180,7 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNSERIALIZE, FAIL,
                             "can't deserialize object token into address")
 
-            if (!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
+            if (!H5_addr_defined(src_oloc->addr) || src_oloc->addr == 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
             dst_oloc->addr = HADDR_UNDEF;
 
@@ -243,7 +243,7 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
             /* Get object address */
             p = (const uint8_t *)data;
             H5F_addr_decode(src_oloc->file, &p, &src_oloc->addr);
-            if (!H5F_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
+            if (!H5_addr_defined(src_oloc->addr) || src_oloc->addr == 0) {
                 H5MM_free(data);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
             }

@@ -228,7 +228,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hbool_t *hdr_dirty)
 
 done:
 
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (dblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -237,7 +237,7 @@ done:
                                 "unable to remove fixed array data block from cache")
 
             /* Release data block's disk space */
-            if (H5F_addr_defined(dblock->addr) &&
+            if (H5_addr_defined(dblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dblock->addr, (hsize_t)dblock->size) < 0)
                 HDONE_ERROR(H5E_FARRAY, H5E_CANTFREE, HADDR_UNDEF, "unable to release fixed array data block")
 
@@ -272,7 +272,7 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags)
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(dblk_addr));
+    HDassert(H5_addr_defined(dblk_addr));
 
     /* only the H5AC__READ_ONLY_FLAG flag is permitted */
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -366,7 +366,7 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, haddr_t dblk_addr)
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(dblk_addr));
+    HDassert(H5_addr_defined(dblk_addr));
 
     /* Protect data block */
     if (NULL == (dblock = H5FA__dblock_protect(hdr, dblk_addr, H5AC__NO_FLAGS_SET)))

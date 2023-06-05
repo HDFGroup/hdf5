@@ -475,7 +475,7 @@ H5D__bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
     /* Sanity check */
     HDassert(ctx);
     HDassert(record);
-    HDassert(H5F_addr_defined(record->chunk_addr));
+    HDassert(H5_addr_defined(record->chunk_addr));
     HDassert(0 != record->nbytes);
 
     /* Encode the record's fields */
@@ -522,7 +522,7 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
         UINT64DECODE(raw, record->scaled[u]);
 
     /* Sanity checks */
-    HDassert(H5F_addr_defined(record->chunk_addr));
+    HDassert(H5_addr_defined(record->chunk_addr));
     HDassert(0 != record->nbytes);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -551,7 +551,7 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
 
     /* Sanity checks */
     HDassert(record);
-    HDassert(H5F_addr_defined(record->chunk_addr));
+    HDassert(H5_addr_defined(record->chunk_addr));
     HDassert(0 != record->nbytes);
 
     HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
@@ -585,7 +585,7 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, const H5S_t
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(H5F_addr_defined(dset_ohdr_addr));
+    HDassert(H5_addr_defined(dset_ohdr_addr));
 
     idx_info->storage->u.btree2.dset_ohdr_addr = dset_ohdr_addr;
 
@@ -625,7 +625,7 @@ H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
     HDassert(idx_info->storage);
     HDassert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(idx_info->storage->u.btree2.bt2);
 
     /* Set up object header location for dataset */
@@ -686,7 +686,7 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->layout);
     HDassert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(NULL == idx_info->storage->u.btree2.bt2);
 
     /* Set up the user data */
@@ -736,7 +736,7 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     bt2_cparam.rrec_size = H5F_SIZEOF_ADDR(idx_info->f)         /* Address of chunk */
                            + (idx_info->layout->ndims - 1) * 8; /* # of dimensions x 64-bit chunk offsets */
@@ -806,7 +806,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     HDassert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__bt2_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -885,9 +885,9 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
-    HDassert(H5F_addr_defined(udata->chunk_block.offset));
+    HDassert(H5_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
     if (NULL == idx_info->storage->u.btree2.bt2) {
@@ -980,7 +980,7 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(idx_info->layout);
     HDassert(idx_info->layout->ndims > 0);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
@@ -1101,7 +1101,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t chu
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(chunk_cb);
     HDassert(chunk_udata);
 
@@ -1193,7 +1193,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
@@ -1257,7 +1257,7 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->storage);
 
     /* Check if the index data structure has been allocated */
-    if (H5F_addr_defined(idx_info->storage->idx_addr)) {
+    if (H5_addr_defined(idx_info->storage->idx_addr)) {
         /* Set up user data for creating context */
         u_ctx.f          = idx_info->f;
         u_ctx.ndims      = idx_info->layout->ndims - 1;
@@ -1313,7 +1313,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
     HDassert(idx_info_dst->pline);
     HDassert(idx_info_dst->layout);
     HDassert(idx_info_dst->storage);
-    HDassert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    HDassert(!H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source v2 B-tree is open yet */
     if (NULL == idx_info_src->storage->u.btree2.bt2)
@@ -1326,7 +1326,7 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk_id
     /* Create v2 B-tree that describes the chunked dataset in the destination file */
     if (H5D__bt2_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
-    HDassert(H5F_addr_defined(idx_info_dst->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Reset metadata tag */
     H5_END_TAG
@@ -1399,7 +1399,7 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
     HDassert(index_size);
 
     /* Open v2 B-tree */

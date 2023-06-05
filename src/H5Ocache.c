@@ -1195,7 +1195,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
     FUNC_ENTER_PACKAGE
 
     HDassert(oh);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(image);
     HDassert(len);
     HDassert(udata->f);

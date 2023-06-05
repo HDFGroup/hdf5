@@ -246,10 +246,10 @@ H5FS__sinfo_lock(H5F_t *f, H5FS_t *fspace, unsigned accmode)
     }         /* end if */
     else {
         /* If the section address is defined, load it from the file */
-        if (H5F_addr_defined(fspace->sect_addr)) {
+        if (H5_addr_defined(fspace->sect_addr)) {
             /* Sanity check */
             HDassert(fspace->sinfo_protected == FALSE);
-            HDassert(H5F_addr_defined(fspace->addr));
+            HDassert(H5_addr_defined(fspace->addr));
 
 #ifdef H5FS_SINFO_DEBUG
             HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %" PRIuHADDR "\n",
@@ -390,7 +390,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
             unsigned cache_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting heap */
 
             /* Sanity check */
-            HDassert(H5F_addr_defined(fspace->addr));
+            HDassert(H5_addr_defined(fspace->addr));
 
             /* Check if we've made new changes to the section info while locked */
             if (fspace->sinfo_modified) {
@@ -412,7 +412,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
             } /* end if */
 
             /* Sanity check */
-            HDassert(H5F_addr_defined(fspace->sect_addr));
+            HDassert(H5_addr_defined(fspace->sect_addr));
 
             /* Unprotect section info in cache */
             /* (Possibly dirty) */
@@ -446,7 +446,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
             /* Check if the section info was modified */
             if (fspace->sinfo_modified) {
                 /* Check if we need to release section info in the file */
-                if (H5F_addr_defined(fspace->sect_addr)) {
+                if (H5_addr_defined(fspace->sect_addr)) {
                     /* Set flag to release section info space in file */
                     /* On file close or flushing, only need to release section info with size
                        bigger than previous section */
@@ -465,7 +465,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
             } /* end if */
             else {
                 /* Sanity checks... */
-                if (H5F_addr_defined(fspace->sect_addr))
+                if (H5_addr_defined(fspace->sect_addr))
                     HDassert(fspace->alloc_sect_size == fspace->sect_size);
                 else
                     HDassert(fspace->alloc_sect_size == 0);
@@ -481,7 +481,7 @@ H5FS__sinfo_unlock(H5F_t *f, H5FS_t *fspace, hbool_t modified)
             hsize_t old_alloc_sect_size = fspace->alloc_sect_size; /* Previous size of section info in file */
 
             /* Sanity check */
-            HDassert(H5F_addr_defined(fspace->addr));
+            HDassert(H5_addr_defined(fspace->addr));
 
             /* Reset section info in header */
             fspace->sect_addr       = HADDR_UNDEF;
@@ -964,7 +964,7 @@ H5FS__sect_link_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls, H5FS_
     /* Check arguments. */
     HDassert(sinfo);
     HDassert(sect);
-    HDassert(H5F_addr_defined(sect->addr));
+    HDassert(H5_addr_defined(sect->addr));
     HDassert(sect->size);
 
     /* Determine correct bin which holds items of the section's size */
@@ -1154,7 +1154,7 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
     /* Check arguments. */
     HDassert(fspace);
     HDassert(*sect);
-    HDassert(H5F_addr_defined((*sect)->addr));
+    HDassert(H5_addr_defined((*sect)->addr));
     HDassert((*sect)->size);
 
     /* Loop until no more merging */
@@ -1357,7 +1357,7 @@ H5FS_sect_add(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigned flag
     /* Check arguments. */
     HDassert(fspace);
     HDassert(sect);
-    HDassert(H5F_addr_defined(sect->addr));
+    HDassert(H5_addr_defined(sect->addr));
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
@@ -1443,7 +1443,7 @@ H5FS_sect_try_extend(H5F_t *f, H5FS_t *fspace, haddr_t addr, hsize_t size, hsize
     /* Check arguments. */
     HDassert(f);
     HDassert(fspace);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(size > 0);
     HDassert(extra_requested > 0);
 
@@ -1580,7 +1580,7 @@ H5FS_sect_try_merge(H5F_t *f, H5FS_t *fspace, H5FS_section_info_t *sect, unsigne
     HDassert(f);
     HDassert(fspace);
     HDassert(sect);
-    HDassert(H5F_addr_defined(sect->addr));
+    HDassert(H5_addr_defined(sect->addr));
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
@@ -1708,7 +1708,7 @@ H5FS__sect_find_node(H5FS_t *fspace, hsize_t request, H5FS_section_info_t **node
                         /* Get section node */
                         curr_sect = (H5FS_section_info_t *)H5SL_item(curr_sect_node);
 
-                        HDassert(H5F_addr_defined(curr_sect->addr));
+                        HDassert(H5_addr_defined(curr_sect->addr));
                         HDassert(curr_fspace_node->sect_size == curr_sect->size);
 
                         cls = &fspace->sect_cls[curr_sect->type];
@@ -2216,7 +2216,7 @@ H5FS__sect_assert(const H5FS_t *fspace)
                         cls  = &fspace->sect_cls[sect->type];
 
                         /* Sanity check section */
-                        HDassert(H5F_addr_defined(sect->addr));
+                        HDassert(H5_addr_defined(sect->addr));
                         HDassert(fspace_node->sect_size == sect->size);
                         if (cls->valid)
                             (*cls->valid)(cls, sect);
@@ -2424,7 +2424,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace, haddr_t 
     if (fspace->serial_sect_count > 0 && fspace->sinfo) {
         /* the section info is floating, so space->sinfo should be defined */
 
-        if (!H5F_addr_defined(fspace->addr)) {
+        if (!H5_addr_defined(fspace->addr)) {
 
             /* start by allocating file space for the header */
 
@@ -2453,7 +2453,7 @@ H5FS_vfd_alloc_hdr_and_section_info_if_needed(H5F_t *f, H5FS_t *fspace, haddr_t 
             *fs_addr_ptr = fspace->addr;
         }
 
-        if (!H5F_addr_defined(fspace->sect_addr)) {
+        if (!H5_addr_defined(fspace->sect_addr)) {
 
             /* now allocate file space for the section info */
 

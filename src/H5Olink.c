@@ -633,7 +633,7 @@ H5O_link_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
         /* Construct object location for object, in order to decrement it's ref count */
         H5O_loc_reset(&oloc);
         oloc.file = f;
-        HDassert(H5F_addr_defined(lnk->u.hard.addr));
+        HDassert(H5_addr_defined(lnk->u.hard.addr));
         oloc.addr = lnk->u.hard.addr;
 
         /* Decrement the ref count for the object */
@@ -771,7 +771,7 @@ H5O__link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     /* check args */
     HDassert(link_src);
     HDassert(dst_oloc);
-    HDassert(H5F_addr_defined(dst_oloc->addr));
+    HDassert(H5_addr_defined(dst_oloc->addr));
     HDassert(dst_oloc->file);
     HDassert(link_dst);
     HDassert(cpy_info);

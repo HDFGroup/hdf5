@@ -2165,7 +2165,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
-    if (H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
+    if (H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
         H5_FAILED();
         HDputs("    Hard link test failed. Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -2210,7 +2210,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
-    if (H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
+    if (H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
         H5_FAILED();
         HDputs("    Soft link test failed. Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -5377,7 +5377,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
                 if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)u, &linfo,
                                         H5P_DEFAULT) < 0)
                     TEST_ERROR;
-                if (H5F_addr_ne(linfo.u.address, objno[u]))
+                if (H5_addr_ne(linfo.u.address, objno[u]))
                     TEST_ERROR;
             } /* end if */
             else {
@@ -5400,7 +5400,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
                 if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)u, &linfo,
                                         H5P_DEFAULT) < 0)
                     TEST_ERROR;
-                if (H5F_addr_ne(linfo.u.address, objno[u]))
+                if (H5_addr_ne(linfo.u.address, objno[u]))
                     TEST_ERROR;
             } /* end if */
             else {
@@ -5429,7 +5429,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
                 if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)u, &linfo,
                                         H5P_DEFAULT) < 0)
                     TEST_ERROR;
-                if (H5F_addr_ne(linfo.u.address, objno[dec_u]))
+                if (H5_addr_ne(linfo.u.address, objno[dec_u]))
                     TEST_ERROR;
             } /* end if */
             else {
@@ -6007,11 +6007,11 @@ delete_by_idx_old_deprec(hid_t fapl)
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
-                if (H5F_addr_ne(linfo.u.address, objno[u + 1]))
+                if (H5_addr_ne(linfo.u.address, objno[u + 1]))
                     TEST_ERROR;
             } /* end if */
             else {
-                if (H5F_addr_ne(linfo.u.address, objno[dec_u]))
+                if (H5_addr_ne(linfo.u.address, objno[dec_u]))
                     TEST_ERROR;
             } /* end else */
 
@@ -6081,11 +6081,11 @@ delete_by_idx_old_deprec(hid_t fapl)
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
-                if (H5F_addr_ne(linfo.u.address, objno[(u * 2) + 1]))
+                if (H5_addr_ne(linfo.u.address, objno[(u * 2) + 1]))
                     TEST_ERROR;
             } /* end if */
             else {
-                if (H5F_addr_ne(linfo.u.address, objno[dec_u]))
+                if (H5_addr_ne(linfo.u.address, objno[dec_u]))
                     TEST_ERROR;
             } /* end else */
 
@@ -6115,11 +6115,11 @@ delete_by_idx_old_deprec(hid_t fapl)
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
-                if (H5F_addr_ne(linfo.u.address, objno[(u * 2) + 3]))
+                if (H5_addr_ne(linfo.u.address, objno[(u * 2) + 3]))
                     TEST_ERROR;
             } /* end if */
             else {
-                if (H5F_addr_ne(linfo.u.address, objno[dec_u]))
+                if (H5_addr_ne(linfo.u.address, objno[dec_u]))
                     TEST_ERROR;
             } /* end else */
 
@@ -6208,7 +6208,7 @@ link_iterate_deprec_cb(hid_t group_id, const char *link_name, const H5L_info1_t 
             return H5_ITER_ERROR;
         if (info->cset != my_info.cset)
             return H5_ITER_ERROR;
-        if (H5F_addr_ne(info->u.address, my_info.u.address))
+        if (H5_addr_ne(info->u.address, my_info.u.address))
             return H5_ITER_ERROR;
     } /* end if */
 
@@ -6707,7 +6707,7 @@ link_iterate_old_deprec_cb(hid_t group_id, const char *link_name, const H5L_info
             return H5_ITER_ERROR;
         if (info->cset != my_info.cset)
             return H5_ITER_ERROR;
-        if (H5F_addr_ne(info->u.address, my_info.u.address))
+        if (H5_addr_ne(info->u.address, my_info.u.address))
             return H5_ITER_ERROR;
     } /* end if */
 

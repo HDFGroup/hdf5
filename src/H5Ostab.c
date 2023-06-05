@@ -357,7 +357,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
 
     /* check args */
     HDassert(stab_src);
-    HDassert(H5F_addr_defined(dst_oloc->addr));
+    HDassert(H5_addr_defined(dst_oloc->addr));
     HDassert(dst_oloc->file);
     HDassert(stab_dst);
     HDassert(cpy_info);

@@ -99,7 +99,7 @@ H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
     HDassert(hdr);
 
     /* Check for creating free space info for the heap */
-    if (H5F_addr_defined(hdr->fs_addr)) {
+    if (H5_addr_defined(hdr->fs_addr)) {
         /* Open an existing free space structure for the heap */
         if (NULL == (hdr->fspace = H5FS_open(hdr->f, hdr->fs_addr, NELMTS(classes), classes, hdr,
                                              (hsize_t)H5HF_FSPACE_THRHD_DEF, (hsize_t)H5HF_FSPACE_ALIGN_DEF)))
@@ -122,7 +122,7 @@ H5HF__space_start(H5HF_hdr_t *hdr, hbool_t may_create)
                 (hdr->fspace = H5FS_create(hdr->f, &hdr->fs_addr, &fs_create, NELMTS(classes), classes, hdr,
                                            (hsize_t)H5HF_FSPACE_THRHD_DEF, (hsize_t)H5HF_FSPACE_ALIGN_DEF)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
-            HDassert(H5F_addr_defined(hdr->fs_addr));
+            HDassert(H5_addr_defined(hdr->fs_addr));
         } /* end if */
     }     /* end else */
 

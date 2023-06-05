@@ -57,7 +57,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);

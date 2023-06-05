@@ -812,7 +812,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
             hsize_t fsf_size;
 
             /* Sanity checks */
-            HDassert(H5F_addr_defined(entry_ptr->addr));
+            HDassert(H5_addr_defined(entry_ptr->addr));
             HDassert(!H5F_IS_TMP_ADDR(f, entry_ptr->addr));
 #ifndef NDEBUG
             {
@@ -955,15 +955,15 @@ H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr, size_t *len
 
     /* Get the file's end-of-allocation value */
     eoa = H5F_get_eoa(f, cooked_type);
-    if (!H5F_addr_defined(eoa))
+    if (!H5_addr_defined(eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid EOA address for file")
 
     /* Check for bad address in general */
-    if (H5F_addr_gt(addr, eoa))
+    if (H5_addr_gt(addr, eoa))
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation")
 
     /* Check if the amount of data to read will be past the EOA */
-    if (H5F_addr_gt((addr + *len), eoa)) {
+    if (H5_addr_gt((addr + *len), eoa)) {
         if (actual)
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA")
         else
@@ -1021,7 +1021,7 @@ H5C__load_entry(H5F_t *f,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(type->get_initial_load_size);
     if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
         HDassert(type->get_final_load_size);
@@ -1839,7 +1839,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      * either the speculative read flag.  Hence disallow.
      */
     HDassert(!((type->flags & H5C__CLASS_SKIP_READS) && (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)));
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(type->get_initial_load_size);
     HDassert(type->deserialize);
 
@@ -2159,7 +2159,7 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     HDassert(type);
     HDassert(type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type);
     HDassert(type->image_len);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(thing);
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -2434,7 +2434,7 @@ H5C_mark_entry_dirty(void *thing)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
+    HDassert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
@@ -2531,7 +2531,7 @@ H5C_mark_entry_clean(void *_thing)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
+    HDassert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
@@ -2605,7 +2605,7 @@ H5C_mark_entry_unserialized(void *thing)
 
     /* Sanity checks */
     HDassert(entry);
-    HDassert(H5F_addr_defined(entry->addr));
+    HDassert(H5_addr_defined(entry->addr));
 
     if (entry->is_protected || entry->is_pinned) {
         HDassert(!entry->is_read_only);
@@ -2651,7 +2651,7 @@ H5C_mark_entry_serialized(void *_thing)
 
     /* Sanity checks */
     HDassert(entry);
-    HDassert(H5F_addr_defined(entry->addr));
+    HDassert(H5_addr_defined(entry->addr));
 
     /* Operate on pinned entry */
     if (entry->is_protected)
@@ -2700,9 +2700,9 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
     HDassert(cache_ptr);
     HDassert(type);
-    HDassert(H5F_addr_defined(old_addr));
-    HDassert(H5F_addr_defined(new_addr));
-    HDassert(H5F_addr_ne(old_addr, new_addr));
+    HDassert(H5_addr_defined(old_addr));
+    HDassert(H5_addr_defined(new_addr));
+    HDassert(H5_addr_ne(old_addr, new_addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
@@ -2846,7 +2846,7 @@ H5C_resize_entry(void *thing, size_t new_size)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
+    HDassert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
@@ -2978,7 +2978,7 @@ H5C_pin_protected_entry(void *thing)
 
     /* Sanity checks */
     HDassert(entry_ptr);
-    HDassert(H5F_addr_defined(entry_ptr->addr));
+    HDassert(H5_addr_defined(entry_ptr->addr));
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr);
 
@@ -3056,7 +3056,7 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
     HDassert(cache_ptr);
     HDassert(type);
     HDassert(type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_protected_entry_list(cache_ptr) < 0 || H5C__validate_pinned_entry_list(cache_ptr) < 0 ||
@@ -3527,7 +3527,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
     cache_ptr = f->shared->cache;
 
     HDassert(cache_ptr);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(thing);
     HDassert(!(pin_entry && unpin_entry));
 
@@ -3870,9 +3870,9 @@ H5C_create_flush_dependency(void *parent_thing, void *child_thing)
 
     /* Sanity checks */
     HDassert(parent_entry);
-    HDassert(H5F_addr_defined(parent_entry->addr));
+    HDassert(H5_addr_defined(parent_entry->addr));
     HDassert(child_entry);
-    HDassert(H5F_addr_defined(child_entry->addr));
+    HDassert(H5_addr_defined(child_entry->addr));
     cache_ptr = parent_entry->cache_ptr;
     HDassert(cache_ptr);
     HDassert(cache_ptr == child_entry->cache_ptr);
@@ -4009,9 +4009,9 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
     /* Sanity checks */
     HDassert(parent_entry);
-    HDassert(H5F_addr_defined(parent_entry->addr));
+    HDassert(H5_addr_defined(parent_entry->addr));
     HDassert(child_entry);
-    HDassert(H5F_addr_defined(child_entry->addr));
+    HDassert(H5_addr_defined(child_entry->addr));
     cache_ptr = parent_entry->cache_ptr;
     HDassert(cache_ptr);
     HDassert(cache_ptr == child_entry->cache_ptr);
@@ -4132,7 +4132,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
     if (H5C__validate_lru_list(cache_ptr) < 0)

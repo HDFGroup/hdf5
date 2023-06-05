@@ -316,7 +316,7 @@ create_array(H5F_t *f, const H5FA_create_t *cparam, H5FA_t **fa, haddr_t *fa_add
     /* Check status of array */
     if (H5FA_get_addr(*fa, fa_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(*fa_addr))
+    if (!H5_addr_defined(*fa_addr))
         TEST_ERROR;
 
     /* Check array stats */

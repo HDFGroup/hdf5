@@ -243,7 +243,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hbool_t *stats_changed)
     ret_value = iblock_addr;
 
 done:
-    if (!H5F_addr_defined(ret_value))
+    if (!H5_addr_defined(ret_value))
         if (iblock) {
             /* Remove from cache, if inserted */
             if (inserted)
@@ -252,7 +252,7 @@ done:
                                 "unable to remove extensible array index block from cache")
 
             /* Release index block's disk space */
-            if (H5F_addr_defined(iblock->addr) &&
+            if (H5_addr_defined(iblock->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, iblock->addr, (hsize_t)iblock->size) < 0)
                 HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, HADDR_UNDEF,
                             "unable to release file space for extensible array index block")
@@ -379,7 +379,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(hdr->idx_blk_addr));
+    HDassert(H5_addr_defined(hdr->idx_blk_addr));
 
     /* Protect index block */
     if (NULL == (iblock = H5EA__iblock_protect(hdr, H5AC__NO_FLAGS_SET)))
@@ -397,7 +397,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
         sblk_idx = dblk_idx = 0;
         for (u = 0; u < iblock->ndblk_addrs; u++) {
             /* Check for data block existing */
-            if (H5F_addr_defined(iblock->dblk_addrs[u])) {
+            if (H5_addr_defined(iblock->dblk_addrs[u])) {
                 /* Delete data block */
                 if (H5EA__dblock_delete(hdr, iblock, iblock->dblk_addrs[u],
                                         hdr->sblk_info[sblk_idx].dblk_nelmts) < 0)
@@ -424,7 +424,7 @@ H5EA__iblock_delete(H5EA_hdr_t *hdr)
         /* Iterate over super blocks */
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Check for data block existing */
-            if (H5F_addr_defined(iblock->sblk_addrs[u])) {
+            if (H5_addr_defined(iblock->sblk_addrs[u])) {
                 /* Delete super block */
                 if (H5EA__sblock_delete(hdr, iblock, iblock->sblk_addrs[u], (unsigned)(u + iblock->nsblks)) <
                     0)
