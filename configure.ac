@@ -622,7 +622,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
