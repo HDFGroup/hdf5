@@ -123,16 +123,6 @@ if (MSVC)
   set (CMAKE_MFC_FLAG 0)
 endif ()
 
-set (MAKE_SYSTEM)
-if (CMAKE_BUILD_TOOL MATCHES "make")
-  set (MAKE_SYSTEM 1)
-endif ()
-
-set (CFG_INIT "/${CMAKE_CFG_INTDIR}")
-if (MAKE_SYSTEM)
-  set (CFG_INIT "")
-endif ()
-
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -369,6 +359,10 @@ if (WIN32)
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif ()
 
+configure_file (${LIBAEC_SOURCE_DIR}/LICENSE.txt ${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt @ONLY)
+configure_file (${LIBAEC_SOURCE_DIR}/README.SZIP ${LIBAEC_BINARY_DIR}/LIBAEC_README.SZIP @ONLY)
+configure_file (${LIBAEC_SOURCE_DIR}/README.md ${LIBAEC_BINARY_DIR}/LIBAEC_README.md @ONLY)
+
 #-----------------------------------------------------------------------------
 # Set the cpack variables
 #-----------------------------------------------------------------------------
@@ -383,9 +377,9 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
   set (CPACK_PACKAGE_VERSION_MAJOR "${LIBAEC_PACKAGE_VERSION_MAJOR}")
   set (CPACK_PACKAGE_VERSION_MINOR "${LIBAEC_PACKAGE_VERSION_MINOR}")
   set (CPACK_PACKAGE_VERSION_PATCH "")
-  set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
-  set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.SZIP")
-  set (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+  set (CPACK_RESOURCE_FILE_LICENSE "${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt")
+  set (CPACK_PACKAGE_DESCRIPTION_FILE "${LIBAEC_BINARY_DIR}/LIBAEC_README.SZIP")
+  set (CPACK_RESOURCE_FILE_README "${LIBAEC_BINARY_DIR}/LIBAEC_README.md")
   set (CPACK_PACKAGE_RELOCATABLE TRUE)
   set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "libaec - Adaptive Entropy Coding library by Deutsches Klimarechenzentrum GmbH")
   set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
@@ -419,7 +413,7 @@ if (NOT LIBAEC_EXTERNALLY_CONFIGURED)
     endif ()
 #WiX variables
     set (CPACK_WIX_UNINSTALL "1")
-    set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
+    set (CPACK_RESOURCE_FILE_LICENSE "${LIBAEC_BINARY_DIR}/LIBAEC_LICENSE.txt")
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "STGZ")
     list (APPEND CPACK_GENERATOR "DragNDrop")

@@ -1,0 +1,30 @@
+name: hdf5 1.10 daily build
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "4 0 * * *"
+
+# A workflow run is made up of one or more jobs that can run sequentially or
+# in parallel.
+jobs:
+  call-workflow-tarball:
+    uses: ./.github/workflows/tarball.yml
+
+  call-workflow-ctest:
+    needs: call-workflow-tarball
+    uses: ./.github/workflows/cmake-ctest.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+
+  call-workflow-release:
+    needs: [call-workflow-tarball, call-workflow-ctest]
+    uses: ./.github/workflows/release.yml
+    with:
+      file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
+      file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+    if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
+
