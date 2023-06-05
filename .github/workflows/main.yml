@@ -434,7 +434,7 @@ jobs:
         run: echo '${{ toJSON(matrix) }}'
 
       - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build
+        run: sudo apt-get install ninja-build doxygen graphviz
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install Autotools Dependencies (Linux, serial)
@@ -463,7 +463,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Dependencies (macOS)
-        run: brew install ninja
+        run: brew install ninja doxygen
         if: matrix.os == 'macos-13'
 
       - name: Set environment for MSVC (Windows)

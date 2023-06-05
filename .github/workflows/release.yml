@@ -55,6 +55,12 @@ jobs:
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       # Get files created by tarball script
+      - name: Get doxygen (Linux)
+        uses: actions/download-artifact@v3
+        with:
+              name: docs-doxygen
+              path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@v3
         with:
@@ -107,6 +113,7 @@ jobs:
           tag_name: "snapshot"
           prerelease: true
           files: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
