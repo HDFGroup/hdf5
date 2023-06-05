@@ -379,7 +379,7 @@ H5FD_hdfs_init(void)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_HDFS_g))
@@ -420,7 +420,7 @@ H5FD__hdfs_term(void)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     /* Reset VFL ID */
@@ -454,7 +454,7 @@ H5FD__hdfs_handle_open(const char *path, const char *namenode_name, const int32_
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (path == NULL || path[0] == '\0')
@@ -539,7 +539,7 @@ H5FD__hdfs_handle_close(hdfs_t *handle)
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (handle == NULL)
@@ -629,7 +629,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     HDassert(fa != NULL);
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
@@ -670,7 +670,7 @@ H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst)
     H5TRACE2("e", "i*x", fapl_id, fa_dst);
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (fa_dst == NULL)
@@ -827,7 +827,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (file == NULL)
@@ -885,7 +885,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
     /* Sanity check on file offsets */
@@ -1223,7 +1223,7 @@ H5FD__hdfs_close(H5FD_t *_file)
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     /* Sanity checks */
@@ -1279,7 +1279,7 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
     HDassert(f1->hdfs_handle != NULL);
@@ -1352,7 +1352,7 @@ H5FD__hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     if (flags) {
@@ -1390,7 +1390,7 @@ H5FD__hdfs_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     FUNC_LEAVE_NOAPI(file->eoa)
@@ -1421,7 +1421,7 @@ H5FD__hdfs_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     file->eoa = addr;
@@ -1455,7 +1455,7 @@ H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_STATIC_NOERR
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     HDassert(file->hdfs_handle != NULL);
@@ -1490,7 +1490,7 @@ H5FD__hdfs_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
     if (!file_handle)
@@ -1540,7 +1540,7 @@ H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
     HDassert(file != NULL);
@@ -1612,7 +1612,7 @@ H5FD__hdfs_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file")
@@ -1650,7 +1650,7 @@ H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDfprintf(stdout, "called %s.\n", FUNC);
+    HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file")

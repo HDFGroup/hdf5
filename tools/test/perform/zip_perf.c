@@ -77,7 +77,6 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
  * Function:    error
  * Purpose:     Display error message and exit.
  * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
  */
 static void
 error(const char *fmt, ...)
@@ -97,7 +96,6 @@ error(const char *fmt, ...)
  * Purpose:     Cleanup the output file.
  * Returns:     Nothing
  * Programmer:  Bill Wendling, 06. June 2002
- * Modifications:
  */
 static void
 cleanup(void)
@@ -162,7 +160,6 @@ write_file(Bytef *source, uLongf sourceLen)
  *              Z_BUF_ERROR     - not enough room in the output buffer
  *              Z_STREAM_ERROR  - level parameter is invalid
  * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
  */
 static void
 compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
@@ -190,33 +187,12 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceL
     }
 }
 
-#ifdef LATER
-/*
- * Function:    uncompress_buffer
- * Purpose:     Uncompress the buffer.
- * Returns:     Z_OK            - success
- *              Z_MEM_ERROR     - not enough memory
- *              Z_BUF_ERROR     - not enough room in the output buffer
- *              Z_DATA_ERROR    - the input data was corrupted
- * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
- */
-static int
-uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
-{
-    int rc = uncompress(dest, destLen, source, sourceLen);
-
-    return rc;
-}
-#endif /* LATER */
-
 /*
  * Function:    get_unique_name
  * Purpose:     Create a new file who's name doesn't conflict with
  *              pre-existing files.
  * Returns:     Nothing
  * Programmer:  Bill Wendling, 06. June 2002
- * Modifications:
  */
 #define ZIP_PERF_FILE "zip_perf.data"
 static void
@@ -253,7 +229,6 @@ get_unique_name(void)
  * Purpose:     Print a usage message and then exit.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
  */
 static void
 usage(void)
@@ -296,7 +271,6 @@ usage(void)
  *              If an unknown size indicator is used, then the program will
  *              exit with EXIT_FAILURE as the return value.
  * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
  */
 static unsigned long
 parse_size_directive(const char *size)
@@ -485,7 +459,6 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
  * Purpose:     Run the program
  * Return:      EXIT_SUCCESS or EXIT_FAILURE
  * Programmer:  Bill Wendling, 05. June 2002
- * Modifications:
  */
 int
 main(int argc, char *argv[])
@@ -573,7 +546,6 @@ main(int argc, char *argv[])
  *              zlib stuff.
  * Return:      EXIT_SUCCESS
  * Programmer:  Bill Wendling, 10. June 2002
- * Modifications:
  */
 int
 main(void)

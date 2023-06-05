@@ -91,7 +91,7 @@ H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_AGGR_DEBUG
-    HDfprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", FUNC, (unsigned)alloc_type, size);
+    HDfprintf(stderr, "%s: alloc_type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)alloc_type, size);
 #endif /* H5MF_AGGR_DEBUG */
 
     /* check arguments */
@@ -119,7 +119,7 @@ H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
 done:
 #ifdef H5MF_AGGR_DEBUG
-    HDfprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", FUNC, ret_value,
+    HDfprintf(stderr, "%s: Leaving: ret_value = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, ret_value,
               size);
 #endif /* H5MF_AGGR_DEBUG */
 
@@ -150,7 +150,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
 
     FUNC_ENTER_STATIC
 #ifdef H5MF_AGGR_DEBUG
-    HDfprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", FUNC, (unsigned)type, size);
+    HDfprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)type, size);
 #endif /* H5MF_AGGR_DEBUG */
 
     /* check args */
@@ -199,7 +199,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
             H5FD_mem_t alloc_type, other_alloc_type; /* Current aggregator & 'other' aggregator types */
 
 #ifdef H5MF_AGGR_DEBUG
-            HDfprintf(stderr, "%s: aggr = {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", FUNC,
+            HDfprintf(stderr, "%s: aggr = {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", __func__,
                       aggr->addr, aggr->tot_size, aggr->size);
 #endif /* H5MF_AGGR_DEBUG */
 
@@ -268,7 +268,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
 
                     /* Allocate another block */
 #ifdef H5MF_AGGR_DEBUG
-                    HDfprintf(stderr, "%s: Allocating block\n", FUNC);
+                    HDfprintf(stderr, "%s: Allocating block\n", __func__);
 #endif /* H5MF_AGGR_DEBUG */
 
                     if (aggr_frag_size > (ext_size - size))
@@ -388,7 +388,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
 
 done:
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr, "%s: ret_value = %" PRIuHADDR "\n", FUNC, ret_value);
+        HDfprintf(stderr, "%s: ret_value = %" PRIuHADDR "\n", __func__, ret_value);
 #endif /* H5MF_AGGR_DEBUG */
         FUNC_LEAVE_NOAPI(ret_value)
     } /* end H5MF__aggr_alloc() */
@@ -734,8 +734,8 @@ done:
             tmp_addr = aggr->addr;
             tmp_size = aggr->size;
 #ifdef H5MF_AGGR_DEBUG
-            HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", FUNC, tmp_addr,
-                      tmp_size);
+            HDfprintf(stderr, "%s: tmp_addr = %" PRIuHADDR ", tmp_size = %" PRIuHSIZE "\n", __func__,
+                      tmp_addr, tmp_size);
 #endif /* H5MF_AGGR_DEBUG */
 
             /* Reset aggregator block information */

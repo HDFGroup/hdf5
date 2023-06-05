@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Saturday, September 12, 2015
- *
- * Purpose:	This file contains declarations which define macros for the
- *		H5E package.  Including this header means that the source file
- *		is part of the H5E package.
+ * Purpose: This file contains declarations which define macros for the
+ *          H5E package.  Including this header means that the source file
+ *          is part of the H5E package.
  */
 #ifndef H5Emodule_H
 #define H5Emodule_H
@@ -494,7 +491,7 @@
  *      if((dset_id=H5Dopen(file_id, dset_name, access_plist)) < 0)
  *      {
  *          ***  Push client error onto error stack  ***
- *          H5Epush(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
+ *          H5Epush(H5E_DEFAULT,__FILE__,__func__,__LINE__,cls_id,
  *                  CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_OPEN, “H5Dopen failed”);
  *      }
  *      ***  Indicate error occurred in function  ***
@@ -509,7 +506,7 @@
  *      if (H5Dwrite(dset_id, mem_type_id, mem_space_id, file_space_id, dset_xfer_plist_id, buf) < 0)
  *      {
  *          ***  Push client error onto error stack  ***
- *          H5Epush2(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
+ *          H5Epush2(H5E_DEFAULT,__FILE__,__func__,__LINE__,cls_id,
  *                  CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_HDF5,
  *                  “H5Dwrite failed”);
  *          ***  Preserve the error stack by assigning an object handle to it  ***

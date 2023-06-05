@@ -102,7 +102,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -404,8 +404,6 @@ static H5FD_hdfs_fapl_t default_fa = {
  * Programmer:  Jacob Smith
  *              2018-04-25
  *
- * Changes:     None.
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -613,8 +611,6 @@ error:
  *
  * Programmer:  Jacob Smith
  *              2018-04-25
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -1383,10 +1379,6 @@ error:
  * Programmer: Jacob Smith
  *             2017-11-06
  *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
- *
  *---------------------------------------------------------------------------
  */
 static int
@@ -1447,15 +1439,6 @@ test_noops_and_autofails(void)
 
     H5E_BEGIN_TRY{
         JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
-
-    /* no-op calls to `lock()` and `unlock()`
-     */
-    JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
-    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), "lock issue")
-    JSVERIFY(SUCCEED, H5FDunlock(file), "unlock issue")
-    /* Lock/unlock with null file or similar error crashes tests.
-     * HDassert in calling hierarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
-     */
 
     /************
      * TEARDOWN *
@@ -1537,10 +1520,6 @@ test_cmp(void)
  *
  * Programmer: Jacob Smith
  *             2017-11-07
- *
- * Changes:
- *     + modify from S3VFD codebase to HDFS; Minor changes, mostly.
- *         + Jacob Smith 2018-06-08
  *
  *---------------------------------------------------------------------------
  */

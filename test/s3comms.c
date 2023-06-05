@@ -96,7 +96,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -1759,8 +1759,6 @@ error:
  *
  * Programmer: Jacob Smith 2018-01-24
  *
- * Changes: None
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1812,8 +1810,6 @@ error:
  * Function: test_s3r_open()
  *
  * Programmer: Jacob Smith 2018-01-??
- *
- * Changes: None
  *
  *---------------------------------------------------------------------------
  */
@@ -2538,9 +2534,9 @@ test_uriencode(void)
     dest = (char *)HDmalloc(sizeof(char) * 15);
     HDassert(dest != NULL);
 
-    JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, false, &dest_written),
+    JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
              "destination cannot be NULL");
-    JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, false, &dest_written),
+    JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, FALSE, &dest_written),
              "source string cannot be NULL");
 
     HDfree(dest);

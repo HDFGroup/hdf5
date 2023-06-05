@@ -177,7 +177,7 @@
             const char *p_color = "red";                                                                     \
             eventa(__func__)    = MPE_Log_get_event_number();                                                \
             eventb(__func__)    = MPE_Log_get_event_number();                                                \
-            MPE_Describe_state(eventa(__func__), eventb(__func__), FUNC, p_color);                           \
+            MPE_Describe_state(eventa(__func__), eventb(__func__), __func__, p_color);                       \
         }                                                                                                    \
         MPE_Log_event(eventa(__func__), 0, p_event_start);                                                   \
     }

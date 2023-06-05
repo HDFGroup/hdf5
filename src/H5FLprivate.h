@@ -24,9 +24,6 @@
 #define H5FLprivate_H
 
 /* Public headers needed by this file */
-#ifdef LATER
-#include "H5FLpublic.h" /*API prototypes			     */
-#endif                  /* LATER */
 
 /* Private headers needed by this file */
 
@@ -55,7 +52,7 @@
 #endif
 
 /* Macro for inclusion in the free list allocation calls */
-#define H5FL_TRACK_INFO , __FILE__, FUNC, __LINE__
+#define H5FL_TRACK_INFO , __FILE__, __func__, __LINE__
 
 /* Macro for inclusion in internal free list allocation calls */
 #define H5FL_TRACK_INFO_INT , call_file, call_func, call_line

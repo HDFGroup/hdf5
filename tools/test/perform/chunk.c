@@ -20,7 +20,6 @@
  */
 
 /* See H5private.h for how to include headers */
-#undef NDEBUG
 #include "hdf5.h"
 
 #include <assert.h>
@@ -98,8 +97,6 @@ const H5Z_class2_t H5Z_COUNTER[1] = {{
  * Programmer:	Robb Matzke
  *              Thursday, May 14, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -123,8 +120,6 @@ counter(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -175,8 +170,6 @@ create_dataset(void)
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -248,8 +241,6 @@ test_rowmaj(int op, size_t cache_size, size_t io_size)
  * Programmer:	Robb Matzke
  *              Friday, May 15, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static double
@@ -318,8 +309,6 @@ test_diag(int op, size_t cache_size, size_t io_size, size_t offset)
  *
  * Programmer:	Robb Matzke
  *              Thursday, May 14, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

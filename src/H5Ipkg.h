@@ -11,12 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, May 15, 2003
- *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5I package.  Source files outside the H5I package should
- *		include H5Iprivate.h instead.
+ * Purpose: This file contains declarations which are visible only within
+ *          the H5I package.  Source files outside the H5I package should
+ *          include H5Iprivate.h instead.
  */
 #if !(defined H5I_FRIEND || defined H5I_MODULE)
 #error "Do not include this file outside the H5I package!"
@@ -27,15 +24,6 @@
 
 /* Get package's private header */
 #include "H5Iprivate.h"
-
-/* uthash is an external, header-only hash table implementation.
- *
- * We include the file directly in src/ and #define a few functions
- * to use our internal memory calls.
- */
-#define uthash_malloc(sz)    H5MM_malloc(sz)
-#define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
-#include "uthash.h"
 
 /**************************/
 /* Package Private Macros */

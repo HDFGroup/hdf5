@@ -43,15 +43,6 @@
 #include "H5Sprivate.h"  /* Dataspaces        */
 #include "H5VMprivate.h" /* Vector            */
 
-/* uthash is an external, header-only hash table implementation.
- *
- * We include the file directly in src/ and #define a few functions
- * to use our internal memory calls.
- */
-#define uthash_malloc(sz)    H5MM_malloc(sz)
-#define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
-#include "uthash.h"
-
 #ifdef H5_HAVE_PARALLEL
 
 /****************/
@@ -66,9 +57,11 @@
 
 /***** Macros for One linked collective IO case. *****/
 /* The default value to do one linked collective IO for all chunks.
-   If the average number of chunks per process is greater than this value,
-      the library will create an MPI derived datatype to link all chunks to do collective IO.
-      The user can set this value through an API. */
+ * If the average number of chunks per process is greater than this
+ * value, the library will create an MPI derived datatype to link all
+ * chunks to do collective IO.  The user can set this value through an
+ * API.
+ */
 
 /* Macros to represent options on how to obtain chunk address for one linked-chunk IO case */
 #define H5D_OBTAIN_ONE_CHUNK_ADDR_IND 0
@@ -79,10 +72,10 @@
 #define H5D_ALL_CHUNK_ADDR_THRES_COL_NUM 10000
 
 /***** Macros for multi-chunk collective IO case. *****/
-/* The default value of the threshold to do collective IO for this chunk.
-   If the average number of processes per chunk is greater than the default value,
-   collective IO is done for this chunk.
-*/
+/* The default value of the threshold to do collective IO for this
+ *  chunk.  If the average number of processes per chunk is greater
+ *  than the default value, collective IO is done for this chunk.
+ */
 
 /* Macros to represent different IO modes(NONE, Independent or collective)for multiple chunk IO case */
 #define H5D_CHUNK_IO_MODE_COL 1
@@ -445,7 +438,7 @@ static FILE             *debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                    \
-            fflush(debug_stream);                                                                            \
+            HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -454,7 +447,7 @@ static FILE             *debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);       \
-            fflush(debug_stream);                                                                            \
+            HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -464,7 +457,7 @@ static FILE             *debug_stream             = NULL;
                                                                                                              \
         if (trace_flag) {                                                                                    \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_in_pre, __func__);                                         \
-            debug_indent += (int)strlen(trace_in_pre);                                                       \
+            debug_indent += (int)HDstrlen(trace_in_pre);                                                     \
         }                                                                                                    \
     } while (0)
 
@@ -473,7 +466,7 @@ static FILE             *debug_stream             = NULL;
         hbool_t trace_flag = H5D_mpio_debug_flags_s[(int)'t'];                                               \
                                                                                                              \
         if (trace_flag) {                                                                                    \
-            debug_indent -= (int)strlen(trace_out_pre);                                                      \
+            debug_indent -= (int)HDstrlen(trace_out_pre);                                                    \
             H5D_MPIO_DEBUG_VA(rank, "%s%s", trace_out_pre, __func__);                                        \
         }                                                                                                    \
     } while (0)
@@ -584,9 +577,6 @@ H5D__mpio_debug_init(void)
  *
  * Return:      Success:   Non-negative: TRUE or FALSE
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 3, 2002
  *
  *-------------------------------------------------------------------------
  */

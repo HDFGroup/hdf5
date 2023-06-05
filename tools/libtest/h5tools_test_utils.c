@@ -100,7 +100,7 @@ H5_GCC_DIAG_OFF("format")
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -372,8 +372,6 @@ H5_GCC_DIAG_OFF("format")
  * Programmer: Jacob Smith
  *             2017-11-11
  *
- * Changes: None.
- *
  *----------------------------------------------------------------------------
  */
 static unsigned
@@ -594,8 +592,6 @@ error:
  *
  * Programmer: Jacob Smith
  *             2017-11-13
- *
- * Changes:    None
  *
  *----------------------------------------------------------------------------
  */
@@ -975,8 +971,6 @@ error:
  * Programmer: Jacob Smith
  *             2018-07-12
  *
- * Changes:    None
- *
  *----------------------------------------------------------------------------
  */
 static unsigned
@@ -1267,8 +1261,6 @@ H5_GCC_DIAG_ON("format")
  *
  * Programmer: Jacob Smith
  *             2017-11-10
- *
- * Changes:    None.
  *
  *----------------------------------------------------------------------------
  */
