@@ -758,7 +758,7 @@ C function is a macro: \see \ref api-compat-macros.</td>
 <td>Sets up use of the Fletcher32 checksum filter.</td>
 </tr>
 <tr>
-<td>#H5Pset_local_heap_size_hint#H5Pget_local_heap_size_hint/</td>
+<td>#H5Pset_local_heap_size_hint/#H5Pget_local_heap_size_hint</td>
 <td>Sets/gets the anticipated maximum size of a local heap.</td>
 </tr>
 <tr>
