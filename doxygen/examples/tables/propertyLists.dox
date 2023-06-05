@@ -245,7 +245,7 @@ file access property list.</td>
 </tr>
 <tr>
 <td>#H5Pset_page_buffer_size/#H5Pget_page_buffer_size</td>
-<td>Set/get the the maximum size for the page buffer.</td>
+<td>Set/get the maximum size for the page buffer.</td>
 </tr>
 <tr>
 <td>#H5Pset_sieve_buf_size/#H5Pget_sieve_buf_size</td>
