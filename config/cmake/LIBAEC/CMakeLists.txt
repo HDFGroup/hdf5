@@ -123,16 +123,6 @@ if (MSVC)
   set (CMAKE_MFC_FLAG 0)
 endif ()
 
-set (MAKE_SYSTEM)
-if (CMAKE_BUILD_TOOL MATCHES "make")
-  set (MAKE_SYSTEM 1)
-endif ()
-
-set (CFG_INIT "/${CMAKE_CFG_INTDIR}")
-if (MAKE_SYSTEM)
-  set (CFG_INIT "")
-endif ()
-
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
