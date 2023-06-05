@@ -18,9 +18,6 @@
       "hidden": true,
       "inherits": "ci-base-tgz",
       "cacheVariables": {
-        "HDF5_ENABLE_Z_LIB_SUPPORT": "ON",
-        "HDF5_ENABLE_SZIP_SUPPORT": "ON",
-        "HDF5_ENABLE_SZIP_ENCODING": "ON",
         "BUILD_ZLIB_WITH_FETCHCONTENT": "ON",
         "ZLIB_PACKAGE_NAME": {"type": "STRING", "value": "zlib"},
         "ZLIB_TGZ_ORIGPATH": {"type": "STRING", "value": "https://github.com/madler/zlib/releases/download/v1.2.13"},

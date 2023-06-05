@@ -596,16 +596,6 @@ if (MSVC)
   set (WIN_LINK_FLAGS "")
 endif ()
 
-set (MAKE_SYSTEM)
-if (CMAKE_MAKE_PROGRAM MATCHES "make")
-  set (MAKE_SYSTEM 1)
-endif ()
-
-set (CFG_INIT "/${CMAKE_CFG_INTDIR}")
-if (MAKE_SYSTEM)
-  set (CFG_INIT "")
-endif ()
-
 # Do not generate test programs by default
 option (HDF5_BUILD_GENERATORS "Build Test Generators" OFF)
 

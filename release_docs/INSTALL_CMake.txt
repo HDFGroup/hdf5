@@ -325,17 +325,17 @@ IV. Further considerations
             ZLIB_TGZ_ORIGPATH:STRING="some_location"
 
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
-         where "some_location" is the URL or full path to the compressed
-         file and ext is the type of compression file. The individual filters are
-         enabled by setting the BUILD_<filter>_WITH_FETCHCONTENT CMake variable to ON.
+         where "some_location" is the URL and by setting
+            ZLIB_USE_LOCALCONTENT:BOOL=OFF
+            LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+         or full path to the compressed file and ext is the type of compression file.
+         The individual filters are enabled by setting the BUILD_<filter>_WITH_FETCHCONTENT
+         CMake variable to ON.
          Also set CMAKE_BUILD_TYPE to the configuration type during configuration.
          See the settings in the config/cmake/cacheinit.cmake file HDF uses for testing.
 
          The files can also be retrieved from a local path if necessary
             TGZPATH:STRING="some_location"
-         by setting
-            ZLIB_USE_LOCALCONTENT:BOOL=ON
-            LIBAEC_USE_LOCALCONTENT:BOOL=ON
 
    3. If you plan to use compression plugins:
       A. Use source packages from an GIT server by adding the following CMake
@@ -520,25 +520,22 @@ These five steps are described in detail below.
                 set (HDF5_INSTALL_MOD_FORTRAN "NO" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" FORCE)
                 set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
                 set (HDF5_BUILD_GENERATORS ON CACHE BOOL "Build Test Generators" FORCE)
-                set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
-                set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
-                set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
                 set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
                 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
                 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
                 set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
-                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+                set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
                 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
-                set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+                set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
                 set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.2.13" CACHE STRING "Use ZLIB from original location" FORCE)
                 set (ZLIB_TGZ_ORIGNAME "zlib-1.2.13.tar.gz" CACHE STRING "Use ZLIB from original compressed file" FORCE)
-                set (ZLIB_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
+                set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
                 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
                 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
-                set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original location" FORCE)
-                set (LIBAEC_TGZ_ORIGNAME "libaec-v1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
-                set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
+                set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6" CACHE STRING "Use LIBAEC from original location" FORCE)
+                set (LIBAEC_TGZ_ORIGNAME "libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
+                set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
                 #######################
                 # filter plugin options
                 #######################
@@ -881,12 +878,12 @@ if (BUILD_TESTING)
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS"           0
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"              0
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 OFF
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 ON
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()
@@ -895,11 +892,11 @@ endif ()
 if (BUILD_SZIP_WITH_FETCHCONTENT)
     LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
     LIBAEC_TGZ_ORIGNAME       "Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
-    LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    OFF
+    LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    ON
 if (BUILD_ZLIB_WITH_FETCHCONTENT)
     ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"        "https://github.com/madler/zlib/releases/download/v1.2.13"
     ZLIB_TGZ_ORIGNAME         "Use ZLIB from original compressed file" "zlib-1.2.13.tar.gz"
-    ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    OFF
+    ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    ON
 
 NOTE:
   The BUILD_STATIC_EXECS ("Build Static Executables") option is only valid
