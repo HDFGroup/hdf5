@@ -91,7 +91,7 @@ jobs:
   PreRelease:
     runs-on: ubuntu-latest
     needs: [create-tag, getfiles]
-    environment: snapshots
+    environment: snapshots_1_14
     permissions:
         contents: write
     steps:
