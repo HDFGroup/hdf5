@@ -68,22 +68,65 @@
  *
  *     String: "Secret Access Key" associated with the ID and resource.
  *
- * `secret_tok` (char[])
- *
- *     String: "Security/Session Token" associated with the ID and resource.
- *
- *     This secret_tok is only needed when you are using temporary security
- *     credentials.
- *
  ****************************************************************************/
 
+/**
+ * \def H5FD_CURR_ROS3_FAPL_T_VERSION
+ * The version number of the H5FD_ros3_fapl_t configuration
+ * structure for the $H5FD_ROS3 driver.
+ */
 #define H5FD_CURR_ROS3_FAPL_T_VERSION 1
 
-#define H5FD_ROS3_MAX_REGION_LEN     32
-#define H5FD_ROS3_MAX_SECRET_ID_LEN  128
+/**
+ * \def H5FD_ROS3_MAX_REGION_LEN
+ * Maximum string length for specifying the region of the S3 bucket.
+ */
+#define H5FD_ROS3_MAX_REGION_LEN 32
+/**
+ * \def H5FD_ROS3_MAX_SECRET_ID_LEN
+ * Maximum string length for specifying the security ID.
+ */
+#define H5FD_ROS3_MAX_SECRET_ID_LEN 128
+/**
+ * \def H5FD_ROS3_MAX_SECRET_KEY_LEN
+ * Maximum string length for specifying the security key.
+ */
 #define H5FD_ROS3_MAX_SECRET_KEY_LEN 128
+/**
+ * \def H5FD_ROS3_MAX_SECRET_TOK_LEN
+ * Maximum string length for specifying the session/security token.
+ */
 #define H5FD_ROS3_MAX_SECRET_TOK_LEN 1024
 
+/**
+ *\struct H5FD_ros3_fapl_t
+ * \brief Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().
+ *
+ * \details H5FD_ros_fapl_t is a public structure that is used to pass
+ *          configuration data to the #H5FD_ROS3 driver via a File Access
+ *          Property List. A pointer to an instance of this structure is
+ *          a parameter to H5Pset_fapl_ros3() and H5Pget_fapl_ros3().
+ *
+ * \var int32_t H5FD_ros3_fapl_t::version
+ *      Version number of the H5FD_ros3_fapl_t structure. Any instance passed
+ *      to H5Pset_fapl_ros3() / H5Pget_fapl_ros3() must have a recognized version
+ *      number or an error will be raised. Currently, this field should be set
+ *      to #H5FD_CURR_ROS3_FAPL_T_VERSION.
+ *
+ * \var hbool_t H5FD_ros3_fapl_t::authenticate
+ *      A boolean which specifies if security credentials should be used for
+ *      accessing a S3 bucket.
+ *
+ * \var char H5FD_ros3_fapl_t::aws_region[H5FD_ROS3_MAX_REGION_LEN + 1]
+ *      A string which specifies the AWS region of the S3 bucket.
+ *
+ * \var char H5FD_ros3_fapl_t::secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1]
+ *      A string which specified the security ID.
+ *
+ * \var char H5FD_ros3_fapl_t::secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1]
+ *      A string which specified the security key.
+ *
+ */
 typedef struct H5FD_ros3_fapl_t {
     int32_t version;
     hbool_t authenticate;
@@ -96,33 +139,66 @@ typedef struct H5FD_ros3_fapl_t {
 extern "C" {
 #endif
 
+/**
+ * \brief Internal routine to initialize #H5FD_ROS3 driver. Not meant to be
+ *        called directly by an HDF5 application.
+ */
 H5_DLL hid_t H5FD_ros3_init(void);
 
 /**
  * \ingroup FAPL
  *
- * \todo Add missing documentation
+ * \brief Queries a File Access Property List for #H5FD_ROS3 file driver properties.
+ *
+ * \fapl_id
+ * \param[out] fa_out Pointer to #H5FD_ROS3 driver configuration structure.
+ * \returns \herr_t
  */
 H5_DLL herr_t H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out);
 
 /**
  * \ingroup FAPL
  *
- * \todo Add missing documentation
+ * \brief Modifies the specified File Access Property List to use the #H5FD_ROS3 driver.
+ *
+ * \fapl_id
+ * \param[in] fa Pointer to #H5FD_ROS3 driver configuration structure.
+ * \returns \herr_t
  */
 H5_DLL herr_t H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa);
 
 /**
  * \ingroup FAPL
  *
- * \todo Add missing documentation
+ * \brief Queries a File Access Property List for #H5FD_ROS3 file driver session/security
+ *        token.
+ *
+ * \fapl_id
+ * \param[in] size Size of the provided char array for storing the session/security token.
+ * \param[out] token Session/security token.
+ * \returns \herr_t
+ *
+ * \since 1.14.2
  */
 H5_DLL herr_t H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token);
 
 /**
  * \ingroup FAPL
  *
- * \todo Add missing documentation
+ * \brief Modifies the specified File Access Property List to use the #H5FD_ROS3 driver
+ *        by adding the specified session/security token.
+ *
+ * \fapl_id
+ * \param[in] token Session/security token.
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapy_ros3_token() modifies the File Access Property List to use the
+ *          #H5FD_ROS3 driver by adding or updating the session/security token.
+ *
+ *          The session token is only needed when you want to access a S3 bucket
+ *          using temporary security credentials.
+ *
+ * \since 1.14.2
  */
 H5_DLL herr_t H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token);
 

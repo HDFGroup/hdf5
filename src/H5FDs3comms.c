@@ -42,6 +42,7 @@
 #include "H5Eprivate.h"  /* error handling    */
 #include "H5MMprivate.h" /* memory management */
 #include "H5FDs3comms.h" /* S3 Communications */
+#include "H5FDros3.h"    /* ros3 file driver  */
 
 /****************/
 /* Local Macros */
@@ -793,6 +794,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     H5MM_xfree(handle->secret_id);
     H5MM_xfree(handle->region);
     H5MM_xfree(handle->signing_key);
+    H5MM_xfree(handle->token);
 
     HDassert(handle->httpverb != NULL);
     H5MM_xfree(handle->httpverb);
@@ -1163,6 +1165,7 @@ done:
             H5MM_xfree(handle->region);
             H5MM_xfree(handle->secret_id);
             H5MM_xfree(handle->signing_key);
+            H5MM_xfree(handle->token);
             if (handle->httpverb != NULL)
                 H5MM_xfree(handle->httpverb);
             H5MM_xfree(handle);
@@ -1226,8 +1229,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     hrb_t             *request       = NULL;
     int                ret           = 0; /* working variable to check  */
                                           /* return value of HDsnprintf  */
-    struct s3r_datastruct *sds       = NULL;
-    herr_t                 ret_value = SUCCEED;
+    char                  *authorization  = NULL;
+    char                  *buffer1        = NULL;
+    char                  *signed_headers = NULL;
+    struct s3r_datastruct *sds            = NULL;
+    herr_t                 ret_value      = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1315,7 +1321,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     else {
         /* authenticate request
          */
-        char authorization[2048 + 1];
+        authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
         /*   2048 := approximate max length...
          *     67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
          *             "SignedHeaders=,Signature=")>
@@ -1326,10 +1332,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
          * +  128 <max? len(signed_headers)>
          * + 1024 <max? len(session_token)>
          */
-        char buffer1[2048 + 1]; /* -> Canonical Request -> Signature */
-        char buffer2[256 + 1];  /* -> String To Sign -> Credential */
+        char buffer2[256 + 1]; /* -> String To Sign -> Credential */
         char iso8601now[ISO8601_SIZE];
-        char signed_headers[48 + 1024 + 1];
+        buffer1        = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN +
+                                             1); /* -> Canonical Request -> Signature */
+        signed_headers = (char *)H5MM_malloc(48 + H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
         /* should be large enough for nominal listing:
          * "host;range;x-amz-content-sha256;x-amz-date;x-amz-security-token"
          * + '\0', with "range;" and/or "x-amz-security-token" possibly absent
@@ -1411,7 +1418,9 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /**** COMPUTE AUTHORIZATION ****/
 
         /* buffer1 -> canonical request */
-        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, 2048, signed_headers, 48 + 1024, request)) {
+        if (FAIL == H5FD_s3comms_aws_canonical_request(buffer1, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                       signed_headers, 48 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                                                       request)) {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad canonical request");
         }
         /* buffer2->string-to-sign */
@@ -1427,9 +1436,10 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (ret == 0 || ret >= S3COMMS_MAX_CREDENTIAL_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 credential string");
 
-        ret = HDsnprintf(authorization, 2048, "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s",
-                         buffer2, signed_headers, buffer1);
-        if (ret <= 0 || ret >= 2048)
+        ret = HDsnprintf(authorization, 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN,
+                         "AWS4-HMAC-SHA256 Credential=%s,SignedHeaders=%s,Signature=%s", buffer2,
+                         signed_headers, buffer1);
+        if (ret <= 0 || ret >= 512 + H5FD_ROS3_MAX_SECRET_TOK_LEN)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format aws4 authorization string");
 
         /* append authorization header to http request buffer */
@@ -1518,6 +1528,18 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 done:
     /* clean any malloc'd resources
      */
+    if (authorization != NULL) {
+        H5MM_xfree(authorization);
+        authorization = NULL;
+    }
+    if (buffer1 != NULL) {
+        H5MM_xfree(buffer1);
+        buffer1 = NULL;
+    }
+    if (signed_headers != NULL) {
+        H5MM_xfree(signed_headers);
+        signed_headers = NULL;
+    }
     if (curlheaders != NULL) {
         curl_slist_free_all(curlheaders);
         curlheaders = NULL;

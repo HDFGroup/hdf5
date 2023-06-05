@@ -611,7 +611,7 @@ H5FD__ros3_fapl_free(void *_fa)
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ros3_token
  *
- * Purpose:     Returns session/secutiry token of the ros3 file access
+ * Purpose:     Returns session/security token of the ros3 file access
  *              property list though the function arguments.
  *
  * Return:      Success:        Non-negative
@@ -657,7 +657,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
 
     /* Copy the token data out */
     tokenlen = HDstrlen(token_src);
-    if (size < tokenlen) {
+    if (size <= tokenlen) {
         tokenlen = size - 1;
     }
     H5MM_memcpy(token_dst, token_src, sizeof(char) * tokenlen);
@@ -791,7 +791,8 @@ H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *
  * Function:    H5Pset_fapl_ros3_token()
  *
  * Purpose:     Modify the file access property list to use the H5FD_ROS3
- *              driver defined in this source file.
+ *              driver defined in this source file by adding or
+ *              modifying the session/security token property.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -820,7 +821,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if (HDstrlen(token) >= H5FD_ROS3_MAX_SECRET_TOK_LEN)
+    if (HDstrlen(token) > H5FD_ROS3_MAX_SECRET_TOK_LEN)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
                     "specified token exceeds the internally specified maximum string length")
 
@@ -832,7 +833,7 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
     }
     else {
-        if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char) * H5FD_ROS3_MAX_SECRET_TOK_LEN,
+        if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1),
                        (void *)token, NULL, NULL, NULL, NULL, H5FD__ros3_str_token_delete,
                        H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp, H5FD__ros3_str_token_close) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
