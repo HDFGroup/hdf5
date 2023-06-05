@@ -40,6 +40,8 @@ message (STATUS "COMMAND: ${TEST_EMULATOR} ${TEST_PROGRAM} ${TEST_ARGS}")
 if (TEST_LIBRARY_DIRECTORY)
   if (WIN32)
     set (ENV{PATH} "$ENV{PATH};${TEST_LIBRARY_DIRECTORY}")
+  elseif (APPLE)
+    set (ENV{DYLD_LIBRARY_PATH} "$ENV{DYLD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
   else ()
     set (ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${TEST_LIBRARY_DIRECTORY}")
   endif ()
@@ -374,6 +376,22 @@ if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
       COMMAND ${CMAKE_COMMAND} -E echo ${TEST_STREAM}
       RESULT_VARIABLE TEST_RESULT
   )
+endif ()
+
+if (NOT DEFINED ENV{HDF5_NOCLEANUP})
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}" AND NOT TEST_SAVE)
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
+  endif ()
+
+  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
+    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  endif ()
+
+  if (TEST_DELETE_LIST)
+    foreach (dfile in ${TEST_DELETE_LIST})
+      file (REMOVE ${dfile})
+    endforeach ()
+  endif ()
 endif ()
 
 # everything went fine...
