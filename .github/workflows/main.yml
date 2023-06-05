@@ -81,6 +81,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
+            docs: OFF
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -100,6 +101,7 @@ jobs:
             cpp: ON
             fortran: ON
             java: ON
+            docs: ON
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -120,6 +122,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -141,6 +144,7 @@ jobs:
             cpp: disable
             fortran: enable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: disable
@@ -161,6 +165,7 @@ jobs:
             cpp: ON
             fortran: OFF
             java: ON
+            docs: OFF
             libaecfc: ON
             localaec: OFF
             zlibfc: ON
@@ -186,6 +191,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -209,6 +215,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -232,6 +239,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -255,6 +263,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -278,6 +287,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -301,6 +311,7 @@ jobs:
             cpp: enable
             fortran: enable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: enable
             direct_vfd: enable
@@ -325,6 +336,7 @@ jobs:
             cpp: enable
             fortran: disable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
@@ -349,6 +361,7 @@ jobs:
             cpp: enable
             fortran: disable
             java: enable
+            docs: disable
             parallel: disable
             mirror_vfd: disable
             direct_vfd: enable
@@ -373,6 +386,7 @@ jobs:
             cpp: disable
             fortran: disable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: enable
@@ -396,6 +410,7 @@ jobs:
             cpp: disable
             fortran: disable
             java: disable
+            docs: disable
             parallel: enable
             mirror_vfd: disable
             direct_vfd: enable
@@ -507,7 +522,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DHDF5_BUILD_DOC=${{ matrix.docs }} -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && ! (matrix.thread_safety.enabled)
 
@@ -516,7 +531,7 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=OFF -DHDF5_BUILD_FORTRAN:BOOL=OFF -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_BUILD_HL_LIB:BOOL=OFF -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
+          cmake -C $GITHUB_WORKSPACE/config/cmake/cacheinit.cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=OFF -DHDF5_BUILD_FORTRAN:BOOL=OFF -DHDF5_BUILD_JAVA:BOOL=OFF -DHDF5_BUILD_HL_LIB:BOOL=OFF -DHDF5_BUILD_DOC=OFF -DBUILD_SZIP_WITH_FETCHCONTENT=${{ matrix.libaecfc }} -DLIBAEC_USE_LOCALCONTENT=${{ matrix.localaec }} -DBUILD_ZLIB_WITH_FETCHCONTENT=${{ matrix.zlibfc }} -DZLIB_USE_LOCALCONTENT=${{ matrix.localzlib }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (matrix.thread_safety.enabled)
 
