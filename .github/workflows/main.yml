@@ -378,9 +378,9 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
-        if: (matrix.generator == 'autogen') && !  (matrix.thread_safety.enabled)
+        if: (matrix.generator == 'autogen') && (matrix.thread_safety.enabled)
 
       #
       # CMAKE CONFIGURE
@@ -433,3 +433,17 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
         if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+
+      #
+      # INSTALL (note that this runs even when we don't run the tests)
+      #
+
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')
