@@ -310,7 +310,7 @@ H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo)
         /* Check if we don't know how many links there are */
         if (linfo->nlinks == HSIZET_MAX) {
             /* Check if we are using "dense" link storage */
-            if (H5F_addr_defined(linfo->fheap_addr)) {
+            if (H5_addr_defined(linfo->fheap_addr)) {
                 /* Open the name index v2 B-tree */
                 if (NULL == (bt2_name = H5B2_open(grp_oloc->file, linfo->name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
@@ -473,7 +473,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         /* (If the encoded form of the link is too large to fit into an object
          *  header message, convert to using dense link storage instead of link messages)
          */
-        if (H5F_addr_defined(linfo.fheap_addr))
+        if (H5_addr_defined(linfo.fheap_addr))
             use_new_dense = TRUE;
         else if (linfo.nlinks < ginfo.max_compact && link_msg_size < H5O_MESG_MAX_SIZE)
             use_new_dense = FALSE;
@@ -649,7 +649,7 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_order_t
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
         } /* end if */
 
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Iterate over the links in the group, building a table of the link messages */
             if ((ret_value = H5G__dense_iterate(grp_oloc->file, &linfo, idx_type, order, skip, last_lnk, op,
                                                 op_data)) < 0)
@@ -730,7 +730,7 @@ H5G__obj_info(const H5O_loc_t *oloc, H5G_info_t *grp_info)
         grp_info->max_corder = linfo.max_corder;
 
         /* Check if the group is using compact or dense storage for its links */
-        if (H5F_addr_defined(linfo.fheap_addr))
+        if (H5_addr_defined(linfo.fheap_addr))
             grp_info->storage_type = H5G_STORAGE_TYPE_DENSE;
         else
             grp_info->storage_type = H5G_STORAGE_TYPE_COMPACT;
@@ -790,7 +790,7 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
 
         /* Check for dense link storage */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
             if (H5G__dense_get_name_by_idx(oloc->file, &linfo, idx_type, order, n, name, name_size,
                                            name_len) < 0)
@@ -848,7 +848,7 @@ H5G__obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo)
         linfo->max_corder = 0;
 
     /* Check for transitioning out of dense storage, if we are using it */
-    if (H5F_addr_defined(linfo->fheap_addr)) {
+    if (H5_addr_defined(linfo->fheap_addr)) {
         /* Check if there's no more links */
         if (linfo->nlinks == 0) {
             /* Delete the dense storage */
@@ -962,7 +962,7 @@ H5G_obj_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *n
         use_old_format = FALSE;
 
         /* Check for dense or compact storage */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Remove object from the dense link storage */
             if (H5G__dense_remove(oloc->file, &linfo, grp_full_path_r, name) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
@@ -1032,7 +1032,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
         use_old_format = FALSE;
 
         /* Check for dense or compact storage */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Remove object from the dense link storage */
             if (H5G__dense_remove_by_idx(grp_oloc->file, &linfo, grp_full_path_r, idx_type, order, n) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't remove object")
@@ -1095,7 +1095,7 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
     if (linfo_exists) {
         /* Check for dense link storage */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Get the object's info from the dense link storage */
             if (H5G__dense_lookup(grp_oloc->file, &linfo, name, found, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
@@ -1153,7 +1153,7 @@ H5G_obj_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_index_t idx_type, H5_iter_or
         } /* end if */
 
         /* Check for dense link storage */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Get the link from the dense storage */
             if (H5G__dense_lookup_by_idx(grp_oloc->file, &linfo, idx_type, order, n, lnk) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")

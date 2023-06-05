@@ -278,7 +278,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     HDassert(mesg);
 
     /* Free file space for cache image */
-    if (H5F_addr_defined(mesg->addr)) {
+    if (H5_addr_defined(mesg->addr)) {
         /* The space for the cache image block was allocated directly
          * from the VFD layer at the end of file.  As this was the
          * last file space allocation before shutdown, the cache image
@@ -289,7 +289,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
 
-            HDassert(H5F_addr_eq(final_eoa, mesg->addr + mesg->size));
+            HDassert(H5_addr_eq(final_eoa, mesg->addr + mesg->size));
 
             if (H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")

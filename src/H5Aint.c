@@ -1688,8 +1688,8 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
     /* Sanity check */
     HDassert(f);
     HDassert(ainfo);
-    HDassert(H5F_addr_defined(ainfo->fheap_addr));
-    HDassert(H5F_addr_defined(ainfo->name_bt2_addr));
+    HDassert(H5_addr_defined(ainfo->fheap_addr));
+    HDassert(H5_addr_defined(ainfo->name_bt2_addr));
     HDassert(atable);
 
     /* Open the name index v2 B-tree */
@@ -2060,7 +2060,7 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
         /* Check if we don't know how many attributes there are */
         if (ainfo->nattrs == HSIZET_MAX) {
             /* Check if we are using "dense" attribute storage */
-            if (H5F_addr_defined(ainfo->fheap_addr)) {
+            if (H5_addr_defined(ainfo->fheap_addr)) {
                 /* Open the name index v2 B-tree */
                 if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")

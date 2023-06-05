@@ -302,7 +302,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     HDassert(image);
     HDassert(udata);
     HDassert(udata->f);
-    HDassert(H5F_addr_defined(udata->addr));
+    HDassert(H5_addr_defined(udata->addr));
 
     /* Allocate space for the extensible array data structure */
     if (NULL == (hdr = H5EA__hdr_alloc(udata->f)))
@@ -351,7 +351,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     H5F_addr_decode(udata->f, &image, &hdr->idx_blk_addr); /* Address of index block */
 
     /* Index block statistics */
-    if (H5F_addr_defined(hdr->idx_blk_addr)) {
+    if (H5_addr_defined(hdr->idx_blk_addr)) {
         H5EA_iblock_t iblock; /* Fake index block for computing size */
 
         /* Set index block count for file */
@@ -736,7 +736,7 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(hdr->f, &image, &arr_addr);
-    if (H5F_addr_ne(arr_addr, hdr->addr))
+    if (H5_addr_ne(arr_addr, hdr->addr))
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
 
     /* Internal information */
@@ -1036,7 +1036,7 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
     HDassert(udata);
     HDassert(udata->hdr);
     HDassert(udata->sblk_idx > 0);
-    HDassert(H5F_addr_defined(udata->sblk_addr));
+    HDassert(H5_addr_defined(udata->sblk_addr));
     HDassert(image_len);
 
     /* Set up fake super block for computing size on disk */
@@ -1134,7 +1134,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     HDassert(udata->hdr);
     HDassert(udata->parent);
     HDassert(udata->sblk_idx > 0);
-    HDassert(H5F_addr_defined(udata->sblk_addr));
+    HDassert(H5_addr_defined(udata->sblk_addr));
 
     /* Allocate the extensible array super block */
     if (NULL == (sblock = H5EA__sblock_alloc(udata->hdr, udata->parent, udata->sblk_idx)))
@@ -1159,7 +1159,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
-    if (H5F_addr_ne(arr_addr, udata->hdr->addr))
+    if (H5_addr_ne(arr_addr, udata->hdr->addr))
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
 
     /* Offset of block within the array's address space */
@@ -1560,7 +1560,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     HDassert(udata->hdr);
     HDassert(udata->parent);
     HDassert(udata->nelmts > 0);
-    HDassert(H5F_addr_defined(udata->dblk_addr));
+    HDassert(H5_addr_defined(udata->dblk_addr));
 
     /* Allocate the extensible array data block */
     if (NULL == (dblock = H5EA__dblock_alloc(udata->hdr, udata->parent, udata->nelmts)))
@@ -1588,7 +1588,7 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
-    if (H5F_addr_ne(arr_addr, udata->hdr->addr))
+    if (H5_addr_ne(arr_addr, udata->hdr->addr))
         HGOTO_ERROR(H5E_EARRAY, H5E_BADVALUE, NULL, "wrong extensible array header address")
 
     /* Offset of block within the array's address space */
@@ -2002,7 +2002,7 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     HDassert(udata);
     HDassert(udata->hdr);
     HDassert(udata->parent);
-    HDassert(H5F_addr_defined(udata->dblk_page_addr));
+    HDassert(H5_addr_defined(udata->dblk_page_addr));
 
     /* Allocate the extensible array data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))

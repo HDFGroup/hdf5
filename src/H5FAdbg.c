@@ -91,8 +91,8 @@ H5FA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(addr));
+    HDassert(H5_addr_defined(obj_addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
@@ -164,13 +164,13 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
 
     /* Check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(cls);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(hdr_addr));
+    HDassert(H5_addr_defined(obj_addr));
 
     /* Check for debugging context callback available */
     if (cls->crt_dbg_ctx)

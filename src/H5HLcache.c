@@ -379,7 +379,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, voi
     /* Check if heap block exists */
     if (heap.dblk_size)
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
+        if (H5_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr))
             /* Note that the heap should be a single object in the cache */
             *actual_len += heap.dblk_size;
 
@@ -418,7 +418,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
     HDassert(udata->sizeof_size > 0);
     HDassert(udata->sizeof_addr > 0);
     HDassert(udata->sizeof_prfx > 0);
-    HDassert(H5F_addr_defined(udata->prfx_addr));
+    HDassert(H5_addr_defined(udata->prfx_addr));
     HDassert(dirty);
 
     /* Allocate space in memory for the heap */
@@ -436,7 +436,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Check if heap block exists */
     if (heap->dblk_size) {
         /* Check if heap data block is contiguous with header */
-        if (H5F_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
+        if (H5_addr_eq((heap->prfx_addr + heap->prfx_size), heap->dblk_addr)) {
             /* Note that the heap should be a single object in the cache */
             heap->single_cache_obj = TRUE;
 
@@ -553,7 +553,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     HDassert(image);
     HDassert(prfx);
     HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    HDassert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
     HDassert(prfx->heap);
 
     /* Get the pointer to the heap */
@@ -645,7 +645,7 @@ H5HL__cache_prefix_free_icr(void *_thing)
     /* Check arguments */
     HDassert(prfx);
     HDassert(prfx->cache_info.type == H5AC_LHEAP_PRFX);
-    HDassert(H5F_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
+    HDassert(H5_addr_eq(prfx->cache_info.addr, prfx->heap->prfx_addr));
 
     /* Destroy local heap prefix */
     if (H5HL__prfx_dest(prfx) < 0)

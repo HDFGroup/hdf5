@@ -303,7 +303,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, hbool_t *found, void *
     HDassert(type->decode);
     HDassert(type->cmp3);
     HDassert(type->found);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
@@ -395,7 +395,7 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     HDassert(f);
     HDassert(bt_ud);
     HDassert(bt_ud->bt);
-    HDassert(H5F_addr_defined(bt_ud->addr));
+    HDassert(H5_addr_defined(bt_ud->addr));
     HDassert(split_bt_ud);
     HDassert(!split_bt_ud->bt);
 
@@ -414,11 +414,11 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     if (H5DEBUG(B)) {
         const char *side;
 
-        if (!H5F_addr_defined(bt_ud->bt->left) && !H5F_addr_defined(bt_ud->bt->right))
+        if (!H5_addr_defined(bt_ud->bt->left) && !H5_addr_defined(bt_ud->bt->right))
             side = "ONLY";
-        else if (!H5F_addr_defined(bt_ud->bt->right))
+        else if (!H5_addr_defined(bt_ud->bt->right))
             side = "RIGHT";
-        else if (!H5F_addr_defined(bt_ud->bt->left))
+        else if (!H5_addr_defined(bt_ud->bt->left))
             side = "LEFT";
         else
             side = "MIDDLE";
@@ -431,9 +431,9 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
      * Decide how to split the children of the old node among the old node
      * and the new node.
      */
-    if (!H5F_addr_defined(bt_ud->bt->right))
+    if (!H5_addr_defined(bt_ud->bt->right))
         nleft = (unsigned)((double)shared->two_k * split_ratios[2]); /*right*/
-    else if (!H5F_addr_defined(bt_ud->bt->left))
+    else if (!H5_addr_defined(bt_ud->bt->left))
         nleft = (unsigned)((double)shared->two_k * split_ratios[0]); /*left*/
     else
         nleft = (unsigned)((double)shared->two_k * split_ratios[1]); /*middle*/
@@ -489,7 +489,7 @@ H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_
     split_bt_ud->bt->left  = bt_ud->addr;
     split_bt_ud->bt->right = bt_ud->bt->right;
 
-    if (H5F_addr_defined(bt_ud->bt->right)) {
+    if (H5_addr_defined(bt_ud->bt->right)) {
         H5B_t *tmp_bt;
 
         if (NULL ==
@@ -559,7 +559,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     HDassert(f);
     HDassert(type);
     HDassert(type->sizeof_nkey <= sizeof _lt_key);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
@@ -588,7 +588,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     } /* end if */
     HDassert(H5B_INS_RIGHT == my_ins);
     HDassert(split_bt_ud.bt);
-    HDassert(H5F_addr_defined(split_bt_ud.addr));
+    HDassert(H5_addr_defined(split_bt_ud.addr));
 
     /* Get level of old root */
     level = bt_ud.bt->level;
@@ -696,7 +696,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
 
     HDassert(bt);
     HDassert(bt_flags);
-    HDassert(H5F_addr_defined(child));
+    HDassert(H5_addr_defined(child));
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     HDassert(bt->nchildren < shared->two_k);
@@ -794,7 +794,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     HDassert(f);
     HDassert(bt_ud);
     HDassert(bt_ud->bt);
-    HDassert(H5F_addr_defined(bt_ud->addr));
+    HDassert(H5_addr_defined(bt_ud->addr));
     HDassert(type);
     HDassert(type->decode);
     HDassert(type->cmp3);
@@ -805,7 +805,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     HDassert(rt_key_changed);
     HDassert(split_bt_ud);
     HDassert(!split_bt_ud->bt);
-    HDassert(!H5F_addr_defined(split_bt_ud->addr));
+    HDassert(!H5_addr_defined(split_bt_ud->addr));
     HDassert(split_bt_ud->cache_flags == H5AC__NO_FLAGS_SET);
 
     bt = bt_ud->bt;
@@ -905,7 +905,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
 #ifdef H5_STRICT_FORMAT_CHECKS
         /* Since we are to the left of the leftmost key there must not be a left
          * sibling */
-        if (H5F_addr_defined(bt->left))
+        if (H5_addr_defined(bt->left))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values")
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
@@ -956,7 +956,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
 #ifdef H5_STRICT_FORMAT_CHECKS
         /* Since we are to the right of the rightmost key there must not be a
          * right sibling */
-        if (H5F_addr_defined(bt->right))
+        if (H5_addr_defined(bt->right))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "internal error: likely corrupt key values")
 #endif /* H5_STRICT_FORMAT_CHECKS */
     }
@@ -1126,7 +1126,7 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operato
      */
     HDassert(f);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(op);
     HDassert(udata);
 
@@ -1185,7 +1185,7 @@ H5B_iterate(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operator_t op, 
      */
     HDassert(f);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(op);
     HDassert(udata);
 
@@ -1237,7 +1237,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
     FUNC_ENTER_PACKAGE
 
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(type);
     HDassert(type->decode);
     HDassert(type->cmp3);
@@ -1358,7 +1358,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                  * between siblings.  Overwrite the key that that is not
                  * "critical" for any child in its node to maintain this
                  * consistency (and avoid breaking key/child consistency) */
-                if (H5F_addr_defined(bt->left)) {
+                if (H5_addr_defined(bt->left)) {
                     if (NULL == (sibling = (H5B_t *)H5AC_protect(f, H5AC_BT, bt->left, &cache_udata,
                                                                  H5AC__NO_FLAGS_SET)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR,
@@ -1378,7 +1378,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                                     "unable to release node from tree")
                     sibling = NULL; /* Make certain future references will be caught */
                 }                   /* end if */
-                if (H5F_addr_defined(bt->right)) {
+                if (H5_addr_defined(bt->right)) {
                     if (NULL == (sibling = (H5B_t *)H5AC_protect(f, H5AC_BT, bt->right, &cache_udata,
                                                                  H5AC__NO_FLAGS_SET)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5B_INS_ERROR,
@@ -1495,7 +1495,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
         ret_value = H5B_INS_NOOP;
 
     /* Patch keys in neighboring trees if necessary */
-    if (*lt_key_changed && H5F_addr_defined(bt->left)) {
+    if (*lt_key_changed && H5_addr_defined(bt->left)) {
         HDassert(type->critical_key == H5B_LEFT);
         HDassert(level > 0);
 
@@ -1510,7 +1510,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release node from tree")
         sibling = NULL; /* Make certain future references will be caught */
     }                   /* end if */
-    else if (*rt_key_changed && H5F_addr_defined(bt->right)) {
+    else if (*rt_key_changed && H5_addr_defined(bt->right)) {
         HDassert(type->critical_key == H5B_RIGHT);
         HDassert(level > 0);
 
@@ -1566,7 +1566,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     HDassert(f);
     HDassert(type);
     HDassert(type->sizeof_nkey <= sizeof _lt_key);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* The actual removal */
     if (H5B_INS_ERROR ==
@@ -1608,7 +1608,7 @@ H5B_delete(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     /* Check args */
     HDassert(f);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
 
     /* Get shared info for B-tree */
     if (NULL == (rc_shared = (type->get_shared)(f, udata)))
@@ -1854,7 +1854,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, const H5B_
      */
     HDassert(f);
     HDassert(type);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(info_udata);
     HDassert(info_udata->bt_info);
     HDassert(info_udata->udata);
@@ -1893,7 +1893,7 @@ H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, const H5B_
      * Follow the right-sibling pointer from node to node until we've
      *      processed all nodes.
      */
-    while (H5F_addr_defined(next_addr)) {
+    while (H5_addr_defined(next_addr)) {
         /* Protect the next node to the right */
         addr = next_addr;
         if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
@@ -1953,7 +1953,7 @@ H5B_get_info(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_info_t *bt_inf
     HDassert(f);
     HDassert(type);
     HDassert(bt_info);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(udata);
 
     /* Portably initialize B-tree info struct */
@@ -2005,7 +2005,7 @@ H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
     HDassert(f);
     HDassert(type);
 
-    if (!H5F_addr_defined(addr))
+    if (!H5_addr_defined(addr))
         HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "address is undefined")
 
     /* Get shared info for B-tree */

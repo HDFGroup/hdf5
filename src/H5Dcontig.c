@@ -212,7 +212,7 @@ H5D__contig_fill(H5D_t *dset)
 
     /* Check args */
     HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
-    HDassert(H5F_addr_defined(dset->shared->layout.storage.u.contig.addr));
+    HDassert(H5_addr_defined(dset->shared->layout.storage.u.contig.addr));
     HDassert(dset->shared->layout.storage.u.contig.size > 0);
     HDassert(dset->shared->space);
     HDassert(dset->shared->type);
@@ -538,7 +538,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
     HDassert(storage);
 
     /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->u.contig.addr);
+    ret_value = (hbool_t)H5_addr_defined(storage->u.contig.addr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_is_space_alloc() */

@@ -514,7 +514,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     HDassert(chunkno < oh->nchunks);
     HDassert(size > 0);
     HDassert(msg_idx != NULL);
-    HDassert(H5F_addr_defined(oh->chunk[chunkno].addr));
+    HDassert(H5_addr_defined(oh->chunk[chunkno].addr));
 
     /* Test to see if the specified chunk ends with a null messages.
      * If successful, set the index of the null message in extend_msg.
@@ -903,7 +903,7 @@ H5O__alloc_chunk(H5F_t *f, H5O_t *oh, size_t size, size_t found_null, const H5O_
 
     /* Allocate space in file to hold the new chunk */
     new_chunk_addr = H5MF_alloc(f, H5FD_MEM_OHDR, (hsize_t)size);
-    if (!H5F_addr_defined(new_chunk_addr))
+    if (!H5_addr_defined(new_chunk_addr))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate space for new chunk")
 
     /* Create the new chunk giving it a file address. */

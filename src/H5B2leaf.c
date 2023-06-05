@@ -142,7 +142,7 @@ done:
                                 "unable to remove v2 B-tree leaf node from cache")
 
             /* Release leaf node's disk space */
-            if (H5F_addr_defined(node_ptr->addr) &&
+            if (H5_addr_defined(node_ptr->addr) &&
                 H5MF_xfree(hdr->f, H5FD_MEM_BTREE, node_ptr->addr, (hsize_t)hdr->node_size) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL,
                             "unable to release file space for v2 B-tree leaf node")
@@ -180,7 +180,7 @@ H5B2__protect_leaf(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, hbo
     /* Check arguments. */
     HDassert(hdr);
     HDassert(node_ptr);
-    HDassert(H5F_addr_defined(node_ptr->addr));
+    HDassert(H5_addr_defined(node_ptr->addr));
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
@@ -275,7 +275,7 @@ H5B2__neighbor_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, void *neigh
     /* Check arguments. */
     HDassert(hdr);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
     HDassert(op);
 
     /* Lock current B-tree node */
@@ -347,7 +347,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
     /* Check arguments. */
     HDassert(hdr);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
@@ -461,7 +461,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_update_s
     /* Check arguments. */
     HDassert(hdr);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
@@ -708,7 +708,7 @@ H5B2__shadow_leaf(H5B2_leaf_t *leaf, H5B2_node_ptr_t *curr_node_ptr)
      */
     HDassert(leaf);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
     hdr = leaf->hdr;
     HDassert(hdr);
     HDassert(hdr->swmr_write);
@@ -775,7 +775,7 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_
     /* Check arguments. */
     HDassert(hdr);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))
@@ -881,7 +881,7 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, H5B2_node_ptr_t *curr_node_ptr, H5B2_n
     /* Check arguments. */
     HDassert(hdr);
     HDassert(curr_node_ptr);
-    HDassert(H5F_addr_defined(curr_node_ptr->addr));
+    HDassert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock B-tree leaf node */
     if (NULL == (leaf = H5B2__protect_leaf(hdr, parent, curr_node_ptr, FALSE, H5AC__NO_FLAGS_SET)))

@@ -354,7 +354,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         min_dblock_size *= 2;
 
     /* Check if this is the first block in the heap */
-    if (!H5F_addr_defined(hdr->man_dtable.table_addr) &&
+    if (!H5_addr_defined(hdr->man_dtable.table_addr) &&
         min_dblock_size == hdr->man_dtable.cparam.start_block_size) {
         /* Create new direct block at starting offset */
         if (H5HF__man_dblock_create(hdr, NULL, 0, &dblock_addr, ret_sec_node) < 0)
@@ -440,7 +440,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
      * Check arguments.
      */
     HDassert(hdr);
-    HDassert(H5F_addr_defined(dblock_addr));
+    HDassert(H5_addr_defined(dblock_addr));
     HDassert(dblock_size > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
@@ -467,7 +467,7 @@ H5HF__man_dblock_protect(H5HF_hdr_t *hdr, haddr_t dblock_addr, size_t dblock_siz
         } /* end if */
         else {
             /* Sanity check */
-            HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
+            HDassert(H5_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
 
             /* Set up parameters to read filtered direct block */
             udata.odi_size    = par_iblock->filt_ents[par_entry].size;
@@ -561,7 +561,7 @@ H5HF__man_dblock_locate(H5HF_hdr_t *hdr, hsize_t obj_off, H5HF_indirect_t **ret_
         iblock_addr = iblock->ents[entry].addr;
 
         /* Check if we need to (re-)create the child indirect block */
-        if (!H5F_addr_defined(iblock_addr)) {
+        if (!H5_addr_defined(iblock_addr)) {
             if (H5HF__man_iblock_create(hdr, iblock, entry, nrows, nrows, &iblock_addr) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
 
@@ -627,7 +627,7 @@ H5HF__man_dblock_delete(H5F_t *f, haddr_t dblock_addr, hsize_t dblock_size)
      * Check arguments.
      */
     HDassert(f);
-    HDassert(H5F_addr_defined(dblock_addr));
+    HDassert(H5_addr_defined(dblock_addr));
     HDassert(dblock_size > 0);
 
     /* Check the direct block's status in the metadata cache */

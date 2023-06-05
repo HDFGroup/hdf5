@@ -202,11 +202,11 @@ H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size)
     heap->dblk_size = new_heap_size;
 
     /* Check if heap data block actually moved in the file */
-    if (H5F_addr_eq(old_addr, new_addr)) {
+    if (H5_addr_eq(old_addr, new_addr)) {
         /* Check if heap data block is contiguous w/prefix */
         if (heap->single_cache_obj) {
             /* Sanity check */
-            HDassert(H5F_addr_eq(heap->prfx_addr + heap->prfx_size, old_addr));
+            HDassert(H5_addr_eq(heap->prfx_addr + heap->prfx_size, old_addr));
             HDassert(heap->prfx);
 
             /* Resize the heap prefix in the cache */
@@ -215,7 +215,7 @@ H5HL__dblk_realloc(H5F_t *f, H5HL_t *heap, size_t new_heap_size)
         }
         else {
             /* Sanity check */
-            HDassert(H5F_addr_ne(heap->prfx_addr + heap->prfx_size, old_addr));
+            HDassert(H5_addr_ne(heap->prfx_addr + heap->prfx_size, old_addr));
             HDassert(heap->dblk);
 
             /* Resize the heap data block in the cache */

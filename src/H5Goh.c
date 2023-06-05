@@ -327,7 +327,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Sanity check */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5_addr_defined(loc->addr));
     HDassert(oh);
     HDassert(bh_info);
 
@@ -342,7 +342,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't read LINFO message")
 
         /* Check if name index available */
-        if (H5F_addr_defined(linfo.name_bt2_addr)) {
+        if (H5_addr_defined(linfo.name_bt2_addr)) {
             /* Open the name index v2 B-tree */
             if (NULL == (bt2_name = H5B2_open(loc->file, linfo.name_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
@@ -353,7 +353,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         } /* end if */
 
         /* Check if creation order index available */
-        if (H5F_addr_defined(linfo.corder_bt2_addr)) {
+        if (H5_addr_defined(linfo.corder_bt2_addr)) {
             /* Open the creation order index v2 B-tree */
             if (NULL == (bt2_corder = H5B2_open(loc->file, linfo.corder_bt2_addr, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL,
@@ -366,7 +366,7 @@ H5O__group_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
         } /* end if */
 
         /* Get fractal heap size, if available */
-        if (H5F_addr_defined(linfo.fheap_addr)) {
+        if (H5_addr_defined(linfo.fheap_addr)) {
             /* Open the fractal heap for links */
             if (NULL == (fheap = H5HF_open(loc->file, linfo.fheap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")

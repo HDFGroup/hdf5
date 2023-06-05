@@ -452,8 +452,8 @@ H5G__stab_delete(H5F_t *f, const H5O_stab_t *stab)
 
     HDassert(f);
     HDassert(stab);
-    HDassert(H5F_addr_defined(stab->btree_addr));
-    HDassert(H5F_addr_defined(stab->heap_addr));
+    HDassert(H5_addr_defined(stab->btree_addr));
+    HDassert(H5_addr_defined(stab->heap_addr));
 
     /* Pin the heap down in memory */
     if (NULL == (heap = H5HL_protect(f, stab->heap_addr, H5AC__NO_FLAGS_SET)))

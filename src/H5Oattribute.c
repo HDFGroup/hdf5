@@ -246,7 +246,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
         } /* end else */
 
         /* Check if switching to "dense" attribute storage is possible */
-        if (!H5F_addr_defined(ainfo.fheap_addr)) {
+        if (!H5_addr_defined(ainfo.fheap_addr)) {
             htri_t shareable;    /* Whether the attribute will be shared */
             size_t raw_size = 0; /* Raw size of message */
 
@@ -314,7 +314,7 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     } /* end else */
 
     /* Check for storing attribute with dense storage */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Insert attribute into dense storage */
         if (H5A__dense_insert(loc->file, &ainfo, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to add to dense storage")
@@ -478,7 +478,7 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
     } /* end else if */
     else {
         /* Check for attributes in dense storage */
-        if (H5F_addr_defined(ainfo.fheap_addr)) {
+        if (H5_addr_defined(ainfo.fheap_addr)) {
             /* Open attribute with dense storage */
             if (NULL == (opened_attr = H5A__dense_open(loc->file, &ainfo, name)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
@@ -901,7 +901,7 @@ H5O__attr_write(const H5O_loc_t *loc, H5A_t *attr)
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Modify the attribute data in dense storage */
         if (H5A__dense_write(loc->file, &ainfo, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
@@ -1147,7 +1147,7 @@ H5O__attr_rename(const H5O_loc_t *loc, const char *old_name, const char *new_nam
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Rename the attribute data in dense storage */
         if (H5A__dense_rename(loc->file, &ainfo, old_name, new_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
@@ -1220,7 +1220,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
     /* Check arguments */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
+    HDassert(H5_addr_defined(loc->addr));
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
@@ -1236,7 +1236,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Check for skipping too many attributes */
         if (skip > 0 && skip >= ainfo.nattrs)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
@@ -1354,7 +1354,7 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
     ainfo->nattrs--;
 
     /* Check for shifting from dense storage back to compact storage */
-    if (H5F_addr_defined(ainfo->fheap_addr) && ainfo->nattrs < oh->min_dense) {
+    if (H5_addr_defined(ainfo->fheap_addr) && ainfo->nattrs < oh->min_dense) {
         hbool_t can_convert = TRUE; /* Whether converting to attribute messages is possible */
         size_t  u;                  /* Local index */
 
@@ -1529,7 +1529,7 @@ H5O__attr_remove(const H5O_loc_t *loc, const char *name)
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Delete attribute from dense storage */
         if (H5A__dense_remove(loc->file, &ainfo, name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
@@ -1610,7 +1610,7 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Delete attribute from dense storage */
         if (H5A__dense_remove_by_idx(loc->file, &ainfo, idx_type, order, n) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
@@ -1791,7 +1791,7 @@ H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists)
     } /* end if */
 
     /* Check for attributes stored densely */
-    if (H5F_addr_defined(ainfo.fheap_addr)) {
+    if (H5_addr_defined(ainfo.fheap_addr)) {
         /* Check if attribute exists in dense storage */
         if (H5A__dense_exists(loc->file, &ainfo, name, attr_exists) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
@@ -1854,7 +1854,7 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
         else if (ainfo_exists > 0) {
             /* Check if name index available */
-            if (H5F_addr_defined(ainfo.name_bt2_addr)) {
+            if (H5_addr_defined(ainfo.name_bt2_addr)) {
                 /* Open the name index v2 B-tree */
                 if (NULL == (bt2_name = H5B2_open(f, ainfo.name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
@@ -1865,7 +1865,7 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
             } /* end if */
 
             /* Check if creation order index available */
-            if (H5F_addr_defined(ainfo.corder_bt2_addr)) {
+            if (H5_addr_defined(ainfo.corder_bt2_addr)) {
                 /* Open the creation order index v2 B-tree */
                 if (NULL == (bt2_corder = H5B2_open(f, ainfo.corder_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL,
@@ -1877,7 +1877,7 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
             } /* end if */
 
             /* Get storage size of fractal heap, if it's used */
-            if (H5F_addr_defined(ainfo.fheap_addr)) {
+            if (H5_addr_defined(ainfo.fheap_addr)) {
                 /* Open the fractal heap for attributes */
                 if (NULL == (fheap = H5HF_open(f, ainfo.fheap_addr)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")

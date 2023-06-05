@@ -137,7 +137,7 @@ H5O__cont_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     HDassert(f);
     HDassert(p);
     HDassert(cont);
-    HDassert(H5F_addr_defined(cont->addr));
+    HDassert(H5_addr_defined(cont->addr));
     HDassert(cont->size > 0);
 
     /* encode */

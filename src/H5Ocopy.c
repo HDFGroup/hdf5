@@ -225,7 +225,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
 
     HDassert(oloc_src);
     HDassert(oloc_src->file);
-    HDassert(H5F_addr_defined(oloc_src->addr));
+    HDassert(H5_addr_defined(oloc_src->addr));
     HDassert(oloc_dst->file);
     HDassert(cpy_info);
 
@@ -650,7 +650,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
              (size_t)dst_oh_size + oh_dst->chunk[0].image);
 
     /* Set the dest. object location to the first chunk address */
-    HDassert(H5F_addr_defined(addr_new));
+    HDassert(H5_addr_defined(addr_new));
     oloc_dst->addr = addr_new;
 
     /* If we are merging committed datatypes and this is a committed datatype, insert
@@ -952,7 +952,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     /* Sanity check */
     HDassert(oloc_src);
     HDassert(oloc_src->file);
-    HDassert(H5F_addr_defined(oloc_src->addr));
+    HDassert(H5_addr_defined(oloc_src->addr));
     HDassert(oloc_dst->file);
 
     /* Initialize copy info before errors can be thrown */
@@ -1186,7 +1186,7 @@ H5O__copy_search_comm_dt_attr_cb(const H5A_t *attr, void *_udata)
     HDassert(attr);
     HDassert(udata);
     HDassert(udata->dst_dt_list);
-    HDassert(H5F_addr_defined(udata->obj_oloc.addr));
+    HDassert(H5_addr_defined(udata->obj_oloc.addr));
 
     /* Get attribute datatype */
     if (NULL == (dt = H5A_type(attr)))

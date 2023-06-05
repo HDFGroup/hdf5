@@ -248,7 +248,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->f);
-    HDassert(H5F_addr_defined(udata->addr));
+    HDassert(H5_addr_defined(udata->addr));
 
     /* Allocate space for the fixed array data structure */
     if (NULL == (hdr = H5FA__hdr_alloc(udata->f)))
@@ -285,7 +285,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     H5F_addr_decode(udata->f, &image, &hdr->dblk_addr); /* Address of index block */
 
     /* Check for data block */
-    if (H5F_addr_defined(hdr->dblk_addr)) {
+    if (H5_addr_defined(hdr->dblk_addr)) {
         H5FA_dblock_t dblock;           /* Fake data block for computing size */
         size_t        dblk_page_nelmts; /* # of elements per data block page */
 
@@ -676,7 +676,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
-    if (H5F_addr_ne(arr_addr, udata->hdr->addr))
+    if (H5_addr_ne(arr_addr, udata->hdr->addr))
         HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header address")
 
     /* Page initialization flags */
@@ -1075,7 +1075,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     HDassert(udata);
     HDassert(udata->hdr);
     HDassert(udata->nelmts > 0);
-    HDassert(H5F_addr_defined(udata->dblk_page_addr));
+    HDassert(H5_addr_defined(udata->dblk_page_addr));
 
     /* Allocate the fixed array data block page */
     if (NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
