@@ -1089,8 +1089,7 @@ smoke_check_5(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.5
-    };
+        /* double      empty_reserve          = */ 0.5};
 
     if (paged)
         TESTING("smoke check #5P -- all clean, ins, prot, unprot, AR cache 1")
@@ -2048,7 +2047,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2082,7 +2082,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2114,7 +2115,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2146,7 +2148,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2170,7 +2173,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2207,7 +2211,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2234,7 +2239,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
@@ -2343,7 +2349,8 @@ smoke_check_10(int express_test, unsigned paged)
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2375,7 +2382,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2407,7 +2415,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2439,7 +2448,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2463,7 +2473,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2490,7 +2501,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2514,7 +2526,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2541,7 +2554,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
