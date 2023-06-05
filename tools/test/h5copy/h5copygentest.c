@@ -512,21 +512,21 @@ gen_obj_ref(hid_t loc_id)
      * add dataset */
     sid = H5Screate_simple(1, dims1, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     oid = H5Dcreate2(loc_id, OBJ_REF_DS, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     status = H5Dwrite(oid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -538,7 +538,7 @@ gen_obj_ref(hid_t loc_id)
      * add group  */
     oid = H5Gcreate2(loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -546,34 +546,34 @@ gen_obj_ref(hid_t loc_id)
 
     status = H5Rcreate(&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
     status = H5Rcreate(&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     sid = H5Screate_simple(1, dims2, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     oid = H5Dcreate2(loc_id, "Dset_OBJREF", H5T_STD_REF_OBJ, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
 
     status = H5Dwrite(oid, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, or_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -612,7 +612,7 @@ gen_region_ref(hid_t loc_id)
 
     sid = H5Screate_simple(2, dims2, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -620,7 +620,7 @@ gen_region_ref(hid_t loc_id)
     /* create normal dataset which is referred */
     oid2 = H5Dcreate2(loc_id, REG_REF_DS2, H5T_STD_I8LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid2 < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -628,7 +628,7 @@ gen_region_ref(hid_t loc_id)
     /* write values to dataset */
     status = H5Dwrite(oid2, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -636,7 +636,7 @@ gen_region_ref(hid_t loc_id)
     /* select elements space for reference */
     status = H5Sselect_elements(sid, H5S_SELECT_SET, 4, coords[0]);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_elements failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -644,7 +644,7 @@ gen_region_ref(hid_t loc_id)
     /* create region reference from elements space */
     status = H5Rcreate(&rr_data[0], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -652,7 +652,7 @@ gen_region_ref(hid_t loc_id)
     /* select hyperslab space for reference */
     status = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Sselect_hyperslab failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -660,7 +660,7 @@ gen_region_ref(hid_t loc_id)
     /* create region reference from hyperslab space */
     status = H5Rcreate(&rr_data[1], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -670,7 +670,7 @@ gen_region_ref(hid_t loc_id)
     /* Create dataspace. */
     sid = H5Screate_simple(1, dims1, NULL);
     if (sid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Screate_simple failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -678,7 +678,7 @@ gen_region_ref(hid_t loc_id)
     /* create region reference dataset */
     oid1 = H5Dcreate2(loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid1 < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -686,7 +686,7 @@ gen_region_ref(hid_t loc_id)
     /* write data as region references */
     status = H5Dwrite(oid1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -815,7 +815,7 @@ gen_extlink_trg(hid_t loc_id)
      * target file */
     gid = H5Gcreate2(loc_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -830,7 +830,7 @@ gen_extlink_trg(hid_t loc_id)
     tid    = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tcommit2(loc_id, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Tcommit2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -863,7 +863,7 @@ gen_extlink_src(hid_t loc_id)
      *------------------------------------------------------------------------*/
     gid = H5Gcreate2(loc_id, "/group_ext", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -874,7 +874,7 @@ gen_extlink_src(hid_t loc_id)
     /* link to dataset */
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/simple", gid, "extlink_dset", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -882,7 +882,7 @@ gen_extlink_src(hid_t loc_id)
     /* link to group */
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "/group", gid, "extlink_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -891,7 +891,7 @@ gen_extlink_src(hid_t loc_id)
     status =
         H5Lcreate_external(HDF_EXT_TRG_FILE, "/datatype", gid, "extlink_datatype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -899,7 +899,7 @@ gen_extlink_src(hid_t loc_id)
     /* dangling link - no obj*/
     status = H5Lcreate_external(HDF_EXT_TRG_FILE, "notyet", gid, "extlink_notyet1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }
@@ -907,7 +907,7 @@ gen_extlink_src(hid_t loc_id)
     /* dangling link - no file */
     status = H5Lcreate_external("notyet_file.h5", "notyet", gid, "extlink_notyet2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0) {
-        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", FUNC, __LINE__);
+        HDfprintf(stderr, "Error: %s %d> H5Lcreate_external failed.\n", __func__, __LINE__);
         ret = FAIL;
         goto out;
     }

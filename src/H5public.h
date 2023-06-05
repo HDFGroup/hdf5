@@ -33,27 +33,25 @@
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
+
+/* C library header files for things that appear in HDF5 public headers */
+#ifdef __cplusplus
+#include <cinttypes>
+#else
+#include <inttypes.h>
+#endif
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is available
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#ifdef H5_STDC_HEADERS
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-#endif
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h> /* For C9x types */
-#endif
-#else
-#ifdef H5_HAVE_STDINT_H_CXX
-#include <stdint.h> /* For C9x types (when included from C++) */
-#endif
-#endif
-#ifdef H5_HAVE_INTTYPES_H
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#endif
-#ifdef H5_HAVE_STDDEF_H
-#include <stddef.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL
@@ -200,11 +198,17 @@
 typedef int herr_t;
 
 /**
- * Boolean type.  Successful return values are zero (false) or positive
- * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return #htri_t however return zero
- * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a #htri_t function is:
+ * C99-style Boolean type. Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.
+ * \attention Boolean functions cannot fail.
+ */
+#include <stdbool.h>
+typedef bool hbool_t;
+/**
+ * Three-valued Boolean type. Functions that return #htri_t however return zero
+ * (false), positive (true), or negative (failure).
+ *
+ * The proper way to test for truth from a #htri_t function is:
  * \code
  * if ((retval = H5Tcommitted(type)) > 0) {
  *     printf("data type is committed\n");
@@ -215,21 +219,7 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#ifdef H5_HAVE_STDBOOL_H
-#include <stdbool.h>
-#else /* H5_HAVE_STDBOOL_H */
-#ifndef __cplusplus
-#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
-#define bool _Bool
-#else
-#define bool unsigned int
-#endif
-#define true 1
-#define false 0
-#endif /* __cplusplus */
-#endif /* H5_HAVE_STDBOOL_H */
-typedef bool hbool_t;
-typedef int  htri_t;
+typedef int htri_t;
 
 /* The signed version of size_t
  *
@@ -497,7 +487,7 @@ extern "C" {
  *          issued. If one finds that an HDF5 library function is failing
  *          inexplicably, H5open() can be called first. It is safe to call
  *          H5open() before an application issues any other function calls to
- *          the HDF5 library as there are no damaging side effects in calling
+ *          the HDF5 library, as there are no damaging side effects in calling
  *          it more than once.
  */
 H5_DLL herr_t H5open(void);
@@ -523,13 +513,13 @@ H5_DLL herr_t H5close(void);
  *          function is in situations where the library is dynamically linked
  *          into an application and is un-linked from the application before
  *          exit() gets called. In those situations, a routine installed with
- *          atexit() would jump to a routine which was no longer in memory,
+ *          atexit() would jump to a routine that was no longer in memory,
  *          causing errors.
  *
  * \attention In order to be effective, this routine \Emph{must} be called
  *            before any other HDF5 function calls, and must be called each
  *            time the library is loaded/linked into the application (the first
- *            time and after it's been un-loaded).
+ *            time and after it's been unloaded).
  */
 H5_DLL herr_t H5dont_atexit(void);
 /**
@@ -541,7 +531,7 @@ H5_DLL herr_t H5dont_atexit(void);
  *          of the library, freeing any unused memory.
  *
  *          It is not required that H5garbage_collect() be called at any
- *          particular time; it is only necessary in certain situations where
+ *          particular time; it is only necessary for certain situations where
  *          the application has performed actions that cause the library to
  *          allocate many objects. The application should call
  *          H5garbage_collect() if it eventually releases those objects and
@@ -732,7 +722,7 @@ H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
  * \param[in] mem Buffer to be freed. Can be NULL
  * \return \herr_t
  *
- * \details H5free_memory() frees memory that has been allocated by the caller
+ * \details H5free_memory() frees the memory that has been allocated by the caller
  *          with H5allocate_memory() or by the HDF5 library on behalf of the
  *          caller.
  *
@@ -782,7 +772,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *          initialized.
  *
  *          This function is intended to have the semantics of malloc() and
- *          calloc(). However, unlike malloc() and calloc() which allow for a
+ *          calloc(). However, unlike malloc() and calloc(), which allow for a
  *          "special" pointer to be returned instead of NULL, this function
  *          always returns NULL on failure or when size is set to 0 (zero).
  *
@@ -794,7 +784,7 @@ H5_DLL herr_t H5free_memory(void *mem);
  *            the same library that initially allocated it. In most cases, the
  *            HDF5 API uses resources that are allocated and freed either
  *            entirely by the user or entirely by the library, so this is not a
- *            problem. In rare cases, however, HDF5 API calls will free memory
+ *            problem. In rare cases, however, HDF5 API calls will free the memory
  *            that the user allocated. This function allows the user to safely
  *            allocate this memory.\n
  *            It is particularly important to use this function to allocate

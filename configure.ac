@@ -13,7 +13,7 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_PREREQ([2.69])
+AC_PREREQ([2.71])
 
 ## AC_INIT takes the name of the package, the version number, and an
 ## email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
@@ -559,7 +559,7 @@ AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Deter
 AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 
 ## ----------------------------------------------------------------------
-## Check if they would like the Fortran interface compiled
+## Check if the Fortran interface should be enabled
 ##
 
 ## This needs to be exposed for the library info file even if Fortran is disabled.
@@ -622,7 +622,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -797,7 +797,7 @@ HDF_CXX=no
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
 AC_PROG_CXX
-AC_PROG_CXXCPP    ## this is checked for when AC_HEADER_STDC is done
+AC_PROG_CXXCPP
 
 AC_MSG_CHECKING([if c++ interface enabled])
 
@@ -922,7 +922,7 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
-## the AM_PROG_LIBTOOL macro.
+## the LT_INIT macro.
 ##
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
@@ -1169,7 +1169,7 @@ AC_SUBST([HDF5_TOOLS])
 ## Default is to build tests and tools
 HDF5_TOOLS=yes
 
-AC_MSG_CHECKING([if building tools is disabled])
+AC_MSG_CHECKING([if building tools is enabled])
 
 AC_ARG_ENABLE([tools],
               [AS_HELP_STRING([--enable-tools],
@@ -1350,7 +1350,6 @@ AC_CHECK_LIB([dl], [dlopen])
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
-AC_HEADER_STDC
 AC_HEADER_TIME
 
 ## Unix
@@ -1854,10 +1853,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 #include "szlib.h"
             ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-                if(SZ_encoder_enabled() == 1)
-                    exit(0);
-                else
-                    exit(1);
+                return SZ_encoder_enabled() != 1;
             ]])]
         , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
    )
@@ -2048,10 +2044,8 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
-            #if STDC_HEADERS
             #include <stdlib.h>
             #include <pthread.h>
-            #endif
         ],[
               pthread_attr_t attribute;
               int ret;
@@ -3882,11 +3876,13 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112)],
+            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112)],
                             [Specify default release version of public symbols
                              [default=v112]])],,
             [withval=v112])
 
+## Allowing "default" allows the GitHub CI to check that we didn't forget
+## to change the defaults when creating a new major version
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
     DEFAULT_API_VERSION=v16
@@ -3902,7 +3898,7 @@ elif test "X$withval" = "Xv110"; then
     DEFAULT_API_VERSION=v110
     AC_DEFINE([USE_110_API_DEFAULT], [1],
               [Define using v1.10 public API symbols by default])
-elif test "X$withval" = "Xv112"; then
+elif test "X$withval" = "Xv112" -o "X$withval" = "Xdefault"; then
     AC_MSG_RESULT([v112])
     DEFAULT_API_VERSION=v112
     AC_DEFINE([USE_112_API_DEFAULT], [1],

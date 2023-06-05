@@ -15,11 +15,11 @@
  *          a remote host.
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
-
 #include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_MIRROR_VFD
+
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 #include "H5Eprivate.h"      /* Error handling           */
 #include "H5Fprivate.h"      /* File access              */
@@ -218,7 +218,7 @@ H5FD__init_package(void)
 
     FUNC_ENTER_STATIC
 
-    LOG_OP_CALL(FUNC);
+    LOG_OP_CALL(__func__);
 
     if (H5FD_mirror_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize mirror VFD");

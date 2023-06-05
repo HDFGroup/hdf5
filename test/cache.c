@@ -294,17 +294,17 @@ smoke_check_1(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -322,7 +322,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -340,7 +340,7 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -358,7 +358,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -368,7 +368,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -381,7 +381,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -391,7 +391,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -404,12 +404,12 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -423,7 +423,7 @@ smoke_check_1(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -492,17 +492,17 @@ smoke_check_2(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -520,7 +520,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -538,7 +538,7 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -556,7 +556,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -566,7 +566,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -579,7 +579,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -589,7 +589,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -602,12 +602,12 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -621,7 +621,7 @@ smoke_check_2(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -689,17 +689,17 @@ smoke_check_3(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -717,7 +717,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -735,7 +735,7 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -753,7 +753,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -763,7 +763,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -776,7 +776,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -786,7 +786,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -799,12 +799,12 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -818,7 +818,7 @@ smoke_check_3(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -887,17 +887,17 @@ smoke_check_4(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -915,7 +915,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -933,7 +933,7 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -951,7 +951,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -961,7 +961,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -974,7 +974,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -984,7 +984,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -997,12 +997,12 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1016,7 +1016,7 @@ smoke_check_4(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1052,11 +1052,7 @@ smoke_check_5(int express_test, unsigned paged)
     H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
-#if 1
         /* H5C_auto_resize_report_fcn rpt_fcn = */ NULL,
-#else
-        /* H5C_auto_resize_report_fcn rpt_fcn = */ H5C_def_auto_resize_rpt_fcn,
-#endif
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
@@ -1130,12 +1126,12 @@ smoke_check_5(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1152,7 +1148,7 @@ smoke_check_5(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1163,7 +1159,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1174,7 +1170,7 @@ smoke_check_5(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1185,7 +1181,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1195,7 +1191,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1207,7 +1203,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1217,7 +1213,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1229,12 +1225,12 @@ smoke_check_5(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1248,7 +1244,7 @@ smoke_check_5(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1362,12 +1358,12 @@ smoke_check_6(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1384,7 +1380,7 @@ smoke_check_6(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1395,7 +1391,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1406,7 +1402,7 @@ smoke_check_6(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1417,7 +1413,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1427,7 +1423,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1439,7 +1435,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1449,7 +1445,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1461,12 +1457,12 @@ smoke_check_6(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1480,7 +1476,7 @@ smoke_check_6(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1595,12 +1591,12 @@ smoke_check_7(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1617,7 +1613,7 @@ smoke_check_7(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1628,7 +1624,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1639,7 +1635,7 @@ smoke_check_7(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1650,7 +1646,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1660,7 +1656,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1672,7 +1668,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1682,7 +1678,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1694,12 +1690,12 @@ smoke_check_7(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1713,7 +1709,7 @@ smoke_check_7(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1828,12 +1824,12 @@ smoke_check_8(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1850,7 +1846,7 @@ smoke_check_8(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1861,7 +1857,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1872,7 +1868,7 @@ smoke_check_8(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1883,7 +1879,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1893,7 +1889,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1905,7 +1901,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1915,7 +1911,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1927,12 +1923,12 @@ smoke_check_8(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1946,7 +1942,7 @@ smoke_check_8(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2025,12 +2021,12 @@ smoke_check_9(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -2038,7 +2034,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* disable evictions */
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2052,7 +2048,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2072,7 +2068,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* enable evictions */
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2086,7 +2082,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2104,7 +2100,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2118,7 +2114,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2136,7 +2132,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2150,7 +2146,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2160,7 +2156,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2174,7 +2170,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2187,7 +2183,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2197,7 +2193,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2211,7 +2207,7 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2224,7 +2220,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2238,12 +2234,12 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2257,7 +2253,7 @@ smoke_check_9(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2336,18 +2332,18 @@ smoke_check_10(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2365,7 +2361,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2379,7 +2375,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2397,7 +2393,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2411,7 +2407,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2429,7 +2425,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2443,7 +2439,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2453,7 +2449,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2467,7 +2463,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2480,7 +2476,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2494,7 +2490,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2504,7 +2500,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2518,7 +2514,7 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2531,7 +2527,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2545,12 +2541,12 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2564,7 +2560,7 @@ smoke_check_10(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2639,17 +2635,17 @@ write_permitted_check(int
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)0, paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2667,7 +2663,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2687,7 +2683,7 @@ write_permitted_check(int
                             /* dirty_unprotects       */ NO_CHANGE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = TRUE;
 
@@ -2707,7 +2703,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2717,7 +2713,7 @@ write_permitted_check(int
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2730,7 +2726,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2747,12 +2743,12 @@ write_permitted_check(int
     write_permitted = TRUE;
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2766,7 +2762,7 @@ write_permitted_check(int
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -3060,7 +3056,7 @@ check_insert_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -3149,7 +3145,7 @@ check_flush_cache(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -11553,7 +11549,7 @@ check_get_entry_status(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -11834,7 +11830,7 @@ check_expunge_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -12225,7 +12221,7 @@ check_multiple_read_protect(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -12325,7 +12321,7 @@ check_move_entry(unsigned paged)
         H5_FAILED()
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_move_entry() */
@@ -12583,7 +12579,7 @@ check_pin_protected_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13451,7 +13447,7 @@ check_resize_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13536,7 +13532,7 @@ check_evictions_enabled(unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* create the cache */
     if (pass) {
@@ -13558,7 +13554,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that it is empty */
     if (pass) {
@@ -13574,7 +13570,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that H5C_get_evictions_enabled() returns the expected value */
     if (pass) {
@@ -13590,7 +13586,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13602,7 +13598,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache is full */
     if (pass) {
@@ -13618,7 +13614,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13628,7 +13624,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that an entry has been evicted */
     if (pass) {
@@ -13644,7 +13640,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13674,7 +13670,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13683,7 +13679,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that another entry has been evicted */
     if (pass) {
@@ -13700,7 +13696,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13730,7 +13726,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions */
     if (pass) {
@@ -13746,7 +13742,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that evictions are disabled */
     if (pass) {
@@ -13763,7 +13759,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13773,7 +13769,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
@@ -13790,7 +13786,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13799,7 +13795,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
@@ -13816,7 +13812,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions */
     if (pass) {
@@ -13832,7 +13828,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 19 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13842,7 +13838,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 20 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entries have been evicted */
     if (pass) {
@@ -13859,7 +13855,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 21 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13869,7 +13865,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 22 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the entries have been evicted to bring the
      * cache back down to its normal size.
@@ -13889,7 +13885,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 23 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13919,7 +13915,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 24 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13949,7 +13945,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 25 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions again */
     if (pass) {
@@ -13965,7 +13961,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 26 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -13977,7 +13973,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 27 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has grown */
     if (pass) {
@@ -13994,7 +13990,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 28 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions again */
     if (pass) {
@@ -14010,7 +14006,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 29 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14019,7 +14015,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 30 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has returned to its maximum size */
     if (pass) {
@@ -14036,7 +14032,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 31 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14066,7 +14062,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 32 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions one last time before we shut down */
     if (pass) {
@@ -14082,7 +14078,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 33 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14090,7 +14086,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 34 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         PASSED();
@@ -14101,7 +14097,7 @@ check_evictions_enabled(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14199,7 +14195,7 @@ check_flush_protected_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14288,7 +14284,7 @@ check_destroy_pinned_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -14384,7 +14380,7 @@ check_destroy_protected_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -14465,7 +14461,7 @@ check_duplicate_insert_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14554,7 +14550,7 @@ check_double_pin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14652,7 +14648,7 @@ check_double_unpin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14764,7 +14760,7 @@ check_pin_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14846,7 +14842,7 @@ check_double_protect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14924,7 +14920,7 @@ check_double_unprotect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15006,7 +15002,7 @@ check_mark_entry_dirty_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15123,7 +15119,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15240,7 +15236,7 @@ check_move_entry_errs(unsigned paged)
     else {
         H5_FAILED()
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -15340,7 +15336,7 @@ check_resize_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15461,7 +15457,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15548,7 +15544,7 @@ check_protect_ro_rw_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15677,7 +15673,7 @@ check_protect_retries(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15817,7 +15813,7 @@ check_check_evictions_enabled_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -19683,7 +19679,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     } /* end else */
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_auto_cache_resize() */
@@ -22283,7 +22279,7 @@ check_auto_cache_resize_disable(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -22970,7 +22966,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -25202,7 +25198,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -25698,7 +25694,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -25803,7 +25799,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     } /* end else */
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -25824,7 +25820,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25887,7 +25883,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -25957,7 +25953,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26011,7 +26007,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26064,7 +26060,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -26139,7 +26135,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26210,7 +26206,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -26269,7 +26265,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26317,7 +26313,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26368,7 +26364,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -26414,7 +26410,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (cache_ptr) {
 
@@ -26424,7 +26420,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     HDfree(expected);
 
@@ -32263,7 +32259,7 @@ check_entry_deletions_during_scans(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -33709,7 +33705,7 @@ check_stats(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_COLLECT_CACHE_STATS */
@@ -34189,7 +34185,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     hid_t   fcpl_id = H5P_DEFAULT;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     saved_fid = -1;
 
@@ -34232,7 +34228,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass && try_core_file_driver) {
         if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL) {
@@ -34249,7 +34245,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             core_file_driver_failed = TRUE;
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", __func__);
         }
         else {
             saved_fapl_id = fapl_id;
@@ -34257,7 +34253,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
@@ -34272,7 +34268,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5Fcreate() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", __func__);
         } /* end if */
     }     /* end if */
 
@@ -34280,7 +34276,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     H5CX_push();
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         HDassert(fid >= 0);
@@ -34290,7 +34286,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5Fflush() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
         }
         else {
             file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
@@ -34299,13 +34295,13 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
                 failure_mssg = "Can't get file_ptr.";
 
                 if (verbose)
-                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
             }
         }
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -34348,7 +34344,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         if (cache_ptr == NULL) {
@@ -34356,19 +34352,19 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5C_create() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5C_create() failed.\n", __func__);
         }
         else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
             pass         = FALSE;
             failure_mssg = "Bad cache_ptr magic.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
+                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", __func__);
         }
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) { /* allocate space for test entries */
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
@@ -34378,7 +34374,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5MF_alloc() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", __func__);
         }
         else if (actual_base_addr > BASE_ADDR) {
             /* If this happens, must increase BASE_ADDR so that the
@@ -34389,14 +34385,14 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "actual_base_addr > BASE_ADDR";
 
             if (verbose)
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", FUNC);
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", __func__);
         }
 
         saved_actual_base_addr = actual_base_addr;
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         /* Need to set this else all cache tests will fail */
@@ -34407,7 +34403,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     return (ret_val);
 } /* setup_cache() */
