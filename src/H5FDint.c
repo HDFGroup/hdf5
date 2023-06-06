@@ -2164,7 +2164,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
 
-/* 
+/*
  * Comparison routine used by HDqsort in H5FD__sort_io_req_real()
  */
 static int
@@ -2609,13 +2609,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, 
-                            H5S_t **file_spaces, H5S_t **mem_spaces, 
-                            haddr_t offsets[], H5_flexible_const_ptr_t bufs[], 
-                            size_t src_element_sizes[], size_t dst_element_sizes[], 
-                            MPI_Datatype *final_ftype, hbool_t *final_ftype_is_derived, 
-                            MPI_Datatype *final_mtype, hbool_t *final_mtype_is_derived,
-                            int *size_i, H5_flexible_const_ptr_t *mpi_bufs_base)
+H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
+                           haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
+                           size_t dst_element_sizes[], MPI_Datatype *final_ftype,
+                           hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
+                           hbool_t *final_mtype_is_derived, int *size_i,
+                           H5_flexible_const_ptr_t *mpi_bufs_base)
 {
 
     MPI_Datatype *piece_mtype           = NULL;
