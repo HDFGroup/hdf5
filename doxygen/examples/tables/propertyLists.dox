@@ -245,7 +245,7 @@ file access property list.</td>
 </tr>
 <tr>
 <td>#H5Pset_page_buffer_size/#H5Pget_page_buffer_size</td>
-<td>Set/get the the maximum size for the page buffer.</td>
+<td>Set/get the maximum size for the page buffer.</td>
 </tr>
 <tr>
 <td>#H5Pset_sieve_buf_size/#H5Pget_sieve_buf_size</td>
@@ -742,7 +742,7 @@ C function is a macro: \see \ref api-compat-macros.</td>
 <td>Sets up use of the Fletcher32 checksum filter.</td>
 </tr>
 <tr>
-<td>#H5Pset_local_heap_size_hint#H5Pget_local_heap_size_hint/</td>
+<td>#H5Pset_local_heap_size_hint/#H5Pget_local_heap_size_hint</td>
 <td>Sets/gets the anticipated maximum size of a local heap.</td>
 </tr>
 <tr>

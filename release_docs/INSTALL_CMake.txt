@@ -308,7 +308,7 @@ IV. Further considerations
          CMake options:
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
             ZLIB_TGZ_NAME:STRING="zlib_src.ext"
-            SZIP_TGZ_NAME:STRING="szip_src.ext"
+            SZAEC_TGZ_NAME:STRING="szaec_src.ext"
             TGZPATH:STRING="some_location"
          where "some_location" is the URL or full path to the compressed
          file and ext is the type of compression file. Also set CMAKE_BUILD_TYPE
@@ -326,17 +326,17 @@ IV. Further considerations
             ZLIB_TGZ_ORIGPATH:STRING="some_location"
 
             HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="TGZ"
-         where "some_location" is the URL or full path to the compressed
-         file and ext is the type of compression file. The individual filters are
-         enabled by setting the BUILD_<filter>_WITH_FETCHCONTENT CMake variable to ON.
+         where "some_location" is the URL and by setting
+            ZLIB_USE_LOCALCONTENT:BOOL=OFF
+            LIBAEC_USE_LOCALCONTENT:BOOL=OFF
+         or full path to the compressed file and ext is the type of compression file.
+         The individual filters are enabled by setting the BUILD_<filter>_WITH_FETCHCONTENT
+         CMake variable to ON.
          Also set CMAKE_BUILD_TYPE to the configuration type during configuration.
          See the settings in the config/cmake/cacheinit.cmake file HDF uses for testing.
 
          The files can also be retrieved from a local path if necessary
             TGZPATH:STRING="some_location"
-         by setting
-            ZLIB_USE_LOCALCONTENT:BOOL=ON
-            LIBAEC_USE_LOCALCONTENT:BOOL=ON
 
    3. If you plan to use compression plugins:
       A. Use source packages from an GIT server by adding the following CMake
@@ -514,28 +514,32 @@ These five steps are described in detail below.
                 ########################
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
+                set (HDF_PACKAGE_NAMESPACE "hdf5::" CACHE STRING "Name for HDF package namespace (can be empty)" FORCE)
+                set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build C++ support" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-                set (HDF5_ENABLE_Z_LIB_SUPPORT ON CACHE BOOL "Enable Zlib Filters" FORCE)
-                set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
-                set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
-                set (MPIEXEC_MAX_NUMPROCS "3" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
+                set (HDF5_BUILD_JAVA ON CACHE BOOL "Build JAVA support" FORCE)
+                set (HDF5_INSTALL_MOD_FORTRAN "NO" CACHE STRING "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" FORCE)
+                set_property (CACHE HDF5_INSTALL_MOD_FORTRAN PROPERTY STRINGS NO SHARED STATIC)
+                set (HDF5_BUILD_GENERATORS ON CACHE BOOL "Build Test Generators" FORCE)
+                set (MPIEXEC_MAX_NUMPROCS "4" CACHE STRING "Minimum number of processes for HDF parallel tests" FORCE)
                 set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
                 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
-                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
+                set (HDF5_MINGW_STATIC_GCC_LIBS ON CACHE BOOL "Statically link libgcc/libstdc++" FORCE)
+                set (HDF5_ALLOW_EXTERNAL_SUPPORT "TGZ" CACHE STRING "Allow External Library Building (NO GIT TGZ)" FORCE)
                 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT TGZ)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
-                set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+                set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use HDF5_ZLib from compressed file" FORCE)
                 set (ZLIB_TGZ_ORIGPATH "https://github.com/madler/zlib/releases/download/v1.2.13" CACHE STRING "Use ZLIB from original location" FORCE)
                 set (ZLIB_TGZ_ORIGNAME "zlib-1.2.13.tar.gz" CACHE STRING "Use ZLIB from original compressed file" FORCE)
-                set (ZLIB_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
+                set (ZLIB_USE_LOCALCONTENT ON CACHE BOOL "Use local file for ZLIB FetchContent" FORCE)
                 set (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)
                 set (LIBAEC_PACKAGE_NAME "libaec" CACHE STRING "Name of AEC SZIP package" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (SZAEC_TGZ_NAME "LIBAEC.tar.gz" CACHE STRING "Use SZip AEC from compressed file" FORCE)
                 set (USE_LIBAEC ON CACHE BOOL "Use libaec szip replacement" FORCE)
-                set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original location" FORCE)
-                set (LIBAEC_TGZ_ORIGNAME "libaec-v1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
-                set (LIBAEC_USE_LOCALCONTENT OFF CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
+                set (LIBAEC_TGZ_ORIGPATH "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6" CACHE STRING "Use LIBAEC from original location" FORCE)
+                set (LIBAEC_TGZ_ORIGNAME "libaec-1.0.6.tar.gz" CACHE STRING "Use LIBAEC from original compressed file" FORCE)
+                set (LIBAEC_USE_LOCALCONTENT ON CACHE BOOL "Use local file for LIBAEC FetchContent" FORCE)
                 #######################
                 # filter plugin options
                 #######################
@@ -616,6 +620,13 @@ These five steps are described in detail below.
                 set (ZFP_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (ZFP_TGZ_NAME "zfp.tar.gz" CACHE STRING "Use ZFP from compressed file" FORCE)
                 set (ZFP_PACKAGE_NAME "zfp" CACHE STRING "Name of ZFP package" FORCE)
+                ######
+                # zstd
+                ######
+                set (ZSTD_GIT_URL "https://github.com/facebook/zstd" CACHE STRING "Use ZSTD from repository" FORCE)
+                set (ZSTD_GIT_BRANCH "dev" CACHE STRING "" FORCE)
+                set (ZSTD_TGZ_NAME "zstd.tar.gz" CACHE STRING "Use ZSTD from compressed file" FORCE)
+                set (ZSTD_PACKAGE_NAME "zstd" CACHE STRING "Name of ZSTD package" FORCE)
 
    2. Configure the cache settings
 
@@ -766,13 +777,13 @@ BUILD_STATIC_EXECS "Build Static Executables"  OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   ON
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
-HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    ON
-HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
-HDF5_BUILD_JAVA     "Build JAVA support"             OFF
-HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
-HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
-HDF5_BUILD_HL_TOOLS "Build HIGH Level HDF5 Tools"    ON
+HDF5_BUILD_CPP_LIB      "Build HDF5 C++ Library"          OFF
+HDF5_BUILD_EXAMPLES     "Build HDF5 Library Examples"     ON
+HDF5_BUILD_FORTRAN      "Build FORTRAN support"           OFF
+HDF5_BUILD_JAVA         "Build JAVA support"              OFF
+HDF5_BUILD_HL_LIB       "Build HIGH Level HDF5 Library"   ON
+HDF5_BUILD_TOOLS        "Build HDF5 Tools"                ON
+HDF5_BUILD_HL_TOOLS     "Build HIGH Level HDF5 Tools"     ON
 
 ---------------- HDF5 Folder Build Options ---------------------
 Defaults relative to $<INSTALL_PREFIX>
@@ -798,72 +809,84 @@ HDF5_INSTALL_DOC_DIR      "HDF5_INSTALL_DATA_DIR/doc/hdf5"
 
 ---------------- HDF5 Advanced Options ---------------------
 HDF5_USE_GNU_DIRS              "TRUE to use GNU Coding Standard install directory variables,
-                                FALSE to use historical settings"                             FALSE
-ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                  OFF
-ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
-HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                        ""
-HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
-HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                          OFF
-HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
-HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
-HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"                   OFF
-HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                         ON
-HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                     OFF
-HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
-HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
+                                FALSE to use historical settings"                                FALSE
+ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                     OFF
+ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"             OFF
+HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                           ""
+HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                       OFF
+HDF5_ENABLE_ALL_WARNINGS       "Enable all warnings"                                             OFF
+HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)."    OFF
+HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"                 OFF
+HDF5_ENABLE_DEBUG_APIS         "Turn on extra debug output in all packages"                      OFF
+HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                            ON
+HDF5_ENABLE_DIRECT_VFD         "Build the Direct I/O Virtual File Driver"                        OFF
+HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                             ON
+HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                            OFF
 HDF5_ENABLE_PREADWRITE         "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON
-HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
-HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
-HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
-HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
-HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
-HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
-HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
-HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
-HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF
+HDF5_ENABLE_TRACE              "Enable API tracing capability"                                   OFF
+HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                          OFF
+HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                         ON
+HDF5_BUILD_GENERATORS          "Build Test Generators"                                           OFF
+HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                               OFF
+HDF5_NO_PACKAGES               "Do not include CPack Packaging"                                  OFF
+HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"               OFF
+HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                        OFF
 HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
-                                FALSE to build according to BUILD_SHARED_LIBS"                FALSE
-HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
-HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
-HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "3"
-HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
-HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
-DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112)"                    "v112"
-HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  ON
-HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
+                                FALSE to build according to BUILD_SHARED_LIBS"                   FALSE
+HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                              OFF
+HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                    OFF
+DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112)"                       "v112"
+HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
+HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
-HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
-HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"             OFF
-HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                             OFF
+HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                             OFF
+HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"                OFF
+HDF5_MINGW_STATIC_GCC_LIBS     "Statically link libgcc/libstdc++"                                OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     HDF5_ENABLE_INSTRUMENT     "Instrument The library"                      OFF
-if (HDF5_TEST_VFD)
-    HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 if (HDF5_BUILD_FORTRAN)
-    HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" "XX"
-    if (BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is SHARED
-    if (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is SHARED
-    if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is STATIC
+    HDF5_INSTALL_MOD_FORTRAN "Copy FORTRAN mod files to include directory (NO SHARED STATIC)" SHARED
+    if (BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)         default HDF5_INSTALL_MOD_FORTRAN is SHARED
+    if (BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS)     default HDF5_INSTALL_MOD_FORTRAN is SHARED
+    if (NOT BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)     default HDF5_INSTALL_MOD_FORTRAN is STATIC
     if (NOT BUILD_SHARED_LIBS AND NOT BUILD_STATIC_LIBS) default HDF5_INSTALL_MOD_FORTRAN is SHARED
-HDF5_BUILD_DOC                 "Build documentation"                              OFF
-HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                    OFF
-HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                      OFF
-HDF5_ENABLE_FORMATTERS         "format source files"                              OFF
-TEST_SHELL_SCRIPTS             "Enable shell script tests"                        ON
+HDF5_BUILD_DOC                 "Build documentation"                                OFF
+HDF5_ENABLE_ANALYZER_TOOLS     "enable the use of Clang tools"                      OFF
+HDF5_ENABLE_SANITIZERS         "execute the Clang sanitizer"                        OFF
+HDF5_ENABLE_FORMATTERS         "format source files"                                OFF
+
+---------------- HDF5 Advanced Test Options ---------------------
+if (BUILD_TESTING)
+    HDF5_TEST_SERIAL               "Execute non-parallel tests"                                   ON
+    HDF5_TEST_TOOLS                "Execute tools tests"                                          ON
+    HDF5_TEST_EXAMPLES             "Execute tests on examples"                                    ON
+    HDF5_TEST_SWMR                 "Execute SWMR tests"                                           ON
+    HDF5_TEST_PARALLEL             "Execute parallel tests"                                       ON
+    HDF5_TEST_FORTRAN              "Execute fortran tests"                                        ON
+    HDF5_TEST_CPP                  "Execute cpp tests"                                            ON
+    HDF5_TEST_JAVA                 "Execute java tests"                                           ON
+    HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "3"
+    HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
+    if (HDF5_TEST_PASSTHROUGH_VOL)
+        HDF5_TEST_FHEAP_PASSTHROUGH_VOL "Execute fheap test with different passthrough VOL connectors" ON
+    HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
+    if (HDF5_TEST_VFD)
+        HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"                       ON
+    TEST_SHELL_SCRIPTS             "Enable shell script tests"                                    ON
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO GIT TGZ)"        "NO"
 HDF5_ENABLE_PLUGIN_SUPPORT  "Enable PLUGIN Filters"                               OFF
 HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                                     OFF
-HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                                 ON
 PLUGIN_USE_EXTERNAL         "Use External Library Building for PLUGINS"           0
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB"              0
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP"              0
 if (HDF5_ENABLE_SZIP_SUPPORT)
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 OFF
-    USE_LIBAEC                "Use libaec szip replacement"                       OFF
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"                                 ON
+    USE_LIBAEC                "Use libaec szip replacement"                       ON
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 else ()
@@ -872,11 +895,11 @@ endif ()
 if (BUILD_SZIP_WITH_FETCHCONTENT)
     LIBAEC_TGZ_ORIGPATH       "Use LIBAEC from original location"        "https://github.com/MathisRosenhauer/libaec/releases/download/v1.0.6/libaec-1.0.6.tar.gz"
     LIBAEC_TGZ_ORIGNAME       "Use LIBAEC from original compressed file" "libaec-v1.0.6.tar.gz"
-    LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    OFF
+    LIBAEC_USE_LOCALCONTENT   "Use local file for LIBAEC FetchContent"    ON
 if (BUILD_ZLIB_WITH_FETCHCONTENT)
     ZLIB_TGZ_ORIGPATH         "Use ZLIB from original location"        "https://github.com/madler/zlib/releases/download/v1.2.13"
     ZLIB_TGZ_ORIGNAME         "Use ZLIB from original compressed file" "zlib-1.2.13.tar.gz"
-    ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    OFF
+    ZLIB_USE_LOCALCONTENT     "Use local file for ZLIB FetchContent"    ON
 
 NOTE:
   The BUILD_STATIC_EXECS ("Build Static Executables") option is only valid
