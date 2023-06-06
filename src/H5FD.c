@@ -1729,8 +1729,8 @@ H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_read_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                               bufs) < 0)
+    if (H5FD_read_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                               element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
 
 done:
@@ -1828,22 +1828,22 @@ H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                                bufs) < 0)
+    if (H5FD_write_selection_id(SKIP_NO_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                                element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_selection() */
 
-
-/* 
+/*
  * Translate selections to vector CB if possible, if not, scalar CB
  *  --skip selection CB
  */
 herr_t
-H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
-                   hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
+H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                               hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                               size_t element_sizes[], void *bufs[] /* out */)
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
@@ -1894,21 +1894,22 @@ H5FDread_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_read_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                               bufs) < 0)
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                               element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_vector_from_selection() */
 
-/* 
+/*
  * Translate selections to vector CB if possible, if not, scalar CB
  *  --skip selection CB
  */
 herr_t
-H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
-                    hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                                size_t element_sizes[], const void *bufs[])
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
@@ -1959,22 +1960,22 @@ H5FDwrite_vector_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_write_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                                bufs) < 0)
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                                element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDwrite_vector_from_selection() */
 
-/* 
+/*
  * Translate selections to scalar CB
  *  --skip selection CB
  *  --skip vector CB
  */
 herr_t
 H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
-                   hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
@@ -2025,23 +2026,23 @@ H5FDread_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t c
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_read_selection_id(SKIP_SELECTION_CB|SKIP_VECTOR_CB, 
-                               file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                               bufs) < 0)
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                               file_space_ids, offsets, element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDread_from_selection() */
 
-/* 
+/*
  * Translate selections to scalar CB
  *  --skip selection CB
  *  --skip vector CB
  */
 herr_t
 H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
-                    hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                         const void *bufs[])
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
@@ -2092,9 +2093,8 @@ H5FDwrite_from_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t 
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
-    if (H5FD_write_selection_id(SKIP_SELECTION_CB|SKIP_VECTOR_CB, 
-                                file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
-                                bufs) < 0)
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                                file_space_ids, offsets, element_sizes, bufs) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
 
 done:
