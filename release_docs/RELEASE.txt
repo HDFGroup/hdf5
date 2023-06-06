@@ -402,6 +402,14 @@ Bug Fixes since HDF5-1.12.2 release
 
     Configuration
     -------------
+    - The accum test now passes on macOS 12+ (Monterey) w/ CMake
+
+      Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
+      started failing on macOS 12+ when building with CMake. CMake has been
+      updated to set DYLD_LIBRARY_PATH on macOS and the test now passes.
+
+      Fixes GitHub #2994, #2261, and #1289
+
     - Fixed syntax of generator expressions used by CMake
 
       Adding quotes around the generator expression should allow CMake to
