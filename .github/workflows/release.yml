@@ -120,3 +120,13 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Create .nojekyll
+        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/docs/html/.nojekyll
+        shell: bash
+
+      - name: dev-only-docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/docs/html
