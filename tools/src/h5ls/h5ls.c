@@ -2656,15 +2656,17 @@ main(int argc, char *argv[])
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
-    H5FD_ros3_fapl_t ros3_fa = {
-        1,     /* Structure Version */
-        FALSE, /* Authenticate?     */
-        "",    /* AWS Region        */
-        "",    /* Access Key ID     */
-        "",    /* Secret Access Key */
+    H5FD_ros3_fapl_ext_t ros3_fa = {
+        {
+            1,     /* Structure Version */
+            FALSE, /* Authenticate?     */
+            "",    /* AWS Region        */
+            "",    /* Access Key ID     */
+            "",    /* Secret Access Key */
+        },
+        "", /* Session/security token */
     };
-    char token[H5FD_ROS3_MAX_SECRET_TOK_LEN]; /* Session/security token */
-#endif                                        /* H5_HAVE_ROS3_VFD */
+#endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
     /* "Default" HDFS configuration */
@@ -2848,14 +2850,13 @@ main(int argc, char *argv[])
             }
             start++;
 
-            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa, token) < 0) {
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', &(ros3_fa.fa), ros3_fa.token) < 0) {
                 HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
-            vfd_info.info  = &ros3_fa;
-            vfd_info.token = token;
+            vfd_info.info = &ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();

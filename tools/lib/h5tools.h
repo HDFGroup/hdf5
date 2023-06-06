@@ -569,7 +569,6 @@ typedef struct h5tools_vfd_info_t {
 
     /* Pointer to information to be passed to the driver for its setup */
     const void *info;
-    const char *token;
 
     /* Field specifying either the driver's name or value (ID) */
     union {

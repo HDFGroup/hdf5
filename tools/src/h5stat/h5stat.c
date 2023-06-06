@@ -119,12 +119,15 @@ static const char *drivername = NULL;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
-static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* Structure Version */
-    FALSE, /* Authenticate?     */
-    "",    /* AWS Region        */
-    "",    /* Access Key ID     */
-    "",    /* Secret Access Key */
+static H5FD_ros3_fapl_ext_t ros3_fa = {
+    {
+        1,     /* Structure Version */
+        FALSE, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
+    },
+    "", /* Session/security token */
 };
 static char token[H5FD_ROS3_MAX_SECRET_TOK_LEN]; /* Session/security token */
 #endif                                           /* H5_HAVE_ROS3_VFD */
@@ -964,7 +967,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa, token) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &(ros3_fa.fa), ros3_fa.token) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     goto error;
                 }
@@ -1685,10 +1688,8 @@ main(int argc, char *argv[])
         vfd_info.u.name = drivername;
 
 #ifdef H5_HAVE_ROS3_VFD
-        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
-            vfd_info.info  = &ros3_fa;
-            vfd_info.token = token;
-        }
+        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX]))
+            vfd_info.info = &ros3_fa;
 #endif
 #ifdef H5_HAVE_LIBHDFS
         if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX]))

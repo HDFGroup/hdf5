@@ -121,10 +121,10 @@
  *      A string which specifies the AWS region of the S3 bucket.
  *
  * \var char H5FD_ros3_fapl_t::secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1]
- *      A string which specified the security ID.
+ *      A string which specifies the security ID.
  *
  * \var char H5FD_ros3_fapl_t::secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1]
- *      A string which specified the security key.
+ *      A string which specifies the security key.
  *
  */
 typedef struct H5FD_ros3_fapl_t {
@@ -134,6 +134,27 @@ typedef struct H5FD_ros3_fapl_t {
     char    secret_id[H5FD_ROS3_MAX_SECRET_ID_LEN + 1];
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
 } H5FD_ros3_fapl_t;
+
+/**
+ * \struct H5FD_ros3_fapl_ext_t
+ * \brief Extended configuration structure for holding the configuration data
+ *        to the #H5FD_ROS3 driver via a File Access Property List.
+ *
+ * \details H5FD_ros_fapl_ext_t is a public structure that is used to pass
+ *          configuration data to the #H5FD_ROS3 driver via a File Access
+ *          Property List.
+ *
+ * \var H5FD_ros3_fapl_t H5FD_ros3_fapl_ext_t::fa
+ *      Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().
+ *
+ * \var char H5FD_ros3_fapl_ext_t::token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]
+ *      A string which specifies the session/security token.
+ *
+ */
+typedef struct H5FD_ros3_fapl_ext_t {
+    H5FD_ros3_fapl_t fa;
+    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];
+} H5FD_ros3_fapl_ext_t;
 
 #ifdef __cplusplus
 extern "C" {

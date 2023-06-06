@@ -1070,8 +1070,8 @@ test_set_configured_fapl(void)
     hid_t      fapl_id  = H5I_INVALID_HID;
     other_fa_t wrong_fa = {0x432, 0xf82, 0x9093};
 #ifdef H5_HAVE_ROS3_VFD
-    H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
-    H5FD_ros3_fapl_t ros3_auth_fa = {
+    H5FD_ros3_fapl_ext_t ros3_anon_fa = {{1, FALSE, "", "", ""}, ""};
+    H5FD_ros3_fapl_t     ros3_auth_fa = {
         1,                            /* fapl version           */
         TRUE,                         /* authenticate           */
         "us-east-1",                  /* aws region             */
@@ -1181,7 +1181,6 @@ test_set_configured_fapl(void)
 
     }; /* testcases `cases` array */
     unsigned int i;
-    char         token[H5FD_ROS3_MAX_SECRET_TOK_LEN] = "";
 
 #ifdef H5_HAVE_ROS3_VFD
     n_cases += 3;
@@ -1223,7 +1222,6 @@ test_set_configured_fapl(void)
         vfd_info.type   = VFD_BY_NAME;
         vfd_info.info   = C.conf_fa;
         vfd_info.u.name = C.vfdname;
-        vfd_info.token  = token;
         result          = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
         if (C.expected == 0) {
             JSVERIFY(result, H5I_INVALID_HID, C.message)

@@ -32,12 +32,15 @@ static hbool_t get_onion_revision_count = FALSE;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
-static H5FD_ros3_fapl_t ros3_fa_g = {
-    1,     /* Structure Version */
-    FALSE, /* Authenticate?     */
-    "",    /* AWS Region        */
-    "",    /* Access Key ID     */
-    "",    /* Secret Access Key */
+static H5FD_ros3_fapl_ext_t ros3_fa_g = {
+    {
+        1,     /* Structure Version */
+        FALSE, /* Authenticate?     */
+        "",    /* AWS Region        */
+        "",    /* Access Key ID     */
+        "",    /* Secret Access Key */
+    },
+    "", /* Session/security token */
 };
 static char token[H5FD_ROS3_MAX_SECRET_TOK_LEN]; /* Session/security token */
 #endif                                           /* H5_HAVE_ROS3_VFD */
@@ -1148,7 +1151,7 @@ end_collect:
 
             case '$':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa_g, token) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &(ros3_fa_g.fa), ros3_fa_g.token) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     usage(h5tools_getprogname());
                     free_handler(hand, argc);
@@ -1157,8 +1160,7 @@ end_collect:
                     goto done;
                 }
 
-                vfd_info_g.info  = &ros3_fa_g;
-                vfd_info_g.token = token;
+                vfd_info_g.info = &ros3_fa_g;
 #else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 h5tools_setstatus(EXIT_FAILURE);
