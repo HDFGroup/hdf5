@@ -19,11 +19,12 @@
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
-#include "H5private.h"      /* Generic Functions           */
-#include "H5Eprivate.h"     /* Error handling              */
-#include "H5FDprivate.h"    /* File drivers                */
-#include "H5FDonion.h"      /* Onion file driver           */
-#include "H5FDonion_priv.h" /* Onion file driver internals */
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FDprivate.h"    /* File drivers                             */
+#include "H5FDonion.h"      /* Onion file driver                        */
+#include "H5FDonion_priv.h" /* Onion file driver internals              */
+#include "H5MMprivate.h"    /* Memory management                        */
 
 /*-----------------------------------------------------------------------------
  * Function:    H5FD__onion_write_history

@@ -13,10 +13,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5B2cache.c
- *              Jan 31 2005
- *              Quincey Koziol
  *
- * Purpose:     Implement v2 B-tree metadata cache methods.
+ * Purpose:     Implement v2 B-tree metadata cache methods
  *
  *-------------------------------------------------------------------------
  */
@@ -30,10 +28,13 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5B2pkg.h"     /* v2 B-trees				*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5WBprivate.h" /* Wrapped Buffers                      */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5B2pkg.h"     /* B-Trees (Version 2)                      */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */

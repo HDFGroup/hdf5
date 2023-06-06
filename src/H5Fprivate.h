@@ -17,272 +17,24 @@
 #ifndef H5Fprivate_H
 #define H5Fprivate_H
 
-/* Early typedefs to avoid circular dependencies */
+/* This definition has to be early, before the other private headers,
+ * due to circular dependencies.
+ */
 typedef struct H5F_t H5F_t;
 
 /* Include package's public header */
 #include "H5Fpublic.h"
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h" /* Memory management            */
 #include "H5FDprivate.h" /* File drivers                 */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"  /* Property lists               */
-#endif                   /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h" /* Vectors and arrays           */
+#include "H5Pprivate.h" /* Property lists               */
+#endif
 #include "H5VLprivate.h" /* Virtual Object Layer         */
 
 /**************************/
 /* Library Private Macros */
 /**************************/
-
-/*
- * Encode and decode macros for file meta-data.
- * Currently, all file meta-data is little-endian.
- */
-
-#define INT16ENCODE(p, i)                                                                                    \
-    {                                                                                                        \
-        *(p) = (uint8_t)((unsigned)(i)&0xff);                                                                \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
-        (p)++;                                                                                               \
-    }
-
-#define UINT16ENCODE(p, i)                                                                                   \
-    {                                                                                                        \
-        *(p) = (uint8_t)((unsigned)(i)&0xff);                                                                \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
-        (p)++;                                                                                               \
-    }
-
-#define INT32ENCODE(p, i)                                                                                    \
-    {                                                                                                        \
-        *(p) = (uint8_t)((uint32_t)(i)&0xff);                                                                \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((uint32_t)(i) >> 8) & 0xff);                                                       \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((uint32_t)(i) >> 16) & 0xff);                                                      \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((uint32_t)(i) >> 24) & 0xff);                                                      \
-        (p)++;                                                                                               \
-    }
-
-#define UINT32ENCODE(p, i)                                                                                   \
-    {                                                                                                        \
-        *(p) = (uint8_t)((i)&0xff);                                                                          \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((i) >> 8) & 0xff);                                                                 \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((i) >> 16) & 0xff);                                                                \
-        (p)++;                                                                                               \
-        *(p) = (uint8_t)(((i) >> 24) & 0xff);                                                                \
-        (p)++;                                                                                               \
-    }
-
-/* Encode an unsigned integer into a variable-sized buffer */
-/* (Assumes that the high bits of the integer are zero) */
-#define ENCODE_VAR(p, typ, n, l)                                                                             \
-    {                                                                                                        \
-        typ      _n = (n);                                                                                   \
-        size_t   _i;                                                                                         \
-        uint8_t *_p = (uint8_t *)(p);                                                                        \
-                                                                                                             \
-        for (_i = 0; _i < l; _i++, _n >>= 8)                                                                 \
-            *_p++ = (uint8_t)(_n & 0xff);                                                                    \
-        (p) = (uint8_t *)(p) + l;                                                                            \
-    }
-
-/* Encode a 32-bit unsigned integer into a variable-sized buffer */
-/* (Assumes that the high bits of the integer are zero) */
-#define UINT32ENCODE_VAR(p, n, l) ENCODE_VAR(p, uint32_t, n, l)
-
-#define INT64ENCODE(p, n)                                                                                    \
-    {                                                                                                        \
-        int64_t  _n = (n);                                                                                   \
-        size_t   _i;                                                                                         \
-        uint8_t *_p = (uint8_t *)(p);                                                                        \
-                                                                                                             \
-        for (_i = 0; _i < sizeof(int64_t); _i++, _n >>= 8)                                                   \
-            *_p++ = (uint8_t)(_n & 0xff);                                                                    \
-        for (/*void*/; _i < 8; _i++)                                                                         \
-            *_p++ = (uint8_t)((n) < 0 ? 0xff : 0);                                                           \
-        (p) = (uint8_t *)(p) + 8;                                                                            \
-    }
-
-#define UINT64ENCODE(p, n)                                                                                   \
-    {                                                                                                        \
-        uint64_t _n = (n);                                                                                   \
-        size_t   _i;                                                                                         \
-        uint8_t *_p = (uint8_t *)(p);                                                                        \
-                                                                                                             \
-        for (_i = 0; _i < sizeof(uint64_t); _i++, _n >>= 8)                                                  \
-            *_p++ = (uint8_t)(_n & 0xff);                                                                    \
-        for (/*void*/; _i < 8; _i++)                                                                         \
-            *_p++ = 0;                                                                                       \
-        (p) = (uint8_t *)(p) + 8;                                                                            \
-    }
-
-/* Encode a 64-bit unsigned integer into a variable-sized buffer */
-/* (Assumes that the high bits of the integer are zero) */
-#define UINT64ENCODE_VAR(p, n, l) ENCODE_VAR(p, uint64_t, n, l)
-
-/* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
-/* (Assumes that the high bits of the integer are zero) */
-#define UINT64ENCODE_VARLEN(p, n)                                                                            \
-    {                                                                                                        \
-        uint64_t __n = (uint64_t)(n);                                                                        \
-        unsigned _s  = H5VM_limit_enc_size(__n);                                                             \
-                                                                                                             \
-        *(p)++ = (uint8_t)_s;                                                                                \
-        UINT64ENCODE_VAR(p, __n, _s);                                                                        \
-    }
-
-#define H5_ENCODE_UNSIGNED(p, n)                                                                             \
-    {                                                                                                        \
-        HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));                                              \
-        UINT32ENCODE(p, n)                                                                                   \
-    }
-
-/* Assumes the endianness of uint64_t is the same as double */
-#define H5_ENCODE_DOUBLE(p, n)                                                                               \
-    {                                                                                                        \
-        uint64_t _n;                                                                                         \
-        size_t   _u;                                                                                         \
-        uint8_t *_p = (uint8_t *)(p);                                                                        \
-                                                                                                             \
-        HDcompile_assert(sizeof(double) == 8);                                                               \
-        HDcompile_assert(sizeof(double) == sizeof(uint64_t));                                                \
-        H5MM_memcpy(&_n, &n, sizeof(double));                                                                \
-        for (_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                                                  \
-            *_p++ = (uint8_t)(_n & 0xff);                                                                    \
-        (p) = (uint8_t *)(p) + 8;                                                                            \
-    }
-
-/* DECODE converts little endian bytes pointed by p to integer values and store
- * it in i.  For signed values, need to do sign-extension when converting
- * the last byte which carries the sign bit.
- * The macros does not require i be of a certain byte sizes.  It just requires
- * i be big enough to hold the intended value range.  E.g. INT16DECODE works
- * correctly even if i is actually a 64bit int like in a Cray.
- */
-
-#define INT16DECODE(p, i)                                                                                    \
-    {                                                                                                        \
-        (i) = (int16_t)((*(p)&0xff));                                                                        \
-        (p)++;                                                                                               \
-        (i) |= (int16_t)(((*(p)&0xff) << 8) | ((*(p)&0x80) ? ~0xffff : 0x0));                                \
-        (p)++;                                                                                               \
-    }
-
-#define UINT16DECODE(p, i)                                                                                   \
-    {                                                                                                        \
-        (i) = (uint16_t)(*(p)&0xff);                                                                         \
-        (p)++;                                                                                               \
-        (i) |= (uint16_t)((*(p)&0xff) << 8);                                                                 \
-        (p)++;                                                                                               \
-    }
-
-#define INT32DECODE(p, i)                                                                                    \
-    {                                                                                                        \
-        (i) = ((int32_t)(*(p)&0xff));                                                                        \
-        (p)++;                                                                                               \
-        (i) |= ((int32_t)(*(p)&0xff) << 8);                                                                  \
-        (p)++;                                                                                               \
-        (i) |= ((int32_t)(*(p)&0xff) << 16);                                                                 \
-        (p)++;                                                                                               \
-        (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) | ((*(p)&0x80) ? ~0xffffffffULL : 0x0ULL)));       \
-        (p)++;                                                                                               \
-    }
-
-#define UINT32DECODE(p, i)                                                                                   \
-    {                                                                                                        \
-        (i) = (uint32_t)(*(p)&0xff);                                                                         \
-        (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 8);                                                                 \
-        (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 16);                                                                \
-        (p)++;                                                                                               \
-        (i) |= ((uint32_t)(*(p)&0xff) << 24);                                                                \
-        (p)++;                                                                                               \
-    }
-
-/* Decode a variable-sized buffer */
-/* (Assumes that the high bits of the integer will be zero) */
-#define DECODE_VAR(p, n, l)                                                                                  \
-    {                                                                                                        \
-        size_t _i;                                                                                           \
-                                                                                                             \
-        n = 0;                                                                                               \
-        (p) += l;                                                                                            \
-        for (_i = 0; _i < l; _i++)                                                                           \
-            n = (n << 8) | *(--p);                                                                           \
-        (p) += l;                                                                                            \
-    }
-
-/* Decode a variable-sized buffer into a 32-bit unsigned integer */
-/* (Assumes that the high bits of the integer will be zero) */
-#define UINT32DECODE_VAR(p, n, l) DECODE_VAR(p, n, l)
-
-#define INT64DECODE(p, n)                                                                                    \
-    {                                                                                                        \
-        /* WE DON'T CHECK FOR OVERFLOW! */                                                                   \
-        size_t _i;                                                                                           \
-                                                                                                             \
-        n = 0;                                                                                               \
-        (p) += 8;                                                                                            \
-        for (_i = 0; _i < sizeof(int64_t); _i++)                                                             \
-            n = (n << 8) | *(--p);                                                                           \
-        (p) += 8;                                                                                            \
-    }
-
-#define UINT64DECODE(p, n)                                                                                   \
-    {                                                                                                        \
-        /* WE DON'T CHECK FOR OVERFLOW! */                                                                   \
-        size_t _i;                                                                                           \
-                                                                                                             \
-        n = 0;                                                                                               \
-        (p) += 8;                                                                                            \
-        for (_i = 0; _i < sizeof(uint64_t); _i++)                                                            \
-            n = (n << 8) | *(--p);                                                                           \
-        (p) += 8;                                                                                            \
-    }
-
-/* Decode a variable-sized buffer into a 64-bit unsigned integer */
-/* (Assumes that the high bits of the integer will be zero) */
-#define UINT64DECODE_VAR(p, n, l) DECODE_VAR(p, n, l)
-
-/* Decode a 64-bit unsigned integer and its length from a variable-sized buffer */
-/* (Assumes that the high bits of the integer will be zero) */
-#define UINT64DECODE_VARLEN(p, n)                                                                            \
-    {                                                                                                        \
-        unsigned _s = *(p)++;                                                                                \
-                                                                                                             \
-        UINT64DECODE_VAR(p, n, _s);                                                                          \
-    }
-
-#define H5_DECODE_UNSIGNED(p, n)                                                                             \
-    {                                                                                                        \
-        HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));                                              \
-        UINT32DECODE(p, n)                                                                                   \
-    }
-
-/* Assumes the endianness of uint64_t is the same as double */
-#define H5_DECODE_DOUBLE(p, n)                                                                               \
-    {                                                                                                        \
-        uint64_t _n;                                                                                         \
-        size_t   _u;                                                                                         \
-                                                                                                             \
-        HDcompile_assert(sizeof(double) == 8);                                                               \
-        HDcompile_assert(sizeof(double) == sizeof(uint64_t));                                                \
-        _n = 0;                                                                                              \
-        (p) += 8;                                                                                            \
-        for (_u = 0; _u < sizeof(uint64_t); _u++)                                                            \
-            _n = (_n << 8) | *(--p);                                                                         \
-        H5MM_memcpy(&(n), &_n, sizeof(double));                                                              \
-        (p) += 8;                                                                                            \
-    }
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
@@ -414,39 +166,8 @@ typedef struct H5F_t H5F_t;
 #endif /* H5F_MODULE */
 
 /* Macros to encode/decode offset/length's for storing in the file */
-#define H5F_ENCODE_LENGTH_LEN(p, l, s)                                                                       \
-    switch (s) {                                                                                             \
-        case 4:                                                                                              \
-            UINT32ENCODE(p, l);                                                                              \
-            break;                                                                                           \
-        case 8:                                                                                              \
-            UINT64ENCODE(p, l);                                                                              \
-            break;                                                                                           \
-        case 2:                                                                                              \
-            UINT16ENCODE(p, l);                                                                              \
-            break;                                                                                           \
-        default:                                                                                             \
-            HDassert("bad sizeof size" && 0);                                                                \
-    }
-
-#define H5F_ENCODE_LENGTH(f, p, l) H5F_ENCODE_LENGTH_LEN(p, l, H5F_SIZEOF_SIZE(f))
-
-#define H5F_DECODE_LENGTH_LEN(p, l, s)                                                                       \
-    switch (s) {                                                                                             \
-        case 4:                                                                                              \
-            UINT32DECODE(p, l);                                                                              \
-            break;                                                                                           \
-        case 8:                                                                                              \
-            UINT64DECODE(p, l);                                                                              \
-            break;                                                                                           \
-        case 2:                                                                                              \
-            UINT16DECODE(p, l);                                                                              \
-            break;                                                                                           \
-        default:                                                                                             \
-            HDassert("bad sizeof size" && 0);                                                                \
-    }
-
-#define H5F_DECODE_LENGTH(f, p, l) DECODE_VAR(p, l, H5F_SIZEOF_SIZE(f))
+#define H5F_ENCODE_LENGTH(f, p, l) H5_ENCODE_LENGTH_LEN(p, l, H5F_SIZEOF_SIZE(f))
+#define H5F_DECODE_LENGTH(f, p, l) H5_DECODE_LENGTH_LEN(p, l, H5F_SIZEOF_SIZE(f))
 
 /*
  * Macros that check for overflows.  These are somewhat dangerous to fiddle
