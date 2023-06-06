@@ -277,7 +277,7 @@ done:
 JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1info(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf  = {H5L_TYPE_ERROR, FALSE, -1, H5T_CSET_ERROR, 0};
     const char *linkName = NULL;
     jvalue      args[5];
     herr_t      status  = FAIL;
@@ -340,7 +340,7 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
                                           jint index_field, jint order, jlong link_n, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, FALSE, -1, H5T_CSET_ERROR, 0};
     const char *groupName = NULL;
     jvalue      args[5];
     herr_t      status  = FAIL;
@@ -454,7 +454,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstring name,
                                   jobjectArray link_value, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, FALSE, -1, H5T_CSET_ERROR, 0};
     const char *file_name = NULL;
     const char *obj_name  = NULL;
     const char *linkName  = NULL;
@@ -544,7 +544,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
                                            jint index_field, jint order, jlong link_n,
                                            jobjectArray link_value, jlong access_id)
 {
-    H5L_info2_t infobuf;
+    H5L_info2_t infobuf   = {H5L_TYPE_ERROR, FALSE, -1, H5T_CSET_ERROR, 0};
     const char *file_name = NULL;
     const char *obj_name  = NULL;
     const char *grpName   = NULL;

@@ -157,7 +157,7 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang CMake"
-            os: macos-11
+            os: macos-13
             cpp: ON
             fortran: OFF
             java: ON
@@ -324,10 +324,10 @@ jobs:
         run: |
            sudo apt update
            sudo apt install automake autoconf libtool libtool-bin
-           sudo apt install gcc-11 g++-11 gfortran-11
-           echo "CC=gcc-11" >> $GITHUB_ENV
-           echo "CXX=g++-11" >> $GITHUB_ENV
-           echo "FC=gfortran-11" >> $GITHUB_ENV
+           sudo apt install gcc-12 g++-12 gfortran-12
+           echo "CC=gcc-12" >> $GITHUB_ENV
+           echo "CXX=g++-12" >> $GITHUB_ENV
+           echo "FC=gfortran-12" >> $GITHUB_ENV
            sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
 
@@ -347,7 +347,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-11'
+        if: matrix.os == 'macos-13'
 
       - name: Set environment for MSVC (Windows)
         run: |
@@ -429,10 +429,23 @@ jobs:
         if: (matrix.generator == 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
 
       - name: CMake Run Tests
-        run: ctest --build . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
-        # Skip Debug MSVC while we investigate H5L Java test timeouts
-        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
+
+      # THREAD-SAFE
+
+      - name: Autotools Run Thread-Safe Tests
+        run: |
+          cd test
+          ./ttsafe
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen') && (matrix.run_tests) && (matrix.thread_safety.enabled)
+
+      - name: CMake Run Thread-Safe Tests
+        run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V -R ttsafe
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && (matrix.thread_safety.enabled)
 
       #
       # INSTALL (note that this runs even when we don't run the tests)
