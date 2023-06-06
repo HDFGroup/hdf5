@@ -193,7 +193,7 @@ H5_DLL herr_t H5FD_init(void);
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t
-H5FD_selection_build_types(hbool_t io_op_write, size_t num_pieces,
+H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
                             struct H5S_t **file_spaces, struct H5S_t **mem_spaces,
                             haddr_t addrs[], H5_flexible_const_ptr_t bufs[],
                             size_t src_type_sizes[], size_t dst_type_sizes[],

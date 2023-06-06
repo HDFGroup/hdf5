@@ -2165,7 +2165,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
 
 
 /* 
- * Comparision routine used by HDqsort in H5FD__sort_io_req_real()
+ * Comparison routine used by HDqsort in H5FD__sort_io_req_real()
  */
 static int
 H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
@@ -2612,7 +2612,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_selection_build_types(hbool_t io_op_write, size_t num_pieces, 
+H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, 
                             H5S_t **file_spaces, H5S_t **mem_spaces, 
                             haddr_t offsets[], H5_flexible_const_ptr_t bufs[], 
                             size_t src_element_sizes[], size_t dst_element_sizes[], 

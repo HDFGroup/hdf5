@@ -1459,12 +1459,12 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
     H5D_mpio_actual_io_mode_t        actual_io_mode        = 0;
     size_t                           i; /* Local index variable */
 
-    H5S_t **file_spaces;
-    H5S_t **mem_spaces;
-    haddr_t *addrs;
-    H5_flexible_const_ptr_t *bufs;
-    size_t *src_type_sizes;
-    size_t *dst_type_sizes;
+    H5S_t **file_spaces = NULL;
+    H5S_t **mem_spaces = NULL;
+    haddr_t *addrs = NULL;
+    H5_flexible_const_ptr_t *bufs = NULL;
+    size_t *src_type_sizes = NULL;
+    size_t *dst_type_sizes = NULL;
     hbool_t io_op_write;
 
     herr_t                           ret_value = SUCCEED;
@@ -1573,7 +1573,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
         io_op_write = (io_info->op_type == H5D_IO_OP_WRITE) ? TRUE : FALSE;
         
-        if (H5FD_selection_build_types(io_op_write, num_chunk, file_spaces, mem_spaces,
+        if (H5FD_selection_build_types(io_op_write, (uint32_t)num_chunk, file_spaces, mem_spaces,
                                        addrs, bufs, src_type_sizes, dst_type_sizes,
                                        &chunk_final_ftype, &chunk_final_ftype_is_derived,
                                        &chunk_final_mtype, &chunk_final_mtype_is_derived, &size_i, &base_buf_addr) < 0)
