@@ -68,7 +68,7 @@ ALIASES += space_id="\param[in] space_id Dataspace identifier"
 ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
 
 ################################################################################
-# Dataypes
+# Datatypes
 ################################################################################
 
 ALIASES += type_id="\param[in] type_id Datatype identifier"

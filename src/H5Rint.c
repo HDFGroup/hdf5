@@ -557,7 +557,7 @@ H5R__get_region(H5F_t *file, const void *_ref)
         HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, NULL, "not found")
 
     /* Unserialize the selection */
-    if (H5S_SELECT_DESERIALIZE(&ds, &p) < 0)
+    if (H5S_SELECT_DESERIALIZE(&ds, &p, SIZE_MAX) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't deserialize selection")
 
     ret_value = ds;
