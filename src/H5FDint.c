@@ -108,14 +108,14 @@ typedef struct H5FD_get_driver_ud_t {
 /* Local Prototypes */
 /********************/
 static int    H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data);
-static herr_t H5FD__read_selection_translate(uint32_t skip_vector_cb,
-                                             H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                             H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                             size_t element_sizes[], void *bufs[] /* out */);
-static herr_t H5FD__write_selection_translate(uint32_t skip_vector_cb,
-                                              H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                              H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                              size_t element_sizes[], const void *bufs[]);
+static herr_t H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                             hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                             H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                             void *bufs[] /* out */);
+static herr_t H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type,
+                                              hid_t dxpl_id, uint32_t count, H5S_t **mem_spaces,
+                                              H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                              const void *bufs[]);
 
 /*********************/
 /* Package Variables */
@@ -755,8 +755,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                               H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
+H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                               uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t         extend_sizes = FALSE;
@@ -1197,8 +1197,8 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
         /* Otherwise, implement the selection read as a sequence of regular
          * or vector read calls.
          */
-        if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                           element_sizes, bufs) < 0)
+        if (H5FD__read_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
+                                           offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
 
 done:
@@ -1295,7 +1295,7 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
 #endif /* H5_HAVE_PARALLEL */
 
     skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
-    skip_vector_cb = skip_cb & SKIP_VECTOR_CB;
+    skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
 
@@ -1363,8 +1363,8 @@ H5FD_read_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                           element_sizes, bufs) < 0)
+        if (H5FD__read_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
+                                           file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
     }
 
@@ -1407,8 +1407,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
+H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
+                                uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
                                 size_t element_sizes[], const void *bufs[])
 {
     hbool_t         extend_sizes = FALSE;
@@ -1841,8 +1841,8 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
         /* Otherwise, implement the selection write as a sequence of regular
          * or vector write calls.
          */
-        if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                            element_sizes, bufs) < 0)
+        if (H5FD__write_selection_translate(SKIP_NO_CB, file, type, dxpl_id, count, mem_spaces, file_spaces,
+                                            offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
 
 done:
@@ -1891,8 +1891,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
-                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                        hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                        size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
     H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1936,7 +1937,7 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
 #endif /* H5_HAVE_PARALLEL */
 
     skip_selection_cb = skip_cb & SKIP_SELECTION_CB;
-    skip_vector_cb = skip_cb & SKIP_VECTOR_CB;
+    skip_vector_cb    = skip_cb & SKIP_VECTOR_CB;
 
     if (file->base_addr > 0) {
 
@@ -1998,8 +1999,8 @@ H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_t type, uint32_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                            element_sizes, bufs) < 0)
+        if (H5FD__write_selection_translate(skip_vector_cb, file, type, dxpl_id, count, mem_spaces,
+                                            file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
     }
 
@@ -2163,7 +2164,6 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
 
-
 /* 
  * Comparison routine used by HDqsort in H5FD__sort_io_req_real()
  */
@@ -2198,7 +2198,7 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
 static herr_t
 H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct H5FD_vsrt_tmp_t **srt_tmp)
 {
-    size_t  i;
+    size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2232,7 +2232,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
         for (i = 0; i < count; i++) {
-            (*srt_tmp)[i].addr = addrs[i];
+            (*srt_tmp)[i].addr  = addrs[i];
             (*srt_tmp)[i].index = i;
         }
 
@@ -2437,18 +2437,16 @@ done:
  * This is derived from H5FD_sort_vector_io_req()
  */
 herr_t
-H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, 
-                           hid_t mem_space_ids[], hid_t file_space_ids[], 
-                           haddr_t offsets[], size_t element_sizes[],
-                           H5_flexible_const_ptr_t bufs[], 
-                           hid_t **s_mem_space_ids_ptr, hid_t **s_file_space_ids_ptr, 
-                           haddr_t **s_offsets_ptr, size_t **s_element_sizes_ptr,
-                           H5_flexible_const_ptr_t **s_bufs_ptr)
+H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t mem_space_ids[],
+                           hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                           H5_flexible_const_ptr_t bufs[], hid_t **s_mem_space_ids_ptr,
+                           hid_t **s_file_space_ids_ptr, haddr_t **s_offsets_ptr,
+                           size_t **s_element_sizes_ptr, H5_flexible_const_ptr_t **s_bufs_ptr)
 {
-    size_t count = (size_t)_count;
-    size_t i;
-    struct H5FD_vsrt_tmp_t *srt_tmp = NULL;
-    herr_t ret_value = SUCCEED; /* Return value */
+    size_t                  count = (size_t)_count;
+    size_t                  i;
+    struct H5FD_vsrt_tmp_t *srt_tmp   = NULL;
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2479,31 +2477,31 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count,
 
     if (*selection_was_sorted) {
 
-        *s_mem_space_ids_ptr = mem_space_ids;
+        *s_mem_space_ids_ptr  = mem_space_ids;
         *s_file_space_ids_ptr = file_space_ids;
-        *s_offsets_ptr = offsets;
-        *s_element_sizes_ptr = element_sizes;
-        *s_bufs_ptr  = bufs;
+        *s_offsets_ptr        = offsets;
+        *s_element_sizes_ptr  = element_sizes;
+        *s_bufs_ptr           = bufs;
     }
     else {
 
         /* must sort the offsets array in increasing offset order, while
          * maintaining the association between each offset, and the
-         * mem_space_ids[], file_space_ids[], element_sizes[], 
+         * mem_space_ids[], file_space_ids[], element_sizes[],
          * and bufs[] values at the same index.
          *
          * Do this by allocating an array of struct H5FD_ssrt_tmp_t, where
          * each instance of H5FD_vsrt_tmp_t has two fields, offset and index.
          * Load the array with the contents of the offsets array and
          * the index of the associated entry. Sort the array, allocate
-         * the s_mem_space_ids_ptr, s_file_space_ids_ptr, s_offsets_ptr, 
+         * the s_mem_space_ids_ptr, s_file_space_ids_ptr, s_offsets_ptr,
          * s_element_sizes_ptr, and s_bufs_ptr
          * arrays and populate them using the mapping provided by
          * the sorted array of H5FD_ssrt_tmp_t.
          */
         size_t j;
         size_t fixed_element_sizes_index = count;
-        size_t fixed_bufs_index = count;
+        size_t fixed_bufs_index          = count;
 
         if ((NULL == (*s_mem_space_ids_ptr = (hid_t *)HDmalloc(count * sizeof(hid_t)))) ||
             (NULL == (*s_file_space_ids_ptr = (hid_t *)HDmalloc(count * sizeof(hid_t)))) ||
@@ -2518,15 +2516,14 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count,
         HDassert(element_sizes[0] != 0);
         HDassert(bufs[0].cvp != NULL);
 
-        /* Scan the element_sizes and bufs array to determine if the fixed 
-         * element_sizes / bufs optimization is in use, and if so, to determine 
-         * the index of the last valid value on each vector.  
+        /* Scan the element_sizes and bufs array to determine if the fixed
+         * element_sizes / bufs optimization is in use, and if so, to determine
+         * the index of the last valid value on each vector.
          * We have already verified that the first
          * elements of these arrays are valid so we can start at the second
          * element (if it exists).
          */
-        for (i = 1; i < count && ((fixed_element_sizes_index == count) || 
-                                  (fixed_bufs_index == count)); i++) {
+        for (i = 1; i < count && ((fixed_element_sizes_index == count) || (fixed_bufs_index == count)); i++) {
             if ((fixed_element_sizes_index == count) && (element_sizes[i] == 0))
                 fixed_element_sizes_index = i - 1;
             if ((fixed_bufs_index == count) && (bufs[i].cvp == NULL))
@@ -2543,11 +2540,11 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count,
 
             j = srt_tmp[i].index;
 
-            (*s_mem_space_ids_ptr)[i] = mem_space_ids[j];
+            (*s_mem_space_ids_ptr)[i]  = mem_space_ids[j];
             (*s_file_space_ids_ptr)[i] = file_space_ids[j];
-            (*s_offsets_ptr)[i] = offsets[j];
-            (*s_element_sizes_ptr)[i] = element_sizes[MIN(j, fixed_element_sizes_index)];
-            (*s_bufs_ptr)[i] = bufs[MIN(j, fixed_bufs_index)];
+            (*s_offsets_ptr)[i]        = offsets[j];
+            (*s_element_sizes_ptr)[i]  = element_sizes[MIN(j, fixed_element_sizes_index)];
+            (*s_bufs_ptr)[i]           = bufs[MIN(j, fixed_bufs_index)];
         }
     }
 
@@ -2607,7 +2604,7 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  
+ * Programmer:
  *
  *-------------------------------------------------------------------------
  */
@@ -2626,21 +2623,22 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
     MPI_Aint     *piece_file_disp_array = NULL;
     MPI_Aint     *piece_mem_disp_array  = NULL;
     hbool_t      *piece_mft_is_derived_array =
-        NULL; /* Flags to indicate each piece's MPI file datatype is derived */;
+        NULL; /* Flags to indicate each piece's MPI file datatype is derived */
+    ;
     hbool_t *piece_mmt_is_derived_array =
         NULL;                          /* Flags to indicate each piece's MPI memory datatype is derived */
     int *piece_mpi_file_counts = NULL; /* Count of MPI file datatype for each piece */
     int *piece_mpi_mem_counts  = NULL; /* Count of MPI memory datatype for each piece */
 
     haddr_t base_file_addr;
-    size_t i, j;        /* Local index variable */
-    int  mpi_code;      /* MPI return code */
+    size_t  i, j;     /* Local index variable */
+    int     mpi_code; /* MPI return code */
 
-    hbool_t extend_src_sizes = FALSE;
-    hbool_t extend_dst_sizes = FALSE;
-    hbool_t extend_bufs  = FALSE;
+    hbool_t                 extend_src_sizes = FALSE;
+    hbool_t                 extend_dst_sizes = FALSE;
+    hbool_t                 extend_bufs      = FALSE;
     H5_flexible_const_ptr_t buf;
-    size_t src_element_size, dst_element_size;
+    size_t                  src_element_size, dst_element_size;
 
     herr_t ret_value = SUCCEED;
 
@@ -2650,26 +2648,24 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
 
         /* Allocate information for num_pieces */
         if (NULL == (piece_mtype = (MPI_Datatype *)H5MM_malloc(num_pieces * sizeof(MPI_Datatype))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate piece memory datatype buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory datatype buffer")
         if (NULL == (piece_ftype = (MPI_Datatype *)H5MM_malloc(num_pieces * sizeof(MPI_Datatype))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file datatype buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file datatype buffer")
         if (NULL == (piece_file_disp_array = (MPI_Aint *)H5MM_malloc(num_pieces * sizeof(MPI_Aint))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate piece file displacement buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file displacement buffer")
         if (NULL == (piece_mem_disp_array = (MPI_Aint *)H5MM_calloc(num_pieces * sizeof(MPI_Aint))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate piece memory displacement buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate piece memory displacement buffer")
         if (NULL == (piece_mpi_mem_counts = (int *)H5MM_calloc(num_pieces * sizeof(int))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory counts buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece memory counts buffer")
         if (NULL == (piece_mpi_file_counts = (int *)H5MM_calloc(num_pieces * sizeof(int))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file counts buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate piece file counts buffer")
         if (NULL == (piece_mmt_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate piece memory is derived datatype flags buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate piece memory is derived datatype flags buffer")
         if (NULL == (piece_mft_is_derived_array = (hbool_t *)H5MM_calloc(num_pieces * sizeof(hbool_t))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate piece file is derived datatype flags buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                        "couldn't allocate piece file is derived datatype flags buffer")
 
         /* save lowest file address */
         base_file_addr = offsets[0];
@@ -2710,7 +2706,8 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
                 if (src_element_sizes[i] == 0) {
                     extend_src_sizes = TRUE;
                     src_element_size = src_element_sizes[i - 1];
-               } else 
+                }
+                else
                     src_element_size = src_element_sizes[i];
             }
 
@@ -2718,18 +2715,19 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
                 if (dst_element_sizes[i] == 0) {
                     extend_dst_sizes = TRUE;
                     dst_element_size = dst_element_sizes[i - 1];
-                } else 
+                }
+                else
                     dst_element_size = src_element_sizes[i];
             }
 
             if (!extend_bufs) {
                 if (bufs[i].cvp == NULL) {
                     extend_bufs = TRUE;
-                    buf = bufs[i - 1];
-                } else
+                    buf         = bufs[i - 1];
+                }
+                else
                     buf = bufs[i];
             }
-
 
             /* Obtain disk and memory MPI derived datatype */
             /* NOTE: The permute_map array can be allocated within H5S_mpio_space_type
@@ -2756,21 +2754,21 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
             if (is_permuted)
                 HDassert(permute_map);
 
-            if (H5S_mpio_space_type(mem_spaces[i], dst_element_size,
-                                    &piece_mtype[i], &piece_mpi_mem_counts[i],
-                                    &(piece_mmt_is_derived_array[i]), FALSE, /* this is a memory
-                                                                                space, so if the file
-                                                                                space is not
-                                                                                permuted, there is no
-                                                                                need to permute the
-                                                                                datatype if the point
-                                                                                selections are out of
-                                                                                order*/
-                                    &permute_map,                            /* IN: the permutation map
-                                                                                generated by the
-                                                                                file_space selection
-                                                                                and applied to the
-                                                                                memory selection */
+            if (H5S_mpio_space_type(mem_spaces[i], dst_element_size, &piece_mtype[i],
+                                    &piece_mpi_mem_counts[i], &(piece_mmt_is_derived_array[i]),
+                                    FALSE,        /* this is a memory
+                                                     space, so if the file
+                                                     space is not
+                                                     permuted, there is no
+                                                     need to permute the
+                                                     datatype if the point
+                                                     selections are out of
+                                                     order*/
+                                    &permute_map, /* IN: the permutation map
+                                                     generated by the
+                                                     file_space selection
+                                                     and applied to the
+                                                     memory selection */
                                     &is_permuted /* IN */) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "couldn't create MPI buf type")
 
@@ -2784,19 +2782,17 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
             piece_file_disp_array[i] = (MPI_Aint)offsets[i] - (MPI_Aint)base_file_addr;
 
             if (io_op_write) {
-                piece_mem_disp_array[i] =
-                    (MPI_Aint)buf.cvp - (MPI_Aint)(*mpi_bufs_base).cvp;
+                piece_mem_disp_array[i] = (MPI_Aint)buf.cvp - (MPI_Aint)(*mpi_bufs_base).cvp;
             }
             else {
-                piece_mem_disp_array[i] =
-                    (MPI_Aint)buf.vp - (MPI_Aint)(*mpi_bufs_base).vp;
+                piece_mem_disp_array[i] = (MPI_Aint)buf.vp - (MPI_Aint)(*mpi_bufs_base).vp;
             }
         } /* end for */
 
         /* Create final MPI derived datatype for the file */
         if (MPI_SUCCESS !=
-            (mpi_code = MPI_Type_create_struct((int)num_pieces, piece_mpi_file_counts,
-                                               piece_file_disp_array, piece_ftype, final_ftype)))
+            (mpi_code = MPI_Type_create_struct((int)num_pieces, piece_mpi_file_counts, piece_file_disp_array,
+                                               piece_ftype, final_ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
 
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(final_ftype)))
@@ -2826,9 +2822,8 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces,
 
         /* We have a single, complicated MPI datatype for both memory & file */
         *size_i = 1;
-
-
-    } else {
+    }
+    else {
 
         /* No chunks selected for this process */
         *size_i = 0;

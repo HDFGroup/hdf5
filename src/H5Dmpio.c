@@ -1447,14 +1447,14 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
 H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_rank)
 #endif
 {
-    MPI_Datatype  chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
-    hbool_t       chunk_final_mtype_is_derived = FALSE;
-    MPI_Datatype  chunk_final_ftype; /* Final file MPI datatype for all chunks with selection */
-    hbool_t       chunk_final_ftype_is_derived = FALSE;
+    MPI_Datatype chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
+    hbool_t      chunk_final_mtype_is_derived = FALSE;
+    MPI_Datatype chunk_final_ftype; /* Final file MPI datatype for all chunks with selection */
+    hbool_t      chunk_final_ftype_is_derived = FALSE;
 
     H5D_storage_t ctg_store; /* Storage info for "fake" contiguous dataset */
 
-    int  mpi_code;                     /* MPI return code */
+    int                              mpi_code; /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
     H5D_mpio_actual_io_mode_t        actual_io_mode        = 0;
     size_t                           i; /* Local index variable */
@@ -1467,7 +1467,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
     size_t *dst_type_sizes = NULL;
     hbool_t io_op_write;
 
-    herr_t                           ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1493,7 +1493,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
     {
         hsize_t mpi_buf_count; /* Number of MPI types */
         size_t  num_chunk;     /* Number of chunks for this process */
-        int size_i;
+        int     size_i;
 
         H5D_piece_info_t *piece_info;
 
@@ -1540,18 +1540,23 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
             if (NULL == (file_spaces = H5MM_malloc(num_chunk * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (mem_spaces = H5MM_malloc(num_chunk * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for memory space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for memory space list")
 
             if (NULL == (addrs = H5MM_malloc(num_chunk * sizeof(haddr_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for piece address list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for piece address list")
 
             if (NULL == (bufs = H5MM_malloc(num_chunk * sizeof(H5_flexible_const_ptr_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for bufs buffer list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for bufs buffer list")
 
             if (NULL == (src_type_sizes = H5MM_malloc(num_chunk * sizeof(size_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for src type size list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for src type size list")
             if (NULL == (dst_type_sizes = H5MM_malloc(num_chunk * sizeof(size_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for dst type size list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for dst type size list")
         }
 
 #ifdef H5Dmpio_DEBUG
@@ -1560,14 +1565,14 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
         for (i = 0; i < num_chunk; i++) {
             piece_info = io_info->sel_pieces[i];
 
-            file_spaces[i] = piece_info->fspace;
-            mem_spaces[i]= piece_info->mspace;
-            addrs[i] = piece_info->faddr;
+            file_spaces[i]    = piece_info->fspace;
+            mem_spaces[i]     = piece_info->mspace;
+            addrs[i]          = piece_info->faddr;
             src_type_sizes[i] = piece_info->dset_info->type_info.src_type_size;
             dst_type_sizes[i] = piece_info->dset_info->type_info.dst_type_size;
             if (io_info->op_type == H5D_IO_OP_WRITE)
                 bufs[i].cvp = piece_info->dset_info->buf.cvp;
-             else if (io_info->op_type == H5D_IO_OP_READ)
+            else if (io_info->op_type == H5D_IO_OP_READ)
                 bufs[i].vp = piece_info->dset_info->buf.vp;
         }
 
@@ -1579,16 +1584,15 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
                                        &chunk_final_mtype, &chunk_final_mtype_is_derived, &size_i, &base_buf_addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't build type for MPI-IO")
 
-
         /* We have a single, complicated MPI datatype for both memory & file */
         mpi_buf_count = (hsize_t)size_i;
 
 #ifdef H5Dmpio_DEBUG
         H5D_MPIO_DEBUG(mpi_rank, "before coming to final collective I/O");
 #endif
-        /* For num_chunk == 0, 
+        /* For num_chunk == 0,
          *  no selection at all for this process
-         *  just provide a valid mem address. no actual IO occur 
+         *  just provide a valid mem address. no actual IO occur
          */
 
         io_info->store_faddr = (num_chunk == 0) ? 0 : ctg_store.contig.dset_addr;
