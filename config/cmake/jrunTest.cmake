@@ -300,22 +300,6 @@ if (TEST_SKIP_COMPARE AND NOT TEST_NO_DISPLAY)
   endif ()
 endif ()
 
-if (NOT DEFINED ENV{HDF5_NOCLEANUP})
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}")
-    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
-  endif ()
-
-  if (EXISTS "${TEST_FOLDER}/${TEST_OUTPUT}.err")
-    file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-  endif ()
-
-  if (TEST_DELETE_LIST)
-    foreach (dfile in ${TEST_DELETE_LIST})
-      file (REMOVE ${dfile})
-    endforeach ()
-  endif ()
-endif ()
-
 # everything went fine...
 message (STATUS "${TEST_PROGRAM} Passed")
 
