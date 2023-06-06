@@ -200,7 +200,7 @@ Bug Fixes since HDF5-1.10.10 release
       match, opening of the dataset will fail.
 
       Fixes GitHub issue #2606
-      
+
     - Fix for CVE-2019-8396
 
       Malformed HDF5 files may have truncated content which does not match

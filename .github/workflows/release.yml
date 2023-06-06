@@ -1,0 +1,115 @@
+name: hdf5 1.10 release
+
+# Controls when the action will run. Triggers the workflow on a schedule
+on:
+  workflow_call:
+    inputs:
+      file_base:
+        description: "The common base name of the source tarballs"
+        required: true
+        type: string
+      file_branch:
+        description: "The branch name for the source tarballs"
+        required: true
+        type: string
+      file_sha:
+        description: "The sha for the source tarballs"
+        required: true
+        type: string
+
+# Previous workflows must pass to get here so tag the commit that created the files
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write # In order to allow tag creation
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Get Sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: |
+          git checkout ${{ inputs.file_sha }}
+
+      - uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          commit_sha: ${{ inputs.file_sha }}
+          tag: "snapshot"
+          force_push_tag: true
+          message: "Latest snapshot"
+
+      # Print result using the action output.
+      - run: |
+          echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
+
+  getfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set file base name
+        id: set-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      # Get files created by tarball script
+      - name: Get tgz-tarball (Linux)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-tarball
+              path: ${{ github.workspace }}
+
+      - name: Get zip-tarball (Windows)
+        uses: actions/download-artifact@v3
+        with:
+              name: zip-tarball
+              path: ${{ github.workspace }}
+
+      # Get files created by cmake-ctest script
+      - name: Get published binary (Windows)
+        uses: actions/download-artifact@v3
+        with:
+              name: zip-vs2022-binary
+              path: ${{ github.workspace }}
+
+      - name: Get published binary (MacOS)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-osx12-binary
+              path: ${{ github.workspace }}
+
+      - name: Get published binary (Linux)
+        uses: actions/download-artifact@v3
+        with:
+              name: tgz-ubuntu-2204-binary
+              path: ${{ github.workspace }}
+
+      # Get files used by release script
+
+  PreRelease:
+    runs-on: ubuntu-latest
+    needs: [create-tag, getfiles]
+    environment: snapshots_1_10
+    permissions:
+        contents: write
+    steps:
+      - name: Set file base name
+        id: get-file-base
+        run: |
+          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
+          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
+
+      - name: PreRelease tag
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "snapshot"
+          prerelease: true
+          files: |
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
