@@ -122,11 +122,11 @@ jobs:
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
       - name: Create .nojekyll
-        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/docs/html/.nojekyll
+        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
         shell: bash
 
       - name: dev-only-docs
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/docs/html
+          publish_dir: ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
