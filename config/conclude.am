@@ -121,7 +121,7 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	   tname=$(@:.chkexe_=)$(EXEEXT);\
 	   log=$(@:.chkexe_=.chklog); \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
+	   if [ $(@:.chkexe_=.chkexe) -nt $${tname} ]; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
               if test -n "$(REALTIMEOUTPUT)"; then \
@@ -209,7 +209,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer $${chkname} $$cmd $(SCRIPT_DEPEND); then \
+	   if [ $${chkname} -nt $$cmd ] && [ $${chkname} -nt $(SCRIPT_DEPEND) ]; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \

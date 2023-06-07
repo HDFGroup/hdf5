@@ -50,9 +50,9 @@ CLEANFILES=$(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
+	mkdir -p -m 755 $@
 $(EXAMPLETOPDIR):
-	-$(top_srcdir)/bin/mkdirs $@
+	mkdir -p -m 755 $@
 
 # Install and uninstall rules.  We install the source files, not the
 # example programs themselves.
