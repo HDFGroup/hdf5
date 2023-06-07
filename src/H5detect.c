@@ -694,20 +694,8 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 static void
 print_header(void)
 {
-
-    time_t      now = HDtime(NULL);
-    struct tm  *tm  = HDlocaltime(&now);
-    char        real_name[30];
-    char        host_name[256];
     int         i;
     const char *s;
-#ifdef H5_HAVE_GETPWUID
-    struct passwd *pwd = NULL;
-#else
-    int pwd      = 1;
-#endif
-    static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     static const char *purpose      = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
@@ -746,60 +734,10 @@ the radix point is still assumed to be\n\
 before the first `M' but after the implicit\n\
 bit.\n";
 
-    /*
-     * The real name is the first item from the passwd gecos field.
-     */
-#ifdef H5_HAVE_GETPWUID
-    {
-        size_t n;
-        char  *comma;
-        if ((pwd = HDgetpwuid(HDgetuid()))) {
-            if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
-                n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
-                HDstrncpy(real_name, pwd->pw_gecos, n);
-                real_name[n] = '\0';
-            }
-            else {
-                HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
-                real_name[sizeof(real_name) - 1] = '\0';
-            }
-        }
-        else
-            real_name[0] = '\0';
-    }
-#else
-    real_name[0] = '\0';
-#endif
-
-    /* The FQDM of this host or the empty string */
-#ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(host_name, sizeof(host_name)) < 0) {
-        host_name[0] = '\0';
-    }
-#else
-    host_name[0] = '\0';
-#endif
-
     /* The file header: warning, copyright notice, build information */
     fprintf(rawoutstream, "/* Generated automatically by H5detect -- DO NOT EDIT! */\n\n\n");
     HDfputs(FileHeader, rawoutstream); /* The copyright notice -- see top of this file */
 
-    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
-            1900 + tm->tm_year);
-    if (pwd || real_name[0] || host_name[0]) {
-        fprintf(rawoutstream, " *\t\t\t");
-        if (real_name[0])
-            fprintf(rawoutstream, "%s <", real_name);
-#ifdef H5_HAVE_GETPWUID
-        if (pwd)
-            HDfputs(pwd->pw_name, rawoutstream);
-#endif
-        if (host_name[0])
-            fprintf(rawoutstream, "@%s", host_name);
-        if (real_name[0])
-            fprintf(rawoutstream, ">");
-        HDfputc('\n', rawoutstream);
-    }
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
         HDfputc(*s, rawoutstream);
