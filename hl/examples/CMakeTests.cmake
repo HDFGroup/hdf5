@@ -66,7 +66,7 @@ foreach (example ${examples})
         -D "TEST_OUTPUT=hl_ex_${example}.txt"
         #-D "TEST_REFERENCE=hl_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   if (last_test)
