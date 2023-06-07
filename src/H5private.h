@@ -534,13 +534,12 @@
 /* Macros for enabling/disabling particular MSVC warnings.
  */
 #ifdef _MSC_VER
-#define H5_MSVC_DIAG_OFF(x) #pragma warning(H5_DIAG_JOINSTR("disable:", x))
-#define H5_MSVC_DIAG_ON(x)  #pragma warning(H5_DIAG_JOINSTR("default:", x))
+#define H5_MSVC_DIAG_OFF(x) #pragma warning("disable:" ## #x)
+#define H5_MSVC_DIAG_ON(x)  #pragma warning("default:" ## #x)
 #else
 #define H5_MSVC_DIAG_OFF(x)
 #define H5_MSVC_DIAG_ON(x)
 #endif
-
 
 /* Function pointer typedef for qsort */
 typedef int (*H5_sort_func_cb_t)(const void *, const void *);

@@ -738,11 +738,11 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     /* Set the shared heap header's file context for this operation */
     H5_GCC_DIAG_OFF("discarded-qualifiers")
     H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
-    H5_MSVC_DIAG_OFF("4090")
+    H5_MSVC_DIAG_OFF(4090)
     hdr->f = f;
     H5_GCC_DIAG_ON("discarded-qualifiers")
     H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
-    H5_MSVC_DIAG_ON("4090")
+    H5_MSVC_DIAG_ON(4090)
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1321,11 +1321,11 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     /* Set the shared heap header's file context for this operation */
     H5_GCC_DIAG_OFF("discarded-qualifiers")
     H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
-    H5_MSVC_DIAG_OFF("4090")
+    H5_MSVC_DIAG_OFF(4090)
     hdr->f = f;
     H5_GCC_DIAG_ON("discarded-qualifiers")
     H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
-    H5_MSVC_DIAG_ON("4090")
+    H5_MSVC_DIAG_ON(4090)
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
