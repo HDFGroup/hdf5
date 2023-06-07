@@ -5,8 +5,6 @@
 #
 # Note that any files or directories that are excluded here should also be
 # added to the 'exclude' list in .github/workflows/clang-format-check.yml
-#
-# (Remember to update both bin/format_source and bin/format_source_patch)
 
 find . \( -type d -path ./config -prune -and -not -path ./config \) \
     -or \( \( \! \( \
