@@ -541,7 +541,6 @@
 #define H5_MSVC_DIAG_ON(x)
 #endif
 
-
 /* Function pointer typedef for qsort */
 typedef int (*H5_sort_func_cb_t)(const void *, const void *);
 
