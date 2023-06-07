@@ -45,6 +45,7 @@ struct timezone {
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
+#define HDmkdir(S, M)        _mkdir(S)
 
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.
