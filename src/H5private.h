@@ -276,52 +276,68 @@
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
+/* clang-format off */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
-#define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
-#define H5_ATTR_UNUSED          __attribute__((unused))
-#ifdef H5_HAVE_PARALLEL
-#define H5_ATTR_PARALLEL_UNUSED __attribute__((unused))
-#define H5_ATTR_PARALLEL_USED   /*void*/
+#   define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
+#   define H5_ATTR_UNUSED          __attribute__((unused))
+
+#   ifdef H5_HAVE_PARALLEL
+#       define H5_ATTR_PARALLEL_UNUSED __attribute__((unused))
+#       define H5_ATTR_PARALLEL_USED   /*void*/
+#   else
+#       define H5_ATTR_PARALLEL_UNUSED /*void*/
+#       define H5_ATTR_PARALLEL_USED   __attribute__((unused))
+#   endif
+
+#   ifdef H5_NO_DEPRECATED_SYMBOLS
+#       define H5_ATTR_DEPRECATED_USED H5_ATTR_UNUSED
+#   else
+#       define H5_ATTR_DEPRECATED_USED /*void*/
+#   endif
+
+#   ifdef H5_DEBUG_API
+#       define H5_ATTR_DEBUG_API_USED /*void*/
+#   else
+#       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
+#   endif
+
+#   ifndef NDEBUG
+#       define H5_ATTR_NDEBUG_UNUSED /*void*/
+#   else
+#       define H5_ATTR_NDEBUG_UNUSED H5_ATTR_UNUSED
+#   endif
+
+#   define H5_ATTR_NORETURN __attribute__((noreturn))
+#   define H5_ATTR_CONST    __attribute__((const))
+#   define H5_ATTR_PURE     __attribute__((pure))
+
+#   if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#       define H5_ATTR_FALLTHROUGH __attribute__((fallthrough));
+#   else
+#       define H5_ATTR_FALLTHROUGH /* FALLTHROUGH */
+#   endif
+
+#  if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#       define H5_ATTR_MALLOC __attribute__((malloc))
+#  else
+#       define H5_ATTR_MALLOC /*void*/
+#  endif
+
 #else
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   __attribute__((unused))
+#   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
+#   define H5_ATTR_UNUSED          /*void*/
+#   define H5_ATTR_NDEBUG_UNUSED   /*void*/
+#   define H5_ATTR_DEBUG_API_USED  /*void*/
+#   define H5_ATTR_DEPRECATED_USED /*void*/
+#   define H5_ATTR_PARALLEL_UNUSED /*void*/
+#   define H5_ATTR_PARALLEL_USED   /*void*/
+#   define H5_ATTR_NORETURN        /*void*/
+#   define H5_ATTR_CONST           /*void*/
+#   define H5_ATTR_PURE            /*void*/
+#   define H5_ATTR_FALLTHROUGH     /*void*/
+#   define H5_ATTR_MALLOC          /*void*/
 #endif
-#ifdef H5_NO_DEPRECATED_SYMBOLS
-#define H5_ATTR_DEPRECATED_USED H5_ATTR_UNUSED
-#else                           /* H5_NO_DEPRECATED_SYMBOLS */
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#endif                          /* H5_NO_DEPRECATED_SYMBOLS */
-#ifdef H5_DEBUG_API
-#define H5_ATTR_DEBUG_API_USED /*void*/
-#else                          /* H5_DEBUG_API */
-#define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#endif /* H5_DEBUG_API */
-#ifndef NDEBUG
-#define H5_ATTR_NDEBUG_UNUSED /*void*/
-#else                         /* NDEBUG */
-#define H5_ATTR_NDEBUG_UNUSED H5_ATTR_UNUSED
-#endif /* NDEBUG */
-#define H5_ATTR_NORETURN __attribute__((noreturn))
-#define H5_ATTR_CONST    __attribute__((const))
-#define H5_ATTR_PURE     __attribute__((pure))
-#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
-#define H5_ATTR_FALLTHROUGH __attribute__((fallthrough));
-#else
-#define H5_ATTR_FALLTHROUGH /* FALLTHROUGH */
-#endif
-#else
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#endif
+/* clang-format on */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
