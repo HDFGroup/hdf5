@@ -10,7 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*keep this declaration near the top of this file -RPM*/
+/* Keep this declaration near the top of this file */
 static const char *FileHeader = "\n\
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
  * Copyright by The HDF Group.                                               *\n\
@@ -22,28 +22,26 @@ static const char *FileHeader = "\n\
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n\
  * If you do not have access to either file, you may request a copy from     *\n\
  * help@hdfgroup.org.                                                        *\n\
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
+ *                                                                           *\n\
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 /*
- * Purpose:    This code was borrowed heavily from the `detect.c'
- *        program in the AIO distribution from Lawrence
- *        Livermore National Laboratory.
+ * Purpose:     This code was borrowed heavily from the `detect.c'
+ *              program in the AIO distribution from Lawrence
+ *              Livermore National Laboratory.
  *
- *        Detects machine byte order and floating point
- *        format and generates a C source file (H5Tinit.c)
- *        to describe those parameters.
+ *              Detects machine byte order and floating point
+ *              format and generates a C source file (H5Tinit.c)
+ *              to describe those parameters.
  *
  * Assumptions: We have an ANSI compiler.  We're on a Unix like
- *        system or configure has detected those Unix
- *        features which aren't available.  We're not
- *        running on a Vax or other machine with mixed
- *        endianness.
+ *              system or configure has detected those Unix
+ *              features which aren't available.  We're not
+ *              running on a Vax or other machine with mixed
+ *              endianness.
  *-------------------------------------------------------------------------
  */
 #undef NDEBUG
 #include "H5private.h"
-/* Do NOT use HDfprintf in this file as it is not linked with the library,
- * which contains the H5system.c file in which the function is defined.
- */
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
@@ -59,10 +57,7 @@ static const char *FileHeader = "\n\
 
 #define MAXDETECT 64
 
-/*
- * This structure holds information about a type that
- * was detected.
- */
+/* This structure holds information about a type that was detected */
 typedef struct detected_t {
     const char   *varname;
     unsigned int  size;             /* total byte size                  */
@@ -79,7 +74,7 @@ typedef struct detected_t {
 
 FILE *rawoutstream = NULL;
 
-/* global variables types detection code */
+/* Global variables types detection code */
 H5_GCC_DIAG_OFF("larger-than=")
 static detected_t d_g[MAXDETECT];
 H5_GCC_DIAG_ON("larger-than=")
@@ -100,7 +95,7 @@ static void         detect_C99_floats(void);
 /*-------------------------------------------------------------------------
  * Function:    precision
  *
- * Purpose:     Determine the precision and offset.
+ * Purpose:     Determine the precision and offset
  *
  * Return:      void
  *-------------------------------------------------------------------------
@@ -231,7 +226,7 @@ precision(detected_t *d)
 static void
 print_results(int nd, detected_t *d)
 {
-    int byte_order = 0; /*byte order of data types*/
+    int byte_order = 0; /* byte order of data types */
     int i, j;
 
     /* Include files */
@@ -246,11 +241,11 @@ print_results(int nd, detected_t *d)
 /***********/\n\
 /* Headers */\n\
 /***********/\n\
-#include \"H5private.h\"        /* Generic Functions            */\n\
-#include \"H5Eprivate.h\"        /* Error handling              */\n\
-#include \"H5FLprivate.h\"    /* Free Lists                */\n\
-#include \"H5Iprivate.h\"        /* IDs                      */\n\
-#include \"H5Tpkg.h\"        /* Datatypes                 */\n\
+#include \"H5private.h\"            /* Generic Functions                */\n\
+#include \"H5Eprivate.h\"           /* Error handling                   */\n\
+#include \"H5FLprivate.h\"          /* Free Lists                       */\n\
+#include \"H5Iprivate.h\"           /* IDs                              */\n\
+#include \"H5Tpkg.h\"               /* Datatypes                        */\n\
 \n\
 \n\
 /****************/\n\
@@ -296,19 +291,15 @@ print_results(int nd, detected_t *d)
 
     /* The interface initialization function */
     fprintf(rawoutstream, "\n\
-\n\
+\n\
 /*-------------------------------------------------------------------------\n\
  * Function:    H5T__init_native\n\
  *\n\
- * Purpose:    Initialize pre-defined native datatypes from code generated\n\
- *              during the library configuration by H5detect.\n\
+ * Purpose:     Initialize pre-defined native datatypes from code generated\n\
+ *              during the library configuration by H5detect\n\
  *\n\
- * Return:    Success:    non-negative\n\
- *        Failure:    negative\n\
- *\n\
- * Programmer:    Robb Matzke\n\
- *              Wednesday, December 16, 1998\n\
- *\n\
+ * Return:      Success:    non-negative\n\
+ *              Failure:    negative\n\
  *-------------------------------------------------------------------------\n\
  */\n\
 herr_t\n\
@@ -325,11 +316,11 @@ H5T__init_native(void)\n\
          * are always zero.  This happens on the Cray for `short' where
          * sizeof(short) is 8, but only the low-order 4 bytes are ever used.
          */
-        if (d[i].is_vax) /* the type is a VAX floating number */
+        if (d[i].is_vax) /* The type is a VAX floating number */
             byte_order = -1;
         else {
             for (j = 0; j < 32; j++) {
-                /*Find the 1st containing valid data*/
+                /* Find the 1st containing valid data */
                 if (d[i].perm[j] > -1) {
                     byte_order = d[i].perm[j];
                     break;
@@ -338,9 +329,9 @@ H5T__init_native(void)\n\
         }
 
         /* Print a comment to describe this section of definitions. */
-        fprintf(rawoutstream, "\n   /*\n");
+        fprintf(rawoutstream, "\n    /*\n");
         iprint(d + i);
-        fprintf(rawoutstream, "    */\n");
+        fprintf(rawoutstream, "     */\n");
 
         /* The part common to fixed and floating types */
         fprintf(rawoutstream, "\
@@ -349,7 +340,7 @@ H5T__init_native(void)\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->shared->type = H5T_FLOAT;\n\
     dt->shared->size = %d;\n",
-                d[i].size); /*size            */
+                d[i].size); /* Size */
 
         if (byte_order == -1)
             fprintf(rawoutstream, "\
@@ -366,27 +357,26 @@ H5T__init_native(void)\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-                d[i].offset,                            /*offset        */
-                d[i].precision);                        /*precision        */
-        /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/ /* Double-check that byte-order doesn't change */
+                d[i].offset,        /* Offset */
+                d[i].precision);    /* Precision */
 
         /* The part unique to floating point types */
         fprintf(rawoutstream, "\
-dt->shared->u.atomic.u.f.sign = %d;\n\
-dt->shared->u.atomic.u.f.epos = %d;\n\
-dt->shared->u.atomic.u.f.esize = %d;\n\
-dt->shared->u.atomic.u.f.ebias = 0x%08lx;\n\
-dt->shared->u.atomic.u.f.mpos = %d;\n\
-dt->shared->u.atomic.u.f.msize = %d;\n\
-dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
-dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
-                d[i].sign,                      /*sign location */
-                d[i].epos,                      /*exponent loc    */
-                d[i].esize,                     /*exponent size */
-                (unsigned long)(d[i].bias),     /*exponent bias */
-                d[i].mpos,                      /*mantissa loc    */
-                d[i].msize,                     /*mantissa size */
-                d[i].imp ? "IMPLIED" : "NONE"); /*normalization */
+    dt->shared->u.atomic.u.f.sign = %d;\n\
+    dt->shared->u.atomic.u.f.epos = %d;\n\
+    dt->shared->u.atomic.u.f.esize = %d;\n\
+    dt->shared->u.atomic.u.f.ebias = 0x%08lx;\n\
+    dt->shared->u.atomic.u.f.mpos = %d;\n\
+    dt->shared->u.atomic.u.f.msize = %d;\n\
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_%s;\n\
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;\n",
+                d[i].sign,                      /* Sign location */
+                d[i].epos,                      /* Exponent loc */
+                d[i].esize,                     /* Exponent size */
+                (unsigned long)(d[i].bias),     /* Exponent bias */
+                d[i].mpos,                      /* Mantissa loc */
+                d[i].msize,                     /* Mantissa size */
+                d[i].imp ? "IMPLIED" : "NONE"); /* Normalization */
 
         /* Register the type */
         fprintf(rawoutstream, "\
@@ -425,8 +415,8 @@ done:\n\
         if(dt != NULL) {\n\
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);\n\
             dt = H5FL_FREE(H5T_t, dt);\n\
-        } /* end if */\n\
-    } /* end if */\n\
+        }\n\
+    }\n\
 \n\
     FUNC_LEAVE_NOAPI(ret_value);\n} /* end H5T__init_native() */\n");
 
@@ -435,10 +425,9 @@ done:\n\
 /*-------------------------------------------------------------------------
  * Function:    iprint
  *
- * Purpose:     Prints information about the fields of a floating point format.
+ * Purpose:     Prints information about the fields of a floating point format
  *
  * Return:      void
-
  *-------------------------------------------------------------------------
  */
 static void
@@ -448,10 +437,9 @@ iprint(detected_t *d)
 
     for (pass = (d->size - 1) / 4;; --pass) {
         unsigned int i, k;
-        /*
-         * Print the byte ordering above the bit fields.
-         */
-        fprintf(rawoutstream, "    * ");
+
+        /* Print the byte ordering above the bit fields */
+        fprintf(rawoutstream, "     * ");
         for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
             fprintf(rawoutstream, "%4d", d->perm[i]);
             if (i > pass * 4)
@@ -460,10 +448,8 @@ iprint(detected_t *d)
                 break;
         }
 
-        /*
-         * Print the bit fields
-         */
-        fprintf(rawoutstream, "\n    * ");
+        /* Print the bit fields */
+        fprintf(rawoutstream, "\n     * ");
         for (i = MIN(pass * 4 + 3, d->size - 1), k = MIN(pass * 32 + 31, 8 * d->size - 1); i >= pass * 4;
              --i) {
             unsigned int j;
@@ -479,7 +465,7 @@ iprint(detected_t *d)
                     HDfputc('M', rawoutstream);
                 }
                 else {
-                    HDfputc('?', rawoutstream); /*unknown floating point bit */
+                    HDfputc('?', rawoutstream); /* Unknown floating point bit */
                 }
                 --k;
             }
@@ -493,10 +479,8 @@ iprint(detected_t *d)
             break;
     }
 
-    /*
-     * Is there an implicit bit in the mantissa.
-     */
-    fprintf(rawoutstream, "    * Implicit bit? %s\n", d->imp ? "yes" : "no");
+    /* Is there an implicit bit in the mantissa? */
+    fprintf(rawoutstream, "     * Implicit bit? %s\n", d->imp ? "yes" : "no");
 }
 
 /*-------------------------------------------------------------------------
@@ -535,7 +519,6 @@ byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
  *              the corresponding bit in pad_mask is set to 0.
  *
  * Return:      Index of first differing bit.
- *
  *-------------------------------------------------------------------------
  */
 static unsigned int
@@ -585,33 +568,26 @@ fix_order(int n, int last, int *perm, const char **mesg)
     int i;
 
     if (last > 1) {
-        /*
-         * We have at least three points to consider.
-         */
+
+        /* We have at least three points to consider */
         if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
-            /*
-             * Little endian.
-             */
+            /* Little endian */
             if (mesg)
                 *mesg = "Little-endian";
             for (i = 0; i < n; i++)
                 perm[i] = i;
         }
         else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
-            /*
-             * Big endian.
-             */
+            /* Big endian */
             if (mesg)
                 *mesg = "Big-endian";
             for (i = 0; i < n; i++)
                 perm[i] = (n - 1) - i;
         }
         else {
-            /*
-             * Bi-endian machines like VAX.
+            /* Bi-endian machines like VAX
              * (NOTE: This is not an actual determination of the VAX-endianness.
-             *          It could have some other endianness and fall into this
-             *          case - JKM & QAK)
+             *        It could have some other endianness and fall into this case.
              */
             HDassert(0 == n % 2);
             if (mesg)
@@ -624,7 +600,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
     }
     else {
         fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n", n);
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 }
 
@@ -652,7 +628,6 @@ fix_order(int n, int last, int *perm, const char **mesg)
  *                          returns zero.
  *
  *              Failure:    1
- *
  *-------------------------------------------------------------------------
  */
 static unsigned int
@@ -661,16 +636,14 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
     unsigned char *a = (unsigned char *)_a;
     unsigned char *b = (unsigned char *)_b;
     unsigned int   changed, major, minor;
-    unsigned int   msmb; /* most significant mantissa bit */
+    unsigned int   msmb; /* Most significant mantissa bit */
 
-    /*
-     * Look for the least significant bit that has changed between
+    /* Look for the least significant bit that has changed between
      * A and B.  This is the least significant bit of the exponent.
      */
     changed = bit_cmp(n, perm, a, b, pad_mask);
 
-    /*
-     * The bit to the right (less significant) of the changed bit should
+    /* The bit to the right (less significant) of the changed bit should
      * be the most significant bit of the mantissa.  If it is non-zero
      * then the format does not remove the leading `1' of the mantissa.
      */
@@ -687,8 +660,7 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
  * Purpose:   Determines the bias of the exponent.  This function should
  *            be called with _A having a value of `1'.
  *
- * Return:    The exponent bias.
- *
+ * Return:    The exponent bias
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static unsigned int
@@ -799,9 +771,7 @@ bit.\n";
     real_name[0] = '\0';
 #endif
 
-    /*
-     * The FQDM of this host or the empty string.
-     */
+    /* The FQDM of this host or the empty string */
 #ifdef H5_HAVE_GETHOSTNAME
     if (HDgethostname(host_name, sizeof(host_name)) < 0) {
         host_name[0] = '\0';
@@ -810,11 +780,9 @@ bit.\n";
     host_name[0] = '\0';
 #endif
 
-    /*
-     * The file header: warning, copyright notice, build information.
-     */
-    fprintf(rawoutstream, "/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
+    /* The file header: warning, copyright notice, build information */
+    fprintf(rawoutstream, "/* Generated automatically by H5detect -- DO NOT EDIT! */\n\n\n");
+    HDfputs(FileHeader, rawoutstream); /* The copyright notice -- see top of this file */
 
     fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
             1900 + tm->tm_year);
@@ -895,9 +863,9 @@ detect_C99_floats(void)
 /*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Main entry point.
+ * Purpose:     Main entry point
  *
- * Return:      Success:    EXIT_SUCCESS
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
  */
