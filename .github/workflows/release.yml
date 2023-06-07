@@ -48,8 +48,8 @@ jobs:
   getfiles:
     runs-on: ubuntu-latest
     steps:
-      - name: Set file base name
-        id: set-file-base
+      - name: Get file base name
+        id: get-file-base
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
@@ -101,7 +101,7 @@ jobs:
     permissions:
         contents: write
     steps:
-      - name: Set file base name
+      - name: Get file base name
         id: get-file-base
         run: |
           FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
@@ -120,3 +120,13 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Create .nojekyll
+        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
+        shell: bash
+
+      - name: dev-only-docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
