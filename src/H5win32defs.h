@@ -42,6 +42,7 @@ struct timezone {
 #define HDcreat(S, M)        Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDfstat(F, B)        _fstati64(F, B)
+#define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
 #define HDgetdrive()         _getdrive()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
