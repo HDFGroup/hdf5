@@ -41,7 +41,7 @@ foreach (example ${examples})
         -D "TEST_OUTPUT=cpp_ex_${example}.txt"
         #-D "TEST_REFERENCE=cpp_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (CPP_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_cppex)
@@ -80,7 +80,7 @@ foreach (example ${tutr_examples})
         -D "TEST_OUTPUT=cpp_ex_${example}.txt"
         #-D "TEST_REFERENCE=cpp_ex_${example}.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (CPP_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_cppex_tutr)

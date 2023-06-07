@@ -244,7 +244,7 @@
               -D "TEST_REFERENCE=./testfiles/${testname}.out"
               -D "TEST_ERRREF=./testfiles/${testname}.err"
               -D "TEST_MASK=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
     endif ()
@@ -272,7 +272,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
@@ -289,7 +289,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5COPY_UD-${testname} PROPERTIES DEPENDS H5COPY_UD-${testname}-clear-objects)
@@ -307,7 +307,7 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY_UD-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD-${testname})
     endif ()
@@ -336,7 +336,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
@@ -354,7 +354,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5COPY_UD_ERR-${testname} PROPERTIES DEPENDS H5COPY_UD_ERR-${testname}-clearall-objects)
@@ -372,7 +372,7 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5COPY_UD_ERR-${testname}-DIFF PROPERTIES DEPENDS H5COPY_UD_ERR-${testname})
     endif ()
@@ -396,7 +396,7 @@
               -D "TEST_OUTPUT=./testfiles/${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=./testfiles/${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5COPY-${resultfile} PROPERTIES

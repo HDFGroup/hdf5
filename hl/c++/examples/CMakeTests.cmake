@@ -36,7 +36,7 @@ else ()
       -D "TEST_OUTPUT=ptExampleFL.txt"
       #-D "TEST_REFERENCE=ptExampleFL.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (HL_CPP_ex_ptExampleFL PROPERTIES DEPENDS HL_CPP_ex_ptExampleFL-clear-objects)
