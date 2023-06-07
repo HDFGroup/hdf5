@@ -510,8 +510,7 @@
 #define H5_GCC_DIAG_ON(x)
 #endif
 
-/* Macros for enabling/disabling particular clang-only warnings.
- */
+/* Macros for enabling/disabling particular clang-only warnings */
 #if defined(__clang__)
 #define H5_CLANG_DIAG_OFF(x) H5_DIAG_OFF(x)
 #define H5_CLANG_DIAG_ON(x)  H5_DIAG_ON(x)
@@ -531,8 +530,7 @@
 #define H5_GCC_CLANG_DIAG_ON(x)
 #endif
 
-/* Macros for enabling/disabling particular MSVC warnings.
- */
+/* Macros for enabling/disabling particular MSVC warnings */
 #ifdef _MSC_VER
 #define H5_MSVC_DIAG_OFF(x) #pragma warning("disable:" ## #x)
 #define H5_MSVC_DIAG_ON(x)  #pragma warning("default:" ## #x)
