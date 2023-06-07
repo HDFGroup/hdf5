@@ -3,7 +3,7 @@
 # Copyright by The HDF Group.
 # All rights reserved.
 #
-# This file is part of HDF5. The full HDF5 copyright notice, including
+# This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
 # distribution tree, or in https://www.hdfgroup.org/licenses.
@@ -236,6 +236,7 @@ do
     echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-overflow"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"           ' >> tmp.out
     echo '#if !defined (__clang__)                                          ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"        ' >> tmp.out
