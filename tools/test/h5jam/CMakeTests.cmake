@@ -71,7 +71,7 @@
               -D "TEST_ERRREF=testfiles/${expectfile}.txt"
               -D "TEST_SKIP_COMPARE=1"
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
@@ -98,7 +98,7 @@
               -D "TEST_OUTPUT=${expectfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
@@ -117,7 +117,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DEPENDS ${testdepends})
       add_test (
@@ -131,7 +131,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_REFERENCE=${actual}.new"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP_CMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-H5DMP)
     endif ()
@@ -174,7 +174,7 @@
                   -D "TEST_OUTPUT=${outfile}.ufile.txt"
                   -D "TEST_EXPECT=0"
                   -D "TEST_SKIP_COMPARE=TRUE"
-                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                  -P "${HDF_RESOURCES_DIR}/runTest.cmake"
           )
           set_tests_properties (H5JAM-${testname}-UNJAM PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-clear-objects)
           set (compare_test "${outfile}.ufile.txt")

@@ -99,7 +99,7 @@ macro (HL_ADD_TEST hl_name)
         -D "TEST_OUTPUT=hl_${hl_name}.txt"
         #-D "TEST_REFERENCE=hl_${hl_name}.out"
         -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (HL_${hl_name} PROPERTIES

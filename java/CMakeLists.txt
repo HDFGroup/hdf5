@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.12)
 project (HDF5_JAVA C Java)
 
-set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR};${HDF_RESOURCES_EXT_DIR}")
+set (CMAKE_MODULE_PATH "${HDF_RESOURCES_DIR};${HDF_RESOURCES_DIR}")
 find_package (Java)
 
 #-----------------------------------------------------------------------------

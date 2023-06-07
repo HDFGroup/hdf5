@@ -236,7 +236,7 @@
               -D "TEST_OUTPUT=h5repack-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=h5repack-${testname}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES
@@ -347,7 +347,7 @@
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_FILTER:STRING=${testfilter}"
                 -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES
             DEPENDS H5REPACK_CMP-${testname}-clear-objects
@@ -395,7 +395,7 @@
                 -D "TEST_SKIP_COMPARE=true"
                 -D "TEST_REFERENCE=${resultfile}.mty"
                 -D "TEST_ERRREF=${result_errcheck}"
-                -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
         )
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS H5REPACK_MASK-${testname}-clear-objects)
       endif ()
@@ -437,7 +437,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
             DEPENDS "H5REPACK_DMP-${testname}"
@@ -480,7 +480,7 @@
               -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${testname}.${testfile}.tst"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES
           DEPENDS H5REPACK_DIFF-${testname}
@@ -523,7 +523,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${statarg}.${resultfile}.ddl"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_STAT-h5stat-${testname} PROPERTIES
             DEPENDS "H5REPACK_STAT-${testname}"
@@ -576,7 +576,7 @@
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_FILTER:STRING=${testfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
-                  -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+                  -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
               DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
@@ -602,7 +602,7 @@
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_FILTER:STRING=${nottestfilter}"
                   -D "TEST_REFERENCE=${testfilter}"
-                  -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+                  -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES
               DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF
@@ -649,7 +649,7 @@
                 -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_REFERENCE=${testfile}-${testname}-v.ddl"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES
             WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
@@ -687,7 +687,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_FILTER:STRING=SUPERBLOCK_VERSION ${superblock}"
               -D "TEST_REFERENCE=SUPERBLOCK_VERSION ${superblock}"
-              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5REPACK_VERIFY_SUPERBLOCK-${testname}_DMP PROPERTIES
           DEPENDS H5REPACK_VERIFY_SUPERBLOCK-${testname}
@@ -745,7 +745,7 @@
               -D "TEST_OUTPUT=out-${testname}_N.${testname}.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=out-${testname}_N.${testname}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_META-${testname}_N_DFF PROPERTIES
           DEPENDS H5REPACK_META-${testname}_N
@@ -767,7 +767,7 @@
               -D "TEST_OUTPUT=out-${testname}_M.${testname}.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=out-${testname}_M.${testname}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_META-${testname}_M_DFF PROPERTIES
           DEPENDS H5REPACK_META-${testname}_M
@@ -814,7 +814,7 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname} PROPERTIES
           DEPENDS H5REPACK_UD-${testname}-clear-objects
@@ -832,7 +832,7 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-${testname}-h5dump PROPERTIES
           DEPENDS "H5REPACK_UD-${testname}"

@@ -55,7 +55,7 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_OUTPUT=f90_ex_${example}.txt"
           #-D "TEST_REFERENCE=f90_ex_${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (f90_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_f90_ex)
@@ -78,7 +78,7 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_OUTPUT=f03_ex_${example}.txt"
           #-D "TEST_REFERENCE=f03_ex_${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+          -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (f03_ex_${example} PROPERTIES FIXTURES_REQUIRED clear_f90_ex)

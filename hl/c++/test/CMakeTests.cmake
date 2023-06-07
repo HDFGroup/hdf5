@@ -33,7 +33,7 @@ else ()
       -D "TEST_OUTPUT=hl_ptableTest.txt"
       #-D "TEST_REFERENCE=hl_ptableTest.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (HL_CPP_ptableTest PROPERTIES DEPENDS HL_CPP_ptableTest-clear-objects)
