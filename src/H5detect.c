@@ -357,8 +357,8 @@ H5T__init_native(void)\n\
     dt->shared->u.atomic.prec = %d;\n\
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-                d[i].offset,        /* Offset */
-                d[i].precision);    /* Precision */
+                d[i].offset,     /* Offset */
+                d[i].precision); /* Precision */
 
         /* The part unique to floating point types */
         fprintf(rawoutstream, "\
@@ -386,9 +386,9 @@ H5T__init_native(void)\n\
 
         /* Variables for alignment of compound datatype */
         if (!strcmp(d[i].varname, "SCHAR") || !strcmp(d[i].varname, "SHORT") ||
-            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") ||
-            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
-            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
+            !strcmp(d[i].varname, "INT") || !strcmp(d[i].varname, "LONG") || !strcmp(d[i].varname, "LLONG") ||
+            !strcmp(d[i].varname, "FLOAT") || !strcmp(d[i].varname, "DOUBLE") ||
+            !strcmp(d[i].varname, "LDOUBLE")) {
             fprintf(rawoutstream, "    H5T_NATIVE_%s_ALIGN_g = %lu;\n", d[i].varname,
                     (unsigned long)(d[i].comp_align));
         }
@@ -694,9 +694,9 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 static void
 print_header(void)
 {
-    int         i;
-    const char *s;
-    static const char *purpose      = "\
+    int                i;
+    const char        *s;
+    static const char *purpose = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
 floating point numeric formats found on this\n\
