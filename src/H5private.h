@@ -532,8 +532,8 @@
 
 /* Macros for enabling/disabling particular MSVC warnings */
 #ifdef _MSC_VER
-#define H5_MSVC_DIAG_OFF(x) #pragma warning("disable:" ## #x)
-#define H5_MSVC_DIAG_ON(x)  #pragma warning("default:" ## #x)
+#define H5_MSVC_DIAG_OFF(x) #pragma warning("disable:"## #x)
+#define H5_MSVC_DIAG_ON(x)  #pragma warning("default:"## #x)
 #else
 #define H5_MSVC_DIAG_OFF(x)
 #define H5_MSVC_DIAG_ON(x)
