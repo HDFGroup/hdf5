@@ -15,7 +15,7 @@
  *          things and MinGW.
  *
  *          This file must be included before the H5private.h HD mappings, so
- *          the definitions here will supercede them.
+ *          the definitions here will supersede them.
  */
 
 #ifdef H5_HAVE_WIN32_API
