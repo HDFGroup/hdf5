@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5HL.c
- *                  Jul 16 1997
- *                  Robb Matzke
  *
  * Purpose:         Heap functions for the local heaps used by symbol
  *                  tables to store names (among other things).
@@ -31,11 +29,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions        */
-#include "H5Eprivate.h"  /* Error handling           */
-#include "H5Fprivate.h"  /* File access              */
-#include "H5HLpkg.h"     /* Local Heaps              */
-#include "H5MFprivate.h" /* File memory management   */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5HLpkg.h"     /* Local Heaps                              */
+#include "H5MFprivate.h" /* File Memory Management                   */
+#include "H5MMprivate.h" /* Memory Management                        */
 
 /****************/
 /* Local Macros */

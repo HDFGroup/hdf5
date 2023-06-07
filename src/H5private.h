@@ -194,7 +194,7 @@
 #       define H5_ATTR_DEBUG_API_USED /*void*/
 #   else
 #       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#   endif /* H5_DEBUG_API */
+#   endif
 
 #   ifndef NDEBUG
 #       define H5_ATTR_NDEBUG_UNUSED /*void*/
@@ -2468,6 +2468,9 @@ typedef union {
     void       *vp;
     const void *cvp;
 } H5_flexible_const_ptr_t;
+
+/* File-independent encode/decode routines */
+#include "H5encode.h"
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

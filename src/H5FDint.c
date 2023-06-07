@@ -35,6 +35,7 @@
 #include "H5FDpkg.h"     /* File Drivers                             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5PLprivate.h" /* Plugins                                  */
 
 /****************/

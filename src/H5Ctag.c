@@ -13,11 +13,9 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Ctag.c
- *              June 5 2016
- *              Quincey Koziol
  *
  * Purpose:     Functions in this file operate on tags for metadata
- *              cache entries.
+ *              cache entries
  *
  *-------------------------------------------------------------------------
  */
@@ -32,12 +30,14 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5ACprivate.h" /* Metadata cache                       */
-#include "H5Cpkg.h"      /* Cache				*/
-#include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* Files				*/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata Cache                           */
+#include "H5Cpkg.h"      /* Cache                                    */
+#include "H5CXprivate.h" /* API Contexts                             */
+#include "H5Eprivate.h"  /* Error Handling                           */
+#include "H5Fpkg.h"      /* Files                                    */
+#include "H5FLprivate.h" /* Free Lists                               */
+#include "H5MMprivate.h" /* Memory management                        */
 
 /****************/
 /* Local Macros */
