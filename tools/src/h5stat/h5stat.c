@@ -120,11 +120,12 @@ static const char *drivername = NULL;
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* Structure Version */
+    2,     /* Structure Version */
     FALSE, /* Authenticate?     */
     "",    /* AWS Region        */
     "",    /* Access Key ID     */
     "",    /* Secret Access Key */
+    "",    /* Session Token     */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 

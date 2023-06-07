@@ -1030,7 +1030,7 @@ done:
 herr_t
 h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out)
 {
-    const char *ccred[3];
+    const char *ccred[4];
     unsigned    nelems     = 0;
     char       *s3cred_src = NULL;
     char      **s3cred     = NULL;
@@ -1041,12 +1041,13 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
         H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
 
     /* Sanity-check tuple count */
-    if (nelems != 3)
+    if (nelems < 3 || nelems > 4)
         H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
 
     ccred[0] = (const char *)s3cred[0];
     ccred[1] = (const char *)s3cred[1];
     ccred[2] = (const char *)s3cred[2];
+    ccred[3] = (nelems == 3) ? NULL : (const char *)s3cred[3];
 
     if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
@@ -1080,7 +1081,7 @@ done:
  *     If all three strings are empty (""), the default fapl will be default.
  *     Both aws_region and secret_id values must be both empty or both
  *         populated. If
- *     Only secret_key is allowed to be empty (the empty string, "").
+ *     Only secret_key and session_token allowed to be empty (the empty string, "").
  *     All values are checked against overflow as defined in the ros3 vfd
  *     header file; if a value overruns the permitted space, FAIL is returned
  *     and the function aborts without resetting the fapl to values initially
@@ -1144,11 +1145,12 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
     if (show_progress) {
         HDprintf("  preset fapl with default values\n");
     }
-    fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->authenticate  = FALSE;
-    *(fa->aws_region) = '\0';
-    *(fa->secret_id)  = '\0';
-    *(fa->secret_key) = '\0';
+    fa->version          = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->authenticate     = FALSE;
+    *(fa->aws_region)    = '\0';
+    *(fa->secret_id)     = '\0';
+    *(fa->secret_key)    = '\0';
+    *(fa->session_token) = '\0';
 
     /* sanity-check supplied values
      */
@@ -1213,6 +1215,18 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
             HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 HDprintf("  secret_key set\n");
+            }
+
+            if (HDstrlen(values[3]) > H5FD_ROS3_MAX_SESSION_TOKEN_LEN) {
+                if (show_progress) {
+                    HDprintf("  ERROR: session_token value too long\n");
+                }
+                ret_value = 0;
+                goto done;
+            }
+            HDmemcpy(fa->session_token, values[3], (HDstrlen(values[3]) + 1));
+            if (show_progress) {
+                HDprintf("  session_token set\n");
             }
 
             fa->authenticate = TRUE;
