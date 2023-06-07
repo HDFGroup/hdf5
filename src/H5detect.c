@@ -152,7 +152,7 @@ precision(detected_t *d)
                     _pad_mask[_i] |= _byte_mask;                                                             \
                 H5_GCC_CLANG_DIAG_ON("float-equal")                                                          \
                 _buf1[_i] ^= _byte_mask;                                                                     \
-            } /* end for */                                                                                  \
+            }                                                                                                \
                                                                                                              \
         /* Byte Order */                                                                                     \
         for (_i = 0, _v1 = (TYPE)0.0L, _v2 = (TYPE)1.0L; _i < (int)sizeof(TYPE); _i++) {                     \
