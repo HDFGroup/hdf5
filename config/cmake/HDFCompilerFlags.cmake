@@ -56,6 +56,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
   else ()
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
         NOT CMAKE_C_CLANG_TIDY)
+      # `clang-tidy` does not understand -fstdarg-opt
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
     endif ()
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
