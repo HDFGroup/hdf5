@@ -1,14 +1,8 @@
 name: h5py
-
 on:
-  push:
-    branches: [ develop ]
-    paths-ignore:
-    - 'doc/**'
-    - 'release_docs/**'
-  pull_request:
-    branches: [ develop ]
   workflow_dispatch:
+  schedule:
+    - cron: "6 0 * * *"
 
 jobs:
   build:
