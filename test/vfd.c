@@ -2306,11 +2306,12 @@ test_ros3(void)
     char             filename[1024];    /* filename                     */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {
-        /* version      = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
-        /* authenticate = */ FALSE,
-        /* aws_region   = */ "",
-        /* secret_id    = */ "",
-        /* secret_key   = */ "plugh",
+        /* version         = */ H5FD_CURR_ROS3_FAPL_T_VERSION,
+        /* authenticate    = */ FALSE,
+        /* aws_region      = */ "",
+        /* secret_id       = */ "",
+        /* secret_key      = */ "plugh",
+        /* session_token   = */ "",
     };
 #endif /*H5_HAVE_ROS3_VFD */
 
