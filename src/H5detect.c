@@ -22,7 +22,6 @@ static const char *FileHeader = "\n\
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n\
  * If you do not have access to either file, you may request a copy from     *\n\
  * help@hdfgroup.org.                                                        *\n\
- *                                                                           *\n\
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n";
 /*
  * Purpose:     This code was borrowed heavily from the `detect.c'
@@ -694,9 +693,20 @@ find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 static void
 print_header(void)
 {
-    int                i;
-    const char        *s;
-    static const char *purpose = "\
+    time_t      now = time(NULL);
+    struct tm  *tm  = localtime(&now);
+    char        real_name[30];
+    char        host_name[256];
+    int         i;
+    const char *s;
+#ifdef H5_HAVE_GETPWUID
+    struct passwd *pwd = NULL;
+#else
+    int pwd      = 1;
+#endif
+    static const char *month_name[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    static const char *purpose      = "\
 This machine-generated source code contains\n\
 information about the various integer and\n\
 floating point numeric formats found on this\n\
@@ -734,10 +744,58 @@ the radix point is still assumed to be\n\
 before the first `M' but after the implicit\n\
 bit.\n";
 
+    /* The real name is the first item from the passwd gecos field */
+#ifdef H5_HAVE_GETPWUID
+    {
+        size_t n;
+        char  *comma;
+        if ((pwd = getpwuid(getuid()))) {
+            if ((comma = strchr(pwd->pw_gecos, ','))) {
+                n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));
+                strncpy(real_name, pwd->pw_gecos, n);
+                real_name[n] = '\0';
+            }
+            else {
+                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                real_name[sizeof(real_name) - 1] = '\0';
+            }
+        }
+        else
+            real_name[0] = '\0';
+    }
+#else
+    real_name[0] = '\0';
+#endif
+
+    /* The FQDM of this host or the empty string */
+#ifdef H5_HAVE_GETHOSTNAME
+    if (gethostname(host_name, sizeof(host_name)) < 0) {
+        host_name[0] = '\0';
+    }
+#else
+    host_name[0] = '\0';
+#endif
+
     /* The file header: warning, copyright notice, build information */
     fprintf(rawoutstream, "/* Generated automatically by H5detect -- DO NOT EDIT! */\n\n\n");
     fputs(FileHeader, rawoutstream); /* The copyright notice -- see top of this file */
 
+    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
+            1900 + tm->tm_year);
+    if (pwd || real_name[0] || host_name[0]) {
+        fprintf(rawoutstream, " *\t\t\t");
+        if (real_name[0])
+            fprintf(rawoutstream, "%s <", real_name);
+#ifdef H5_HAVE_GETPWUID
+        if (pwd)
+            fputs(pwd->pw_name, rawoutstream);
+#endif
+        if (host_name[0])
+            fprintf(rawoutstream, "@%s", host_name);
+        if (real_name[0])
+            fprintf(rawoutstream, ">");
+        fputc('\n', rawoutstream);
+    }
     fprintf(rawoutstream, " *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
         fputc(*s, rawoutstream);
