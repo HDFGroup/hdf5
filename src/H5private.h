@@ -194,7 +194,7 @@
 #       define H5_ATTR_DEBUG_API_USED /*void*/
 #   else
 #       define H5_ATTR_DEBUG_API_USED H5_ATTR_UNUSED
-#   endif /* H5_DEBUG_API */
+#   endif
 
 #   ifndef NDEBUG
 #       define H5_ATTR_NDEBUG_UNUSED /*void*/
@@ -412,6 +412,35 @@
  * Used in the VOL code.
  */
 #define H5_REQUEST_NULL NULL
+
+/* clang-format off */
+/* Address-related macros */
+#define H5_addr_overflow(X,Z)    (HADDR_UNDEF == (X) ||                     \
+                                  HADDR_UNDEF == (X) + (haddr_t)(Z) ||      \
+                                  (X) + (haddr_t)(Z) < (X))
+#define H5_addr_defined(X)       ((X) != HADDR_UNDEF)
+/* The H5_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
+ * certain that X is not HADDR_UNDEF and then checking that X equals Y
+ */
+#define H5_addr_eq(X,Y)          ((X) != HADDR_UNDEF && (X) == (Y))
+#define H5_addr_ne(X,Y)          (!H5_addr_eq((X),(Y)))
+#define H5_addr_lt(X,Y)          ((X) != HADDR_UNDEF &&                     \
+                                  (Y) != HADDR_UNDEF &&                     \
+                                  (X) < (Y))
+#define H5_addr_le(X,Y)          ((X) != HADDR_UNDEF &&                     \
+                                  (Y) != HADDR_UNDEF &&                     \
+                                  (X) <= (Y))
+#define H5_addr_gt(X,Y)          ((X) != HADDR_UNDEF &&                     \
+                                  (Y) != HADDR_UNDEF &&                     \
+                                  (X) > (Y))
+#define H5_addr_ge(X,Y)          ((X) != HADDR_UNDEF &&                     \
+                                  (Y) != HADDR_UNDEF &&                     \
+                                  (X) >= (Y))
+#define H5_addr_cmp(X,Y)         (H5_addr_eq((X), (Y)) ? 0 :                \
+                                 (H5_addr_lt((X), (Y)) ? -1 : 1))
+#define H5_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
+                                      ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+/* clang-format on */
 
 /*
  * Methods to compare the equality of floating-point values:
@@ -2439,6 +2468,9 @@ typedef union {
     void       *vp;
     const void *cvp;
 } H5_flexible_const_ptr_t;
+
+/* File-independent encode/decode routines */
+#include "H5encode.h"
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

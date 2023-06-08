@@ -177,7 +177,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
 
         md   = (lt + rt) / 2;
         oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-        cmp  = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
+        cmp  = H5_addr_cmp(mp_loc.oloc->addr, oloc->addr);
         if (cmp < 0)
             rt = md;
         else if (cmp > 0)
@@ -295,7 +295,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
     mnt_oloc     = H5G_oloc(child->shared->root_grp);
     child_idx    = -1;
 
-    if (child->parent && H5F_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
+    if (child->parent && H5_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
         unsigned u; /*counters			*/
 
         /*
@@ -326,7 +326,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         while (lt < rt && cmp) {
             md       = (lt + rt) / 2;
             mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-            cmp      = H5F_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
+            cmp      = H5_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
             if (cmp < 0)
                 rt = md;
             else
@@ -621,7 +621,7 @@ H5F_traverse_mount(H5O_loc_t *oloc /*in,out*/)
         while (lt < rt && cmp) {
             md       = (lt + rt) / 2;
             mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
-            cmp      = H5F_addr_cmp(oloc->addr, mnt_oloc->addr);
+            cmp      = H5_addr_cmp(oloc->addr, mnt_oloc->addr);
             if (cmp < 0)
                 rt = md;
             else

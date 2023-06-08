@@ -35,6 +35,7 @@
 #include "H5FDpkg.h"     /* File Drivers                             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory management                        */
 #include "H5PLprivate.h" /* Plugins                                  */
 
 /****************/
@@ -2034,7 +2035,7 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
-    HDassert(H5F_addr_defined(addr) && addr <= file->maxaddr);
+    HDassert(H5_addr_defined(addr) && addr <= file->maxaddr);
 
     /* Dispatch to driver, convert to absolute address */
     if ((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
@@ -2193,13 +2194,13 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(H5F_addr_defined(addr_1));
-    HDassert(H5F_addr_defined(addr_2));
+    HDassert(H5_addr_defined(addr_1));
+    HDassert(H5_addr_defined(addr_2));
 
     /* Compare the addresses */
-    if (H5F_addr_gt(addr_1, addr_2))
+    if (H5_addr_gt(addr_1, addr_2))
         ret_value = 1;
-    else if (H5F_addr_lt(addr_1, addr_2))
+    else if (H5_addr_lt(addr_1, addr_2))
         ret_value = -1;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2239,11 +2240,11 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 
     /* scan the addrs array to see if it is sorted */
     for (i = 1; i < count; i++) {
-        HDassert(H5F_addr_defined(addrs[i - 1]));
+        HDassert(H5_addr_defined(addrs[i - 1]));
 
-        if (H5F_addr_gt(addrs[i - 1], addrs[i]))
+        if (H5_addr_gt(addrs[i - 1], addrs[i]))
             break;
-        else if (H5F_addr_eq(addrs[i - 1], addrs[i]))
+        else if (H5_addr_eq(addrs[i - 1], addrs[i]))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
     }
 
@@ -2298,9 +2299,9 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         i = 1;
 
         for (i = 1; i < count; i++) {
-            HDassert(H5F_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
+            HDassert(H5_addr_lt(srt_tmp[i - 1].addr, srt_tmp[i].addr));
 
-            if (H5F_addr_eq(addrs[i - 1], addrs[i]))
+            if (H5_addr_eq(addrs[i - 1], addrs[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
         }
 

@@ -97,7 +97,7 @@ H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr)
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->sblock);
-    HDassert(!H5F_addr_defined(f->shared->sblock->ext_addr));
+    HDassert(!H5_addr_defined(f->shared->sblock->ext_addr));
     HDassert(ext_ptr);
 
     /* Check for older version of superblock format that can't support superblock extensions */
@@ -105,7 +105,7 @@ H5F__super_ext_create(H5F_t *f, H5O_loc_t *ext_ptr)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL,
                     "superblock extension not permitted with version %u of superblock",
                     f->shared->sblock->super_vers)
-    else if (H5F_addr_defined(f->shared->sblock->ext_addr))
+    else if (H5_addr_defined(f->shared->sblock->ext_addr))
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "superblock extension already exists?!?!")
     else {
         /* The superblock extension isn't actually a group, but the
@@ -149,7 +149,7 @@ H5F__super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(H5F_addr_defined(ext_addr));
+    HDassert(H5_addr_defined(ext_addr));
     HDassert(ext_ptr);
 
     /* Set up "fake" object location for superblock extension */
@@ -254,7 +254,7 @@ H5F__update_super_ext_driver_msg(H5F_t *f)
      * if appropriate.
      */
     if (sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
-        if (H5F_addr_defined(sblock->ext_addr)) {
+        if (H5_addr_defined(sblock->ext_addr)) {
             /* Check for ignoring the driver info for this file */
             if (!H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
                 size_t driver_size; /* Size of driver info block (bytes)*/
@@ -401,11 +401,11 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 #ifdef H5_HAVE_PARALLEL
     }  /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    if (!H5F_addr_defined(super_addr))
+    if (!H5_addr_defined(super_addr))
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "file signature not found")
 
     /* Check for userblock present */
-    if (H5F_addr_gt(super_addr, 0)) {
+    if (H5_addr_gt(super_addr, 0)) {
         /* Set the base address for the file in the VFD now */
         if (H5F__set_base_addr(f, super_addr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "failed to set base address for file driver")
@@ -508,7 +508,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     /* Check if superblock address is different from base address and adjust
      * base address and "end of file" address if so.
      */
-    if (!H5F_addr_eq(super_addr, sblock->base_addr)) {
+    if (!H5_addr_eq(super_addr, sblock->base_addr)) {
         /* If the superblock moved in the file, adjust the EOF */
         /* (Handles moving earlier & later) */
         udata.stored_eof -= (sblock->base_addr - super_addr);
@@ -626,7 +626,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
     H5AC_set_ring(H5AC_RING_SBE, NULL);
 
     /* Decode the optional driver information block */
-    if (H5F_addr_defined(sblock->driver_addr)) {
+    if (H5_addr_defined(sblock->driver_addr)) {
         H5O_drvinfo_t          *drvinfo;             /* Driver info */
         H5F_drvrinfo_cache_ud_t drvrinfo_udata;      /* User data for metadata callbacks */
         unsigned drvinfo_flags = H5AC__NO_FLAGS_SET; /* Flags used in driver info block unprotect call */
@@ -676,7 +676,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set end-of-address marker for file")
 
     /* Decode the optional superblock extension info */
-    if (H5F_addr_defined(sblock->ext_addr)) {
+    if (H5_addr_defined(sblock->ext_addr)) {
         H5O_loc_t     ext_loc; /* "Object location" for superblock extension */
         H5O_btreek_t  btreek;  /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo; /* Driver info message from superblock extension */
@@ -693,7 +693,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
         /* Check for superblock extension being located "outside" the stored
          *      'eoa' value, which can occur with the split/multi VFD.
          */
-        if (H5F_addr_gt(sblock->ext_addr, udata.stored_eof)) {
+        if (H5_addr_gt(sblock->ext_addr, udata.stored_eof)) {
             /* Set the 'eoa' for the object header memory type large enough
              *  to give some room for a reasonably sized superblock extension.
              *  (This is _rather_ a kludge -QAK)
@@ -961,7 +961,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
      *          earlier in this routine.
      */
     if (((rw_flags & H5AC__READ_ONLY_FLAG) == 0) && sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 &&
-        H5F_addr_defined(sblock->ext_addr)) {
+        H5_addr_defined(sblock->ext_addr)) {
         /* Check for modifying the driver info when opening the file */
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD)) {
             size_t driver_size; /* Size of driver info block (bytes) */
@@ -1013,7 +1013,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                             "error in removing message from superblock extension")
 
             /* Check if the superblock extension was removed */
-            if (!H5F_addr_defined(sblock->ext_addr))
+            if (!H5_addr_defined(sblock->ext_addr))
                 sblock_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
     }     /* end if */
@@ -1428,7 +1428,7 @@ H5F__super_init(H5F_t *f)
         /* Check for creating an "old-style" driver info block */
         if (driver_size > 0) {
             /* Sanity check */
-            HDassert(H5F_addr_defined(sblock->driver_addr));
+            HDassert(H5_addr_defined(sblock->driver_addr));
 
             /* Allocate space for the driver info */
             if (NULL == (drvinfo = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
@@ -1451,7 +1451,7 @@ H5F__super_init(H5F_t *f)
             f->shared->drvinfo = drvinfo;
         } /* end if */
         else
-            HDassert(!H5F_addr_defined(sblock->driver_addr));
+            HDassert(!H5_addr_defined(sblock->driver_addr));
     } /* end if */
 
 done:
@@ -1649,7 +1649,7 @@ H5F__super_size(H5F_t *f, hsize_t *super_size, hsize_t *super_ext_size)
 
     /* Set the superblock extension size */
     if (super_ext_size) {
-        if (H5F_addr_defined(f->shared->sblock->ext_addr)) {
+        if (H5_addr_defined(f->shared->sblock->ext_addr)) {
             H5O_loc_t      ext_loc;  /* "Object location" for superblock extension */
             H5O_hdr_info_t hdr_info; /* Object info for superblock extension */
 
@@ -1713,7 +1713,7 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, 
     H5AC_set_ring(H5AC_RING_SBE, &orig_ring);
 
     /* Open/create the superblock extension object header */
-    if (H5F_addr_defined(f->shared->sblock->ext_addr)) {
+    if (H5_addr_defined(f->shared->sblock->ext_addr)) {
         if (H5F__super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
     } /* end if */
@@ -1723,7 +1723,7 @@ H5F__super_ext_write_msg(H5F_t *f, unsigned id, void *mesg, hbool_t may_create, 
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "unable to create file's superblock extension")
         ext_created = TRUE;
     } /* end else */
-    HDassert(H5F_addr_defined(ext_loc.addr));
+    HDassert(H5_addr_defined(ext_loc.addr));
     ext_opened = TRUE;
 
     /* Check if message with ID does not exist in the object header */
@@ -1789,7 +1789,7 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
     FUNC_ENTER_PACKAGE
 
     /* Make sure that the superblock extension object header exists */
-    HDassert(H5F_addr_defined(f->shared->sblock->ext_addr));
+    HDassert(H5_addr_defined(f->shared->sblock->ext_addr));
 
     /* Set the ring type in the API context */
     H5AC_set_ring(H5AC_RING_SBE, &orig_ring);
@@ -1819,7 +1819,7 @@ H5F__super_ext_remove_msg(H5F_t *f, unsigned id)
             if ((null_count = H5O_msg_count(&ext_loc, H5O_NULL_ID)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
             else if ((unsigned)null_count == hdr_info.nmesgs) {
-                HDassert(H5F_addr_defined(ext_loc.addr));
+                HDassert(H5_addr_defined(ext_loc.addr));
                 if (H5O_delete(f, ext_loc.addr) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to count messages")
                 f->shared->sblock->ext_addr = HADDR_UNDEF;

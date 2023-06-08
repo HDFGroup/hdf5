@@ -127,7 +127,7 @@ H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNU
     if (idx_info->pline->nused) {
         idx_info->layout->flags |= H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER;
 
-        if (!H5F_addr_defined(idx_info->storage->idx_addr)) {
+        if (!H5_addr_defined(idx_info->storage->idx_addr)) {
             idx_info->storage->u.single.nbytes      = 0;
             idx_info->storage->u.single.filter_mask = 0;
         }
@@ -163,7 +163,7 @@ H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->storage);
     HDassert(idx_info->layout->max_nchunks == idx_info->layout->nchunks);
     HDassert(idx_info->layout->nchunks == 1);
-    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     if (idx_info->pline->nused)
         HDassert(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER);
@@ -192,7 +192,7 @@ H5D__single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
     /* Check args */
     HDassert(storage);
 
-    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
+    FUNC_LEAVE_NOAPI((hbool_t)H5_addr_defined(storage->idx_addr))
 } /* end H5D__single_idx_is_space_alloc() */
 
 /*-------------------------------------------------------------------------
@@ -224,7 +224,7 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     HDassert(udata);
 
     /* Set the address for the chunk */
-    HDassert(H5F_addr_defined(udata->chunk_block.offset));
+    HDassert(H5_addr_defined(udata->chunk_block.offset));
     idx_info->storage->idx_addr = udata->chunk_block.offset;
 
     if (idx_info->pline->nused > 0) {
@@ -278,7 +278,7 @@ H5D__single_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
         udata->chunk_block.length = idx_info->layout->size;
         udata->filter_mask        = 0;
     } /* end else */
-    if (!H5F_addr_defined(udata->chunk_block.offset))
+    if (!H5_addr_defined(udata->chunk_block.offset))
         udata->chunk_block.length = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -311,7 +311,7 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     HDassert(idx_info->storage);
     HDassert(chunk_cb);
     HDassert(chunk_udata);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
     HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
@@ -358,7 +358,7 @@ H5D__single_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info->storage->idx_addr));
 
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER)
         nbytes = idx_info->storage->u.single.nbytes;
@@ -400,10 +400,10 @@ H5D__single_idx_delete(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
 
-    if (H5F_addr_defined(idx_info->storage->idx_addr))
+    if (H5_addr_defined(idx_info->storage->idx_addr))
         ret_value = H5D__single_idx_remove(idx_info, NULL);
     else
-        HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+        HDassert(!H5_addr_defined(idx_info->storage->idx_addr));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__single_idx_delete() */
@@ -433,7 +433,7 @@ H5D__single_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_i
     HDassert(idx_info_src->pline);
     HDassert(idx_info_src->layout);
     HDassert(idx_info_src->storage);
-    HDassert(H5F_addr_defined(idx_info_src->storage->idx_addr));
+    HDassert(H5_addr_defined(idx_info_src->storage->idx_addr));
 
     HDassert(idx_info_dst);
     HDassert(idx_info_dst->f);

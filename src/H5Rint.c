@@ -1382,7 +1382,7 @@ H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes, unsigned ch
 
     /* Get the heap information */
     H5F_addr_decode(f, &p, &(hobjid.addr));
-    if (!H5F_addr_defined(hobjid.addr) || hobjid.addr == 0)
+    if (!H5_addr_defined(hobjid.addr) || hobjid.addr == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
     UINT32DECODE(p, hobjid.idx);
 

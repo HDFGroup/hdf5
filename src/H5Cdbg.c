@@ -830,8 +830,8 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(H5F_addr_defined(parent_addr));
-    HDassert(H5F_addr_defined(child_addr));
+    HDassert(H5_addr_defined(parent_addr));
+    HDassert(H5_addr_defined(child_addr));
     HDassert(fd_exists_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, parent_addr, parent_ptr, FAIL)
@@ -1021,7 +1021,7 @@ H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(entry_ptr_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
@@ -1147,7 +1147,7 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
 
     /* Sanity checks */
     HDassert(cache_ptr);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(expected_type);
     HDassert(in_cache_ptr);
     HDassert(type_ok_ptr);

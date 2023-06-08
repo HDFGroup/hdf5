@@ -3,6 +3,8 @@ HDF5 version 1.15.0 currently under development
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
 [![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![HDF-EOS5 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdfeos5.yml?branch=develop&label=HDF-EOS5)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![netCDF build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/netcdf.yml?branch=develop&label=netCDF)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
 [![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
 [![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
@@ -89,10 +91,9 @@ layer.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.10.11 | Last HDF5 1.10 release |
+| 1.10.11 | CVE fixes, Last HDF5 1.10 release |
 | 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
-| 1.14.1 | Selection I/O with datatype conversion |
-| 1.14.2 | VFD SWMR (tentative) |
+| 1.14.2 | CVE fixes, VFD SWMR (tentative) |
 | 2.0.0 | TBD |
 
 This list of feature release versions is also tentative, and the specific release

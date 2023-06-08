@@ -51,7 +51,7 @@
 
 MODULE H5LIB
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_INTPTR_T
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_INTPTR_T, C_INT64_T
   USE H5GLOBAL
   IMPLICIT NONE
 
@@ -149,6 +149,13 @@ MODULE H5LIB
   !
   INTEGER, PARAMETER :: H5T_FLAGS_LEN = 35
   INTEGER, DIMENSION(1:H5T_FLAGS_LEN) :: H5T_flags
+  !
+  ! H5VL flags declaration
+  !
+  INTEGER, PARAMETER :: H5VL_FLAGS_LEN = 3
+  INTEGER, DIMENSION(1:H5VL_FLAGS_LEN) :: H5VL_flags
+  INTEGER, PARAMETER :: H5VL_INT64_FLAGS_LEN = 46
+  INTEGER(C_INT64_T), DIMENSION(1:H5VL_INT64_FLAGS_LEN) :: H5VL_int64_flags
 
   !
   ! H5Z flags declaration
@@ -209,11 +216,13 @@ CONTAINS
             i_H5S_hid_flags, &
             i_H5S_hsize_flags, &
             i_H5T_flags, &
+            i_H5VL_flags, &
+            i_H5VL_int64_flags, &
             i_H5Z_flags, &
             i_H5generic_flags, &
             i_H5generic_haddr_flags) &
             BIND(C,NAME='h5init_flags_c')
-         IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T, C_INT64_T
          IMPORT :: H5D_FLAGS_LEN, H5D_SIZE_FLAGS_LEN, &
               H5E_FLAGS_LEN, H5E_HID_FLAGS_LEN, &
               H5ES_FLAGS_LEN, H5ES_HID_FLAGS_LEN, &
@@ -221,31 +230,34 @@ CONTAINS
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
               H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HID_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
-              H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
+              H5T_FLAGS_LEN, H5VL_FLAGS_LEN, H5VL_INT64_FLAGS_LEN, &
+              H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
-         INTEGER         , DIMENSION(1:H5D_FLAGS_LEN)             :: i_H5D_flags
-         INTEGER(SIZE_T) , DIMENSION(1:H5D_SIZE_FLAGS_LEN)        :: i_H5D_size_flags
-         INTEGER         , DIMENSION(1:H5E_FLAGS_LEN)             :: i_H5E_flags
-         INTEGER(HID_T)  , DIMENSION(1:H5E_HID_FLAGS_LEN)         :: i_H5E_hid_flags
-         INTEGER         , DIMENSION(1:H5ES_FLAGS_LEN)            :: i_H5ES_flags
-         INTEGER(HID_T)  , DIMENSION(1:H5ES_HID_FLAGS_LEN)        :: i_H5ES_hid_flags
-         INTEGER         , DIMENSION(1:H5F_FLAGS_LEN)             :: i_H5F_flags
-         INTEGER         , DIMENSION(1:H5G_FLAGS_LEN)             :: i_H5G_flags
-         INTEGER         , DIMENSION(1:H5FD_FLAGS_LEN)            :: i_H5FD_flags
-         INTEGER(HID_T)  , DIMENSION(1:H5FD_HID_FLAGS_LEN)        :: i_H5FD_hid_flags
-         INTEGER         , DIMENSION(1:H5I_FLAGS_LEN)             :: i_H5I_flags
-         INTEGER         , DIMENSION(1:H5L_FLAGS_LEN)             :: i_H5L_flags
-         INTEGER         , DIMENSION(1:H5O_FLAGS_LEN)             :: i_H5O_flags
-         INTEGER(HID_T)  , DIMENSION(1:H5P_FLAGS_LEN)             :: i_H5P_flags
-         INTEGER         , DIMENSION(1:H5P_FLAGS_INT_LEN)         :: i_H5P_flags_int
-         INTEGER         , DIMENSION(1:H5R_FLAGS_LEN)             :: i_H5R_flags
-         INTEGER         , DIMENSION(1:H5S_FLAGS_LEN)             :: i_H5S_flags
-         INTEGER(HID_T)  , DIMENSION(1:H5S_HID_FLAGS_LEN)         :: i_H5S_hid_flags
-         INTEGER(HSIZE_T), DIMENSION(1:H5S_HSIZE_FLAGS_LEN)       :: i_H5S_hsize_flags
-         INTEGER         , DIMENSION(1:H5T_FLAGS_LEN)             :: i_H5T_flags
-         INTEGER         , DIMENSION(1:H5Z_FLAGS_LEN)             :: i_H5Z_flags
-         INTEGER         , DIMENSION(1:H5generic_FLAGS_LEN)       :: i_H5generic_flags
-         INTEGER(HADDR_T), DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: i_H5generic_haddr_flags
+         INTEGER           , DIMENSION(1:H5D_FLAGS_LEN)             :: i_H5D_flags
+         INTEGER(SIZE_T)   , DIMENSION(1:H5D_SIZE_FLAGS_LEN)        :: i_H5D_size_flags
+         INTEGER           , DIMENSION(1:H5E_FLAGS_LEN)             :: i_H5E_flags
+         INTEGER(HID_T)    , DIMENSION(1:H5E_HID_FLAGS_LEN)         :: i_H5E_hid_flags
+         INTEGER           , DIMENSION(1:H5ES_FLAGS_LEN)            :: i_H5ES_flags
+         INTEGER(HID_T)    , DIMENSION(1:H5ES_HID_FLAGS_LEN)        :: i_H5ES_hid_flags
+         INTEGER           , DIMENSION(1:H5F_FLAGS_LEN)             :: i_H5F_flags
+         INTEGER           , DIMENSION(1:H5G_FLAGS_LEN)             :: i_H5G_flags
+         INTEGER           , DIMENSION(1:H5FD_FLAGS_LEN)            :: i_H5FD_flags
+         INTEGER(HID_T)    , DIMENSION(1:H5FD_HID_FLAGS_LEN)        :: i_H5FD_hid_flags
+         INTEGER           , DIMENSION(1:H5I_FLAGS_LEN)             :: i_H5I_flags
+         INTEGER           , DIMENSION(1:H5L_FLAGS_LEN)             :: i_H5L_flags
+         INTEGER           , DIMENSION(1:H5O_FLAGS_LEN)             :: i_H5O_flags
+         INTEGER(HID_T)    , DIMENSION(1:H5P_FLAGS_LEN)             :: i_H5P_flags
+         INTEGER           , DIMENSION(1:H5P_FLAGS_INT_LEN)         :: i_H5P_flags_int
+         INTEGER           , DIMENSION(1:H5R_FLAGS_LEN)             :: i_H5R_flags
+         INTEGER           , DIMENSION(1:H5S_FLAGS_LEN)             :: i_H5S_flags
+         INTEGER(HID_T)    , DIMENSION(1:H5S_HID_FLAGS_LEN)         :: i_H5S_hid_flags
+         INTEGER(HSIZE_T)  , DIMENSION(1:H5S_HSIZE_FLAGS_LEN)       :: i_H5S_hsize_flags
+         INTEGER           , DIMENSION(1:H5T_FLAGS_LEN)             :: i_H5T_flags
+         INTEGER           , DIMENSION(1:H5VL_FLAGS_LEN)            :: i_H5VL_flags
+         INTEGER(C_INT64_T), DIMENSION(1:H5VL_INT64_FLAGS_LEN)      :: i_H5VL_int64_flags
+         INTEGER           , DIMENSION(1:H5Z_FLAGS_LEN)             :: i_H5Z_flags
+         INTEGER           , DIMENSION(1:H5generic_FLAGS_LEN)       :: i_H5generic_flags
+         INTEGER(HADDR_T)  , DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: i_H5generic_haddr_flags
        END FUNCTION h5init_flags_c
 
        INTEGER FUNCTION h5init1_flags_c( i_H5LIB_flags ) &
@@ -331,6 +343,8 @@ CONTAINS
          H5S_hid_flags, &
          H5S_hsize_flags, &
          H5T_flags, &
+         H5VL_flags, &
+         H5VL_int64_flags, &
          H5Z_flags, &
          H5generic_flags,&
          H5generic_haddr_flags)
@@ -454,28 +468,28 @@ CONTAINS
     !
     ! H5FD flags
     !
-    H5FD_MPIO_INDEPENDENT_F = H5FD_flags(1)
-    H5FD_MPIO_COLLECTIVE_F  = H5FD_flags(2)
-    H5FD_MEM_NOLIST_F       = H5FD_flags(3)
-    H5FD_MEM_DEFAULT_F      = H5FD_flags(4)
-    H5FD_MEM_SUPER_F        = H5FD_flags(5)
-    H5FD_MEM_BTREE_F        = H5FD_flags(6)
-    H5FD_MEM_DRAW_F         = H5FD_flags(7)
-    H5FD_MEM_GHEAP_F        = H5FD_flags(8)
-    H5FD_MEM_LHEAP_F        = H5FD_flags(9)
-    H5FD_MEM_OHDR_F         = H5FD_flags(10)
-    H5FD_MEM_NTYPES_F       = H5FD_flags(11)
+    H5FD_MPIO_INDEPENDENT_F               = H5FD_flags(1)
+    H5FD_MPIO_COLLECTIVE_F                = H5FD_flags(2)
+    H5FD_MEM_NOLIST_F                     = H5FD_flags(3)
+    H5FD_MEM_DEFAULT_F                    = H5FD_flags(4)
+    H5FD_MEM_SUPER_F                      = H5FD_flags(5)
+    H5FD_MEM_BTREE_F                      = H5FD_flags(6)
+    H5FD_MEM_DRAW_F                       = H5FD_flags(7)
+    H5FD_MEM_GHEAP_F                      = H5FD_flags(8)
+    H5FD_MEM_LHEAP_F                      = H5FD_flags(9)
+    H5FD_MEM_OHDR_F                       = H5FD_flags(10)
+    H5FD_MEM_NTYPES_F                     = H5FD_flags(11)
     H5FD_SUBFILING_CURR_FAPL_VERSION_F    = H5FD_flags(12)
     H5FD_SUBFILING_FAPL_MAGIC_F           = H5FD_flags(13)
     H5FD_SUBFILING_DEFAULT_STRIPE_COUNT_F = H5FD_flags(14)
     H5FD_IOC_FAPL_MAGIC_F                 = H5FD_flags(15)
     H5FD_IOC_CURR_FAPL_VERSION_F          = H5FD_flags(16)
     H5FD_IOC_DEFAULT_THREAD_POOL_SIZE_F   = H5FD_flags(17)
-    SELECT_IOC_ONE_PER_NODE_F    = H5FD_flags(18)
-    SELECT_IOC_EVERY_NTH_RANK_F  = H5FD_flags(19)
-    SELECT_IOC_WITH_CONFIG_F     = H5FD_flags(20)
-    SELECT_IOC_TOTAL_F           = H5FD_flags(21)
-    IOC_SELECTION_OPTIONS_F      = H5FD_flags(22)
+    SELECT_IOC_ONE_PER_NODE_F             = H5FD_flags(18)
+    SELECT_IOC_EVERY_NTH_RANK_F           = H5FD_flags(19)
+    SELECT_IOC_WITH_CONFIG_F              = H5FD_flags(20)
+    SELECT_IOC_TOTAL_F                    = H5FD_flags(21)
+    IOC_SELECTION_OPTIONS_F               = H5FD_flags(22)
 
     !
     ! H5FD file driver flags
@@ -648,6 +662,61 @@ CONTAINS
     H5T_ARRAY_F          = H5T_flags(33)
     H5T_DIR_ASCEND_F     = H5T_flags(34)
     H5T_DIR_DESCEND_F    = H5T_flags(35)
+    !
+    ! H5VL flags
+    !
+    H5VL_VERSION_F   = H5VL_flags(1)
+    H5_VOL_INVALID_F = H5VL_flags(2)
+    H5_VOL_NATIVE_F  = H5VL_flags(3)
+
+    H5VL_CAP_FLAG_NONE_F             = H5VL_int64_flags(1)
+    H5VL_CAP_FLAG_THREADSAFE_F       = H5VL_int64_flags(2)
+    H5VL_CAP_FLAG_ASYNC_F            = H5VL_int64_flags(3)
+    H5VL_CAP_FLAG_NATIVE_FILES_F     = H5VL_int64_flags(4)
+    H5VL_CAP_FLAG_ATTR_BASIC_F       = H5VL_int64_flags(5)
+    H5VL_CAP_FLAG_ATTR_MORE_F        = H5VL_int64_flags(6)
+    H5VL_CAP_FLAG_DATASET_BASIC_F    = H5VL_int64_flags(7)
+    H5VL_CAP_FLAG_DATASET_MORE_F     = H5VL_int64_flags(8)
+    H5VL_CAP_FLAG_FILE_BASIC_F       = H5VL_int64_flags(9)
+    H5VL_CAP_FLAG_FILE_MORE_F        = H5VL_int64_flags(10)
+    H5VL_CAP_FLAG_GROUP_BASIC_F      = H5VL_int64_flags(11)
+    H5VL_CAP_FLAG_GROUP_MORE_F       = H5VL_int64_flags(12)
+    H5VL_CAP_FLAG_LINK_BASIC_F       = H5VL_int64_flags(13)
+    H5VL_CAP_FLAG_LINK_MORE_F        = H5VL_int64_flags(14)
+    H5VL_CAP_FLAG_MAP_BASIC_F        = H5VL_int64_flags(15)
+    H5VL_CAP_FLAG_MAP_MORE_F         = H5VL_int64_flags(16)
+    H5VL_CAP_FLAG_OBJECT_BASIC_F     = H5VL_int64_flags(17)
+    H5VL_CAP_FLAG_OBJECT_MORE_F      = H5VL_int64_flags(18)
+    H5VL_CAP_FLAG_REF_BASIC_F        = H5VL_int64_flags(19)
+    H5VL_CAP_FLAG_REF_MORE_F         = H5VL_int64_flags(20)
+    H5VL_CAP_FLAG_OBJ_REF_F          = H5VL_int64_flags(21)
+    H5VL_CAP_FLAG_REG_REF_F          = H5VL_int64_flags(22)
+    H5VL_CAP_FLAG_ATTR_REF_F         = H5VL_int64_flags(23)
+    H5VL_CAP_FLAG_STORED_DATATYPES_F = H5VL_int64_flags(24)
+    H5VL_CAP_FLAG_CREATION_ORDER_F   = H5VL_int64_flags(25)
+    H5VL_CAP_FLAG_ITERATE_F          = H5VL_int64_flags(26)
+    H5VL_CAP_FLAG_STORAGE_SIZE_F     = H5VL_int64_flags(27)
+    H5VL_CAP_FLAG_BY_IDX_F           = H5VL_int64_flags(28)
+    H5VL_CAP_FLAG_GET_PLIST_F        = H5VL_int64_flags(29)
+    H5VL_CAP_FLAG_FLUSH_REFRESH_F    = H5VL_int64_flags(30)
+    H5VL_CAP_FLAG_EXTERNAL_LINKS_F   = H5VL_int64_flags(31)
+    H5VL_CAP_FLAG_HARD_LINKS_F       = H5VL_int64_flags(32)
+    H5VL_CAP_FLAG_SOFT_LINKS_F       = H5VL_int64_flags(33)
+    H5VL_CAP_FLAG_UD_LINKS_F         = H5VL_int64_flags(34)
+    H5VL_CAP_FLAG_TRACK_TIMES_F      = H5VL_int64_flags(35)
+    H5VL_CAP_FLAG_MOUNT_F            = H5VL_int64_flags(36)
+    H5VL_CAP_FLAG_FILTERS_F          = H5VL_int64_flags(37)
+    H5VL_CAP_FLAG_FILL_VALUES_F      = H5VL_int64_flags(38)
+
+    H5VL_OPT_QUERY_SUPPORTED_F       = H5VL_int64_flags(39)
+    H5VL_OPT_QUERY_READ_DATA_F       = H5VL_int64_flags(40)
+    H5VL_OPT_QUERY_WRITE_DATA_F      = H5VL_int64_flags(41)
+    H5VL_OPT_QUERY_QUERY_METADATA_F  = H5VL_int64_flags(42)
+    H5VL_OPT_QUERY_MODIFY_METADATA_F = H5VL_int64_flags(43)
+    H5VL_OPT_QUERY_COLLECTIVE_F      = H5VL_int64_flags(44)
+    H5VL_OPT_QUERY_NO_ASYNC_F        = H5VL_int64_flags(45)
+    H5VL_OPT_QUERY_MULTI_OBJ_F       = H5VL_int64_flags(46)
+
     !
     ! H5Z flags
     !

@@ -90,8 +90,8 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
      * Check arguments.
      */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(addr));
+    HDassert(H5_addr_defined(obj_addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
@@ -171,13 +171,13 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
      * Check arguments.
      */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(type);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(hdr_addr));
+    HDassert(H5_addr_defined(obj_addr));
     HDassert(nrec > 0);
 
     /* Load the B-tree header */
@@ -272,13 +272,13 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
      * Check arguments.
      */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
     HDassert(type);
-    HDassert(H5F_addr_defined(hdr_addr));
-    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(H5_addr_defined(hdr_addr));
+    HDassert(H5_addr_defined(obj_addr));
     HDassert(nrec > 0);
 
     /* Load the B-tree header */

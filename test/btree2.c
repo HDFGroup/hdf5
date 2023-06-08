@@ -145,7 +145,7 @@ create_btree(H5F_t *f, const H5B2_create_t *cparam, H5B2_t **bt2, haddr_t *bt2_a
         FAIL_STACK_ERROR;
     if (H5B2_get_addr(*bt2, bt2_addr /*out*/) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(*bt2_addr))
+    if (!H5_addr_defined(*bt2_addr))
         FAIL_STACK_ERROR;
 
     /* Success */
@@ -5400,7 +5400,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Attempt to remove a non-existent record from a B-tree with 1 record */
@@ -5445,7 +5445,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the root node has been freed */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     PASSED();
@@ -5529,7 +5529,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the root node has not been freed */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     record  = 34;
@@ -5554,7 +5554,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the root node has not been freed */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     record  = 56;
@@ -5579,7 +5579,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the root node has not been freed */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     record  = 38;
@@ -5604,7 +5604,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         FAIL_STACK_ERROR;
 
     /* Make certain that the root node has been freed */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */
@@ -5689,7 +5689,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Attempt to remove a non-existent record from a B-tree with 1 record */
@@ -5920,7 +5920,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam, const bt2_
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6118,7 +6118,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6296,7 +6296,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam, const bt
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6427,7 +6427,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6648,7 +6648,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6796,7 +6796,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -6944,7 +6944,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7089,7 +7089,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7230,7 +7230,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7277,7 +7277,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam, const bt2_t
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */
@@ -7371,7 +7371,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam, const bt2_te
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7657,7 +7657,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7808,7 +7808,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -7959,7 +7959,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8111,7 +8111,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8263,7 +8263,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8389,7 +8389,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8514,7 +8514,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam, cons
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8641,7 +8641,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam, const
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (!H5F_addr_defined(root_addr))
+    if (!H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Check for closing & re-opening the B-tree */
@@ -8929,7 +8929,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */
@@ -9013,7 +9013,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */
@@ -9095,7 +9095,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */
@@ -9177,7 +9177,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR;
 
     /* Make certain that the address of the root node is defined */
-    if (H5F_addr_defined(root_addr))
+    if (H5_addr_defined(root_addr))
         TEST_ERROR;
 
     /* Close the v2 B-tree */

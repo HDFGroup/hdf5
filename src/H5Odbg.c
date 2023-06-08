@@ -112,7 +112,7 @@ H5O__assert(const H5O_t *oh)
         HDassert(oh->chunk[u].size > (size_t)H5O_SIZEOF_CHKHDR_OH(oh));
 
         /* All chunks must be allocated on disk */
-        HDassert(H5F_addr_defined(oh->chunk[u].addr));
+        HDassert(H5_addr_defined(oh->chunk[u].addr));
 
         /* Version specific checks */
         if (oh->version > H5O_VERSION_1) {
@@ -165,7 +165,7 @@ H5O__assert(const H5O_t *oh)
             /* Sanity check that every continuation message has a matching chunk */
             /* (and only one) */
             for (v = 0; v < oh->nchunks; v++) {
-                if (H5F_addr_eq(cont->addr, oh->chunk[v].addr) && cont->size == oh->chunk[v].size) {
+                if (H5_addr_eq(cont->addr, oh->chunk[v].addr) && cont->size == oh->chunk[v].size) {
                     HDassert(cont->chunkno == v);
                     HDassert(!found_chunk);
                     found_chunk = TRUE;
@@ -286,7 +286,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
     /* check args */
     HDassert(f);
     HDassert(oh);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
@@ -360,7 +360,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
 
         /* Decrement chunk 0's size by the object header prefix size */
         if (0 == i) {
-            if (H5F_addr_ne(oh->chunk[i].addr, addr))
+            if (H5_addr_ne(oh->chunk[i].addr, addr))
                 HDfprintf(stream, "*** WRONG ADDRESS FOR CHUNK #0!\n");
             chunk_size = oh->chunk[i].size - (size_t)H5O_SIZEOF_HDR(oh);
         } /* end if */
@@ -519,7 +519,7 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 
     /* check args */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(stream);
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);

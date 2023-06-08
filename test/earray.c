@@ -491,7 +491,7 @@ create_array(H5F_t *f, const H5EA_create_t *cparam, H5EA_t **ea, haddr_t *ea_add
         TEST_ERROR;
     if (H5EA_get_addr(*ea, ea_addr) < 0)
         FAIL_STACK_ERROR;
-    if (!H5F_addr_defined(*ea_addr))
+    if (!H5_addr_defined(*ea_addr))
         TEST_ERROR;
     HDmemset(&state, 0, sizeof(state));
     state.hdr_size = EA_HDR_SIZE;

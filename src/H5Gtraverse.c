@@ -420,7 +420,7 @@ H5G__traverse_special(const H5G_loc_t *grp_loc, const H5O_link_t *lnk, unsigned 
      *  the status of the object (into a hard link), so don't use an 'else'
      *  statement here. -QAK)
      */
-    if (H5F_addr_defined(obj_loc->oloc->addr) && (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
+    if (H5_addr_defined(obj_loc->oloc->addr) && (0 == (target & H5G_TARGET_MOUNT) || !last_comp)) {
         if (H5F_traverse_mount(obj_loc->oloc /*in,out*/) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "mount point traversal failed")
     } /* end if */

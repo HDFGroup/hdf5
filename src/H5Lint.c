@@ -2180,7 +2180,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
             tmp_src_oloc.file = src_oloc->file;
             tmp_src_oloc.addr = src_lnk->u.hard.addr;
         } /* end if */
-        HDassert(H5F_addr_defined(tmp_src_oloc.addr));
+        HDassert(H5_addr_defined(tmp_src_oloc.addr));
 
         /* Copy the shared object from source to destination */
         /* Don't care about obj_type or udata because those are only important

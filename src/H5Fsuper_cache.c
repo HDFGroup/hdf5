@@ -273,14 +273,14 @@ H5F__drvrinfo_prefix_decode(H5O_drvinfo_t *drvrinfo, char *drv_name, const uint8
 
         /* Get current EOA... */
         eoa = H5FD_get_eoa(udata->f->shared->lf, H5FD_MEM_SUPER);
-        if (!H5F_addr_defined(eoa))
+        if (!H5_addr_defined(eoa))
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
         /* ... if it is too small, extend it. */
         min_eoa = udata->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE + drvrinfo->len;
 
         /* If it grew, set it */
-        if (H5F_addr_gt(min_eoa, eoa))
+        if (H5_addr_gt(min_eoa, eoa))
             if (H5FD_set_eoa(udata->f->shared->lf, H5FD_MEM_SUPER, min_eoa) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
     }
@@ -548,7 +548,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata, 
          *  undefined to let the library ignore the family driver information saved
          *  in the superblock.
          */
-        if (udata->ignore_drvrinfo && H5F_addr_defined(sblock->driver_addr)) {
+        if (udata->ignore_drvrinfo && H5_addr_defined(sblock->driver_addr)) {
             /* Eliminate the driver info */
             sblock->driver_addr     = HADDR_UNDEF;
             udata->drvrinfo_removed = TRUE;

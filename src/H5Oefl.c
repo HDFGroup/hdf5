@@ -118,7 +118,7 @@ H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED
     if (H5_IS_BUFFER_OVERFLOW(p, H5F_sizeof_addr(f), p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     H5F_addr_decode(f, &p, &(mesg->heap_addr));
-    if (H5F_addr_defined(mesg->heap_addr) == FALSE)
+    if (H5_addr_defined(mesg->heap_addr) == FALSE)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad local heap address when parsing efl msg")
 
     /* Decode the file list */
@@ -227,7 +227,7 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
     UINT16ENCODE(p, mesg->nused);
 
     /* Heap address */
-    HDassert(H5F_addr_defined(mesg->heap_addr));
+    HDassert(H5_addr_defined(mesg->heap_addr));
     H5F_addr_encode(f, &p, mesg->heap_addr);
 
     /* Encode file list */

@@ -190,6 +190,7 @@ H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len, void *
     HDassert(image_len == H5HG_MINSIZE);
 
     /* Deserialize the heap's header */
+    heap.size = 0;
     if (H5HG__hdr_deserialize(&heap, (const uint8_t *)image, image_len, (const H5F_t *)udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix")
 

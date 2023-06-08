@@ -394,7 +394,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
     HDassert(f);
     HDassert(fspace);
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(H5_addr_defined(addr));
     HDassert(new_addr);
     HDassert(new_len);
     HDassert(flags);
@@ -420,7 +420,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          * 1) The instance of H5FS_sinfo_t is not in the metadata cache.
          *
-         *    This will be TRUE iff H5F_addr_defined(fspace->sect_addr)
+         *    This will be TRUE iff H5_addr_defined(fspace->sect_addr)
          *    is FALSE, and fspace->sinfo is not NULL.  This is sometimes
          *    referred to as "floating" section info in the comments.
          *
@@ -431,11 +431,11 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          *
          *    and
          *
-         *        H5F_addr_defined(fspace->addr)
+         *        H5_addr_defined(fspace->addr)
          *
          *    will both be TRUE.  If this condition does not hold, then
          *    either the free space info is not persistent
-         *    (!H5F_addr_defined(fspace->addr)???) or the section info
+         *    (!H5_addr_defined(fspace->addr)???) or the section info
          *    contains no free space data that must be written to file
          *    ( fspace->serial_sect_count == 0 ).
          *
@@ -455,7 +455,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          * cases 2) and 3), as the section info should not be stored on
          * disk if it doesn't exist.  Similarly, since the section info
          * will not be stored to disk unless the header is,
-         * H5F_addr_defined(fspace->addr) must hold as well.
+         * H5_addr_defined(fspace->addr) must hold as well.
          *
          * As the objective is to touch up the free space manager header
          * so that it contains sensical data on the size and location of
@@ -463,7 +463,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          * cases differently.
          *
          * Case 1) If either fspace->serial_sect_count == 0 or
-         *         ! H5F_addr_defined(fspace->addr) do nothing as either
+         *         ! H5_addr_defined(fspace->addr) do nothing as either
          *         the free space manager data is not persistent, or the
          *         section info is empty.
          *
@@ -487,11 +487,11 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
          * as dirty, as the metadata cache would not be attempting to
          * serialize the header if it thought it was clean.
          */
-        if (fspace->serial_sect_count > 0 && H5F_addr_defined(fspace->addr)) {
+        if (fspace->serial_sect_count > 0 && H5_addr_defined(fspace->addr)) {
             /* Sanity check */
             HDassert(fspace->sect_size > 0);
 
-            if (!H5F_addr_defined(fspace->sect_addr)) { /* case 1 */
+            if (!H5_addr_defined(fspace->sect_addr)) { /* case 1 */
                 haddr_t tag = HADDR_UNDEF;
                 haddr_t sect_addr;
                 hsize_t saved_sect_size, new_sect_size;
@@ -587,10 +587,10 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             /* for one reason or another (see comment above) there should
              * not be any file space allocated for the section info.
              */
-            HDassert(!H5F_addr_defined(fspace->sect_addr));
+            HDassert(!H5_addr_defined(fspace->sect_addr));
         } /* end else */
     }     /* end if */
-    else if (H5F_addr_defined(fspace->sect_addr)) {
+    else if (H5_addr_defined(fspace->sect_addr)) {
         /* Here the metadata cache is managing the section info.
          *
          * Do some sanity checks, and then test to see if the section
@@ -630,7 +630,7 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_AT
             fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
             /* Sanity check */
-            HDassert(!H5F_addr_eq(fspace->sect_addr, new_sect_addr));
+            HDassert(!H5_addr_eq(fspace->sect_addr, new_sect_addr));
 
             /* Let the metadata cache know the section info moved */
             if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
@@ -702,10 +702,10 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
      * into real file space if necessary before this function was called.
      * The following asserts are a cursory check on this.
      */
-    HDassert((!H5F_addr_defined(fspace->sect_addr)) || (!H5F_IS_TMP_ADDR(f, fspace->sect_addr)));
+    HDassert((!H5_addr_defined(fspace->sect_addr)) || (!H5F_IS_TMP_ADDR(f, fspace->sect_addr)));
 
     if (!H5F_POINT_OF_NO_RETURN(f))
-        HDassert((!H5F_addr_defined(fspace->sect_addr)) ||
+        HDassert((!H5_addr_defined(fspace->sect_addr)) ||
                  ((fspace->sect_size > 0) && (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
 
     /* Magic number */
@@ -989,7 +989,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Address of free space header for these sections */
     H5F_addr_decode(udata->f, &image, &fs_addr);
-    if (H5F_addr_ne(fs_addr, fspace->addr))
+    if (H5_addr_ne(fs_addr, fspace->addr))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
 
     /* Check for any serialized sections */
@@ -1161,8 +1161,8 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     fspace = sinfo->fspace;
     HDassert(fspace->cache_info.type == H5AC_FSPACE_HDR);
     HDassert(fspace->cache_info.is_pinned);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(H5F_addr_eq(fspace->sect_addr, addr));
+    HDassert(H5_addr_defined(addr));
+    HDassert(H5_addr_eq(fspace->sect_addr, addr));
     HDassert(fspace->sect_size == len);
     HDassert(new_addr);
     HDassert(new_len);
@@ -1174,7 +1174,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
     if (H5F_IS_TMP_ADDR(f, fspace->sect_addr)) {
         /* Sanity check */
         HDassert(fspace->sect_size > 0);
-        HDassert(H5F_addr_eq(fspace->sect_addr, addr));
+        HDassert(H5_addr_eq(fspace->sect_addr, addr));
 
         /* Allocate space for the section info in file */
         if (HADDR_UNDEF == (sinfo_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FSPACE_SINFO, fspace->sect_size)))
@@ -1183,7 +1183,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
         fspace->alloc_sect_size = (size_t)fspace->sect_size;
 
         /* Sanity check */
-        HDassert(!H5F_addr_eq(sinfo->fspace->sect_addr, sinfo_addr));
+        HDassert(!H5_addr_eq(sinfo->fspace->sect_addr, sinfo_addr));
 
         /* Let the metadata cache know the section info moved */
         if (H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, sinfo_addr) < 0)
@@ -1197,7 +1197,7 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5_
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
     } /* end if */
 
-    if (!H5F_addr_eq(addr, sinfo_addr)) {
+    if (!H5_addr_eq(addr, sinfo_addr)) {
         *new_addr = sinfo_addr;
         *flags    = H5C__SERIALIZE_MOVED_FLAG;
     } /* end if */
