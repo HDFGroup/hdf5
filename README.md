@@ -31,10 +31,10 @@ Full Documentation and Programming Resources for this release can be found at
 
    https://portal.hdfgroup.org/display/HDF5
 
-See the [RELEASE.txt](../release_docs/RELEASE.txt) file in the [release_docs/](../release_docs/) directory for information specific
+See the [RELEASE.txt](/release_docs/RELEASE.txt) file in the [release_docs/](/release_docs/) directory for information specific
 to the features and updates included in this release of the library.
 
-Several more files are located within the [release_docs/](../release_docs/) directory with specific
+Several more files are located within the [release_docs/](/release_docs/) directory with specific
 details for several common platforms and configurations.
 
     INSTALL - Start Here. General instructions for compiling and installing the library
@@ -54,11 +54,8 @@ Information regarding Help Desk and Support services is available at
 
 FORUM and NEWS
 --------------
-The following public forums are provided for public announcements and discussions
+The [HDF Forum](https://forum.hdfgroup.org) is provided for public announcements and discussions
 of interest to the general HDF5 Community.
-
-   - Homepage of the Forum
-   https://forum.hdfgroup.org
 
    - News and Announcements
    https://forum.hdfgroup.org/c/news-and-announcements-from-the-hdf-group
