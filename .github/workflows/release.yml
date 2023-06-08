@@ -113,17 +113,22 @@ jobs:
           tag_name: "snapshot"
           prerelease: true
           files: |
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.zip
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
-              ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
+              ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Create .nojekyll
-        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
-        shell: bash
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+#      - name: Create .nojekyll
+#        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
+#        shell: bash
 
       - name: dev-only-docs
         uses: peaceiris/actions-gh-pages@v3
