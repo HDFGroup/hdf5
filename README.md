@@ -66,7 +66,7 @@ of interest to the general HDF5 Community.
 These forums are provided as an open and public service for searching and reading.
 Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the [instructions](https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
-) pertaining to the Forum's use and configuration
+) pertaining to the Forum's use and configuration.
 
 RELEASE SCHEDULE
 ----------------
