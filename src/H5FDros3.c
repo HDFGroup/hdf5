@@ -38,9 +38,12 @@
 
 #ifdef H5_HAVE_ROS3_VFD
 
-/* toggle function call prints: 1 turns on
+/* toggle debugging; pick a level
  */
-#define ROS3_DEBUG 1
+#define ROS3_DEBUG_NONE           0
+#define ROS3_DEBUG_TRACE_API      1
+#define ROS3_DEBUG_TRACE_INTERNAL 2
+#define ROS3_DEBUG                ROS3_DEBUG_NONE
 
 /* toggle stats collection and reporting
  */
@@ -629,7 +632,7 @@ H5FD__ros3_reset_stats(H5FD_ros3_t *file)
 
     FUNC_ENTER_PACKAGE
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     HDprintf("H5FD__ros3_reset_stats() called\n");
 #endif
 
@@ -1274,7 +1277,7 @@ H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     HDfprintf(stdout, "H5FD__ros3_query() called.\n");
 #endif
 
@@ -1314,7 +1317,7 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     HDfprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
 #endif
 
@@ -1345,7 +1348,7 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     HDfprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
 #endif
 
@@ -1379,7 +1382,7 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-#if ROS3_DEBUG
+#if ROS3_DEBUG >= ROS3_DEBUG_TRACE_INTERNAL
     HDfprintf(stdout, "H5FD__ros3_get_eof() called.\n");
 #endif
 
