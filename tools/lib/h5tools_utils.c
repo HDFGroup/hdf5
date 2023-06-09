@@ -1028,8 +1028,7 @@ done:
  *----------------------------------------------------------------------------
  */
 herr_t
-h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out,
-                              char *token_out)
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_ext_t *fapl_config_out)
 {
     const char *ccred[4];
     unsigned    nelems     = 0;
@@ -1055,7 +1054,7 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
         ccred[3] = (const char *)s3cred[3];
     }
 
-    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, token_out, ccred))
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
         H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
 
 done:
@@ -1131,7 +1130,7 @@ done:
  *----------------------------------------------------------------------------
  */
 int
-h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **values)
+h5tools_populate_ros3_fapl(H5FD_ros3_fapl_ext_t *fa, const char **values)
 {
     int show_progress = 0; /* set to 1 for debugging */
     int ret_value     = 1; /* 1 for success, 0 for failure           */
@@ -1149,7 +1148,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
         goto done;
     }
 
-    if (token == NULL) {
+    if (fa->token == NULL) {
         if (show_progress) {
             HDprintf("  ERROR: null pointer to token\n");
         }
@@ -1160,12 +1159,12 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
     if (show_progress) {
         HDprintf("  preset fapl with default values\n");
     }
-    fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
-    fa->authenticate  = FALSE;
-    *(fa->aws_region) = '\0';
-    *(fa->secret_id)  = '\0';
-    *(fa->secret_key) = '\0';
-    *token            = '\0';
+    fa->fa.version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
+    fa->fa.authenticate  = FALSE;
+    *(fa->fa.aws_region) = '\0';
+    *(fa->fa.secret_id)  = '\0';
+    *(fa->fa.secret_key) = '\0';
+    *(fa->token)         = '\0';
 
     /* sanity-check supplied values
      */
@@ -1210,7 +1209,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
+            HDmemcpy(fa->fa.aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
                 HDprintf("  aws_region set\n");
             }
@@ -1222,7 +1221,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
+            HDmemcpy(fa->fa.secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
                 HDprintf("  secret_id set\n");
             }
@@ -1234,7 +1233,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
+            HDmemcpy(fa->fa.secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 HDprintf("  secret_key set\n");
             }
@@ -1246,12 +1245,12 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, char *token, const char **value
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(token, values[3], (HDstrlen(values[3]) + 1));
+            HDmemcpy(fa->token, values[3], (HDstrlen(values[3]) + 1));
             if (show_progress) {
                 HDprintf("  token set\n");
             }
 
-            fa->authenticate = TRUE;
+            fa->fa.authenticate = TRUE;
             if (show_progress) {
                 HDprintf("  set to authenticate\n");
             }

@@ -2850,7 +2850,7 @@ main(int argc, char *argv[])
             }
             start++;
 
-            if (h5tools_parse_ros3_fapl_tuple(start, ',', &(ros3_fa.fa), ros3_fa.token) < 0) {
+            if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
                 HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
                 usage();
                 leave(EXIT_FAILURE);

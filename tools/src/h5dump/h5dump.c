@@ -1151,7 +1151,7 @@ end_collect:
 
             case '$':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &(ros3_fa_g.fa), ros3_fa_g.token) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa_g) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     usage(h5tools_getprogname());
                     free_handler(hand, argc);

@@ -242,8 +242,8 @@ static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static herr_t H5FD__ros3_str_token_copy(const char *name, size_t size, void *_value);
 static int    H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size);
-static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *value);
-static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5FD__ros3_str_token_close(const char *name, size_t size, void *_value);
+static herr_t H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value);
 
 static const H5FD_class_t H5FD_ros3_g = {
     H5FD_CLASS_VERSION,       /* struct version       */
@@ -626,8 +626,8 @@ H5FD__ros3_fapl_free(void *_fa)
 herr_t
 H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
 {
-    H5P_genplist_t *plist                                   = NULL;
-    char            token_src[H5FD_ROS3_MAX_SECRET_TOK_LEN] = {0};
+    H5P_genplist_t *plist = NULL;
+    char           *token_src;
     htri_t          token_exists;
     size_t          tokenlen  = 0;
     herr_t          ret_value = SUCCEED;
@@ -651,7 +651,7 @@ H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token_dst /*out*/)
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
     if (token_exists) {
-        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, token_src) < 0)
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
     }
 
@@ -682,7 +682,7 @@ done:
 static herr_t
 H5FD__ros3_str_token_copy(const char *name, size_t size, void *_value)
 {
-    char **value     = (char **)&_value;
+    char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -716,20 +716,20 @@ done:
 static int
 H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size)
 {
-    char const *value1    = (char const *)_value1;
-    char const *value2    = (char const *)_value2;
-    int         ret_value = SUCCEED;
+    char *const *value1    = (char *const *)_value1;
+    char *const *value2    = (char *const *)_value2;
+    int          ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    if (value1) {
-        if (value2)
-            ret_value = HDstrcmp(value1, value2);
+    if (*value1) {
+        if (*value2)
+            ret_value = HDstrcmp(*value1, *value2);
         else
             ret_value = 1;
     }
     else {
-        if (value2)
+        if (*value2)
             ret_value = -1;
         else
             ret_value = 0;
@@ -753,11 +753,15 @@ H5FD__ros3_str_token_cmp(const void *_value1, const void *_value2, size_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_str_token_close(const char *name, size_t size, void *value)
+H5FD__ros3_str_token_close(const char *name, size_t size, void *_value)
 {
+    char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        HDfree(*value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__ros3_str_token_close */
@@ -778,11 +782,15 @@ H5FD__ros3_str_token_close(const char *name, size_t size, void *value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *value)
+H5FD__ros3_str_token_delete(hid_t prop_id, const char *name, size_t size, void *_value)
 {
+    char **value     = (char **)_value;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_NOERR
+
+    if (*value)
+        HDfree(*value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__ros3_str_token_delete */
@@ -805,6 +813,7 @@ herr_t
 H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
 {
     H5P_genplist_t *plist = NULL;
+    char           *token_src;
     htri_t          token_exists;
     herr_t          ret_value = SUCCEED;
 
@@ -829,13 +838,17 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to check if property token exists in plist")
 
     if (token_exists) {
-        if (H5P_set(plist, ROS3_TOKEN_PROP_NAME, (void *)token) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token_src) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get token value")
+
+        HDmemcpy(token_src, token, HDstrlen(token) + 1);
     }
     else {
-        if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1),
-                       (void *)token, NULL, NULL, NULL, NULL, H5FD__ros3_str_token_delete,
-                       H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp, H5FD__ros3_str_token_close) < 0)
+        token_src = HDmalloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
+        HDmemcpy(token_src, token, HDstrlen(token) + 1);
+        if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
+                       H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
+                       H5FD__ros3_str_token_close) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
     }
 
@@ -939,8 +952,8 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_ros3_fapl_t fa;
     H5P_genplist_t  *plist = NULL;
     htri_t           token_exists;
-    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN] = {0};
-    H5FD_t          *ret_value                           = NULL;
+    char            *token;
+    H5FD_t          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -973,7 +986,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if ((token_exists = H5P_exist_plist(plist, ROS3_TOKEN_PROP_NAME)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "failed to check if property token exists in plist")
     if (token_exists) {
-        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, token) < 0)
+        if (H5P_get(plist, ROS3_TOKEN_PROP_NAME, &token) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get token value")
     }
 

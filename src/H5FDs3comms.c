@@ -1322,6 +1322,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         /* authenticate request
          */
         authorization = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN + 1);
+        if (authorization == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for authorization variable.");
         /*   2048 := approximate max length...
          *     67 <len("AWS4-HMAC-SHA256 Credential=///s3/aws4_request,"
          *             "SignedHeaders=,Signature=")>
@@ -1334,9 +1336,13 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
          */
         char buffer2[256 + 1]; /* -> String To Sign -> Credential */
         char iso8601now[ISO8601_SIZE];
-        buffer1        = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN +
-                                             1); /* -> Canonical Request -> Signature */
+        buffer1 = (char *)H5MM_malloc(512 + H5FD_ROS3_MAX_SECRET_TOK_LEN +
+                                      1); /* -> Canonical Request -> Signature */
+        if (buffer1 == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for buffer1 variable.");
         signed_headers = (char *)H5MM_malloc(48 + H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
+        if (signed_headers == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for signed_headers variable.");
         /* should be large enough for nominal listing:
          * "host;range;x-amz-content-sha256;x-amz-date;x-amz-security-token"
          * + '\0', with "range;" and/or "x-amz-security-token" possibly absent
@@ -1664,8 +1670,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     size_t      sh_size      = (size_t)_sh_size;
     size_t      cr_len       = 0; /* working length of canonical request str */
     size_t      sh_len       = 0; /* working length of signed headers str */
-    char        tmpstr[1024 + 1];
-    tmpstr[1024] = 0; /* terminating NULL */
+    char        tmpstr[1024];
 
     /* "query params" refers to the optional element in the URL, e.g.
      *     http://bucket.aws.com/myfile.txt?max-keys=2&prefix=J

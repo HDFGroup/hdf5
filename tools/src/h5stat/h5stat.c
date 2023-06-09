@@ -967,7 +967,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &(ros3_fa.fa), ros3_fa.token) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     goto error;
                 }

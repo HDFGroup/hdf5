@@ -135,27 +135,6 @@ typedef struct H5FD_ros3_fapl_t {
     char    secret_key[H5FD_ROS3_MAX_SECRET_KEY_LEN + 1];
 } H5FD_ros3_fapl_t;
 
-/**
- * \struct H5FD_ros3_fapl_ext_t
- * \brief Extended configuration structure for holding the configuration data
- *        to the #H5FD_ROS3 driver via a File Access Property List.
- *
- * \details H5FD_ros_fapl_ext_t is a public structure that is used to pass
- *          configuration data to the #H5FD_ROS3 driver via a File Access
- *          Property List.
- *
- * \var H5FD_ros3_fapl_t H5FD_ros3_fapl_ext_t::fa
- *      Configuration structure for H5Pset_fapl_ros3() / H5Pget_fapl_ros3().
- *
- * \var char H5FD_ros3_fapl_ext_t::token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1]
- *      A string which specifies the session/security token.
- *
- */
-typedef struct H5FD_ros3_fapl_ext_t {
-    H5FD_ros3_fapl_t fa;
-    char             token[H5FD_ROS3_MAX_SECRET_TOK_LEN + 1];
-} H5FD_ros3_fapl_ext_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -213,10 +192,13 @@ H5_DLL herr_t H5Pget_fapl_ros3_token(hid_t fapl_id, size_t size, char *token);
  * \param[in] token Session/security token.
  * \returns \herr_t
  *
- * \details H5Pset_fapy_ros3_token() modifies the File Access Property List to use the
- *          #H5FD_ROS3 driver by adding or updating the session/security token.
+ * \details H5Pset_fapl_ros3_token() modifies an existing File Access Property List which
+ *          is used by #H5FD_ROS3 driver by adding or updating the session/security token
+ *          of the property list. Be aware, to set the token first you need to create
+ *          a proper File Access Property List using H5Pset_fapl_ros() and use this list
+ *          as input argument of the function H5Pset_fapl_ros3_token().
  *
- *          The session token is only needed when you want to access a S3 bucket
+ *          Note, the session token is only needed when you want to access a S3 bucket
  *          using temporary security credentials.
  *
  * \since 1.14.2
