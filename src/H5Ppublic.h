@@ -8442,7 +8442,7 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          attribute and compact dataset I/O, is disregarded.  It is also
  *          possible that data was cached in the dataset chunk cache or sieve
  *          buffer, which may prevent I/O from hitting the disk, and thereby
- *          prevent it from being counted by this functon.
+ *          prevent it from being counted by this function.
  *
  * \since 1.14.2
  *
