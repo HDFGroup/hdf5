@@ -110,7 +110,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
-            ros3_vfd: ON
+            ros3_vfd: OFF
             toolchain: "config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
@@ -472,7 +472,7 @@ jobs:
            sudo apt update
            sudo apt install automake autoconf libtool libtool-bin
            sudo apt install gcc-12 g++-12 gfortran-12
-           sudo apt install libssl3 libssl-dev curl libcurl4 libcurl4-openssl-dev
+           sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
