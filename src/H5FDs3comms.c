@@ -972,6 +972,10 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
 
     handle->filesize = (size_t)content_length;
 
+#if S3COMMS_DEBUG >= S3COMMS_DEBUG_REQUESTS
+    HDfprintf(stdout, " -- size: %ju\n", content_length);
+#endif
+
     /**********************
      * UNDO HEAD SETTINGS *
      **********************/
@@ -1382,7 +1386,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
         if (rangebytesstr != NULL) {
 #if S3COMMS_DEBUG >= S3COMMS_DEBUG_REQUESTS
-            HDfprintf(stdout, " -- range: %s\n", rangebytesstr);
+            HDfprintf(stdout, " -- request: %llu %zu\n", offset, len);
 
 #endif
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Range", rangebytesstr))
