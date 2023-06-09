@@ -727,10 +727,10 @@ error:
 static int
 test_compound_insert_empty_enum(void)
 {
-    hid_t   enum_id = H5I_INVALID_HID;
-    hid_t   cmpd_id = H5I_INVALID_HID;
-    hid_t   copy_id = H5I_INVALID_HID;
-    size_t  size;
+    hid_t  enum_id = H5I_INVALID_HID;
+    hid_t  cmpd_id = H5I_INVALID_HID;
+    hid_t  copy_id = H5I_INVALID_HID;
+    size_t size;
 
     TESTING("copying empty enums works");
 
