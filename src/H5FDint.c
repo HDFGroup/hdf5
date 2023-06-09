@@ -209,9 +209,9 @@ done:
 herr_t
 H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/)
 {
-    hid_t  dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
+    hid_t    dxpl_id = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t actual_selection_io_mode;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -278,10 +278,10 @@ done:
 herr_t
 H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf)
 {
-    hid_t   dxpl_id;                 /* DXPL for operation */
-    haddr_t eoa       = HADDR_UNDEF; /* EOA for file */
+    hid_t    dxpl_id;           /* DXPL for operation */
+    haddr_t  eoa = HADDR_UNDEF; /* EOA for file */
     uint32_t actual_selection_io_mode;
-    herr_t  ret_value = SUCCEED;     /* Return value */
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -375,7 +375,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     size_t     size;
     H5FD_mem_t type;
     hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
-    hbool_t    is_raw = FALSE;          /* Does this include raw data */
+    hbool_t    is_raw    = FALSE;           /* Does this include raw data */
     herr_t     ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -620,7 +620,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     H5FD_mem_t type;
     hid_t      dxpl_id;                 /* DXPL for operation */
     haddr_t    eoa       = HADDR_UNDEF; /* EOA for file */
-    hbool_t    is_raw = FALSE;          /* Does this include raw data */
+    hbool_t    is_raw    = FALSE;       /* Does this include raw data */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -697,7 +697,6 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
                 if (type == H5FD_MEM_DRAW)
                     is_raw = TRUE;
             }
-
         }
 
         if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))

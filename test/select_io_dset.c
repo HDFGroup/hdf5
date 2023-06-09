@@ -142,7 +142,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     int         trans_wbuf[DSET_SELECT_DIM];
     int         rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr                  = "2*x";
+    const char *expr = "2*x";
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -279,17 +279,17 @@ error:
 static herr_t
 test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
 {
-    int      i;
-    hid_t    did  = H5I_INVALID_HID;
-    hid_t    sid  = H5I_INVALID_HID;
-    hid_t    dcpl = H5I_INVALID_HID;
-    hid_t    dxpl = H5I_INVALID_HID;
-    hsize_t  dims[1];
-    hsize_t  cdims[1];
-    char    *wbuf     = NULL;
-    char    *wbuf_bak = NULL;
-    char    *rbuf     = NULL;
-    char     dset_name[DSET_NAME_LEN];
+    int     i;
+    hid_t   did  = H5I_INVALID_HID;
+    hid_t   sid  = H5I_INVALID_HID;
+    hid_t   dcpl = H5I_INVALID_HID;
+    hid_t   dxpl = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    char   *wbuf     = NULL;
+    char   *wbuf_bak = NULL;
+    char   *rbuf     = NULL;
+    char    dset_name[DSET_NAME_LEN];
 
     if ((wbuf = (char *)HDmalloc((size_t)(4 * DSET_SELECT_DIM))) == NULL)
         FAIL_STACK_ERROR;
@@ -448,7 +448,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     long        trans_wbuf[DSET_SELECT_DIM];
     long long   rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr                  = "5 * (10 - x)";
+    const char *expr = "5 * (10 - x)";
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
@@ -598,7 +598,7 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     short       trans_wbuf[DSET_SELECT_DIM];
     short       rbuf[DSET_SELECT_DIM];
     char        dset_name[DSET_NAME_LEN];
-    const char *expr                  = "2 * (10 + x)";
+    const char *expr = "2 * (10 + x)";
 
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
