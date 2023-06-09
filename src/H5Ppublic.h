@@ -8402,8 +8402,8 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
 /**
  * \ingroup DXPL
  *
- * \brief Retrieves the type(s) of I/O that HDF5 actually performed on
- *        last I/O call (not necessarily the type requested)
+ * \brief Retrieves the type(s) of I/O that HDF5 actually performed on raw data
+ *        during the last I/O call
  *
  * \dxpl_id{plist_id}
  * \param[out] actual_selection_io_mode A bitwise set value indicating the
@@ -8420,9 +8420,9 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *      I/O were actually performed.
  *
  * \details H5Pget_actual_selection_io_mode() allows the user to determine which
- *          type(s) of I/O were actually performed during the last I/O operation
- *          which used \p plist_id.  This property is set after all I/O is
- *          completed; if I/O fails, it will not be set.
+ *          type(s) of I/O were actually performed on raw data during the last
+ *          I/O operation which used \p plist_id.  This property is set after
+ *          all I/O is completed; if I/O fails, it will not be set.
  *
  *          H5Pget_no_selection_io_cause() can be used to determine the reason
  *          why selection or vector I/O was not performed.
@@ -8437,12 +8437,12 @@ H5_DLL herr_t H5Pget_no_selection_io_cause(hid_t plist_id, uint32_t *no_selectio
  *          - #H5D_SELECTION_IO
  *          Selection I/O was performed
  *
- *          Be aware that this function will include the types of all I/O that
- *          were performed during this operation, including any metadata
- *          operations that may be incidental to the requested I/O. To make sure
- *          this function is only capturing raw data I/O, one can temporarily
- *          disable metadata cache evictions by calling H5Fset_mdc_config() with
- *          evictions_enabled set to false.
+ *          Be aware that this function will only include raw data I/O performed
+ *          as part of the last I/O operation.  Any metadata flushes, including
+ *          attribute and compact dataset I/O, is disregarded.  It is also
+ *          possible that data was cached in the dataset chunk cache or sieve
+ *          buffer, which may prevent I/O from hitting the disk, and thereby
+ *          prevent it from being counted by this functon.
  *
  * \since 1.14.2
  *
