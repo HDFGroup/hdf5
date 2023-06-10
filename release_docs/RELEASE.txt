@@ -47,7 +47,7 @@ New Features
 
     Configuration:
     -------------
-    - The minumum required version of Autoconf has been bumped to 2.71
+    - The minimum required version of Autoconf has been bumped to 2.71
 
       This fixes a problem with the Intel oneAPI Fortran compiler's -loopopt
       option being interpreted as a linker option (see bug fixes, below).
