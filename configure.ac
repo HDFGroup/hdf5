@@ -1461,7 +1461,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
-
+  *mingw*)
+    AC_DEFINE([HAVE_WINDOWS], [1], [Define if this is a Windows machine])
+    AC_DEFINE([HAVE_WIN32_API], [1], [Define if on the Windows platform using the Win32 API])
+    AC_DEFINE([HAVE_MINGW], [1], [Define if using MinGW])
+    H5_CPPFLAGS="-D_GNU_SOURCE -D__USE_MINGW_ANSI_STDIO $H5_CPPFLAGS"
+    ;;
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
