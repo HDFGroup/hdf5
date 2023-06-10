@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Report a problem with HDF5
-title: "[BUG]"
-labels: bug
+title: ""
+labels: ""
 assignees: ''
 
 ---
