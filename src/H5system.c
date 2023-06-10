@@ -979,7 +979,7 @@ char *
 Wstrcasestr_wrap(const char *haystack, const char *needle)
 {
     if (needle && !*needle)
-        return haystack;
+        return (char *)haystack;
     else
         return StrStrIA(haystack, needle);
 }
