@@ -239,7 +239,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
 #endif
 
     /* Search the list of tagged object addresses in the cache */
-    tag_info = (H5C_tag_info_t *)H5SL_search(cache->tag_list, &tag);
+    HASH_FIND(hh, cache->tag_list, &tag, sizeof(haddr_t), tag_info);
 
     /* Check if this is the first entry for this tagged object */
     if (NULL == tag_info) {
@@ -250,10 +250,9 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
         /* Set the tag for all entries */
         tag_info->tag = tag;
 
-        /* Insert tag info into skip list */
-        if (H5SL_insert(cache->tag_list, tag_info, &(tag_info->tag)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert tag info in skip list")
-    } /* end if */
+        /* Insert tag info into the hash table */
+        HASH_ADD(hh, cache->tag_list, tag, sizeof(haddr_t), tag_info);
+    }
     else
         HDassert(tag_info->corked || (tag_info->entry_cnt > 0 && tag_info->head));
 
@@ -294,7 +293,7 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     H5C_tag_info_t *tag_info;            /* Points to a tag info struct */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Assertions */
     HDassert(cache != NULL);
@@ -322,17 +321,14 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
             /* Sanity check */
             HDassert(NULL == tag_info->head);
 
-            if (H5SL_remove(cache->tag_list, &(tag_info->tag)) != tag_info)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove tag info from list")
-
             /* Release the tag info */
+            HASH_DELETE(hh, cache->tag_list, tag_info);
             tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
-        } /* end if */
+        }
         else
             HDassert(tag_info->corked || NULL != tag_info->head);
-    } /* end if */
+    }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__untag_entry */
 
@@ -363,7 +359,7 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Search the list of tagged object addresses in the cache */
-    tag_info = (H5C_tag_info_t *)H5SL_search(cache->tag_list, &tag);
+    HASH_FIND(hh, cache->tag_list, &tag, sizeof(haddr_t), tag_info);
 
     /* If there's any entries for this tag, iterate over them */
     if (tag_info) {
@@ -755,7 +751,7 @@ done:
  *              value specified by src_tag and changes it to the value
  *              specified by dest_tag.
  *
- * Return:      SUCCEED or FAIL.
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Mike McGreevy
  *              March 17, 2010
@@ -765,27 +761,28 @@ done:
 herr_t
 H5C_retag_entries(H5C_t *cache, haddr_t src_tag, haddr_t dest_tag)
 {
-    H5C_tag_info_t *tag_info;            /* Points to a tag info struct */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    H5C_tag_info_t *tag_info = NULL;
 
     /* Function enter macro */
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(cache);
 
     /* Remove tag info from tag list */
-    if (NULL != (tag_info = (H5C_tag_info_t *)H5SL_remove(cache->tag_list, &src_tag))) {
+    HASH_FIND(hh, cache->tag_list, &src_tag, sizeof(haddr_t), tag_info);
+    if (NULL != tag_info) {
+        /* Remove info with old tag */
+        HASH_DELETE(hh, cache->tag_list, tag_info);
+
         /* Change to new tag */
         tag_info->tag = dest_tag;
 
-        /* Re-insert tag info into skip list */
-        if (H5SL_insert(cache->tag_list, tag_info, &(tag_info->tag)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert tag info in skip list")
-    } /* end if */
+        /* Re-insert tag info into tag list */
+        HASH_ADD(hh, cache->tag_list, tag, sizeof(haddr_t), tag_info);
+    }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5C_retag_entries() */
 
 /*-------------------------------------------------------------------------
