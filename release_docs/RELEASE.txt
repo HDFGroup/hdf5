@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - The minumum required version of Autoconf has been bumped to 2.71
+
+      This fixes a problem with the Intel oneAPI Fortran compiler's -loopopt
+      option being interpreted as a linker option (see bug fixes, below).
+
+      This should only affect building the library from a maintenance branch
+      using the Autotools, when autogen.sh is used to generate the Autotools
+      files.
+
+      It does NOT affect the binaries or building from the source tarballs
+      that we distribute at release as Autoconf does not need to be re-run.
+
     - Added support for CMake presets file.
 
       CMake supports two main files, CMakePresets.json and CMakeUserPresets.json,
@@ -243,7 +255,7 @@ Bug Fixes since HDF5-1.12.2 release
       checkings will remove the potential invalid read of any of these
       values that could be triggered by a malformed file.
 
-      (GH-2603 - 2023/04/16)
+      Fixes GitHub issue #2603
 
     - Fixed potential buffer overrun issues in some object header decode routines
 
@@ -402,6 +414,17 @@ Bug Fixes since HDF5-1.12.2 release
 
     Configuration
     -------------
+    - Fix Intel oneAPI -loopopt Fortran option being detected as a linker flag
+
+      Intel's new oneAPI Fortran compiler takes a -loopopt flag that is
+      interpreted as a linker flag by Autoconf 2.69 and earlier. This bug
+      only affects the Autotools when building with Intel's oneAPI when
+      Fortran is enabled.
+
+      This was fixed by changing the required minimum version of Autoconf
+      to 2.71 in configure.ac. The release source code will be processed
+      with Autoconf 2.71 or later.
+
     - The accum test now passes on macOS 12+ (Monterey) w/ CMake
 
       Due to changes in the way macOS handles LD_LIBRARY_PATH, the accum test
