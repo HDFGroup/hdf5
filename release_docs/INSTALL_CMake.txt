@@ -834,7 +834,6 @@ HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"             
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                    OFF
 DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114)"                 "v114"
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                     ON
-HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"          ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                             OFF
 HDF5_MSVC_NAMING_CONVENTION    "Use MSVC Naming conventions for Shared Libraries"                OFF
