@@ -1040,11 +1040,7 @@ endif ()
 #-----------------------------------------------------------------------------
 # Set up source generators
 #-----------------------------------------------------------------------------
-if (HDF5_USE_PREGEN)
-  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_USE_PREGEN_DIR})
-else ()
-  set (HDF5_GENERATED_SOURCE_DIR ${HDF5_SRC_BINARY_DIR})
-endif ()
+set (HDF5_GENERATED_SOURCE_DIR ${HDF5_SRC_BINARY_DIR})
 
 if (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${HDF5_SRC_BINARY_DIR}/shared")
