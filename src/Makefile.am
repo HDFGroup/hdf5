@@ -18,8 +18,6 @@
 include $(top_srcdir)/config/commence.am
 include $(top_srcdir)/config/lt_vers.am
 
-noinst_PROGRAMS = H5make_libsettings
-
 # Our main target, the HDF5 library
 lib_LTLIBRARIES=libhdf5.la
 
@@ -185,19 +183,6 @@ endif
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
 settings_DATA=libhdf5.settings
-
-# Build configuration header file generation
-# The LD_LIBRARY_PATH setting is a kludge.
-# Things should have been all set during H5make_libsettings making.
-# Remove the generated .c file if errors occur unless HDF5_Make_Ignore
-# is set to ignore the error.
-H5lib_settings.c: H5make_libsettings$(EXEEXT) libhdf5.settings
-	@if $(AM_V_P); then set -x; else echo "  GEN      H5lib_settings.c"; fi;    \
-	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                        \
-	    sed -e 's/-L/:/g' -e 's/ //g'`"                                         \
-	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT)  $@  ||                          \
-	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||                \
-	    ($(RM) $@ ; exit 1)
 
 # Error header generation
 #

@@ -3893,9 +3893,11 @@ AC_ARG_ENABLE([embedded-libinfo],
 
    if test "${enable_embedded_libinfo}" = "yes"; then
       AC_MSG_RESULT([yes])
+      BUILD_SETTINGS_FILE="src/H5build_settings.autotools.c.in"
       AC_DEFINE([HAVE_EMBEDDED_LIBINFO], [1],
                 [Define if library information should be embedded in the executables])
    else
+      BUILD_SETTINGS_FILE="src/H5build_settings.off.c.in"
       AC_MSG_RESULT([no])
     fi
 
@@ -4028,10 +4030,11 @@ fi
 ##
 AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
-AC_CONFIG_FILES([src/libhdf5.settings
-                 Makefile
+AC_CONFIG_FILES([Makefile
                  doxygen/Doxyfile
                  src/Makefile
+                 src/libhdf5.settings
+                 src/H5build_settings.c:${BUILD_SETTINGS_FILE}
                  test/Makefile
                  test/H5srcdir_str.h
                  test/test_abort_fail.sh
