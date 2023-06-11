@@ -47,6 +47,11 @@ New Features
 
     Configuration:
     -------------
+    - Running H5make_libsettings is no longer required for cross-compiling
+
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
     - Running H5detect is no longer required for cross-compiling
 
       The functionality of H5detect is now exercised at library startup,
