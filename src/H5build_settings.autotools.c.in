@@ -17,8 +17,8 @@ H5_CLANG_DIAG_OFF("overlength-strings")
 
 /* clang-format off */
 const char H5build_settings[]=
-    "       SUMMARY OF THE HDF5 CONFIGURATION\n"
-    "       =================================\n"
+    "        SUMMARY OF THE HDF5 CONFIGURATION\n"
+    "        =================================\n"
     "\n"
     "General Information:\n"
     "-------------------\n"
