@@ -47,6 +47,11 @@ New Features
 
     Configuration:
     -------------
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
+
     - Updated HDF5 API tests CMake code to support VOL connectors
 
       * Implemented support for fetching, building and testing HDF5
