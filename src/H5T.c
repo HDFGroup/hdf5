@@ -1504,9 +1504,9 @@ H5T_top_term_package(void)
                         if (H5DEBUG(T)) {
                             HDfprintf(H5DEBUG(T),
                                       "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
+                                      "0x%016zx failed to free private data for "
                                       "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.app_func), path->name);
+                                      (size_t)path->conv.u.app_func, path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -1519,9 +1519,9 @@ H5T_top_term_package(void)
                         if (H5DEBUG(T)) {
                             HDfprintf(H5DEBUG(T),
                                       "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
+                                      "0x%016zx failed to free private data for "
                                       "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.lib_func), path->name);
+                                      (size_t)path->conv.u.lib_func, path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -2633,9 +2633,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         HDfprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx "
+                                  "H5T: conversion function 0x%016zx "
                                   "failed to free private data for %s (ignored)\n",
-                                  (unsigned long)(old_path->conv.u.app_func), old_path->name);
+                                  (size_t)old_path->conv.u.app_func, old_path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2644,9 +2644,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     HDfprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx "
+                              "H5T: conversion function 0x%016zx "
                               "failed to free private data for %s (ignored)\n",
-                              (unsigned long)(old_path->conv.u.lib_func), old_path->name);
+                              (size_t)old_path->conv.u.lib_func, old_path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(old_path->src);
@@ -2813,9 +2813,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         HDfprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx failed "
+                                  "H5T: conversion function 0x%016zx failed "
                                   "to free private data for %s (ignored)\n",
-                                  (unsigned long)(path->conv.u.app_func), path->name);
+                                  (size_t)path->conv.u.app_func, path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2824,9 +2824,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     HDfprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx failed "
+                              "H5T: conversion function 0x%016zx failed "
                               "to free private data for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.lib_func), path->name);
+                              (size_t)path->conv.u.lib_func, path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(path->src);
@@ -5221,8 +5221,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                                          (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
-                    HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.app_func), path->name);
+                    HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
+                              (size_t)path->conv.u.app_func, path->name);
 #endif
                 H5E_clear_stack(NULL); /*ignore the failure*/
             }                          /* end if */
@@ -5231,8 +5231,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                                           (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
             if (H5DEBUG(T))
-                HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                          (unsigned long)(path->conv.u.lib_func), path->name);
+                HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
+                          (size_t)path->conv.u.lib_func, path->name);
 #endif
             H5E_clear_stack(NULL); /*ignore the failure*/
         }                          /* end if */
