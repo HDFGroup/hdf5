@@ -66,7 +66,7 @@
         int           _i, _j, _last = (-1);                                                                  \
                                                                                                              \
         memset(&INFO, 0, sizeof(INFO));                                                                      \
-        INFO.size    = sizeof(TYPE);                                                                         \
+        INFO.size = sizeof(TYPE);                                                                            \
                                                                                                              \
         /* Initialize padding mask */                                                                        \
         memset(_pad_mask, 0, sizeof(_pad_mask));                                                             \
