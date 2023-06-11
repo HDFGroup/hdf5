@@ -6,7 +6,7 @@ project (HDF5_SRC C)
 #-----------------------------------------------------------------------------
 set (H5_SOURCES
     ${HDF5_SRC_DIR}/H5.c
-    ${HDF5_SRC_DIR}/H5build_settings.c
+    ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
     ${HDF5_SRC_DIR}/H5checksum.c
     ${HDF5_SRC_DIR}/H5dbg.c
     ${HDF5_SRC_DIR}/H5mpi.c
@@ -1080,6 +1080,88 @@ if (LOCAL_BATCH_TEST)
 endif ()
 
 #-----------------------------------------------------------------------------
+# Set up library builds
+#-----------------------------------------------------------------------------
+if (BUILD_STATIC_LIBS)
+  set (gen_SRCS ${HDF5_SRC_BINARY_DIR}/H5build_settings.c)
+  add_custom_target (gen_${HDF5_LIB_TARGET} ALL
+    DEPENDS ${lib_prog_deps}
+    COMMENT "Generation target files"
+  )
+
+  add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${H5_MODULE_HEADERS})
+  target_include_directories (${HDF5_LIB_TARGET}
+      PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>;$<BUILD_INTERFACE:${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}>"
+  )
+  target_compile_options(${HDF5_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  target_compile_definitions(${HDF5_LIB_TARGET}
+      PUBLIC
+          ${HDF_EXTRA_C_FLAGS}
+          ${HDF_EXTRA_FLAGS}
+      PRIVATE
+          "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>" # Enable tracing of the API
+          "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
+          "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
+  )
+  TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC)
+  target_link_libraries (${HDF5_LIB_TARGET}
+      PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS}
+      PUBLIC "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
+  )
+  if (NOT WIN32)
+    target_link_libraries (${HDF5_LIB_TARGET}
+      PRIVATE "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADSAFE}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
+    )
+  endif ()
+  set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
+  H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC 0)
+  set_target_properties (${HDF5_LIB_TARGET} PROPERTIES FOLDER libraries)
+  add_dependencies (${HDF5_LIB_TARGET} gen_${HDF5_LIB_TARGET})
+
+  set (install_targets ${HDF5_LIB_TARGET})
+endif ()
+
+if (BUILD_SHARED_LIBS)
+  set (shared_gen_SRCS ${HDF5_SRC_BINARY_DIR}/H5build_settings.c)
+  add_custom_target (gen_${HDF5_LIBSH_TARGET} ALL
+    DEPENDS ${lib_prog_deps}
+    COMMENT "Shared generation target files"
+  )
+
+  add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS} ${H5_MODULE_HEADERS})
+  target_include_directories (${HDF5_LIBSH_TARGET}
+      PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PUBLIC "$<$<BOOL:${HDF5_ENABLE_HDFS}>:${HDFS_INCLUDE_DIR}>"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>;$<BUILD_INTERFACE:${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR}>"
+  )
+  target_compile_options(${HDF5_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  target_compile_definitions(${HDF5_LIBSH_TARGET}
+      PUBLIC
+          "H5_BUILT_AS_DYNAMIC_LIB"
+          ${HDF_EXTRA_C_FLAGS}
+          ${HDF_EXTRA_FLAGS}
+      PRIVATE
+          "$<$<BOOL:${HDF5_ENABLE_THREADSAFE}>:H5_HAVE_THREADSAFE>"
+          "$<$<BOOL:${HDF5_ENABLE_TRACE}>:H5_DEBUG_API>"  # Enable tracing of the API
+          "$<$<BOOL:${HDF5_ENABLE_DEBUG_APIS}>:${HDF5_DEBUG_APIS}>"
+          "$<$<CONFIG:Developer>:${HDF5_DEVELOPER_DEFS}>"
+  )
+  TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED)
+  target_link_libraries (${HDF5_LIBSH_TARGET}
+      PRIVATE ${LINK_LIBS} ${LINK_COMP_LIBS}
+              "$<$<OR:$<BOOL:${HDF5_ENABLE_THREADSAFE}>,$<BOOL:${HDF5_ENABLE_SUBFILING_VFD}>>:Threads::Threads>"
+      PUBLIC "$<$<NOT:$<PLATFORM_ID:Windows>>:${CMAKE_DL_LIBS}>" "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:MPI::MPI_C>"
+  )
+  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
+  H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED "LIB")
+  set_target_properties (${HDF5_LIBSH_TARGET} PROPERTIES FOLDER libraries)
+  add_dependencies (${HDF5_LIBSH_TARGET} gen_${HDF5_LIBSH_TARGET})
+
+  set (install_targets ${install_targets} ${HDF5_LIBSH_TARGET})
+endif ()
+
+#-----------------------------------------------------------------------------
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
@@ -1226,7 +1308,7 @@ if (DOXYGEN_FOUND)
   # Replace variables inside @@ with the current values
   add_custom_target (hdf5lib_doc ALL
         COMMAND ${DOXYGEN_EXECUTABLE} ${HDF5_BINARY_DIR}/Doxyfile
-        DEPENDS ${HDF5_SRC_BINARY_DIR}/H5lib_settings.c
+        DEPENDS ${HDF5_SRC_BINARY_DIR}/H5build_settings.c
         WORKING_DIRECTORY ${HDF5_SRC_DIR}
         COMMENT "Generating HDF5 library Source API documentation with Doxygen"
         VERBATIM )

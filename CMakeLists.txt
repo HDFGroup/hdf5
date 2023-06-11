@@ -1225,6 +1225,11 @@ endif ()
 configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
 
 #-----------------------------------------------------------------------------
+# Generate the H5build_settings.c file
+#-----------------------------------------------------------------------------
+configure_file (${HDF5_SOURCE_DIR}/src/H5build_settings.cmake.c.in ${HDF5_SRC_BINARY_DIR}/H5build_settings.c @ONLY)
+
+#-----------------------------------------------------------------------------
 # Options for use by cross compiling and toolchains
 #-----------------------------------------------------------------------------
 option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
