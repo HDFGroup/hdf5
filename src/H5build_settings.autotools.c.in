@@ -82,7 +82,7 @@ const char H5build_settings[]=
 @BUILD_CXX_CONDITIONAL_TRUE@    "             Static C++ Library: @enable_static@\n"
     "\n"
     "                           Java: @HDF_JAVA@\n"
-@BUILD_JAVA_CONDITIONAL_TRUE@   "                  Java Compiler: @JAVA_VERSION@\n"
+@BUILD_JAVA_CONDITIONAL_TRUE@    "                  Java Compiler: @JAVA_VERSION@\n"
     "\n"
     "\n"
     "Features:\n"
