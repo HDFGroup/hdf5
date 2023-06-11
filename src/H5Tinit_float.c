@@ -100,7 +100,6 @@
         const char   *_mesg;                                                                                 \
                                                                                                              \
         memset(&INFO, 0, sizeof(INFO));                                                                      \
-        INFO.varname = #VAR;                                                                                 \
         INFO.size    = sizeof(TYPE);                                                                         \
                                                                                                              \
         /* Initialize padding mask */                                                                        \
@@ -170,10 +169,7 @@
         _v1       = (TYPE)1.0L;                                                                              \
         INFO.bias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                  \
         H5T__precision(&(INFO));                                                                             \
-        if (!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||                             \
-            !strcmp(INFO.varname, "LDOUBLE")) {                                                              \
-            COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                           \
-        }                                                                                                    \
+        COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
     }
 
 /* Detect alignment for C structure */
@@ -193,7 +189,6 @@
 
 /* Holds detected information about a native floating-point type */
 typedef struct H5T_fpoint_det_t {
-    const char   *varname;
     unsigned int  size;             /* Total byte size                  */
     unsigned int  precision;        /* Meaningful bits                  */
     unsigned int  offset;           /* Bit offset to meaningful bits    */
