@@ -14,39 +14,6 @@
  * Purpose: Initialize native floating-point datatypes
  */
 
-/*
- *			Each of the numeric formats listed below are
- *			printed from most significant bit to least
- *			significant bit even though the actual bytes
- *			might be stored in a different order in
- *			memory.     The integers above each binary byte
- *			indicate the relative order of the bytes in
- *			memory; little-endian machines have
- *			decreasing numbers while big-endian machines
- *			have increasing numbers.
- *
- *			The fields of the numbers are printed as
- *			letters with `S' for the mantissa sign bit,
- *			`M' for the mantissa magnitude, and `E' for
- *			the exponent.  The exponent has an associated
- *			bias which can be subtracted to find the
- *			true exponent.    The radix point is assumed
- *			to be before the first `M' bit.     Any bit
- *			of a floating-point value not falling into one
- *			of these categories is printed as a question
- *			mark.  Bits of integer types are printed as
- *			`I' for 2's complement and `U' for magnitude.
- *
- *			If the most significant bit of the normalized
- *			mantissa (always a `1' except for `0.0') is
- *			not stored then an `implicit=yes' appears
- *			under the field description.  In this case,
- *			the radix point is still assumed to be
- *			before the first `M' but after the implicit
- *			bit.
- *
- */
-
 /****************/
 /* Module Setup */
 /****************/
@@ -97,7 +64,6 @@
         unsigned char _pad_mask[sizeof(TYPE)];                                                               \
         unsigned char _byte_mask;                                                                            \
         int           _i, _j, _last = (-1);                                                                  \
-        const char   *_mesg;                                                                                 \
                                                                                                              \
         memset(&INFO, 0, sizeof(INFO));                                                                      \
         INFO.size    = sizeof(TYPE);                                                                         \
@@ -138,15 +104,13 @@
                 _last         = _i;                                                                          \
             }                                                                                                \
         }                                                                                                    \
-        H5T__fix_order(sizeof(TYPE), _last, INFO.perm, (const char **)&_mesg);                               \
-                                                                                                             \
-        if (!strcmp(_mesg, "VAX"))                                                                           \
-            INFO.is_vax = TRUE;                                                                              \
+        H5T__fix_order(sizeof(TYPE), _last, INFO.perm, &INFO.order);                                         \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
-        _v1      = (TYPE)0.5L;                                                                               \
-        _v2      = (TYPE)1.0L;                                                                               \
-        INFO.imp = H5T__imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                             \
+        _v1       = (TYPE)0.5L;                                                                              \
+        _v2       = (TYPE)1.0L;                                                                              \
+        INFO.imp  = H5T__imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                            \
+        INFO.norm = INFO.imp ? H5T_NORM_IMPLIED : H5T_NORM_NONE;                                             \
                                                                                                              \
         /* Sign bit */                                                                                       \
         _v1       = (TYPE)1.0L;                                                                              \
@@ -166,9 +130,9 @@
                                                                                                              \
         INFO.esize = INFO.sign - INFO.epos;                                                                  \
                                                                                                              \
-        _v1       = (TYPE)1.0L;                                                                              \
-        INFO.bias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                  \
-        H5T__precision(&(INFO));                                                                             \
+        _v1        = (TYPE)1.0L;                                                                             \
+        INFO.ebias = H5T__find_bias(INFO.epos, INFO.esize, INFO.perm, &_v1);                                 \
+        H5T__set_precision(&(INFO));                                                                         \
         COMP_ALIGNMENT(TYPE, INFO.comp_align);                                                               \
     }
 
@@ -190,14 +154,15 @@
 /* Holds detected information about a native floating-point type */
 typedef struct H5T_fpoint_det_t {
     unsigned int  size;             /* Total byte size                  */
-    unsigned int  precision;        /* Meaningful bits                  */
+    unsigned int  prec;             /* Meaningful bits                  */
     unsigned int  offset;           /* Bit offset to meaningful bits    */
     int           perm[32];         /* For detection of byte order      */
-    hbool_t       is_vax;           /* For VAX (float & double) only    */
+    H5T_order_t   order;            /* byte order                       */
     unsigned int  sign;             /* Location of sign bit             */
     unsigned int  mpos, msize, imp; /* Information about mantissa       */
+    H5T_norm_t    norm;             /* Information about mantissa       */
     unsigned int  epos, esize;      /* Information about exponent       */
-    unsigned long bias;             /* Exponent bias for floating point */
+    unsigned long ebias;            /* Exponent bias for floating point */
     unsigned int  comp_align;       /* Alignment for structure          */
 } H5T_fpoint_det_t;
 
@@ -228,10 +193,10 @@ typedef struct H5T_fpoint_det_t {
 /* Functions used in the DETECT_F() macro */
 static int          H5T__byte_cmp(int, const void *, const void *, const unsigned char *);
 static unsigned int H5T__bit_cmp(unsigned int, int *, void *, void *, const unsigned char *);
-static void         H5T__fix_order(int, int, int *, const char **);
+static void         H5T__fix_order(int, int, int *, H5T_order_t *);
 static unsigned int H5T__imp_bit(unsigned int, int *, void *, void *, const unsigned char *);
 static unsigned int H5T__find_bias(unsigned int, unsigned int, int *, void *);
-static void         H5T__precision(H5T_fpoint_det_t *);
+static void         H5T__set_precision(H5T_fpoint_det_t *);
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__byte_cmp
@@ -248,15 +213,18 @@ static void         H5T__precision(H5T_fpoint_det_t *);
 static int
 H5T__byte_cmp(int n, const void *_a, const void *_b, const unsigned char *pad_mask)
 {
-    int                  i;
-    const unsigned char *a = (const unsigned char *)_a;
-    const unsigned char *b = (const unsigned char *)_b;
+    const unsigned char *a         = (const unsigned char *)_a;
+    const unsigned char *b         = (const unsigned char *)_b;
+    int                  ret_value = -1;
 
-    for (i = 0; i < n; i++)
+    FUNC_ENTER_PACKAGE_NOERR
+
+    for (int i = 0; i < n; i++)
         if ((a[i] & pad_mask[i]) != (b[i] & pad_mask[i]))
-            return i;
+            HGOTO_DONE(i);
 
-    return -1;
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -278,6 +246,9 @@ H5T__bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned 
     unsigned char *a = (unsigned char *)_a;
     unsigned char *b = (unsigned char *)_b;
     unsigned char  aa, bb;
+    unsigned int   ret_value = 0;
+
+    FUNC_ENTER_PACKAGE_NOERR
 
     for (i = 0; i < nbytes; i++) {
         assert(perm[i] < (int)nbytes);
@@ -287,15 +258,13 @@ H5T__bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned 
 
             for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
                 if ((aa & 1) != (bb & 1))
-                    return i * 8 + j;
+                    HGOTO_DONE(i * 8 + j);
             }
-            fprintf(stderr, "INTERNAL ERROR");
-            abort();
         }
     }
-    fprintf(stderr, "INTERNAL ERROR");
-    abort();
-    return 0;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -313,42 +282,41 @@ H5T__bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned 
  *-------------------------------------------------------------------------
  */
 static void
-H5T__fix_order(int n, int last, int *perm, const char **mesg)
+H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
 {
     int i;
 
-    if (last > 1) {
+    FUNC_ENTER_PACKAGE_NOERR
 
-        /* We have at least three points to consider */
-        if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
-            /* Little endian */
-            if (mesg)
-                *mesg = "Little-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = i;
-        }
-        else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
-            /* Big endian */
-            if (mesg)
-                *mesg = "Big-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = (n - 1) - i;
-        }
-        else {
-            /* Undetermined endianness (e.g., bi-endian like in VAX) */
-            assert(0 == n % 2);
-            if (mesg)
-                *mesg = "VAX";
-            for (i = 0; i < n; i += 2) {
-                perm[i]     = (n - 2) - i;
-                perm[i + 1] = (n - 1) - i;
-            }
-        }
+    assert(last > 1);
+
+    /* We have at least three points to consider */
+    if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
+        /* Little endian */
+        *order = H5T_ORDER_LE;
+        for (i = 0; i < n; i++)
+            perm[i] = i;
+    }
+    else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
+        /* Big endian */
+        *order = H5T_ORDER_BE;
+        for (i = 0; i < n; i++)
+            perm[i] = (n - 1) - i;
     }
     else {
-        fprintf(stderr, "Failed to detect byte order of %d-byte floating point.\n", n);
-        exit(EXIT_FAILURE);
+        /* Undetermined endianness - defaults to 'VAX' for historical
+         * reasons, but there are other mixed-endian systems (like ARM
+         * in rare cases)
+         */
+        assert(0 == n % 2);
+        *order = H5T_ORDER_VAX;
+        for (i = 0; i < n; i += 2) {
+            perm[i]     = (n - 2) - i;
+            perm[i + 1] = (n - 1) - i;
+        }
     }
+
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------
@@ -387,6 +355,8 @@ H5T__imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char 
     unsigned int   minor;
     unsigned int   msmb; /* Most significant mantissa bit */
 
+    FUNC_ENTER_PACKAGE_NOERR
+
     /* Look for the least significant bit that has changed between
      * A and B.  This is the least significant bit of the exponent.
      */
@@ -400,7 +370,7 @@ H5T__imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char 
     major = msmb / 8;
     minor = msmb % 8;
 
-    return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
+    FUNC_LEAVE_NOAPI((a[perm[major]] >> minor) & 0x01 ? 0 : 1);
 }
 
 /*-------------------------------------------------------------------------
@@ -419,6 +389,8 @@ H5T__find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
     unsigned char  mask;
     unsigned int   b, shift = 0, nbits, bias = 0;
 
+    FUNC_ENTER_PACKAGE_NOERR
+
     while (esize > 0) {
         nbits = MIN(esize, (8 - epos % 8));
         mask  = (unsigned char)((1 << nbits) - 1);
@@ -429,11 +401,12 @@ H5T__find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
         esize -= nbits;
         epos += nbits;
     }
-    return bias;
+
+    FUNC_LEAVE_NOAPI(bias);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5T__precision
+ * Function:    H5T__set_precision
  *
  * Purpose:     Determine the precision and offset
  *
@@ -441,11 +414,14 @@ H5T__find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
  *-------------------------------------------------------------------------
  */
 static void
-H5T__precision(H5T_fpoint_det_t *d)
+H5T__set_precision(H5T_fpoint_det_t *d)
 {
-    /* A floating point */
-    d->offset    = MIN3(d->mpos, d->epos, d->sign);
-    d->precision = d->msize + d->esize + 1;
+    FUNC_ENTER_PACKAGE_NOERR
+
+    d->offset = MIN3(d->mpos, d->epos, d->sign);
+    d->prec   = d->msize + d->esize + 1;
+
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------
@@ -460,110 +436,109 @@ H5T__precision(H5T_fpoint_det_t *d)
 herr_t H5_NO_UBSAN
 H5T__init_native_float_types(void)
 {
-    H5T_fpoint_det_t float_det;
-    H5T_fpoint_det_t double_det;
-    H5T_fpoint_det_t long_double_det;
+    H5T_fpoint_det_t det;
     H5T_t           *dt        = NULL;
     herr_t           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    memset(&float_det, 0, sizeof(H5T_fpoint_det_t));
-    memset(&double_det, 0, sizeof(H5T_fpoint_det_t));
-    memset(&long_double_det, 0, sizeof(H5T_fpoint_det_t));
-
     /* H5T_NATIVE_FLOAT */
 
     /* Get the type's characteristics */
-    DETECT_F(float, FLOAT, float_det);
+    memset(&det, 0, sizeof(H5T_fpoint_det_t));
+    DETECT_F(float, FLOAT, det);
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = float_det.size;
-    dt->shared->u.atomic.order     = H5T_ORDER_LE;      /* HERE */
-    dt->shared->u.atomic.offset    = float_det.offset;
-    dt->shared->u.atomic.prec      = float_det.precision;
+    dt->shared->size               = det.size;
+    dt->shared->u.atomic.order     = det.order;
+    dt->shared->u.atomic.offset    = det.offset;
+    dt->shared->u.atomic.prec      = det.prec;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = float_det.sign;
-    dt->shared->u.atomic.u.f.epos  = float_det.epos;
-    dt->shared->u.atomic.u.f.esize = float_det.esize;
-    dt->shared->u.atomic.u.f.ebias = 0x0000007f;        /* HERE */
-    dt->shared->u.atomic.u.f.mpos  = float_det.mpos;
-    dt->shared->u.atomic.u.f.msize = float_det.msize;
-    dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;  /* HERE */
+    dt->shared->u.atomic.u.f.sign  = det.sign;
+    dt->shared->u.atomic.u.f.epos  = det.epos;
+    dt->shared->u.atomic.u.f.esize = det.esize;
+    dt->shared->u.atomic.u.f.ebias = det.ebias;
+    dt->shared->u.atomic.u.f.mpos  = det.mpos;
+    dt->shared->u.atomic.u.f.msize = det.msize;
+    dt->shared->u.atomic.u.f.norm  = det.norm;
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_FLOAT_ALIGN_g = float_det.comp_align;
+    H5T_NATIVE_FLOAT_ALIGN_g = det.comp_align;
 
     /* H5T_NATIVE_DOUBLE */
 
     /* Get the type's characteristics */
-    DETECT_F(double, DOUBLE, double_det);
+    memset(&det, 0, sizeof(H5T_fpoint_det_t));
+    DETECT_F(double, DOUBLE, det);
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = double_det.size;
-    dt->shared->u.atomic.order     = H5T_ORDER_LE;
-    dt->shared->u.atomic.offset    = double_det.offset;
-    dt->shared->u.atomic.prec      = double_det.precision;
+    dt->shared->size               = det.size;
+    dt->shared->u.atomic.order     = det.order;
+    dt->shared->u.atomic.offset    = det.offset;
+    dt->shared->u.atomic.prec      = det.prec;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = double_det.sign;
-    dt->shared->u.atomic.u.f.epos  = double_det.epos;
-    dt->shared->u.atomic.u.f.esize = double_det.esize;
-    dt->shared->u.atomic.u.f.ebias = 0x000003ff;
-    dt->shared->u.atomic.u.f.mpos  = double_det.mpos;
-    dt->shared->u.atomic.u.f.msize = double_det.msize;
-    dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;
+    dt->shared->u.atomic.u.f.sign  = det.sign;
+    dt->shared->u.atomic.u.f.epos  = det.epos;
+    dt->shared->u.atomic.u.f.esize = det.esize;
+    dt->shared->u.atomic.u.f.ebias = det.ebias;
+    dt->shared->u.atomic.u.f.mpos  = det.mpos;
+    dt->shared->u.atomic.u.f.msize = det.msize;
+    dt->shared->u.atomic.u.f.norm  = det.norm;
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_DOUBLE_ALIGN_g = double_det.comp_align;
+    H5T_NATIVE_DOUBLE_ALIGN_g = det.comp_align;
 
     /* H5T_NATIVE_LDOUBLE */
 
     /* Get the type's characteristics */
-    DETECT_F(long double, LDOUBLE, long_double_det);
+    memset(&det, 0, sizeof(H5T_fpoint_det_t));
+    DETECT_F(long double, LDOUBLE, det);
 
     /* Allocate and fill type structure */
     if (NULL == (dt = H5T__alloc()))
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = long_double_det.size;
-    dt->shared->u.atomic.order     = H5T_ORDER_LE;
-    dt->shared->u.atomic.offset    = long_double_det.offset;
-    dt->shared->u.atomic.prec      = long_double_det.precision;
+    dt->shared->size               = det.size;
+    dt->shared->u.atomic.order     = det.order;
+    dt->shared->u.atomic.offset    = det.offset;
+    dt->shared->u.atomic.prec      = det.prec;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = long_double_det.sign;
-    dt->shared->u.atomic.u.f.epos  = long_double_det.epos;
-    dt->shared->u.atomic.u.f.esize = long_double_det.esize;
-    dt->shared->u.atomic.u.f.ebias = 0x00003fff;
-    dt->shared->u.atomic.u.f.mpos  = long_double_det.mpos;
-    dt->shared->u.atomic.u.f.msize = long_double_det.msize;
-    dt->shared->u.atomic.u.f.norm  = H5T_NORM_NONE;
+    dt->shared->u.atomic.u.f.sign  = det.sign;
+    dt->shared->u.atomic.u.f.epos  = det.epos;
+    dt->shared->u.atomic.u.f.esize = det.esize;
+    dt->shared->u.atomic.u.f.ebias = det.ebias;
+    dt->shared->u.atomic.u.f.mpos  = det.mpos;
+    dt->shared->u.atomic.u.f.msize = det.msize;
+    dt->shared->u.atomic.u.f.norm  = det.norm;
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_LDOUBLE_ALIGN_g = long_double_det.comp_align;
+    H5T_NATIVE_LDOUBLE_ALIGN_g = det.comp_align;
 
-    /* Set the platform's alignment  */
-    H5T_native_order_g         = H5T_ORDER_LE;
+    /* Set the platform's alignment (assumes long double's order
+     * is true for all types)
+     */
+    H5T_native_order_g = det.order;
 
 done:
     if (ret_value < 0) {
