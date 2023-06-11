@@ -487,25 +487,25 @@ H5T__init_native_float_types(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = 4;
-    dt->shared->u.atomic.order     = H5T_ORDER_LE;
-    dt->shared->u.atomic.offset    = 0;
-    dt->shared->u.atomic.prec      = 32;
+    dt->shared->size               = float_det.size;
+    dt->shared->u.atomic.order     = H5T_ORDER_LE;      /* HERE */
+    dt->shared->u.atomic.offset    = float_det.offset;
+    dt->shared->u.atomic.prec      = float_det.precision;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = 31;
-    dt->shared->u.atomic.u.f.epos  = 23;
-    dt->shared->u.atomic.u.f.esize = 8;
-    dt->shared->u.atomic.u.f.ebias = 0x0000007f;
-    dt->shared->u.atomic.u.f.mpos  = 0;
-    dt->shared->u.atomic.u.f.msize = 23;
-    dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;
+    dt->shared->u.atomic.u.f.sign  = float_det.sign;
+    dt->shared->u.atomic.u.f.epos  = float_det.epos;
+    dt->shared->u.atomic.u.f.esize = float_det.esize;
+    dt->shared->u.atomic.u.f.ebias = 0x0000007f;        /* HERE */
+    dt->shared->u.atomic.u.f.mpos  = float_det.mpos;
+    dt->shared->u.atomic.u.f.msize = float_det.msize;
+    dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;  /* HERE */
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_FLOAT_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_FLOAT_ALIGN_g = 4;
+    H5T_NATIVE_FLOAT_ALIGN_g = float_det.comp_align;
 
     /* H5T_NATIVE_DOUBLE */
 
@@ -517,25 +517,25 @@ H5T__init_native_float_types(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = 8;
+    dt->shared->size               = double_det.size;
     dt->shared->u.atomic.order     = H5T_ORDER_LE;
-    dt->shared->u.atomic.offset    = 0;
-    dt->shared->u.atomic.prec      = 64;
+    dt->shared->u.atomic.offset    = double_det.offset;
+    dt->shared->u.atomic.prec      = double_det.precision;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = 63;
-    dt->shared->u.atomic.u.f.epos  = 52;
-    dt->shared->u.atomic.u.f.esize = 11;
+    dt->shared->u.atomic.u.f.sign  = double_det.sign;
+    dt->shared->u.atomic.u.f.epos  = double_det.epos;
+    dt->shared->u.atomic.u.f.esize = double_det.esize;
     dt->shared->u.atomic.u.f.ebias = 0x000003ff;
-    dt->shared->u.atomic.u.f.mpos  = 0;
-    dt->shared->u.atomic.u.f.msize = 52;
+    dt->shared->u.atomic.u.f.mpos  = double_det.mpos;
+    dt->shared->u.atomic.u.f.msize = double_det.msize;
     dt->shared->u.atomic.u.f.norm  = H5T_NORM_IMPLIED;
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_DOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_DOUBLE_ALIGN_g = 8;
+    H5T_NATIVE_DOUBLE_ALIGN_g = double_det.comp_align;
 
     /* H5T_NATIVE_LDOUBLE */
 
@@ -547,25 +547,25 @@ H5T__init_native_float_types(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "datatype allocation failed")
     dt->shared->state              = H5T_STATE_IMMUTABLE;
     dt->shared->type               = H5T_FLOAT;
-    dt->shared->size               = 16;
+    dt->shared->size               = long_double_det.size;
     dt->shared->u.atomic.order     = H5T_ORDER_LE;
-    dt->shared->u.atomic.offset    = 0;
-    dt->shared->u.atomic.prec      = 80;
+    dt->shared->u.atomic.offset    = long_double_det.offset;
+    dt->shared->u.atomic.prec      = long_double_det.precision;
     dt->shared->u.atomic.lsb_pad   = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad   = H5T_PAD_ZERO;
-    dt->shared->u.atomic.u.f.sign  = 79;
-    dt->shared->u.atomic.u.f.epos  = 64;
-    dt->shared->u.atomic.u.f.esize = 15;
+    dt->shared->u.atomic.u.f.sign  = long_double_det.sign;
+    dt->shared->u.atomic.u.f.epos  = long_double_det.epos;
+    dt->shared->u.atomic.u.f.esize = long_double_det.esize;
     dt->shared->u.atomic.u.f.ebias = 0x00003fff;
-    dt->shared->u.atomic.u.f.mpos  = 0;
-    dt->shared->u.atomic.u.f.msize = 64;
+    dt->shared->u.atomic.u.f.mpos  = long_double_det.mpos;
+    dt->shared->u.atomic.u.f.msize = long_double_det.msize;
     dt->shared->u.atomic.u.f.norm  = H5T_NORM_NONE;
     dt->shared->u.atomic.u.f.pad   = H5T_PAD_ZERO;
 
     /* Register the type and set global variables */
     if ((H5T_NATIVE_LDOUBLE_g = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register ID for built-in datatype")
-    H5T_NATIVE_LDOUBLE_ALIGN_g = 16;
+    H5T_NATIVE_LDOUBLE_ALIGN_g = long_double_det.comp_align;
 
     /* Set the platform's alignment  */
     H5T_native_order_g         = H5T_ORDER_LE;
