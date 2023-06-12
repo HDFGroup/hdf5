@@ -10,12 +10,4 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5private.h"
-
-H5_GCC_DIAG_OFF("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
-
 const char H5build_settings[]="";
-
-H5_GCC_DIAG_ON("larger-than=")
-H5_CLANG_DIAG_OFF("overlength-strings")
