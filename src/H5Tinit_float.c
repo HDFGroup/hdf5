@@ -104,26 +104,30 @@
                 _last         = _i;                                                                          \
             }                                                                                                \
         }                                                                                                    \
-        H5T__fix_order(sizeof(TYPE), _last, INFO.perm, &INFO.order);                                         \
+        if (H5T__fix_order(sizeof(TYPE), _last, INFO.perm, &INFO.order) < 0)                                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
         _v1       = (TYPE)0.5L;                                                                              \
         _v2       = (TYPE)1.0L;                                                                              \
-        INFO.imp  = H5T__imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                            \
+        if (H5T__imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.imp)) < 0)                   \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to determine implicit bit")                \
         INFO.norm = INFO.imp ? H5T_NORM_IMPLIED : H5T_NORM_NONE;                                             \
                                                                                                              \
         /* Sign bit */                                                                                       \
         _v1       = (TYPE)1.0L;                                                                              \
         _v2       = (TYPE)-1.0L;                                                                             \
-        INFO.sign = H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                            \
+        if (H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.sign)) < 0)                  \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
                                                                                                              \
         /* Mantissa */                                                                                       \
         INFO.mpos = 0;                                                                                       \
                                                                                                              \
         _v1        = (TYPE)1.0L;                                                                             \
         _v2        = (TYPE)1.5L;                                                                             \
-        INFO.msize = H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);                           \
-        INFO.msize += 1 + (unsigned int)(INFO.imp ? 0 : 1) - INFO.mpos;                                      \
+        if (H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.msize)) < 0)                 \
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
+        INFO.msize += 1 + (unsigned)(INFO.imp ? 0 : 1) - INFO.mpos;                                          \
                                                                                                              \
         /* Exponent */                                                                                       \
         INFO.epos = INFO.mpos + INFO.msize;                                                                  \
@@ -144,7 +148,7 @@
             TYPE x;                                                                                          \
         } s;                                                                                                 \
                                                                                                              \
-        COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));                                        \
+        COMP_ALIGN = (unsigned)((char *)(&(s.x)) - (char *)(&s));                                            \
     }
 
 /******************/
@@ -153,17 +157,17 @@
 
 /* Holds detected information about a native floating-point type */
 typedef struct H5T_fpoint_det_t {
-    unsigned int  size;             /* Total byte size                  */
-    unsigned int  prec;             /* Meaningful bits                  */
-    unsigned int  offset;           /* Bit offset to meaningful bits    */
-    int           perm[32];         /* For detection of byte order      */
-    H5T_order_t   order;            /* byte order                       */
-    unsigned int  sign;             /* Location of sign bit             */
-    unsigned int  mpos, msize, imp; /* Information about mantissa       */
-    H5T_norm_t    norm;             /* Information about mantissa       */
-    unsigned int  epos, esize;      /* Information about exponent       */
-    unsigned long ebias;            /* Exponent bias for floating point */
-    unsigned int  comp_align;       /* Alignment for structure          */
+    unsigned    size;             /* Total byte size                  */
+    unsigned    prec;             /* Meaningful bits                  */
+    unsigned    offset;           /* Bit offset to meaningful bits    */
+    int         perm[32];         /* For detection of byte order      */
+    H5T_order_t order;            /* byte order                       */
+    unsigned    sign;             /* Location of sign bit             */
+    unsigned    mpos, msize, imp; /* Information about mantissa       */
+    H5T_norm_t  norm;             /* Information about mantissa       */
+    unsigned    epos, esize;      /* Information about exponent       */
+    unsigned    long ebias;       /* Exponent bias for floating point */
+    unsigned    comp_align;       /* Alignment for structure          */
 } H5T_fpoint_det_t;
 
 /********************/
@@ -192,10 +196,10 @@ typedef struct H5T_fpoint_det_t {
 
 /* Functions used in the DETECT_F() macro */
 static int          H5T__byte_cmp(int, const void *, const void *, const unsigned char *);
-static unsigned int H5T__bit_cmp(unsigned int, int *, void *, void *, const unsigned char *);
-static void         H5T__fix_order(int, int, int *, H5T_order_t *);
-static unsigned int H5T__imp_bit(unsigned int, int *, void *, void *, const unsigned char *);
-static unsigned int H5T__find_bias(unsigned int, unsigned int, int *, void *);
+static herr_t       H5T__bit_cmp(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
+static herr_t       H5T__fix_order(int, int, int *, H5T_order_t *);
+static herr_t       H5T__imp_bit(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
+static unsigned     H5T__find_bias(unsigned, unsigned, int *, void *);
 static void         H5T__set_precision(H5T_fpoint_det_t *);
 
 /*-------------------------------------------------------------------------
@@ -236,32 +240,40 @@ done:
  *              actual order to little endian.  Ignores differences where
  *              the corresponding bit in pad_mask is set to 0.
  *
- * Return:      Index of first differing bit.
+ *              Sets `first` to the index of the first differing bit
+ *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static unsigned int
-H5T__bit_cmp(unsigned int nbytes, int *perm, void *_a, void *_b, const unsigned char *pad_mask)
+static herr_t
+H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char *pad_mask, unsigned *first)
 {
-    unsigned int   i;
     unsigned char *a = (unsigned char *)_a;
     unsigned char *b = (unsigned char *)_b;
     unsigned char  aa, bb;
-    unsigned int   ret_value = 0;
+    herr_t         ret_value = SUCCEED;;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    for (i = 0; i < nbytes; i++) {
-        assert(perm[i] < (int)nbytes);
+    *first = 0;
+
+    for (unsigned i = 0; i < nbytes; i++) {
+        if (perm[i] >= (int)nbytes)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failure in bit comparison")
         if ((aa = (unsigned char)(a[perm[i]] & pad_mask[perm[i]])) !=
             (bb = (unsigned char)(b[perm[i]] & pad_mask[perm[i]]))) {
-            unsigned int j;
 
-            for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
-                if ((aa & 1) != (bb & 1))
-                    HGOTO_DONE(i * 8 + j);
+            for (unsigned j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
+                if ((aa & 1) != (bb & 1)) {
+                    *first = i * 8 + j;
+                    HGOTO_DONE(SUCCEED);
+                }
             }
         }
     }
+
+    /* If we got here and didn't set a value, error out */
+    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "didn't find a value for `first`")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -278,29 +290,30 @@ done:
  *              This function assumes that the mantissa byte ordering
  *              implies the total ordering.
  *
- * Return:      void
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
 {
-    int i;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    assert(last > 1);
+    if (last <= 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")
 
     /* We have at least three points to consider */
     if (perm[last] < perm[last - 1] && perm[last - 1] < perm[last - 2]) {
         /* Little endian */
         *order = H5T_ORDER_LE;
-        for (i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
             perm[i] = i;
     }
     else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
         /* Big endian */
         *order = H5T_ORDER_BE;
-        for (i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
             perm[i] = (n - 1) - i;
     }
     else {
@@ -308,15 +321,18 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
          * reasons, but there are other mixed-endian systems (like ARM
          * in rare cases)
          */
-        assert(0 == n % 2);
+        if (0 != n % 2)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "n is not a power of 2")
+
         *order = H5T_ORDER_VAX;
-        for (i = 0; i < n; i += 2) {
+        for (int i = 0; i < n; i += 2) {
             perm[i]     = (n - 2) - i;
             perm[i + 1] = (n - 1) - i;
         }
     }
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -336,31 +352,32 @@ H5T__fix_order(int n, int last, int *perm, H5T_order_t *order)
  *              of the exponent.
  *
  *
- * Return:      Success:    Non-zero if the most significant bit
- *                          of the mantissa is discarded (ie, the
- *                          mantissa has an implicit `one' as the
- *                          most significant bit).    Otherwise,
- *                          returns zero.
+ * Return:      imp_bit will be set to 1 if the most significant bit
+ *              of the mantissa is discarded (ie, the mantissa has an
+ *              implicit `one' as the most significant bit). Otherwise,
+ *              imp_bit will be set to zero zero.
  *
- *              Failure:    1
+ *              SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static unsigned int
-H5T__imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_mask)
+static herr_t
+H5T__imp_bit(unsigned n, int *perm, void *_a, void *_b, const unsigned char *pad_mask, unsigned *imp_bit)
 {
     unsigned char *a = (unsigned char *)_a;
     unsigned char *b = (unsigned char *)_b;
-    unsigned int   changed;
-    unsigned int   major;
-    unsigned int   minor;
-    unsigned int   msmb; /* Most significant mantissa bit */
+    unsigned       changed;
+    unsigned       major;
+    unsigned       minor;
+    unsigned       msmb; /* Most significant mantissa bit */
+    herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Look for the least significant bit that has changed between
      * A and B.  This is the least significant bit of the exponent.
      */
-    changed = H5T__bit_cmp(n, perm, a, b, pad_mask);
+    if (H5T__bit_cmp(n, perm, a, b, pad_mask, &changed) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "couldn't find LSB")
 
     /* The bit to the right (less significant) of the changed bit should
      * be the most significant bit of the mantissa.  If it is non-zero
@@ -370,7 +387,10 @@ H5T__imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char 
     major = msmb / 8;
     minor = msmb % 8;
 
-    FUNC_LEAVE_NOAPI((a[perm[major]] >> minor) & 0x01 ? 0 : 1);
+    *imp_bit = (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -382,19 +402,19 @@ H5T__imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char 
  * Return:    The exponent bias
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE static unsigned int
-H5T__find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
+H5_ATTR_PURE static unsigned
+H5T__find_bias(unsigned epos, unsigned esize, int *perm, void *_a)
 {
     unsigned char *a = (unsigned char *)_a;
     unsigned char  mask;
-    unsigned int   b, shift = 0, nbits, bias = 0;
+    unsigned       b, shift = 0, nbits, bias = 0;
 
     FUNC_ENTER_PACKAGE_NOERR
 
     while (esize > 0) {
         nbits = MIN(esize, (8 - epos % 8));
         mask  = (unsigned char)((1 << nbits) - 1);
-        b     = (unsigned int)(a[perm[epos / 8]] >> (epos % 8)) & mask;
+        b     = (unsigned)(a[perm[epos / 8]] >> (epos % 8)) & mask;
         bias |= b << shift;
 
         shift += nbits;
