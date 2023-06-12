@@ -314,6 +314,7 @@ typedef struct {
     /**
      * \param[in] dest Address of the destination buffer
      * \param[in] src Address of the source buffer
+     * \param[in] size Size in bytes of the file image buffer to allocate
      * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
      *                          the operation being performed on the file image
      *                          when this callback is invoked
@@ -326,6 +327,7 @@ typedef struct {
     //! <!-- [image_memcpy_snip] -->
     /**
      * \param[in] ptr Pointer to the buffer being reallocated
+     * \param[in] size Size in bytes of the file image buffer to allocate
      * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
      *                          the operation being performed on the file image
      *                          when this callback is invoked
@@ -336,6 +338,10 @@ typedef struct {
     void *(*image_realloc)(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
     //! <!-- [image_realloc_snip] -->
     /**
+     * \param[in] ptr Pointer to the buffer being reallocated
+     * \param[in] file_image_op A value from #H5FD_file_image_op_t indicating
+     *                          the operation being performed on the file image
+     *                          when this callback is invoked
      * \param[in] udata Value passed in in the H5Pset_file_image_callbacks
      *            parameter \p udata
      */

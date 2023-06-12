@@ -321,7 +321,7 @@ jobs:
             os: ubuntu-latest
             cpp: enable
             fortran: disable
-            java: enable
+            java: disable
             docs: disable
             parallel: disable
             mirror_vfd: disable
