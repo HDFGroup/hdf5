@@ -47,6 +47,28 @@ New Features
 
     Configuration:
     -------------
+    - Removed long double work-around symbols and configure options
+
+      Several options and public symbols that were provided to paper over
+      non-standard long double conversions between signed/unsigned long
+      and long long values were removed from the Autotools and CMake. These
+      were added twenty years ago, when C99 and 64-bit platforms were less
+      common and are no longer needed.
+
+      Autotools:
+        --enable-dconv-accuracy
+
+      CMake:
+        HDF5_WANT_DATA_ACCURACY
+
+      H5pubconf.h symbols:
+        H5_WANT_DATA_ACCURACY
+        H5_LDOUBLE_TO_LONG_SPECIAL
+        H5_LONG_TO_LDOUBLE_SPECIAL
+        H5_LDOUBLE_TO_LLONG_ACCURATE
+        H5_LLONG_TO_LDOUBLE_CORRECT
+        H5_DISABLE_SOME_LDOUBLE_CONV
+
     - Updated HDF5 API tests CMake code to support VOL connectors
 
       * Implemented support for fetching, building and testing HDF5
