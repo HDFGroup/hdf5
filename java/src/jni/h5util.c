@@ -77,8 +77,7 @@ static int    render_bin_output_region_data_points(FILE *stream, hid_t region_sp
                                                    hsize_t *ptdata);
 static int    render_bin_output_region_points(FILE *stream, hid_t region_space, hid_t region_id,
                                               hid_t container);
-jobject       translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class_t type_class,
-                                    void *raw_buf);
+jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf);
 void          translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class,
                                     void *raw_buf);
 
@@ -439,40 +438,43 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
             break;
 
         case H5T_ENUM: {
-            void *value = NULL;
+            void          *value      = NULL;
+            unsigned char  tmp_uchar  = 0;
+            unsigned short tmp_ushort = 0;
+            unsigned int   tmp_uint   = 0;
+#if H5_SIZEOF_LONG != H5_SIZEOF_INT
+            unsigned long tmp_ulong = 0;
+#endif
+#if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+            unsigned long long tmp_ullong = 0;
+#endif
 
             token = HDstrtok(this_str, delimiter);
 
             switch (typeSize) {
                 case sizeof(char): {
-                    unsigned char tmp_uchar = 0;
-                    value                   = &tmp_uchar;
+                    value = &tmp_uchar;
                     break;
                 }
 
                 case sizeof(short): {
-                    unsigned short tmp_ushort = 0;
-                    value                     = &tmp_ushort;
+                    value = &tmp_ushort;
                     break;
                 }
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
                 case sizeof(long): {
-                    unsigned long tmp_ulong = 0;
-                    value                   = &tmp_ulong;
+                    value = &tmp_ulong;
                     break;
                 }
 #endif
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
                 case sizeof(long long): {
-                    unsigned long long tmp_ullong = 0;
-                    value                         = &tmp_ullong;
+                    value = &tmp_ullong;
                     break;
                 }
 #endif
-
                 default: {
-                    unsigned int tmp_uint = 0;
-                    value                 = &tmp_uint;
+                    value = &tmp_uint;
                     break;
                 }
             }
@@ -4045,16 +4047,14 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5export_1attribute */
 
 jobject
-translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class_t type_class, void *raw_buf)
+translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf)
 {
-    jobject      jobj        = NULL;
-    hid_t        memb        = H5I_INVALID_HID;
-    int          ret_buflen  = -1;
-    jboolean     found_jList = JNI_TRUE;
-    jobjectArray jList       = NULL;
+    jobject      jobj  = NULL;
+    hid_t        memb  = H5I_INVALID_HID;
+    jobjectArray jList = NULL;
     H5T_class_t  vlClass;
     size_t       vlSize;
-    size_t       i, x;
+    size_t       i;
     size_t       typeSize;
     // raw_buf is normally bytes except when used for variable length strings
     char *char_buf = (char *)raw_buf;
@@ -4062,7 +4062,6 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
     /* retrieve the java.util.ArrayList interface class */
     jclass    arrCList      = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
     jmethodID arrListMethod = ENVPTR->GetMethodID(ENVONLY, arrCList, "<init>", "(I)V");
-    jmethodID arrAddMethod  = ENVPTR->GetMethodID(ENVONLY, arrCList, "add", "(Ljava/lang/Object;)Z");
 
     /* Cache class types */
     /* jclass cBool   = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean"); */
@@ -4087,7 +4086,6 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    ret_buflen = ENVPTR->GetArrayLength(ENVONLY, ret_buf);
     switch (type_class) {
         case H5T_VLEN: {
             if (!(memb = H5Tget_super(mem_type_id)))
@@ -4099,9 +4097,6 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
 
             /* Convert element to a list */
             hvl_t vl_elem;
-
-            found_jList = JNI_TRUE;
-            jList       = NULL;
 
             /* Get the number of sequence elements */
             HDmemcpy(&vl_elem, char_buf, sizeof(hvl_t));
@@ -4121,8 +4116,7 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            int   nmembs = H5Tget_nmembers(mem_type_id);
-            void *objBuf = NULL;
+            int nmembs = H5Tget_nmembers(mem_type_id);
 
             /* The list we're going to return: */
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -4136,15 +4130,13 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
 
                 if ((memb = H5Tget_member_type(mem_type_id, (unsigned int)i)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
-                if ((memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)i)) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
+                memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)i);
                 if ((memb_vlClass = H5Tget_class(memb)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
                 if (!(memb_vlSize = H5Tget_size(memb)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                translate_atomic_rbuf(ENVONLY, jList, memb, memb_vlClass,
-                                      char_buf + i * typeSize + memb_offset);
+                translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + i * typeSize + memb_offset);
                 H5Tclose(memb);
             }
             jobj = jList;
@@ -4315,7 +4307,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
     hid_t       memb = H5I_INVALID_HID;
     H5T_class_t vlClass;
     size_t      vlSize;
-    size_t      i, x;
+    size_t      i;
     size_t      typeSize;
     // raw_buf is normally bytes except when used for variable length strings
     char *char_buf = (char *)raw_buf;
@@ -4371,8 +4363,6 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            void *objBuf = NULL;
-
             /* Convert each compound element */
             int nmembs = H5Tget_nmembers(mem_type_id);
 
@@ -4394,14 +4384,13 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
                 if ((memb = H5Tget_member_type(mem_type_id, (unsigned int)i)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
-                if ((memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)i)) < 0)
-                    H5_LIBRARY_ERROR(ENVONLY);
+                memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)i);
                 if ((memb_vlClass = H5Tget_class(memb)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
                 if (!(memb_vlSize = H5Tget_size(memb)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, i);
+                jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)i);
                 translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass,
                                       char_buf + i * typeSize + memb_offset);
                 ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
@@ -4434,7 +4423,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
             translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, objBuf);
 
-            HDmemcpy(char_buf, (char *)objBuf, vlSize * jnelmts);
+            HDmemcpy(char_buf, (char *)objBuf, vlSize * (size_t)jnelmts);
             break;
         } /* H5T_ARRAY */
         case H5T_ENUM:
@@ -4446,6 +4435,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                 case sizeof(jbyte): {
                     jbyte byteValue = ENVPTR->CallByteMethod(ENVONLY, in_obj, byteValueMid);
                     HDmemcpy(char_buf, ((char *)&byteValue), typeSize);
+                    break;
                 }
                 case sizeof(jshort): {
                     jshort shortValue = ENVPTR->CallShortMethod(ENVONLY, in_obj, shortValueMid);
@@ -4504,12 +4494,12 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                 length = ENVPTR->GetStringUTFLength(ENVONLY, in_obj);
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                 if (is_variable) {
-                    char *new_buf = (char *)HDcalloc((size_t)1, length + 1);
-                    HDmemcpy(((char *)new_buf), utf8, length);
+                    char *new_buf = (char *)HDcalloc(1, (size_t)(length + 1));
+                    HDmemcpy(((char *)new_buf), utf8, (size_t)length);
                     HDmemcpy(char_buf, &new_buf, typeSize);
                 }
                 else {
-                    HDmemcpy(char_buf, utf8, length);
+                    HDmemcpy(char_buf, utf8, (size_t)length);
                 }
                 UNPIN_JAVA_STRING(ENVONLY, in_obj, utf8);
                 utf8 = NULL;
@@ -4547,25 +4537,13 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     jmethodID arrListMethod = ENVPTR->GetMethodID(ENVONLY, arrCList, "<init>", "(I)V");
     jmethodID arrAddMethod  = ENVPTR->GetMethodID(ENVONLY, arrCList, "add", "(Ljava/lang/Object;)Z");
 
-    /* Cache class types */
-    jclass    cByte         = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
-    jclass    cShort        = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
-    jclass    cInt          = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
-    jclass    cLong         = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
-    jclass    cFloat        = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
-    jclass    cDouble       = ENVPTR->FindClass(ENVONLY, "java/lang/Double");
-    jmethodID byteValueMid  = ENVPTR->GetStaticMethodID(ENVONLY, cByte, "valueOf", "(B)Ljava/lang/Byte;");
-    jmethodID shortValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cShort, "valueOf", "(S)Ljava/lang/Short;");
-    jmethodID intValueMid   = ENVPTR->GetStaticMethodID(ENVONLY, cInt, "valueOf", "(I)Ljava/lang/Integer;");
-    jmethodID longValueMid  = ENVPTR->GetStaticMethodID(ENVONLY, cLong, "valueOf", "(J)Ljava/lang/Long;");
-    jmethodID floatValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cFloat, "valueOf", "(F)Ljava/lang/Float;");
-    jmethodID doubleValueMid =
-        ENVPTR->GetStaticMethodID(ENVONLY, cDouble, "valueOf", "(D)Ljava/lang/Double;");
-
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
     ret_buflen = ENVPTR->GetArrayLength(ENVONLY, ret_buf);
+    if (ret_buflen < 0)
+        H5_JNI_FATAL_ERROR(ENVONLY, "ret_buflen: Array length cannot be negative");
+
     switch (type_class) {
         case H5T_VLEN: {
             if (!(memb = H5Tget_super(mem_type_id)))
@@ -4592,7 +4570,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_rbuf: number of VL elements < 0");
 
                 /* The list we're going to return: */
-                if (i < ret_buflen) {
+                if (i < (size_t)ret_buflen) {
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 }
                 if (NULL == jList) {
@@ -4604,7 +4582,6 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 }
 
                 translate_rbuf(ENVONLY, jList, memb, vlClass, (jsize)nelmts, vl_elem.p);
-                int jListlen = ENVPTR->GetArrayLength(ENVONLY, jList);
                 if (found_jList == JNI_FALSE) {
                     jboolean addResult =
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jList);
@@ -4612,7 +4589,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                         H5_JNI_FATAL_ERROR(ENVONLY, "translate_rbuf: cannot add VL element");
                 }
                 else {
-                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, i, (jobject)jList);
+                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, (jobject)jList);
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                 }
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
@@ -4620,15 +4597,13 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            void *objBuf = NULL;
-
             /* Convert each compound element to a list */
             for (i = 0; i < (size_t)count; i++) {
                 found_jList = JNI_TRUE;
                 jList       = NULL;
 
                 /* The list we're going to return: */
-                if (i < ret_buflen) {
+                if (i < (size_t)ret_buflen) {
                     jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
                 }
                 if (NULL == jList) {
@@ -4647,21 +4622,20 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                     if ((memb = H5Tget_member_type(mem_type_id, (unsigned int)x)) < 0)
                         H5_LIBRARY_ERROR(ENVONLY);
-                    if ((memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)x)) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
+                    memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)x);
 
                     if ((memb_vlClass = H5Tget_class(memb)) < 0)
                         H5_LIBRARY_ERROR(ENVONLY);
                     if (!(memb_vlSize = H5Tget_size(memb)))
                         H5_LIBRARY_ERROR(ENVONLY);
 
-                    jobj = translate_atomic_rbuf(ENVONLY, jList, memb, memb_vlClass,
+                    jobj = translate_atomic_rbuf(ENVONLY, memb, memb_vlClass,
                                                  char_buf + i * typeSize + memb_offset);
                     if (jobj) {
                         if (found_jList == JNI_FALSE)
                             ENVPTR->CallBooleanMethod(ENVONLY, jList, arrAddMethod, (jobject)jobj);
                         else
-                            ENVPTR->SetObjectArrayElement(ENVONLY, jList, i, (jobject)jobj);
+                            ENVPTR->SetObjectArrayElement(ENVONLY, jList, (jsize)i, (jobject)jobj);
                         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                         ENVPTR->DeleteLocalRef(ENVONLY, jobj);
                     }
@@ -4671,7 +4645,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 if (ret_buflen == 0)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
-                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, i, jList);
+                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, jList);
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             }
@@ -4704,7 +4678,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 HDmemcpy((char *)objBuf, char_buf + i * typeSize, typeSize);
 
                 /* The list we're going to return: */
-                if (i < ret_buflen) {
+                if (i < (size_t)ret_buflen) {
                     if (NULL ==
                         (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i)))
                         found_jList = JNI_FALSE;
@@ -4720,7 +4694,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                 if (found_jList == JNI_FALSE)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
-                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, i, jList);
+                    ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, jList);
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             }
@@ -4739,13 +4713,12 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
         case H5T_STRING: {
             /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
-                jobj =
-                    translate_atomic_rbuf(ENVONLY, ret_buf, mem_type_id, type_class, char_buf + i * typeSize);
+                jobj = translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize);
                 if (jobj) {
                     if (ret_buflen == 0)
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jobj);
                     else
-                        ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, i, (jobject)jobj);
+                        ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, (jsize)i, (jobject)jobj);
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                     ENVPTR->DeleteLocalRef(ENVONLY, jobj);
                 }
@@ -4780,23 +4753,6 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
     jclass arrCList = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
     /* retrieve the toArray method */
     jmethodID mToArray = ENVPTR->GetMethodID(ENVONLY, arrCList, "toArray", "()[Ljava/lang/Object;");
-
-    /* Cache class types */
-    /* jclass cBool   = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean"); */
-    jclass cByte   = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
-    jclass cShort  = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
-    jclass cInt    = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
-    jclass cLong   = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
-    jclass cFloat  = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
-    jclass cDouble = ENVPTR->FindClass(ENVONLY, "java/lang/Double");
-
-    /* jmethodID boolValueMid   = ENVPTR->GetMethodID(ENVONLY, cBool, "booleanValue", "()Z"); */
-    jmethodID byteValueMid   = ENVPTR->GetMethodID(ENVONLY, cByte, "byteValue", "()B");
-    jmethodID shortValueMid  = ENVPTR->GetMethodID(ENVONLY, cShort, "shortValue", "()S");
-    jmethodID intValueMid    = ENVPTR->GetMethodID(ENVONLY, cInt, "intValue", "()I");
-    jmethodID longValueMid   = ENVPTR->GetMethodID(ENVONLY, cLong, "longValue", "()J");
-    jmethodID floatValueMid  = ENVPTR->GetMethodID(ENVONLY, cFloat, "floatValue", "()F");
-    jmethodID doubleValueMid = ENVPTR->GetMethodID(ENVONLY, cDouble, "doubleValue", "()D");
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -4840,8 +4796,6 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            void *objBuf = NULL;
-
             /* Convert each list to a compound element */
             for (i = 0; i < (size_t)count; i++) {
                 if (NULL == (jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i)))
@@ -4867,15 +4821,14 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
 
                     if ((memb = H5Tget_member_type(mem_type_id, (unsigned int)x)) < 0)
                         H5_LIBRARY_ERROR(ENVONLY);
-                    if ((memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)x)) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
+                    memb_offset = H5Tget_member_offset(mem_type_id, (unsigned int)x);
 
                     if ((memb_vlClass = H5Tget_class(memb)) < 0)
                         H5_LIBRARY_ERROR(ENVONLY);
                     if (!(memb_vlSize = H5Tget_size(memb)))
                         H5_LIBRARY_ERROR(ENVONLY);
 
-                    jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, x);
+                    jobject arr_obj = ENVPTR->GetObjectArrayElement(ENVONLY, array, (jsize)x);
                     translate_atomic_wbuf(ENVONLY, arr_obj, memb, memb_vlClass,
                                           char_buf + i * typeSize + memb_offset);
                     ENVPTR->DeleteLocalRef(ENVONLY, arr_obj);
@@ -4887,8 +4840,6 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             break;
         } /* H5T_COMPOUND */
         case H5T_ARRAY: {
-            void *objBuf = NULL;
-
             if (!(memb = H5Tget_super(mem_type_id)))
                 H5_LIBRARY_ERROR(ENVONLY);
             if ((vlClass = H5Tget_class(memb)) < 0)
@@ -4910,8 +4861,8 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
                 if (jnelmts < 0)
                     H5_BAD_ARGUMENT_ERROR(ENVONLY, "translate_wbuf: number of array elements < 0");
 
-                translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts,
-                               char_buf + i * vlSize * jnelmts); // objBuf);
+                translate_wbuf(ENVONLY, array, memb, vlClass, jnelmts,
+                               char_buf + i * vlSize * (size_t)jnelmts);
 
                 ENVPTR->DeleteLocalRef(ENVONLY, jList);
             } /* end for (i = 0; i < count; i++) */
