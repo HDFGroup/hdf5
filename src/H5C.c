@@ -182,87 +182,10 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
  *        flag to determine whether writes are permitted.
  *
  * Return:      Success:        Pointer to the new instance.
- *
  *              Failure:        NULL
  *
  * Programmer:  John Mainzer
  *              6/2/04
- *
- * Modifications:
- *
- *              JRM -- 7/20/04
- *              Updated for the addition of the hash table.
- *
- *              JRM -- 10/5/04
- *              Added call to H5C_reset_cache_hit_rate_stats().  Also
- *              added initialization for cache_is_full flag and for
- *              resize_ctl.
- *
- *              JRM -- 11/12/04
- *              Added initialization for the new size_decreased field.
- *
- *              JRM -- 11/17/04
- *              Added/updated initialization for the automatic cache
- *              size control data structures.
- *
- *              JRM -- 6/24/05
- *              Added support for the new write_permitted field of
- *              the H5C_t structure.
- *
- *              JRM -- 7/5/05
- *              Added the new log_flush parameter and supporting code.
- *
- *              JRM -- 9/21/05
- *              Added the new aux_ptr parameter and supporting code.
- *
- *              JRM -- 1/20/06
- *              Added initialization of the new prefix field in H5C_t.
- *
- *              JRM -- 3/16/06
- *              Added initialization for the pinned entry related fields.
- *
- *              JRM -- 5/31/06
- *              Added initialization for the trace_file_ptr field.
- *
- *              JRM -- 8/19/06
- *              Added initialization for the flush_in_progress field.
- *
- *              JRM -- 8/25/06
- *              Added initialization for the slist_len_increase and
- *              slist_size_increase fields.  These fields are used
- *              for sanity checking in the flush process, and are not
- *              compiled in unless H5C_DO_SANITY_CHECKS is TRUE.
- *
- *              JRM -- 3/28/07
- *              Added initialization for the new is_read_only and
- *              ro_ref_count fields.
- *
- *              JRM -- 7/27/07
- *              Added initialization for the new evictions_enabled
- *              field of H5C_t.
- *
- *              JRM -- 12/31/07
- *              Added initialization for the new flash cache size increase
- *              related fields of H5C_t.
- *
- *              JRM -- 11/5/08
- *              Added initialization for the new clean_index_size and
- *              dirty_index_size fields of H5C_t.
- *
- *
- *              Missing entries?
- *
- *
- *              JRM -- 4/20/20
- *              Added initialization for the slist_enabled field.  Recall
- *              that the slist is used to flush metadata cache entries
- *              in (roughly) increasing address order.  While this is
- *              needed at flush and close, it is not used elsewhere.
- *              The slist_enabled field exists to allow us to construct
- *              the slist when needed, and leave it empty otherwise -- thus
- *              avoiding the overhead of maintaining it.
- *
- *                                               JRM -- 4/29/20
  *
  *-------------------------------------------------------------------------
  */
@@ -296,8 +219,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     if (NULL == (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list")
 
-    if (NULL == (cache_ptr->tag_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list for tagged entry addresses")
+    cache_ptr->tag_list = NULL;
 
     /* If we get this far, we should succeed.  Go ahead and initialize all
      * the fields.
@@ -504,7 +426,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
 #ifndef NDEBUG
     cache_ptr->get_entry_ptr_from_addr_counter = 0;
-#endif /* NDEBUG */
+#endif
 
     /* Set return value */
     ret_value = cache_ptr;
@@ -515,16 +437,16 @@ done:
             if (cache_ptr->slist_ptr != NULL)
                 H5SL_close(cache_ptr->slist_ptr);
 
-            if (cache_ptr->tag_list != NULL)
-                H5SL_close(cache_ptr->tag_list);
+            HASH_CLEAR(hh, cache_ptr->tag_list);
+            cache_ptr->tag_list = NULL;
 
             if (cache_ptr->log_info != NULL)
                 H5MM_xfree(cache_ptr->log_info);
 
             cache_ptr->magic = 0;
             cache_ptr        = H5FL_FREE(H5C_t, cache_ptr);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_create() */
@@ -664,33 +586,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C__free_tag_list_cb
- *
- * Purpose:     Callback function to free tag nodes from the skip list.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *        January 2014
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
-{
-    H5C_tag_info_t *tag_info = (H5C_tag_info_t *)_item;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(tag_info);
-
-    /* Release the item */
-    tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
-
-    FUNC_LEAVE_NOAPI(0)
-} /* H5C__free_tag_list_cb() */
-
-/*-------------------------------------------------------------------------
  *
  * Function:    H5C_prep_for_file_close
  *
@@ -722,10 +617,7 @@ H5C_prep_for_file_close(H5F_t *f)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* For now at least, it is possible to receive the
-     * close warning more than once -- the following
-     * if statement handles this.
-     */
+    /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
         HGOTO_DONE(SUCCEED)
     cache_ptr->close_warning_received = TRUE;
@@ -797,27 +689,15 @@ done:
  * Programmer:  John Mainzer
  *        6/2/04
  *
- * Modifications:
- *
- *              JRM -- 5/15/20
- *
- *              Updated the function to enable the slist prior to the
- *              call to H5C__flush_invalidate_cache().
- *
- *              Arguably, it shouldn't be necessary to re-enable the
- *              slist after the call to H5C__flush_invalidate_cache(), as
- *              the metadata cache should be discarded.  However, in the
- *              test code, we make multiple calls to H5C_dest().  Thus
- *              we re-enable the slist on failure if it and the cache
- *              still exist.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5C_dest(H5F_t *f)
 {
-    H5C_t *cache_ptr = f->shared->cache;
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5C_t          *cache_ptr = f->shared->cache;
+    H5C_tag_info_t *item      = NULL;
+    H5C_tag_info_t *tmp       = NULL;
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -833,57 +713,42 @@ H5C_dest(H5F_t *f)
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
 
     /* Flush and invalidate all cache entries */
     if (H5C__flush_invalidate_cache(f, H5C__NO_FLAGS_SET) < 0)
-
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
     /* Generate & write cache image if requested */
-    if (cache_ptr->image_ctl.generate_image) {
-
+    if (cache_ptr->image_ctl.generate_image)
         if (H5C__generate_cache_image(f, cache_ptr) < 0)
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "Can't generate metadata cache image")
-    }
 
     /* Question: Is it possible for cache_ptr->slist be non-null at this
      *           point?  If no, shouldn't this if statement be an assert?
      */
     if (cache_ptr->slist_ptr != NULL) {
-
         HDassert(cache_ptr->slist_len == 0);
         HDassert(cache_ptr->slist_size == 0);
 
         H5SL_close(cache_ptr->slist_ptr);
-
         cache_ptr->slist_ptr = NULL;
-
-    } /* end if */
-
-    if (cache_ptr->tag_list != NULL) {
-
-        H5SL_destroy(cache_ptr->tag_list, H5C__free_tag_list_cb, NULL);
-
-        cache_ptr->tag_list = NULL;
-
-    } /* end if */
-
-    if (cache_ptr->log_info != NULL) {
-
-        H5MM_xfree(cache_ptr->log_info);
     }
+
+    HASH_ITER(hh, cache_ptr->tag_list, item, tmp)
+    {
+        HASH_DELETE(hh, cache_ptr->tag_list, item);
+        item = H5FL_FREE(H5C_tag_info_t, item);
+    }
+
+    if (cache_ptr->log_info != NULL)
+        H5MM_xfree(cache_ptr->log_info);
 
 #ifndef NDEBUG
 #if H5C_DO_SANITY_CHECKS
-
-    if (cache_ptr->get_entry_ptr_from_addr_counter > 0) {
-
+    if (cache_ptr->get_entry_ptr_from_addr_counter > 0)
         HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                   cache_ptr->get_entry_ptr_from_addr_counter);
-    }
 #endif /* H5C_DO_SANITY_CHECKS */
 
     cache_ptr->magic = 0;
@@ -892,18 +757,12 @@ H5C_dest(H5F_t *f)
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
 
 done:
-
-    if ((ret_value < 0) && (cache_ptr) && (cache_ptr->slist_ptr)) {
-
+    if (ret_value < 0 && cache_ptr && cache_ptr->slist_ptr)
         /* need this for test code -- see change note for details */
-
         if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
-
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed")
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_dest() */
 
 /*-------------------------------------------------------------------------
@@ -8107,7 +7966,7 @@ done:
 herr_t
 H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 {
-    H5C_tag_info_t *tag_info; /* Points to a tag info struct */
+    H5C_tag_info_t *tag_info  = NULL;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -8118,7 +7977,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     HDassert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */
-    tag_info = (H5C_tag_info_t *)H5SL_search(cache_ptr->tag_list, &obj_addr);
+    HASH_FIND(hh, cache_ptr->tag_list, &obj_addr, sizeof(haddr_t), tag_info);
 
     if (H5C__GET_CORKED == action) {
         HDassert(corked);
@@ -8126,7 +7985,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             *corked = TRUE;
         else
             *corked = FALSE;
-    } /* end if */
+    }
     else {
         /* Sanity check */
         HDassert(H5C__SET_CORK == action || H5C__UNCORK == action);
@@ -8142,25 +8001,24 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 /* Set the tag for all entries */
                 tag_info->tag = obj_addr;
 
-                /* Insert tag info into skip list */
-                if (H5SL_insert(cache_ptr->tag_list, tag_info, &(tag_info->tag)) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert tag info in skip list")
-            } /* end if */
+                /* Insert tag info into hash table */
+                HASH_ADD(hh, cache_ptr->tag_list, tag, sizeof(haddr_t), tag_info);
+            }
             else {
                 /* Check for object already corked */
                 if (tag_info->corked)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked")
                 HDassert(tag_info->entry_cnt > 0 && tag_info->head);
-            } /* end else */
+            }
 
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
             cache_ptr->num_objs_corked++;
-
-        } /* end if */
+        }
         else {
             /* Sanity check */
-            HDassert(tag_info);
+            if (NULL == tag_info)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "tag info pointer is NULL")
 
             /* Check for already uncorked */
             if (!tag_info->corked)
@@ -8175,16 +8033,15 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 /* Sanity check */
                 HDassert(NULL == tag_info->head);
 
-                if (H5SL_remove(cache_ptr->tag_list, &(tag_info->tag)) != tag_info)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove tag info from list")
+                HASH_DELETE(hh, cache_ptr->tag_list, tag_info);
 
                 /* Release the tag info */
                 tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
-            } /* end if */
+            }
             else
                 HDassert(NULL != tag_info->head);
-        } /* end else */
-    }     /* end else */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
