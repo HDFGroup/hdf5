@@ -14,13 +14,13 @@
 #ifndef H5_CONFIG_H_
 #define H5_CONFIG_H_
 
-/* Define if the Windows virtual file driver should be compiled */
+/* Define if this is a Windows machine */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
 /* Define if using MinGW */
 #cmakedefine H5_HAVE_MINGW @H5_HAVE_MINGW@
 
-/* Define if on the Windows platform and default WIN32 API */
+/* Define if on the Windows platform and using the Win32 API */
 #cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
 
 /* Define if using a Windows compiler (i.e. Visual Studio) */
