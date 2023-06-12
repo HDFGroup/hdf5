@@ -108,23 +108,23 @@
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
                                                                                                              \
         /* Implicit mantissa bit */                                                                          \
-        _v1       = (TYPE)0.5L;                                                                              \
-        _v2       = (TYPE)1.0L;                                                                              \
+        _v1 = (TYPE)0.5L;                                                                                    \
+        _v2 = (TYPE)1.0L;                                                                                    \
         if (H5T__imp_bit(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.imp)) < 0)                   \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to determine implicit bit")                \
         INFO.norm = INFO.imp ? H5T_NORM_IMPLIED : H5T_NORM_NONE;                                             \
                                                                                                              \
         /* Sign bit */                                                                                       \
-        _v1       = (TYPE)1.0L;                                                                              \
-        _v2       = (TYPE)-1.0L;                                                                             \
+        _v1 = (TYPE)1.0L;                                                                                    \
+        _v2 = (TYPE)-1.0L;                                                                                   \
         if (H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.sign)) < 0)                  \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
                                                                                                              \
         /* Mantissa */                                                                                       \
         INFO.mpos = 0;                                                                                       \
                                                                                                              \
-        _v1        = (TYPE)1.0L;                                                                             \
-        _v2        = (TYPE)1.5L;                                                                             \
+        _v1 = (TYPE)1.0L;                                                                                    \
+        _v2 = (TYPE)1.5L;                                                                                    \
         if (H5T__bit_cmp(sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask, &(INFO.msize)) < 0)                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "failed to detect byte order")                     \
         INFO.msize += 1 + (unsigned)(INFO.imp ? 0 : 1) - INFO.mpos;                                          \
@@ -157,17 +157,17 @@
 
 /* Holds detected information about a native floating-point type */
 typedef struct H5T_fpoint_det_t {
-    unsigned    size;             /* Total byte size                  */
-    unsigned    prec;             /* Meaningful bits                  */
-    unsigned    offset;           /* Bit offset to meaningful bits    */
-    int         perm[32];         /* For detection of byte order      */
-    H5T_order_t order;            /* byte order                       */
-    unsigned    sign;             /* Location of sign bit             */
-    unsigned    mpos, msize, imp; /* Information about mantissa       */
-    H5T_norm_t  norm;             /* Information about mantissa       */
-    unsigned    epos, esize;      /* Information about exponent       */
-    unsigned    long ebias;       /* Exponent bias for floating point */
-    unsigned    comp_align;       /* Alignment for structure          */
+    unsigned      size;             /* Total byte size                  */
+    unsigned      prec;             /* Meaningful bits                  */
+    unsigned      offset;           /* Bit offset to meaningful bits    */
+    int           perm[32];         /* For detection of byte order      */
+    H5T_order_t   order;            /* byte order                       */
+    unsigned      sign;             /* Location of sign bit             */
+    unsigned      mpos, msize, imp; /* Information about mantissa       */
+    H5T_norm_t    norm;             /* Information about mantissa       */
+    unsigned      epos, esize;      /* Information about exponent       */
+    unsigned long ebias;            /* Exponent bias for floating point */
+    unsigned      comp_align;       /* Alignment for structure          */
 } H5T_fpoint_det_t;
 
 /********************/
@@ -195,12 +195,12 @@ typedef struct H5T_fpoint_det_t {
 /*******************/
 
 /* Functions used in the DETECT_F() macro */
-static int          H5T__byte_cmp(int, const void *, const void *, const unsigned char *);
-static herr_t       H5T__bit_cmp(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
-static herr_t       H5T__fix_order(int, int, int *, H5T_order_t *);
-static herr_t       H5T__imp_bit(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
-static unsigned     H5T__find_bias(unsigned, unsigned, int *, void *);
-static void         H5T__set_precision(H5T_fpoint_det_t *);
+static int      H5T__byte_cmp(int, const void *, const void *, const unsigned char *);
+static herr_t   H5T__bit_cmp(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
+static herr_t   H5T__fix_order(int, int, int *, H5T_order_t *);
+static herr_t   H5T__imp_bit(unsigned, int *, void *, void *, const unsigned char *, unsigned *);
+static unsigned H5T__find_bias(unsigned, unsigned, int *, void *);
+static void     H5T__set_precision(H5T_fpoint_det_t *);
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__byte_cmp
@@ -251,7 +251,8 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
     unsigned char *a = (unsigned char *)_a;
     unsigned char *b = (unsigned char *)_b;
     unsigned char  aa, bb;
-    herr_t         ret_value = SUCCEED;;
+    herr_t         ret_value = SUCCEED;
+    ;
 
     FUNC_ENTER_PACKAGE
 
