@@ -2040,13 +2040,13 @@ CONTAINS
 !!
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)               :: src_id
-    INTEGER(HID_T) , INTENT(IN)               :: dst_id
-    INTEGER(SIZE_T), INTENT(IN)               :: nelmts
-    TYPE(C_PTR)    , INTENT(INOUT)            :: buf
-    INTEGER        , INTENT(OUT)              :: hdferr
-    TYPE(C_PTR)    , INTENT(INOUT), OPTIONAL  :: background
-    INTEGER(HID_T) , INTENT(IN)   , OPTIONAL  :: plist_id
+    INTEGER(HID_T) , INTENT(IN)            :: src_id
+    INTEGER(HID_T) , INTENT(IN)            :: dst_id
+    INTEGER(SIZE_T), INTENT(IN)            :: nelmts
+    TYPE(C_PTR)    , INTENT(IN)            :: buf
+    INTEGER        , INTENT(OUT)           :: hdferr
+    TYPE(C_PTR)    , INTENT(IN), OPTIONAL  :: background
+    INTEGER(HID_T) , INTENT(IN), OPTIONAL  :: plist_id
     INTEGER(HID_T) :: plist_id_default
     TYPE(C_PTR) :: background_default
 

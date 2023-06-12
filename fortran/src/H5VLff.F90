@@ -52,10 +52,10 @@ CONTAINS
 !!
 !! \brief Registers a new VOL connector as a member of the virtual object layer class by name.
 !!
-!! \param name    Connector name.
-!! \param vol_id  VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
+!! \param name    \fortran_vol_name
+!! \param vol_id  VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F
 !! \param hdferr  \fortran_error
-!! \param vipl_id VOL initialization property list identifier.
+!! \param vipl_id VOL initialization property list identifier
 !!
 !! See C API: @ref H5VLregister_connector_by_name()
 !!
@@ -94,10 +94,10 @@ CONTAINS
 !!
 !! \brief Registers a new VOL connector by value.
 !!
-!! \param connector_value Connector value.
-!! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
+!! \param connector_value Connector value
+!! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F
 !! \param hdferr          \fortran_error
-!! \param vipl_id         VOL initialization property list identifier.
+!! \param vipl_id         VOL initialization property list identifier
 !!
 !! See C API: @ref H5VLregister_connector_by_value()
 !!
@@ -134,8 +134,8 @@ CONTAINS
 !!
 !! \brief Determines whether a VOL class has been registered or not ccording to a specified connector name.
 !!
-!! \param name       Connector name.
-!! \param registered State of VOL class registration.
+!! \param name       \fortran_vol_name
+!! \param registered State of VOL class registration
 !! \param hdferr     \fortran_error
 !!
 !! See C API: @ref H5VLis_connector_registered_by_name()
@@ -171,9 +171,9 @@ CONTAINS
 !!
 !! \brief Determines whether a VOL class has been registered or not according to a specified connector value (ID).
 !!
-!! \param value ConneConnector value.
-!! \param registered State of VOL class registration.
-!! \param hdferr Retu\fortran_error
+!! \param value      Connector value
+!! \param registered State of VOL class registration
+!! \param hdferr     \fortran_error
 !!
 !! See C API: @ref H5VLis_connector_registered_by_value()
 !!
@@ -205,7 +205,7 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param obj_id Object id.
+!! \param obj_id Object id
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
@@ -238,7 +238,7 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param name   Connector name.
+!! \param name   \fortran_vol_name
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
@@ -275,8 +275,8 @@ CONTAINS
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
-!! \param value CConnector value.
-!! \param vol_id Connector id.
+!! \param value  Connector value
+!! \param vol_id Connector id
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5VLget_connector_id_by_value()
@@ -308,10 +308,10 @@ CONTAINS
 !!
 !! \brief Retrieves a connector name for a VOL.
 !!
-!! \param obj_id   Object identifier or file identifier.
-!! \param name     Connector name.
+!! \param obj_id   Object identifier or file identifier
+!! \param name     \fortran_vol_name
 !! \param hdferr   \fortran_error
-!! \param name_len Maximum length of the name to retrieve.
+!! \param name_len Maximum length of the name to retrieve
 !!
 !! See C API: @ref H5VLget_connector_name()
 !!
@@ -355,7 +355,7 @@ CONTAINS
 !!
 !! \brief Closes a VOL connector ID.
 !!
-!! \param vol_id A valid identifier of the connectory to unregister.
+!! \param vol_id A valid identifier of the connectory to unregister
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5VLclose()
@@ -381,8 +381,8 @@ CONTAINS
 !!
 !! \brief Removes a VOL connector ID from the library.
 !!
-!! \param plugin_id A valid identifier of the connector to unregister..
-!! \param hdferr Ret\fortran_error
+!! \param plugin_id A valid identifier of the connector to unregister
+!! \param hdferr    \fortran_error
 !!
 !! See C API: @ref H5VLunregister_connector()
 !!

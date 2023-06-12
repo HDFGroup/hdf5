@@ -18,6 +18,18 @@
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!
+!  If you add a new H5ES function to the module you must add the function name
+!  to the Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
+!
 
 MODULE H5ES
 
@@ -32,7 +44,7 @@ CONTAINS
 !!
 !! \brief Creates an event set.
 !!
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !!
 !! See C API: @ref H5EScreate()
@@ -60,7 +72,7 @@ CONTAINS
 !!
 !! \brief Retrieves number of events in an event set.
 !!
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param count  The number of events in the event set
 !! \param hdferr \fortran_error
 !!
@@ -90,7 +102,7 @@ CONTAINS
 !!
 !! \brief Retrieves the next operation counter to be assigned in an event set.
 !!
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param counter The number of events in the event set
 !! \param hdferr  \fortran_error
 !!
@@ -121,7 +133,7 @@ CONTAINS
 !!
 !! \brief Waits for operations in event set to complete.
 !!
-!! \param es_id           \es_id
+!! \param es_id           \fortran_es_id
 !! \param timeout         The number of events in the event set
 !! \param num_in_progress The number of operations still in progress
 !! \param err_occurred    Flag if an operation in the event set failed
@@ -163,7 +175,7 @@ CONTAINS
 !!
 !! \brief Attempt to cancel operations in an event set.
 !!
-!! \param es_id            \es_id
+!! \param es_id            \fortran_es_id
 !! \param num_not_canceled The number of events not canceled
 !! \param err_occurred     Status indicating if error is present in the event set
 !! \param hdferr           \fortran_error
@@ -202,7 +214,7 @@ CONTAINS
 !!
 !! \brief Checks for failed operations.
 !!
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param err_occurred Status indicating if error is present in the event set
 !! \param hdferr       \fortran_error
 !!
@@ -238,7 +250,7 @@ CONTAINS
 !!
 !! \brief Retrieves the number of failed operations.
 !!
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param num_errs Number of errors
 !! \param hdferr   \fortran_error
 !!
@@ -270,7 +282,7 @@ CONTAINS
 !!
 !! \brief Terminates access to an event set.
 !!
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !!
 !! See C API: @ref H5ESclose()

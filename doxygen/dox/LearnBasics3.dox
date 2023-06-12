@@ -945,7 +945,7 @@ For a more complete script (and to help resolve issues) see the script provided 
 
 \subsection subsecLBCompilingCMakeExamples HDF5 Examples
 The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
-in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5_examples">HDF5 Examples</a> github repository.
+in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5-examples">HDF5 Examples</a> github repository.
 
 Go into the share directory and follow the instructions in USING_CMake_examples.txt to build the examples.
 
