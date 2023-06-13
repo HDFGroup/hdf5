@@ -37,17 +37,13 @@ foreach $arg (@ARGV) {
     # Skip files that don't include H5private.h
     # H5system. has to be inspected by hand since it wraps POSIX files
     #
-    # H5detect and H5make_libsettings are created before the library exists
-    # so calls that link to function replacements won't work. We'll ignore
-    # it here.
-    #
     # If a user specifies one file, process it no matter what so people
     # can inspect files we normally skip (like H5system.c).
 
     $ignore = 0;
 
     # Ignored files in src/
-    if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5VLpassthru|H5system|H5detect|H5make_libsettings/) {
+    if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5VLpassthru|H5system/) {
         $ignore = 1;
     }
     # Ignored atomic test files in test/

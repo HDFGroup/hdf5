@@ -433,7 +433,7 @@ H5FL_EXTERN(H5T_t);
 H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
-H5_DLL herr_t H5T__init_native(void);
+H5_DLL herr_t H5T__init_native_float_types(void);
 H5_DLL herr_t H5T__init_native_internal(void);
 H5_DLL H5T_t *H5T__create(H5T_class_t type, size_t size);
 H5_DLL H5T_t *H5T__alloc(void);
