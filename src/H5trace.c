@@ -281,8 +281,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
         argname = HDva_arg(ap, char *);
         if (argname)
             H5RS_asprintf_cat(rs, "%s%s=", argno ? ", " : "", argname);
-        else
-            argname = "";
 
         /* A pointer/array */
         if (ptr) {
