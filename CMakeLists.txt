@@ -794,9 +794,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.12.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v112")
-endif ()
 set (H5_USE_112_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v112")
   set (H5_USE_112_API_DEFAULT 1)
