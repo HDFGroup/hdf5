@@ -252,7 +252,6 @@ H5T__bit_cmp(unsigned nbytes, int *perm, void *_a, void *_b, const unsigned char
     unsigned char *b = (unsigned char *)_b;
     unsigned char  aa, bb;
     herr_t         ret_value = SUCCEED;
-    ;
 
     FUNC_ENTER_PACKAGE
 
