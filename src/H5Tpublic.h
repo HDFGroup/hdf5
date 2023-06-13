@@ -728,8 +728,7 @@ H5_DLLVAR hid_t H5T_VAX_F32_g;
 H5_DLLVAR hid_t H5T_VAX_F64_g;
 
 /*
- * The predefined native types. These are the types detected by H5detect and
- * they violate the naming scheme a little.  Instead of a class name,
+ * The predefined native types for this platform. Instead of a class name,
  * precision and byte order as the last component, they have a C-like type
  * name.  If the type begins with `U' then it is the unsigned version of the
  * integer type; other integer types are signed.  The type LLONG corresponds

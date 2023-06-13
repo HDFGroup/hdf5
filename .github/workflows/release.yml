@@ -45,8 +45,12 @@ jobs:
       - run: |
           echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
 
-  getfiles:
+  PreRelease-getfiles:
     runs-on: ubuntu-latest
+    needs: create-tag
+    environment: snapshots
+    permissions:
+        contents: write
     steps:
       - name: Get file base name
         id: get-file-base
@@ -92,21 +96,6 @@ jobs:
               name: tgz-ubuntu-2204-binary
               path: ${{ github.workspace }}
 
-      # Get files used by release script
-
-  PreRelease:
-    runs-on: ubuntu-latest
-    needs: [create-tag, getfiles]
-    environment: snapshots
-    permissions:
-        contents: write
-    steps:
-      - name: Get file base name
-        id: get-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
-
       - name: PreRelease tag
         uses: softprops/action-gh-release@v1
         with:
@@ -121,12 +110,19 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
 
-      - name: Create .nojekyll
-        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
-        shell: bash
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+#      - name: Create .nojekyll
+#        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
+#        shell: bash
 
       - name: dev-only-docs
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+          publish_dir: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+          destination_dir: ./docs
+

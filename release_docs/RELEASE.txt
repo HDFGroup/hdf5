@@ -47,6 +47,46 @@ New Features
 
     Configuration:
     -------------
+    - Removed CMake cross-compiling variables
+
+      * HDF5_USE_PREGEN
+      * HDF5_BATCH_H5DETECT
+
+      These were used to work around H5detect and H5make_libsettings and
+      are no longer required.
+
+    - Running H5make_libsettings is no longer required for cross-compiling
+
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
+
+    - Removed long double work-around symbols and configure options
+
+      Several options and public symbols that were provided to paper over
+      non-standard long double conversions between signed/unsigned long
+      and long long values were removed from the Autotools and CMake. These
+      were added twenty years ago, when C99 and 64-bit platforms were less
+      common and are no longer needed.
+
+      Autotools:
+        --enable-dconv-accuracy
+
+      CMake:
+        HDF5_WANT_DATA_ACCURACY
+
+      H5pubconf.h symbols:
+        H5_WANT_DATA_ACCURACY
+        H5_LDOUBLE_TO_LONG_SPECIAL
+        H5_LONG_TO_LDOUBLE_SPECIAL
+        H5_LDOUBLE_TO_LLONG_ACCURATE
+        H5_LLONG_TO_LDOUBLE_CORRECT
+        H5_DISABLE_SOME_LDOUBLE_CONV
+
     - Updated HDF5 API tests CMake code to support VOL connectors
 
       * Implemented support for fetching, building and testing HDF5
@@ -228,6 +268,17 @@ Bug Fixes since HDF5-1.14.0 release
 ===================================
     Library
     -------
+    - Fixed a potential bug when copying empty enum datatypes
+
+      Copying an empty enum datatype (including implicitly, as when an enum
+      is a part of a compound datatype) would fail in an assert in debug
+      mode and could fail in release mode depending on how the platform
+      handles undefined behavior regarding size 0 memory allocations and
+      using memcpy with a NULL src pointer.
+
+      The library is now more more careful about using memory operations when
+      copying empty enum datatypes and will not error or raise an assert.
+
     - Added an AAPL check to H5Acreate
 
       A check was added to H5Acreate to ensure that a failure is correctly
