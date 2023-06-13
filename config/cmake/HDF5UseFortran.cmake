@@ -43,11 +43,16 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${SOURCE_CODE}"
     )
+    if (CMAKE_VERSION VERSION_LESS 3.25)
+      set (_RUN_OUTPUT_VARIABLE "RUN_OUTPUT_VARIABLE")
+    else ()
+      set (_RUN_OUTPUT_VARIABLE  "RUN_OUTPUT_STDOUT_VARIABLE")
+    endif()
     TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
-        RUN_OUTPUT_VARIABLE OUTPUT_VAR
+        ${_RUN_OUTPUT_VARIABLE} OUTPUT_VAR
     )
     set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
@@ -187,10 +192,10 @@ foreach (KIND ${VAR})
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
           IMPLICIT NONE
           INTEGER (KIND=${KIND}) a
-          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
+          WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
        END
    "
   )
@@ -230,10 +235,10 @@ foreach (KIND ${VAR} )
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
           IMPLICIT NONE
           REAL (KIND=${KIND}) a
-          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
+          WRITE(stdout,'(I0)') ${FC_SIZEOF_A}
        END
   "
   )
@@ -272,17 +277,17 @@ set (PROG_SRC3
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stdout=>OUTPUT_UNIT
           IMPLICIT NONE
           INTEGER a
           REAL b
           DOUBLE PRECISION c
-          WRITE(stderr,*) ${FC_SIZEOF_A}
-          WRITE(stderr,*) kind(a)
-          WRITE(stderr,*) ${FC_SIZEOF_B}
-          WRITE(stderr,*) kind(b)
-          WRITE(stderr,*) ${FC_SIZEOF_C}
-          WRITE(stderr,*) kind(c)
+          WRITE(stdout,*) ${FC_SIZEOF_A}
+          WRITE(stdout,*) kind(a)
+          WRITE(stdout,*) ${FC_SIZEOF_B}
+          WRITE(stdout,*) kind(b)
+          WRITE(stdout,*) ${FC_SIZEOF_C}
+          WRITE(stdout,*) kind(c)
        END
   "
 )

@@ -56,11 +56,16 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
 
+  set (last_test "")
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
         NAME JAVA_intro-${example}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
     )
+    if (last_test)
+      set_tests_properties (JAVA_intro-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
+    endif ()
 
     add_test (
         NAME JAVA_intro-${example}-copy-objects
@@ -87,6 +92,16 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     set_tests_properties (JAVA_intro-${example} PROPERTIES
         DEPENDS JAVA_intro-${example}-copy-objects
     )
+
+    add_test (
+        NAME JAVA_intro-${example}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+    )
+    set_tests_properties (JAVA_intro-${example}-clean-objects PROPERTIES
+        DEPENDS JAVA_intro-${example}
+    )
+    set (last_test "JAVA_intro-${example}-clean-objects")
   endforeach ()
 
 endif ()
