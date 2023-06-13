@@ -11,12 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Wednesday, April  8, 1998
- * Modified:    Albert Cheng
- *         September 11, 2010
- */
-/*
  * The purpose of this test is to verify if a virtual file driver can handle:
  *    a. Large file (2GB)
  *    This should exceed 32bits I/O system since offset is a signed
@@ -61,12 +55,6 @@
 #define GB (HDoff_t)0x40000000L
 
 #define MAX_TRIES 100
-
-#if H5_SIZEOF_LONG_LONG >= 8
-#define GB8LL ((unsigned long long)8 * 1024 * 1024 * 1024)
-#else
-#define GB8LL 0 /*cannot do the test*/
-#endif
 
 /* Define Small, Large, Extra Large, Huge File which
  * correspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
@@ -330,7 +318,7 @@ static int
 writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
 {
     hsize_t size1[4] = {8, 1024, 1024, 1024};
-    hsize_t size2[1] = {GB8LL};
+    hsize_t size2[1] = {8LL * 1024LL * 1024LL * 1024LL};
     hsize_t hs_start[1];
     hsize_t hs_size[1];
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
@@ -689,12 +677,6 @@ test_family(hid_t fapl)
          * because we would generate multi-gigabyte files.
          */
         HDputs("Checking if file system is adequate for this test...");
-        if (sizeof(long long) < 8 || 0 == GB8LL) {
-            HDputs("Test skipped because sizeof(long long) is too small. This");
-            HDputs("hardware apparently doesn't support 64-bit integer types.");
-            usage();
-            goto quit;
-        }
         if (!sparse_support) {
             HDputs("Test skipped because file system does not support holes.");
             usage();

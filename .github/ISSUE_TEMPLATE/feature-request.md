@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Suggest an improvement to HDF5
-title: "[Feature Request]"
-labels: enhancement
+title: ""
+labels: ""
 assignees: ''
 
 ---

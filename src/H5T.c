@@ -1283,20 +1283,16 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "llong_flt", native_llong, native_float, H5T__conv_llong_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "llong_dbl", native_llong, native_double, H5T__conv_llong_double);
-#ifdef H5T_CONV_INTERNAL_LLONG_LDOUBLE
     status |=
         H5T__register_int(H5T_PERS_HARD, "llong_ldbl", native_llong, native_ldouble, H5T__conv_llong_ldouble);
-#endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
     /* From unsigned long long to floats */
     status |=
         H5T__register_int(H5T_PERS_HARD, "ullong_flt", native_ullong, native_float, H5T__conv_ullong_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "ullong_dbl", native_ullong, native_double, H5T__conv_ullong_double);
-#ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
     status |= H5T__register_int(H5T_PERS_HARD, "ullong_ldbl", native_ullong, native_ldouble,
                                 H5T__conv_ullong_ldouble);
-#endif /* H5T_CONV_INTERNAL_ULLONG_LDOUBLE */
 
     /* From floats to char */
     status |=
@@ -1360,20 +1356,16 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "flt_llong", native_float, native_llong, H5T__conv_float_llong);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_llong", native_double, native_llong, H5T__conv_double_llong);
-#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
     status |=
         H5T__register_int(H5T_PERS_HARD, "ldbl_llong", native_ldouble, native_llong, H5T__conv_ldouble_llong);
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_LLONG */
 
     /* From floats to unsigned long long */
     status |=
         H5T__register_int(H5T_PERS_HARD, "flt_ullong", native_float, native_ullong, H5T__conv_float_ullong);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_ullong", native_double, native_ullong, H5T__conv_double_ullong);
-#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
     status |= H5T__register_int(H5T_PERS_HARD, "ldbl_ullong", native_ldouble, native_ullong,
                                 H5T__conv_ldouble_ullong);
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_ULLONG */
 
     /*
      * The special no-op conversion is the fastest, so we list it last. The
@@ -1504,9 +1496,9 @@ H5T_top_term_package(void)
                         if (H5DEBUG(T)) {
                             HDfprintf(H5DEBUG(T),
                                       "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
+                                      "0x%016zx failed to free private data for "
                                       "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.app_func), path->name);
+                                      (size_t)path->conv.u.app_func, path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -1519,9 +1511,9 @@ H5T_top_term_package(void)
                         if (H5DEBUG(T)) {
                             HDfprintf(H5DEBUG(T),
                                       "H5T: conversion function "
-                                      "0x%08lx failed to free private data for "
+                                      "0x%016zx failed to free private data for "
                                       "%s (ignored)\n",
-                                      (unsigned long)(path->conv.u.lib_func), path->name);
+                                      (size_t)path->conv.u.lib_func, path->name);
                         } /* end if */
 #endif
                         H5E_clear_stack(NULL); /*ignore the error*/
@@ -2633,9 +2625,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         HDfprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx "
+                                  "H5T: conversion function 0x%016zx "
                                   "failed to free private data for %s (ignored)\n",
-                                  (unsigned long)(old_path->conv.u.app_func), old_path->name);
+                                  (size_t)old_path->conv.u.app_func, old_path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2644,9 +2636,9 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     HDfprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx "
+                              "H5T: conversion function 0x%016zx "
                               "failed to free private data for %s (ignored)\n",
-                              (unsigned long)(old_path->conv.u.lib_func), old_path->name);
+                              (size_t)old_path->conv.u.lib_func, old_path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(old_path->src);
@@ -2813,9 +2805,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                     if (H5DEBUG(T))
                         HDfprintf(H5DEBUG(T),
-                                  "H5T: conversion function 0x%08lx failed "
+                                  "H5T: conversion function 0x%016zx failed "
                                   "to free private data for %s (ignored)\n",
-                                  (unsigned long)(path->conv.u.app_func), path->name);
+                                  (size_t)path->conv.u.app_func, path->name);
 #endif
                 } /* end if */
             }     /* end if */
@@ -2824,9 +2816,9 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
                     HDfprintf(H5DEBUG(T),
-                              "H5T: conversion function 0x%08lx failed "
+                              "H5T: conversion function 0x%016zx failed "
                               "to free private data for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.lib_func), path->name);
+                              (size_t)path->conv.u.lib_func, path->name);
 #endif
             } /* end if */
             (void)H5T_close_real(path->src);
@@ -3623,21 +3615,28 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                  * of each new member with copied values. That is, H5T_copy() is a
                  * deep copy.
                  */
-                if (NULL == (new_dt->shared->u.enumer.name =
-                                 H5MM_malloc(new_dt->shared->u.enumer.nalloc * sizeof(char *))))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "enam name array memory allocation failed")
-                if (NULL == (new_dt->shared->u.enumer.value =
-                                 H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
-                                "enam value array memory allocation failed")
-                H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
-                            new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
-                for (i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
-                    if (NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
-                                    "can't copy string for enum value's name")
-                    new_dt->shared->u.enumer.name[i] = s;
-                } /* end for */
+                if (old_dt->shared->u.enumer.nalloc > 0) {
+                    if (NULL == (new_dt->shared->u.enumer.name =
+                                     H5MM_malloc(new_dt->shared->u.enumer.nalloc * sizeof(char *))))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                                    "enam name array memory allocation failed")
+                    if (NULL == (new_dt->shared->u.enumer.value =
+                                     H5MM_malloc(new_dt->shared->u.enumer.nalloc * new_dt->shared->size)))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL,
+                                    "enam value array memory allocation failed")
+                    H5MM_memcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                                new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
+                    for (i = 0; i < new_dt->shared->u.enumer.nmembs; i++) {
+                        if (NULL == (s = H5MM_xstrdup(old_dt->shared->u.enumer.name[i])))
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL,
+                                        "can't copy string for enum value's name")
+                        new_dt->shared->u.enumer.name[i] = s;
+                    }
+                }
+                else {
+                    /* Empty enum */
+                    HDmemset(&new_dt->shared->u.enumer, 0, sizeof(H5T_enum_t));
+                }
                 break;
 
             case H5T_VLEN:
@@ -5221,8 +5220,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                                          (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
                 if (H5DEBUG(T))
-                    HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                              (unsigned long)(path->conv.u.app_func), path->name);
+                    HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
+                              (size_t)path->conv.u.app_func, path->name);
 #endif
                 H5E_clear_stack(NULL); /*ignore the failure*/
             }                          /* end if */
@@ -5231,8 +5230,8 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
                                           (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
             if (H5DEBUG(T))
-                HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx free failed for %s (ignored)\n",
-                          (unsigned long)(path->conv.u.lib_func), path->name);
+                HDfprintf(H5DEBUG(T), "H5T: conversion function 0x%016zx free failed for %s (ignored)\n",
+                          (size_t)path->conv.u.lib_func, path->name);
 #endif
             H5E_clear_stack(NULL); /*ignore the failure*/
         }                          /* end if */
