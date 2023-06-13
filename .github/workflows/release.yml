@@ -45,8 +45,12 @@ jobs:
       - run: |
           echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
 
-  getfiles:
+  PreRelease-getfiles:
     runs-on: ubuntu-latest
+    needs: create-tag
+    environment: snapshots
+    permissions:
+        contents: write
     steps:
       - name: Get file base name
         id: get-file-base
@@ -91,21 +95,6 @@ jobs:
         with:
               name: tgz-ubuntu-2204-binary
               path: ${{ github.workspace }}
-
-      # Get files used by release script
-
-  PreRelease:
-    runs-on: ubuntu-latest
-    needs: [create-tag, getfiles]
-    environment: snapshots_1_14
-    permissions:
-        contents: write
-    steps:
-      - name: Get file base name
-        id: get-file-base
-        run: |
-          FILE_NAME_BASE=$(echo "${{ inputs.file_base }}")
-          echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
 
       - name: PreRelease tag
         uses: softprops/action-gh-release@v1
