@@ -1290,7 +1290,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
             }
         }
 
-        if (l_opts[i].name == NULL) {
+        if (l_opts && l_opts[i].name == NULL) {
             /* exhausted all of the l_opts we have and still didn't match */
             if (H5_opterr)
                 HDfprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
