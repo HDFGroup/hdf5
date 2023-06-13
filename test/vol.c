@@ -573,9 +573,9 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 static herr_t
 fake_vol_info_to_str(const void *info, char **str)
 {
-    herr_t    ret_value = SUCCEED; /* Return value */
-    const int val       = *(const int *)info;
-    const int str_size  = 16; /* The size of the string */
+    const int    val       = *(const int *)info;
+    const size_t str_size  = 16; /* The size of the string */
+    herr_t       ret_value = SUCCEED;
 
     /* Verify the info is correct before continuing */
     if (val != INT_MAX) {
@@ -584,9 +584,10 @@ fake_vol_info_to_str(const void *info, char **str)
     }
 
     /* Allocate the string long enough for the info */
-    *str = (char *)malloc(str_size);
+    if (NULL == (*str = (char *)HDcalloc(1, str_size)))
+        return FAIL;
 
-    HDsnprintf(*str, str_size, "%d", *((const int *)info));
+    HDsnprintf(*str, str_size, "%d", val);
 
     return ret_value;
 } /* end fake_vol_info_to_str() */
