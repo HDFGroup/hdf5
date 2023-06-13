@@ -60,6 +60,8 @@ $SRC_H5COPY_TESTFILES/h5copy_extlinks_trg.h5
 LIST_OTHER_TEST_FILES="
 $SRC_H5COPY_TESTFILES/h5copy_misc1.out
 $SRC_H5COPY_TESTFILES/h5copy_misc1.err
+$SRC_H5COPY_TESTFILES/h5copy_help1.ddl
+$SRC_H5COPY_TESTFILES/h5copy_help2.ddl
 "
 
 H5COPY=../../src/h5copy/h5copy               # The tool name
@@ -483,6 +485,42 @@ H5DIFFTEST_FAIL()
     fi
 }
 
+# ADD_HELP_TEST
+TOOLTEST_HELP() {
+
+    expect="$TESTDIR/$1"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+    shift
+
+    # Run test.
+    TESTING $H5COPY $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5COPY_BIN "$@"
+    ) >$actual 2>$actual_err
+
+    if [ ! -f $expectdata ]; then
+        # Create the expect data file if it doesn't yet exist.
+        echo " CREATED"
+        cp $actual $expect-CREATED
+        echo "    Expected output (*.ddl) missing"
+        nerrors="`expr $nerrors + 1`"
+    elif $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected output (*.ddl) differs from actual output (*.out)"
+        nerrors="`expr $nerrors + 1`"
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+        rm -f $actual $actual_err
+    fi
+
+}
+
 # Copy single datasets of various forms from one group to another,
 #       adding object copied to the destination file each time
 #
@@ -606,6 +644,10 @@ fi
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
+
+# check help text
+TOOLTEST_HELP h5copy_help1.ddl -h
+TOOLTEST_HELP h5copy_help2.ddl --help
 
 # Start tests
 COPY_OBJECTS

@@ -114,7 +114,15 @@ Bug Fixes since HDF5-1.14.1 release
 
     Java Library
     ------------
-    -
+    - Fixed switch case 'L' block missing a break statement.
+
+      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
+      which causes it to fall through and throw an HDF5JavaException when attempting to
+      read an Array[Array[Long]].
+
+      The error was fixed by inserting a break statement at the end of the case 'L': sections.
+
+      Fixes GitHub issue #3056
 
 
     Configuration
