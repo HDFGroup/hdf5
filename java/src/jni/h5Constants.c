@@ -1653,16 +1653,24 @@ Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1GHEAP_1SIZE(JNIEnv *env, jcla
 {
     return (hsize_t)(3 * (HADDR_MAX / (H5FD_MEM_NTYPES - 1)));
 }
+H5_GCC_CLANG_DIAG_OFF("sign-conversion")
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1LHEAP_1SIZE(JNIEnv *env, jclass cls)
 {
+    /* XXX: BADNESS! - This value cannot fit into a jlong!
+     *
+     * For now, we're going to ignore these values since the multi VFD is
+     * scheduled for removal in HDF5 2.0.
+     */
     return (hsize_t)(4 * (HADDR_MAX / (H5FD_MEM_NTYPES - 1)));
 }
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1OHDR_1SIZE(JNIEnv *env, jclass cls)
 {
+    /* XXX: BADNESS! - This value cannot fit into a jlong! */
     return (hsize_t)(5 * (HADDR_MAX / (H5FD_MEM_NTYPES - 1)));
 }
+H5_GCC_CLANG_DIAG_ON("sign-conversion")
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

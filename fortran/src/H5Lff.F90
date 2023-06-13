@@ -180,7 +180,7 @@ CONTAINS
 !!
 !! \param loc_id  Identifier of the file or group containing the object.
 !! \param name    Name of the link to delete.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !! \param file    \fortran_file
@@ -196,9 +196,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
-    INTEGER    , INTENT(IN), OPTIONAL :: line
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
+    INTEGER    , OPTIONAL, INTENT(IN) :: line
 
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
@@ -298,7 +298,7 @@ CONTAINS
 !! \param target_path Path to the target object, which is not required to exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
@@ -318,8 +318,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
@@ -430,7 +430,7 @@ CONTAINS
 !! \param obj_name    Name of the target object, which must already exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
@@ -451,8 +451,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
@@ -644,7 +644,7 @@ CONTAINS
 !!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
 !!                    \li H5_ITER_N_F       - Number of iteration orders
 !! \param n           Link for which to retrieve information.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !! \param file        \fortran_file
@@ -664,8 +664,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -765,8 +765,10 @@ CONTAINS
 !!
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
-!! \param link_exists Pointer to Link exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
-!! \param es_id       \es_id
+!! \param link_exists Pointer to link exists status. It should be declared INTEGER(C_INT) and initialized
+!!                    to zero (false) for portability. It will return one when true. LOGICAL(C_BOOL) is also
+!!                    acceptable but may encounter atypical anomalies. It should be initialized to false when used.
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
 !! \param file        \fortran_file
@@ -779,12 +781,12 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    TYPE(C_PTR)     , INTENT(INOUT) :: link_exists
+    TYPE(C_PTR)     , INTENT(IN) :: link_exists
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: lapl_id_default
@@ -1371,8 +1373,11 @@ CONTAINS
 !!                     in \p return_value for H5Literate_async_f(), so \p return_value should
 !!                     not be used for determining the return state of the callback routine.
 !!
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
 !!
 !! See C API: @ref H5Literate_async()
 !!
@@ -1388,8 +1393,8 @@ CONTAINS
     INTEGER         , INTENT(OUT)   :: return_value
     INTEGER(HID_T)  , INTENT(IN)    :: es_id
     INTEGER         , INTENT(OUT)   :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR

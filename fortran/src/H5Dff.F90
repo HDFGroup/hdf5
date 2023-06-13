@@ -287,7 +287,7 @@ CONTAINS
 !! \param type_id  Dataset datatype identifier
 !! \param space_id Dataset dataspace identifier
 !! \param dset_id  Dataset identifier
-!! \param es_id    \es_id
+!! \param es_id    \fortran_es_id
 !! \param hdferr   \fortran_error
 !! \param dcpl_id  Dataset creation property list
 !! \param lcpl_id  Link creation property list
@@ -311,8 +311,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lcpl_id_default
@@ -422,7 +422,7 @@ CONTAINS
 !! \param loc_id  File or group identifier
 !! \param name    Dataset name
 !! \param dset_id Dataset identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param dapl_id Dataset access property list
 !! \param file    \fortran_file
@@ -439,8 +439,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: dapl_id_default
@@ -515,7 +515,7 @@ CONTAINS
 !! \brief Asynchronously closes a dataset.
 !!
 !! \param dset_id Dataset identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
@@ -528,8 +528,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -659,7 +659,7 @@ CONTAINS
 !!
 !! \param dataset_id Dataset identifier
 !! \param fsize      Array containing the new magnitude of each dimension
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param file       \fortran_file
 !! \param func       \fortran_func
@@ -673,8 +673,8 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: fsize
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -1363,7 +1363,7 @@ CONTAINS
 !!
 !! \param dataset_id   Dataset identifier.
 !! \param dataspace_id Dataspace identifier.
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param file         \fortran_file
 !! \param func         \fortran_func
@@ -1377,8 +1377,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: dataspace_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -1455,11 +1455,11 @@ CONTAINS
 !!
   SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)    :: type_id
-    INTEGER(HID_T), INTENT(IN)    :: space_id
-    INTEGER(HID_T), INTENT(IN)    :: plist_id
-    TYPE(C_PTR)   , INTENT(INOUT) :: buf
-    INTEGER       , INTENT(OUT)   :: hdferr
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    INTEGER(HID_T), INTENT(IN)  :: space_id
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    TYPE(C_PTR)   , INTENT(IN)  :: buf
+    INTEGER       , INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER FUNCTION h5dvlen_reclaim_c(type_id, space_id, plist_id, buf) BIND(C, NAME='h5dvlen_reclaim_c')
@@ -1485,7 +1485,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer to receive data read from file.
-!! \param es_id         \es_id
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
@@ -1502,14 +1502,14 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
-    TYPE(C_PTR), INTENT(INOUT) :: buf
+    TYPE(C_PTR), INTENT(IN)    :: buf
     INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -1552,7 +1552,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer with data to be written to the file.
-!! \param es_id         \es_id
+!! \param es_id         \fortran_es_id
 !! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
@@ -1575,8 +1575,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -1662,7 +1662,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
-    TYPE(C_PTR), INTENT(INOUT) :: buf
+    TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
@@ -1773,9 +1773,9 @@ CONTAINS
   SUBROUTINE h5dfill_f(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
-    TYPE(C_PTR)                :: fill_value
+    TYPE(C_PTR), INTENT(IN)    :: fill_value
     INTEGER(HID_T), INTENT(IN) :: fill_type_id
-    TYPE(C_PTR)                :: buf
+    TYPE(C_PTR), INTENT(IN)    :: buf
     INTEGER(HID_T), INTENT(IN) :: buf_type_id
     INTEGER(HID_T), INTENT(IN) :: space_id
   END SUBROUTINE h5dfill_f
@@ -2101,7 +2101,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
-    TYPE(C_PTR), INTENT(INOUT) :: buf
+    TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
@@ -2126,9 +2126,9 @@ CONTAINS
 
  SUBROUTINE h5dfill_ptr(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
     IMPLICIT NONE
-    TYPE(C_PTR)                :: fill_value
+    TYPE(C_PTR)   , INTENT(IN) :: fill_value
     INTEGER(HID_T), INTENT(IN) :: fill_type_id
-    TYPE(C_PTR)                :: buf
+    TYPE(C_PTR)   , INTENT(IN) :: buf
     INTEGER(HID_T), INTENT(IN) :: buf_type_id
     INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -2288,7 +2288,7 @@ CONTAINS
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_type_id
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_space_id
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
-    TYPE(C_PTR),                      DIMENSION(*) :: buf
+    TYPE(C_PTR),          INTENT(IN), DIMENSION(*) :: buf
     INTEGER,              INTENT(OUT)              :: hdferr
     INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: xfer_prp
 
@@ -2339,7 +2339,7 @@ CONTAINS
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_type_id
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: mem_space_id
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
-    TYPE(C_PTR),                      DIMENSION(*) :: buf
+    TYPE(C_PTR),          INTENT(IN), DIMENSION(*) :: buf
     INTEGER,              INTENT(OUT)              :: hdferr
     INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: xfer_prp
 

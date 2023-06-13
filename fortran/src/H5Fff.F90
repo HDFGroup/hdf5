@@ -127,7 +127,7 @@ CONTAINS
 !!                     \li H5F_ACC_TRUNC_F
 !!                     \li H5F_ACC_EXCL_F
 !! \param file_id      File identifier
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param creation_prp File creation property list identifier
 !! \param access_prp   File access property list identifier
@@ -147,8 +147,8 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: creation_prp
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: creation_prp_default
@@ -234,7 +234,7 @@ CONTAINS
 !! \param scope     Specifies the scope of the flushing action. Possible values are:
 !!                  \li H5F_SCOPE_GLOBAL_F
 !!                  \li H5F_SCOPE_LOCAL_F
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
@@ -248,8 +248,8 @@ CONTAINS
     INTEGER, INTENT(IN) :: scope
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -418,7 +418,7 @@ CONTAINS
 !!                     \li H5F_ACC_RDWR_F
 !!                     \li H5F_ACC_RDONLY_F
 !! \param file_id      File identifier
-!! \param es_id        \es_id
+!! \param es_id        \fortran_es_id
 !! \param hdferr       \fortran_error
 !! \param access_prp   File access property list identifier
 !! \param file         \fortran_file
@@ -436,8 +436,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: access_prp_default
@@ -515,7 +515,7 @@ CONTAINS
 !!
 !! \param file_id     Identifier of a file for which an additional identifier is required.
 !! \param ret_file_id New file identifier.
-!! \param es_id       \es_id
+!! \param es_id       \fortran_es_id
 !! \param hdferr      \fortran_error
 !! \param file        \fortran_file
 !! \param func        \fortran_func
@@ -529,8 +529,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: ret_file_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -724,7 +724,7 @@ CONTAINS
 !! \brief Asynchronously closes HDF5 file.
 !!
 !! \param file_id File identifier
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param file    \fortran_file
 !! \param func    \fortran_func
@@ -737,8 +737,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: file_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR

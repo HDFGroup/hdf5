@@ -261,7 +261,7 @@ CONTAINS
 !! \param loc_id    Location identifier.
 !! \param name      Group name at the specified location.
 !! \param grp_id    Group identifier.
-!! \param es_id     \es_id
+!! \param es_id     \fortran_es_id
 !! \param hdferr    \fortran_error
 !! \param size_hint A parameter indicating the number of bytes to reserve for the names that will appear in the group.
 !!                  Set to OBJECT_NAMELEN_DEFAULT_F if using any of the optional parameters lcpl_id, gcpl_id,
@@ -287,8 +287,8 @@ CONTAINS
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: gcpl_id
     INTEGER(HID_T) , INTENT(IN), OPTIONAL :: gapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T)  :: lcpl_id_default
@@ -420,7 +420,7 @@ CONTAINS
 !! \param loc_id  Location identifier.
 !! \param name    Name of the group to open.
 !! \param grp_id  Group identifier.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param gapl_id Group access property list identifier.
 !! \param file    \fortran_file
@@ -438,8 +438,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: gapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: gapl_id_default
@@ -509,7 +509,7 @@ CONTAINS
 !! \brief Asynchronously closes the specified group.
 !!
 !! \param grp_id Group identifier.
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
 !! \param func   \fortran_func
@@ -522,8 +522,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: grp_id
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: file_default = C_NULL_PTR
@@ -1076,7 +1076,7 @@ CONTAINS
 !!
 !! \param loc_id Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
 !! \param ginfo  Derived type in which group information is returned.
-!! \param es_id  \es_id
+!! \param es_id  \fortran_es_id
 !! \param hdferr \fortran_error
 !! \param file   \fortran_file
 !! \param func   \fortran_func
@@ -1092,8 +1092,8 @@ CONTAINS
     TYPE(H5G_info_t), INTENT(OUT), TARGET  :: ginfo
     INTEGER(HID_T)  , INTENT(IN)           :: es_id
     INTEGER         , INTENT(OUT)          :: hdferr
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     TYPE(C_PTR) :: ptr
@@ -1234,7 +1234,7 @@ CONTAINS
 !! \param order      Order of the count in the index.
 !! \param n          Position in the index of the group for which information is retrieved.
 !! \param ginfo      Derived type in which group information is returned.
-!! \param es_id      \es_id
+!! \param es_id      \fortran_es_id
 !! \param hdferr     \fortran_error
 !! \param lapl_id    Link access property list.
 !! \param file       \fortran_file
@@ -1256,8 +1256,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default
@@ -1414,9 +1414,12 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Name of group containing group for which information is to be retrieved.
 !! \param ginfo   Derived type in which group information is returned.
-!! \param es_id   \es_id
+!! \param es_id   \fortran_es_id
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
 !!
 !! See C API: @ref H5Gget_info_by_name_async()
 !!
@@ -1430,8 +1433,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    TYPE(C_PTR), OPTIONAL :: file
-    TYPE(C_PTR), OPTIONAL :: func
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: file
+    TYPE(C_PTR), OPTIONAL, INTENT(IN) :: func
     INTEGER    , INTENT(IN), OPTIONAL :: line
 
     INTEGER(HID_T) :: lapl_id_default

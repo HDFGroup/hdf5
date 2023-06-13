@@ -4457,7 +4457,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   SUBROUTINE h5pget_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
     CHARACTER(LEN=*), INTENT(IN)  :: name
-    TYPE(C_PTR)     , INTENT(OUT) :: value
+    TYPE(C_PTR)     , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
   END SUBROUTINE h5pget_f
 
@@ -4675,7 +4675,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)                 :: fillvalue
+    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
     hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
@@ -4825,7 +4825,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    TYPE(C_PTR), INTENT(OUT) :: value
+    TYPE(C_PTR), INTENT(IN) :: value
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER :: name_len
 
@@ -4998,8 +4998,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER(HID_T)  , INTENT(OUT) :: class
     INTEGER         , INTENT(OUT) :: hdferr
-    TYPE(C_PTR)     , OPTIONAL    :: create_data, copy_data, close_data
-    TYPE(C_FUNPTR)  , OPTIONAL    :: create, copy, close
+    TYPE(C_PTR)     , OPTIONAL, INTENT(IN) :: create_data, copy_data, close_data
+    TYPE(C_FUNPTR)  , OPTIONAL, INTENT(IN) :: create, copy, close
     INTEGER :: name_len
     TYPE(C_PTR) :: create_data_default, copy_data_default, close_data_default
     TYPE(C_FUNPTR) :: create_default, copy_default, close_default
@@ -5090,19 +5090,19 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
   SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)                :: fapl_id
-    TYPE(C_PTR)    , INTENT(OUT), DIMENSION(*) :: buf_ptr
-    INTEGER(SIZE_T), INTENT(OUT)               :: buf_len_ptr
-    INTEGER        , INTENT(OUT)               :: hdferr
+    INTEGER(HID_T) , INTENT(IN)               :: fapl_id
+    TYPE(C_PTR)    , INTENT(IN), DIMENSION(*) :: buf_ptr
+    INTEGER(SIZE_T), INTENT(OUT)              :: buf_len_ptr
+    INTEGER        , INTENT(OUT)              :: hdferr
 
     INTERFACE
        INTEGER FUNCTION h5pget_file_image_c(fapl_id, buf_ptr, buf_len_ptr) &
             BIND(C, NAME='h5pget_file_image_c')
          IMPORT :: c_ptr
          IMPORT :: HID_T, SIZE_T
-         INTEGER(HID_T), INTENT(IN) :: fapl_id
-         TYPE(C_PTR), DIMENSION(*), INTENT(OUT)  :: buf_ptr
-         INTEGER(SIZE_T), INTENT(OUT)  :: buf_len_ptr
+         INTEGER(HID_T) :: fapl_id
+         TYPE(C_PTR), DIMENSION(*) :: buf_ptr
+         INTEGER(SIZE_T) :: buf_len_ptr
        END FUNCTION h5pget_file_image_c
     END INTERFACE
 
@@ -6047,15 +6047,15 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_minimize
 
     INTERFACE
-       INTEGER FUNCTION h5pget_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pget_dset_no_attrs_hint')
-         IMPORT :: HID_T, C_BOOL
+       INTEGER(C_INT) FUNCTION H5Pget_dset_no_attrs_hint_c(dcpl_id, minimize) BIND(C, NAME='H5Pget_dset_no_attrs_hint')
+         IMPORT :: C_INT, HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
          LOGICAL(C_BOOL), INTENT(OUT) :: minimize
-       END FUNCTION h5pget_dset_no_attrs_hint_c
+       END FUNCTION H5Pget_dset_no_attrs_hint_c
     END INTERFACE
 
-    hdferr = INT(h5pget_dset_no_attrs_hint_c(dcpl_id, c_minimize))
+    hdferr = INT(H5Pget_dset_no_attrs_hint_c(dcpl_id, c_minimize))
 
     ! Transfer value of C C_BOOL type to Fortran LOGICAL
     minimize = c_minimize
@@ -6114,24 +6114,24 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     INTEGER(HID_T) , INTENT(IN)   :: plist_id
     INTEGER(HID_T) , INTENT(IN)   :: new_vol_id
     INTEGER        , INTENT(OUT)  :: hdferr
-    TYPE(C_PTR)    , OPTIONAL     :: new_vol_info
+    TYPE(C_PTR)    , INTENT(IN), OPTIONAL :: new_vol_info
 
     TYPE(C_PTR) :: new_vol_info_default
 
     INTERFACE
-       INTEGER FUNCTION h5pset_vol(plist_id, new_vol_id, new_vol_info) BIND(C, NAME='H5Pset_vol')
-         IMPORT :: HID_T, C_PTR
+       INTEGER(C_INT) FUNCTION H5Pset_vol(plist_id, new_vol_id, new_vol_info) BIND(C, NAME='H5Pset_vol')
+         IMPORT :: C_INT, HID_T, C_PTR
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
          INTEGER(HID_T), INTENT(IN), VALUE :: new_vol_id
          TYPE(C_PTR)   , INTENT(IN), VALUE :: new_vol_info
-       END FUNCTION h5pset_vol
+       END FUNCTION H5Pset_vol
     END INTERFACE
 
     new_vol_info_default = C_NULL_PTR
     IF(PRESENT(new_vol_info)) new_vol_info_default=new_vol_info
 
-    hdferr = INT(h5pset_vol(plist_id, new_vol_id, new_vol_info_default))
+    hdferr = INT(H5Pset_vol(plist_id, new_vol_id, new_vol_info_default))
 
   END SUBROUTINE h5pset_vol_f
 
@@ -6148,22 +6148,52 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !!
   SUBROUTINE h5pget_vol_id_f(plist_id, vol_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T) , INTENT(IN)   :: plist_id
-    INTEGER(HID_T) , INTENT(OUT)  :: vol_id
-    INTEGER        , INTENT(OUT)  :: hdferr
+    INTEGER(HID_T), INTENT(IN)   :: plist_id
+    INTEGER(HID_T), INTENT(OUT)  :: vol_id
+    INTEGER       , INTENT(OUT)  :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION h5pget_vol_id(plist_id, vol_id) BIND(C, NAME='H5Pget_vol_id')
-         IMPORT :: HID_T, C_PTR
+       INTEGER(C_INT) FUNCTION h5pget_vol_id(plist_id, vol_id) BIND(C, NAME='H5Pget_vol_id')
+         IMPORT :: C_INT, HID_T, C_PTR
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
          INTEGER(HID_T), INTENT(OUT) :: vol_id
        END FUNCTION h5pget_vol_id
     END INTERFACE
 
-    hdferr = INT(h5pget_vol_id(plist_id, vol_id))
+    hdferr = INT(H5Pget_vol_id(plist_id, vol_id))
 
   END SUBROUTINE h5pget_vol_id_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Query the capability flags for the VOL connector that will be used with this file access property list (FAPL).
+!
+!! \param plist_id  File access property list identifier
+!! \param cap_flags Flags that indicate the VOL connector capabilities
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Pget_vol_cap_flags()
+!!
+  SUBROUTINE  h5pget_vol_cap_flags_f(plist_id, cap_flags, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)    , INTENT(IN)   :: plist_id
+    INTEGER(C_INT64_T), INTENT(OUT)  :: cap_flags
+    INTEGER           , INTENT(OUT)  :: hdferr
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Pget_vol_cap_flags(plist_id, cap_flags) BIND(C, NAME='H5Pget_vol_cap_flags')
+         IMPORT :: C_INT, HID_T, C_PTR, C_INT64_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: plist_id
+         INTEGER(C_INT64_T), INTENT(OUT)   :: cap_flags
+       END FUNCTION H5Pget_vol_cap_flags
+    END INTERFACE
+
+    hdferr = INT(H5Pget_vol_cap_flags(plist_id, cap_flags))
+
+  END SUBROUTINE h5pget_vol_cap_flags_f
 
 !>
 !! \ingroup FH5P
@@ -6187,17 +6217,17 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+       INTEGER(C_INT) FUNCTION H5Pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
             BIND(C, NAME='H5Pget_file_locking')
-         IMPORT :: HID_T, C_BOOL
+         IMPORT :: C_INT, HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
          LOGICAL(C_BOOL), INTENT(OUT) :: use_file_locking
          LOGICAL(C_BOOL), INTENT(OUT) :: ignore_disabled_locks
-       END FUNCTION h5pget_file_locking
+       END FUNCTION H5Pget_file_locking
     END INTERFACE
 
-    hdferr = INT(h5pget_file_locking(fapl_id, c_use_flag, c_ignore_flag))
+    hdferr = INT(H5Pget_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
     ! Transfer value of C C_BOOL type to Fortran LOGICAL
     use_file_locking = c_use_flag
@@ -6227,21 +6257,21 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+       INTEGER(C_INT) FUNCTION H5Pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
             BIND(C, NAME='H5Pset_file_locking')
-         IMPORT :: HID_T, C_BOOL
+         IMPORT :: C_INT, HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
          LOGICAL(C_BOOL), INTENT(IN), VALUE :: use_file_locking
          LOGICAL(C_BOOL), INTENT(IN), VALUE :: ignore_disabled_locks
-       END FUNCTION h5pset_file_locking
+       END FUNCTION H5Pset_file_locking
     END INTERFACE
 
     ! Transfer value of Fortran LOGICAL to C C_BOOL type
     c_use_flag = use_file_locking
     c_ignore_flag = ignore_disabled_locks
 
-    hdferr = INT(h5pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
+    hdferr = INT(H5Pset_file_locking(fapl_id, c_use_flag, c_ignore_flag))
 
   END SUBROUTINE h5pset_file_locking_f
 

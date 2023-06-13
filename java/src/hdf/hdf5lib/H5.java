@@ -13806,7 +13806,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tcreate creates a new dataype of the specified class with the specified number of bytes.
+     * H5Tcreate creates a new datatype of the specified class with the specified number of bytes.
      *
      * @param tclass
      *            IN: Class of datatype to create.
@@ -15261,7 +15261,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tvlen_create creates a new variable-length (VL) dataype.
+     * H5Tvlen_create creates a new variable-length (VL) datatype.
      *
      * @param base_id
      *            IN: Identifier of parent datatype.
