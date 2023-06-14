@@ -47,7 +47,7 @@
 
 /* toggle stats collection and reporting
  */
-#define ROS3_STATS 1
+#define ROS3_STATS 0
 
 /* The driver identification number, initialized at runtime
  */

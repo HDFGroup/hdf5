@@ -56,7 +56,7 @@
 #define S3COMMS_DEBUG_TRACE_API      2
 #define S3COMMS_DEBUG_TRACE_INTERNAL 3
 #define S3COMMS_DEBUG_HEADERS        4
-#define S3COMMS_DEBUG                S3COMMS_DEBUG_REQUESTS
+#define S3COMMS_DEBUG                S3COMMS_DEBUG_NONE
 
 /* manipulate verbosity of CURL output
  * operates separately from S3COMMS_DEBUG
