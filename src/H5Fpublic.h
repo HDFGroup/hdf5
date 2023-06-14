@@ -1915,7 +1915,6 @@ H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
  * \details H5Fis_hdf5() determines whether a file is in the HDF5 format.
  *
  * \todo In which version was this function deprecated?
- * \todo In which version was this function introduced?
  *
  */
 H5_DLL htri_t H5Fis_hdf5(const char *file_name);
