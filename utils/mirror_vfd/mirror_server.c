@@ -131,27 +131,6 @@ struct server_run {
 };
 
 /* ---------------------------------------------------------------------------
- * Function:   mybzero
- *
- * Purpose:    Introduce bzero without neededing it on the system.
- *
- * Programmer: Jacob Smith
- *             2020-03-30
- * ---------------------------------------------------------------------------
- */
-static void
-mybzero(void *dest, size_t size)
-{
-    size_t i = 0;
-    char  *s = NULL;
-    HDassert(dest);
-    s = (char *)dest;
-    for (i = 0; i < size; i++) {
-        *(s + i) = 0;
-    }
-} /* end mybzero() */
-
-/* ---------------------------------------------------------------------------
  * Function:    usage
  *
  * Purpose:     Print the usage message to stdout.
@@ -190,18 +169,16 @@ usage(void)
 static int
 parse_args(int argc, char **argv, struct op_args *args_out)
 {
-    int i;
-
-    /* preset default values
-     */
+    /* Preset default values */
     args_out->main_port        = DEFAULT_PORT;
     args_out->help             = 0;
     args_out->log_prepend_serv = 1;
     args_out->log_prepend_type = 1;
     args_out->verbosity        = MIRROR_LOG_DEFAULT_VERBOSITY;
-    /* preset empty strings */
-    mybzero(args_out->log_path, PATH_MAX + 1);
-    mybzero(args_out->writer_log_path, PATH_MAX + 1);
+
+    /* Preset empty strings */
+    HDmemset(args_out->log_path, 0, PATH_MAX + 1);
+    HDmemset(args_out->writer_log_path, 0, PATH_MAX + 1);
 
     if (argv == NULL || *argv == NULL) {
         mirror_log(NULL, V_ERR, "invalid argv pointer");
@@ -209,7 +186,7 @@ parse_args(int argc, char **argv, struct op_args *args_out)
     }
 
     /* Loop over arguments after program name */
-    for (i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
             mirror_log(NULL, V_INFO, "found help argument");
             args_out->help = 1;
@@ -569,7 +546,7 @@ handle_requests(struct server_run *run)
             mirror_log(run->loginfo, V_INFO, "probable OPEN xmit received");
 
             H5FD_mirror_xmit_decode_open(xopen, (const unsigned char *)mybuf);
-            if (FALSE == H5FD_mirror_xmit_is_open(xopen)) {
+            if (false == H5FD_mirror_xmit_is_open(xopen)) {
                 mirror_log(run->loginfo, V_WARN, "expected OPEN xmit was malformed");
                 HDclose(connfd);
                 continue;
