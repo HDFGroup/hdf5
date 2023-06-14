@@ -112,7 +112,7 @@ main(void)
 
         // Get information to obtain memory dataspace.
         rank            = filespace->getSimpleExtentNdims();
-        herr_t status_n = filespace->getSimpleExtentDims(dimsr);
+        (void)filespace->getSimpleExtentDims(dimsr);
 
         if (H5D_CHUNKED == prop.getLayout())
             rank_chunk = prop.getChunk(rank, chunk_dimsr);

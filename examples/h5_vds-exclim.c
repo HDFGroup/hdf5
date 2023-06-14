@@ -48,7 +48,7 @@ main(void)
     herr_t  status;
     hsize_t vdsdims[3] = {VDSDIM0, VDSDIM1, VDSDIM2}, kdims[3] = {KDIM0, KDIM1, KDIM2},
             ndims[3] = {NDIM0, NDIM1, NDIM2}, start[3], /* Hyperslab parameters */
-        stride[3], count[3], block[3];
+            count[3], block[3];
     hsize_t      start_out[3], stride_out[3], count_out[3], block_out[3];
     int          k = 2;
     int          n = 3;

@@ -27,7 +27,7 @@ static const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4", "mo
 #define NX            4
 #define NY            5
 #define NAME_BUF_SIZE 40
-static int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
+static int bm[NX][NY]; /* Data buffers */
 
 /*-------------------------------------------------------------------------
  * Function:	setup
