@@ -399,7 +399,7 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --${{ matrix.ros3_vfd }}-ros3-vfd --with-szlib=${{ matrix.szip }}
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --${{ matrix.ros3_vfd }}-ros3-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safety.enabled)
 
