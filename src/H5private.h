@@ -973,6 +973,12 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
 #endif
+#ifndef HDntohl
+#define HDntohl(A) ntohl((A))
+#endif
+#ifndef HDntohs
+#define HDntohs(A) ntohs((A))
+#endif
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
 #endif
