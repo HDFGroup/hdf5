@@ -6,7 +6,6 @@ Programs run via `autogen.sh` (or the equivalent in CMake) are indicated.
 |-------|-------|
 |`buildhdf5`|Convenience script to build HDF5 using the Autotools|
 |`checkapi`|Checks if public API calls are used in internal functions|
-|`checkposix`|Checks if C/POSIX calls are prefixed with `HD`|
 |`chkcopyright`|Checks if files have appropriate copyright statements|
 |`cmakehdf5`|Convenience script to build HDF5 using CMake|
 |`debug-ohdr`|Examines debug output from `H5O_open/close` to look for open objects|
