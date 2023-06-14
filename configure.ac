@@ -2033,7 +2033,7 @@ case "`uname`" in
   CYGWIN*)
     ;;
   *)
-    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo getpwuid])
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
     ;;
 esac
 AC_CHECK_FUNCS([_scrsize ioctl])
@@ -2080,7 +2080,6 @@ AC_SEARCH_LIBS([clock_gettime], [rt posix4])
 AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([rand_r random setsysinfo])
-AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([strcasestr strdup symlink])
 AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
 
