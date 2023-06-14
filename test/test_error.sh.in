@@ -14,7 +14,7 @@
 
 srcdir=@srcdir@
 
-# Determine backward compatibility options eneabled
+# Determine backward compatibility options enabled
 DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
 CMP='cmp -s'
