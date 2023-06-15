@@ -241,28 +241,28 @@ prepare_listening_socket(struct server_run *run)
     mirror_log(run->loginfo, V_INFO, "preparing socket");
 
     server_addr.sin_family      = AF_INET;
-    server_addr.sin_addr.s_addr = HDhtonl(INADDR_ANY);
-    server_addr.sin_port        = HDhtons((uint16_t)run->opts.main_port);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port        = htons((uint16_t)run->opts.main_port);
 
     mirror_log(run->loginfo, V_INFO, "socket()");
-    ret_value = HDsocket(AF_INET, SOCK_STREAM, 0);
+    ret_value = socket(AF_INET, SOCK_STREAM, 0);
     if (ret_value < 0) {
         mirror_log(run->loginfo, V_ERR, "listening socket:%d", ret_value);
         goto error;
     }
 
     mirror_log(run->loginfo, V_ALL, "setsockopt()");
-    HDsetsockopt(ret_value, SOL_SOCKET, SO_REUSEADDR, &_true, sizeof(int));
+    setsockopt(ret_value, SOL_SOCKET, SO_REUSEADDR, &_true, sizeof(int));
 
     mirror_log(run->loginfo, V_INFO, "bind()");
-    ret = HDbind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    ret = bind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0) {
         mirror_log(run->loginfo, V_ERR, "bind() %s", HDstrerror(errno));
         goto error;
     }
 
     mirror_log(run->loginfo, V_INFO, "listen()");
-    ret = HDlisten(ret_value, LISTENQ);
+    ret = listen(ret_value, LISTENQ);
     if (ret < 0) {
         mirror_log(run->loginfo, V_ERR, "H5FD server listen:%d", ret);
         goto error;
@@ -392,7 +392,7 @@ accept_connection(struct server_run *run)
     /*------------------------------*/
     /* accept a connection on a socket */
     clilen = sizeof(client_addr);
-    connfd = HDaccept(run->listenfd, (struct sockaddr *)&client_addr, &clilen);
+    connfd = accept(run->listenfd, (struct sockaddr *)&client_addr, &clilen);
     if (connfd < 0) {
         mirror_log(run->loginfo, V_ERR, "accept:%d", connfd);
         goto error;
@@ -401,15 +401,15 @@ accept_connection(struct server_run *run)
 
     /*------------------------------*/
     /* get client address information */
-    host_port = HDgethostbyaddr((const char *)&client_addr.sin_addr.s_addr,
-                                sizeof(client_addr.sin_addr.s_addr), AF_INET);
+    host_port = gethostbyaddr((const char *)&client_addr.sin_addr.s_addr, sizeof(client_addr.sin_addr.s_addr),
+                              AF_INET);
     if (host_port == NULL) {
         mirror_log(run->loginfo, V_ERR, "gethostbyaddr()");
         goto error;
     }
 
     /* function has the string space statically scoped -- OK until next call */
-    hostaddrp = HDinet_ntoa(client_addr.sin_addr);
+    hostaddrp = inet_ntoa(client_addr.sin_addr);
     /* TODO? proper error-checking */
 
     mirror_log(run->loginfo, V_INFO, "server connected with %s (%s)", host_port->h_name, hostaddrp);
