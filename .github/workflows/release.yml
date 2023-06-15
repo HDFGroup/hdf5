@@ -99,7 +99,7 @@ jobs:
       - name: PreRelease tag
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "snapshot"
+          tag_name: "snapshot_1_14"
           prerelease: true
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
