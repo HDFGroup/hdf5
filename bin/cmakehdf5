@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # Build and Test HDF5 using cmake.
 # Author: Allen Byrne
 #         Albert Cheng
@@ -365,7 +365,7 @@ STEP "Configure..." \
     $with_zlib \
     $with_szlib \
     $srcdir" $configlog &&\
-    cat $config_summary >> $configlog
+    cat src/$config_summary >> $configlog
 
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release -- $njobs" $makelog
