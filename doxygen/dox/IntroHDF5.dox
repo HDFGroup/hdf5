@@ -602,8 +602,8 @@ Navigate back: \ref index "Main" / \ref GettingStarted
 @page HDF5Examples HDF5 Examples
 Example programs of how to use HDF5 are provided below.
 For HDF-EOS specific examples, see the <a href="http://hdfeos.org/zoo/index.php">examples</a>
-of how to access and visualize NASA HDF-EOS files using IDL, MATLAB, and NCL on the
-<a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> page.
+of how to access and visualize NASA HDF-EOS files using Python, IDL, MATLAB, and NCL
+on the <a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> page.
 
 \section secHDF5Examples Examples
 \li \ref LBExamples
