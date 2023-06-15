@@ -274,10 +274,6 @@ versions used when creating objects.</td>
 <td>Sets the file VOL connector for a file access property list.</td>
 </tr>
 <tr>
-<td>#H5Pget_vol_cap_flags</td>
-<td>Retrieves the capability flags for the VOL connector that will be used with a file access property list.</td>
-</tr>
-<tr>
 <td>#H5Pget_vol_id</td>
 <td>Retrieves the identifier of the current VOL connector.</td>
 </tr>
@@ -316,18 +312,6 @@ versions used when creating objects.</td>
 <td>Returns a pointer to file driver information.</td>
 </tr>
 <tr>
-<td>#H5Pset_driver_by_name</td>
-<td>Sets a file driver according to a given driver name.</td>
-</tr>
-<tr>
-<td>#H5Pset_driver_by_value</td>
-<td>Sets a file driver according to a given driver value.</td>
-</tr>
-<tr>
-<td>#H5Pget_driver_config_str</td>
-<td>Retrieves a string representation of the configuration for the driver.</td>
-</tr>
-<tr>
 <td>#H5Pset_fapl_core/#H5Pget_fapl_core</td>
 <td>Sets the driver for buffered memory files (in RAM) or retrieves information regarding
 the driver.</td>
@@ -344,10 +328,6 @@ larger than 2 gigabytes, or retrieves information regarding driver.</td>
 <tr>
 <td>#H5Pset_fapl_hdfs/#H5Pget_fapl_hdfs</td>
 <td>.</td>
-</tr>
-<tr>
-<td>#H5Pset_fapl_ioc/#H5Pget_fapl_ioc</td>
-<td>Modifies/queries the file driver properties of the I/O concentrator driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_log</td>
@@ -383,10 +363,6 @@ and one raw data file.</td>
 <tr>
 <td>#H5Pset_fapl_stdio</td>
 <td>Sets driver for buffered permanent files.</td>
-</tr>
-<tr>
-<td>#H5Pset_fapl_subfiling/#H5Pget_fapl_subfiling</td>
-<td>Modifies/queries the file driver properties of the subfiling driver.</td>
 </tr>
 <tr>
 <td>#H5Pset_fapl_windows</td>
@@ -625,10 +601,6 @@ pointers to application-allocated buffers.</td>
 <tr>
 <td>#H5Pset_data_transform/#H5Pget_data_transform</td>
 <td>Sets/gets a data transform expression.</td>
-</tr>
-<tr>
-<td>#H5Pset_dataset_io_hyperslab_selection</td>
-<td>Sets a hyperslab file selection for a dataset I/O operation.</td>
 </tr>
 <tr>
 <td>#H5Pset_edc_check/#H5Pget_edc_check</td>
