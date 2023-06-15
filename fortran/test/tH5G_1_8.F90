@@ -1220,7 +1220,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 !!$	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 !!$	TEST_ERROR
 !!$    }  end if
-!!$    if(H5F_addr_ne(oinfo1.addr, oinfo2.addr)) {
+!!$    if(H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
 !!$	H5_FAILED();
 !!$	puts("    Hard link test failed. Link seems not to point to the ");
 !!$	puts("    expected file location.");

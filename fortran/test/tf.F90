@@ -69,8 +69,10 @@ CONTAINS
 
     CHARACTER(LEN=*), INTENT(IN) :: title_header ! test name
     INTEGER, PARAMETER :: width = TAB_SPACE+10
-    CHARACTER(LEN=2*width) ::title_centered =" "
+    CHARACTER(LEN=2*width) ::title_centered
     INTEGER :: len, i
+
+    title_centered(:) = " "
 
     len=LEN_TRIM(title_header)
     title_centered(1:3) ="| |"
@@ -94,8 +96,8 @@ CONTAINS
     ENDDO
     WRITE(*,'("| |")')
 
-    WRITE(*,'(A)') title_centered
-
+    WRITE(*,'(A)') TRIM(title_centered)
+  
     WRITE(*,'("| |")', ADVANCE="NO")
     DO i = 1, width-5
        WRITE(*,'(1X)', ADVANCE="NO")
