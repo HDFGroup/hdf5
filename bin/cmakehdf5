@@ -45,6 +45,7 @@ fi
 cacheinit=$srcdir/config/cmake/cacheinit.cmake
 build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
 build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
+build_java=-DHDF5_BUILD_JAVA:BOOL=OFF           # Java interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=OFF  # Threadsafe feature default off
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
@@ -82,6 +83,8 @@ Usage: $progname [<options>]
     enable or disable fortran API. Default is off.
   --enable-cxx | --disable-cxx:
     enable or disable c++ API. Default is off.
+  --enable-java | --disable-java:
+    enable or disable Java API. Default is off.
   --enable-hl | --disable-hl:
     enable or disable high level API. Default is on.
   --enable-threadsafe | --disable-threadsafe:
@@ -210,6 +213,7 @@ fi
 # XXX can be:
 # fortran	Fortran interface
 # cxx		C++ interface
+# java          Java interface
 # hl		Highlevel interface
 # testing	Build tests
 # tools		Build tools
@@ -226,6 +230,12 @@ while [ $# -gt 0 ]; do
 	    ;;
 	--disable-cxx)
 	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF
+	    ;;
+        --enable-java)
+            build_java=-DHDF5_BUILD_JAVA:BOOL=ON
+	    ;;
+        --disable-java)
+            build_java=-DHDF5_BUILD_JAVA:BOOL=OFF
 	    ;;
 	--enable-hl)
 	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON
@@ -345,6 +355,7 @@ STEP "Configure..." \
     -C $cacheinit \
     $build_cpp_lib \
     $build_fortran \
+    $build_java \
     $build_hl_lib \
     $build_threadsafe \
     $shared_lib \
