@@ -457,7 +457,7 @@ Bug Fixes since HDF5-1.14.0 release
     - Reading a H5std_string (std::string) via a C++ DataSet previously
       truncated the string at the first null byte as if reading a C string.
       Fixed length datasets are now read into H5std_string as a fixed length
-      string of the appropriate size. Varible length datasets will still be
+      string of the appropriate size. Variable length datasets will still be
       truncated at the first null byte.
 
       Fixes Github issue #3034
