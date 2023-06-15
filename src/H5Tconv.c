@@ -7656,12 +7656,14 @@ H5T__conv_llong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5T_CONV_INTERNAL_LLONG_LDOUBLE
 herr_t
 H5T__conv_llong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_xF(LLONG, LDOUBLE, long long, long double, -, -);
 }
+#endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ullong_float
@@ -7716,12 +7718,14 @@ H5T__conv_ullong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
 herr_t
 H5T__conv_ullong_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long long, long double, -, -);
 }
+#endif /*H5T_CONV_INTERNAL_ULLONG_LDOUBLE*/
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_float_schar
@@ -8352,6 +8356,7 @@ H5T__conv_double_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
 herr_t
 H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
@@ -8360,6 +8365,7 @@ H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
     H5T_CONV_Fx(LDOUBLE, LLONG, long double, long long, LLONG_MIN, LLONG_MAX);
     H5_GCC_CLANG_DIAG_ON("float-equal")
 }
+#endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ldouble_ullong
@@ -8374,6 +8380,7 @@ H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_ULLONG
 herr_t
 H5T__conv_ldouble_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
@@ -8382,6 +8389,7 @@ H5T__conv_ldouble_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
     H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long long, 0, ULLONG_MAX);
     H5_GCC_CLANG_DIAG_ON("float-equal")
 }
+#endif /*H5T_CONV_INTERNAL_LDOUBLE_ULLONG*/
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_f_i

@@ -3384,6 +3384,27 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Decide whether the data accuracy has higher priority during data
+## conversions.  If not, some hard conversions will still be preferred even
+## though the data may be wrong (for example, some compilers don't
+## support denormalized floating values) to maximize speed.
+##
+AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
+AC_ARG_ENABLE([dconv-accuracy],
+              [AS_HELP_STRING([--enable-dconv-accuracy],
+                              [if data accuracy is guaranteed during
+                              data conversions [default=yes]])],
+              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
+
+if test "$DATA_ACCURACY" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([WANT_DATA_ACCURACY], [1],
+            [Data accuracy is preferred to speed during data conversions])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine has window style pathname,
 ## that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
 ## (This flag should be _unset_ for all machines, except for Windows, where
@@ -3401,6 +3422,158 @@ case "`uname`" in
     AC_MSG_RESULT([no])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is using a special algorithm to convert
+## 'long double' to '(unsigned) long' values.  (This flag should only be set for
+## the IBM Power6 Linux.  When the bit sequence of long double is
+## 0x4351ccf385ebc8a0bfcc2a3c3d855620, the converted value of (unsigned)long
+## is 0x004733ce17af227f, not the same as the library's conversion to 0x004733ce17af2282.
+## The machine's conversion gets the correct value.  We define the macro and disable
+## this kind of test until we figure out what algorithm they use.
+##
+## CROSS-COMPILING: Assume 'no'
+AC_MSG_CHECKING([if using special algorithm to convert long double to (unsigned) long values])
+
+## NOTE: Place all configure test programs into cmake's source file, then use a preprocessor directive
+## to select the proper test program. This is done by echoing the #define and cat'ing the cmake
+## source file. (HDFFV-9467)
+
+TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_LONG_SPECIAL_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ldouble_to_long_special=${hdf5_cv_ldouble_to_long_special=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_long_special],
+        [AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([$TEST_SRC])]
+    , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no], [hdf5_cv_ldouble_to_long_special=no])])
+fi
+
+if test ${hdf5_cv_ldouble_to_long_special} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_LONG_SPECIAL], [1],
+            [Define if your system converts long double to (unsigned) long values with special algorithm.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is using a special algorithm
+## to convert some values of '(unsigned) long' to 'long double' values.
+## (This flag should be off for all machines, except for IBM Power6 Linux,
+## when the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
+## ..., 7fffff..., the compiler uses a unknown algorithm.  We define a
+## macro and skip the test for now until we know about the algorithm.
+##
+## CROSS-COMPILING: Assume 'no'
+AC_MSG_CHECKING([if using special algorithm to convert (unsigned) long to long double values])
+
+TEST_SRC="`(echo \"#define H5_LONG_TO_LDOUBLE_SPECIAL_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_long_to_ldouble_special=${hdf5_cv_long_to_ldouble_special=no}
+else
+   AC_CACHE_VAL([hdf5_cv_long_to_ldouble_special],
+        [AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([$TEST_SRC])]
+    , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no], [hdf5_cv_long_to_ldouble_special=no])])
+fi
+
+if test ${hdf5_cv_long_to_ldouble_special} = "yes"; then
+  AC_DEFINE([LONG_TO_LDOUBLE_SPECIAL], [1],
+            [Define if your system can convert (unsigned) long to long double values with special algorithm.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine can accurately convert
+## 'long double' to '(unsigned) long long' values.  (This flag should
+## be set for all machines, except for Mac OS 10.4, SGI IRIX64 6.5 and
+## Powerpc Linux using XL compilers.
+## When the bit sequence of long double is 0x4351ccf385ebc8a0bfcc2a3c...,
+## the values of (unsigned)long long start to go wrong on these
+## two machines.  Adjusting it higher to 0x4351ccf385ebc8a0dfcc... or
+## 0x4351ccf385ebc8a0ffcc... will make the converted values wildly wrong.
+## This test detects this wrong behavior and disable the test.
+##
+## CROSS-COMPILING: Assume 'yes'
+AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
+
+TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_LLONG_ACCURATE_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no], [hdf5_cv_ldouble_to_llong_accurate=yes])])
+fi
+
+if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_LLONG_ACCURATE], [1],
+            [Define if your system can convert long double to (unsigned) long long values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine can accurately convert
+## '(unsigned) long long' to 'long double' values.  (This flag should be
+## set for all machines, except for Mac OS 10.4 and Powerpc Linux using
+## XL compilers.
+## When the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
+## ..., 7fffff..., the converted values are twice as big as they should be.
+##
+## CROSS-COMPILING: Assume 'yes'
+AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
+
+TEST_SRC="`(echo \"#define H5_LLONG_TO_LDOUBLE_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
+else
+   AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no], [hdf5_cv_llong_to_ldouble_correct=yes])])
+fi
+
+if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
+  AC_DEFINE([LLONG_TO_LDOUBLE_CORRECT], [1],
+            [Define if your system can convert (unsigned) long long to long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine is IBM ppc64le and cannot
+## accurately convert some long double values.
+##
+## CROSS-COMPILING: Assume 'yes'
+AC_MSG_CHECKING([if the system is IBM ppc64le and cannot correctly convert some long double values])
+
+TEST_SRC="`(echo \"#define H5_DISABLE_SOME_LDOUBLE_CONV_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_disable_some_ldouble_conv=${hdf5_cv_disable_some_ldouble_conv=no}
+else
+   AC_CACHE_VAL([hdf5_cv_disable_some_ldouble_conv],
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_disable_some_ldouble_conv=yes], [hdf5_cv_disable_some_ldouble_conv=no], [hdf5_cv_disable_some_ldouble_conv=yes])])
+fi
+
+if test ${hdf5_cv_disable_some_ldouble_conv} = "yes"; then
+  AC_DEFINE([DISABLE_SOME_LDOUBLE_CONV], [1],
+            [Define if your system is IBM ppc64le and cannot convert some long double values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
 
 ## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
