@@ -1031,15 +1031,6 @@ References:
     https://stackoverflow.com/questions/54539682/how-to-set-up-cmake-to-cross-compile-with-clang-for-arm-embedded-on-windows?rq=1
     https://developer.android.com/ndk/guides/cmake
 
-Predefine H5Tinit.c file
--------------------------------
-The one file that needs to be pre-generated is the H5Tinit.c file. The variables
-indicated in the error log (see above) are the variables that need to match the target system.
-
-The HDF5 CMake variables;
-    HDF5_USE_PREGEN: set this to true
-    HDF5_USE_PREGEN_DIR: set this path to the preset H5Tinit.c file
-
 
 ========================================================================
 X:    Using CMakePresets.json for compiling

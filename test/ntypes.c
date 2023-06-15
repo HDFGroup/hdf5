@@ -381,10 +381,7 @@ test_compound_dtype2(hid_t file)
 #else
 #error "Unknown 'long' size"
 #endif
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I32BE) < 0)
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I64BE) < 0)
         TEST_ERROR;
 #else
@@ -397,10 +394,7 @@ test_compound_dtype2(hid_t file)
         TEST_ERROR;
     if (H5Tinsert(tid, "st", HOFFSET(s1, st), tid2) < 0)
         TEST_ERROR;
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U32BE) < 0)
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U64BE) < 0)
         TEST_ERROR;
 #else
@@ -532,10 +526,7 @@ test_compound_dtype2(hid_t file)
         TEST_ERROR;
     if (H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_LLONG))
         TEST_ERROR;
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I32LE))
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I64LE))
         TEST_ERROR;
 #else

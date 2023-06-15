@@ -408,11 +408,9 @@
  * NATIVE
  *       </td>
  *       <td span='3'>
- * This architecture contains C-like datatypes for the machine on which
- * the library was compiled. The types were actually defined by running
- * the H5detect program when the library was compiled. In order to be
- * portable, applications should almost always use this architecture
- * to describe things in memory.
+ * This architecture contains C-like datatypes for the machine for which
+ * the library was compiled. In order to be portable, applications should
+ * almost always use this architecture to describe things in memory.
  *       </td>
  *     </tr>
  *     <tr>
@@ -3921,9 +3919,8 @@ filled according to the value of this property. The padding can be:
  *
  * \defgroup PDTNAT Native Datatypes
  * \ingroup PDT
- * \details These are the datatypes detected during library \Emph{compilation}
- *          by \c H5detect(). Their names differ from other HDF5 datatype names
- *          as follows:
+ * \details These are the C-like datatypes for the platform. Their names differ
+ *          from other HDF5 datatype names as follows:
  *          \li Instead of a class name, precision and byte order as the last
  *              component, they have a C-like type name.
  *          \li If the type begins with \c U then it is the unsigned version of
