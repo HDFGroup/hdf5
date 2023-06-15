@@ -97,6 +97,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: PreRelease tag
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "snapshot"
@@ -109,6 +110,15 @@ jobs:
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Store Release url
+        run: |
+          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+    
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./upload_url
+          name: upload_url
 
       - name: List files for the space (Linux)
         run: |
