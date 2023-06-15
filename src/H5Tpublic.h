@@ -2306,7 +2306,7 @@ H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
  *
  *          \li #H5T_NATIVE_FLOAT
  *          \li #H5T_NATIVE_DOUBLE
- *          \li #H5T_NATIVE_LDOUBLE
+ *          \li H5T_NATIVE_LDOUBLE
  *
  *          \li #H5T_NATIVE_B8
  *          \li #H5T_NATIVE_B16

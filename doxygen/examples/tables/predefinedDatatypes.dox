@@ -469,7 +469,7 @@
 <td>C-style double</td>
 </tr>
 <tr>
-<td>#H5T_NATIVE_LDOUBLE</td>
+<td>H5T_NATIVE_LDOUBLE</td>
 <td>C-style long double</td>
 </tr>
 <tr>

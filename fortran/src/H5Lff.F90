@@ -472,7 +472,7 @@ CONTAINS
 !!                     \li H5L_TYPE_SOFT_F     - Soft link
 !!                     \li H5L_TYPE_EXTERNAL_F - External link
 !!                     \li H5L_TYPE_ERROR_ F   - Error
-!! \param token        If the link is a hard link, token specifies the object token that the link points to.
+!! \param address      If the link is a hard link, address specifies the file address that the link points to.
 !! \param val_size     If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                     the length of the name of the pointed-to object with a null terminator.
 !! \param hdferr       \fortran_error
