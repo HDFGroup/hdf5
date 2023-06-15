@@ -17,6 +17,10 @@ on:
         required: true
         type: string
 
+# Minimal permissions to be inherited by any job that don't declare it's own permissions
+permissions:
+  contents: read
+
 # Previous workflows must pass to get here so tag the commit that created the files
 jobs:
   create-tag:
