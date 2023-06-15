@@ -3493,7 +3493,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                                                (hsize_t)0, (hsize_t)0);
                         break;
                     case H5Z_FILTER_SZIP:
-                        szip_options_mask = cd_values[0];
+                        szip_options_mask     = cd_values[0];
                         szip_pixels_per_block = cd_values[1];
 
                         h5tools_str_append(&buffer, "%s %s", SZIP, BEGIN);

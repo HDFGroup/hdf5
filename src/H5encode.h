@@ -32,7 +32,7 @@
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define UINT16ENCODE(p, i)                                                                                   \
     do {                                                                                                     \
@@ -40,7 +40,7 @@
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff);                                                       \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define INT32ENCODE(p, i)                                                                                    \
     do {                                                                                                     \
@@ -52,7 +52,7 @@
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((uint32_t)(i) >> 24) & 0xff);                                                      \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define UINT32ENCODE(p, i)                                                                                   \
     do {                                                                                                     \
@@ -64,7 +64,7 @@
         (p)++;                                                                                               \
         *(p) = (uint8_t)(((i) >> 24) & 0xff);                                                                \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 /* Encode an unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
@@ -94,7 +94,7 @@
         for (/*void*/; _i < 8; _i++)                                                                         \
             *_p++ = (uint8_t)((n) < 0 ? 0xff : 0);                                                           \
         (p) = (uint8_t *)(p) + 8;                                                                            \
-    } while(0)
+    } while (0)
 
 #define UINT64ENCODE(p, n)                                                                                   \
     do {                                                                                                     \
@@ -107,7 +107,7 @@
         for (/*void*/; _i < 8; _i++)                                                                         \
             *_p++ = 0;                                                                                       \
         (p) = (uint8_t *)(p) + 8;                                                                            \
-    } while(0)
+    } while (0)
 
 /* Encode a 64-bit unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
@@ -117,7 +117,7 @@
     do {                                                                                                     \
         HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));                                              \
         UINT32ENCODE(p, n);                                                                                  \
-    } while(0)
+    } while (0)
 
 /* Assumes the endianness of uint64_t is the same as double */
 #define H5_ENCODE_DOUBLE(p, n)                                                                               \
@@ -132,7 +132,7 @@
         for (_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)                                                  \
             *_p++ = (uint8_t)(_n & 0xff);                                                                    \
         (p) = (uint8_t *)(p) + 8;                                                                            \
-    } while(0)
+    } while (0)
 
 /* DECODE converts little endian bytes pointed by p to integer values and store
  * it in i.  For signed values, need to do sign-extension when converting
@@ -148,7 +148,7 @@
         (p)++;                                                                                               \
         (i) |= (int16_t)(((*(p)&0xff) << 8) | ((*(p)&0x80) ? ~0xffff : 0x0));                                \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define UINT16DECODE(p, i)                                                                                   \
     do {                                                                                                     \
@@ -156,7 +156,7 @@
         (p)++;                                                                                               \
         (i) |= (uint16_t)((*(p)&0xff) << 8);                                                                 \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define INT32DECODE(p, i)                                                                                    \
     do {                                                                                                     \
@@ -168,7 +168,7 @@
         (p)++;                                                                                               \
         (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) | ((*(p)&0x80) ? ~0xffffffffULL : 0x0ULL)));       \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 #define UINT32DECODE(p, i)                                                                                   \
     do {                                                                                                     \
@@ -180,7 +180,7 @@
         (p)++;                                                                                               \
         (i) |= ((uint32_t)(*(p)&0xff) << 24);                                                                \
         (p)++;                                                                                               \
-    } while(0)
+    } while (0)
 
 /* Decode a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
@@ -193,7 +193,7 @@
         for (_i = 0; _i < l; _i++)                                                                           \
             n = (n << 8) | *(--p);                                                                           \
         (p) += l;                                                                                            \
-    } while(0)
+    } while (0)
 
 /* Decode a variable-sized buffer into a 32-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
@@ -209,7 +209,7 @@
         for (_i = 0; _i < sizeof(int64_t); _i++)                                                             \
             n = (n << 8) | *(--p);                                                                           \
         (p) += 8;                                                                                            \
-    } while(0)
+    } while (0)
 
 #define UINT64DECODE(p, n)                                                                                   \
     do {                                                                                                     \
@@ -221,7 +221,7 @@
         for (_i = 0; _i < sizeof(uint64_t); _i++)                                                            \
             n = (n << 8) | *(--p);                                                                           \
         (p) += 8;                                                                                            \
-    } while(0)
+    } while (0)
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
@@ -231,7 +231,7 @@
     do {                                                                                                     \
         HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));                                              \
         UINT32DECODE(p, n);                                                                                  \
-    } while(0)
+    } while (0)
 
 /* Assumes the endianness of uint64_t is the same as double */
 #define H5_DECODE_DOUBLE(p, n)                                                                               \
@@ -247,7 +247,7 @@
             _n = (_n << 8) | *(--p);                                                                         \
         HDmemcpy(&(n), &_n, sizeof(double));                                                                 \
         (p) += 8;                                                                                            \
-    } while(0)
+    } while (0)
 
 /* Macros to encode/decode offset/length's for storing in the file */
 #define H5_ENCODE_LENGTH_LEN(p, l, s)                                                                        \
@@ -264,8 +264,8 @@
                 break;                                                                                       \
             default:                                                                                         \
                 HDassert("bad sizeof size" && 0);                                                            \
-       }                                                                                                     \
-    } while(0)
+        }                                                                                                    \
+    } while (0)
 
 #define H5_DECODE_LENGTH_LEN(p, l, s)                                                                        \
     do {                                                                                                     \
@@ -282,6 +282,6 @@
             default:                                                                                         \
                 HDassert("bad sizeof size" && 0);                                                            \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 #endif /* H5encode_H */

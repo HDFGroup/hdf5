@@ -44,8 +44,8 @@
             HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
                 HDputs("    Suppressing further errors...");                                                 \
-        } /* end if */                                                                                       \
-    } while(0) /* end GHEAP_REPEATED_ERR */
+        }       /* end if */                                                                                 \
+    } while (0) /* end GHEAP_REPEATED_ERR */
 
 const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapooo", NULL};
 

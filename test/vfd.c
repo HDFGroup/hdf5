@@ -85,7 +85,7 @@ static int __k;
             }                                                                                                \
             HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                        \
         }                                                                                                    \
-    } while(0) /* end #define HEXPRINT() */
+    } while (0) /* end #define HEXPRINT() */
 
 /* Macro SET_SIZE()
  *
@@ -2391,7 +2391,7 @@ error:
         HDfflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
-    } while(0)
+    } while (0)
 
 /*-------------------------------------------------------------------------
  * Function:    compare_splitter_config_info

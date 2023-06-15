@@ -321,7 +321,7 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
         /* Allocate space if necessary */
         if (info->nused == info->nalloc) {
             info->nalloc = MAX(1, info->nalloc * 2);
-            info->paths = (trav_path_t *)HDrealloc(info->paths, info->nalloc * sizeof(trav_path_t));
+            info->paths  = (trav_path_t *)HDrealloc(info->paths, info->nalloc * sizeof(trav_path_t));
         } /* end if */
 
         /* Append it */

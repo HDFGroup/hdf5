@@ -157,7 +157,7 @@ static int without_hardware_g = 0;
             if (n < SRC_PREC - 1)                                                                            \
                 value2 = (TYPE)(value2 << 1);                                                                \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Change a buffer's byte order from big endian to little endian.  It's mainly for library's
  * bit operations which handle only little endian order.
@@ -187,7 +187,7 @@ static int without_hardware_g = 0;
                 EBUF[(ESIZE - 1) - m] = mediator2;                                                           \
             }                                                                                                \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point normalized values.
  * It's for conversion test of floating-point as the source.
@@ -267,7 +267,7 @@ static int without_hardware_g = 0;
         HDmemcpy(saved_p, &value2, SRC_SIZE);                                                                \
         buf_p += SRC_SIZE;                                                                                   \
         saved_p += SRC_SIZE;                                                                                 \
-    } while(0)
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point denormalized values.
  * It's for conversion test of floating-point as the source.
@@ -319,7 +319,7 @@ static int without_hardware_g = 0;
         }                                                                                                    \
         HDfree(tmp1);                                                                                        \
         HDfree(tmp2);                                                                                        \
-    } while(0)
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point special values, +/-0, +/-infinity,
  * +/-QNaN, +/-SNaN.  It's for conversion test of floating-point as the source.
@@ -383,7 +383,7 @@ static int without_hardware_g = 0;
                                                                                                              \
         HDmemcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
         HDfree(value);                                                                                       \
-    } while(0)
+    } while (0)
 
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);

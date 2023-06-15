@@ -1663,10 +1663,15 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
  * that will always generate the expected name.
  */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)                                                        \
-    do { ASSIGN_##srctype##_TO_##dsttype(dst, dsttype, src, srctype) } while (0)
+    do {                                                                                                     \
+        ASSIGN_##srctype##_TO_##dsttype(dst, dsttype, src, srctype)                                          \
+    } while (0)
 
 #else /* NDEBUG */
-#define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype) do { (dst) = (dsttype)(src); } while (0)
+#define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)                                                        \
+    do {                                                                                                     \
+        (dst) = (dsttype)(src);                                                                              \
+    } while (0)
 #endif /* NDEBUG */
 
 #if defined(H5_HAVE_WINDOW_PATH)

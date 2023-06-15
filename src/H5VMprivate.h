@@ -41,7 +41,7 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
             H5MM_memcpy(DST, SRC, (N) * sizeof(*(DST)));                                                     \
         else                                                                                                 \
             HDmemset(DST, 0, (N) * sizeof(*(DST)));                                                          \
-    } while(0)
+    } while (0)
 
 #define H5VM_vector_zero(N, DST) HDmemset(DST, 0, (N) * sizeof(*(DST)))
 
@@ -60,7 +60,7 @@ typedef herr_t (*H5VM_opvv_func_t)(hsize_t dst_off, hsize_t src_off, size_t len,
             HDmemmove(&(COORDS)[1], &(COORDS)[0], sizeof(TYPE) * (UNLIM_DIM));                               \
             (COORDS)[0] = _tmp;                                                                              \
         } /* end if */                                                                                       \
-    } while(0)
+    } while (0)
 
 /* Given a coordinate offset array (COORDS) of type TYPE, move the value at
  * offset 0 to offset of the unlimied dimension (UNLIM_DIM), sliding any

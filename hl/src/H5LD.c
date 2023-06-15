@@ -194,7 +194,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
             switch (*fields_ptr) {
                 case '\0':           /* end of list */
                     if (gotmember) { /* getting something and end of "fields" */
-                        *cur++ = '\0';
+                        *cur++           = '\0';
                         memb->names[++j] = NULL;
                     }    /* end if */
                     else /* getting nothing but end of list */

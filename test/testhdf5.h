@@ -48,7 +48,7 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Check that a pointer is valid (i.e.: not NULL) */
 #define CHECK_PTR(ret, where)                                                                                \
@@ -62,7 +62,7 @@
                           __FILE__);                                                                         \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Check that a pointer is NULL */
 #define CHECK_PTR_NULL(ret, where)                                                                           \
@@ -76,7 +76,7 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Check that two pointers are equal */
 #define CHECK_PTR_EQ(ret, val, where)                                                                        \
@@ -91,7 +91,7 @@
                 (where), (const void *)(ret), (const void *)(val), (int)__LINE__, __FILE__);                 \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    } while(0)
+    } while (0)
 
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(_x, _val, where)                                                                              \
@@ -170,13 +170,13 @@
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                                            \
         if (mpi_rank == 0 && HDGetTestVerbosity() > (V))                                                     \
             print_func A;                                                                                    \
-    } while(0)
+    } while (0)
 #else /* H5_HAVE_PARALLEL */
 #define MESSAGE(V, A)                                                                                        \
     do {                                                                                                     \
         if (HDGetTestVerbosity() > (V))                                                                      \
             print_func A;                                                                                    \
-    } while(0)
+    } while (0)
 #endif /* H5_HAVE_PARALLEL */
 
 /* Used to indicate an error that is complex to check for */

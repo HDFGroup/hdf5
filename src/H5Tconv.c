@@ -1046,7 +1046,7 @@ done:                                                                           
         _tmp     = ARRAY[I];                                                                                 \
         ARRAY[I] = ARRAY[J];                                                                                 \
         ARRAY[J] = _tmp;                                                                                     \
-    } while(0)
+    } while (0)
 
 /* Minimum size of variable-length conversion buffer */
 #define H5T_VLEN_MIN_CONF_BUF_SIZE 4096
