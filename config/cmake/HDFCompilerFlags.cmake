@@ -56,7 +56,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
     endif ()
   else ()
-    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
+        NOT CMAKE_C_CLANG_TIDY)
+      # `clang-tidy` does not understand -fstdarg-opt
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstdarg-opt")
     endif ()
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
@@ -66,6 +68,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
       # This should NOT be on by default as it can cause process issues.
       #-----------------------------------------------------------------------------
       option (HDF5_ENABLE_BUILD_DIAGS "Enable color and URL extended diagnostic messages" OFF)
+      mark_as_advanced (HDF5_ENABLE_BUILD_DIAGS)
       if (HDF5_ENABLE_BUILD_DIAGS)
         message (STATUS "... default color and URL extended diagnostic messages enabled")
       else ()

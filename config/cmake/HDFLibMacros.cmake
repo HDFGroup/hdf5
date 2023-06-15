@@ -17,13 +17,14 @@ macro (ORIGINAL_ZLIB_LIBRARY compress_type)
         GIT_TAG ${ZLIB_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter ZLIB file ${ZLIB_URL}")
     FetchContent_Declare (HDF5_ZLIB
         URL ${ZLIB_URL}
         URL_HASH ""
     )
   endif ()
   FetchContent_GetProperties(HDF5_ZLIB)
-  if(NOT zlib_POPULATED)
+  if(NOT hdf5_zlib_POPULATED)
     FetchContent_Populate(HDF5_ZLIB)
 
     # Copy an additional/replacement files into the populated source
@@ -51,6 +52,7 @@ macro (ORIGINAL_SZIP_LIBRARY compress_type encoding)
         GIT_TAG ${SZIP_BRANCH}
     )
   elseif (${compress_type} MATCHES "TGZ")
+    message (VERBOSE "Filter SZIP file ${SZIP_URL}")
     FetchContent_Declare (SZIP
         URL ${SZIP_URL}
         URL_HASH ""

@@ -228,7 +228,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
  * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
- * @version HDF5 1.10.10 <br />
+ * @version HDF5 1.12.3 <br />
  *          <b>See also: </b>
  *          @ref HDFARRAY hdf.hdf5lib.HDFArray<br />
  *          @ref HDF5CONST hdf.hdf5lib.HDF5Constants<br />
@@ -5082,8 +5082,8 @@ public class H5 implements java.io.Serializable {
      *
      * @param name
      *            IN: File name to check.
-     * @param file_id
-     *            IN: File identifier for a currently-open HDF5 file
+     * @param fapl_id
+     *            IN: File access property list identifier
      *
      * @return true if file is accessible, false if not.
      *
@@ -5092,7 +5092,7 @@ public class H5 implements java.io.Serializable {
      * @exception NullPointerException
      *            name is null.
      **/
-    public synchronized static native boolean H5Fis_accessible(String name, long file_id)
+    public synchronized static native boolean H5Fis_accessible(String name, long fapl_id)
         throws HDF5LibraryException, NullPointerException;
 
     /**
@@ -13773,7 +13773,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tcreate creates a new dataype of the specified class with the specified number of bytes.
+     * H5Tcreate creates a new datatype of the specified class with the specified number of bytes.
      *
      * @param tclass
      *            IN: Class of datatype to create.
@@ -15228,7 +15228,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tvlen_create creates a new variable-length (VL) dataype.
+     * H5Tvlen_create creates a new variable-length (VL) datatype.
      *
      * @param base_id
      *            IN: Identifier of parent datatype.

@@ -31,10 +31,6 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<th>Event Set (H5ES)</th><td>@ref H5ES "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>HDF5 event set life cycle used with HDF5 VOL connectors that enable the asynchronous feature in HDF5.
-</td>
-</tr>
-<tr>
 <th>Files (H5F)</th><td>@ref H5F "C"</td><td>@ref H5::H5File "C++"</td><td>@ref FH5F "Fortran"</td><td>@ref JH5F "Java"</td><td>Manage HDF5 files.
 </td>
 </tr>
