@@ -1381,21 +1381,21 @@ test_read_string(H5File &file)
 {
     SUBTEST("DataSet::read(H5std_string)")
     try {
-        const H5std_string DATASET_NAME("test_read_string");
-        const unsigned long NX = 8;
-        const char DATA[NX] = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
-        const H5std_string EXPECTED_STR = H5std_string(DATA, NX);
-        H5std_string str;
+        const H5std_string  DATASET_NAME("test_read_string");
+        const unsigned long NX           = 8;
+        const char          DATA[NX]     = {'a', 0, 0, 0, 0, 0, 0, 'Z'};
+        const H5std_string  EXPECTED_STR = H5std_string(DATA, NX);
+        H5std_string        str;
 
         /*
          * Write characters with internal null bytes
          */
 
-        PredType datatype( PredType::NATIVE_INT8 );
-        hsize_t dimsf[RANK1] = { NX };
-        DataSpace dataspace( RANK1, dimsf );
-        DataSet dataset = file.createDataSet( DATASET_NAME, datatype, dataspace );
-        dataset.write( DATA, datatype);
+        PredType  datatype(PredType::NATIVE_INT8);
+        hsize_t   dimsf[RANK1] = {NX};
+        DataSpace dataspace(RANK1, dimsf);
+        DataSet   dataset = file.createDataSet(DATASET_NAME, datatype, dataspace);
+        dataset.write(DATA, datatype);
         dataset.close();
 
         /*
@@ -1432,7 +1432,8 @@ test_read_string(H5File &file)
          */
         PASSED();
         return 0;
-    } catch (Exception &E) {
+    }
+    catch (Exception &E) {
         // H5_FAILED should probably be invoked before verify_val
         H5_FAILED();
         issue_fail_msg("test_read_string", __LINE__, __FILE__);
