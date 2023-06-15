@@ -455,6 +455,7 @@ public class HDFArray {
                     new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                 throw(ex);
             }
+            break;
         } // end of statement for arrays of boxed objects
         default:
             HDF5JavaException ex =
@@ -527,6 +528,7 @@ public class HDFArray {
                             new HDF5JavaException("HDFArray: unsupported Object type: " + ArrayDescriptor.NT);
                         throw(ex);
                     }
+                    break;
                 } // end of statement for arrays of boxed numerics
                 } // end of switch statement for arrays of primitives
 

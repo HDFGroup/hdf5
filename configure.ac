@@ -535,31 +535,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
-##
-HAVE_FLOAT128=0
-HAVE_QUADMATH=0
-FLT128_DIG=0
-LDBL_DIG=0
-
-AC_CHECK_SIZEOF([__float128])
-AC_CHECK_SIZEOF([_Quad])
-AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
-PAC_FC_LDBL_DIG
-
-AC_SUBST([PAC_C_MAX_REAL_PRECISION])
-
-if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
-  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-else
-  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-fi
-AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
-AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran interface compiled
+## Check if the Fortran interface should be enabled
 ##
 
 ## This needs to be exposed for the library info file even if Fortran is disabled.
@@ -578,6 +554,30 @@ AC_ARG_ENABLE([fortran],
 AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
+
+## ----------------------------------------------------------------------
+## Check for non-standard extension __FLOAT128
+##
+  HAVE_FLOAT128=0
+  HAVE_QUADMATH=0
+  FLT128_DIG=0
+  LDBL_DIG=0
+
+  AC_CHECK_SIZEOF([__float128])
+  AC_CHECK_SIZEOF([_Quad])
+  AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+  PAC_FC_LDBL_DIG
+
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+
+  if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  else
+    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  fi
+  AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 
 ## We will output an include file for Fortran, H5config_f.inc which
 ## contains various configure definitions used by the Fortran Library.
@@ -1136,7 +1136,7 @@ AC_SUBST([HDF5_TOOLS])
 ## Default is to build tests and tools
 HDF5_TOOLS=yes
 
-AC_MSG_CHECKING([if building tools is disabled])
+AC_MSG_CHECKING([if building tools is enabled])
 
 AC_ARG_ENABLE([tools],
               [AS_HELP_STRING([--enable-tools],
@@ -2369,6 +2369,7 @@ case "X-$DEV_WARNINGS" in
     ;;
   X-no)
     H5_CFLAGS="$H5_CFLAGS $NO_DEVELOPER_WARNING_CFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DEVELOPER_WARNING_FCFLAGS"
     AC_MSG_RESULT([no])
     ;;
   *)
