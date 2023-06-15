@@ -1755,10 +1755,7 @@ error:
 } /* end test_percent_encode_char() */
 
 /*---------------------------------------------------------------------------
- * Function: test_s3r_open()
- *
- * Programmer: Jacob Smith 2018-01-24
- *
+ * Function: test_s3r_get_filesize()
  *---------------------------------------------------------------------------
  */
 static herr_t

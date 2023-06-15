@@ -1035,7 +1035,7 @@ test_history_encode_decode_empty(void)
 
     TESTING("encode/decode history (empty and failures)");
 
-    /* Generage checksum but don't store it yet */
+    /* Generate checksum but don't store it yet */
     checksum = H5_checksum_fletcher32(exp, H5FD_ONION_ENCODED_SIZE_HISTORY - 4);
     ptr      = exp + H5FD_ONION_ENCODED_SIZE_HISTORY - 4;
     UINT32ENCODE(ptr, checksum);

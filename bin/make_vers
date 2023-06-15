@@ -509,7 +509,7 @@ for $file (@ARGV) {
     close SOURCE;
 
     # Create header files
-    print "Generating '", $prefix, "H5version.h'\n";
+    print "Generating 'H5version.h'\n";
     create_public($prefix);
 
 #for $name (sort keys %functions) {

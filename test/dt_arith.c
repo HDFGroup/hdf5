@@ -11,6 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
  * Purpose:     Tests the data type interface (H5T)
  */
 
@@ -2814,7 +2817,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     int   status;    /*child exit status    */
 
     /*
-     * Some systems generage SIGFPE during floating point overflow and we
+     * Some systems generate SIGFPE during floating point overflow and we
      * cannot assume that we can continue from such a signal.  Therefore, we
      * fork here and let the child run the test and return the number of
      * failures with the exit status.
@@ -4842,7 +4845,20 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name, "long double",
+                   "float");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
@@ -4852,8 +4868,20 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                   "float or double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
 #endif
 
 done:
@@ -4919,12 +4947,47 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
+#if !defined(H5_LONG_TO_LDOUBLE_SPECIAL) && !defined(H5_DISABLE_SOME_LDOUBLE_CONV)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "(unsigned) long",
+                   "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+    }
+#endif
 #endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char str[256]; /*hello string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long long", "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char str[256]; /*hello string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "unsigned long long",
+                   "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 
@@ -5000,31 +5063,77 @@ run_fp_int_conv(const char *name)
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
         }
         else {
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_INT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
+#else
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                       "signed and unsigned char, short, int, long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+#endif
         }
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
+#ifndef H5_LDOUBLE_TO_LONG_SPECIAL
         if (test_values != TEST_SPECIAL && test_values != TEST_NORMAL) {
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
         }
         else {
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
+#endif
         }
+#else
+        {
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double",
+                       "(unsigned) long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+        }
+#endif
 #endif /*H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
-        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
-#endif /* H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG */
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char str[256]; /*string        */
 
-#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
-    }  /* end for */
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double", "long long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to hardware conversion error.");
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#if defined(H5_LDOUBLE_TO_LLONG_ACCURATE)
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double",
+                       "unsigned long long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to hardware conversion error.");
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#endif
+#endif
+    } /* end for */
 
     return nerrors;
 }
