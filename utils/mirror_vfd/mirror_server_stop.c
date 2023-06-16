@@ -137,18 +137,18 @@ send_shutdown(struct mshs_opts *opts)
         return -1;
     }
 
-    live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+    live_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0) {
         HDprintf("ERROR socket()\n");
         return -1;
     }
 
     target_addr.sin_family      = AF_INET;
-    target_addr.sin_port        = HDhtons((uint16_t)opts->portno);
-    target_addr.sin_addr.s_addr = HDinet_addr(opts->ip);
+    target_addr.sin_port        = htons((uint16_t)opts->portno);
+    target_addr.sin_addr.s_addr = inet_addr(opts->ip);
     HDmemset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
 
-    if (HDconnect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
+    if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
         HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
         return -1;
     }

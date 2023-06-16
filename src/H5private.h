@@ -611,9 +611,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDabort
 #define HDabort() abort()
 #endif
-#ifndef HDaccept
-#define HDaccept(A, B, C) accept((A), (B), (C))
-#endif
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif
@@ -644,9 +641,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDatoll
 #define HDatoll(S) atoll(S)
 #endif
-#ifndef HDbind
-#define HDbind(A, B, C) bind((A), (B), (C))
-#endif
 #ifndef HDcalloc
 #define HDcalloc(N, Z) calloc(N, Z)
 #endif
@@ -667,9 +661,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDclosedir
 #define HDclosedir(D) closedir(D)
-#endif
-#ifndef HDconnect
-#define HDconnect(A, B, C) connect((A), (B), (C))
 #endif
 #ifndef HDcreat
 #define HDcreat(S, M) creat(S, M)
@@ -826,9 +817,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgetenv
 #define HDgetenv(S) getenv(S)
 #endif
-#ifndef HDgethostbyaddr
-#define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C))
-#endif
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif
@@ -849,18 +837,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDgmtime
 #define HDgmtime(T) gmtime(T)
-#endif
-#ifndef HDhtonl
-#define HDhtonl(X) htonl((X))
-#endif
-#ifndef HDhtons
-#define HDhtons(X) htons((X))
-#endif
-#ifndef HDinet_addr
-#define HDinet_addr(C) inet_addr((C))
-#endif
-#ifndef HDinet_ntoa
-#define HDinet_ntoa(C) inet_ntoa((C))
 #endif
 #ifndef HDisalnum
 #define HDisalnum(C) isalnum((int)(C)) /* Cast for Solaris warning */
@@ -906,9 +882,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDldexp
 #define HDldexp(X, N) ldexp(X, N)
-#endif
-#ifndef HDlisten
-#define HDlisten(A, B) listen((A), (B))
 #endif
 #ifndef HDllround
 #define HDllround(V) llround(V)
@@ -972,12 +945,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
-#endif
-#ifndef HDntohl
-#define HDntohl(A) ntohl((A))
-#endif
-#ifndef HDntohs
-#define HDntohs(A) ntohs((A))
 #endif
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
@@ -1100,9 +1067,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsetenv
 #define HDsetenv(N, V, O) setenv(N, V, O)
 #endif
-#ifndef HDsetsockopt
-#define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E))
-#endif
 #ifndef HDsetvbuf
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, Z)
 #endif
@@ -1123,9 +1087,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDsnprintf
 #define HDsnprintf snprintf /*varargs*/
-#endif
-#ifndef HDsocket
-#define HDsocket(A, B, C) socket((A), (B), (C))
 #endif
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
@@ -1190,9 +1151,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrndup
 #define HDstrndup(S, N) strndup(S, N)
-#endif
-#ifndef HDstrpbrk
-#define HDstrpbrk(X, Y) strpbrk(X, Y)
 #endif
 #ifndef HDstrrchr
 #define HDstrrchr(S, C) strrchr(S, C)
