@@ -63,7 +63,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
               name: docs-doxygen
-              path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+              path: ${{ github.workspace }}
 
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@v3
@@ -114,11 +114,11 @@ jobs:
       - name: Store Release url
         run: |
           echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-    
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ./upload_url
-          name: upload_url
+
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          path: ./upload_url
+#          name: upload_url
 
       - name: List files for the space (Linux)
         run: |
