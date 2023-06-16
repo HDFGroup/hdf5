@@ -2035,7 +2035,7 @@ Java_hdf_hdf5lib_HDF5Constants_H5O_1TOKEN_1UNDEF(JNIEnv *env, jclass cls)
     H5O_token_t undef_token = H5O_TOKEN_UNDEF;
 
     /* TODO: Can be optimized by keeping a global reference to the undefined token class */
-    return create_H5O_token_t(env, &undef_token, FALSE);
+    return create_H5O_token_t(env, &undef_token, false);
 }
 
 JNIEXPORT jlong JNICALL
