@@ -66,7 +66,7 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: Zip Folder
-        run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+        run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@v3
