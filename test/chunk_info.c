@@ -641,7 +641,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, H5S_ALL, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt to get info of a non-existing chunk.");
 
@@ -698,7 +698,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt to get info of a non-existing chunk.");
 
@@ -798,7 +798,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -922,7 +922,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -945,7 +945,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1064,7 +1064,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1170,7 +1170,7 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1207,7 +1207,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1319,7 +1319,7 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1356,7 +1356,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1468,7 +1468,7 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempted to get info of a chunk using an out-of-range index.");
 
@@ -1505,7 +1505,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1665,7 +1665,7 @@ test_basic_query(hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -1744,7 +1744,7 @@ test_basic_query(hid_t fapl)
     {
         ret = H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_fail, &cptr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     if (cptr != &(chunk_infos[1]))
@@ -1774,7 +1774,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(basicfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -1852,7 +1852,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_num_chunks(dset, dspace, &nchunks);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1863,7 +1863,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1875,7 +1875,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     {
         ret = H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.");
 
@@ -1897,7 +1897,7 @@ error:
         H5Sclose(dspace);
         H5Fclose(chunkfile);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -2185,7 +2185,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(filter_file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;

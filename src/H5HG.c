@@ -380,7 +380,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
     ret_value = idx;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__alloc() */
 
 /*-------------------------------------------------------------------------
@@ -823,7 +823,7 @@ done:
     if (heap && H5AC_unprotect(f, H5AC_GHEAP, hobj->addr, heap, flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value);
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5HG_remove() */
 
 /*-------------------------------------------------------------------------

@@ -44,7 +44,7 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
     haddr_t        size      = (haddr_t)H5FD_ONION_ENCODED_SIZE_HEADER;
     uint32_t       sum       = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF")
@@ -68,7 +68,7 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_header() */
 
 /*-------------------------------------------------------------------------
@@ -88,7 +88,7 @@ H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file)
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header")
@@ -102,7 +102,7 @@ H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file)
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_header()*/
 
 /*-----------------------------------------------------------------------------
@@ -128,7 +128,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     unsigned char *ptr       = NULL;
     size_t         ret_value = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf != NULL);
     HDassert(header != NULL);
@@ -180,7 +180,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_header_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -206,7 +206,7 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     unsigned char *ptr       = buf;
     size_t         ret_value = 0;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(buf != NULL);
     HDassert(checksum != NULL);
@@ -228,5 +228,5 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     UINT32ENCODE(ptr, *checksum);
     ret_value = (size_t)(ptr - buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_header_encode() */

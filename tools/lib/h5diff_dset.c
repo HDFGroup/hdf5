@@ -95,7 +95,7 @@ done:
         H5Dclose(did2);
         /* enable error reporting */
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
     return nfound;
@@ -931,7 +931,7 @@ done:
         H5Tclose(m_tid2);
         /* enable error reporting */
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5TOOLS_ENDDEBUG(": %d with nfound:%d", ret_value, nfound);
     return nfound;

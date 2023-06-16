@@ -149,5 +149,5 @@ done:
     if (h && H5AC_unprotect(f, H5AC_GHEAP, addr, h, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG_debug() */

@@ -441,7 +441,7 @@ error:
         H5Sclose(mem_space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         HDfree(buf);
     if (out)
@@ -547,7 +547,7 @@ error:
         H5Sclose(fspace);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         HDfree(buf);
     if (script)

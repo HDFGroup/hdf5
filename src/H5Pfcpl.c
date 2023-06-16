@@ -712,7 +712,7 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
         /* Encode all the btree  */
         for (u = 0; u < H5B_NUM_BTREE_ID; u++) {
             /* Encode the left split value */
-            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)btree_k)
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)btree_k);
             btree_k++;
         } /* end for */
     }     /* end if */
@@ -760,7 +760,7 @@ H5P__fcrt_btree_rank_dec(const void **_pp, void *_value)
 
     /* Decode all the type flags */
     for (u = 0; u < H5B_NUM_BTREE_ID; u++)
-        H5_DECODE_UNSIGNED(*pp, btree_k[u])
+        H5_DECODE_UNSIGNED(*pp, btree_k[u]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -999,7 +999,7 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
         /* Encode all the type flags */
         for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++) {
             /* Encode the left split value */
-            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)type_flags)
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)type_flags);
             type_flags++;
         } /* end for */
     }     /* end if */
@@ -1048,7 +1048,7 @@ H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *_value)
 
     /* Decode all the type flags */
     for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++)
-        H5_DECODE_UNSIGNED(*pp, type_flags[u])
+        H5_DECODE_UNSIGNED(*pp, type_flags[u]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1090,7 +1090,7 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
         /* Encode all the minsize values */
         for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++) {
             /* Encode the left split value */
-            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)minsizes)
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)minsizes);
             minsizes++;
         } /* end for */
     }     /* end if */
@@ -1139,7 +1139,7 @@ H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *_value)
 
     /* Decode all the minsize values */
     for (u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++)
-        H5_DECODE_UNSIGNED(*pp, minsizes[u])
+        H5_DECODE_UNSIGNED(*pp, minsizes[u]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

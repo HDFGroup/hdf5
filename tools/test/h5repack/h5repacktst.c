@@ -2303,7 +2303,7 @@ out:
         H5Tclose(tid);
         H5Pclose(gcplid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2373,7 +2373,7 @@ out:
         H5Gclose(rid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2441,7 +2441,7 @@ out:
         H5Gclose(g2id);
         H5Gclose(g3id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2515,7 +2515,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2600,7 +2600,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2670,7 +2670,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2743,7 +2743,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2851,7 +2851,7 @@ error:
         H5Sclose(sid);
         H5Dclose(dsid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2953,7 +2953,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3137,7 +3137,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3235,7 +3235,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3331,7 +3331,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3404,7 +3404,7 @@ error:
 
         H5Sclose(s_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(s_buf);
 
@@ -3547,7 +3547,7 @@ error:
         H5Pclose(dcpl2);
         H5Pclose(dcpl3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf1);
     HDfree(buf2);
@@ -3604,7 +3604,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3686,7 +3686,7 @@ out:
         H5Sclose(m_sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3740,7 +3740,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3800,7 +3800,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -3870,7 +3870,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -4640,7 +4640,7 @@ out:
         H5Dclose(did);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -4749,7 +4749,7 @@ out:
         H5Dclose(did1);
         H5Dclose(did2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return retval;
 }
@@ -5888,7 +5888,7 @@ out:
         H5Sclose(sid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -5941,7 +5941,7 @@ out:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6003,7 +6003,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6044,7 +6044,7 @@ out:
         H5Aclose(aid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6170,7 +6170,7 @@ out:
         H5Dclose(did);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end make_named_dtype() */
 

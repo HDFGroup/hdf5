@@ -443,7 +443,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -460,7 +460,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -477,7 +477,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         {
             fa = H5FA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fa) {
             /* Close opened fixed array */
             H5FA_close(fa);
@@ -528,7 +528,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_create() */
@@ -596,7 +596,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_reopen() */
@@ -699,7 +699,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -835,7 +835,7 @@ error:
         H5Fclose(fid0);
         H5Fclose(fid00);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice_diff() */
@@ -897,7 +897,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     {
         fa2 = H5FA_open(f, fa_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fa2) {
         /* Close opened array */
         H5FA_close(fa2);
@@ -920,7 +920,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
     {
         fa = H5FA_open(f, fa_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fa) {
         /* Close opened array */
         H5FA_close(fa);
@@ -955,7 +955,7 @@ error:
             H5FA_close(fa2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_delete_open() */
@@ -1481,7 +1481,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_set_elmts() */
@@ -1609,7 +1609,7 @@ error:
             H5FA_close(fa);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_skip_elmts() */
@@ -1801,7 +1801,7 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

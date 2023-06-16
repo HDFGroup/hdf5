@@ -262,7 +262,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_fapl_configuration() */
 
@@ -1274,7 +1274,7 @@ error:
         H5Pclose(splitter_config->rw_fapl_id);
         H5Pclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(splitter_config);
 
     return H5I_INVALID_HID;
@@ -1329,7 +1329,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_create_and_close() */
 
@@ -1497,7 +1497,7 @@ error:
          */
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     LOGPRINT(1, "_create_chunking_ids() FAILED\n");
 
@@ -1815,7 +1815,7 @@ error:
         H5Sclose(dspace_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_basic_dataset_write() */
 
@@ -1903,7 +1903,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_chunked_dataset_write() */
 
@@ -1995,7 +1995,7 @@ error:
         H5Gclose(grp_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_on_disk_zoo() */
 
@@ -2137,7 +2137,7 @@ error:
         H5Dclose(dset_id);
         H5Sclose(dspace_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* test_vanishing_datasets() */
 
@@ -2274,7 +2274,7 @@ error:
             H5Pclose(bundle[i].fapl_id);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(bundle);
     HDfree(buf);
     return -1;

@@ -67,9 +67,9 @@ test_basic_links(hid_t fapl_id, hbool_t new_format)
 
     try {
         if (new_format)
-            SUBTEST("Link creation (w/new group format)")
+            SUBTEST("Link creation (w/new group format)");
         else
-            SUBTEST("Link creation")
+            SUBTEST("Link creation");
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
         H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
@@ -174,9 +174,9 @@ test_lcpl(hid_t fapl_id, hbool_t new_format)
     hsize_t     dims[2];
 
     if (new_format)
-        SUBTEST("Link creation property lists (w/new group format)")
+        SUBTEST("Link creation property lists (w/new group format)");
     else
-        SUBTEST("Link creation property lists")
+        SUBTEST("Link creation property lists");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -254,9 +254,9 @@ test_move(hid_t fapl_id, hbool_t new_format)
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::moveLink (w/new group format)")
+        SUBTEST("Group::moveLink (w/new group format)");
     else
-        SUBTEST("Group::moveLink")
+        SUBTEST("Group::moveLink");
 
     try {
         FileAccPropList fapl(fapl_id);
@@ -399,9 +399,9 @@ test_copy(hid_t fapl_id, hbool_t new_format)
     char filename[1024];
 
     if (new_format)
-        SUBTEST("Group::copyLink (w/new group format)")
+        SUBTEST("Group::copyLink (w/new group format)");
     else
-        SUBTEST("Group::copyLink")
+        SUBTEST("Group::copyLink");
 
     try {
         // Create two new files
@@ -537,9 +537,9 @@ test_num_links(hid_t fapl_id, hbool_t new_format)
     char filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("Setting number of links (w/new group format)")
+        SUBTEST("Setting number of links (w/new group format)");
     else
-        SUBTEST("Setting number of links")
+        SUBTEST("Setting number of links");
 
     try {
         // Use the file access template id to create a file access prop. list.
@@ -622,9 +622,9 @@ test_visit(hid_t fapl_id, hbool_t new_format)
     char    filename[NAME_BUF_SIZE];
 
     if (new_format)
-        SUBTEST("H5Object::visit (w/new group format)")
+        SUBTEST("H5Object::visit (w/new group format)");
     else
-        SUBTEST("H5Object::visit")
+        SUBTEST("H5Object::visit");
 
     try {
         // Use the file access template id to create a file access prop. list

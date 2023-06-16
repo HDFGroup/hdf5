@@ -329,7 +329,6 @@ H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth)
     /* Deep copy the names */
     if (depth == H5_COPY_DEEP) {
         /* Nothing currently */
-        ;
     }
     else if (depth == H5_COPY_SHALLOW) {
         H5G__ent_reset(src);

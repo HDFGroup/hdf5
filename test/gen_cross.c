@@ -176,7 +176,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -264,7 +264,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -352,7 +352,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -448,7 +448,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -544,7 +544,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -640,7 +640,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -737,7 +737,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -825,7 +825,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -921,7 +921,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -1012,7 +1012,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1101,7 +1101,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1210,7 +1210,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }

@@ -456,7 +456,7 @@ H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
         /* Number of messages */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
         if (oh->store_bad_mesg_count)
-            UINT16ENCODE(chunk_image, (oh->nmesgs - 1))
+            UINT16ENCODE(chunk_image, (oh->nmesgs - 1));
         else
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
             UINT16ENCODE(chunk_image, oh->nmesgs);
@@ -1269,7 +1269,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
         if (oh->version == H5O_VERSION_1) {
             if (H5_IS_BUFFER_OVERFLOW(chunk_image, 2, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-            UINT16DECODE(chunk_image, id)
+            UINT16DECODE(chunk_image, id);
         }
         else {
             if (H5_IS_BUFFER_OVERFLOW(chunk_image, 1, p_end))

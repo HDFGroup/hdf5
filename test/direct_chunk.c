@@ -364,7 +364,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
         HDfree(outbuf);
@@ -476,7 +476,7 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -659,7 +659,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -935,7 +935,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1171,7 +1171,7 @@ error:
         H5Tclose(st);
         H5Tclose(dt);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1251,7 +1251,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Try to get chunk size for a contiguous dataset.  It should fail */
     H5E_BEGIN_TRY
@@ -1259,7 +1259,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dget_chunk_storage_size(dataset, offset, &chunk_nbytes)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Try to H5Dread_chunk from the contiguous dataset.  It should fail */
     H5E_BEGIN_TRY
@@ -1267,7 +1267,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Dclose(dataset) < 0)
         goto error;
@@ -1293,14 +1293,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk((hid_t)-1, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid DXPL ID for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
@@ -1308,14 +1308,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, (hid_t)-1, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid OFFSET for H5Dwrite_chunk and H5Dread_chunk */
     H5E_BEGIN_TRY
@@ -1323,14 +1323,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, NULL, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, NULL, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check when OFFSET is out of dataset range for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = NX + 1;
@@ -1340,14 +1340,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check when OFFSET is not on chunk boundary for H5Dwrite_chunk and H5Dread_chunk */
     offset[0] = CHUNK_NX;
@@ -1357,14 +1357,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid buffer size for H5Dwrite_chunk only */
     offset[0] = CHUNK_NX;
@@ -1375,7 +1375,7 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Check invalid data buffer for H5Dwrite_chunk and H5Dread_chunk */
     buf_size = CHUNK_NX * CHUNK_NY * sizeof(int);
@@ -1384,14 +1384,14 @@ test_invalid_parameters(hid_t file)
         if ((status = H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, buf_size, NULL)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5E_BEGIN_TRY
     {
         if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, NULL)) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Dclose(dataset) < 0)
         goto error;
@@ -1416,7 +1416,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -1604,7 +1604,7 @@ error:
         H5Pclose(dxpl);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
         HDfree(outbuf);
@@ -1793,7 +1793,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (outbuf)
         HDfree(outbuf);
@@ -1952,7 +1952,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -2035,7 +2035,7 @@ test_read_unallocated_chunk(hid_t file)
             {
                 status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* Check that the chunk read call does not succeed. */
             if (status != -1)
@@ -2047,7 +2047,7 @@ test_read_unallocated_chunk(hid_t file)
             {
                 status = H5Dget_chunk_storage_size(dataset, offset, &direct_chunk_nbytes);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* Check that the chunk storage size call does not succeed. */
             if (status != -1)
@@ -2081,7 +2081,7 @@ error:
         H5Pclose(cparms);
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -2238,7 +2238,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;

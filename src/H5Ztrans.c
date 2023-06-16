@@ -897,7 +897,7 @@ H5Z__parse_factor(H5Z_token *current, H5Z_datval_ptrs *dat_val_pointers)
     ret_value = factor;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -1396,7 +1396,7 @@ H5Z__xform_reduce_tree(H5Z_node *tree)
         }
     }
 
-    FUNC_LEAVE_NOAPI_VOID;
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------
@@ -1429,7 +1429,7 @@ H5Z__do_op(H5Z_node *tree)
     else if (tree->type == H5Z_XFORM_MINUS)
         H5Z_XFORM_DO_OP6(-)
 
-    FUNC_LEAVE_NOAPI_VOID;
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 /*-------------------------------------------------------------------------

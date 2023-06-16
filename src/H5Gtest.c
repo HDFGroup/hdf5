@@ -424,7 +424,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(grp->oloc.addr);
+    H5_BEGIN_TAG(grp->oloc.addr)
 
     /* Get the link info */
     if (H5G__obj_get_linfo(&(grp->oloc), &linfo) < 0)

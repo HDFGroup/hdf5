@@ -286,7 +286,7 @@ done:
         if (travt)
             trav_table_free(travt);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 } /* h5repack_verify() */
@@ -475,7 +475,7 @@ done:
         if (trav)
             trav_table_free(trav);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }

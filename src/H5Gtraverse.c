@@ -829,7 +829,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
      * shouldn't be during the traversal. Note that for best tagging assertion
      * coverage, setting H5C_DO_TAGGING_SANITY_CHECKS is advised.
      */
-    H5_BEGIN_TAG(H5AC__INVALID_TAG);
+    H5_BEGIN_TAG(H5AC__INVALID_TAG)
 
     /* Go perform "real" traversal */
     if (H5G__traverse_real(loc, name, target, op, op_data) < 0)

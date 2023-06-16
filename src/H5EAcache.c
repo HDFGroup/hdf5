@@ -270,7 +270,7 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     if (stored_chksum != computed_chksum)
         ret_value = FALSE;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_hdr_verify_chksum() */
 
 /*-------------------------------------------------------------------------
@@ -1631,7 +1631,7 @@ done:
         if (dblock && H5EA__dblock_dest(dblock) < 0)
             HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5EA__cache_dblock_deserialize() */
 
 /*-------------------------------------------------------------------------

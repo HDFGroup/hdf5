@@ -114,7 +114,7 @@ H5ES__event_new(H5VL_t *connector, void *token)
     ret_value = ev;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ES__event_new() */
 
 /*-------------------------------------------------------------------------

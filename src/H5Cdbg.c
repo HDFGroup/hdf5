@@ -834,8 +834,8 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
     HDassert(H5_addr_defined(child_addr));
     HDassert(fd_exists_ptr);
 
-    H5C__SEARCH_INDEX(cache_ptr, parent_addr, parent_ptr, FAIL)
-    H5C__SEARCH_INDEX(cache_ptr, child_addr, child_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, parent_addr, parent_ptr, FAIL);
+    H5C__SEARCH_INDEX(cache_ptr, child_addr, child_ptr, FAIL);
 
     if (parent_ptr && child_ptr) {
         if (child_ptr->flush_dep_nparents > 0) {
@@ -1024,7 +1024,7 @@ H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr
     HDassert(H5_addr_defined(addr));
     HDassert(entry_ptr_ptr);
 
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
     if (entry_ptr == NULL)
         /* the entry doesn't exist in the cache -- report this
@@ -1152,7 +1152,7 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
     HDassert(in_cache_ptr);
     HDassert(type_ok_ptr);
 
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
     if (entry_ptr == NULL)
         /* the entry doesn't exist in the cache -- report this

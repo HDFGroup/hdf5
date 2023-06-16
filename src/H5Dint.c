@@ -668,7 +668,7 @@ H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize)
 done:
     if (FAIL == ret_value)
         *minimize = FALSE;
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__use_minimized_dset_headers */
 
 /*-------------------------------------------------------------------------
@@ -788,7 +788,7 @@ H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__calculate_minimum_header_size */
 
 /*-------------------------------------------------------------------------
@@ -830,7 +830,7 @@ H5D__prepare_minimized_oh(H5F_t *file, H5D_t *dset, H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "can't apply object header to file")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__prepare_minimized_oh */
 
 /*-------------------------------------------------------------------------

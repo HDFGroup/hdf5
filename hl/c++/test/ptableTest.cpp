@@ -194,7 +194,7 @@ error:
     {
         H5Tclose(dtypeID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -576,7 +576,7 @@ error:
         H5Tclose(dtypeID1);
         H5Tclose(dtypeID2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;
@@ -708,7 +708,7 @@ error:
         H5Tclose(compound_type);
         H5Fclose(fileID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;

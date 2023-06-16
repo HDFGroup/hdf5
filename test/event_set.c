@@ -238,7 +238,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -645,7 +645,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

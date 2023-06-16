@@ -139,7 +139,7 @@ test_vltypes_dataset_create(void)
     {
         dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(dataset, FAIL, "H5Dcreate2");
 
     /* Close datatype */
@@ -208,14 +208,14 @@ test_vltypes_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(cset, FAIL, "H5Tget_cset");
 
     H5E_BEGIN_TRY
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(strpad, FAIL, "H5Tget_strpad");
 
     /* Close datatype */

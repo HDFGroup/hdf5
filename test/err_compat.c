@@ -366,7 +366,7 @@ test_h5epush1(hid_t file)
         did =
             H5Dcreate2(H5I_INVALID_HID, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create the dataset */
     if ((did = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)

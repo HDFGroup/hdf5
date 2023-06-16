@@ -457,7 +457,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
             break;
         default:
             break;
-    };
+    }
 
     return obj_list;
 }

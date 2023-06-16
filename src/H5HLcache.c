@@ -298,11 +298,11 @@ H5HL__fl_serialize(const H5HL_t *heap)
         image = heap->dblk_image + fl->offset;
 
         if (fl->next)
-            H5_ENCODE_LENGTH_LEN(image, fl->next->offset, heap->sizeof_size)
+            H5_ENCODE_LENGTH_LEN(image, fl->next->offset, heap->sizeof_size);
         else
-            H5_ENCODE_LENGTH_LEN(image, H5HL_FREE_NULL, heap->sizeof_size)
+            H5_ENCODE_LENGTH_LEN(image, H5HL_FREE_NULL, heap->sizeof_size);
 
-        H5_ENCODE_LENGTH_LEN(image, fl->size, heap->sizeof_size)
+        H5_ENCODE_LENGTH_LEN(image, fl->size, heap->sizeof_size);
     }
 
     FUNC_LEAVE_NOAPI_VOID

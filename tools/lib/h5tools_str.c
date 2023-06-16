@@ -459,7 +459,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
     {
         snblocks = H5Sget_select_hyper_nblocks(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Print block information */
     if (snblocks > 0) {
@@ -520,7 +520,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
     {
         snpoints = H5Sget_select_elem_npoints(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Print point information */
     if (snpoints > 0) {
