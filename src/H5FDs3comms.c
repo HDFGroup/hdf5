@@ -1281,6 +1281,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
 
+#if S3COMMS_DEBUG
+    HDfprintf(stderr, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+              offset, offset + len, len);
+#endif
+
     /*******************
      * COMPILE REQUEST *
      *******************/
