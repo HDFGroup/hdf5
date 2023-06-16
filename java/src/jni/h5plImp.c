@@ -216,7 +216,7 @@ Java_hdf_hdf5lib_H5_H5PLget(JNIEnv *env, jclass clss, jint idx)
     if ((buf_size = H5PLget((unsigned)idx, NULL, 0)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (aName = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+    if (NULL == (aName = (char *)malloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5PLget: failed to allocate plugin name buffer");
 
     if ((H5PLget((unsigned)idx, aName, (size_t)buf_size + 1)) < 0)
@@ -228,7 +228,7 @@ Java_hdf_hdf5lib_H5_H5PLget(JNIEnv *env, jclass clss, jint idx)
 
 done:
     if (aName)
-        HDfree(aName);
+        free(aName);
 
     return str;
 } /* end Java_hdf_hdf5lib_H5_H5PLget */
