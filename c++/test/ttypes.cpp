@@ -45,7 +45,7 @@ using namespace H5;
  */
 
 static const char *FILENAME[] = {"dtypes1.h5",       "dtypes2.h5",           "dtypes3.h5", "dtypes4.h5",
-                          "encode_decode.h5", "h5_type_operators.h5", NULL};
+                                 "encode_decode.h5", "h5_type_operators.h5", NULL};
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 

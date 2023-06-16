@@ -1796,7 +1796,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid
     H5VL_pass_through_t       *new_o;
     H5VL_file_specific_args_t  my_args;
     H5VL_file_specific_args_t *new_args;
-    H5VL_pass_through_info_t  *info = NULL;
+    H5VL_pass_through_info_t  *info         = NULL;
     hid_t                      under_vol_id = -1;
     herr_t                     ret_value;
 

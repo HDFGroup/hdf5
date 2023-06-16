@@ -26,9 +26,9 @@
 #define NAME_BUF_SIZE 1024
 
 static const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
-                          "extlinks_env1",        /* 1: target file */
-                          TMPDIR "extlinks_env1", /* 2 */
-                          NULL};
+                                 "extlinks_env1",        /* 1: target file */
+                                 TMPDIR "extlinks_env1", /* 2 */
+                                 NULL};
 
 static int external_link_env(hid_t fapl, hbool_t new_format);
 

@@ -61,7 +61,8 @@ static int one_tests[ONE_NTESTS] = {3, -1, 0, -9, 1};
  *            {4,10}->{4,12}; {4,10}->{4,9}; {4,10}->{4,10}
  */
 #define TWO_NTESTS 9
-static int two_tests[TWO_NTESTS][2] = {{2, 2}, {2, -1}, {2, 0}, {-1, 2}, {-1, -1}, {-1, 0}, {0, 2}, {0, -1}, {0, 0}};
+static int two_tests[TWO_NTESTS][2] = {{2, 2},  {2, -1}, {2, 0},  {-1, 2}, {-1, -1},
+                                       {-1, 0}, {0, 2},  {0, -1}, {0, 0}};
 
 /* Verify that the two input values are the same */
 #define VERIFY_EQUAL(_x, _y)                                                                                 \

@@ -27,7 +27,7 @@
  */
 
 static const char *FILENAME[] = {"set_extent1", "set_extent2", "set_extent3", "set_extent4",
-                          "set_extent5", "set_extent6", NULL};
+                                 "set_extent5", "set_extent6", NULL};
 
 #define NAME_BUF_SIZE  1024
 #define EXT_FILE_NAME1 "ext1.bin"

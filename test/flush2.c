@@ -31,8 +31,8 @@
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME "clear_status_flags"
 
 static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NELEMENTS        10000

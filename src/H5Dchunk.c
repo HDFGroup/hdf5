@@ -2700,7 +2700,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t num_chunks = 0;
+        size_t num_chunks       = 0;
         size_t element_sizes[2] = {dset_info->type_info.src_type_size, 0};
         void  *bufs[2]          = {dset_info->buf.vp, NULL};
 
@@ -3021,7 +3021,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t      num_chunks = 0;
+        size_t      num_chunks       = 0;
         size_t      element_sizes[2] = {dset_info->type_info.dst_type_size, 0};
         const void *bufs[2]          = {dset_info->buf.cvp, NULL};
 

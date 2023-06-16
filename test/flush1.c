@@ -28,8 +28,8 @@
 #include "H5FDpkg.h" /* File drivers             */
 
 static const char *FILENAME[] = {"flush",          "flush-swmr",          "noflush",
-                          "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
-                          "noflush_extend", "noflush_extend-swmr", NULL};
+                                 "noflush-swmr",   "flush_extend",        "flush_extend-swmr",
+                                 "noflush_extend", "noflush_extend-swmr", NULL};
 
 /* Number and size of dataset dims, chunk size, etc. */
 #define NDIMS            1

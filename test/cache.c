@@ -14156,7 +14156,7 @@ static unsigned
 check_double_pin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14241,7 +14241,7 @@ static unsigned
 check_double_unpin_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14335,7 +14335,7 @@ static unsigned
 check_pin_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14442,7 +14442,7 @@ check_pin_entry_errs(unsigned paged)
 static unsigned
 check_double_protect_err(unsigned paged)
 {
-    H5F_t             *file_ptr = NULL;
+    H5F_t             *file_ptr  = NULL;
     test_entry_t      *entry_ptr = NULL;
     H5C_cache_entry_t *cache_entry_ptr;
 
@@ -14525,7 +14525,7 @@ static unsigned
 check_double_unprotect_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14606,7 +14606,7 @@ static unsigned
 check_mark_entry_dirty_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14685,7 +14685,7 @@ static unsigned
 check_expunge_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -14797,9 +14797,9 @@ static unsigned
 check_move_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr  = NULL;
-    H5C_t        *cache_ptr = NULL;
-    test_entry_t *entry_ptr = NULL;
+    H5F_t        *file_ptr      = NULL;
+    H5C_t        *cache_ptr     = NULL;
+    test_entry_t *entry_ptr     = NULL;
     test_entry_t *entry_0_0_ptr = NULL;
     test_entry_t *entry_0_1_ptr = NULL;
     test_entry_t *entry_1_0_ptr = NULL;
@@ -14914,7 +14914,7 @@ static unsigned
 check_resize_entry_errs(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -15015,7 +15015,7 @@ static unsigned
 check_unprotect_ro_dirty_err(unsigned paged)
 {
     herr_t        result;
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
 
     if (paged)
@@ -15135,7 +15135,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 static unsigned
 check_protect_ro_rw_err(unsigned paged)
 {
-    H5F_t        *file_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *entry_ptr = NULL;
     void         *thing_ptr = NULL;
 

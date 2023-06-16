@@ -57,8 +57,8 @@ typedef enum {
 static const char *FILENAME[] = {"app_ref", NULL};
 
 static const char *IDNAME[T_NUMCLASSES] = {"File",        "Property List", "Property Class", "Datatype",
-                                    "Dataspace",   "Dataset",       "Attribute",      "Group",
-                                    "Error Class", "Error Message", "Error Stack"};
+                                           "Dataspace",   "Dataset",       "Attribute",      "Group",
+                                           "Error Class", "Error Message", "Error Stack"};
 
 static int rc[T_NUMCLASSES];
 

@@ -26,7 +26,7 @@
 /* #define NO_FILLING */
 
 static const char *FILENAME[] = {"fillval_1", "fillval_2", "fillval_3", "fillval_4", "fillval_5",
-                          "fillval_6", "fillval_7", "fillval_8", "fillval_9", NULL};
+                                 "fillval_6", "fillval_7", "fillval_8", "fillval_9", NULL};
 
 /* Common type for compound datatype operations */
 typedef struct {
@@ -873,7 +873,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     int                i, j, *buf = NULL, odd;
     unsigned           u;
     comp_datatype      rd_c, fill_c, should_be_c;
-    comp_datatype     *buf_c = NULL;
+    comp_datatype     *buf_c      = NULL;
     H5D_space_status_t allocation = H5D_SPACE_STATUS_ERROR;
 
     fill_c.a = 0;

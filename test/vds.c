@@ -30,8 +30,8 @@ typedef enum {
 } test_api_config_t;
 
 static const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_src_1", "vds%%_src",
-                          "vds_dapl",   "vds_virt_2", "vds_virt_3", "vds_src_2", "vds_src_3",
-                          "vds%%_src2", "vds_dapl2",  NULL};
+                                 "vds_dapl",   "vds_virt_2", "vds_virt_3", "vds_src_2", "vds_src_3",
+                                 "vds%%_src2", "vds_dapl2",  NULL};
 
 /* Define to enable verbose test output */
 /* #define VDS_TEST_VERBOSE 1 */

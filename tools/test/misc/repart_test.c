@@ -23,7 +23,7 @@
 #define FAMILY_H5REPART_SIZE2 (5 * KB)
 
 static const char *FILENAME[] = {"fst_family%05d.h5", "scd_family%05d.h5", "family_to_single.h5",
-                          "family_to_sec2.h5", NULL};
+                                 "family_to_sec2.h5", NULL};
 
 herr_t test_family_h5repart_opens(void);
 herr_t test_single_h5repart_opens(void);

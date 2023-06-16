@@ -49,9 +49,9 @@
 #include "H5Opkg.h" /* Object headers            */
 
 static const char *FILENAME[] = {"swmr0", /* 0 */
-                          "swmr1", /* 1 */
-                          "swmr2", /* 2 */
-                          NULL};
+                                 "swmr1", /* 1 */
+                                 "swmr2", /* 2 */
+                                 NULL};
 
 #define NAME_BUF_SIZE 1024 /* Length of file name */
 

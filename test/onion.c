@@ -912,10 +912,10 @@ test_header_encode_decode(void)
     ptr      = exp + H5FD_ONION_ENCODED_SIZE_HEADER - 4;
     UINT32ENCODE(ptr, checksum);
 
-    hdr.version    = H5FD_ONION_HEADER_VERSION_CURR;
-    hdr.flags      = 12;
-    hdr.origin_eof = 8589934609ull;
-    hdr.page_size = 4096;
+    hdr.version      = H5FD_ONION_HEADER_VERSION_CURR;
+    hdr.flags        = 12;
+    hdr.origin_eof   = 8589934609ull;
+    hdr.page_size    = 4096;
     hdr.history_addr = 123456;
     hdr.history_size = 88;
 

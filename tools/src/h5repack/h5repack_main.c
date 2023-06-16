@@ -21,8 +21,8 @@ static int  parse_command_line(int argc, const char *const *argv, pack_opt_t *op
 static void leave(int ret) H5_ATTR_NORETURN;
 
 /* module-scoped variables */
-static int  has_i   = 0;
-static int  has_o   = 0;
+static int         has_i   = 0;
+static int         has_o   = 0;
 static const char *infile  = NULL;
 static const char *outfile = NULL;
 

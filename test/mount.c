@@ -20,7 +20,8 @@
 #include "H5Fprivate.h" /* File access				*/
 #include "H5Iprivate.h" /* IDs			  		*/
 
-static const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4", "mount_5", "mount_6", "mount_7", NULL};
+static const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4",
+                                 "mount_5", "mount_6", "mount_7", NULL};
 
 /* For "mount_after_close" test */
 #define RANK          2

@@ -547,10 +547,10 @@ check_file_open_tags(hid_t fcpl, int type)
     /* Variable Declarations */
     hid_t fid = -1; /* File Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE; /* verbose file output */
-#endif                   /* NDEBUG */
-    hid_t   fapl = -1;   /* File access prop list */
-    haddr_t root_tag;    /* Root Group Tag */
+    int verbose = FALSE;           /* verbose file output */
+#endif                             /* NDEBUG */
+    hid_t   fapl = -1;             /* File access prop list */
+    haddr_t root_tag;              /* Root Group Tag */
     haddr_t sbe_tag = HADDR_UNDEF; /* Sblock Extension Tag */
 
     /* Testing Macro */

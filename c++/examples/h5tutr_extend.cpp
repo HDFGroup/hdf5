@@ -111,7 +111,7 @@ main(void)
         prop      = dataset->getCreatePlist();
 
         // Get information to obtain memory dataspace.
-        rank            = filespace->getSimpleExtentNdims();
+        rank = filespace->getSimpleExtentNdims();
         (void)filespace->getSimpleExtentDims(dimsr);
 
         if (H5D_CHUNKED == prop.getLayout()) {
