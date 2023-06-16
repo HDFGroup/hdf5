@@ -65,6 +65,9 @@ jobs:
               name: docs-doxygen
               path: ${{ github.workspace }}
 
+      - name: Zip Folder
+        run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@v3
         with:
@@ -103,7 +106,7 @@ jobs:
           tag_name: "snapshot"
           prerelease: true
           files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
