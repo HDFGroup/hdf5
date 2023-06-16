@@ -165,7 +165,7 @@ New Features
 
     - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
       file hdf5-config.cmake. This allows to easily detect if the library
-      has been build with or without read-only S3 functionality.
+      has been built with or without read-only S3 functionality.
 
     Library:
     --------
@@ -188,6 +188,10 @@ New Features
       functions to allow the library to modify the contents of write buffers, in
       order to avoid malloc/memcpy.  Currently only used for type conversion
       with selection I/O.
+
+    - Added H5Pset_fapl_ros3_token() and H5Pget_fapl_ros3_token() API functions
+      to set or get the session/security token. This token is needed when
+      making use of AWS temporary security credentials.
 
 
     Parallel Library:
@@ -257,7 +261,7 @@ Bug Fixes since HDF5-1.14.0 release
       handles undefined behavior regarding size 0 memory allocations and
       using memcpy with a NULL src pointer.
 
-      The library is now more more careful about using memory operations when
+      The library is now more careful about using memory operations when
       copying empty enum datatypes and will not error or raise an assert.
 
     - Added an AAPL check to H5Acreate
