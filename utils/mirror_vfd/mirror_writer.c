@@ -562,7 +562,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return -1;
 } /* end do_open() */

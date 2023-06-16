@@ -124,7 +124,7 @@ error:
         H5Sclose(space);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_path_env() */
 
@@ -212,7 +212,7 @@ error:
         H5Pclose(fapl_id_new);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     nerrors = MAX(1, nerrors);
     HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;

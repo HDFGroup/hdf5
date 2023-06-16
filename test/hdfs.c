@@ -548,7 +548,7 @@ test_fapl_config_validation(void)
              */
             success = H5Pset_fapl_hdfs(fapl_id, &case_ptr->config);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(case_ptr->expected, success, case_ptr->msg)
 
@@ -590,7 +590,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return 1;
 #endif /* H5_HAVE_LIBHDFS */
@@ -674,7 +674,7 @@ error:
     {
         (void)H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 #endif /* H5_HAVE_LIBHDFS */
@@ -862,7 +862,7 @@ test_vfd_open(void)
         {
             fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
                 HDfprintf(stderr, "\n!!!!! WARNING !!!!!\n"
@@ -926,7 +926,7 @@ error:
             (void)H5Pclose(fapl_unconfigured);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 
@@ -1046,7 +1046,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1114,7 +1114,7 @@ test_H5FDread_without_eoa_set_fails(void)
 
     H5E_BEGIN_TRY{/* mute stack trace on expected failure */
                   JSVERIFY(FAIL, H5FDread(file_shakespeare, H5FD_MEM_DRAW, H5P_DEFAULT, 1200699, 102, buffer),
-                           "cannot read before eoa is set")} H5E_END_TRY;
+                           "cannot read before eoa is set")} H5E_END_TRY
     for (i = 0; i < HDFS_TEST_MAX_BUF_SIZE; i++) {
         JSVERIFY(0, (unsigned)buffer[i], "buffer was modified by write!")
     }
@@ -1146,7 +1146,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1316,7 +1316,7 @@ test_read(void)
         {
             open_return = H5FDread(file_raven, H5FD_MEM_DRAW, H5P_DEFAULT, test.addr, test.len, buffer);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         JSVERIFY(test.success, open_return, test.message)
 
@@ -1353,7 +1353,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     return 1;
@@ -1433,12 +1433,12 @@ test_noops_and_autofails(void)
     /* auto-fail calls to write and truncate
      */
     H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDwrite(file, H5FD_MEM_DRAW, H5P_DEFAULT, 1000, 35, data),
-                           "write must fail")} H5E_END_TRY;
+                           "write must fail")} H5E_END_TRY
 
-    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY;
+    H5E_BEGIN_TRY{JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, FALSE), "truncate must fail")} H5E_END_TRY
 
     H5E_BEGIN_TRY{
-        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
+        JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY
 
     /************
      * TEARDOWN *
@@ -1464,7 +1464,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file != NULL) {
         (void)H5FDclose(file);
@@ -1566,12 +1566,11 @@ test_H5F_integration(void)
 
     /* Read-Write Open access is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(filename_example_h5, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fopen(filename_example_h5, H5F_ACC_RDWR, fapl_id))} H5E_END_TRY
 
     /* H5Fcreate() is not allowed with this file driver.
      */
-    H5E_BEGIN_TRY{
-        FAIL_IF(0 <= H5Fcreate(filename_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY;
+    H5E_BEGIN_TRY{FAIL_IF(0 <= H5Fcreate(filename_missing, H5F_ACC_RDONLY, H5P_DEFAULT, fapl_id))} H5E_END_TRY
 
     /* Successful open.
      */
@@ -1606,7 +1605,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     if (file > 0) {
         (void)H5Fclose(file);

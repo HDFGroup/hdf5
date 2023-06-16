@@ -557,7 +557,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
     H5O_loc_t *oloc      = NULL;    /* Object location for ID   */
     herr_t     ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     *file = NULL;
 

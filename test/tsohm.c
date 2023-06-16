@@ -1344,7 +1344,7 @@ test_sohm_attrs(void)
         ret = H5Pclose(fcpl_id);
         CHECK_I(ret, "H5Pclose");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* three shared message indices
      */
@@ -2157,9 +2157,9 @@ test_sohm_size2(int close_reopen)
     herr_t              ret;
 
     if (close_reopen == 0)
-        MESSAGE(5, ("Testing that shared object header messages save space\n"))
+        MESSAGE(5, ("Testing that shared object header messages save space\n"));
     else
-        MESSAGE(5, ("Testing that shared messages save space when file is closed and reopened\n"))
+        MESSAGE(5, ("Testing that shared messages save space when file is closed and reopened\n"));
 
     /* Create an fcpl with SOHMs disabled */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);

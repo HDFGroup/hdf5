@@ -325,7 +325,7 @@ PerformTests(void)
         }
 
     Test_parameters = NULL; /* clear it. */
-    MESSAGE(2, ("\n\n"))
+    MESSAGE(2, ("\n\n"));
 
     if (num_errs)
         print_func("!!! %d Error(s) were detected !!!\n\n", (int)num_errs);

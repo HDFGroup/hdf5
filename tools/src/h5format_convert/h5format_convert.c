@@ -162,7 +162,6 @@ parse_command_line(int argc, const char *const *argv)
 
 error:
     return -1;
-    ;
 } /* parse_command_line() */
 
 /*-------------------------------------------------------------------------
@@ -334,7 +333,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* convert() */

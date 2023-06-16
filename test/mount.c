@@ -97,7 +97,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end setup() */
 
@@ -151,7 +151,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_basic() */
 
@@ -197,7 +197,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(file1, "/mnt1", file1, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting a file on itself should have failed.");
@@ -217,7 +217,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(mnt, ".", file3, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting two files at one mount point should have failed.");
@@ -242,7 +242,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(mnt, ".", file3b, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Mounting same file opened twice at one mount point should have failed.");
@@ -260,7 +260,7 @@ test_illegal(hid_t fapl)
     {
         status = H5Fmount(file2, "/mnt1/file2", file1b, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Creating a cycle with mount points should have failed.");
@@ -294,7 +294,7 @@ error:
         H5Fclose(file3);
         H5Fclose(file3b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_illegal() */
 
@@ -365,7 +365,7 @@ test_samefile(hid_t fapl)
     {
         status = H5Fmount(mnt1b, ".", file3, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting different files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
@@ -404,7 +404,7 @@ test_samefile(hid_t fapl)
     {
         status = H5Fmount(mnt1b, ".", file2, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Mounting same files at one mount point should have failed.");
     if (H5Funmount(mnt1a, ".") < 0)
@@ -437,7 +437,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_samefile() */
 
@@ -486,7 +486,7 @@ test_hide(hid_t fapl)
     {
         grp = H5Gopen2(file1, "/mnt1/file1", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (grp >= 0) {
         H5_FAILED();
         HDputs("    Name is still accessible under mount point.");
@@ -536,7 +536,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hide() */
 
@@ -622,7 +622,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_assoc() */
 
@@ -690,7 +690,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mntlnk() */
 
@@ -735,7 +735,7 @@ test_move(hid_t fapl)
     {
         status = H5Lmove(file1, "/mnt1/rename_b/y", H5L_SAME_LOC, "/y", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Moving an object across files shouldn't have been possible");
@@ -759,7 +759,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_move() */
 
@@ -825,7 +825,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_preopen() */
 
@@ -898,7 +898,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_postopen() */
 
@@ -965,7 +965,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Incorrect traversal from mount point!");
@@ -986,7 +986,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(mnt, "file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Traversal through mount point should not have worked!");
@@ -996,7 +996,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Oget_info_by_name3(file2, "/mnt_unlink/file2", &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Traversal through mount point should not have worked!");
@@ -1012,7 +1012,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Funmount(file1, "/mnt_unlink");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
@@ -1022,7 +1022,7 @@ test_unlink(hid_t fapl)
     {
         status = H5Funmount(file2, "/");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
@@ -1052,7 +1052,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_unlink() */
 
@@ -1113,7 +1113,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mvmpt() */
 
@@ -1158,7 +1158,7 @@ test_interlink(hid_t fapl)
     {
         status = H5Lcreate_hard(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Interfile hard link should not have been allowed!");
@@ -1170,7 +1170,7 @@ test_interlink(hid_t fapl)
     {
         status = H5Lmove(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Interfile renaming should not have been allowed!");
@@ -1193,7 +1193,7 @@ test_interlink(hid_t fapl)
     {
         dset = H5Dcreate2(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (dset >= 0) {
         H5_FAILED();
         HDputs("    Dataset and shared type must be in the same file!");
@@ -1232,7 +1232,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_interlink() */
 
@@ -1310,7 +1310,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_uniformity() */
 
@@ -1397,7 +1397,7 @@ error:
         H5Fclose(file1);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_close() */
 
@@ -1630,7 +1630,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mount_after_close() */
 
@@ -1897,7 +1897,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -2047,7 +2047,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_missing_unmount() */
 
@@ -2175,7 +2175,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hold_open_file() */
 
@@ -2329,7 +2329,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_hold_open_group() */
 
@@ -2411,7 +2411,7 @@ test_fcdegree_same(hid_t fapl)
     {
         ret = H5Fmount(gidA, ".", fid2, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2471,7 +2471,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_same() */
 
@@ -2565,7 +2565,7 @@ test_fcdegree_semi(hid_t fapl)
     {
         ret = H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2578,7 +2578,7 @@ test_fcdegree_semi(hid_t fapl)
     {
         ret = H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2612,7 +2612,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_semi() */
 
@@ -2717,14 +2717,14 @@ test_fcdegree_strong(hid_t fapl)
     {
         ret = H5Oget_info3(gidA, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         ret = H5Oget_info3(gidAM, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2750,7 +2750,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_fcdegree_strong() */
 
@@ -2859,14 +2859,14 @@ test_acc_perm(hid_t fapl)
     {
         bad_id = H5Gcreate2(gidAM, "Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
 
@@ -2909,7 +2909,7 @@ test_acc_perm(hid_t fapl)
     {
         bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (bad_id >= 0)
         TEST_ERROR;
 
@@ -2954,7 +2954,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_acc_perm() */
 
@@ -3175,7 +3175,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_mult_mount() */
 
@@ -3307,7 +3307,7 @@ test_nested_survive(hid_t fapl)
     {
         gidAMS = H5Gopen2(fid1, "A/M/S", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidAMS >= 0)
         TEST_ERROR;
 
@@ -3386,7 +3386,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_nested_survive() */
 
@@ -3520,7 +3520,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_close_parent() */
 
@@ -3820,7 +3820,7 @@ test_cut_graph(hid_t fapl)
     {
         gidK = H5Gopen2(gidQ, "/A/D/K", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidK >= 0)
         TEST_ERROR;
 
@@ -3843,7 +3843,7 @@ test_cut_graph(hid_t fapl)
     {
         gidO = H5Gopen2(gidM, "/B/H/O", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidO >= 0)
         TEST_ERROR;
 
@@ -3945,7 +3945,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_cut_graph() */
 
@@ -4055,7 +4055,7 @@ test_symlink(hid_t fapl)
     {
         gidL = H5Gopen2(fid1, "L", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gidL >= 0)
         TEST_ERROR;
 
@@ -4109,7 +4109,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_symlink() */
 
@@ -4212,7 +4212,7 @@ error:
             H5Fclose(fid2[i]);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_sharedacc() */
 
@@ -4369,7 +4369,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_sharedclose() */
 
@@ -4522,7 +4522,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_multisharedclose() */
 

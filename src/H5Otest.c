@@ -197,7 +197,7 @@ H5O__is_attr_empty_test(hid_t oid)
                 HDassert(nattrs == 0);
 
                 /* Set metadata tag in API context */
-                H5_BEGIN_TAG(loc->addr);
+                H5_BEGIN_TAG(loc->addr)
 
                 /* Open the name index v2 B-tree */
                 if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
@@ -299,7 +299,7 @@ H5O__num_attrs_test(hid_t oid, hsize_t *nattrs)
             HDassert(obj_nattrs == 0);
 
             /* Set metadata tag in API context */
-            H5_BEGIN_TAG(loc->addr);
+            H5_BEGIN_TAG(loc->addr)
 
             /* Open the name index v2 B-tree */
             if (NULL == (bt2_name = H5B2_open(loc->file, ainfo.name_bt2_addr, NULL)))
@@ -376,7 +376,7 @@ H5O__attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     api_ctx_pushed = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(loc->addr);
+    H5_BEGIN_TAG(loc->addr)
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))

@@ -362,14 +362,14 @@ H5B2__split_root(H5B2_hdr_t *hdr)
 
     /* Update node info for new depth of tree */
     sz_max_nrec = H5B2_NUM_INT_REC(hdr, hdr->depth);
-    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].max_nrec, unsigned, sz_max_nrec, size_t)
+    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].max_nrec, unsigned, sz_max_nrec, size_t);
     hdr->node_info[hdr->depth].split_nrec = (hdr->node_info[hdr->depth].max_nrec * hdr->split_percent) / 100;
     hdr->node_info[hdr->depth].merge_nrec = (hdr->node_info[hdr->depth].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[hdr->depth].cum_max_nrec =
         ((hdr->node_info[hdr->depth].max_nrec + 1) * hdr->node_info[hdr->depth - 1].cum_max_nrec) +
         hdr->node_info[hdr->depth].max_nrec;
     u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[hdr->depth].cum_max_nrec);
-    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
+    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned);
     if (NULL == (hdr->node_info[hdr->depth].nat_rec_fac =
                      H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[hdr->depth].max_nrec)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
@@ -546,7 +546,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             /* Count the number of records being moved */
             for (u = 0; u < move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
-            H5_CHECKED_ASSIGN(left_moved_nrec, hssize_t, moved_nrec, hsize_t)
+            H5_CHECKED_ASSIGN(left_moved_nrec, hssize_t, moved_nrec, hsize_t);
             right_moved_nrec -= (hssize_t)moved_nrec;
 
             /* Copy node pointers from right node to left */
@@ -619,7 +619,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             for (u = 0; u < move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
             left_moved_nrec -= (hssize_t)moved_nrec;
-            H5_CHECKED_ASSIGN(right_moved_nrec, hssize_t, moved_nrec, hsize_t)
+            H5_CHECKED_ASSIGN(right_moved_nrec, hssize_t, moved_nrec, hsize_t);
         } /* end if */
 
         /* Update flush dependencies for grandchildren, if using SWMR */

@@ -1333,7 +1333,7 @@ test_filter_numbers(void)
         id     = H5Z_FILTER_MAX + 1;
         status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1344,7 +1344,7 @@ test_filter_numbers(void)
         id     = -1;
         status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1358,7 +1358,7 @@ test_filter_numbers(void)
         id     = H5Z_FILTER_MAX + 1;
         status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1369,7 +1369,7 @@ test_filter_numbers(void)
         id     = -1;
         status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should fail */
     if (status != FAIL)
@@ -1388,7 +1388,7 @@ error:
     {
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end test_filter_numbers() */
 

@@ -219,14 +219,14 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong dcpl_id, jboolean minimize)
 {
-    hbool_t minimize_val;
-    herr_t  retVal = FAIL;
+    bool   minimize_val;
+    herr_t retVal = FAIL;
 
     UNUSED(clss);
 
-    minimize_val = (JNI_TRUE == minimize) ? TRUE : FALSE;
+    minimize_val = (JNI_TRUE == minimize) ? true : false;
 
-    if ((retVal = H5Pset_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t)minimize_val)) < 0)
+    if ((retVal = H5Pset_dset_no_attrs_hint((hid_t)dcpl_id, (bool)minimize_val)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -241,15 +241,15 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong dcpl_id)
 {
-    hbool_t  minimize = FALSE;
+    bool     minimize = false;
     jboolean bval     = JNI_FALSE;
 
     UNUSED(clss);
 
-    if (H5Pget_dset_no_attrs_hint((hid_t)dcpl_id, (hbool_t *)&minimize) < 0)
+    if (H5Pget_dset_no_attrs_hint((hid_t)dcpl_id, (bool *)&minimize) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (minimize == TRUE)
+    if (minimize == true)
         bval = JNI_TRUE;
 
 done:

@@ -109,7 +109,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, 
 
     UNUSED(clss);
 
-    if ((retVal = H5Pset_fapl_core((hid_t)fapl_id, (size_t)increment, (hbool_t)backing_store)) < 0)
+    if ((retVal = H5Pset_fapl_core((hid_t)fapl_id, (size_t)increment, (bool)backing_store)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -145,7 +145,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, 
         long long inc_temp = *incArray;
         size_t    inc_t    = (size_t)inc_temp;
 
-        if ((status = H5Pget_fapl_core((hid_t)fapl_id, &inc_t, (hbool_t *)backArray)) < 0)
+        if ((status = H5Pget_fapl_core((hid_t)fapl_id, &inc_t, (bool *)backArray)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
         *incArray = (jlong)inc_t;
@@ -656,7 +656,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi(JNIEnv *env, jclass clss, jlong tid, jin
     }
 
     if ((status = H5Pset_fapl_multi((hid_t)tid, (const H5FD_mem_t *)themapArray, (const hid_t *)thefaplArray,
-                                    mName, (const haddr_t *)theaddrArray, (hbool_t)relax)) < 0)
+                                    mName, (const haddr_t *)theaddrArray, (bool)relax)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (memb_name && mName) {
@@ -745,7 +745,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1multi(JNIEnv *env, jclass clss, jlong tid, jin
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_fapl_multi: memory allocation failed");
 
     if ((status = H5Pget_fapl_multi((hid_t)tid, (H5FD_mem_t *)themapArray, (hid_t *)thefaplArray, mName,
-                                    (haddr_t *)theaddrArray, (hbool_t *)&relax)) < 0)
+                                    (haddr_t *)theaddrArray, (bool *)&relax)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (memb_name && mName) {
@@ -928,7 +928,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id, 
         HDmemset(instance.secret_key, 0, H5FD_ROS3_MAX_SECRET_KEY_LEN + 1);
 
     if (instance.aws_region[0] != '\0' && instance.secret_id[0] != '\0' && instance.secret_key[0] != '\0')
-        instance.authenticate = TRUE;
+        instance.authenticate = true;
 
     if (H5Pset_fapl_ros3((hid_t)fapl_id, &instance) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1327,14 +1327,14 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1evict_1on_1close(JNIEnv *env, jclass clss, jlong fapl_id, jboolean evict_on_close)
 {
-    hbool_t evict_on_close_val = FALSE;
-    herr_t  retVal             = FAIL;
+    bool   evict_on_close_val = false;
+    herr_t retVal             = FAIL;
 
     UNUSED(clss);
 
-    evict_on_close_val = (evict_on_close == JNI_TRUE) ? TRUE : FALSE;
+    evict_on_close_val = (evict_on_close == JNI_TRUE) ? true : false;
 
-    if ((retVal = H5Pset_evict_on_close((hid_t)fapl_id, (hbool_t)evict_on_close_val)) < 0)
+    if ((retVal = H5Pset_evict_on_close((hid_t)fapl_id, (bool)evict_on_close_val)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -1349,15 +1349,15 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close(JNIEnv *env, jclass clss, jlong fapl_id)
 {
-    hbool_t  evict_on_close_val = FALSE;
+    bool     evict_on_close_val = false;
     jboolean bval               = JNI_FALSE;
 
     UNUSED(clss);
 
-    if (H5Pget_evict_on_close((hid_t)fapl_id, (hbool_t *)&evict_on_close_val) < 0)
+    if (H5Pget_evict_on_close((hid_t)fapl_id, (bool *)&evict_on_close_val) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    bval = (evict_on_close_val == TRUE) ? JNI_TRUE : JNI_FALSE;
+    bval = (evict_on_close_val == true) ? JNI_TRUE : JNI_FALSE;
 
 done:
     return bval;
@@ -1372,13 +1372,13 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id, jboolean use_file_locking,
                                           jboolean ignore_when_disabled)
 {
-    hbool_t use_file_locking_val     = TRUE;
-    hbool_t ignore_when_disabled_val = TRUE;
+    bool use_file_locking_val     = true;
+    bool ignore_when_disabled_val = true;
 
     UNUSED(clss);
 
-    use_file_locking_val     = (use_file_locking == JNI_TRUE) ? TRUE : FALSE;
-    ignore_when_disabled_val = (ignore_when_disabled == JNI_TRUE) ? TRUE : FALSE;
+    use_file_locking_val     = (use_file_locking == JNI_TRUE) ? true : false;
+    ignore_when_disabled_val = (ignore_when_disabled == JNI_TRUE) ? true : false;
 
     if (H5Pset_file_locking((hid_t)fapl_id, use_file_locking_val, ignore_when_disabled_val) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1395,8 +1395,8 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1use_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id)
 {
-    hbool_t  use_file_locking_val = TRUE;
-    hbool_t  unused               = TRUE;
+    bool     use_file_locking_val = true;
+    bool     unused               = true;
     jboolean bval                 = JNI_FALSE;
 
     UNUSED(clss);
@@ -1404,7 +1404,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1use_1file_1locking(JNIEnv *env, jclass clss, jlong f
     if (H5Pget_file_locking((hid_t)fapl_id, &use_file_locking_val, &unused) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    bval = (use_file_locking_val == TRUE) ? JNI_TRUE : JNI_FALSE;
+    bval = (use_file_locking_val == true) ? JNI_TRUE : JNI_FALSE;
 
 done:
     return bval;
@@ -1418,8 +1418,8 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1ignore_1disabled_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id)
 {
-    hbool_t  ignore_when_disabled_val = TRUE;
-    hbool_t  unused                   = TRUE;
+    bool     ignore_when_disabled_val = true;
+    bool     unused                   = true;
     jboolean bval                     = JNI_FALSE;
 
     UNUSED(clss);
@@ -1427,7 +1427,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1ignore_1disabled_1file_1locking(JNIEnv *env, jclass 
     if (H5Pget_file_locking((hid_t)fapl_id, &unused, &ignore_when_disabled_val) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    bval = (ignore_when_disabled_val == TRUE) ? JNI_TRUE : JNI_FALSE;
+    bval = (ignore_when_disabled_val == true) ? JNI_TRUE : JNI_FALSE;
 
 done:
     return bval;
@@ -1794,8 +1794,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1mdc_1log_1options(JNIEnv *env, jclass clss, jlong fa
 
     PIN_JAVA_STRING(ENVONLY, location, locStr, NULL, "H5Pset_mdc_log_options: location string not pinned");
 
-    if ((retVal = H5Pset_mdc_log_options((hid_t)fapl_id, (hbool_t)is_enabled, locStr,
-                                         (hbool_t)start_on_access)) < 0)
+    if ((retVal = H5Pset_mdc_log_options((hid_t)fapl_id, (bool)is_enabled, locStr, (bool)start_on_access)) <
+        0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -1814,8 +1814,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options(JNIEnv *env, jclass clss, jlong fa
 {
     jboolean  isCopy;
     jboolean *mdc_log_options_ptr = NULL;
-    hbool_t   is_enabled;
-    hbool_t   start_on_access;
+    bool      is_enabled;
+    bool      start_on_access;
     ssize_t   status = -1;
     size_t    location_size;
     jsize     arrLen;

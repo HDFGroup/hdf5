@@ -353,7 +353,7 @@ error:
         H5Sclose(space);
         H5Pclose(create_plist);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }

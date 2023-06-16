@@ -45,7 +45,7 @@ static herr_t H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *in
  * Create a java object of hdf.hdf5lib.structs.H5O_token_t.
  */
 jobject
-create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical_pinning)
+create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, bool is_critical_pinning)
 {
     jbyteArray tokenByteBuf;
     jboolean   token_buf_is_copy;
@@ -193,7 +193,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info(JNIEnv *env, jclass clss, jlong loc_id, jint fi
     if ((status = H5Oget_info3((hid_t)loc_id, &infobuf, (unsigned)fields)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -241,7 +241,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1name(JNIEnv *env, jclass clss, jlong loc_i
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -293,7 +293,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(ENVONLY, &infobuf.token, false)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)infobuf.fileno;
@@ -580,7 +580,7 @@ H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *info, void *cb_d
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     /* Create an H5O_token_t object */
-    if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->token, FALSE)))
+    if (NULL == (token = create_H5O_token_t(CBENVONLY, &info->token, false)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     args[0].j = (jlong)info->fileno;
@@ -1037,14 +1037,14 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Oare_1mdc_1flushes_1disabled(JNIEnv *env, jclass clss, jlong loc_id)
 {
     jboolean bval        = JNI_FALSE;
-    hbool_t  is_disabled = FALSE;
+    bool     is_disabled = false;
 
     UNUSED(clss);
 
     if (H5Oare_mdc_flushes_disabled((hid_t)loc_id, &is_disabled) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (is_disabled == TRUE)
+    if (is_disabled == true)
         bval = JNI_TRUE;
 
 done:

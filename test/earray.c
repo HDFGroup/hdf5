@@ -626,7 +626,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -643,7 +643,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -659,7 +659,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -676,7 +676,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -691,7 +691,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -706,7 +706,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -723,7 +723,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -742,7 +742,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
             {
                 ea = H5EA_create(f, &test_cparam, NULL);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ea) {
                 /* Close opened extensible array */
                 H5EA_close(ea);
@@ -759,7 +759,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -774,7 +774,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         {
             ea = H5EA_create(f, &test_cparam, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ea) {
             /* Close opened extensible array */
             H5EA_close(ea);
@@ -825,7 +825,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_create() */
@@ -896,7 +896,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_reopen() */
@@ -1004,7 +1004,7 @@ error:
         H5Fclose(file);
         H5Fclose(file2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice() */
@@ -1146,7 +1146,7 @@ error:
         H5Fclose(file0);
         H5Fclose(file00);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_open_twice_diff() */
@@ -1211,7 +1211,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     {
         ea2 = H5EA_open(f, ea_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ea2) {
         /* Close opened array */
         H5EA_close(ea2);
@@ -1234,7 +1234,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     {
         ea = H5EA_open(f, ea_addr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ea) {
         /* Close opened array */
         H5EA_close(ea);
@@ -1269,7 +1269,7 @@ error:
             H5EA_close(ea2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_delete_open() */
@@ -2224,7 +2224,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_set_elmts() */
@@ -2383,7 +2383,7 @@ error:
             H5EA_close(ea);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_skip_elmts() */
@@ -2608,7 +2608,7 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

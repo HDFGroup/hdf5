@@ -116,7 +116,7 @@ error:
         H5Tclose(tid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -286,7 +286,7 @@ error:
         H5Tclose(tid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -389,7 +389,7 @@ error:
         H5Tclose(f_tid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -490,7 +490,7 @@ error:
         H5Tclose(f_tid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -597,7 +597,7 @@ error:
     {
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -662,7 +662,7 @@ test_funcs(void)
     {
         size = H5Tget_ebias(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0)
         FAIL_PUTS_ERROR("H5Tget_ebias should not work with enum types");
 
@@ -670,7 +670,7 @@ test_funcs(void)
     {
         inpad = H5Tget_inpad(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (inpad > -1)
         FAIL_PUTS_ERROR("H5Tget_inpad should not work with enum types");
 
@@ -678,7 +678,7 @@ test_funcs(void)
     {
         cset = H5Tget_cset(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (cset > -1)
         FAIL_PUTS_ERROR("H5Tget_cset should not work with enum types");
 
@@ -687,7 +687,7 @@ test_funcs(void)
     {
         ret = H5Tset_offset(tid, size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("H5Tset_offset should not work with enum types");
 
@@ -695,7 +695,7 @@ test_funcs(void)
     {
         ret = H5Tset_order(tid, H5T_ORDER_BE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         FAIL_PUTS_ERROR("H5Tset_order should not work with enum types");
 
@@ -710,7 +710,7 @@ error:
     {
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

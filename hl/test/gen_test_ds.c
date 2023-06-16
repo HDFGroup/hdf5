@@ -336,7 +336,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -400,7 +400,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -480,7 +480,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -561,7 +561,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -609,7 +609,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 

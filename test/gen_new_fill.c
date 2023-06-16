@@ -98,6 +98,6 @@ error:
         H5Dclose(dset2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }

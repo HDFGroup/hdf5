@@ -163,6 +163,9 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
+    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
+      file hdf5-config.cmake. This allows to easily detect if the library
+      has been build with or without read-only S3 functionality.
 
     Library:
     --------

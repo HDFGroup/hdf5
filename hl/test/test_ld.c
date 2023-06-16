@@ -255,7 +255,7 @@ test_LD_dims_params(const char *file)
     {
         ret = H5LDget_dset_dims(invalid_id, one_cur_dims);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
 
     /*
@@ -267,7 +267,7 @@ test_LD_dims_params(const char *file)
     {
         ret = H5LDget_dset_dims(did, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
@@ -336,7 +336,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 } /* test_LD_dims_params() */
@@ -481,7 +481,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_dims() */
@@ -545,7 +545,7 @@ test_LD_size(const char *file)
     {
         dsize = H5LDget_dset_type_size(invalid_id, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(dsize, 0)
 
     /*
@@ -822,7 +822,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_size() */
@@ -928,7 +928,7 @@ test_LD_elmts_invalid(const char *file)
     {
         ret = H5LDget_dset_elmts(invalid_id, prev_dims, cur_dims, NULL, tbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
 
     /* Open dataset: DSET_CMPD */
@@ -964,7 +964,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_elmts_invalid() */
@@ -1122,7 +1122,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 } /* test_LD_elmts_one() */
 
@@ -1336,7 +1336,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 } /* test_LD_elmts_two() */
 

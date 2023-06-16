@@ -131,7 +131,7 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (ainfo->track_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        UINT16DECODE(p, ainfo->max_crt_idx)
+        UINT16DECODE(p, ainfo->max_crt_idx);
     }
     else
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
@@ -428,7 +428,7 @@ H5O__ainfo_copy_file(H5F_t H5_ATTR_NDEBUG_UNUSED *file_src, void *mesg_src, H5F_
         /* Prepare to copy dense attributes - actual copy in post_copy */
 
         /* Set copied metadata tag */
-        H5_BEGIN_TAG(H5AC__COPIED_TAG);
+        H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
         if (H5A__dense_create(file_dst, ainfo_dst) < 0)
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")

@@ -935,7 +935,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fcreate(hdf_file_name, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
         else {
 
@@ -943,7 +943,7 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
             {
                 file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
 
         if (file_id >= 0) {
@@ -6284,7 +6284,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
                 failure_mssg = "SWMR start succeeded in file with cache image.";
             }
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     if (show_progress)

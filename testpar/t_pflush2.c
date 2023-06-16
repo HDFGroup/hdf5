@@ -119,7 +119,7 @@ error:
         H5Sclose(sid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end check_test_file() */
 

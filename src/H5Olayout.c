@@ -578,7 +578,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, H5F_sizeof_size(f), heap_block_p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                     "ran off end of input buffer while decoding")
-                    H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize)
+                    H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize);
 
                     /* Allocate entry list */
                     if (NULL == (mesg->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(
@@ -728,7 +728,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     if (H5_IS_BUFFER_OVERFLOW(heap_block_p, 4, heap_block_p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL,
                                     "ran off end of input buffer while decoding")
-                    UINT32DECODE(heap_block_p, stored_chksum)
+                    UINT32DECODE(heap_block_p, stored_chksum);
 
                     /* Compute checksum */
                     computed_chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);

@@ -272,7 +272,7 @@ error:
         H5Pclose(cparms);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -338,7 +338,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -403,7 +403,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -495,7 +495,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -587,7 +587,7 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

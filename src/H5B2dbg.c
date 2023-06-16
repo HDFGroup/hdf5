@@ -192,7 +192,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
      */
     H5_CHECK_OVERFLOW(depth, unsigned, uint16_t);
     node_ptr.addr = addr;
-    H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned)
+    H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
     if (NULL == (internal = H5B2__protect_internal(hdr, NULL, &node_ptr, (uint16_t)depth, FALSE,
                                                    H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
@@ -293,7 +293,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
      */
     H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
     node_ptr.addr = addr;
-    H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned)
+    H5_CHECKED_ASSIGN(node_ptr.node_nrec, uint16_t, nrec, unsigned);
     if (NULL == (leaf = H5B2__protect_leaf(hdr, NULL, &node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 

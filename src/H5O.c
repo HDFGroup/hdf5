@@ -2093,7 +2093,7 @@ H5O__disable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__disable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2118,7 +2118,7 @@ H5Odisable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2166,7 +2166,7 @@ H5O__enable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__enable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2191,7 +2191,7 @@ H5Oenable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2270,7 +2270,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     H5VL_loc_params_t                  loc_params;          /* Location parameters */
     herr_t                             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", object_id, are_disabled);
 
     /* Sanity check */

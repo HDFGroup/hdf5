@@ -214,7 +214,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
     }
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)                               \
-    {                                                                                                        \
+    do {                                                                                                     \
         struct {                                                                                             \
             TYPE arr[ROWS][COLS];                                                                            \
         } *array           = NULL;                                                                           \
@@ -298,10 +298,10 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             TEST_ERROR;                                                                                      \
                                                                                                              \
         HDfree(array);                                                                                       \
-    }
+    } while (0)
 
 #define INVALID_SET_TEST(TRANSFORM)                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (H5Pset_data_transform(dxpl_id, TRANSFORM) < 0) {                                                 \
             PASSED();                                                                                        \
         }                                                                                                    \
@@ -310,7 +310,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             HDfprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");  \
             goto error;                                                                                      \
         }                                                                                                    \
-    }
+    } while (0)
 
 int
 main(void)

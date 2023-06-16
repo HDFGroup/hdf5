@@ -149,7 +149,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     if (link_flags & H5O_LINK_STORE_CORDER) {
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        INT64DECODE(p, lnk->corder)
+        INT64DECODE(p, lnk->corder);
         lnk->corder_valid = TRUE;
     }
     else {
@@ -223,7 +223,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
             /* Get the link value */
             if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-            UINT16DECODE(p, len)
+            UINT16DECODE(p, len);
             if (len == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
 
@@ -247,7 +247,7 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
             /* A UD link.  Get the user-supplied data */
             if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-            UINT16DECODE(p, len)
+            UINT16DECODE(p, len);
             if (lnk->type == H5L_TYPE_EXTERNAL && len < 3)
                 HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "external link information length < 3")
             lnk->u.ud.size = len;
@@ -332,7 +332,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 
     /* Store the link creation order in the file, if its valid */
     if (lnk->corder_valid)
-        INT64ENCODE(p, lnk->corder)
+        INT64ENCODE(p, lnk->corder);
 
     /* Store a non-default link name character set */
     if (link_flags & H5O_LINK_STORE_NAME_CSET)
@@ -375,7 +375,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
             /* Store the link value */
             len = (uint16_t)HDstrlen(lnk->u.soft.name);
             HDassert(len > 0);
-            UINT16ENCODE(p, len)
+            UINT16ENCODE(p, len);
             H5MM_memcpy(p, lnk->u.soft.name, (size_t)len);
             p += len;
             break;
@@ -389,7 +389,7 @@ H5O__link_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 
             /* Store the user-supplied data, however long it is */
             len = (uint16_t)lnk->u.ud.size;
-            UINT16ENCODE(p, len)
+            UINT16ENCODE(p, len);
             if (len > 0) {
                 H5MM_memcpy(p, lnk->u.ud.udata, (size_t)len);
                 p += len;

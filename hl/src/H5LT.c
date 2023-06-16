@@ -535,7 +535,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -772,7 +772,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -886,7 +886,7 @@ out:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end H5LTopen_file_image() */
 
@@ -1121,7 +1121,7 @@ out:
         H5Dclose(did);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1177,7 +1177,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1254,7 +1254,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1898,7 +1898,6 @@ H5LTget_attribute_ndims(hid_t loc_id, const char *obj_name, const char *attr_nam
     /* End access to the attribute */
     if (H5Aclose(attr_id))
         goto out;
-    ;
 
     /* Close the object */
     if (H5Oclose(obj_id) < 0)
@@ -3405,7 +3404,6 @@ H5LT_get_attribute_disk(hid_t loc_id, const char *attr_name, void *attr_out)
 
     if (H5Aclose(attr_id) < 0)
         return -1;
-    ;
 
     return 0;
 
@@ -3493,7 +3491,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 

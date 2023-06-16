@@ -1394,7 +1394,7 @@ H5DreadVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid
     H5T_class_t tclass;
     jstring     jstr;
     h5str_t     h5str;
-    hbool_t     close_mem_space = FALSE;
+    bool        close_mem_space = false;
     size_t      typeSize;
     size_t      i;
     hid_t       mem_space = mem_sid;
@@ -1413,7 +1413,7 @@ H5DreadVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid
              */
             if ((mem_space = H5Dget_space(did)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
-            close_mem_space = TRUE;
+            close_mem_space = true;
 
             if (H5Sselect_all(mem_space) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1632,7 +1632,7 @@ H5DwriteVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_si
 {
     const char *utf8            = NULL;
     jstring     jstr            = NULL;
-    hbool_t     close_mem_space = FALSE;
+    bool        close_mem_space = false;
     size_t      typeSize;
     size_t      i;
     hid_t       mem_space = mem_sid;
@@ -1649,7 +1649,7 @@ H5DwriteVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_si
              */
             if ((mem_space = H5Dget_space(did)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
-            close_mem_space = TRUE;
+            close_mem_space = true;
 
             if (H5Sselect_all(mem_space) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);

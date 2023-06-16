@@ -380,7 +380,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             {
                 status = H5FD_locate_signature(file, &super_addr);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* Set superblock address to undefined on error */
             if (status < 0)

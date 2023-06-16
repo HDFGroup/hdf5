@@ -292,7 +292,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
         last_addr = addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 
-        H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+        H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
         if (entry_ptr == NULL)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "listed candidate entry not in cache?!?!?")
         if (!entry_ptr->is_dirty)
@@ -680,7 +680,7 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
         HDassert(H5_addr_defined(addr));
 
-        H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+        H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
         if (entry_ptr == NULL) {
 #ifdef H5C_DO_SANITY_CHECKS
@@ -990,7 +990,7 @@ done:
         if (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5C__collective_write() */
 
 /*-------------------------------------------------------------------------

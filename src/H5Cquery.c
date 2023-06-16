@@ -250,7 +250,7 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
     if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
 
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
     if (entry_ptr == NULL) {
         /* the entry doesn't exist in the cache -- report this
@@ -372,7 +372,7 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
     HDassert(H5_addr_defined(addr));
 
     /* Locate the entry at the address */
-    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+    H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
     if (entry_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't find entry in index")
 

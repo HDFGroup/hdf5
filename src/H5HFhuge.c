@@ -442,7 +442,7 @@ H5HF__huge_insert(H5HF_hdr_t *hdr, size_t obj_size, void *obj, void *_id)
 
         /* Encode ID for user */
         *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_HUGE;
-        UINT64ENCODE_VAR(id, new_id, hdr->huge_id_size)
+        UINT64ENCODE_VAR(id, new_id, hdr->huge_id_size);
     } /* end else */
 
     /* Update statistics about heap */
@@ -520,7 +520,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -537,7 +537,7 @@ H5HF__huge_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -609,7 +609,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -626,7 +626,7 @@ H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -708,7 +708,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_filt_indir_found, &found_rec) <
@@ -727,7 +727,7 @@ H5HF__huge_op_real(H5HF_hdr_t *hdr, const uint8_t *id, hbool_t is_read, H5HF_ope
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Look up object in v2 B-tree */
             if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -855,7 +855,7 @@ H5HF__huge_write(H5HF_hdr_t *hdr, const uint8_t *id, const void *obj)
         }
 
         /* Get ID for looking up 'huge' object in v2 B-tree */
-        UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+        UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
         /* Look up object in v2 B-tree */
         if (H5B2_find(hdr->huge_bt2, &search_rec, &found, H5HF__huge_bt2_indir_found, &found_rec) < 0)
@@ -1020,7 +1020,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
             H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */
@@ -1031,7 +1031,7 @@ H5HF__huge_remove(H5HF_hdr_t *hdr, const uint8_t *id)
             H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
 
             /* Get ID for looking up 'huge' object in v2 B-tree */
-            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size);
 
             /* Remove the record for tracking the 'huge' object from the v2 B-tree */
             /* (space in the file for the object is freed in the 'remove' callback) */

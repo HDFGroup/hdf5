@@ -44,7 +44,7 @@ test_h5_dirname(void)
     {
         ret = H5_dirname(NULL, &dirname);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_dirname with NULL path");
     H5Eclear2(H5E_DEFAULT);
 
@@ -55,7 +55,7 @@ test_h5_dirname(void)
     {
         ret = H5_dirname(path, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_dirname with NULL dirname pointer");
     H5Eclear2(H5E_DEFAULT);
 
@@ -248,7 +248,7 @@ test_h5_basename(void)
     {
         ret = H5_basename(NULL, &basename);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_basename with NULL path");
     H5Eclear2(H5E_DEFAULT);
 
@@ -259,7 +259,7 @@ test_h5_basename(void)
     {
         ret = H5_basename(path, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5_basename with NULL basename pointer");
     H5Eclear2(H5E_DEFAULT);
 
@@ -513,7 +513,7 @@ test_h5_strndup(void)
     {
         str = H5_strndup(NULL, 20);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     CHECK_PTR_NULL(str, "H5_strndup with NULL string pointer");
     H5Eclear2(H5E_DEFAULT);
 

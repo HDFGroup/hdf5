@@ -327,7 +327,7 @@ Java_hdf_hdf5lib_H5_H5Iclear_1type(JNIEnv *env, jclass clss, jint type, jboolean
 {
     UNUSED(clss);
 
-    if (H5Iclear_type((H5I_type_t)type, (hbool_t)force) < 0)
+    if (H5Iclear_type((H5I_type_t)type, (bool)force) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:

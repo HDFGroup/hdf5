@@ -126,7 +126,7 @@ error:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end check_data_i() */
 
@@ -200,7 +200,7 @@ error:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end check_data_f() */
 
@@ -334,7 +334,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 } /* end check_file() */
 

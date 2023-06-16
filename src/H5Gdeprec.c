@@ -955,7 +955,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
     H5VL_native_group_optional_args_t grp_opt_args;        /* Arguments for optional operation */
     herr_t                            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
 
     /* Check arguments */
@@ -1071,7 +1071,7 @@ done:
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1096,7 +1096,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     H5G_trav_goi_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(loc);
@@ -1128,7 +1128,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
         {
             ret = H5L_get_info(loc, name, &linfo);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {
             statbuf->linklen = linfo.u.val_size;
@@ -1144,7 +1144,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
 /*-------------------------------------------------------------------------
