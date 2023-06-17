@@ -1051,7 +1051,7 @@ H5Pget_elink_fapl(hid_t lapl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fapl for links")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_fapl() */
 
 /*-------------------------------------------------------------------------
