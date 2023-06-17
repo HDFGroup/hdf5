@@ -85,20 +85,22 @@
 #if H5C_COLLECT_CACHE_STATS
 /* clang-format off */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr) \
-    (cache_ptr)->images_created++;
+do {                                                        \
+    (cache_ptr)->images_created++;                          \
+} while (0)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)  \
-{                                                          \
+do {                                                       \
     /* make sure image len is still good */                \
     assert((cache_ptr)->image_len > 0);                  \
     (cache_ptr)->images_read++;                            \
-}
+} while (0)
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)  \
-{                                                          \
+do {                                                       \
     /* make sure image len is still good */                \
     assert((cache_ptr)->image_len > 0);                  \
     (cache_ptr)->images_loaded++;                          \
     (cache_ptr)->last_image_size = (cache_ptr)->image_len; \
-}
+} while (0)
 /* clang-format on */
 #else /* H5C_COLLECT_CACHE_STATS */
 #define H5C__UPDATE_STATS_FOR_CACHE_IMAGE_CREATE(cache_ptr)
@@ -551,7 +553,7 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
                                cache_ptr->image_buffer) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read metadata cache image block")
 
-            H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr)
+            H5C__UPDATE_STATS_FOR_CACHE_IMAGE_READ(cache_ptr);
 
 #ifdef H5_HAVE_PARALLEL
             if (aux_ptr) {
@@ -634,7 +636,7 @@ H5C__load_cache_image(H5F_t *f)
         /* Update stats -- must do this now, as we are about
          * to discard the size of the cache image.
          */
-        H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr)
+        H5C__UPDATE_STATS_FOR_CACHE_IMAGE_LOAD(cache_ptr);
 
         cache_ptr->image_loaded = TRUE;
     } /* end if */
@@ -2441,7 +2443,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
             /* Must protect parent entry to set up a flush dependency.
              * Do this now, and then uprotect when done.
              */
-            H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, parent_ptr, FAIL)
+            H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, parent_ptr, FAIL);
             parent_ptr->is_protected = TRUE;
 
             /* Setup the flush dependency */
