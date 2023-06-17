@@ -1862,11 +1862,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 
     /* Make certain the dataspaces are the same type */
     if (ds1->extent.type != ds2->extent.type)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Make certain the dataspaces are the same rank */
     if (ds1->extent.rank != ds2->extent.rank)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Make certain the dataspaces' current dimensions are the same size */
     if (ds1->extent.rank > 0) {
@@ -1874,7 +1874,7 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         assert(ds2->extent.size);
         for (u = 0; u < ds1->extent.rank; u++)
             if (ds1->extent.size[u] != ds2->extent.size[u])
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Make certain the dataspaces' maximum dimensions are the same size */
@@ -1883,11 +1883,11 @@ H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
         if (ds1->extent.max != NULL && ds2->extent.max != NULL) {
             for (u = 0; u < ds1->extent.rank; u++)
                 if (ds1->extent.max[u] != ds2->extent.max[u])
-                    HGOTO_DONE(FALSE)
+                    HGOTO_DONE(FALSE);
         } /* end if */
         else if ((ds1->extent.max == NULL && ds2->extent.max != NULL) ||
                  (ds1->extent.max != NULL && ds2->extent.max == NULL))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:

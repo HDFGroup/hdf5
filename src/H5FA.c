@@ -450,7 +450,7 @@ H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
                     HGOTO_ERROR(H5E_FARRAY, H5E_CANTSET, FAIL, "can't set element to class's fill value")
 
                 /* We've retrieved the value, leave now */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             }                             /* end if */
             else {                        /* get the page */
                 size_t  dblk_page_nelmts; /* # of elements in a data block page */

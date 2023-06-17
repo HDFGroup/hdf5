@@ -717,7 +717,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          * H5_ITER_CONT to continue the iteration.
          */
         if (olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
-            HGOTO_DONE(H5_ITER_STOP) /* Indicate that the iterator should stop */
+            HGOTO_DONE(H5_ITER_STOP); /* Indicate that the iterator should stop */
     }                                /* end if */
 
 done:
@@ -2425,7 +2425,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
     if (f->closing) {
         if (was_closed)
             *was_closed = TRUE;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 
     /* Get the number of open objects and open files on this file/mount hierarchy */
@@ -2451,13 +2451,13 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
              * close all objects isn't a major problem.
              */
             if ((nopen_files + nopen_objs) > 0)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             break;
 
         case H5F_CLOSE_SEMI:
             /* Can leave safely if file IDs are still open on this file */
             if (nopen_files > 0)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             /* Sanity check: If close degree if "semi" and we have gotten this
              * far and there are objects left open, bail out now.
@@ -2471,7 +2471,7 @@ H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
         case H5F_CLOSE_STRONG:
             /* If there are other open files in the hierarchy, we can leave now */
             if (nopen_files > 0)
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
 
             /* If we've gotten this far (ie. there are no open file IDs in the file/mount hierarchy), fall
              * through to flush & close */

@@ -564,7 +564,7 @@ H5O__alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size, size
     if (was_extended < 0) /* error */
         HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "can't tell if we can extend chunk")
     else if (was_extended == FALSE) /* can't extend -- we are done */
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Adjust object header prefix flags */
     if (adjust_size_flags) {

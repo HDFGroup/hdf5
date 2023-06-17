@@ -833,7 +833,7 @@ H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id)
     /* Scan through the messages looking for the right one */
     for (u = 0; u < oh->nmesgs; u++)
         if (type == oh->mesg[u].type)
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -988,7 +988,7 @@ H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence, un
 
         /* Break out now, if we've found the correct message */
         if (udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
-            HGOTO_DONE(H5_ITER_STOP)
+            HGOTO_DONE(H5_ITER_STOP);
     } /* end if */
 
 done:

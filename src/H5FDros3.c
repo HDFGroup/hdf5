@@ -1122,71 +1122,71 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     /* URL: SCHEME */
     if (HDstrcmp(purl1->scheme, purl2->scheme))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: HOST */
     if (HDstrcmp(purl1->host, purl2->host))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: PORT */
     if (purl1->port && purl2->port) {
         if (HDstrcmp(purl1->port, purl2->port))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->port)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->port)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: PATH */
     if (purl1->path && purl2->path) {
         if (HDstrcmp(purl1->path, purl2->path))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->path && !purl2->path)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->path && !purl1->path)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* URL: QUERY */
     if (purl1->query && purl2->query) {
         if (HDstrcmp(purl1->query, purl2->query))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (purl1->query && !purl2->query)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (purl2->query && !purl1->query)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: AWS_REGION */
     if (f1->fa.aws_region[0] != '\0' && f2->fa.aws_region[0] != '\0') {
         if (HDstrcmp(f1->fa.aws_region, f2->fa.aws_region))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.aws_region[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.aws_region[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: SECRET_ID */
     if (f1->fa.secret_id[0] != '\0' && f2->fa.secret_id[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_id, f2->fa.secret_id))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_id[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.secret_id[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* FAPL: SECRET_KEY */
     if (f1->fa.secret_key[0] != '\0' && f2->fa.secret_key[0] != '\0') {
         if (HDstrcmp(f1->fa.secret_key, f2->fa.secret_key))
-            HGOTO_DONE(-1)
+            HGOTO_DONE(-1);
     }
     else if (f1->fa.secret_key[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (f2->fa.secret_key[0] != '\0')
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -2314,7 +2314,7 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
         assert(corked);
         if (H5C_get_num_objs_corked(f->shared->cache) == 0) {
             *corked = FALSE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
     }
 

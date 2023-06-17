@@ -1910,9 +1910,9 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
 
     /* Compare drivers */
     if (NULL == (cls1 = H5FD_get_class(info1->driver_id)))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (NULL == (cls2 = H5FD_get_class(info2->driver_id)))
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cls1->name == NULL && cls2->name != NULL)
         HGOTO_DONE(-1);
     if (cls1->name != NULL && cls2->name == NULL)
@@ -1922,9 +1922,9 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
 
     /* Compare driver infos */
     if (cls1->fapl_size < cls2->fapl_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (cls1->fapl_size > cls2->fapl_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     assert(cls1->fapl_size == cls2->fapl_size);
     if (info1->driver_info == NULL && info2->driver_info != NULL)
         HGOTO_DONE(-1);
@@ -3677,37 +3677,37 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_
 
     /* Check for different buffer sizes */
     if (info1->size < info2->size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (info1->size > info2->size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Check for different callbacks */
     /* (Order in memory is fairly meaningless, so just check for equality) */
     if (info1->callbacks.image_malloc != info2->callbacks.image_malloc)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (info1->callbacks.image_memcpy != info2->callbacks.image_memcpy)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (info1->callbacks.image_realloc != info2->callbacks.image_realloc)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (info1->callbacks.image_free != info2->callbacks.image_free)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (info1->callbacks.udata_copy != info2->callbacks.udata_copy)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (info1->callbacks.udata_free != info2->callbacks.udata_free)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
 
     /* Check for different udata */
     /* (Don't know how big it is, so can't check contents) */
     if (info1->callbacks.udata < info2->callbacks.udata)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (info1->callbacks.udata > info2->callbacks.udata)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Check buffer contents (instead of buffer pointers) */
     if (info1->buffer != NULL && info2->buffer == NULL)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (info1->buffer == NULL && info2->buffer != NULL)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (info1->buffer != NULL && info2->buffer != NULL)
         ret_value = memcmp(info1->buffer, info2->buffer, size);
 
@@ -6210,9 +6210,9 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
 
     /* Compare connectors */
     if (NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     if (NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
     assert(status >= 0);
     if (cmp_value != 0)

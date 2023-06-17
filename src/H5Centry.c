@@ -2653,7 +2653,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
     if (entry_ptr == NULL || entry_ptr->type != type)
         /* the old item doesn't exist in the cache, so we are done. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     assert(entry_ptr->addr == old_addr);
     assert(entry_ptr->type == type);
@@ -4056,7 +4056,7 @@ H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flag
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
     if ((entry_ptr == NULL) || (entry_ptr->type != type))
         /* the target doesn't exist in the cache, so we are done. */
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     assert(entry_ptr->addr == addr);
     assert(entry_ptr->type == type);

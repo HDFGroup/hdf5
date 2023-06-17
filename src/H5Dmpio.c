@@ -2878,7 +2878,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
         for (ic = 0; ic < total_chunks; ic++)
             assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
 
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     threshold_nproc_per_chunk = (unsigned)mpi_size * percent_nproc_per_chunk / 100;
@@ -4185,7 +4185,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      */
     if (num_chunks == 0) {
         if (mpi_size == 1)
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
                 coll_io_info.base_maddr.cvp = &fake_buf;

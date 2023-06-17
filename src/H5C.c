@@ -404,7 +404,7 @@ H5C_prep_for_file_close(H5F_t *f)
 
     /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     cache_ptr->close_warning_received = TRUE;
 
     /* Make certain there aren't any protected entries */

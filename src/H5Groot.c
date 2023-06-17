@@ -140,7 +140,7 @@ H5G_mkroot(H5F_t *f, hbool_t create_root)
 
     /* Check if the root group is already initialized */
     if (f->shared->root_grp)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Create information needed for group nodes */
     if (H5G__node_init(f) < 0)

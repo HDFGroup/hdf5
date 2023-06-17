@@ -57,7 +57,7 @@ h5screate_simple_c(int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *sp
 
     c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
     if (c_space_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *space_id = (hid_t_f)c_space_id;
 
@@ -323,10 +323,10 @@ h5sget_select_bounds_c(hid_t_f *space_id, hsize_t_f *start, hsize_t_f *end)
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (H5Sget_select_bounds(c_space_id, c_start, c_end) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     for (i = 0; i < rank; i++) {
         start[i] = (hsize_t_f)(c_start[rank - i - 1] + 1);
@@ -644,7 +644,7 @@ h5soffset_simple_c(hid_t_f *space_id, hssize_t_f *offset)
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -653,7 +653,7 @@ h5soffset_simple_c(hid_t_f *space_id, hssize_t_f *offset)
         c_offset[i] = offset[rank - i - 1];
 
     if (H5Soffset_simple(c_space_id, c_offset) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -693,7 +693,7 @@ h5sset_extent_simple_c(hid_t_f *space_id, int_f *rank, hsize_t_f *current_size, 
     } /* end for */
 
     if (H5Sset_extent_simple((hid_t)*space_id, (int)*rank, c_current_size, c_maximum_size) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;
@@ -729,10 +729,10 @@ h5sget_simple_extent_dims_c(hid_t_f *space_id, hsize_t_f *dims, hsize_t_f *maxdi
     c_space_id = (hid_t)*space_id;
     rank       = H5Sget_simple_extent_ndims(c_space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     if (H5Sget_simple_extent_dims(c_space_id, c_dims, c_maxdims) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -870,7 +870,7 @@ h5sselect_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f 
 
     rank = H5Sget_simple_extent_ndims((hid_t)*space_id);
     if (rank < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Reverse dimensions due to C-FORTRAN storage order.
@@ -885,7 +885,7 @@ h5sselect_hyperslab_c(hid_t_f *space_id, int_f *op, hsize_t_f *start, hsize_t_f 
     } /* end for */
 
     if (H5Sselect_hyperslab((hid_t)*space_id, (H5S_seloper_t)*op, c_start, c_stride, c_count, c_block) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     return ret_value;

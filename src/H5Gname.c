@@ -229,10 +229,10 @@ H5G__common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
                 assert(prefix);
             } /* end if */
             else
-                HGOTO_DONE(FALSE)
+                HGOTO_DONE(FALSE);
         } /* end if */
         else
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end while */
 
     /* If we reached the end of the prefix path to check, it must be a valid prefix */
@@ -665,7 +665,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_DATATYPE:
             /* Avoid non-named datatypes */
             if (!H5T_is_named((H5T_t *)obj_ptr))
-                HGOTO_DONE(SUCCEED) /* Do not exit search over IDs */
+                HGOTO_DONE(SUCCEED); /* Do not exit search over IDs */
 
             oloc     = H5T_oloc((H5T_t *)obj_ptr);
             obj_path = H5T_nameof((H5T_t *)obj_ptr);
@@ -697,7 +697,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     /* Check if the object has a full path still */
     if (!obj_path->full_path_r)
-        HGOTO_DONE(SUCCEED) /* No need to look at object, it's path is already invalid */
+        HGOTO_DONE(SUCCEED); /* No need to look at object, it's path is already invalid */
 
     /* Find the top file in object's mount hier. */
     if (H5F_PARENT(oloc->file)) {
@@ -724,7 +724,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     /* Check if the object is in same file mount hier. */
     if (!H5F_SAME_SHARED(top_obj_file, names->src_file))
-        HGOTO_DONE(SUCCEED) /* No need to look at object, it's path is already invalid */
+        HGOTO_DONE(SUCCEED); /* No need to look at object, it's path is already invalid */
 
     switch (names->op) {
         /*-------------------------------------------------------------------------
@@ -1075,7 +1075,7 @@ H5G__get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info2_t *linfo, 
                     HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, H5_ITER_ERROR, "can't duplicate path string")
 
                 /* We found a match so we return immediately */
-                HGOTO_DONE(H5_ITER_STOP)
+                HGOTO_DONE(H5_ITER_STOP);
             } /* end if */
         }     /* end if */
     }         /* end if */

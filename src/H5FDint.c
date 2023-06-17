@@ -230,7 +230,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     /* If the file is open for SWMR read access, allow access to data past
@@ -292,7 +292,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void 
      * collective transfer.
      */
     if (0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
@@ -386,7 +386,7 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -601,7 +601,7 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
      * collective transfer.
      */
     if (0 == count)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 #endif /* H5_HAVE_PARALLEL */
 
     if (file->base_addr > 0) {
@@ -1115,7 +1115,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1277,7 +1277,7 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1754,7 +1754,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1907,7 +1907,7 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
      * collective transfer.
      */
     if (0 == count) {
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     }
 #endif /* H5_HAVE_PARALLEL */
 

@@ -170,7 +170,7 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
     /* Only change the location if it's different */
     if (loc == dt->shared->u.atomic.u.r.loc && file == dt->shared->u.atomic.u.r.file)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     switch (loc) {
         case H5T_LOC_MEMORY: /* Memory based reference datatype */

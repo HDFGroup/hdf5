@@ -918,7 +918,7 @@ H5S__all_shape_same(H5S_t *space1, H5S_t *space2)
      */
     while (space2_dim >= 0) {
         if (space1->extent.size[space1_dim] != space2->extent.size[space2_dim])
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         space1_dim--;
         space2_dim--;
@@ -929,7 +929,7 @@ H5S__all_shape_same(H5S_t *space1, H5S_t *space2)
      */
     while (space1_dim >= 0) {
         if (space1->extent.size[space1_dim] != 1)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         space1_dim--;
     } /* end while */

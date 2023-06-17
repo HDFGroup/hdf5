@@ -112,7 +112,7 @@ H5G__is_empty_test(hid_t gid)
         if (msg_exists > 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link messages found")
 
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
     } /* end if */
 
     /* Check for a link info message */
@@ -133,15 +133,15 @@ H5G__is_empty_test(hid_t gid)
 
         /* Check for 'dense' link storage file addresses being defined */
         if (H5_addr_defined(linfo.fheap_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (H5_addr_defined(linfo.name_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (H5_addr_defined(linfo.corder_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
 
         /* Check for link count */
         if (linfo.nlinks > 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
     /* "Old format" checks */
@@ -171,7 +171,7 @@ H5G__is_empty_test(hid_t gid)
 
         /* Check for link count */
         if (nlinks > 0)
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:
@@ -223,7 +223,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists == 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has a symbol table message */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
@@ -289,7 +289,7 @@ H5G__has_stab_test(hid_t gid)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists == 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has any link messages */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
@@ -347,13 +347,13 @@ H5G__is_new_dense_test(hid_t gid)
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_STAB_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has any link messages */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINK_ID)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if (msg_exists > 0)
-        HGOTO_DONE(FALSE)
+        HGOTO_DONE(FALSE);
 
     /* Check if the group has link info message */
     if ((msg_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID)) < 0)
@@ -367,9 +367,9 @@ H5G__is_new_dense_test(hid_t gid)
 
         /* Check for 'dense' link storage file addresses being defined */
         if (!H5_addr_defined(linfo.fheap_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
         if (!H5_addr_defined(linfo.name_bt2_addr))
-            HGOTO_DONE(FALSE)
+            HGOTO_DONE(FALSE);
     } /* end if */
 
 done:

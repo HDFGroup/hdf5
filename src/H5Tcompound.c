@@ -496,7 +496,7 @@ H5T__pack(const H5T_t *dt)
     if (H5T_detect_class(dt, H5T_COMPOUND, FALSE) > 0) {
         /* If datatype has been packed, skip packing it and indicate success */
         if (TRUE == H5T__is_packed(dt))
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
 
         /* Check for packing unmodifiable datatype */
         if (H5T_STATE_TRANSIENT != dt->shared->state)

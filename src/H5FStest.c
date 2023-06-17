@@ -107,29 +107,29 @@ H5FS__cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2
     assert(cparam2);
 
     if (cparam1->client < cparam2->client)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->client > cparam2->client)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->shrink_percent < cparam2->shrink_percent)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->shrink_percent > cparam2->shrink_percent)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->expand_percent < cparam2->expand_percent)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->expand_percent > cparam2->expand_percent)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->max_sect_size < cparam2->max_sect_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->max_sect_size > cparam2->max_sect_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     if (cparam1->max_sect_addr < cparam2->max_sect_addr)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->max_sect_addr > cparam2->max_sect_addr)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

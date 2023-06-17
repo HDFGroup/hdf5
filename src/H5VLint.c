@@ -1953,45 +1953,45 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
     /* Compare connector "values" */
     if (cls1->value < cls2->value) {
         *cmp_value = -1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     if (cls1->value > cls2->value) {
         *cmp_value = 1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     assert(cls1->value == cls2->value);
 
     /* Compare connector names */
     if (cls1->name == NULL && cls2->name != NULL) {
         *cmp_value = -1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     if (cls1->name != NULL && cls2->name == NULL) {
         *cmp_value = 1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     if (0 != (*cmp_value = HDstrcmp(cls1->name, cls2->name)))
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Compare connector VOL API versions */
     if (cls1->version < cls2->version) {
         *cmp_value = -1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     if (cls1->version > cls2->version) {
         *cmp_value = 1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     assert(cls1->version == cls2->version);
 
     /* Compare connector info */
     if (cls1->info_cls.size < cls2->info_cls.size) {
         *cmp_value = -1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     if (cls1->info_cls.size > cls2->info_cls.size) {
         *cmp_value = 1;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
     assert(cls1->info_cls.size == cls2->info_cls.size);
 

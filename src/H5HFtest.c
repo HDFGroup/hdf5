@@ -115,41 +115,41 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
 
     /* Compare doubling table parameters */
     if (cparam1->managed.width < cparam2->managed.width)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->managed.width > cparam2->managed.width)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cparam1->managed.start_block_size < cparam2->managed.start_block_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->managed.start_block_size > cparam2->managed.start_block_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cparam1->managed.max_direct_size < cparam2->managed.max_direct_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->managed.max_direct_size > cparam2->managed.max_direct_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cparam1->managed.max_index < cparam2->managed.max_index)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->managed.max_index > cparam2->managed.max_index)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cparam1->managed.start_root_rows < cparam2->managed.start_root_rows)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->managed.start_root_rows > cparam2->managed.start_root_rows)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Compare other general parameters for heap */
     if (cparam1->max_man_size < cparam2->max_man_size)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->max_man_size > cparam2->max_man_size)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     if (cparam1->id_len < cparam2->id_len)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->id_len > cparam2->id_len)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
 
     /* Compare "important" parameters for any I/O pipeline filters */
     if (cparam1->pline.nused < cparam2->pline.nused)
-        HGOTO_DONE(-1)
+        HGOTO_DONE(-1);
     else if (cparam1->pline.nused > cparam2->pline.nused)
-        HGOTO_DONE(1)
+        HGOTO_DONE(1);
     else {
         size_t u, v; /* Local index variables */
 
@@ -157,15 +157,15 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
         for (u = 0; u < cparam1->pline.nused; u++) {
             /* Check filter ID */
             if (cparam1->pline.filter[u].id < cparam2->pline.filter[u].id)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             else if (cparam1->pline.filter[u].id > cparam2->pline.filter[u].id)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Check filter flags */
             if (cparam1->pline.filter[u].flags < cparam2->pline.filter[u].flags)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             else if (cparam1->pline.filter[u].flags > cparam2->pline.filter[u].flags)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
 /* Don't worry about comparing the filter names right now... */
 /* (they are expanded during the encode/decode process, but aren't copied
@@ -174,27 +174,27 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
 #if 0
             /* Check filter name */
             if(!cparam1->pline.filter[u].name && cparam2->pline.filter[u].name)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             else if(cparam1->pline.filter[u].name && !cparam2->pline.filter[u].name)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
             else if(cparam1->pline.filter[u].name && cparam2->pline.filter[u].name) {
                 if((ret_value = HDstrcmp(cparam1->pline.filter[u].name, cparam2->pline.filter[u].name)))
-                    HGOTO_DONE(ret_value)
+                    HGOTO_DONE(ret_value);
             } /* end if */
 #endif
 
             /* Check # of filter parameters */
             if (cparam1->pline.filter[u].cd_nelmts < cparam2->pline.filter[u].cd_nelmts)
-                HGOTO_DONE(-1)
+                HGOTO_DONE(-1);
             else if (cparam1->pline.filter[u].cd_nelmts > cparam2->pline.filter[u].cd_nelmts)
-                HGOTO_DONE(1)
+                HGOTO_DONE(1);
 
             /* Check filter parameters */
             for (v = 0; v < cparam1->pline.filter[u].cd_nelmts; v++) {
                 if (cparam1->pline.filter[u].cd_values[v] < cparam2->pline.filter[u].cd_values[v])
-                    HGOTO_DONE(-1)
+                    HGOTO_DONE(-1);
                 else if (cparam1->pline.filter[u].cd_values[v] > cparam2->pline.filter[u].cd_values[v])
-                    HGOTO_DONE(1)
+                    HGOTO_DONE(1);
             } /* end for */
 
         } /* end for */

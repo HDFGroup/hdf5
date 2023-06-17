@@ -1057,7 +1057,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     /* check arguments */
     assert(f);
     if (!H5_addr_defined(addr) || 0 == size)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     assert(addr != 0); /* Can't deallocate the superblock :-) */
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
@@ -1113,13 +1113,13 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTMERGE, FAIL, "can't check for absorbing block")
             else if (status > 0)
                 /* Indicate success */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             else if (size < f->shared->fs_threshold) {
 #ifdef H5MF_ALLOC_DEBUG_MORE
                 fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
                         __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-                HGOTO_DONE(SUCCEED)
+                HGOTO_DONE(SUCCEED);
             } /* end else-if */
         }     /* end if */
 
@@ -1137,7 +1137,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
             fprintf(stderr, "%s: dropping addr = %" PRIuHADDR ", size = %" PRIuHSIZE ", on the floor!\n",
                     __func__, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         } /* end if */
 
         /* There's either already a free space manager, or the freed

@@ -61,7 +61,7 @@ h5pcreate_c(hid_t_f *cls, hid_t_f *prp_id)
 
     c_prp_id = H5Pcreate((hid_t)*cls);
     if (c_prp_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *prp_id = (hid_t_f)c_prp_id;
 
@@ -115,7 +115,7 @@ h5pcopy_c(hid_t_f *prp_id, hid_t_f *new_prp_id)
 
     c_new_prp_id = H5Pcopy((hid_t)*prp_id);
     if (c_new_prp_id < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *new_prp_id = (hid_t_f)c_new_prp_id;
 
@@ -146,7 +146,7 @@ h5pequal_c(hid_t_f *plist1_id, hid_t_f *plist2_id, int_f *c_flag)
 
     c_c_flag = H5Pequal((hid_t)*plist1_id, (hid_t)*plist2_id);
     if (c_c_flag < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *c_flag = (int_f)c_c_flag;
 
@@ -176,7 +176,7 @@ h5pget_class_c(hid_t_f *prp_id, hid_t_f *classtype)
     int_f ret_value = 0;
 
     if ((c_classtype = H5Pget_class((hid_t)*prp_id)) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     *classtype = (hid_t_f)c_classtype;
 
@@ -4117,7 +4117,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
     if (c_expression_len) {
         c_expression = (char *)malloc(c_expression_len);
         if (NULL == c_expression)
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FAIL);
     } /* end if */
 
     /*
@@ -4125,7 +4125,7 @@ h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
      */
     ret = H5Pget_data_transform((hid_t)*plist_id, c_expression, c_expression_len);
     if (ret < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /* or strlen ? */
     HD5packFstring(c_expression, _fcdtocp(expression), (size_t)*expression_len);
@@ -4170,13 +4170,13 @@ h5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_le
      * Convert FORTRAN name to C name
      */
     if (NULL == (c_expression = HD5f2cstring(expression, (size_t)*expression_len)))
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
     /*
      * Call H5Pset_data_transform function.
      */
     if (H5Pset_data_transform((hid_t)*plist_id, c_expression) < 0)
-        HGOTO_DONE(FAIL)
+        HGOTO_DONE(FAIL);
 
 done:
     if (c_expression)

@@ -111,7 +111,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
      */
     if (cache_ptr->resize_in_progress) {
         reentrant_call = TRUE;
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
     } /* end if */
 
     cache_ptr->resize_in_progress = TRUE;
@@ -1509,7 +1509,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         if ((cur_ring_pel_len > 0) && (cur_ring_pel_len >= old_ring_pel_len)) {
             /* Don't error if allowed to have pinned entries remaining */
             if (evict_flags)
-                HGOTO_DONE(TRUE)
+                HGOTO_DONE(TRUE);
 
             HGOTO_ERROR(
                 H5E_CACHE, H5E_CANTFLUSH, FAIL,

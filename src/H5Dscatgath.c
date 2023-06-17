@@ -464,7 +464,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
 
     /* Check for NOOP read */
     if (dset_info->nelmts == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
@@ -606,7 +606,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
     /* Check for NOOP write */
     if (dset_info->nelmts == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Allocate the iterators */
     if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))

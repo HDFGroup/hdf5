@@ -417,7 +417,7 @@ H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, haddr_t addr, const void *_lt_key, hbo
     for (u = 0; u < udata->common.layout->ndims; u++)
         if (udata->common.scaled[u] >= (lt_key->scaled[u] + 1)) {
             *found = FALSE;
-            HGOTO_DONE(SUCCEED)
+            HGOTO_DONE(SUCCEED);
         }
 
     /* Initialize return values */
@@ -459,7 +459,7 @@ H5D__chunk_disjoint(unsigned n, const hsize_t *scaled1, const hsize_t *scaled2)
     /* Loop over two chunks, detecting disjointness and getting out quickly */
     for (u = 0; u < n; u++)
         if ((scaled1[u] + 1) <= scaled2[u] || (scaled2[u] + 1) <= scaled1[u])
-            HGOTO_DONE(TRUE)
+            HGOTO_DONE(TRUE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -288,7 +288,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
     /* If no datasets have I/O, we're done */
     if (io_op_init == 0)
-        HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED);
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)

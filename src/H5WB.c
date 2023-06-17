@@ -155,7 +155,7 @@ H5WB_actual(H5WB_t *wb, size_t need)
 
         /* Check if we can re-use existing buffer */
         if (need <= wb->alloc_size)
-            HGOTO_DONE(wb->actual_buf)
+            HGOTO_DONE(wb->actual_buf);
         /* Can't re-use existing buffer, free it and proceed */
         else
             wb->actual_buf = H5FL_BLK_FREE(extra_buf, wb->actual_buf);
