@@ -67,14 +67,14 @@
 
 /* Calculate the mis-aligned fragment */
 #define H5MF_EOA_MISALIGN(F, E, A, FR)                                                                       \
-    {                                                                                                        \
+do {                                                                                                        \
         hsize_t m;                                                                                           \
                                                                                                              \
         if (H5_addr_gt((E), 0) && ((m) = ((E) + H5F_BASE_ADDR(F)) % (A)))                                    \
             (FR) = (A)-m;                                                                                    \
         else                                                                                                 \
             (FR) = 0;                                                                                        \
-    }
+} while (0)
 
 /****************************/
 /* Package Private Typedefs */
