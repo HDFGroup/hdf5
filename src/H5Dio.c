@@ -395,7 +395,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             }
             else {
                 /* Call selection I/O directly */
-                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
+                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t);
                 if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                            io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                            io_info.element_sizes, io_info.rbufs) < 0)
@@ -797,7 +797,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             }
             else {
                 /* Call selection I/O directly */
-                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
+                H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t);
                 if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                             io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                             io_info.element_sizes, io_info.wbufs) < 0)

@@ -2740,7 +2740,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t)
+            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t);
             if (H5F_shared_select_read(H5F_SHARED(dset_info->dset->oloc.file), H5FD_MEM_DRAW,
                                        (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces, chunk_addrs,
                                        element_sizes, bufs) < 0)
@@ -3126,7 +3126,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t)
+            H5_CHECK_OVERFLOW(num_chunks, size_t, uint32_t);
             if (H5F_shared_select_write(H5F_SHARED(dset_info->dset->oloc.file), H5FD_MEM_DRAW,
                                         (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces,
                                         chunk_addrs, element_sizes, bufs) < 0)

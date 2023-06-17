@@ -834,7 +834,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
     }
 
     /* Read data from all pieces */
-    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t)
+    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t);
     if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added, tmp_mem_spaces,
                                io_info->file_spaces, io_info->addrs, io_info->element_sizes, tmp_bufs) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
@@ -1171,7 +1171,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
         size_t j = 0; /* Index into array of background buffers */
 
         /* Read data */
-        H5_CHECK_OVERFLOW(bkg_pieces, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(bkg_pieces, size_t, uint32_t);
         if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)bkg_pieces, bkg_mem_spaces,
                                    bkg_file_spaces, bkg_addrs, bkg_element_sizes, bkg_bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to background buffer failed")
@@ -1222,7 +1222,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
     }
 
     /* Write data to disk */
-    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t)
+    H5_CHECK_OVERFLOW(io_info->pieces_added, size_t, uint32_t);
     if (H5F_shared_select_write(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)io_info->pieces_added,
                                 write_mem_spaces, io_info->file_spaces, io_info->addrs,
                                 io_info->element_sizes, write_bufs) < 0)
