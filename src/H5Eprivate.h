@@ -87,10 +87,10 @@ typedef struct H5E_t H5E_t;
  * the `done' label.
  */
 #define HGOTO_DONE(ret_val)                                                                                  \
-    {                                                                                                        \
+do {                                                                                                         \
         ret_value = ret_val;                                                                                 \
         goto done;                                                                                           \
-    }
+} while (0)
 
 /*
  * HGOTO_DONE_TAG macro, used like HGOTO_DONE between H5_BEGIN_TAG and
