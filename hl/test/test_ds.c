@@ -1331,7 +1331,7 @@ out:
         H5Dclose(dsid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1387,7 +1387,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1467,7 +1467,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1531,7 +1531,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1591,7 +1591,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1651,7 +1651,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1715,7 +1715,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1798,7 +1798,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1862,7 +1862,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -1974,7 +1974,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -2054,7 +2054,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -2126,7 +2126,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -2198,7 +2198,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -2278,7 +2278,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -2327,7 +2327,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
 
@@ -3530,7 +3530,7 @@ out:
         H5Sclose(sid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -3664,7 +3664,7 @@ out:
             HDfree(buf);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -3749,7 +3749,7 @@ out:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -4189,7 +4189,7 @@ out:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -4374,7 +4374,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -4583,7 +4583,7 @@ out:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -4762,7 +4762,7 @@ out:
         H5Dclose(dsid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -4920,7 +4920,7 @@ out:
         H5Dclose(dsid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
 
     if (latbuf)
@@ -5187,7 +5187,7 @@ out:
         H5Dclose(dsid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -5428,7 +5428,7 @@ out:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }

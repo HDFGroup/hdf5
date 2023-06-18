@@ -138,7 +138,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -313,7 +313,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* gen_enhance_files() */
 

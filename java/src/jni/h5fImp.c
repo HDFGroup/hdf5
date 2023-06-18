@@ -688,8 +688,8 @@ Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status(JNIEnv *env, jclass clss, jlong
 {
     jboolean *mdc_logging_status_ptr = NULL;
     jboolean  isCopy;
-    hbool_t   is_enabled;
-    hbool_t   is_currently_logging;
+    bool      is_enabled;
+    bool      is_currently_logging;
     jsize     size;
 
     UNUSED(clss);
@@ -729,14 +729,14 @@ done:
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong file_id, jboolean minimize)
 {
-    hbool_t minimize_val;
-    herr_t  retVal = FAIL;
+    bool   minimize_val;
+    herr_t retVal = FAIL;
 
     UNUSED(clss);
 
-    minimize_val = (minimize == JNI_TRUE) ? TRUE : FALSE;
+    minimize_val = (minimize == JNI_TRUE) ? true : false;
 
-    if ((retVal = H5Fset_dset_no_attrs_hint((hid_t)file_id, (hbool_t)minimize_val)) < 0)
+    if ((retVal = H5Fset_dset_no_attrs_hint((hid_t)file_id, (bool)minimize_val)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -752,14 +752,14 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlong file_id)
 {
     jboolean bval     = JNI_FALSE;
-    hbool_t  minimize = FALSE;
+    bool     minimize = false;
 
     UNUSED(clss);
 
-    if (H5Fget_dset_no_attrs_hint((hid_t)file_id, (hbool_t *)&minimize) < 0)
+    if (H5Fget_dset_no_attrs_hint((hid_t)file_id, (bool *)&minimize) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (minimize == TRUE)
+    if (minimize == true)
         bval = JNI_TRUE;
 
 done:

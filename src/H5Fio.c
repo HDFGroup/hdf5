@@ -438,7 +438,7 @@ H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_flush_tagged_metadata */
 
 /*-------------------------------------------------------------------------
@@ -465,7 +465,7 @@ H5F_evict_tagged_metadata(H5F_t *f, haddr_t tag)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_evict_tagged_metadata */
 
 /*-------------------------------------------------------------------------
@@ -518,7 +518,7 @@ H5F__evict_cache_entries(H5F_t *f)
 #endif /* NDEBUG */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__evict_cache_entries() */
 
 /*-------------------------------------------------------------------------

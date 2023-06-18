@@ -138,7 +138,7 @@ H5O__linfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (linfo->track_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, 8, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding")
-        INT64DECODE(p, linfo->max_corder)
+        INT64DECODE(p, linfo->max_corder);
     }
     else
         linfo->max_corder = 0;
@@ -208,7 +208,7 @@ H5O__linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
 
     /* Max. link creation order value for the group, if tracked */
     if (linfo->track_corder)
-        INT64ENCODE(p, linfo->max_corder)
+        INT64ENCODE(p, linfo->max_corder);
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_encode(f, &p, linfo->fheap_addr);
@@ -458,7 +458,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     dst_lnk_init = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */

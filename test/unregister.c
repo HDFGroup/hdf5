@@ -152,7 +152,7 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
@@ -203,7 +203,7 @@ test_unregister_filters(hid_t fapl_id)
     {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
@@ -258,7 +258,7 @@ error:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
     HDfree(buf_data);

@@ -307,7 +307,7 @@ error:
         H5Pclose(dapl);
         H5Pclose(dcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_vds_prefix2 */

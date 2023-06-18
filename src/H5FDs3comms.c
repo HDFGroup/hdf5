@@ -561,7 +561,7 @@ done:
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_hrb_node_set() */
 
 /*----------------------------------------------------------------------------
@@ -980,7 +980,7 @@ done:
     H5MM_xfree(headerresponse);
     sds.magic += 1; /* set to bad magic */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_getsize */
 
 /*----------------------------------------------------------------------------
@@ -1281,6 +1281,11 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
 
+#if S3COMMS_DEBUG
+    HDfprintf(stderr, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+              offset, offset + len, len);
+#endif
+
     /*******************
      * COMPILE REQUEST *
      *******************/
@@ -1526,7 +1531,7 @@ done:
             HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot unset CURLOPT_HTTPHEADER")
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_s3r_read */
 
 /****************************************************************************
@@ -1698,7 +1703,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     HDstrcat(canonical_request_dest, EMPTY_SHA256);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_aws_canonical_request() */
 
 /*----------------------------------------------------------------------------
@@ -1757,7 +1762,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_bytes_to_hex() */
 
 /*----------------------------------------------------------------------------
@@ -1860,7 +1865,7 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not convert to hex string.");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_HMAC_SHA256 */
 
 /*-----------------------------------------------------------------------------
@@ -2010,7 +2015,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     } while (found_setting);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__s3comms_load_aws_creds_from_file() */
 
 /*----------------------------------------------------------------------------
@@ -2106,7 +2111,7 @@ done:
         if (HDfclose(credfile) == EOF)
             HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_load_aws_profile() */
 
 /*----------------------------------------------------------------------------
@@ -2158,7 +2163,7 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_nlowercase() */
 
 /*----------------------------------------------------------------------------
@@ -2203,7 +2208,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     unsigned int  i         = 0;
     herr_t        ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
     HDprintf("called H5FD_s3comms_parse_url.\n");
@@ -2366,7 +2371,7 @@ done:
     if (ret_value == FAIL)
         H5FD_s3comms_free_purl(purl);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_parse_url() */
 
 /*----------------------------------------------------------------------------
@@ -2515,7 +2520,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
     *(repr + *repr_len) = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_s3comms_percent_encode_char */
 
 /*----------------------------------------------------------------------------
@@ -2608,7 +2613,7 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
 done:
     H5MM_xfree(AWS4_secret);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_s3comms_signing_key() */
 
 /*----------------------------------------------------------------------------

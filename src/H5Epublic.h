@@ -79,7 +79,7 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
  * easier just to use this macro like:
  *     H5E_BEGIN_TRY {
  *        ...stuff here that's likely to fail...
- *      } H5E_END_TRY;
+ *      } H5E_END_TRY
  *
  * Warning: don't break, return, or longjmp() from the body of the loop or
  *        the error reporting won't be properly restored!

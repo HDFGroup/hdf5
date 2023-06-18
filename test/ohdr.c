@@ -168,7 +168,7 @@ error:
         H5O_close(&oh_locB, NULL);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_cont() */
@@ -306,7 +306,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_ohdr_cache() */
@@ -457,7 +457,7 @@ error:
         HDremove(FILE_OHDR_SWMR);
         HDfree(wbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_ohdr_swmr() */
@@ -496,7 +496,7 @@ test_ohdr_badness(hid_t fapl)
          */
         fid = H5Fopen(CVE_2020_10810_FILENAME, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (fid >= 0)
         FAIL_PUTS_ERROR("should not have been able to open malformed file");
@@ -510,7 +510,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -615,7 +615,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -782,7 +782,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -797,7 +797,7 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     {
         did = H5Dopen2(loc_bogus, "Dataset3", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did >= 0) {
         H5Dclose(did);
         TEST_ERROR;
@@ -825,7 +825,7 @@ error:
         H5Sclose(sid);
         H5Aclose(aid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* test_unknown() */
@@ -1067,7 +1067,7 @@ error:
         (void)H5Aclose(aid);
         (void)H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(in_buf);
     HDfree(out_buf);
@@ -1298,7 +1298,7 @@ error:
         (void)H5Dclose(dset_F_N_id);
         (void)H5Dclose(dset_F_Y_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_size_comparisons */
 
@@ -1454,7 +1454,7 @@ error:
         (void)H5Dclose(dset_mZ_id);
         (void)H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_with_filter */
 
@@ -1676,7 +1676,7 @@ error:
         (void)H5Fclose(file_id);
         (void)H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_modification_times */
 
@@ -1810,7 +1810,7 @@ error:
         (void)H5Dclose(dset_1_id);
         (void)H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* test_minimized_dset_ohdr_fillvalue_backwards_compatability */
 
@@ -1874,7 +1874,7 @@ main(void)
             {
                 ret = H5Pset_libver_bounds(fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -2070,7 +2070,7 @@ main(void)
             {
                 ret = H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             if (H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE) < 0)
@@ -2163,7 +2163,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

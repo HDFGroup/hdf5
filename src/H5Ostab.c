@@ -307,7 +307,7 @@ H5O__stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, NULL, "can't query local heap size")
 
     /* Set copy metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create components of symbol table message */
     if (H5G__stab_create_components(file_dst, stab_dst, size_hint) < 0)

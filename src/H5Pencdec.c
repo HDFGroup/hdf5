@@ -176,7 +176,7 @@ H5P__encode_unsigned(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)sizeof(unsigned);
 
         /* Encode the value */
-        H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)value)
+        H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)value);
     } /* end if */
 
     /* Set size needed for encoding */
@@ -283,7 +283,7 @@ H5P__encode_double(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)sizeof(double);
 
         /* Encode the value */
-        H5_ENCODE_DOUBLE(*pp, *(const double *)value)
+        H5_ENCODE_DOUBLE(*pp, *(const double *)value);
     } /* end if */
 
     /* Set size needed for encoding */
@@ -538,7 +538,7 @@ H5P__decode_unsigned(const void **_pp, void *_value)
     if (enc_size != sizeof(unsigned))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
 
-    H5_DECODE_UNSIGNED(*pp, *value)
+    H5_DECODE_UNSIGNED(*pp, *value);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -643,7 +643,7 @@ H5P__decode_double(const void **_pp, void *_value)
     if (enc_size != sizeof(double))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
 
-    H5_DECODE_DOUBLE(*pp, *value)
+    H5_DECODE_DOUBLE(*pp, *value);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

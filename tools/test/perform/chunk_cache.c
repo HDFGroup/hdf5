@@ -144,7 +144,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(dataspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(data);
 
     return 1;
@@ -209,7 +209,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(dataspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(data);
 
     return 1;
@@ -286,7 +286,7 @@ error:
         H5Sclose(memspace);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -365,7 +365,7 @@ error:
         H5Sclose(memspace);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

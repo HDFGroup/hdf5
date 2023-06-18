@@ -1654,7 +1654,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     {
         nblocks = H5Sget_select_hyper_nblocks(region_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (nblocks <= 0) {
         ret_value = SUCCEED;
@@ -1831,7 +1831,7 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     {
         npoints = H5Sget_select_elem_npoints(region_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (npoints <= 0) {
         ret_value = SUCCEED;
@@ -1952,8 +1952,8 @@ done:
  * Purpose: Recursive check for variable length string of a datatype.
  *
  * Return:
- *    TRUE : type contains any variable length string
- *    FALSE : type doesn't contain any variable length string
+ *    true : type contains any variable length string
+ *    false : type doesn't contain any variable length string
  *    Negative value: error occur
  *
  *-------------------------------------------------------------------------
@@ -2871,8 +2871,8 @@ h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
     }
 
     /* Check if we have VL data in the dataset's datatype */
-    if (h5str_detect_vlen(type_id) == TRUE)
-        vl_data = TRUE;
+    if (h5str_detect_vlen(type_id) == true)
+        vl_data = true;
 
     if (!(size = H5Tget_size(type_id))) {
         ret_value = FAIL;
@@ -3290,8 +3290,8 @@ done:
  *
  * Purpose:  Recursive check for variable length string of a datatype.
  *
- * Return:   TRUE : type contains any variable length string
- *           FALSE : type doesn't contain any variable length string
+ * Return:   true : type contains any variable length string
+ *           false : type doesn't contain any variable length string
  *           Negative value: failed
  *-------------------------------------------------------------------------
  */
@@ -3299,10 +3299,10 @@ htri_t
 H5Tdetect_variable_str(hid_t tid)
 {
     H5T_class_t tclass = -1;
-    htri_t      ret    = FALSE;
+    htri_t      ret    = false;
 
     ret = H5Tis_variable_str(tid);
-    if ((ret == TRUE) || (ret < 0))
+    if ((ret == true) || (ret < 0))
         goto done;
 
     tclass = H5Tget_class(tid);
@@ -3314,7 +3314,7 @@ H5Tdetect_variable_str(hid_t tid)
             goto done;
         }
         ret = H5Tdetect_variable_str(btid);
-        if ((ret == TRUE) || (ret < 0)) {
+        if ((ret == true) || (ret < 0)) {
             H5Tclose(btid);
             goto done;
         }
@@ -3334,7 +3334,7 @@ H5Tdetect_variable_str(hid_t tid)
             hid_t mtid = H5Tget_member_type(tid, u);
 
             ret = H5Tdetect_variable_str(mtid);
-            if ((ret == TRUE) || (ret < 0)) {
+            if ((ret == true) || (ret < 0)) {
                 H5Tclose(mtid);
                 goto done;
             }
@@ -3708,7 +3708,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full(JNIEnv *env, jclass clss, jlong loc_
         } /* end if */
 
         /* Create an H5O_token_t object */
-        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], TRUE)))
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], true)))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         ENVPTR->SetObjectArrayElement(ENVONLY, oToken, i, token);
@@ -3796,7 +3796,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *env, jclass clss, jlong loc_i
         }
 
         /* Create an H5O_token_t object */
-        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], TRUE)))
+        if (NULL == (token = create_H5O_token_t(ENVONLY, &tokens[i], true)))
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
         ENVPTR->SetObjectArrayElement(ENVONLY, oToken, i, token);

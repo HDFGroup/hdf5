@@ -1021,7 +1021,7 @@ processStrData(FILE *strm, struct Input *in, hid_t file_id)
 
         /*enable error reporting */
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if ((space_id = H5Screate_simple(1, dims, NULL)) < 0)
         goto out;
@@ -1147,7 +1147,7 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 
         /*enable error reporting */
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 #ifdef H5DEBUGIMPORT
     HDprintf("processStrHDFData DATATYPE STRING groups created\n");
 #endif
@@ -1249,7 +1249,7 @@ out:
         H5Sclose(mspace_id);
         H5Tclose(type_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 }
@@ -4629,7 +4629,7 @@ process(struct Options *opt)
             }
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     for (k = 0; k < opt->fcount; k++) {
         in = &(opt->infiles[k].in);
@@ -4677,7 +4677,7 @@ process(struct Options *opt)
 
                 /*enable error reporting */
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /*create data type */
             intype  = createInputDataType(in);
@@ -4733,7 +4733,7 @@ process(struct Options *opt)
 
                 /*enable error reporting */
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             /* write dataset */
             if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) {

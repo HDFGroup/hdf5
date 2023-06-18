@@ -815,7 +815,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 
 } /* hdfs__reset_stats */
 #endif /* HDFS_STATS */
@@ -1162,7 +1162,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* hdfs__fprint_stats */
 #endif /* HDFS_STATS */
 

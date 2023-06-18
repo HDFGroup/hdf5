@@ -815,7 +815,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
 
 
 #define H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, fail_val)                 \
-{                                                                            \
+do {                                                                         \
     int k;                                                                   \
     H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                    \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
@@ -844,10 +844,10 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
                        (cache_ptr)->il_size, fail_val)                       \
     H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)                            \
     H5C__POST_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                   \
-}
+} while (0)
 
 #define H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, fail_val)               \
-{                                                                            \
+do {                                                                         \
     int k;                                                                   \
     H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)                    \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
@@ -879,7 +879,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
                        (cache_ptr)->il_size, fail_val)                       \
     H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)                             \
     H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr, fail_val)                   \
-}
+} while (0)
 
 #define H5C__SEARCH_INDEX(cache_ptr, entry_addr, entry_ptr, fail_val)        \
 {                                                                            \
@@ -958,7 +958,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
                                     (old_size), (new_size), (fail_val))     \
     H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,        \
                                       entry_ptr, fail_val)                  \
-}
+} while (0)
 
 
 /**************************************************************************
@@ -1022,7 +1022,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  */
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
-{                                                                              \
+do {                                                                           \
     HDassert(cache_ptr);                                                       \
                                                                                \
     if((cache_ptr)->slist_enabled) {                                           \
@@ -1056,7 +1056,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         HDassert((cache_ptr)->slist_len == 0);                                 \
         HDassert((cache_ptr)->slist_size == 0);                                \
     }                                                                          \
-} /* H5C__INSERT_ENTRY_IN_SLIST */
+} while (0) /* H5C__INSERT_ENTRY_IN_SLIST */
 
 
 /*-------------------------------------------------------------------------
@@ -1124,7 +1124,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  */
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
-{                                                                             \
+do {                                                                          \
     HDassert(cache_ptr);                                                      \
                                                                               \
     if((cache_ptr)->slist_enabled) {                                          \
@@ -1158,7 +1158,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         HDassert((cache_ptr)->slist_len == 0);                                \
         HDassert((cache_ptr)->slist_size == 0);                               \
     }                                                                         \
-} /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
+} while (0) /* H5C__UPDATE_SLIST_FOR_SIZE_CHANGE */
 
 
 /**************************************************************************
@@ -1461,7 +1461,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  */
 
 #define H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, entry_ptr, fail_val)   \
-{                                                                          \
+do {                                                                       \
     HDassert(cache_ptr);                                                   \
     HDassert(entry_ptr);                                                   \
     HDassert(!(entry_ptr)->is_protected);                                  \
@@ -1484,7 +1484,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */             \
         H5C__UPDATE_RP_FOR_INSERT_APPEND_CD_LRU(cache_ptr, entry_ptr, fail_val) \
     }                                                                      \
-}
+} while (0)
 
 
 /*-------------------------------------------------------------------------
@@ -1592,7 +1592,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  */
 
 #define H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, fail_val)   \
-{                                                                            \
+do {                                                                         \
     HDassert(cache_ptr);                                                     \
     HDassert(entry_ptr);                                                     \
     HDassert(!(entry_ptr)->is_read_only);                                    \
@@ -1615,7 +1615,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */               \
         H5C__UPDATE_RP_FOR_MOVE_CD_LRU(cache_ptr, entry_ptr, was_dirty, fail_val) \
     }                                                                        \
-} /* H5C__UPDATE_RP_FOR_MOVE */
+} while (0) /* H5C__UPDATE_RP_FOR_MOVE */
 
 
 /*-------------------------------------------------------------------------
@@ -1751,7 +1751,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
  */
 
 #define H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, fail_val)       \
-{                                                                          \
+do {                                                                       \
     HDassert(cache_ptr);                                                   \
     HDassert(entry_ptr);                                                   \
     HDassert((entry_ptr)->is_protected);                                   \
@@ -1779,7 +1779,7 @@ if ((cache_ptr)->index_size != ((cache_ptr)->clean_index_size + (cache_ptr)->dir
         /* Maintain the clean & dirty LRU lists, if enabled */             \
         H5C__UPDATE_RP_FOR_UNPROTECT_CD_LRU(cache_ptr, entry_ptr, fail_val) \
     }                                                                      \
-} /* H5C__UPDATE_RP_FOR_UNPROTECT */
+} while (0) /* H5C__UPDATE_RP_FOR_UNPROTECT */
 
 
 #ifdef H5_HAVE_PARALLEL

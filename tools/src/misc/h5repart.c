@@ -483,7 +483,7 @@ main(int argc, char *argv[])
     {
         file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file >= 0) {
         if (H5Fclose(file) < 0) {

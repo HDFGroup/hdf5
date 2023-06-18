@@ -975,7 +975,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
         {
             fid = H5Fopen(fname, flags, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* If we succeeded in opening the file, we're done. */
@@ -1036,7 +1036,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                 {
                     fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
 
                 if (fid >= 0) {
                     used_fapl_id = tmp_fapl_id;

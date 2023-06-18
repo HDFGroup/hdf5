@@ -480,9 +480,9 @@ H5I__destroy_type(H5I_type_t type)
     }
     H5E_END_TRY /* don't care about errors */
 
-        /* Check if we should release the ID class */
-        if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
-            type_info->cls = H5MM_xfree_const(type_info->cls);
+    /* Check if we should release the ID class */
+    if (type_info->cls->flags & H5I_CLASS_IS_APPLICATION)
+        type_info->cls = H5MM_xfree_const(type_info->cls);
 
     HASH_CLEAR(hh, type_info->hash_table);
     type_info->hash_table = NULL;
@@ -827,7 +827,7 @@ H5I_is_file_object(hid_t id)
     H5I_type_t type      = H5I_get_type(id);
     htri_t     ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Fail if the ID type is out of range */
     if (type < 1 || type >= H5I_NTYPES)
@@ -851,7 +851,7 @@ H5I_is_file_object(hid_t id)
         ret_value = FALSE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_is_file_object() */
 
 /*-------------------------------------------------------------------------

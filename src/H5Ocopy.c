@@ -745,7 +745,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
 
     /* Set metadata tag for destination object's object header */
-    H5_BEGIN_TAG(oloc_dst->addr);
+    H5_BEGIN_TAG(oloc_dst->addr)
 
     /* Insert destination object header in cache */
     if (H5AC_insert_entry(oloc_dst->file, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)

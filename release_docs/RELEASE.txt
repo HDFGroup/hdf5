@@ -163,6 +163,9 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
+    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
+      file hdf5-config.cmake. This allows to easily detect if the library
+      has been built with or without read-only S3 functionality.
 
     Library:
     --------
@@ -254,7 +257,7 @@ Bug Fixes since HDF5-1.14.0 release
       handles undefined behavior regarding size 0 memory allocations and
       using memcpy with a NULL src pointer.
 
-      The library is now more more careful about using memory operations when
+      The library is now more careful about using memory operations when
       copying empty enum datatypes and will not error or raise an assert.
 
     - Added an AAPL check to H5Acreate

@@ -171,17 +171,17 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1preserve(JNIEnv *env, jclass clss, jlong plist, jboolean status)
 {
-    hbool_t st     = JNI_FALSE;
-    herr_t  retVal = FAIL;
+    bool   st     = JNI_FALSE;
+    herr_t retVal = FAIL;
 
     UNUSED(clss);
 
     if (JNI_TRUE == status)
-        st = TRUE;
+        st = true;
     else if (JNI_FALSE == status)
         st = false;
     else
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_preserve: status not TRUE or FALSE");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_preserve: status not true or false");
 
     if ((retVal = H5Pset_preserve((hid_t)plist, st)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);

@@ -1935,7 +1935,7 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t);
     for (; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch (attr_op->op_type) {
@@ -2566,7 +2566,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing")
 
     /* Set COPIED tag for destination object's metadata */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert attribute into dense storage */
     if (H5A__dense_insert(udata->file, udata->ainfo, attr_dst) < 0)

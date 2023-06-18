@@ -165,7 +165,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         {
             ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             HDputs("    Data writing is supposed to fail because the chunk can't be written to file.");
@@ -186,7 +186,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         {
             ret = H5Dclose(dataset);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0) {
             H5_FAILED();
             HDputs("    Dataset is supposed to fail because the chunk can't be flushed to file.");
@@ -214,7 +214,7 @@ error:
         H5Dclose(dataset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_filter_write() */
 
@@ -355,7 +355,7 @@ error:
         H5Dclose(dataset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_filter_read() */
 

@@ -178,7 +178,7 @@ error:
         H5Gclose(g3);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -261,7 +261,7 @@ error:
         HDfree(name2);
         HDfree(name1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_long() */
 
@@ -335,7 +335,7 @@ error:
         H5Gclose(cwg);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_large() */
 
@@ -622,7 +622,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end lifecycle() */
 
@@ -785,7 +785,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objname)
         HDfree(objname);
@@ -895,7 +895,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end read_old() */
 
@@ -1036,7 +1036,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end no_compact() */
 
@@ -1189,7 +1189,7 @@ error:
         H5Gclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end gcpl_on_root() */
 
@@ -1293,7 +1293,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* end old_api() */
@@ -1387,7 +1387,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end corrupt_stab_msg() */

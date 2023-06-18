@@ -109,7 +109,6 @@ parse_command_line(int argc, const char *const *argv)
                 if (input_file)
                     h5tools_set_input_file(input_file, 1);
                 break;
-                ;
 
             case 'u':
                 ub_file = HDstrdup(H5_optarg);

@@ -262,7 +262,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_fapl_configuration() */
 
@@ -1274,7 +1274,7 @@ error:
         H5Pclose(splitter_config->rw_fapl_id);
         H5Pclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(splitter_config);
 
     return H5I_INVALID_HID;
@@ -1329,7 +1329,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_create_and_close() */
 
@@ -1497,7 +1497,7 @@ error:
          */
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     LOGPRINT(1, "_create_chunking_ids() FAILED\n");
 
@@ -1815,7 +1815,7 @@ error:
         H5Sclose(dspace_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_basic_dataset_write() */
 
@@ -1903,7 +1903,7 @@ error:
         H5Fclose(file_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_chunked_dataset_write() */
 
@@ -1995,7 +1995,7 @@ error:
         H5Gclose(grp_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_on_disk_zoo() */
 
@@ -2137,7 +2137,7 @@ error:
         H5Dclose(dset_id);
         H5Sclose(dspace_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* test_vanishing_datasets() */
 
@@ -2274,7 +2274,7 @@ error:
             H5Pclose(bundle[i].fapl_id);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(bundle);
     HDfree(buf);
     return -1;
@@ -2332,19 +2332,19 @@ confirm_server(struct mt_opts *opts)
     struct sockaddr_in target_addr;
     unsigned           attempt = 0;
 
-    live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+    live_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0) {
         HDprintf("ERROR socket()\n");
         return -1;
     }
 
     target_addr.sin_family      = AF_INET;
-    target_addr.sin_port        = HDhtons((uint16_t)opts->portno);
-    target_addr.sin_addr.s_addr = HDinet_addr(opts->ip);
+    target_addr.sin_port        = htons((uint16_t)opts->portno);
+    target_addr.sin_addr.s_addr = inet_addr(opts->ip);
     HDmemset(target_addr.sin_zero, '\0', sizeof(target_addr.sin_zero));
 
     while (1) {
-        if (HDconnect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
+        if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
             if (attempt > 10) {
                 HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
                 return -1;
@@ -2362,7 +2362,7 @@ confirm_server(struct mt_opts *opts)
             HDprintf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
 
             /* Re-open socket for retry */
-            live_socket = HDsocket(AF_INET, SOCK_STREAM, 0);
+            live_socket = socket(AF_INET, SOCK_STREAM, 0);
             if (live_socket < 0) {
                 HDprintf("ERROR socket()\n");
                 return -1;

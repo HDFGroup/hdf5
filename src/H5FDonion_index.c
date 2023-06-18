@@ -52,7 +52,7 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
     haddr_t        addr      = 0;
     size_t         size      = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(r_out);
     HDassert(raw_file);
@@ -162,7 +162,7 @@ done:
         H5MM_xfree(r_out->archival_index.list);
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_revision_record() */
 
 /*-----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 {
     hbool_t ret_value = TRUE;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(aix);
 
@@ -200,7 +200,7 @@ H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
                 HGOTO_DONE(FALSE)
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_archival_index_is_valid() */
 
 /*-----------------------------------------------------------------------------
@@ -228,7 +228,7 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
     H5FD_onion_index_entry_t *x         = NULL;
     int                       ret_value = 0;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(aix);
     HDassert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
@@ -276,7 +276,7 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_archival_index_find() */
 
 /*-----------------------------------------------------------------------------
@@ -292,7 +292,7 @@ H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(rix);
     HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -315,7 +315,7 @@ H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
     H5MM_xfree(rix->_hash_table);
     H5MM_xfree(rix);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_destroy() */
 
 /*-----------------------------------------------------------------------------
@@ -336,7 +336,7 @@ H5FD__onion_revision_index_init(uint32_t page_size)
     H5FD_onion_revision_index_t *rix        = NULL;
     H5FD_onion_revision_index_t *ret_value  = NULL;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(0 != page_size);
     HDassert(POWER_OF_TWO(page_size));
@@ -364,7 +364,7 @@ done:
     if (NULL == ret_value)
         H5MM_xfree(rix);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_init() */
 
 /*-----------------------------------------------------------------------------
@@ -390,7 +390,7 @@ H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix)
     uint64_t new_n_keys_populated = 0;
     herr_t   ret_value            = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(rix);
     HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -428,7 +428,7 @@ H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix)
     rix->_hash_table                  = new_table;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_resize() */
 
 /*-----------------------------------------------------------------------------
@@ -452,7 +452,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     H5FD_onion_revision_index_hash_chain_node_t **append_dest = NULL;
     herr_t                                        ret_value   = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(rix);
     HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -502,7 +502,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_insert() */
 
 /*-----------------------------------------------------------------------------
@@ -525,7 +525,7 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
     uint64_t key       = 0;
     int      ret_value = 0;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(rix);
     HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
@@ -547,7 +547,7 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_find() */
 
 /*-----------------------------------------------------------------------------
@@ -597,7 +597,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     unsigned char *ptr          = NULL;
     size_t         ret_value    = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf != NULL);
     HDassert(record != NULL);
@@ -723,7 +723,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_record_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -754,7 +754,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     uint32_t       vers_u32  = (uint32_t)record->version; /* pad out unused bytes */
     uint32_t       page_size = 0;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(checksum != NULL);
     HDassert(buf != NULL);
@@ -805,7 +805,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
     UINT32ENCODE(ptr, *checksum);
 
-    FUNC_LEAVE_NOAPI((size_t)(ptr - buf));
+    FUNC_LEAVE_NOAPI((size_t)(ptr - buf))
 } /* end H5FD__onion_revision_record_encode() */
 
 /*-----------------------------------------------------------------------------
@@ -854,7 +854,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
     };
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(rix);
     HDassert(aix);
@@ -932,5 +932,5 @@ done:
     H5MM_xfree(kept_list);
     H5MM_xfree(new_aix.list);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_merge_revision_index_into_archival_index() */

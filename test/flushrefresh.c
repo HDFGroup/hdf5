@@ -1084,7 +1084,7 @@ flush_verification(const char *obj_pathname, const char *expected)
         oid    = H5Oopen(fid, obj_pathname, H5P_DEFAULT);
         status = H5Oget_info3(oid, &oinfo, H5O_INFO_BASIC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Compare to expected result */
     if (HDstrcmp(expected, FLUSHED) == 0) {
@@ -1112,7 +1112,7 @@ flush_verification(const char *obj_pathname, const char *expected)
         H5Oclose(oid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return SUCCEED;
 

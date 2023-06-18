@@ -37,15 +37,15 @@
 #define GHEAP_TEST_NOBJS 1024
 
 #define GHEAP_REPEATED_ERR(MSG)                                                                              \
-    {                                                                                                        \
+    do {                                                                                                     \
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
             HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
                 HDputs("    Suppressing further errors...");                                                 \
-        } /* end if */                                                                                       \
-    }     /* end GHEAP_REPEATED_ERR */
+        }       /* end if */                                                                                 \
+    } while (0) /* end GHEAP_REPEATED_ERR */
 
 const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapooo", NULL};
 
@@ -152,7 +152,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -252,7 +252,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -342,7 +342,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -438,7 +438,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -499,7 +499,7 @@ test_ooo_indices(hid_t fapl)
             H5Eclear2(H5E_DEFAULT);
             status = H5HG_insert(f, sizeof(j), &j, &obj[j]);
             if (status < 0)
-                GHEAP_REPEATED_ERR("    Unable to insert object into global heap")
+                GHEAP_REPEATED_ERR("    Unable to insert object into global heap");
 
             /* Check that the index is as expected */
             if (obj[j].idx != ((1000 * i) + j - (1000 * ((~i & 1)))) % ((1U << 16) - 1) + 1)
@@ -557,7 +557,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -615,7 +615,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
