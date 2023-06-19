@@ -6,6 +6,9 @@ on:
   schedule:
     - cron: "4 0 * * *"
 
+permissions:
+  contents: read
+
 # A workflow run is made up of one or more jobs that can run sequentially or
 # in parallel.
 jobs:
@@ -21,6 +24,8 @@ jobs:
 
   call-workflow-release:
     needs: [call-workflow-tarball, call-workflow-ctest]
+    permissions:
+      contents: write # In order to allow tag creation
     uses: ./.github/workflows/release.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
