@@ -734,7 +734,7 @@
  *     </tr>
  *     <tr>
  *       <td>
- * #H5T_NATIVE_LDOUBLE
+ * H5T_NATIVE_LDOUBLE
  *       </td>
  *       <td span='3'>
  * long double
