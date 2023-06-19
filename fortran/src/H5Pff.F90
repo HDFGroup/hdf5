@@ -4036,29 +4036,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER         , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pset
-
-!>
-!! \ingroup FH5P
-!!
-!! \brief Sets a property list value.
-!!
-!! \note  \fortran_obsolete
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to modify.
-!! \param value  Property value, supported types are:
-!!               \li INTEGER
-!!               \li REAL
-!!               \li DOUBLE PRECISION
-!!               \li CHARACTER(LEN=*)
-!! \param hdferr \fortran_error
-!!
-  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
-    INTEGER(HID_T), INTENT(IN) :: prp_id
-    CHARACTER(LEN=*), INTENT(IN) :: name
-    INTEGER,   INTENT(IN) :: value
-    INTEGER, INTENT(OUT) :: hdferr
   END SUBROUTINE h5pset_f
 !>
 !! \ingroup FH5P
