@@ -17,6 +17,10 @@ on:
         required: true
         type: string
 
+# Minimal permissions to be inherited by any job that doesn't declare its own permissions
+permissions:
+  contents: read
+
 # Previous workflows must pass to get here so tag the commit that created the files
 jobs:
   create-tag:
@@ -63,7 +67,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
               name: docs-doxygen
-              path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+              path: ${{ github.workspace }}
+
+      - name: Zip Folder
+        run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip. -i ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Get tgz-tarball (Linux)
         uses: actions/download-artifact@v3
@@ -97,15 +104,42 @@ jobs:
               path: ${{ github.workspace }}
 
       - name: PreRelease tag
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "snapshot_1_14"
           prerelease: true
           files: |
-              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+              ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}.zip
               ${{ steps.get-file-base.outputs.FILE_BASE }}-osx12.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-ubuntu-2204.tar.gz
               ${{ steps.get-file-base.outputs.FILE_BASE }}-win_vs2022.zip
               if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+
+      - name: Store Release url
+        run: |
+          echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          path: ./upload_url
+#          name: upload_url
+
+      - name: List files for the space (Linux)
+        run: |
+              ls -l ${{ github.workspace }}
+              ls ${{ runner.workspace }}
+
+#      - name: Create .nojekyll
+#        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
+#        shell: bash
+
+      - name: dev-only-docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
+          destination_dir: ./docs
+
