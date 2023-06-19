@@ -131,15 +131,3 @@ jobs:
         run: |
               ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
-
-#      - name: Create .nojekyll
-#        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
-#        shell: bash
-
-      - name: dev-only-docs
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
-          destination_dir: ./docs
-
