@@ -95,7 +95,7 @@ jobs:
 
       - name: List files in the repository
         run: |
-              ls ${{ github.workspace }}
+              ls -l ${{ github.workspace }}
               ls $GITHUB_WORKSPACE
 
       # Save files created by release script
