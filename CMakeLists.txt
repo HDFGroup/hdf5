@@ -1100,6 +1100,9 @@ if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/ex
   option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
   if (HDF5_BUILD_EXAMPLES)
     add_subdirectory (examples)
+    if (EXISTS "${HDF5_SOURCE_DIR}/examples/doxygen" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples/doxygen")
+      add_subdirectory (examples/doxygen)
+    endif ()
   endif ()
 endif ()
 
