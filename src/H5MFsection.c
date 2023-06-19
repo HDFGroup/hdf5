@@ -166,7 +166,7 @@ const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1] = {{
 /*******************/
 
 /* Declare a free list to manage the H5MF_free_section_t struct */
-H5FL_DEFINE(H5MF_free_section_t);
+H5FL_DEFINE_STATIC(H5MF_free_section_t);
 
 /*
  * "simple/small/large" section callbacks

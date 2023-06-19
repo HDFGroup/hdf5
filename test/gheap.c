@@ -47,7 +47,7 @@
         }       /* end if */                                                                                 \
     } while (0) /* end GHEAP_REPEATED_ERR */
 
-const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapooo", NULL};
+static const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapooo", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    test_1

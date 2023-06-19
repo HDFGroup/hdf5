@@ -19,7 +19,7 @@
 #define FILE "groups.h5"
 
 int
-main()
+main(void)
 {
 
     hid_t   file_id, group_id, dataset_id, dataspace_id; /* identifiers */

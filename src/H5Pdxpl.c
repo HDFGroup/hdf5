@@ -2399,8 +2399,8 @@ herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
-    H5S_t          *space;                         /* Dataspace to hold selection */
+    H5P_genplist_t *plist               = NULL;    /* Property list pointer */
+    H5S_t          *space               = NULL;    /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */

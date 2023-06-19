@@ -98,7 +98,7 @@
 #define TEST_THRESHOLD10 10
 #define TEST_THRESHOLD3  3
 
-const char *FILENAME[] = {"mf", NULL};
+static const char *FILENAME[] = {"mf", NULL};
 
 typedef enum {
     TEST_NORMAL,     /* size of aggregator is >= alignment size */
@@ -367,8 +367,8 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     char           filename[FILENAME_LEN];       /* Filename to use */
     H5F_t         *f         = NULL;             /* Internal file object pointer */
     h5_stat_size_t file_size = 0, new_file_size; /* file size */
-    H5FD_mem_t     type;
-    haddr_t        addr    = 0;
+    H5FD_mem_t     type      = H5FD_MEM_DEFAULT;
+    haddr_t        addr      = 0;
     haddr_t        ma_addr = HADDR_UNDEF, new_ma_addr = HADDR_UNDEF;
     hsize_t        ma_size = 0, new_ma_size = 0;
     hbool_t        suitable_vfd;

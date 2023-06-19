@@ -3345,7 +3345,7 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                     int     j;
                     hsize_t count;
                     hsize_t block;
-                    hsize_t stride;
+                    hsize_t stride              = 0;
                     hsize_t tmp                 = 0;
                     hsize_t k0                  = 0; /* whole location beyond current dimension */
                     hsize_t k1                  = 0; /* partial location within dimension */

@@ -22,7 +22,7 @@
 
 int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {"after_mpi_fin", NULL};
+static const char *FILENAME[] = {"after_mpi_fin", NULL};
 
 int
 main(int argc, char **argv)

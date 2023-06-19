@@ -55,36 +55,36 @@
 #include "szlib.h"
 #endif
 
-const char *FILENAME[] = {"dataset",             /* 0 */
-                          "compact_dataset",     /* 1 */
-                          "dset_offset",         /* 2 */
-                          "max_compact_dataset", /* 3 */
-                          "simple",              /* 4 */
-                          "set_local",           /* 5 */
-                          "random_chunks",       /* 6 */
-                          "huge_chunks",         /* 7 */
-                          "chunk_cache",         /* 8 */
-                          "big_chunk",           /* 9 */
-                          "chunk_fast",          /* 10 */
-                          "chunk_expand",        /* 11 */
-                          "chunk_fixed",         /* 12 */
-                          "copy_dcpl_newfile",   /* 13 */
-                          "partial_chunks",      /* 14 */
-                          "layout_extend",       /* 15 */
-                          "zero_chunk",          /* 16 */
-                          "chunk_single",        /* 17 */
-                          "swmr_non_latest",     /* 18 */
-                          "earray_hdr_fd",       /* 19 */
-                          "farray_hdr_fd",       /* 20 */
-                          "bt2_hdr_fd",          /* 21 */
-                          "storage_size",        /* 22 */
-                          "dls_01_strings",      /* 23 */
-                          "power2up",            /* 24 */
-                          "version_bounds",      /* 25 */
-                          "alloc_0sized",        /* 26 */
-                          "h5s_block",           /* 27 */
-                          "h5s_plist",           /* 28 */
-                          NULL};
+static const char *FILENAME[] = {"dataset",             /* 0 */
+                                 "compact_dataset",     /* 1 */
+                                 "dset_offset",         /* 2 */
+                                 "max_compact_dataset", /* 3 */
+                                 "simple",              /* 4 */
+                                 "set_local",           /* 5 */
+                                 "random_chunks",       /* 6 */
+                                 "huge_chunks",         /* 7 */
+                                 "chunk_cache",         /* 8 */
+                                 "big_chunk",           /* 9 */
+                                 "chunk_fast",          /* 10 */
+                                 "chunk_expand",        /* 11 */
+                                 "chunk_fixed",         /* 12 */
+                                 "copy_dcpl_newfile",   /* 13 */
+                                 "partial_chunks",      /* 14 */
+                                 "layout_extend",       /* 15 */
+                                 "zero_chunk",          /* 16 */
+                                 "chunk_single",        /* 17 */
+                                 "swmr_non_latest",     /* 18 */
+                                 "earray_hdr_fd",       /* 19 */
+                                 "farray_hdr_fd",       /* 20 */
+                                 "bt2_hdr_fd",          /* 21 */
+                                 "storage_size",        /* 22 */
+                                 "dls_01_strings",      /* 23 */
+                                 "power2up",            /* 24 */
+                                 "version_bounds",      /* 25 */
+                                 "alloc_0sized",        /* 26 */
+                                 "h5s_block",           /* 27 */
+                                 "h5s_plist",           /* 28 */
+                                 NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
 

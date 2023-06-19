@@ -23,13 +23,13 @@
 #define H5F_TESTING
 #include "H5Fpkg.h" /* File access                          */
 
-const char *FILENAME[] = {"objcopy_ref_src",
-                          "objcopy_ref_dst",
-                          "objcopy_ref_ext",
-                          "objcopy_ref_src2",
-                          "verbound_ref_src",
-                          "verbound_ref_dst",
-                          NULL};
+static const char *FILENAME[] = {"objcopy_ref_src",
+                                 "objcopy_ref_dst",
+                                 "objcopy_ref_ext",
+                                 "objcopy_ref_src2",
+                                 "verbound_ref_src",
+                                 "verbound_ref_dst",
+                                 NULL};
 
 /* Configuration, really a series of bit flags.  Maximum value is all three
  * bit flags enabled.

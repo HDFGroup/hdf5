@@ -23,7 +23,7 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /* Filename: this is the same as the define in accum.c used by test_swmr_write_big() */
-const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
+static const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 
 /*-------------------------------------------------------------------------
  * Function:    main

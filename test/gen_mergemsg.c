@@ -36,7 +36,7 @@
 #define ATTR3_LEN 1
 
 int
-main()
+main(void)
 {
     hid_t  fid;             /* File ID */
     hid_t  gid, gid2, gid3; /* Group IDs */

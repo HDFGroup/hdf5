@@ -26,20 +26,21 @@
 
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
-const unsigned def_type_flags[H5O_SHMESG_MAX_NINDEXES] = {0, 0, 0, 0, 0, 0};
-const unsigned def_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {250, 250, 250, 250, 250, 250};
+static const unsigned def_type_flags[H5O_SHMESG_MAX_NINDEXES] = {0, 0, 0, 0, 0, 0};
+static const unsigned def_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {250, 250, 250, 250, 250, 250};
 #define DEF_L2B 50
 #define DEF_B2L 40
 
 /* Non-default SOHM values for testing */
 #define TEST_NUM_INDEXES 4
-const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] = {H5O_SHMESG_FILL_FLAG,
-                                                           H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_ATTR_FLAG,
-                                                           H5O_SHMESG_SDSPACE_FLAG,
-                                                           H5O_SHMESG_PLINE_FLAG,
-                                                           0,
-                                                           0};
-const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {0, 2, 40, 100, 3, 1000};
+static const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] = {H5O_SHMESG_FILL_FLAG,
+                                                                  H5O_SHMESG_DTYPE_FLAG |
+                                                                      H5O_SHMESG_ATTR_FLAG,
+                                                                  H5O_SHMESG_SDSPACE_FLAG,
+                                                                  H5O_SHMESG_PLINE_FLAG,
+                                                                  0,
+                                                                  0};
+static const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES]   = {0, 2, 40, 100, 3, 1000};
 #define TEST_L2B 65
 #define TEST_B2L 64
 
@@ -69,31 +70,31 @@ typedef struct dtype1_struct {
 } dtype1_struct;
 
 #define DTYPE2_SIZE 1024
-const char *DSETNAME[]       = {"dataset0",  "dataset1",  "dataset2", "dataset3", "dataset4",
-                          "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
-                          "dataset10", "dataset11", NULL};
-const char *EXTRA_DSETNAME[] = {"ex_dataset0",  "ex_dataset1",  "ex_dataset2",
-                                "ex_dataset3",  "ex_dataset4",  "ex_dataset5",
-                                "ex_dataset6",  "ex_dataset7",  "ex_dataset8",
-                                "ex_dataset9",  "ex_dataset10", "ex_dataset11",
-                                "ex_dataset12", "ex_dataset13", "ex_dataset14",
-                                "ex_dataset15", "ex_dataset16", "ex_dataset17",
-                                "ex_dataset18", "ex_dataset19", NULL};
+static const char *DSETNAME[]       = {"dataset0",  "dataset1",  "dataset2", "dataset3", "dataset4",
+                                 "dataset5",  "dataset6",  "dataset7", "dataset8", "dataset9",
+                                 "dataset10", "dataset11", NULL};
+static const char *EXTRA_DSETNAME[] = {"ex_dataset0",  "ex_dataset1",  "ex_dataset2",
+                                       "ex_dataset3",  "ex_dataset4",  "ex_dataset5",
+                                       "ex_dataset6",  "ex_dataset7",  "ex_dataset8",
+                                       "ex_dataset9",  "ex_dataset10", "ex_dataset11",
+                                       "ex_dataset12", "ex_dataset13", "ex_dataset14",
+                                       "ex_dataset15", "ex_dataset16", "ex_dataset17",
+                                       "ex_dataset18", "ex_dataset19", NULL};
 #define SOHM_HELPER_NUM_EX_DSETS 20
 typedef struct complex_t {
     double re;
     double im;
 } complex_t;
 #define ENUM_NUM_MEMBS 20
-const char *ENUM_NAME[] = {"enum_member0",  "enum_member1",  "enum_member2",
-                           "enum_member3",  "enum_member4",  "enum_member5",
-                           "enum_member6",  "enum_member7",  "enum_member8",
-                           "enum_member9",  "enum_member10", "enum_member11",
-                           "enum_member12", "enum_member13", "enum_member14",
-                           "enum_member15", "enum_member16", "enum_member17",
-                           "enum_member18", "enum_member19", NULL};
-const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1,  2,     -1,
-                        7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
+static const char *ENUM_NAME[] = {"enum_member0",  "enum_member1",  "enum_member2",
+                                  "enum_member3",  "enum_member4",  "enum_member5",
+                                  "enum_member6",  "enum_member7",  "enum_member8",
+                                  "enum_member9",  "enum_member10", "enum_member11",
+                                  "enum_member12", "enum_member13", "enum_member14",
+                                  "enum_member15", "enum_member16", "enum_member17",
+                                  "enum_member18", "enum_member19", NULL};
+static const int   ENUM_VAL[]  = {0, 13,  -500,  63,  64,  -64,  65,  2048,  1,  2,     -1,
+                               7, 130, -5000, 630, 640, -640, 650, 20480, 10, -1001, -10};
 #define SIZE2_RANK1 6
 #define SIZE2_RANK2 10
 #define SIZE2_DIMS                                                                                           \

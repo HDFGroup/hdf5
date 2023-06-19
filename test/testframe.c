@@ -221,7 +221,7 @@ TestParseCmdLine(int argc, char *argv[])
     hbool_t skipped_all = FALSE;
     int     ret_code;
 
-    while (argv++, --argc > 0) {
+    while ((void)argv++, --argc > 0) {
         if ((HDstrcmp(*argv, "-verbose") == 0) || (HDstrcmp(*argv, "-v") == 0)) {
             if (argc > 0) {
                 --argc;

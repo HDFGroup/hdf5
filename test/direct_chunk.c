@@ -86,7 +86,7 @@ static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned
                             size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_BOGUS1[1] = {{
+static const H5Z_class2_t H5Z_BOGUS1[1] = {{
     H5Z_CLASS_T_VERS,  /* H5Z_class_t version */
     H5Z_FILTER_BOGUS1, /* Filter id number        */
     1, 1,              /* Encoding and decoding enabled */
@@ -96,7 +96,7 @@ const H5Z_class2_t H5Z_BOGUS1[1] = {{
     filter_bogus1,     /* The actual filter function    */
 }};
 
-const H5Z_class2_t H5Z_BOGUS2[1] = {{
+static const H5Z_class2_t H5Z_BOGUS2[1] = {{
     H5Z_CLASS_T_VERS,  /* H5Z_class_t version */
     H5Z_FILTER_BOGUS2, /* Filter id number        */
     1, 1,              /* Encoding and decoding enabled */

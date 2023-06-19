@@ -346,7 +346,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 /*******************/
 
 /* "nonexistent" storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
+static const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
     {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5D__nonexistent_readvv, NULL, NULL, NULL, NULL}};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
@@ -356,7 +356,7 @@ H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
-H5FL_DEFINE(H5D_chunk_map_t);
+H5FL_DEFINE_STATIC(H5D_chunk_map_t);
 
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_DEFINE(H5D_piece_info_t);
@@ -2700,7 +2700,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t num_chunks;
+        size_t num_chunks       = 0;
         size_t element_sizes[2] = {dset_info->type_info.src_type_size, 0};
         void  *bufs[2]          = {dset_info->buf.vp, NULL};
 
@@ -3021,7 +3021,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t      num_chunks;
+        size_t      num_chunks       = 0;
         size_t      element_sizes[2] = {dset_info->type_info.dst_type_size, 0};
         const void *bufs[2]          = {dset_info->buf.cvp, NULL};
 

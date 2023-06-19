@@ -18,7 +18,7 @@
  */
 #include "h5test.h"
 
-const char *FILENAME[] = {"dangle", NULL};
+static const char *FILENAME[] = {"dangle", NULL};
 
 #define MAX_DANGLE 1000
 

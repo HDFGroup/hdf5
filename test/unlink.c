@@ -25,9 +25,9 @@
 #include "h5test.h"
 #include "H5Gpkg.h" /* Groups                */
 
-const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
-                          "filespace",       "slashes",        "resurrect_set", "resurrect_type",
-                          "resurrect_group", "unlink_chunked", "full_group",    NULL};
+static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_b",    "lunlink",
+                                 "filespace",       "slashes",        "resurrect_set", "resurrect_type",
+                                 "resurrect_group", "unlink_chunked", "full_group",    NULL};
 
 /* Macros for test_create_unlink() & test_filespace */
 #define GROUPNAME                     "group"

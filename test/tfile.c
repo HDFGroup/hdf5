@@ -142,14 +142,14 @@
 #define FILE8 "tfile8.h5" /* Test file */
 
 /* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
-const char *OLD_FILENAME[] = {
+static const char *OLD_FILENAME[] = {
     "filespace_1_6.h5", /* 1.6 HDF5 file */
     "filespace_1_8.h5"  /* 1.8 HDF5 file */
 };
 
 /* Files created in 1.10.0 release --used in test_filespace_1.10.0_compatible() */
 /* These files are copied from release 1.10.0 tools/h5format_convert/testfiles */
-const char *OLD_1_10_0_FILENAME[] = {
+static const char *OLD_1_10_0_FILENAME[] = {
     "h5fc_ext1_i.h5",   /* 0 */
     "h5fc_ext1_f.h5",   /* 1 */
     "h5fc_ext2_if.h5",  /* 2 */
@@ -159,7 +159,7 @@ const char *OLD_1_10_0_FILENAME[] = {
 };
 
 /* Files used in test_filespace_round_compatible() */
-const char *FSPACE_FILENAMES[] = {
+static const char *FSPACE_FILENAMES[] = {
     "fsm_aggr_nopersist.h5", /* H5F_FILE_SPACE_AGGR, not persisting free-space */
     "fsm_aggr_persist.h5",   /* H5F_FILE_SPACE_AGGR, persisting free-space */
     "paged_nopersist.h5",    /* H5F_FILE_SPACE_PAGE, not persisting free-space */
@@ -168,7 +168,7 @@ const char *FSPACE_FILENAMES[] = {
     "none.h5"                /* H5F_FILE_SPACE_NONE */
 };
 
-const char *FILESPACE_NAME[] = {"tfilespace", NULL};
+static const char *FILESPACE_NAME[] = {"tfilespace", NULL};
 
 /* Declarations for test_libver_bounds_copy():                          */
 /* SRC_FILE: source file created under 1.8 branch with latest format    */

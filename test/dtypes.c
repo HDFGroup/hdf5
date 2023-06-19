@@ -76,8 +76,8 @@
         }                                                                                                    \
     } while (0)
 
-const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
-                          "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
+static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
+                                 "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -3953,27 +3953,32 @@ test_query(void)
         HDprintf("Can't create enumerate type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "RED", (enum_val = 10, &enum_val)) < 0) {
+    enum_val = 10;
+    if (H5Tenum_insert(tid2, "RED", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "GREEN", (enum_val = 11, &enum_val)) < 0) {
+    enum_val = 11;
+    if (H5Tenum_insert(tid2, "GREEN", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "BLUE", (enum_val = 12, &enum_val)) < 0) {
+    enum_val = 12;
+    if (H5Tenum_insert(tid2, "BLUE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "ORANGE", (enum_val = 13, &enum_val)) < 0) {
+    enum_val = 13;
+    if (H5Tenum_insert(tid2, "ORANGE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "YELLOW", (enum_val = 14, &enum_val)) < 0) {
+    enum_val = 14;
+    if (H5Tenum_insert(tid2, "YELLOW", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
@@ -5267,7 +5272,8 @@ test_conv_enum_1(void)
     for (i = 0; i < 26; i++) {
         s[0] = (char)('A' + i);
         H5Tenum_insert(t1, s, &i);
-        H5Tenum_insert(t2, s, (val = i * 1000 + i, &val));
+        val = i * 1000 + i;
+        H5Tenum_insert(t2, s, &val);
     } /* end for */
 
     /* Initialize the buffer */
@@ -6043,27 +6049,32 @@ test_encode(void)
         HDprintf("Can't create enumerate type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "RED", (enum_val = 0, &enum_val)) < 0) {
+    enum_val = 0;
+    if (H5Tenum_insert(tid2, "RED", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "GREEN", (enum_val = 1, &enum_val)) < 0) {
+    enum_val = 1;
+    if (H5Tenum_insert(tid2, "GREEN", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "BLUE", (enum_val = 2, &enum_val)) < 0) {
+    enum_val = 2;
+    if (H5Tenum_insert(tid2, "BLUE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "ORANGE", (enum_val = 3, &enum_val)) < 0) {
+    enum_val = 3;
+    if (H5Tenum_insert(tid2, "ORANGE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "YELLOW", (enum_val = 4, &enum_val)) < 0) {
+    enum_val = 4;
+    if (H5Tenum_insert(tid2, "YELLOW", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;

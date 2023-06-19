@@ -91,18 +91,18 @@ static unsigned int flags_create_s = 0;
  */
 
 /* twenty-six four-character words beginning with 'a' -> 104 bytes */
-const unsigned char *a_list_s =
+static const unsigned char *a_list_s =
     (const unsigned char *)"abetableacedacesacheacidacneadzeafaragedagesaidsairsajarallyalum"
                            "amokantsapesarcsareaartsasksaspsavidaxes";
 uint64_t a_list_size_s = 104;
 
 /* fifty-three four-character words beginning with 'b' -> 212 bytes */
-const unsigned char *b_list_s =
+static const unsigned char *b_list_s =
     (const unsigned char *)"badebailbaitbalebanebarebaskbeambeanbearbeenbeerbeltbentbestbide"
                            "bikebilebindbirdbiteblipblueboarboatbobsbodyboilboldbollboltbond"
                            "boneboobboorboosbootbradbragbratbraybrewbritbrowbuckbudsbunkbunt"
                            "buoyburnburybustbuys";
-uint64_t b_list_size_s = 212;
+static uint64_t b_list_size_s = 212;
 
 /* Allocate and populate filepaths with h5_fixname'd strings as appropriate.
  * Should be released with onion_filepaths_destroy() when done.
@@ -912,9 +912,10 @@ test_header_encode_decode(void)
     ptr      = exp + H5FD_ONION_ENCODED_SIZE_HEADER - 4;
     UINT32ENCODE(ptr, checksum);
 
-    hdr.version    = H5FD_ONION_HEADER_VERSION_CURR;
-    hdr.flags      = 12;
-    hdr.origin_eof = 8589934609ull, hdr.page_size = 4096;
+    hdr.version      = H5FD_ONION_HEADER_VERSION_CURR;
+    hdr.flags        = 12;
+    hdr.origin_eof   = 8589934609ull;
+    hdr.page_size    = 4096;
     hdr.history_addr = 123456;
     hdr.history_size = 88;
 

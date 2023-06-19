@@ -47,23 +47,23 @@
 #define DSET2_DIM  4
 #endif /* H5_HAVE_DIRECT */
 
-const char *FILENAME[] = {"sec2_file",            /*0*/
-                          "core_file",            /*1*/
-                          "family_file",          /*2*/
-                          "new_family_v16",       /*3*/
-                          "multi_file",           /*4*/
-                          "direct_file",          /*5*/
-                          "log_file",             /*6*/
-                          "stdio_file",           /*7*/
-                          "windows_file",         /*8*/
-                          "new_multi_file_v16",   /*9*/
-                          "ro_s3_file",           /*10*/
-                          "splitter_rw_file",     /*11*/
-                          "splitter_wo_file",     /*12*/
-                          "splitter.log",         /*13*/
-                          "ctl_file",             /*14*/
-                          "ctl_splitter_wo_file", /*15*/
-                          NULL};
+static const char *FILENAME[] = {"sec2_file",            /*0*/
+                                 "core_file",            /*1*/
+                                 "family_file",          /*2*/
+                                 "new_family_v16",       /*3*/
+                                 "multi_file",           /*4*/
+                                 "direct_file",          /*5*/
+                                 "log_file",             /*6*/
+                                 "stdio_file",           /*7*/
+                                 "windows_file",         /*8*/
+                                 "new_multi_file_v16",   /*9*/
+                                 "ro_s3_file",           /*10*/
+                                 "splitter_rw_file",     /*11*/
+                                 "splitter_wo_file",     /*12*/
+                                 "splitter.log",         /*13*/
+                                 "ctl_file",             /*14*/
+                                 "ctl_splitter_wo_file", /*15*/
+                                 NULL};
 
 #define LOG_FILENAME "log_vfd_out.log"
 
