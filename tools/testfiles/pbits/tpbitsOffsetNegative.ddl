@@ -32,6 +32,8 @@ usage: h5dump [OPTIONS] files
                           HDF5 file specified
      --vol-info           VOL-specific info to pass to the VOL connector used for
                           opening the HDF5 file specified
+                          If none of the above options are used to specify a VOL, then
+                          the VOL specified by HDF5_VOL_CONNECTOR (if any) will be used.
      --vfd-value          Value (ID) of the VFL driver to use for opening the
                           HDF5 file specified
      --vfd-name           Name of the VFL driver to use for opening the
