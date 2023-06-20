@@ -167,6 +167,8 @@ New Features
       file hdf5-config.cmake. This allows to easily detect if the library
       has been built with or without read-only S3 functionality.
 
+    - Incorporated some of the doxygen code examples into the tests
+
     Library:
     --------
     - Added a Subfiling VFD configuration file prefix environment variable
