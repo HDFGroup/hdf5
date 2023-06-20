@@ -844,7 +844,9 @@ H5Pset_fapl_ros3_token(hid_t fapl_id, const char *token)
         HDmemcpy(token_src, token, HDstrlen(token) + 1);
     }
     else {
-        token_src = HDmalloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
+        token_src = (char *)HDmalloc(sizeof(char) * (H5FD_ROS3_MAX_SECRET_TOK_LEN + 1));
+        if (token_src == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot make space for token_src variable.");
         HDmemcpy(token_src, token, HDstrlen(token) + 1);
         if (H5P_insert(plist, ROS3_TOKEN_PROP_NAME, sizeof(char *), &token_src, NULL, NULL, NULL, NULL,
                        H5FD__ros3_str_token_delete, H5FD__ros3_str_token_copy, H5FD__ros3_str_token_cmp,
