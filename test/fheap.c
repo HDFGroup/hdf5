@@ -89,7 +89,7 @@
 #define NUM_PB_FS             6
 #define PAGE_BUFFER_PAGE_SIZE 4096
 
-const char *FILENAME[] = {"fheap", NULL};
+static const char *FILENAME[] = {"fheap", NULL};
 
 /* Types of tests to perform */
 typedef enum {

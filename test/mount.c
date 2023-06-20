@@ -20,14 +20,15 @@
 #include "H5Fprivate.h" /* File access				*/
 #include "H5Iprivate.h" /* IDs			  		*/
 
-const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4", "mount_5", "mount_6", "mount_7", NULL};
+static const char *FILENAME[] = {"mount_1", "mount_2", "mount_3", "mount_4",
+                                 "mount_5", "mount_6", "mount_7", NULL};
 
 /* For "mount_after_close" test */
 #define RANK          2
 #define NX            4
 #define NY            5
 #define NAME_BUF_SIZE 40
-int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
+static int bm[NX][NY]; /* Data buffers */
 
 /*-------------------------------------------------------------------------
  * Function:	setup

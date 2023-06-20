@@ -47,7 +47,7 @@
     (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_TCONV |    \
      MDSET_FLAG_FILTER)
 
-const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
+static const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 
 /* Names for datasets */
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];

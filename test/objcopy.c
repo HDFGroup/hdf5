@@ -60,8 +60,8 @@
 #define H5O_TESTING
 #include "H5Opkg.h" /* Object header             */
 
-const char *FILENAME[] = {"objcopy_src",  "objcopy_dst",  "objcopy_ext", "objcopy_src2",
-                          "verbound_src", "verbound_dst", NULL};
+static const char *FILENAME[] = {"objcopy_src",  "objcopy_dst",  "objcopy_ext", "objcopy_src2",
+                                 "verbound_src", "verbound_dst", NULL};
 
 /* Configuration, really a series of bit flags.  Maximum value is all three
  * bit flags enabled.

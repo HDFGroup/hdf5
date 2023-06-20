@@ -24,7 +24,7 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-const char *FILENAME[] = {"lheap", NULL};
+static const char *FILENAME[] = {"lheap", NULL};
 
 #define TESTFILE "tsizeslheap.h5"
 

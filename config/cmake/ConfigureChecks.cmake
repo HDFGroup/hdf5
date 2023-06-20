@@ -831,7 +831,7 @@ if (HDF5_BUILD_FORTRAN)
 #define C_LDBL_DIG DECIMAL_DIG\n\
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
-#endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+#endif\n\nint main(void) {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
          "
     )
 

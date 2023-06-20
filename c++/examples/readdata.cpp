@@ -84,7 +84,7 @@ main(void)
              * Get order of datatype and print message if it's a little endian.
              */
             H5std_string order_string;
-            H5T_order_t  order = intype.getOrder(order_string);
+            (void)intype.getOrder(order_string);
             cout << order_string << endl;
 
             /*
@@ -109,7 +109,7 @@ main(void)
          * display them.
          */
         hsize_t dims_out[2];
-        int     ndims = dataspace.getSimpleExtentDims(dims_out, NULL);
+        (void)dataspace.getSimpleExtentDims(dims_out, NULL);
         cout << "rank " << rank << ", dimensions " << (unsigned long)(dims_out[0]) << " x "
              << (unsigned long)(dims_out[1]) << endl;
 

@@ -23,7 +23,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"flush", "noflush", NULL};
+static const char *FILENAME[] = {"flush", "noflush", NULL};
 
 static int *data_g = NULL;
 

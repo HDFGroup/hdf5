@@ -23,7 +23,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {"cache_api_test", NULL};
+static const char *FILENAME[] = {"cache_api_test", NULL};
 
 /* macro definitions */
 

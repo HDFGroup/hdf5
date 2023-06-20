@@ -23,10 +23,10 @@ hsize_t compute_user_block_size(hsize_t);
 hsize_t copy_some_to_file(int, int, hsize_t, hsize_t, ssize_t);
 void    parse_command_line(int, const char *const *);
 
-int   do_clobber  = FALSE;
-char *output_file = NULL;
-char *input_file  = NULL;
-char *ub_file     = NULL;
+static int   do_clobber  = FALSE;
+static char *output_file = NULL;
+static char *input_file  = NULL;
+static char *ub_file     = NULL;
 
 /*
  * Command-line options: The user can specify short or long-named

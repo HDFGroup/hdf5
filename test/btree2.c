@@ -27,7 +27,7 @@
 #include "H5CXprivate.h" /* API Contexts                         */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-const char *FILENAME[] = {"btree2", "btree2_tmp", NULL};
+static const char *FILENAME[] = {"btree2", "btree2_tmp", NULL};
 
 #define INSERT_SPLIT_ROOT_NREC     63
 #define INSERT_SPLIT_ROOT_NREC_REC 64

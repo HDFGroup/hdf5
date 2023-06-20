@@ -40,7 +40,7 @@
 #define H5FD_TESTING
 #include "H5FDpkg.h"
 
-const char *FILENAME[] = {"ohdr", "ohdr_min_a", "ohdr_min_b", NULL};
+static const char *FILENAME[] = {"ohdr", "ohdr_min_a", "ohdr_min_b", NULL};
 
 /* used for object header size comparison */
 #define EQ 1

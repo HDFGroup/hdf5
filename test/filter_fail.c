@@ -25,7 +25,7 @@
 #define DIM                  10
 #define FILTER_CHUNK_DIM     2
 
-const char *FILENAME[] = {"filter_fail_with_cache", "filter_fail_without_cache", NULL};
+static const char *FILENAME[] = {"filter_fail_with_cache", "filter_fail_without_cache", NULL};
 
 static size_t filter_fail(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                           size_t *buf_size, void **buf);

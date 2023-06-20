@@ -46,61 +46,61 @@
 #define SYMLINK1 TMPDIR "sym1.h5"
 #define SYMLINK2 TMPDIR2 "sym2.h5"
 
-const char *FILENAME[] = {"links0",
-                          "links1",
-                          "links2",
-                          "links3",
-                          "links4a",          /* 4 */
-                          "links4b",          /* 5 */
-                          "links4c",          /* 6 */
-                          "links4d",          /* 7 */
-                          "links5",           /* 8 */
-                          "links6",           /* 9 */
-                          "links7",           /* 10 */
-                          "links8",           /* 11 */
-                          "extlinks0",        /* 12: main files */
-                          TMPDIR "extlinks0", /* 13: */
-                          "extlinks1",        /* 14: target files */
-                          TMPDIR "extlinks1", /* 15: */
-                          "extlinks2",        /* 16: */
-                          TMPDIR "extlinks2", /* 17: */
-                          "extlinks3",        /* 18: */
-                          TMPDIR "extlinks3", /* 19: */
-                          "extlinks4",        /* 20: */
-                          TMPDIR "extlinks4", /* 21: */
-                          "extlinks5",        /* 22: */
-                          TMPDIR "extlinks6", /* 23: */
-                          "extlinks7",        /* 24: */
-                          TMPDIR "extlinks7", /* 25: */
-                          TMPDIR "extlinks8", /* 26: */
-                          "extlinks9",        /* 27: */
-                          TMPDIR "extlinks9", /* 28: */
-                          "extlinks10",
-                          /* 29: */            /* TESTS for windows */
-                          TMPDIR "extlinks10", /* 30: */
-                          TMPDIR "extlinks11", /* 31: */
-                          TMPDIR "extlinks12", /* 32: */
-                          "extlinks13",        /* 33: */
-                          TMPDIR "extlinks13", /* 34: */
-                          TMPDIR "extlinks14", /* 35: */
-                          TMPDIR "extlinks15", /* 36: */
-                          "extlinks16A",
-                          /* 37: */              /* TESTS for H5P_set_elink_fapl */
-                          "extlinks16B",         /* 38: */
-                          "extlinks17",          /* 39: */
-                          "extlinks18A",         /* 40: */
-                          "extlinks18B",         /* 41: */
-                          "extlinks19A",         /* 42: */
-                          "extlinks19B",         /* 43: */
-                          "extlinks20",          /* 44: */
-                          "extlinks21A",         /* 45: Files for symlink() tests*/
-                          TMPDIR2 "extlinks21B", /* 46: */
-                          TMPDIR2 "extlinks21C", /* 47: */
-                          "extlinks21C",         /* 48: (same as #47, only without the TMPDIR2 prefix) */
-                          TMPDIR "extlinks21D",  /* 49: */
-                          TMPDIR "extlinks21E",  /* 50: */
-                          "extlinks21E",         /* 51: (same as #50, only without the TMPDIR prefix) */
-                          NULL};
+static const char *FILENAME[] = {"links0",
+                                 "links1",
+                                 "links2",
+                                 "links3",
+                                 "links4a",          /* 4 */
+                                 "links4b",          /* 5 */
+                                 "links4c",          /* 6 */
+                                 "links4d",          /* 7 */
+                                 "links5",           /* 8 */
+                                 "links6",           /* 9 */
+                                 "links7",           /* 10 */
+                                 "links8",           /* 11 */
+                                 "extlinks0",        /* 12: main files */
+                                 TMPDIR "extlinks0", /* 13: */
+                                 "extlinks1",        /* 14: target files */
+                                 TMPDIR "extlinks1", /* 15: */
+                                 "extlinks2",        /* 16: */
+                                 TMPDIR "extlinks2", /* 17: */
+                                 "extlinks3",        /* 18: */
+                                 TMPDIR "extlinks3", /* 19: */
+                                 "extlinks4",        /* 20: */
+                                 TMPDIR "extlinks4", /* 21: */
+                                 "extlinks5",        /* 22: */
+                                 TMPDIR "extlinks6", /* 23: */
+                                 "extlinks7",        /* 24: */
+                                 TMPDIR "extlinks7", /* 25: */
+                                 TMPDIR "extlinks8", /* 26: */
+                                 "extlinks9",        /* 27: */
+                                 TMPDIR "extlinks9", /* 28: */
+                                 "extlinks10",
+                                 /* 29: */            /* TESTS for windows */
+                                 TMPDIR "extlinks10", /* 30: */
+                                 TMPDIR "extlinks11", /* 31: */
+                                 TMPDIR "extlinks12", /* 32: */
+                                 "extlinks13",        /* 33: */
+                                 TMPDIR "extlinks13", /* 34: */
+                                 TMPDIR "extlinks14", /* 35: */
+                                 TMPDIR "extlinks15", /* 36: */
+                                 "extlinks16A",
+                                 /* 37: */              /* TESTS for H5P_set_elink_fapl */
+                                 "extlinks16B",         /* 38: */
+                                 "extlinks17",          /* 39: */
+                                 "extlinks18A",         /* 40: */
+                                 "extlinks18B",         /* 41: */
+                                 "extlinks19A",         /* 42: */
+                                 "extlinks19B",         /* 43: */
+                                 "extlinks20",          /* 44: */
+                                 "extlinks21A",         /* 45: Files for symlink() tests*/
+                                 TMPDIR2 "extlinks21B", /* 46: */
+                                 TMPDIR2 "extlinks21C", /* 47: */
+                                 "extlinks21C", /* 48: (same as #47, only without the TMPDIR2 prefix) */
+                                 TMPDIR "extlinks21D", /* 49: */
+                                 TMPDIR "extlinks21E", /* 50: */
+                                 "extlinks21E",        /* 51: (same as #50, only without the TMPDIR prefix) */
+                                 NULL};
 
 #define FAMILY_SIZE    1024
 #define CORE_INCREMENT 1024

@@ -22,8 +22,8 @@
 #define PAL_NAME    "palette"
 #define PAL_ENTRIES 256
 
-static int     read_data(const char *file_name, hsize_t *width, hsize_t *height);
-unsigned char *gbuf = NULL; /* global buffer for image data */
+static int            read_data(const char *file_name, hsize_t *width, hsize_t *height);
+static unsigned char *gbuf = NULL; /* global buffer for image data */
 
 int
 main(void)

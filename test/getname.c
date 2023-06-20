@@ -35,7 +35,7 @@ typedef struct s1_t {
     float        c;
 } s1_t;
 
-const char *FILENAME[] = {"getname", "getname1", "getname2", "getname3", NULL};
+static const char *FILENAME[] = {"getname", "getname1", "getname2", "getname3", NULL};
 
 #define NAME_BUF_SIZE       64
 #define SMALL_NAME_BUF_SIZE 2

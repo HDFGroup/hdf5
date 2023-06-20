@@ -74,18 +74,18 @@
 
 /* Scalar dataset with simple datatype */
 #define SPACE3_RANK 0
-unsigned space3_data = 65;
+static unsigned space3_data = 65;
 
 /* Scalar dataset with compound datatype */
 #define SPACE4_FIELDNAME1 "c1"
 #define SPACE4_FIELDNAME2 "u"
 #define SPACE4_FIELDNAME3 "f"
 #define SPACE4_FIELDNAME4 "c2"
-size_t space4_field1_off = 0;
-size_t space4_field2_off = 0;
-size_t space4_field3_off = 0;
-size_t space4_field4_off = 0;
-struct space4_struct {
+static size_t space4_field1_off = 0;
+static size_t space4_field2_off = 0;
+static size_t space4_field3_off = 0;
+static size_t space4_field4_off = 0;
+static struct space4_struct {
     char     c1;
     unsigned u;
     float    f;

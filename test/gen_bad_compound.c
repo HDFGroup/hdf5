@@ -26,7 +26,7 @@
 #define FILENAME "bad_compound.h5"
 
 int
-main()
+main(void)
 {
     hid_t   file;
     hid_t   cmpd_dt;

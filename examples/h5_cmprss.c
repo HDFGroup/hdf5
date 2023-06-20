@@ -23,7 +23,7 @@
 #define DIM1 20
 
 int
-main()
+main(void)
 {
 
     hid_t file_id, dataset_id, dataspace_id; /* identifiers */

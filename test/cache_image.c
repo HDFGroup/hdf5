@@ -21,7 +21,7 @@
 
 /* global variable declarations: */
 
-const char *FILENAMES[] = {"cache_image_test", NULL};
+static const char *FILENAMES[] = {"cache_image_test", NULL};
 
 /* local utility function declarations */
 static void create_datasets(hid_t file_id, int min_dset, int max_dset);

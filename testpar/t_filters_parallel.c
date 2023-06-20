@@ -20,8 +20,8 @@
 
 #include "t_filters_parallel.h"
 
-const char *FILENAME[] = {"t_filters_parallel", NULL};
-char        filenames[1][256];
+static const char *FILENAME[] = {"t_filters_parallel", NULL};
+char               filenames[1][256];
 
 static MPI_Comm comm = MPI_COMM_WORLD;
 static MPI_Info info = MPI_INFO_NULL;

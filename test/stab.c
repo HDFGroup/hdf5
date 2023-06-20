@@ -23,7 +23,7 @@
 #include "h5test.h"
 #include "H5Gpkg.h" /* Groups                */
 
-const char *FILENAME[] = {"stab", NULL};
+static const char *FILENAME[] = {"stab", NULL};
 
 #define NAME_BUF_SIZE 1024
 

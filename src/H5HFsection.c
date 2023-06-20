@@ -265,7 +265,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1] = {{
 }};
 
 /* Declare a free list to manage the H5HF_free_section_t struct */
-H5FL_DEFINE(H5HF_free_section_t);
+H5FL_DEFINE_STATIC(H5HF_free_section_t);
 
 /*****************************/
 /* Library Private Variables */

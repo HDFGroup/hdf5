@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"extend", NULL};
+static const char *FILENAME[] = {"extend", NULL};
 
 #define N1X 100 /* USE AN EVEN NUMBER! */
 #define N1Y 100 /* USE AN EVEN NUMBER! */

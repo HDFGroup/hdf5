@@ -92,7 +92,7 @@ int              H5I_next_type_g = (int)H5I_NTYPES;
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /* Whether deletes are actually marks (for mark-and-sweep) */
-hbool_t H5I_marking_g = FALSE;
+static hbool_t H5I_marking_s = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -323,7 +323,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
      */
 
     /* Set marking flag */
-    H5I_marking_g = TRUE;
+    H5I_marking_s = TRUE;
 
     /* Mark nodes for deletion */
     HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
@@ -334,7 +334,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
     }
 
     /* Unset marking flag */
-    H5I_marking_g = FALSE;
+    H5I_marking_s = FALSE;
 
     /* Perform sweep */
     HASH_ITER(hh, udata.type_info->hash_table, item, tmp)
@@ -916,7 +916,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     HASH_FIND(hh, type_info->hash_table, &id, sizeof(hid_t), info);
     if (info) {
         HDassert(!info->marked);
-        if (!H5I_marking_g)
+        if (!H5I_marking_s)
             HASH_DELETE(hh, type_info->hash_table, info);
         else
             info->marked = TRUE;
@@ -932,7 +932,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
-    if (!H5I_marking_g)
+    if (!H5I_marking_s)
         info = H5FL_FREE(H5I_id_info_t, info);
 
     /* Decrement the number of IDs in the type */

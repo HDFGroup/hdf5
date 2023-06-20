@@ -48,10 +48,10 @@
 #define H5O_TESTING
 #include "H5Opkg.h" /* Object headers            */
 
-const char *FILENAME[] = {"swmr0", /* 0 */
-                          "swmr1", /* 1 */
-                          "swmr2", /* 2 */
-                          NULL};
+static const char *FILENAME[] = {"swmr0", /* 0 */
+                                 "swmr1", /* 1 */
+                                 "swmr2", /* 2 */
+                                 NULL};
 
 #define NAME_BUF_SIZE 1024 /* Length of file name */
 

@@ -97,7 +97,7 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 H5FL_DEFINE_STATIC(H5EA_t);
 
 /* Declare a PQ free list to manage the element */
-H5FL_BLK_DEFINE(ea_native_elmt);
+H5FL_BLK_DEFINE_STATIC(ea_native_elmt);
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__new

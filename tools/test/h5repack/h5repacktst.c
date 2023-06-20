@@ -82,7 +82,7 @@
 /* Files for testing file space paging */
 #define FSPACE_OUT "h5repack_fspace_OUT.h5"   /* The output file */
 #define NELMTS(X)  (sizeof(X) / sizeof(X[0])) /* # of elements */
-const char *H5REPACK_FSPACE_FNAMES[] = {
+static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */
     "h5repack_default.h5",            /* 1 */
     "h5repack_page_persist.h5",       /* 2 */
@@ -101,7 +101,7 @@ const char *H5REPACK_FSPACE_FNAMES[] = {
 /* obj and region references in attr of compound and vlen type */
 #define FNAME_ATTR_REF "h5repack_attr_refs.h5"
 
-const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
+static const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 
@@ -4099,9 +4099,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -4323,9 +4325,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 2, dims2, "enum2D", tid, 0) < 0)
         goto out;
@@ -4531,9 +4535,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 3, dims3, "enum3D", tid, 0) < 0)
         goto out;
@@ -4990,9 +4996,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -5293,9 +5301,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 2, dims2, "enum2D", tid, buf452) < 0)
         goto out;
@@ -5737,9 +5747,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 3, dims3, "enum3D", tid, buf453) < 0)
         goto out;

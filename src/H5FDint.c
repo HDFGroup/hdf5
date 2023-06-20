@@ -359,8 +359,8 @@ H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs
     hbool_t    extend_sizes = FALSE;
     hbool_t    extend_types = FALSE;
     uint32_t   i;
-    size_t     size;
-    H5FD_mem_t type;
+    size_t     size      = 0;
+    H5FD_mem_t type      = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id   = H5I_INVALID_HID; /* DXPL for operation */
     herr_t     ret_value = SUCCEED;         /* Return value */
 
@@ -575,8 +575,8 @@ H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addr
     hbool_t    extend_sizes = FALSE;
     hbool_t    extend_types = FALSE;
     uint32_t   i;
-    size_t     size;
-    H5FD_mem_t type;
+    size_t     size = 0;
+    H5FD_mem_t type = H5FD_MEM_DEFAULT;
     hid_t      dxpl_id;                 /* DXPL for operation */
     haddr_t    eoa       = HADDR_UNDEF; /* EOA for file */
     herr_t     ret_value = SUCCEED;     /* Return value */
@@ -763,9 +763,9 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     hbool_t         extend_sizes = FALSE;
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
-    size_t          element_size;
-    void           *buf;
-    hbool_t         use_vector = FALSE;
+    size_t          element_size = 0;
+    void           *buf          = NULL;
+    hbool_t         use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
@@ -1415,9 +1415,9 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     hbool_t         extend_sizes = FALSE;
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
-    size_t          element_size;
-    const void     *buf;
-    hbool_t         use_vector = FALSE;
+    size_t          element_size = 0;
+    const void     *buf          = NULL;
+    hbool_t         use_vector   = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
     haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
