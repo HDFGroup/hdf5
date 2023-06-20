@@ -698,7 +698,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
          * Finally, if the destroy_entry flag is set, discard the
          * entry.
          */
-        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
+        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
 
         if (entry_ptr->in_slist && del_from_slist_on_destroy)
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush, FAIL)
@@ -2038,11 +2038,11 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
 #endif
 
     /* Insert the deserialized entry into the cache.  */
-    H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL)
+    H5C__INSERT_IN_INDEX(cache_ptr, ds_entry_ptr, FAIL);
 
     HDassert(!ds_entry_ptr->in_slist);
     if (ds_entry_ptr->is_dirty)
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, ds_entry_ptr, FAIL)
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, ds_entry_ptr, FAIL);
 
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, ds_entry_ptr, FAIL)
 
@@ -2342,12 +2342,12 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C__make_space_in_cache failed")
     } /* end if */
 
-    H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
+    H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL);
 
     /* New entries are presumed to be dirty */
     HDassert(entry_ptr->is_dirty);
     entry_ptr->flush_marker = set_flush_marker;
-    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+    H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
     H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, FAIL)
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -2472,7 +2472,7 @@ H5C_mark_entry_dirty(void *thing)
         if (was_clean)
             H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
         if (!entry_ptr->in_slist)
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
 
         /* Update stats for entry being marked dirty */
         H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
@@ -2751,7 +2751,7 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
      * don't mark it as dirty either, lest we confuse the flush call back.
      */
     if (!entry_ptr->destroy_in_progress) {
-        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
+        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
 
         if (entry_ptr->in_slist) {
             HDassert(cache_ptr->slist_ptr);
@@ -2780,13 +2780,13 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
         } /* end if */
 
         /* Modify cache data structures */
-        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
-        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL);
+        H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
 
         /* Skip some actions if we're in the middle of flushing the entry */
         if (!entry_ptr->flush_in_progress) {
             /* Update the replacement policy for the entry */
-            H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL)
+            H5C__UPDATE_RP_FOR_MOVE(cache_ptr, entry_ptr, was_dirty, FAIL);
 
             /* Check for entry changing status and do notifications, etc. */
             if (!was_dirty) {
@@ -2924,7 +2924,7 @@ H5C_resize_entry(void *thing, size_t new_size)
         entry_ptr->size = new_size;
 
         if (!entry_ptr->in_slist)
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
 
         if (entry_ptr->is_pinned)
             H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
@@ -3289,9 +3289,9 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
          */
         entry_ptr->flush_me_last = flush_last;
 
-        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
+        H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL);
         if (entry_ptr->is_dirty && !entry_ptr->in_slist)
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, NULL);
 
         /* insert the entry in the data structures used by the replacement
          * policy.  We are just going to take it out again when we update
@@ -3688,7 +3688,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
         /* H5C__UPDATE_RP_FOR_UNPROTECT will place the unprotected entry on
          * the pinned entry list if entry_ptr->is_pinned is TRUE.
          */
-        H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
+        H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL);
 
         entry_ptr->is_protected = FALSE;
 
@@ -3699,7 +3699,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             entry_ptr->flush_marker |= set_flush_marker;
             if (!entry_ptr->in_slist)
                 /* this is a no-op if cache_ptr->slist_enabled is FALSE */
-                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
         } /* end if */
 
         /* This implementation of the "deleted" option is a bit inefficient, as
@@ -4252,7 +4252,7 @@ H5C_remove_entry(void *_entry)
      *    4) Remove it from the tag list for this object
      */
 
-    H5C__DELETE_FROM_INDEX(cache, entry, FAIL)
+    H5C__DELETE_FROM_INDEX(cache, entry, FAIL);
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for collective read access flag */

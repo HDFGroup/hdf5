@@ -23,7 +23,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"flush", "noflush", NULL};
+static const char *FILENAME[] = {"flush", "noflush", NULL};
 
 static int *data_g = NULL;
 
@@ -119,7 +119,7 @@ error:
         H5Sclose(sid);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end check_test_file() */
 

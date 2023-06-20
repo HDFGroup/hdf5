@@ -154,30 +154,7 @@ struct mirror_writer_opts {
     char    *logpath;
 };
 
-static void mybzero(void *dest, size_t size);
-
 static int do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open);
-
-/* ---------------------------------------------------------------------------
- * Function:   mybzero
- *
- * Purpose:    Introduce bzero without neededing it on the system.
- *
- * Programmer: Jacob Smith
- *             2020-03-30
- * ---------------------------------------------------------------------------
- */
-static void
-mybzero(void *dest, size_t size)
-{
-    size_t i = 0;
-    char  *s = NULL;
-    HDassert(dest);
-    s = (char *)dest;
-    for (i = 0; i < size; i++) {
-        *(s + i) = 0;
-    }
-} /* end mybzero() */
 
 /* ---------------------------------------------------------------------------
  * Function:    session_init
@@ -217,10 +194,9 @@ session_init(struct mirror_writer_opts *opts)
     session->reply.pub.version       = H5FD_MIRROR_XMIT_CURR_VERSION;
     session->reply.pub.op            = H5FD_MIRROR_OP_REPLY;
     session->reply.pub.session_token = 0;
-    mybzero(session->reply.message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    HDmemset(session->reply.message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
-    /* Options-derived population
-     */
+    /* Options-derived population */
 
     session->loginfo = mirror_log_init(opts->logpath, "W- ", MIRROR_LOG_DEFAULT_VERBOSITY);
 
@@ -291,25 +267,16 @@ session_start(int socketfd, const H5FD_mirror_xmit_open_t *xmit_open)
 {
     struct mirror_session    *session = NULL;
     struct mirror_writer_opts opts;
-#if 0 /* TODO: behavior option */
-    char logpath[H5FD_MIRROR_XMIT_FILEPATH_MAX] = "";
-#endif
 
     mirror_log(NULL, V_INFO, "session_start()");
 
-    if (FALSE == H5FD_mirror_xmit_is_open(xmit_open)) {
+    if (false == H5FD_mirror_xmit_is_open(xmit_open)) {
         mirror_log(NULL, V_ERR, "invalid OPEN xmit");
         return NULL;
     }
 
-    opts.magic = MW_OPTS_MAGIC;
-#if 0 /* TODO: behavior option */
-    HDsnprintf(logpath, H5FD_MIRROR_XMIT_FILEPATH_MAX, "%s.log",
-            xmit_open->filename);
-    opts.logpath = logpath;
-#else
+    opts.magic   = MW_OPTS_MAGIC;
     opts.logpath = NULL;
-#endif
 
     session = session_init(&opts);
     if (NULL == session) {
@@ -391,7 +358,7 @@ reply_ok(struct mirror_session *session)
     mirror_log(session->loginfo, V_ALL, "reply_ok()");
 
     reply->status = H5FD_MIRROR_STATUS_OK;
-    mybzero(reply->message, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    HDmemset(reply->message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
     return _xmit_reply(session);
 } /* end reply_ok() */
 
@@ -489,7 +456,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     }
     mirror_log(session->loginfo, V_INFO, "lock rw: (%d)", xmit_lock.rw);
 
-    if (H5FDlock(session->file, (hbool_t)xmit_lock.rw) < 0) {
+    if (H5FDlock(session->file, (bool)xmit_lock.rw) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDlock()");
         reply_error(session, "remote H5FDlock() failure");
         return -1;
@@ -520,7 +487,7 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
     haddr_t  _maxaddr = HADDR_UNDEF;
 
     HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
-             TRUE == H5FD_mirror_xmit_is_open(xmit_open));
+             true == H5FD_mirror_xmit_is_open(xmit_open));
 
     mirror_log(session->loginfo, V_INFO, "do_open()");
 
@@ -595,7 +562,7 @@ error:
         {
             (void)H5Pclose(fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return -1;
 } /* end do_open() */
@@ -664,7 +631,7 @@ do_truncate(struct mirror_session *session)
 
     mirror_log(session->loginfo, V_INFO, "do_truncate()");
 
-    /* default DXPL ID (0), 0 for "FALSE" closing -- both probably unused */
+    /* default DXPL ID (0), 0 for "false" closing -- both probably unused */
     if (H5FDtruncate(session->file, 0, 0) < 0) {
         mirror_log(session->loginfo, V_ERR, "H5FDtruncate()");
         reply_error(session, "remote H5FDtruncate() failure");
@@ -853,7 +820,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 
-    mybzero(comm->raw, comm->raw_size);
+    HDmemset(comm->raw, 0, comm->raw_size);
     comm->recd_die = 0;
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */

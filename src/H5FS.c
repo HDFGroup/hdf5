@@ -922,7 +922,6 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hbool_t free_file_space)
     HDassert(fspace);
 
     cache_flags = H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;
-    ;
 
     /* Free space for section info */
     if (H5_addr_defined(fspace->sect_addr)) {

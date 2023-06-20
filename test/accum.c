@@ -27,7 +27,7 @@
 
 /* Filename */
 /* (The file names are the same as the define in accum_swmr_reader.c) */
-const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
+static const char *FILENAME[] = {"accum", "accum_swmr_big", NULL};
 
 /* The reader forked by test_swmr_write_big() */
 #define SWMR_READER "accum_swmr_reader"

@@ -26,7 +26,7 @@
 
 int nerrors = 0; /* errors count */
 
-const char *FILENAME[] = {"shutdown", NULL};
+static const char *FILENAME[] = {"shutdown", NULL};
 
 int
 main(int argc, char **argv)

@@ -28,15 +28,15 @@ using std::cerr;
 using std::endl;
 
 #define MESSAGE(V, A)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (HDGetTestVerbosity() > (V))                                                                      \
             print_func A;                                                                                    \
-    }
+    } while (0)
 #define SUBTEST(TEST)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         printf("   Subtest: %-52s", TEST);                                                                   \
         fflush(stdout);                                                                                      \
-    }
+    } while (0)
 
 int  check_values(hsize_t i, hsize_t j, int apoint, int acheck);
 void check_values(const char *value, const char *msg, int line, const char *file_name);

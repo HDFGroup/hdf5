@@ -269,7 +269,7 @@ done:
     if (objs_incr && file)
         H5F_decr_nopen_objs(file);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refresh_metadata() */
 
 /*-------------------------------------------------------------------------
@@ -344,7 +344,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
             HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__refresh_metadata_close() */
 
 /*-------------------------------------------------------------------------
@@ -434,5 +434,5 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTREGISTER, FAIL, "unable to re-register object ID after refresh")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refresh_metadata_reopen() */

@@ -652,7 +652,7 @@ H5FD__ros3_reset_stats(H5FD_ros3_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end ros3_reset_stats() */
 #endif /* ROS3_STATS */
 
@@ -1055,7 +1055,7 @@ H5FD__ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 
 } /* ros3_fprint_stats */
 #endif /* ROS3_STATS */

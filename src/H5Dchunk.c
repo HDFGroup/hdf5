@@ -79,13 +79,14 @@
 
 /* Sanity check on chunk index types: commonly used by a lot of routines in this file */
 #define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                                 \
-    HDassert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type && H5D_COPS_FARRAY == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||                 \
-             (H5D_CHUNK_IDX_BTREE == (storage)->idx_type && H5D_COPS_BTREE == (storage)->ops) ||             \
-             (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));
-
+    do {                                                                                                     \
+        HDassert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type && H5D_COPS_FARRAY == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||             \
+                 (H5D_CHUNK_IDX_BTREE == (storage)->idx_type && H5D_COPS_BTREE == (storage)->ops) ||         \
+                 (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));            \
+    } while (0)
 /*
  * Feature: If this constant is defined then every cache preemption and load
  *        causes a character to be printed on the standard error stream:
@@ -345,7 +346,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 /*******************/
 
 /* "nonexistent" storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
+static const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
     {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5D__nonexistent_readvv, NULL, NULL, NULL, NULL}};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
@@ -355,7 +356,7 @@ H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
-H5FL_DEFINE(H5D_chunk_map_t);
+H5FL_DEFINE_STATIC(H5D_chunk_map_t);
 
 /* Declare a free list to manage the H5D_piece_info_t struct */
 H5FL_DEFINE(H5D_piece_info_t);
@@ -2699,7 +2700,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t num_chunks;
+        size_t num_chunks       = 0;
         size_t element_sizes[2] = {dset_info->type_info.src_type_size, 0};
         void  *bufs[2]          = {dset_info->buf.vp, NULL};
 
@@ -3020,7 +3021,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Different blocks depending on whether we're using selection I/O */
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
-        size_t      num_chunks;
+        size_t      num_chunks       = 0;
         size_t      element_sizes[2] = {dset_info->type_info.dst_type_size, 0};
         const void *bufs[2]          = {dset_info->buf.cvp, NULL};
 
@@ -3824,8 +3825,7 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
         udata->idx_hint           = idx;
         udata->chunk_block.offset = ent->chunk_block.offset;
         udata->chunk_block.length = ent->chunk_block.length;
-        ;
-        udata->chunk_idx = ent->chunk_idx;
+        udata->chunk_idx          = ent->chunk_idx;
     } /* end if */
     else {
         /* Invalidate idx_hint, to signal that the chunk is not in cache */
@@ -6885,7 +6885,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert chunk record into index */
     if (need_insert && udata->idx_info_dst->storage->ops->insert)

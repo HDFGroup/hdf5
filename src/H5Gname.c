@@ -917,7 +917,7 @@ H5G__name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__name_replace_cb() */
 
 /*-------------------------------------------------------------------------

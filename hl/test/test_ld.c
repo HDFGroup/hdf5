@@ -52,7 +52,7 @@
  *    Varies from 10->13; 10->9, 10->10, 10->1, 10->11
  */
 #define ONE_NTESTS 5
-int one_tests[ONE_NTESTS] = {3, -1, 0, -9, 1};
+static int one_tests[ONE_NTESTS] = {3, -1, 0, -9, 1};
 
 /*
  * Test variations (retained original) for two-dimensional dataset:
@@ -61,7 +61,8 @@ int one_tests[ONE_NTESTS] = {3, -1, 0, -9, 1};
  *            {4,10}->{4,12}; {4,10}->{4,9}; {4,10}->{4,10}
  */
 #define TWO_NTESTS 9
-int two_tests[TWO_NTESTS][2] = {{2, 2}, {2, -1}, {2, 0}, {-1, 2}, {-1, -1}, {-1, 0}, {0, 2}, {0, -1}, {0, 0}};
+static int two_tests[TWO_NTESTS][2] = {{2, 2},  {2, -1}, {2, 0},  {-1, 2}, {-1, -1},
+                                       {-1, 0}, {0, 2},  {0, -1}, {0, 0}};
 
 /* Verify that the two input values are the same */
 #define VERIFY_EQUAL(_x, _y)                                                                                 \
@@ -210,12 +211,12 @@ typedef struct test_valid_fields2 {
 
 /* Temporary buffers for tests: test_LD_elmts_one() & test_LD_elmts_two() */
 #define TEST_BUF_SIZE 100
-int                *iibuf; /* buffer for storing retrieved elements */
-int                *ibuf;  /* buffer for storing retrieved elements (integer) */
-set_t              *cbuf;  /* buffer for storing retrieved elements (compound) */
-set_t              *ccbuf; /* buffer for storing retrieved elements (compound) */
-test_valid_fields1 *vbuf1; /* buffer for storing retrieved elements (FIELDS1) */
-test_valid_fields2 *vbuf2; /* buffer for storing retrieved elements (FIELDS2) */
+static int                *iibuf; /* buffer for storing retrieved elements */
+static int                *ibuf;  /* buffer for storing retrieved elements (integer) */
+static set_t              *cbuf;  /* buffer for storing retrieved elements (compound) */
+static set_t              *ccbuf; /* buffer for storing retrieved elements (compound) */
+static test_valid_fields1 *vbuf1; /* buffer for storing retrieved elements (FIELDS1) */
+static test_valid_fields2 *vbuf2; /* buffer for storing retrieved elements (FIELDS2) */
 
 /*
  *********************************************************************************
@@ -255,7 +256,7 @@ test_LD_dims_params(const char *file)
     {
         ret = H5LDget_dset_dims(invalid_id, one_cur_dims);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
 
     /*
@@ -267,7 +268,7 @@ test_LD_dims_params(const char *file)
     {
         ret = H5LDget_dset_dims(did, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
     if (H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
@@ -336,7 +337,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (-1);
 } /* test_LD_dims_params() */
@@ -481,7 +482,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_dims() */
@@ -545,7 +546,7 @@ test_LD_size(const char *file)
     {
         dsize = H5LDget_dset_type_size(invalid_id, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(dsize, 0)
 
     /*
@@ -822,7 +823,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_size() */
@@ -928,7 +929,7 @@ test_LD_elmts_invalid(const char *file)
     {
         ret = H5LDget_dset_elmts(invalid_id, prev_dims, cur_dims, NULL, tbuf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY_EQUAL(ret, FAIL)
 
     /* Open dataset: DSET_CMPD */
@@ -964,7 +965,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 
 } /* test_LD_elmts_invalid() */
@@ -1122,7 +1123,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 } /* test_LD_elmts_one() */
 
@@ -1336,7 +1337,7 @@ error:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (-1);
 } /* test_LD_elmts_two() */
 

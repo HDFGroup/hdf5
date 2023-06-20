@@ -368,8 +368,7 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /*********************/
 
 /*
- * Predefined data types. These are initialized at runtime in H5Tinit.c and
- * by H5T_init() in this source file.
+ * Predefined data types. These are initialized at runtime by H5T_init().
  *
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
@@ -501,11 +500,7 @@ size_t H5T_NATIVE_FLOAT_ALIGN_g   = 0;
 size_t H5T_NATIVE_DOUBLE_ALIGN_g  = 0;
 size_t H5T_NATIVE_LDOUBLE_ALIGN_g = 0;
 
-/*
- * Alignment constraints for C9x types. These are initialized at run time in
- * H5Tinit.c if the types are provided by the system. Otherwise we set their
- * values to 0 here (no alignment calculated).
- */
+/* Alignment constraints for C99 types */
 size_t H5T_NATIVE_INT8_ALIGN_g        = 0;
 size_t H5T_NATIVE_UINT8_ALIGN_g       = 0;
 size_t H5T_NATIVE_INT_LEAST8_ALIGN_g  = 0;
@@ -756,13 +751,11 @@ H5T_init(void)
     /* Only 16 (numbered 0-15) are supported in the current file format */
     HDcompile_assert(H5T_NCLASSES < 16);
 
-    /*
-     * Initialize pre-defined native datatypes from code generated during
-     * the library configuration by H5detect.
-     */
-    if (H5T__init_native() < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+    /* Initialize native floating-point datatypes */
+    if (H5T__init_native_float_types() < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize floating-point types")
 
+    /* Initialize all other native types */
     if (H5T__init_native_internal() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize integers")
 
@@ -1283,16 +1276,20 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "llong_flt", native_llong, native_float, H5T__conv_llong_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "llong_dbl", native_llong, native_double, H5T__conv_llong_double);
+#ifdef H5T_CONV_INTERNAL_LLONG_LDOUBLE
     status |=
         H5T__register_int(H5T_PERS_HARD, "llong_ldbl", native_llong, native_ldouble, H5T__conv_llong_ldouble);
+#endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
     /* From unsigned long long to floats */
     status |=
         H5T__register_int(H5T_PERS_HARD, "ullong_flt", native_ullong, native_float, H5T__conv_ullong_float);
     status |=
         H5T__register_int(H5T_PERS_HARD, "ullong_dbl", native_ullong, native_double, H5T__conv_ullong_double);
+#ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
     status |= H5T__register_int(H5T_PERS_HARD, "ullong_ldbl", native_ullong, native_ldouble,
                                 H5T__conv_ullong_ldouble);
+#endif /* H5T_CONV_INTERNAL_ULLONG_LDOUBLE */
 
     /* From floats to char */
     status |=
@@ -1356,16 +1353,20 @@ H5T_init(void)
         H5T__register_int(H5T_PERS_HARD, "flt_llong", native_float, native_llong, H5T__conv_float_llong);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_llong", native_double, native_llong, H5T__conv_double_llong);
+#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
     status |=
         H5T__register_int(H5T_PERS_HARD, "ldbl_llong", native_ldouble, native_llong, H5T__conv_ldouble_llong);
+#endif /* H5T_CONV_INTERNAL_LDOUBLE_LLONG */
 
     /* From floats to unsigned long long */
     status |=
         H5T__register_int(H5T_PERS_HARD, "flt_ullong", native_float, native_ullong, H5T__conv_float_ullong);
     status |=
         H5T__register_int(H5T_PERS_HARD, "dbl_ullong", native_double, native_ullong, H5T__conv_double_ullong);
+#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
     status |= H5T__register_int(H5T_PERS_HARD, "ldbl_ullong", native_ldouble, native_ullong,
                                 H5T__conv_ldouble_ullong);
+#endif /* H5T_CONV_INTERNAL_LDOUBLE_ULLONG */
 
     /*
      * The special no-op conversion is the fastest, so we list it last. The

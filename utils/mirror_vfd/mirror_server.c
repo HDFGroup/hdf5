@@ -131,27 +131,6 @@ struct server_run {
 };
 
 /* ---------------------------------------------------------------------------
- * Function:   mybzero
- *
- * Purpose:    Introduce bzero without neededing it on the system.
- *
- * Programmer: Jacob Smith
- *             2020-03-30
- * ---------------------------------------------------------------------------
- */
-static void
-mybzero(void *dest, size_t size)
-{
-    size_t i = 0;
-    char  *s = NULL;
-    HDassert(dest);
-    s = (char *)dest;
-    for (i = 0; i < size; i++) {
-        *(s + i) = 0;
-    }
-} /* end mybzero() */
-
-/* ---------------------------------------------------------------------------
  * Function:    usage
  *
  * Purpose:     Print the usage message to stdout.
@@ -190,18 +169,16 @@ usage(void)
 static int
 parse_args(int argc, char **argv, struct op_args *args_out)
 {
-    int i;
-
-    /* preset default values
-     */
+    /* Preset default values */
     args_out->main_port        = DEFAULT_PORT;
     args_out->help             = 0;
     args_out->log_prepend_serv = 1;
     args_out->log_prepend_type = 1;
     args_out->verbosity        = MIRROR_LOG_DEFAULT_VERBOSITY;
-    /* preset empty strings */
-    mybzero(args_out->log_path, PATH_MAX + 1);
-    mybzero(args_out->writer_log_path, PATH_MAX + 1);
+
+    /* Preset empty strings */
+    HDmemset(args_out->log_path, 0, PATH_MAX + 1);
+    HDmemset(args_out->writer_log_path, 0, PATH_MAX + 1);
 
     if (argv == NULL || *argv == NULL) {
         mirror_log(NULL, V_ERR, "invalid argv pointer");
@@ -209,7 +186,7 @@ parse_args(int argc, char **argv, struct op_args *args_out)
     }
 
     /* Loop over arguments after program name */
-    for (i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (!HDstrncmp(argv[i], "-h", 3) || !HDstrncmp(argv[i], "--help", 7)) {
             mirror_log(NULL, V_INFO, "found help argument");
             args_out->help = 1;
@@ -264,28 +241,28 @@ prepare_listening_socket(struct server_run *run)
     mirror_log(run->loginfo, V_INFO, "preparing socket");
 
     server_addr.sin_family      = AF_INET;
-    server_addr.sin_addr.s_addr = HDhtonl(INADDR_ANY);
-    server_addr.sin_port        = HDhtons((uint16_t)run->opts.main_port);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port        = htons((uint16_t)run->opts.main_port);
 
     mirror_log(run->loginfo, V_INFO, "socket()");
-    ret_value = HDsocket(AF_INET, SOCK_STREAM, 0);
+    ret_value = socket(AF_INET, SOCK_STREAM, 0);
     if (ret_value < 0) {
         mirror_log(run->loginfo, V_ERR, "listening socket:%d", ret_value);
         goto error;
     }
 
     mirror_log(run->loginfo, V_ALL, "setsockopt()");
-    HDsetsockopt(ret_value, SOL_SOCKET, SO_REUSEADDR, &_true, sizeof(int));
+    setsockopt(ret_value, SOL_SOCKET, SO_REUSEADDR, &_true, sizeof(int));
 
     mirror_log(run->loginfo, V_INFO, "bind()");
-    ret = HDbind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    ret = bind(ret_value, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if (ret < 0) {
         mirror_log(run->loginfo, V_ERR, "bind() %s", HDstrerror(errno));
         goto error;
     }
 
     mirror_log(run->loginfo, V_INFO, "listen()");
-    ret = HDlisten(ret_value, LISTENQ);
+    ret = listen(ret_value, LISTENQ);
     if (ret < 0) {
         mirror_log(run->loginfo, V_ERR, "H5FD server listen:%d", ret);
         goto error;
@@ -415,7 +392,7 @@ accept_connection(struct server_run *run)
     /*------------------------------*/
     /* accept a connection on a socket */
     clilen = sizeof(client_addr);
-    connfd = HDaccept(run->listenfd, (struct sockaddr *)&client_addr, &clilen);
+    connfd = accept(run->listenfd, (struct sockaddr *)&client_addr, &clilen);
     if (connfd < 0) {
         mirror_log(run->loginfo, V_ERR, "accept:%d", connfd);
         goto error;
@@ -424,15 +401,15 @@ accept_connection(struct server_run *run)
 
     /*------------------------------*/
     /* get client address information */
-    host_port = HDgethostbyaddr((const char *)&client_addr.sin_addr.s_addr,
-                                sizeof(client_addr.sin_addr.s_addr), AF_INET);
+    host_port = gethostbyaddr((const char *)&client_addr.sin_addr.s_addr, sizeof(client_addr.sin_addr.s_addr),
+                              AF_INET);
     if (host_port == NULL) {
         mirror_log(run->loginfo, V_ERR, "gethostbyaddr()");
         goto error;
     }
 
     /* function has the string space statically scoped -- OK until next call */
-    hostaddrp = HDinet_ntoa(client_addr.sin_addr);
+    hostaddrp = inet_ntoa(client_addr.sin_addr);
     /* TODO? proper error-checking */
 
     mirror_log(run->loginfo, V_INFO, "server connected with %s (%s)", host_port->h_name, hostaddrp);
@@ -569,7 +546,7 @@ handle_requests(struct server_run *run)
             mirror_log(run->loginfo, V_INFO, "probable OPEN xmit received");
 
             H5FD_mirror_xmit_decode_open(xopen, (const unsigned char *)mybuf);
-            if (FALSE == H5FD_mirror_xmit_is_open(xopen)) {
+            if (false == H5FD_mirror_xmit_is_open(xopen)) {
                 mirror_log(run->loginfo, V_WARN, "expected OPEN xmit was malformed");
                 HDclose(connfd);
                 continue;

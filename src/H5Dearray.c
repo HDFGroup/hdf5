@@ -1577,7 +1577,7 @@ H5D__earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src, const H5D_chk
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Create the extensible array that describes chunked storage in the dest. file */
     if (H5D__earray_idx_create(idx_info_dst) < 0)

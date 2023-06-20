@@ -304,7 +304,7 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5_FAILED();
     return FAIL;
 }
@@ -494,7 +494,7 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return FAIL;
@@ -730,7 +730,7 @@ out:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (f)
         HDfclose(f);
     H5_FAILED();

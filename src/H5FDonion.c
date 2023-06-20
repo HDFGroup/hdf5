@@ -259,7 +259,7 @@ H5FD__onion_term(void)
     /* Reset VFL ID */
     H5FD_ONION_g = 0;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* end H5FD__onion_term() */
 
@@ -535,7 +535,7 @@ done:
     H5MM_xfree(buf);
     H5MM_xfree(new_list);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_commit_new_revision_record() */
 
 /*-----------------------------------------------------------------------------
@@ -624,7 +624,7 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eoa)
 } /* end H5FD__onion_get_eoa() */
@@ -642,7 +642,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eof)
 } /* end H5FD__onion_get_eof() */
@@ -693,7 +693,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(file != NULL);
 
@@ -772,7 +772,7 @@ done:
     if (FAIL == ret_value)
         HDremove(recovery_file_nameery); /* destroy new temp file, if 'twas created */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_create_truncate_onion() */
 
 static herr_t
@@ -780,7 +780,7 @@ H5FD__onion_remove_unused_symbols(char *s)
 {
     char *d = s;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     do {
         while (*d == '{' || *d == '}' || *d == ' ') {
@@ -788,7 +788,7 @@ H5FD__onion_remove_unused_symbols(char *s)
         }
     } while ((*s++ = *d++));
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 static herr_t
@@ -797,7 +797,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
     char  *config_str_copy = NULL;
     herr_t ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (!HDstrcmp(config_str, ""))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty")
@@ -891,7 +891,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 done:
     H5MM_free(config_str_copy);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-----------------------------------------------------------------------------
@@ -1028,7 +1028,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         {
             file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* If that didn't work, create a new onion file */
         /* TODO: Move to a new function */
@@ -1237,7 +1237,7 @@ done:
 
     H5MM_xfree(new_fa);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_open() */
 
 /*-----------------------------------------------------------------------------
@@ -1261,7 +1261,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     uint32_t       checksum  = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Guard against simultaneous write-open.
      * TODO: support recovery open with force-write-open flag in FAPL info.
@@ -1321,7 +1321,7 @@ done:
 
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_open_rw() */
 
 /*-----------------------------------------------------------------------------
@@ -1424,7 +1424,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     HDassert(0 == bytes_to_read);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_read() */
 
 /*-----------------------------------------------------------------------------
@@ -1440,11 +1440,11 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_onion_t *file = (H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     file->logical_eoa = addr;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__onion_set_eoa() */
 
 /*-----------------------------------------------------------------------------
@@ -1600,7 +1600,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 done:
     H5MM_xfree(page_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write() */
 
 /*-------------------------------------------------------------------------
@@ -1741,7 +1741,7 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     size_t size      = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
     if (0 == (size = H5FD__onion_write_history(&(file->history), file->onion_file, file->onion_eof,
@@ -1757,5 +1757,5 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     file->onion_eof += size;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_final_history() */

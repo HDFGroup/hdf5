@@ -39,7 +39,7 @@ typedef struct mkgrp_opt_t {
     hid_t   fapl_id; /* fapl to use when opening the file */
 } mkgrp_opt_t;
 
-mkgrp_opt_t params_g; /* Command line parameter settings */
+static mkgrp_opt_t params_g; /* Command line parameter settings */
 
 /*-------------------------------------------------------------------------
  * Function:    leave

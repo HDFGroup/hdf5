@@ -96,7 +96,7 @@ static hbool_t not_comparable;
     }
 
 #define PER_UNSIGN(TYPE, A, B)                                                                               \
-    {                                                                                                        \
+    do {                                                                                                     \
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
@@ -106,7 +106,7 @@ static hbool_t not_comparable;
             per = ABS((double)((TYPE)((B) - (A))) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
-    }
+    } while (0)
 
 #define PDIFF(a, b) (((b) > (a)) ? ((b) - (a)) : ((a) - (b)))
 
@@ -684,7 +684,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                     }
                     /* enable error reporting */
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
             }
             break;
 
@@ -1371,7 +1371,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
         npoints1 = H5Sget_select_elem_npoints(region1_id);
         npoints2 = H5Sget_select_elem_npoints(region2_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5TOOLS_DEBUG("blocks: 1=%" PRIdHSIZE "-2=%" PRIdHSIZE, nblocks1, nblocks2);
     H5TOOLS_DEBUG("points: 1=%" PRIdHSIZE "-2=%" PRIdHSIZE, npoints1, npoints2);
 
@@ -3117,7 +3117,7 @@ done:
     {
         H5Pclose(dxpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -3345,7 +3345,7 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                     int     j;
                     hsize_t count;
                     hsize_t block;
-                    hsize_t stride;
+                    hsize_t stride              = 0;
                     hsize_t tmp                 = 0;
                     hsize_t k0                  = 0; /* whole location beyond current dimension */
                     hsize_t k1                  = 0; /* partial location within dimension */

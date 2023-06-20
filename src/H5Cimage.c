@@ -2482,16 +2482,16 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
          */
 
         /* Insert the prefetched entry in the index */
-        H5C__INSERT_IN_INDEX(cache_ptr, pf_entry_ptr, FAIL)
+        H5C__INSERT_IN_INDEX(cache_ptr, pf_entry_ptr, FAIL);
 
         /* If dirty, insert the entry into the slist. */
         if (pf_entry_ptr->is_dirty)
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, pf_entry_ptr, FAIL)
+            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, pf_entry_ptr, FAIL);
 
         /* Append the entry to the LRU */
-        H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, pf_entry_ptr, FAIL)
+        H5C__UPDATE_RP_FOR_INSERT_APPEND(cache_ptr, pf_entry_ptr, FAIL);
 
-        H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, pf_entry_ptr->is_dirty)
+        H5C__UPDATE_STATS_FOR_PREFETCH(cache_ptr, pf_entry_ptr->is_dirty);
 
         /* If the prefetched entry is the child in one or more flush
          * dependency relationships, recreate those flush dependencies.
@@ -2503,7 +2503,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
 
             /* Find the parent entry */
             parent_ptr = NULL;
-            H5C__SEARCH_INDEX(cache_ptr, pf_entry_ptr->fd_parent_addrs[v], parent_ptr, FAIL)
+            H5C__SEARCH_INDEX(cache_ptr, pf_entry_ptr->fd_parent_addrs[v], parent_ptr, FAIL);
             if (parent_ptr == NULL)
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "fd parent not in cache?!?")
 
@@ -2522,7 +2522,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Can't restore flush dependency")
 
             /* And now unprotect */
-            H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, parent_ptr, FAIL)
+            H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, parent_ptr, FAIL);
             parent_ptr->is_protected = FALSE;
         } /* end for */
     }     /* end for */

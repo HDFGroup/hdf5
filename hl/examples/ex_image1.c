@@ -16,7 +16,7 @@
 #define WIDTH       400
 #define HEIGHT      200
 #define PAL_ENTRIES 9
-unsigned char buf[WIDTH * HEIGHT];
+static unsigned char buf[WIDTH * HEIGHT];
 
 int
 main(void)

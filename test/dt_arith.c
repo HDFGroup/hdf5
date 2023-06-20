@@ -11,6 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
  * Purpose:     Tests the data type interface (H5T)
  */
 
@@ -42,7 +45,7 @@
 #endif
 #define SET_ALIGNMENT(TYPE, VAL) H5T_NATIVE_##TYPE##_ALIGN_g = MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 
-const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
+static const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
 
 /*
  * Count up or down depending on whether the machine is big endian or little
@@ -103,7 +106,7 @@ static int without_hardware_g = 0;
  * This algorithm is mainly to avoid any casting and comparison between source and destination types
  * for compiler, because we're testing conversions. */
 #define INIT_INTEGER(TYPE, SRC_MAX, SRC_MIN, SRC_SIZE, DST_SIZE, SRC_PREC, BUF, SAVED, NELMTS)               \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         unsigned int   n;                                                                                    \
         TYPE           value1 = 1;                                                                           \
@@ -157,13 +160,13 @@ static int without_hardware_g = 0;
             if (n < SRC_PREC - 1)                                                                            \
                 value2 = (TYPE)(value2 << 1);                                                                \
         }                                                                                                    \
-    }
+    } while (0)
 
 /* Change a buffer's byte order from big endian to little endian.  It's mainly for library's
  * bit operations which handle only little endian order.
  */
 #define CHANGE_ORDER(EBUF, EORDER, ESIZE)                                                                    \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned int m;                                                                                      \
         if (H5T_ORDER_BE == EORDER) {                                                                        \
             unsigned char mediator;                                                                          \
@@ -187,14 +190,14 @@ static int without_hardware_g = 0;
                 EBUF[(ESIZE - 1) - m] = mediator2;                                                           \
             }                                                                                                \
         }                                                                                                    \
-    }
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point normalized values.
  * It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_NORM(TYPE, SRC_MAX, SRC_MIN, SRC_MAX_10_EXP, SRC_MIN_10_EXP, SRC_SIZE, DST_SIZE, BUF, SAVED, \
                      NELMTS)                                                                                 \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         size_t         num_norm, factor, n;                                                                  \
         TYPE           value1, value2;                                                                       \
@@ -267,13 +270,13 @@ static int without_hardware_g = 0;
         HDmemcpy(saved_p, &value2, SRC_SIZE);                                                                \
         buf_p += SRC_SIZE;                                                                                   \
         saved_p += SRC_SIZE;                                                                                 \
-    }
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point denormalized values.
  * It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_DENORM(TYPE, SRC_MANT_DIG, SRC_SIZE, SRC_PREC, SRC_ORDR, DST_SIZE, BUF, SAVED, NELMTS)       \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         unsigned char *tmp1, *tmp2;                                                                          \
         size_t         n;                                                                                    \
@@ -319,13 +322,13 @@ static int without_hardware_g = 0;
         }                                                                                                    \
         HDfree(tmp1);                                                                                        \
         HDfree(tmp2);                                                                                        \
-    }
+    } while (0)
 
 /* Allocate buffer and initialize it with floating-point special values, +/-0, +/-infinity,
  * +/-QNaN, +/-SNaN.  It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_SPECIAL(SRC_SIZE, SRC_PREC, SRC_ORDR, SRC_MANT_DIG, DST_SIZE, BUF, SAVED, NELMTS)            \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p;                                                                                \
         unsigned char *value;                                                                                \
         int            n;                                                                                    \
@@ -383,7 +386,7 @@ static int without_hardware_g = 0;
                                                                                                              \
         HDmemcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
         HDfree(value);                                                                                       \
-    }
+    } while (0)
 
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);
@@ -760,7 +763,7 @@ error:
     {
         H5Pclose(dxpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf1)
         HDfree(buf1);
     if (buf2)
@@ -1217,7 +1220,7 @@ error:
         H5Pclose(dxpl_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1529,7 +1532,7 @@ error:
         H5Pclose(dxpl_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -2814,7 +2817,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     int   status;    /*child exit status    */
 
     /*
-     * Some systems generage SIGFPE during floating point overflow and we
+     * Some systems generate SIGFPE during floating point overflow and we
      * cannot assume that we can continue from such a signal.  Therefore, we
      * fork here and let the child run the test and return the number of
      * failures with the exit status.
@@ -4842,7 +4845,20 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s denormalized %s -> %s conversions", name, "long double",
+                   "float");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
+
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
@@ -4852,8 +4868,20 @@ run_fp_tests(const char *name)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                   "float or double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+    }
+#endif
 #endif
 
 done:
@@ -4919,12 +4947,47 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
+#if !defined(H5_LONG_TO_LDOUBLE_SPECIAL) && !defined(H5_DISABLE_SOME_LDOUBLE_CONV)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
+#else
+    {
+        char str[256]; /*string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "(unsigned) long",
+                   "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+    }
+#endif
 #endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char str[256]; /*hello string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long long", "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
+#else  /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char str[256]; /*hello string        */
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "unsigned long long",
+                   "long double");
+        HDprintf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 
@@ -5000,31 +5063,77 @@ run_fp_int_conv(const char *name)
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
         }
         else {
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_INT);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
+#else
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, "long double",
+                       "signed and unsigned char, short, int, long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to the conversion problem on IBM ppc64le cpu.");
+#endif
         }
 #if H5_SIZEOF_LONG != H5_SIZEOF_INT
+#ifndef H5_LDOUBLE_TO_LONG_SPECIAL
         if (test_values != TEST_SPECIAL && test_values != TEST_NORMAL) {
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
         }
         else {
+#ifndef H5_DISABLE_SOME_LDOUBLE_CONV
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
+#endif
         }
+#else
+        {
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double",
+                       "(unsigned) long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to the special algorithm of hardware conversion.");
+        }
+#endif
 #endif /*H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
-        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
-#endif /* H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG */
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char str[256]; /*string        */
 
-#endif /* H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE */
-    }  /* end for */
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double", "long long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to hardware conversion error.");
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#if defined(H5_LDOUBLE_TO_LLONG_ACCURATE)
+        nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char str[256]; /*string        */
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, "long double",
+                       "unsigned long long");
+            HDprintf("%-70s", str);
+            SKIPPED();
+            HDputs("    Test skipped due to hardware conversion error.");
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#endif
+#endif
+    } /* end for */
 
     return nerrors;
 }

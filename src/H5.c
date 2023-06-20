@@ -70,8 +70,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
+static const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
+static const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -903,8 +903,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* Mention the versions we are referring to */
                 HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                           (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
-                /* Show library settings if available */
-                HDfprintf(stderr, "%s", H5libhdf5_settings);
+                /* Show library build settings if available */
+                HDfprintf(stderr, "%s", H5build_settings);
 
                 /* Bail out now. */
                 HDfputs("Bye...\n", stderr);
@@ -920,8 +920,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* Mention the versions we are referring to */
                 HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
                           (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
-                /* Show library settings if available */
-                HDfprintf(stderr, "%s", H5libhdf5_settings);
+                /* Show library build settings if available */
+                HDfprintf(stderr, "%s", H5build_settings);
                 break;
             default:
                 /* 2 or higher: continue silently */

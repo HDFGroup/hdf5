@@ -697,7 +697,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void 
         H5_CHECKED_ASSIGN(int_node_ptr->node_nrec, uint16_t, node_nrec, int);
         if (udata->depth > 1)
             UINT64DECODE_VAR(image, int_node_ptr->all_nrec,
-                             udata->hdr->node_info[udata->depth - 1].cum_max_nrec_size)
+                             udata->hdr->node_info[udata->depth - 1].cum_max_nrec_size);
         else
             int_node_ptr->all_nrec = int_node_ptr->node_nrec;
 

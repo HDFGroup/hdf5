@@ -611,17 +611,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDabort
 #define HDabort() abort()
 #endif
-#ifndef HDabs
-#define HDabs(X) abs(X)
-#endif
-#ifndef HDaccept
-#define HDaccept(A, B, C) accept((A), (B), (C))
-#endif
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
-#endif
-#ifndef HDacos
-#define HDacos(X) acos(X)
 #endif
 #ifndef HDalarm
 #define HDalarm(N) alarm(N)
@@ -629,20 +620,11 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
 #endif
-#ifndef HDasin
-#define HDasin(X) asin(X)
-#endif
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
 #endif
 #ifndef HDassert
 #define HDassert(X) assert(X)
-#endif
-#ifndef HDatan
-#define HDatan(X) atan(X)
-#endif
-#ifndef HDatan2
-#define HDatan2(X, Y) atan2(X, Y)
 #endif
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
@@ -659,41 +641,14 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDatoll
 #define HDatoll(S) atoll(S)
 #endif
-#ifndef HDbind
-#define HDbind(A, B, C) bind((A), (B), (C))
-#endif
-#ifndef HDbsearch
-#define HDbsearch(K, B, N, Z, F) bsearch(K, B, N, Z, F)
-#endif
 #ifndef HDcalloc
 #define HDcalloc(N, Z) calloc(N, Z)
 #endif
 #ifndef HDceil
 #define HDceil(X) ceil(X)
 #endif
-#ifndef HDcfgetispeed
-#define HDcfgetispeed(T) cfgetispeed(T)
-#endif
-#ifndef HDcfgetospeed
-#define HDcfgetospeed(T) cfgetospeed(T)
-#endif
-#ifndef HDcfsetispeed
-#define HDcfsetispeed(T, S) cfsetispeed(T, S)
-#endif
-#ifndef HDcfsetospeed
-#define HDcfsetospeed(T, S) cfsetospeed(T, S)
-#endif
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
-#endif
-#ifndef HDchmod
-#define HDchmod(S, M) chmod(S, M)
-#endif
-#ifndef HDchown
-#define HDchown(S, O, G) chown(S, O, G)
-#endif
-#ifndef HDclearerr
-#define HDclearerr(F) clearerr(F)
 #endif
 #ifndef HDclock
 #define HDclock() clock()
@@ -707,38 +662,14 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDclosedir
 #define HDclosedir(D) closedir(D)
 #endif
-#ifndef HDconnect
-#define HDconnect(A, B, C) connect((A), (B), (C))
-#endif
-#ifndef HDcos
-#define HDcos(X) cos(X)
-#endif
-#ifndef HDcosh
-#define HDcosh(X) cosh(X)
-#endif
 #ifndef HDcreat
 #define HDcreat(S, M) creat(S, M)
-#endif
-#ifndef HDctermid
-#define HDctermid(S) ctermid(S)
 #endif
 #ifndef HDctime
 #define HDctime(T) ctime(T)
 #endif
-#ifndef HDcuserid
-#define HDcuserid(S) cuserid(S)
-#endif
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
-#endif
-#ifndef HDdiv
-#define HDdiv(X, Y) div(X, Y)
-#endif
-#ifndef HDdup
-#define HDdup(F) dup(F)
-#endif
-#ifndef HDdup2
-#define HDdup2(F, I) dup2(F, I)
 #endif
 #ifndef HDexecv
 #define HDexecv(S, AV) execv(S, AV)
@@ -754,12 +685,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HD_exit
 #define HD_exit(N) _exit(N)
-#endif
-#ifndef HDexp
-#define HDexp(X) exp(X)
-#endif
-#ifndef HDexp2
-#define HDexp2(X) exp2(X)
 #endif
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
@@ -790,9 +715,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDfgetc
 #define HDfgetc(F) fgetc(F)
-#endif
-#ifndef HDfgetpos
-#define HDfgetpos(F, P) fgetpos(F, P)
 #endif
 #ifndef HDfgets
 #define HDfgets(S, N, F) fgets(S, N, F)
@@ -829,9 +751,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfloor
 #define HDfloor(X) floor(X)
 #endif
-#ifndef HDfmod
-#define HDfmod(X, Y) fmod(X, Y)
-#endif
 #ifndef HDfopen
 #define HDfopen(S, M) fopen(S, M)
 #endif
@@ -840,9 +759,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfprintf
 #define HDfprintf fprintf
-#endif
-#ifndef HDfpathconf
-#define HDfpathconf(F, N) fpathconf(F, N)
 #endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
@@ -855,9 +771,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfree
 #define HDfree(M) free(M)
-#endif
-#ifndef HDfreopen
-#define HDfreopen(S, M, F) freopen(S, M, F)
 #endif
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
@@ -874,9 +787,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
-#ifndef HDfsetpos
-#define HDfsetpos(F, P) fsetpos(F, P)
-#endif
 #ifndef HDfstat
 #define HDfstat(F, B) fstat(F, B)
 #endif
@@ -892,9 +802,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgetc
 #define HDgetc(F) getc(F)
 #endif
-#ifndef HDgetchar
-#define HDgetchar() getchar()
-#endif
 #ifndef HDgetcwd
 #define HDgetcwd(S, Z) getcwd(S, Z)
 #endif
@@ -907,47 +814,14 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDgetdrive() 0
 #endif
 
-#ifndef HDgetegid
-#define HDgetegid() getegid()
-#endif
 #ifndef HDgetenv
 #define HDgetenv(S) getenv(S)
-#endif
-#ifndef HDgeteuid
-#define HDgeteuid() geteuid()
-#endif
-#ifndef HDgetgid
-#define HDgetgid() getgid()
-#endif
-#ifndef HDgetgrgid
-#define HDgetgrgid(G) getgrgid(G)
-#endif
-#ifndef HDgetgrnam
-#define HDgetgrnam(S) getgrnam(S)
-#endif
-#ifndef HDgetgroups
-#define HDgetgroups(Z, G) getgroups(Z, G)
-#endif
-#ifndef HDgethostbyaddr
-#define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C))
 #endif
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif
-#ifndef HDgetpgrp
-#define HDgetpgrp() getpgrp()
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
-#endif
-#ifndef HDgetppid
-#define HDgetppid() getppid()
-#endif
-#ifndef HDgetpwnam
-#define HDgetpwnam(S) getpwnam(S)
-#endif
-#ifndef HDgetpwuid
-#define HDgetpwuid(U) getpwuid(U)
 #endif
 #ifndef HDgetrusage
 #define HDgetrusage(X, S) getrusage(X, S)
@@ -961,23 +835,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
-#ifndef HDgetuid
-#define HDgetuid() getuid()
-#endif
 #ifndef HDgmtime
 #define HDgmtime(T) gmtime(T)
-#endif
-#ifndef HDhtonl
-#define HDhtonl(X) htonl((X))
-#endif
-#ifndef HDhtons
-#define HDhtons(X) htons((X))
-#endif
-#ifndef HDinet_addr
-#define HDinet_addr(C) inet_addr((C))
-#endif
-#ifndef HDinet_ntoa
-#define HDinet_ntoa(C) inet_ntoa((C))
 #endif
 #ifndef HDisalnum
 #define HDisalnum(C) isalnum((int)(C)) /* Cast for Solaris warning */
@@ -1018,23 +877,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDisxdigit
 #define HDisxdigit(C) isxdigit((int)(C)) /* Cast for Solaris warning */
 #endif
-#ifndef HDkill
-#define HDkill(P, S) kill(P, S)
-#endif
 #ifndef HDlabs
 #define HDlabs(X) labs(X)
 #endif
 #ifndef HDldexp
 #define HDldexp(X, N) ldexp(X, N)
-#endif
-#ifndef HDldiv
-#define HDldiv(X, Y) ldiv(X, Y)
-#endif
-#ifndef HDlink
-#define HDlink(OLD, NEW) link(OLD, NEW)
-#endif
-#ifndef HDlisten
-#define HDlisten(A, B) listen((A), (B))
 #endif
 #ifndef HDllround
 #define HDllround(V) llround(V)
@@ -1044,9 +891,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDllroundl
 #define HDllroundl(V) llroundl(V)
-#endif
-#ifndef HDlocaleconv
-#define HDlocaleconv() localeconv()
 #endif
 #ifndef HDlocaltime
 #define HDlocaltime(T) localtime(T)
@@ -1059,9 +903,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDlog10
 #define HDlog10(X) log10(X)
-#endif
-#ifndef HDlongjmp
-#define HDlongjmp(J, N) longjmp(J, N)
 #endif
 #ifndef HDlround
 #define HDlround(V) lround(V)
@@ -1084,18 +925,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDposix_memalign
 #define HDposix_memalign(P, A, Z) posix_memalign(P, A, Z)
 #endif
-#ifndef HDmblen
-#define HDmblen(S, N) mblen(S, N)
-#endif
-#ifndef HDmbstowcs
-#define HDmbstowcs(P, S, Z) mbstowcs(P, S, Z)
-#endif
-#ifndef HDmbtowc
-#define HDmbtowc(P, S, Z) mbtowc(P, S, Z)
-#endif
-#ifndef HDmemchr
-#define HDmemchr(S, C, Z) memchr(S, C, Z)
-#endif
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
 #endif
@@ -1111,35 +940,17 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
 #endif
-#ifndef HDmkfifo
-#define HDmkfifo(S, M) mkfifo(S, M)
-#endif
 #ifndef HDmktime
 #define HDmktime(T) mktime(T)
 #endif
-#ifndef HDmodf
-#define HDmodf(X, Y) modf(X, Y)
-#endif
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
-#endif
-#ifndef HDntohl
-#define HDntohl(A) ntohl((A))
-#endif
-#ifndef HDntohs
-#define HDntohs(A) ntohs((A))
 #endif
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
 #endif
 #ifndef HDopendir
 #define HDopendir(S) opendir(S)
-#endif
-#ifndef HDpathconf
-#define HDpathconf(S, N) pathconf(S, N)
-#endif
-#ifndef HDpause
-#define HDpause() pause()
 #endif
 #ifndef HDperror
 #define HDperror(S) perror(S)
@@ -1173,9 +984,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDqsort
 #define HDqsort(M, N, Z, F) qsort(M, N, Z, F)
-#endif
-#ifndef HDraise
-#define HDraise(N) raise(N)
 #endif
 
 /* clang-format off */
@@ -1238,9 +1046,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDrewind
 #define HDrewind(F) rewind(F)
 #endif
-#ifndef HDrewinddir
-#define HDrewinddir(D) rewinddir(D)
-#endif
 #ifndef HDround
 #define HDround(V) round(V)
 #endif
@@ -1256,35 +1061,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDscanf
 #define HDscanf scanf /*varargs*/
 #endif
-#ifndef HDselect
-#define HDselect(N, RD, WR, ER, T) select(N, RD, WR, ER, T)
-#endif
 #ifndef HDsetbuf
 #define HDsetbuf(F, S) setbuf(F, S)
 #endif
 #ifndef HDsetenv
 #define HDsetenv(N, V, O) setenv(N, V, O)
-#endif
-#ifndef HDsetgid
-#define HDsetgid(G) setgid(G)
-#endif
-#ifndef HDsetjmp
-#define HDsetjmp(J) setjmp(J)
-#endif
-#ifndef HDsetlocale
-#define HDsetlocale(N, S) setlocale(N, S)
-#endif
-#ifndef HDsetpgid
-#define HDsetpgid(P, PG) setpgid(P, PG)
-#endif
-#ifndef HDsetsid
-#define HDsetsid() setsid()
-#endif
-#ifndef HDsetsockopt
-#define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E))
-#endif
-#ifndef HDsetuid
-#define HDsetuid(U) setuid(U)
 #endif
 #ifndef HDsetvbuf
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, Z)
@@ -1295,53 +1076,17 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsigaction
 #define HDsigaction(S, A, O) sigaction((S), (A), (O))
 #endif
-#ifndef HDsigaddset
-#define HDsigaddset(S, N) sigaddset(S, N)
-#endif
-#ifndef HDsigdelset
-#define HDsigdelset(S, N) sigdelset(S, N)
-#endif
 #ifndef HDsigemptyset
 #define HDsigemptyset(S) sigemptyset(S)
 #endif
-#ifndef HDsigfillset
-#define HDsigfillset(S) sigfillset(S)
-#endif
-#ifndef HDsigismember
-#define HDsigismember(S, N) sigismember(S, N)
-#endif
-#ifndef HDsiglongjmp
-#define HDsiglongjmp(J, N) siglongjmp(J, N)
-#endif
 #ifndef HDsignal
 #define HDsignal(N, F) signal(N, F)
-#endif
-#ifndef HDsigpending
-#define HDsigpending(S) sigpending(S)
-#endif
-#ifndef HDsigprocmask
-#define HDsigprocmask(H, S, O) sigprocmask(H, S, O)
-#endif
-#ifndef HDsigsetjmp
-#define HDsigsetjmp(J, N) sigsetjmp(J, N)
-#endif
-#ifndef HDsigsuspend
-#define HDsigsuspend(S) sigsuspend(S)
-#endif
-#ifndef HDsin
-#define HDsin(X) sin(X)
-#endif
-#ifndef HDsinh
-#define HDsinh(X) sinh(X)
 #endif
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
 #endif
 #ifndef HDsnprintf
 #define HDsnprintf snprintf /*varargs*/
-#endif
-#ifndef HDsocket
-#define HDsocket(A, B, C) socket((A), (B), (C))
 #endif
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
@@ -1373,9 +1118,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrcasecmp
 #define HDstrcasecmp(X, Y) strcasecmp(X, Y)
-#endif
-#ifndef HDstrcoll
-#define HDstrcoll(X, Y) strcoll(X, Y)
 #endif
 #ifndef HDstrcpy
 #define HDstrcpy(X, Y) strcpy(X, Y)
@@ -1410,14 +1152,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrndup
 #define HDstrndup(S, N) strndup(S, N)
 #endif
-#ifndef HDstrpbrk
-#define HDstrpbrk(X, Y) strpbrk(X, Y)
-#endif
 #ifndef HDstrrchr
 #define HDstrrchr(S, C) strrchr(S, C)
-#endif
-#ifndef HDstrspn
-#define HDstrspn(X, Y) strspn(X, Y)
 #endif
 #ifndef HDstrstr
 #define HDstrstr(X, Y) strstr(X, Y)
@@ -1446,59 +1182,17 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrtoumax
 #define HDstrtoumax(S, R, N) strtoumax(S, R, N)
 #endif
-#ifndef HDstrxfrm
-#define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
-#endif
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
-#endif
-#ifndef HDsysconf
-#define HDsysconf(N) sysconf(N)
 #endif
 #ifndef HDsystem
 #define HDsystem(S) system(S)
 #endif
-#ifndef HDtan
-#define HDtan(X) tan(X)
-#endif
-#ifndef HDtanh
-#define HDtanh(X) tanh(X)
-#endif
-#ifndef HDtcdrain
-#define HDtcdrain(F) tcdrain(F)
-#endif
-#ifndef HDtcflow
-#define HDtcflow(F, A) tcflow(F, A)
-#endif
-#ifndef HDtcflush
-#define HDtcflush(F, N) tcflush(F, N)
-#endif
-#ifndef HDtcgetattr
-#define HDtcgetattr(F, T) tcgetattr(F, T)
-#endif
-#ifndef HDtcgetpgrp
-#define HDtcgetpgrp(F) tcgetpgrp(F)
-#endif
-#ifndef HDtcsendbreak
-#define HDtcsendbreak(F, N) tcsendbreak(F, N)
-#endif
-#ifndef HDtcsetattr
-#define HDtcsetattr(F, O, T) tcsetattr(F, O, T)
-#endif
-#ifndef HDtcsetpgrp
-#define HDtcsetpgrp(F, N) tcsetpgrp(F, N)
-#endif
 #ifndef HDtime
 #define HDtime(T) time(T)
 #endif
-#ifndef HDtimes
-#define HDtimes(T) times(T)
-#endif
 #ifndef HDtmpfile
 #define HDtmpfile() tmpfile()
-#endif
-#ifndef HDtmpnam
-#define HDtmpnam(S) tmpnam(S)
 #endif
 #ifndef HDtolower
 #define HDtolower(C) tolower(C)
@@ -1506,29 +1200,14 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDtoupper
 #define HDtoupper(C) toupper(C)
 #endif
-#ifndef HDttyname
-#define HDttyname(F) ttyname(F)
-#endif
 #ifndef HDtzset
 #define HDtzset() tzset()
-#endif
-#ifndef HDumask
-#define HDumask(N) umask(N)
-#endif
-#ifndef HDuname
-#define HDuname(S) uname(S)
-#endif
-#ifndef HDungetc
-#define HDungetc(C, F) ungetc(C, F)
 #endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
 #endif
 #ifndef HDunsetenv
 #define HDunsetenv(S) unsetenv(S)
-#endif
-#ifndef HDutime
-#define HDutime(S, T) utime(S, T)
 #endif
 
 #ifndef HDvasprintf
@@ -1568,12 +1247,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #ifndef HDwaitpid
 #define HDwaitpid(P, W, O) waitpid(P, W, O)
-#endif
-#ifndef HDwcstombs
-#define HDwcstombs(S, P, Z) wcstombs(S, P, Z)
-#endif
-#ifndef HDwctomb
-#define HDwctomb(S, C) wctomb(S, C)
 #endif
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
@@ -1663,10 +1336,15 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
  * that will always generate the expected name.
  */
 #define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)                                                        \
-    ASSIGN_##srctype##_TO_##dsttype(dst, dsttype, src, srctype)
+    do {                                                                                                     \
+        ASSIGN_##srctype##_TO_##dsttype(dst, dsttype, src, srctype)                                          \
+    } while (0)
 
 #else /* NDEBUG */
-#define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype) (dst) = (dsttype)(src);
+#define H5_CHECKED_ASSIGN(dst, dsttype, src, srctype)                                                        \
+    do {                                                                                                     \
+        (dst) = (dsttype)(src);                                                                              \
+    } while (0)
 #endif /* NDEBUG */
 
 #if defined(H5_HAVE_WINDOW_PATH)
@@ -1771,8 +1449,9 @@ extern hbool_t H5_coll_api_sanity_check_g;
 
 extern H5_debug_t H5_debug_g;
 #define H5DEBUG(X) (H5_debug_g.pkg[H5_PKG_##X].stream)
-/* Do not use const else AIX strings does not show it. */
-extern char H5libhdf5_settings[]; /* embedded library information */
+
+/* Embedded build information */
+extern const char H5build_settings[];
 
 /*-------------------------------------------------------------------------
  * Purpose: These macros are inserted automatically just after the

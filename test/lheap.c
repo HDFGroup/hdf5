@@ -24,7 +24,7 @@
 #include "H5Iprivate.h"
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
-const char *FILENAME[] = {"lheap", NULL};
+static const char *FILENAME[] = {"lheap", NULL};
 
 #define TESTFILE "tsizeslheap.h5"
 
@@ -221,7 +221,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

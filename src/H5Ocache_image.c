@@ -71,7 +71,7 @@ const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
 #define H5O_MDCI_VERSION_0 0
 
 /* Declare the free list for H5O_mdci_t's */
-H5FL_DEFINE(H5O_mdci_t);
+H5FL_DEFINE_STATIC(H5O_mdci_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__mdci_decode

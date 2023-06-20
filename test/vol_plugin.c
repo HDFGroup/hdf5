@@ -75,7 +75,7 @@ error:
     {
         H5VLunregister_connector(vol_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 
 } /* end test_registration_by_value() */
@@ -132,7 +132,7 @@ error:
     {
         H5VLunregister_connector(vol_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 
 } /* end test_registration_by_name() */
@@ -237,7 +237,7 @@ error:
         for (i = 0; i < N_REGISTRATIONS; i++)
             H5VLunregister_connector(vol_ids[i]);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 
 } /* end test_multiple_registration() */
@@ -313,7 +313,7 @@ error:
         H5VLclose(vol_id_out);
         H5VLunregister_connector(vol_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 
 } /* end test_getters() */

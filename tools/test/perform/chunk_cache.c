@@ -53,7 +53,7 @@ static size_t counter(unsigned flags, size_t cd_nelmts, const unsigned *cd_value
                       size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_COUNTER[1] = {{
+static const H5Z_class2_t H5Z_COUNTER[1] = {{
     H5Z_CLASS_T_VERS, /* H5Z_class_t version          */
     FILTER_COUNTER,   /* Filter id number             */
     1, 1,             /* Encoding and decoding enabled */
@@ -144,7 +144,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(dataspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(data);
 
     return 1;
@@ -209,7 +209,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(dataspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(data);
 
     return 1;
@@ -286,7 +286,7 @@ error:
         H5Sclose(memspace);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -365,7 +365,7 @@ error:
         H5Sclose(memspace);
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

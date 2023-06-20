@@ -84,7 +84,7 @@ error:
         H5Sclose(sid);
         H5Pclose(dcpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return H5I_INVALID_HID;
 
@@ -223,7 +223,7 @@ error:
         H5Sclose(mem_sid);
         H5Sclose(file_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5_FAILED();
     return 1;

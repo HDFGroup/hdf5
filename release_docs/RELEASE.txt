@@ -47,27 +47,23 @@ New Features
 
     Configuration:
     -------------
-    - Removed long double work-around symbols and configure options
+    - Removed CMake cross-compiling variables
 
-      Several options and public symbols that were provided to paper over
-      non-standard long double conversions between signed/unsigned long
-      and long long values were removed from the Autotools and CMake. These
-      were added twenty years ago, when C99 and 64-bit platforms were less
-      common and are no longer needed.
+      * HDF5_USE_PREGEN
+      * HDF5_BATCH_H5DETECT
 
-      Autotools:
-        --enable-dconv-accuracy
+      These were used to work around H5detect and H5make_libsettings and
+      are no longer required.
 
-      CMake:
-        HDF5_WANT_DATA_ACCURACY
+    - Running H5make_libsettings is no longer required for cross-compiling
 
-      H5pubconf.h symbols:
-        H5_WANT_DATA_ACCURACY
-        H5_LDOUBLE_TO_LONG_SPECIAL
-        H5_LONG_TO_LDOUBLE_SPECIAL
-        H5_LDOUBLE_TO_LLONG_ACCURATE
-        H5_LLONG_TO_LDOUBLE_CORRECT
-        H5_DISABLE_SOME_LDOUBLE_CONV
+      The functionality of H5make_libsettings is now handled via template files,
+      so H5make_libsettings has been removed.
+
+    - Running H5detect is no longer required for cross-compiling
+
+      The functionality of H5detect is now exercised at library startup,
+      so H5detect has been removed.
 
     - Updated HDF5 API tests CMake code to support VOL connectors
 
@@ -167,6 +163,9 @@ New Features
 
       See the CMakeFilters.cmake and config/cmake/cacheinit.cmake files for usage.
 
+    - Added the CMake variable HDF5_ENABLE_ROS3_VFD to the HDF5 CMake config
+      file hdf5-config.cmake. This allows to easily detect if the library
+      has been built with or without read-only S3 functionality.
 
     Library:
     --------
@@ -258,7 +257,7 @@ Bug Fixes since HDF5-1.14.0 release
       handles undefined behavior regarding size 0 memory allocations and
       using memcpy with a NULL src pointer.
 
-      The library is now more more careful about using memory operations when
+      The library is now more careful about using memory operations when
       copying empty enum datatypes and will not error or raise an assert.
 
     - Added an AAPL check to H5Acreate
@@ -461,7 +460,15 @@ Bug Fixes since HDF5-1.14.0 release
 
     Java Library
     ------------
-    -
+    - Fixed switch case 'L' block missing a break statement.
+
+      The HDF5Array.arrayify method is missing a break statement in the case 'L': section
+      which causes it to fall through and throw an HDF5JavaException when attempting to
+      read an Array[Array[Long]].
+
+      The error was fixed by inserting a break statement at the end of the case 'L': sections.
+
+      Fixes GitHub issue #3056
 
 
     Configuration

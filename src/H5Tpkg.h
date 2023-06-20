@@ -112,6 +112,37 @@
 /* (_not_ setting H5T_VISIT_SIMPLE and setting either H5T_VISIT_COMPLEX_FIRST or H5T_VISIT_COMPLEX_LAST will
  * mean visiting all nodes _except_ "simple" "leafs" in the "tree" */
 
+/* Define an internal macro for converting long long to long double.  Mac OS 10.4 gives some
+ * incorrect conversions. */
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_LLONG_LDOUBLE 1
+#endif
+
+/* Define an internal macro for converting unsigned long long to long double.  SGI compilers give
+ * some incorrect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
+ * not support unsigned long long.  For FreeBSD(sleipnir), the last 2 bytes of mantissa are lost when
+ * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly.
+ * Mac OS 10.4 gives some incorrect result. */
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_ULLONG_LDOUBLE 1
+#endif
+
+/* Define an internal macro for converting long double to long long.  SGI compilers give some incorrect
+ * conversions. Mac OS 10.4 gives incorrect conversions. HP-UX 11.00 compiler generates floating exception.
+ * The hard conversion on Windows .NET 2003 has a bug and gives wrong exception value. */
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LDOUBLE_TO_LLONG_ACCURATE)) || (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_LDOUBLE_LLONG 1
+#endif
+
+/* Define an internal macro for converting long double to unsigned long long.  SGI compilers give some
+ * incorrect conversions.  Mac OS 10.4 gives incorrect conversions. HP-UX 11.00 compiler generates
+ * floating exception. */
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LDOUBLE_TO_LLONG_ACCURATE)) || (!H5_WANT_DATA_ACCURACY)
+#define H5T_CONV_INTERNAL_LDOUBLE_ULLONG 1
+#else
+#define H5T_CONV_INTERNAL_LDOUBLE_ULLONG 0
+#endif
+
 /* Statistics about a conversion function */
 struct H5T_stats_t {
     unsigned      ncalls; /*num calls to conversion function   */
@@ -433,7 +464,7 @@ H5FL_EXTERN(H5T_t);
 H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
-H5_DLL herr_t H5T__init_native(void);
+H5_DLL herr_t H5T__init_native_float_types(void);
 H5_DLL herr_t H5T__init_native_internal(void);
 H5_DLL H5T_t *H5T__create(H5T_class_t type, size_t size);
 H5_DLL H5T_t *H5T__alloc(void);
