@@ -460,7 +460,7 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             /* Encode chunk dims */
             HDcompile_assert(sizeof(uint32_t) == sizeof(layout->u.chunk.dim[0]));
             for (u = 0; u < (size_t)layout->u.chunk.ndims; u++) {
-                UINT32ENCODE(*pp, layout->u.chunk.dim[u])
+                UINT32ENCODE(*pp, layout->u.chunk.dim[u]);
                 *size += sizeof(uint32_t);
             } /* end for */
         }     /* end if */
@@ -468,7 +468,7 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             uint64_t nentries = (uint64_t)layout->storage.u.virt.list_nused;
 
             /* Encode number of entries */
-            UINT64ENCODE(*pp, nentries)
+            UINT64ENCODE(*pp, nentries);
             *size += (size_t)8;
 
             /* Iterate over entries */
@@ -613,7 +613,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                 /* Set rank & dimensions */
                 tmp_layout.u.chunk.ndims = (unsigned)ndims;
                 for (u = 0; u < ndims; u++)
-                    UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u])
+                    UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u]);
 
                 /* Point at the newly set up struct */
                 layout = &tmp_layout;
@@ -624,7 +624,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
             uint64_t nentries; /* Number of VDS mappings */
 
             /* Decode number of entries */
-            UINT64DECODE(*pp, nentries)
+            UINT64DECODE(*pp, nentries);
 
             if (nentries == (uint64_t)0)
                 /* Just use the default struct */
@@ -1093,7 +1093,7 @@ H5P__dcrt_fill_value_enc(const void *value, void **_pp, size_t *size)
         *(*pp)++ = (uint8_t)fill->fill_time;
 
         /* Encode size of fill value */
-        INT64ENCODE(*pp, fill->size)
+        INT64ENCODE(*pp, fill->size);
 
         /* Encode the fill value & datatype */
         if (fill->size > 0) {
@@ -1183,7 +1183,7 @@ H5P__dcrt_fill_value_dec(const void **_pp, void *_value)
     fill->fill_time  = (H5D_fill_time_t) * (*pp)++;
 
     /* Decode fill size */
-    INT64DECODE(*pp, fill->size)
+    INT64DECODE(*pp, fill->size);
 
     /* Check if there's a fill value */
     if (fill->size > 0) {

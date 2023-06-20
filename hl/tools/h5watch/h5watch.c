@@ -27,7 +27,7 @@
  *    This tool uses H5LD_memb_t data structure declared in H5LDprivate.h
  */
 
-const char          *progname         = "h5watch"; /* tool name */
+static const char   *progname         = "h5watch"; /* tool name */
 static char         *g_list_of_fields = NULL;      /* command line input for "list_of_fields" */
 static char         *g_dup_fields     = NULL;      /* copy of "list_of_fields" */
 static H5LD_memb_t **g_listv          = NULL;      /* vector info for "list_of_fields" */

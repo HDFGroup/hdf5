@@ -408,7 +408,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HDmemset(p, 0, attr->shared->data_size);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_encode() */
 
 /*--------------------------------------------------------------------------

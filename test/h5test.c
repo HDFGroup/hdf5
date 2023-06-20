@@ -205,7 +205,7 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
     {
         H5Fdelete(filename, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* end h5_delete_test_file() */
 
@@ -369,7 +369,7 @@ h5_reset(void)
             H5Fclose(file);
             HDunlink(filename);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 #endif /* OLD_WAY */
 }
@@ -1594,7 +1594,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }

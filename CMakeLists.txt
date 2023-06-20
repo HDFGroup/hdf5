@@ -794,9 +794,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.12.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v112")
-endif ()
 set (H5_USE_112_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v112")
   set (H5_USE_112_API_DEFAULT 1)
@@ -805,9 +802,6 @@ endif ()
 #-----------------------------------------------------------------------------
 # Option to use 1.14.x API
 #-----------------------------------------------------------------------------
-if (NOT DEFAULT_API_VERSION)
-  set (DEFAULT_API_VERSION "v114")
-endif ()
 set (H5_USE_114_API_DEFAULT 0)
 if (DEFAULT_API_VERSION MATCHES "v114")
   set (H5_USE_114_API_DEFAULT 1)
@@ -1223,11 +1217,5 @@ endif ()
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_SRC_BINARY_DIR}/H5pubconf.h @ONLY)
-
-#-----------------------------------------------------------------------------
-# Options for use by cross compiling and toolchains
-#-----------------------------------------------------------------------------
-option (HDF5_USE_PREGEN "Use pre-generated Files" OFF)
-option (HDF5_BATCH_H5DETECT "Use a batch command for running h5detect" OFF)
 
 include (CMakeInstallation.cmake)

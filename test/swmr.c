@@ -48,10 +48,10 @@
 #define H5O_TESTING
 #include "H5Opkg.h" /* Object headers            */
 
-const char *FILENAME[] = {"swmr0", /* 0 */
-                          "swmr1", /* 1 */
-                          "swmr2", /* 2 */
-                          NULL};
+static const char *FILENAME[] = {"swmr0", /* 0 */
+                                 "swmr1", /* 1 */
+                                 "swmr2", /* 2 */
+                                 NULL};
 
 #define NAME_BUF_SIZE 1024 /* Length of file name */
 
@@ -170,7 +170,7 @@ test_metadata_read_attempts(hid_t in_fapl)
     {
         ret = H5Pset_metadata_read_attempts(fapl, 0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -834,7 +834,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -1531,7 +1531,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -1662,7 +1662,7 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (new_format) {
         if (ret < 0)
             TEST_ERROR;
@@ -1879,7 +1879,7 @@ error:
         H5Sclose(sid2);
         H5Sclose(sid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_start_swmr_write() */
@@ -1990,7 +1990,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2016,7 +2016,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             ret = H5Fstart_swmr_write(fid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -2043,7 +2043,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             ret = H5Fstart_swmr_write(fid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -2072,7 +2072,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2091,7 +2091,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2110,7 +2110,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2143,7 +2143,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2156,7 +2156,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2204,7 +2204,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2231,7 +2231,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2260,7 +2260,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     {
         ret = H5Fstart_swmr_write(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -2290,7 +2290,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, new_fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (bad_fid >= 0)
             TEST_ERROR;
 
@@ -2302,7 +2302,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (bad_fid >= 0)
             TEST_ERROR;
 
@@ -2317,7 +2317,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             ret = H5Fstart_swmr_write(fid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -2335,7 +2335,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         {
             ret = H5Fstart_swmr_write(fid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -2368,7 +2368,7 @@ error:
          */
         H5Fclose(bad_fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_err_start_swmr_write() */
@@ -2523,7 +2523,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
             /* Open the test file */
             fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
 
@@ -2793,7 +2793,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         {
             fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
 
@@ -2869,7 +2869,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         {
             fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
 
@@ -2949,7 +2949,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         {
             fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
 
@@ -3012,7 +3012,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -3177,7 +3177,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_start_swmr_write_stress_ohdr() */
@@ -3287,7 +3287,7 @@ error:
         H5Pclose(vds_dapl1);
         H5Pclose(vds_dapl2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* tssw_persist_dapl_verify() */
@@ -3545,7 +3545,7 @@ error:
         H5Dclose(vdsid2);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_start_swmr_write_persist_dapl() */
@@ -3608,7 +3608,7 @@ test_object_flush_cb(hid_t in_fapl)
     {
         ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3812,7 +3812,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_object_flush_cb() */
@@ -3912,7 +3912,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3921,7 +3921,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, H5S_MAX_RANK + 1, NULL, NULL, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3930,7 +3930,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3943,7 +3943,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3954,7 +3954,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -3965,7 +3965,7 @@ test_append_flush_generic(void)
     {
         ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -4011,7 +4011,7 @@ error:
     {
         H5Pclose(dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_append_flush_generic() */
@@ -4132,7 +4132,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     {
         did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did2 >= 0)
         TEST_ERROR;
 
@@ -4146,7 +4146,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     {
         did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did2 >= 0)
         TEST_ERROR;
 
@@ -4161,7 +4161,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     {
         did2 = H5Dopen2(fid, "dataset2", dapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did2 >= 0)
         TEST_ERROR;
 
@@ -4240,7 +4240,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_append_flush_dataset_chunked() */
@@ -4447,7 +4447,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_append_flush_dataset_fixed() */
@@ -4689,7 +4689,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_append_flush_dataset_multiple() */
@@ -4803,7 +4803,7 @@ test_file_lock_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -4857,7 +4857,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_file_lock_same() */
@@ -4911,7 +4911,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_READ, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid >= 0)
         TEST_ERROR;
 
@@ -4922,7 +4922,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid >= 0)
         TEST_ERROR;
 
@@ -4933,7 +4933,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid >= 0)
         TEST_ERROR;
 
@@ -4944,7 +4944,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid >= 0)
         TEST_ERROR;
 
@@ -4962,7 +4962,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -5058,7 +5058,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -5076,7 +5076,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -5126,7 +5126,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -5144,7 +5144,7 @@ test_file_lock_swmr_same(hid_t in_fapl)
     {
         fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid2 >= 0)
         TEST_ERROR;
 
@@ -5167,7 +5167,7 @@ error:
         H5Fclose(fid);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_file_lock_swmr_same() */
@@ -5258,7 +5258,7 @@ test_file_lock_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5335,7 +5335,7 @@ test_file_lock_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5413,7 +5413,7 @@ test_file_lock_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5491,7 +5491,7 @@ test_file_lock_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should succeed */
         if (child_fid >= 0) {
@@ -5557,7 +5557,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -5655,7 +5655,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5733,7 +5733,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5811,7 +5811,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5888,7 +5888,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -5965,7 +5965,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should succeed */
         if (child_fid >= 0) {
@@ -6045,7 +6045,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -6123,7 +6123,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -6201,7 +6201,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -6279,7 +6279,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should succeed */
         if (child_fid >= 0) {
@@ -6438,7 +6438,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should fail */
         if (child_fid == FAIL)
@@ -6516,7 +6516,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         {
             child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Should succeed */
         if (child_fid >= 0) {
@@ -6580,7 +6580,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -6699,7 +6699,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
             child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
             ret       = H5Fclose(child_fid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
@@ -6772,7 +6772,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -6826,7 +6826,7 @@ test_different_lock_flags(hid_t in_fapl)
     {
         fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (H5I_INVALID_HID != fid3)
         FAIL_PUTS_ERROR("Should not have been able to open a file with different locking flags");
 
@@ -6852,7 +6852,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_different_lock_flags() */
@@ -6897,7 +6897,7 @@ test_swmr_vfd_flag(void)
     {
         fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fid >= 0)
         TEST_ERROR;
 
@@ -6917,7 +6917,7 @@ error:
         H5Pclose(bad_fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_swmr_vfd_flag() */
@@ -7037,7 +7037,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_bug_refresh() */
@@ -7382,7 +7382,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 
@@ -7714,7 +7714,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 

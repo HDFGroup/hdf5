@@ -113,7 +113,7 @@ jobs:
 
       - name: List files for the space (Linux)
         run: |
-              ls ${{ github.workspace }}
+              ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
 
       - name: Uncompress source (Linux)
@@ -141,7 +141,7 @@ jobs:
       - name: List files in the space (Linux)
         run: |
               ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls -l ${{ runner.workspace }}
 
       # Save files created by ctest script
       - name: Save published binary (Linux)
@@ -216,7 +216,7 @@ jobs:
       - name: List files in the space (MacOS)
         run: |
               ls ${{ github.workspace }}
-              ls ${{ runner.workspace }}
+              ls -l ${{ runner.workspace }}
 
       # Save files created by ctest script
       - name: Save published binary (MacOS)

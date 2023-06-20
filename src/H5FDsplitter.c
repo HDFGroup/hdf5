@@ -267,7 +267,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, -1, "unable to copy file access property list");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__copy_plist() */
 
 /*-------------------------------------------------------------------------

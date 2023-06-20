@@ -517,7 +517,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
     }
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(oh_addr);
+    H5_BEGIN_TAG(oh_addr)
 
     /* Cache object header */
     if (H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
@@ -537,7 +537,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_apply_ohdr() */
 
 /*-------------------------------------------------------------------------
@@ -2521,7 +2521,7 @@ H5O_get_oh_flags(const H5O_t *oh)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
     HDassert(oh);
-    FUNC_LEAVE_NOAPI(oh->flags); /* flags can be 0 */
+    FUNC_LEAVE_NOAPI(oh->flags) /* flags can be 0 */
 } /* H5O_get_oh_flags() */
 
 /*-------------------------------------------------------------------------
@@ -2542,7 +2542,7 @@ H5O_get_oh_mtime(const H5O_t *oh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
     HDassert(oh);
     HDassert(oh->mtime);
-    FUNC_LEAVE_NOAPI(oh->mtime);
+    FUNC_LEAVE_NOAPI(oh->mtime)
 } /* H5O_get_oh_mtime() */
 
 /*-------------------------------------------------------------------------
@@ -2559,7 +2559,7 @@ H5O_get_oh_version(const H5O_t *oh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
     HDassert(oh);
     HDassert(oh->version);
-    FUNC_LEAVE_NOAPI(oh->version);
+    FUNC_LEAVE_NOAPI(oh->version)
 } /* H5O_get_oh_version() */
 
 /*-------------------------------------------------------------------------
@@ -3085,12 +3085,12 @@ done:
 static herr_t
 H5O__reset_info2(H5O_info2_t *oinfo)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
     HDmemset(oinfo, 0, sizeof(H5O_info2_t));
     oinfo->type  = H5O_TYPE_UNKNOWN;
     oinfo->token = H5O_TOKEN_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__reset_info2() */

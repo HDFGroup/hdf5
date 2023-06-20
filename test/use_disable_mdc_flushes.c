@@ -27,7 +27,7 @@
 #include "H5Dpkg.h"
 
 /* Global Variable definitions */
-const char *progname_g = "use_disable_mdc_flushes"; /* program name */
+static const char *progname_g = "use_disable_mdc_flushes"; /* program name */
 
 /* these two definitions must match each other */
 #define UC_DATATYPE   H5T_NATIVE_SHORT /* use case HDF5 data type */
@@ -40,14 +40,14 @@ const char *progname_g = "use_disable_mdc_flushes"; /* program name */
         goto done;                                                                                           \
     }
 
-char   *filename_g;
-hsize_t nplanes_g;
-int     use_swmr_g;
-int     chunkplanes_g;
-int     chunksize_g;
-hsize_t dims_g[UC_RANK];
-hsize_t max_dims_g[UC_RANK];
-hsize_t chunkdims_g[UC_RANK];
+static char   *filename_g;
+static hsize_t nplanes_g;
+static int     use_swmr_g;
+static int     chunkplanes_g;
+static int     chunksize_g;
+static hsize_t dims_g[UC_RANK];
+static hsize_t max_dims_g[UC_RANK];
+static hsize_t chunkdims_g[UC_RANK];
 
 static void usage(const char *prog);
 static int  parse_option(int argc, char *const argv[]);

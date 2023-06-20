@@ -384,13 +384,13 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
                                     "ran off end of input buffer while decoding");
                     UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset,
-                                     offset_nbytes)
+                                     offset_nbytes);
                 }
                 else {
                     if (H5_IS_KNOWN_BUFFER_OVERFLOW(skip, *pp, 4, p_end))
                         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, FAIL,
                                     "ran off end of input buffer while decoding");
-                    UINT32DECODE(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset)
+                    UINT32DECODE(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset);
                 }
 
                 /* Older versions of the library allowed a field to have
@@ -1141,9 +1141,9 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 /* Member offset */
                 /* (starting with version 3 of the datatype message, use the minimum # of bytes required) */
                 if (dt->shared->version >= H5O_DTYPE_VERSION_3)
-                    UINT32ENCODE_VAR(*pp, (uint32_t)dt->shared->u.compnd.memb[i].offset, offset_nbytes)
+                    UINT32ENCODE_VAR(*pp, (uint32_t)dt->shared->u.compnd.memb[i].offset, offset_nbytes);
                 else
-                    UINT32ENCODE(*pp, dt->shared->u.compnd.memb[i].offset)
+                    UINT32ENCODE(*pp, dt->shared->u.compnd.memb[i].offset);
 
                 /* If we don't have any array fields, write out the old style
                  * member information, for better backward compatibility

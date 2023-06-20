@@ -290,7 +290,7 @@ test_select_hyper(hid_t xfer_plist)
     {
         ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Test selecting stride<block to verify failure */
@@ -310,7 +310,7 @@ test_select_hyper(hid_t xfer_plist)
     {
         ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Select 2x15x13 hyperslab for disk dataset */
@@ -353,13 +353,13 @@ test_select_hyper(hid_t xfer_plist)
     {
         ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
     H5E_BEGIN_TRY
     {
         ret = H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -403,13 +403,13 @@ test_select_hyper(hid_t xfer_plist)
     {
         ret = H5Dread(dataset, H5T_NATIVE_UCHAR, sid2, sid1, xfer_plist, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
     H5E_BEGIN_TRY
     {
         ret = H5Dread(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, xfer_plist, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
@@ -8235,7 +8235,7 @@ test_scalar_select2(void)
     {
         ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)&coord1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
     /* Select one element in memory with a hyperslab selection */
@@ -8245,7 +8245,7 @@ test_scalar_select2(void)
     {
         ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Select no elements in memory & file with "none" selection */
@@ -13914,7 +13914,7 @@ test_select_bounds(void)
     {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
     /* Set point selection */
@@ -13948,7 +13948,7 @@ test_select_bounds(void)
     {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
     /* Set valid offset for selection */
@@ -14002,7 +14002,7 @@ test_select_bounds(void)
     {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
     /* Set valid offset for selection */
@@ -14056,7 +14056,7 @@ test_select_bounds(void)
     {
         ret = H5Sget_select_bounds(sid, low_bounds, high_bounds);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_select_bounds");
 
     /* Set valid offset for selection */
@@ -14121,7 +14121,7 @@ test_hyper_regular(void)
     {
         is_regular = H5Sis_regular_hyperslab(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
@@ -14129,7 +14129,7 @@ test_hyper_regular(void)
     {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set 'none' selection */
@@ -14141,7 +14141,7 @@ test_hyper_regular(void)
     {
         is_regular = H5Sis_regular_hyperslab(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
@@ -14149,7 +14149,7 @@ test_hyper_regular(void)
     {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set point selection */
@@ -14173,7 +14173,7 @@ test_hyper_regular(void)
     {
         is_regular = H5Sis_regular_hyperslab(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(is_regular, FAIL, "H5Sis_regular_hyperslab");
 
     /* Query regular hyperslab selection info (should fail) */
@@ -14181,7 +14181,7 @@ test_hyper_regular(void)
     {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* Set "regular" hyperslab selection */
@@ -14239,7 +14239,7 @@ test_hyper_regular(void)
     {
         ret = H5Sget_regular_hyperslab(sid, q_start, q_stride, q_count, q_block);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sget_regular_hyperslab");
 
     /* 'XOR' in the point again, to remove it, which should make it regular again */
@@ -15162,19 +15162,19 @@ test_sel_iter(void)
     { /* Bad dataspace ID */
         iter_id = H5Ssel_iter_create(H5I_INVALID_HID, (size_t)1, (unsigned)0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
     H5E_BEGIN_TRY
     { /* Bad element size */
         iter_id = H5Ssel_iter_create(sid, (size_t)0, (unsigned)0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
     H5E_BEGIN_TRY
     { /* Bad flag(s) */
         iter_id = H5Ssel_iter_create(sid, (size_t)1, (unsigned)0xffff);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(iter_id, FAIL, "H5Ssel_iter_create");
 
     /* Try closing selection iterator, with bad parameters */
@@ -15182,13 +15182,13 @@ test_sel_iter(void)
     { /* Invalid ID */
         ret = H5Ssel_iter_close(H5I_INVALID_HID);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Ssel_iter_close");
     H5E_BEGIN_TRY
     { /* Not a selection iterator ID */
         ret = H5Ssel_iter_close(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Ssel_iter_close");
 
     /* Try with no selection sharing, and with sharing */
@@ -15212,7 +15212,7 @@ test_sel_iter(void)
         { /* Invalid ID */
             ret = H5Ssel_iter_close(iter_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_close");
 
         /* Create selection iterator object */
@@ -15224,13 +15224,13 @@ test_sel_iter(void)
         {
             ret = H5Ssel_iter_reset(H5I_INVALID_HID, sid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_reset");
         H5E_BEGIN_TRY
         {
             ret = H5Ssel_iter_reset(iter_id, H5I_INVALID_HID);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_reset");
 
         /* Try retrieving sequences, with bad parameters */
@@ -15238,31 +15238,31 @@ test_sel_iter(void)
         { /* Invalid ID */
             ret = H5Ssel_iter_get_seq_list(H5I_INVALID_HID, (size_t)1, (size_t)1, &nseq, &nbytes, off, len);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
         H5E_BEGIN_TRY
         { /* Invalid nseq pointer */
             ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, NULL, &nbytes, off, len);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
         H5E_BEGIN_TRY
         { /* Invalid nbytes pointer */
             ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, NULL, off, len);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
         H5E_BEGIN_TRY
         { /* Invalid offset array */
             ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, NULL, len);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
         H5E_BEGIN_TRY
         { /* Invalid length array */
             ret = H5Ssel_iter_get_seq_list(iter_id, (size_t)1, (size_t)1, &nseq, &nbytes, off, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         VERIFY(ret, FAIL, "H5Ssel_iter_get_seq_list");
 
         /* Close selection iterator */
@@ -15686,31 +15686,31 @@ test_select_intersect_block(void)
     { /* Bad dataspace ID */
         status = H5Sselect_intersect_block(H5I_INVALID_HID, block_start, block_end);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(status, FAIL, "H5Sselect_intersect_block");
     H5E_BEGIN_TRY
     { /* Bad start pointer */
         status = H5Sselect_intersect_block(sid, NULL, block_end);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(status, FAIL, "H5Sselect_intersect_block");
     H5E_BEGIN_TRY
     { /* Bad end pointer */
         status = H5Sselect_intersect_block(sid, block_start, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(status, FAIL, "H5Sselect_intersect_block");
     H5E_BEGIN_TRY
     { /* Invalid block */
         status = H5Sselect_intersect_block(sid, block_start, block_end2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(status, FAIL, "H5Sselect_intersect_block");
     H5E_BEGIN_TRY
     { /* Another invalid block */
         status = H5Sselect_intersect_block(sid, block_start, block_end3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(status, FAIL, "H5Sselect_intersect_block");
 
     /* Set selection to 'none' */

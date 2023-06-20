@@ -33,7 +33,7 @@
 
 /* Data written to the dataset for single block test.  Global variable
  * for convenience. */
-int da_buffer[2][3][6][2];
+static int da_buffer[2][3][6][2];
 
 /***********************************************************
 **

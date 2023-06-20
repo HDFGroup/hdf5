@@ -149,7 +149,7 @@ static int              H5FL__fac_term_all(void);
 H5FL_DEFINE(H5FL_blk_node_t);
 
 /* Declare a free list to manage the H5FL_fac_gc_node_t struct */
-H5FL_DEFINE(H5FL_fac_gc_node_t);
+H5FL_DEFINE_STATIC(H5FL_fac_gc_node_t);
 
 /* Declare a free list to manage the H5FL_fac_head_t struct */
 H5FL_DEFINE(H5FL_fac_head_t);

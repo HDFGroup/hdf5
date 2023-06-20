@@ -294,7 +294,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy(JNIEnv *env, jclass clss, jlon
 {
     UNUSED(clss);
 
-    if (H5Pset_file_space_strategy((hid_t)fcpl_id, (H5F_fspace_strategy_t)strategy, (hbool_t)persist,
+    if (H5Pset_file_space_strategy((hid_t)fcpl_id, (H5F_fspace_strategy_t)strategy, (bool)persist,
                                    (hsize_t)threshold) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
@@ -325,7 +325,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy(JNIEnv *env, jclass clss, jlon
         PIN_LONG_ARRAY(ENVONLY, threshold, thresholdArray, &isCopy,
                        "H5Pget_file_space: threshold not pinned");
 
-    if ((status = H5Pget_file_space_strategy((hid_t)fcpl_id, &thestrategy, (hbool_t *)persistArray,
+    if ((status = H5Pget_file_space_strategy((hid_t)fcpl_id, &thestrategy, (bool *)persistArray,
                                              (hsize_t *)thresholdArray)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
@@ -346,8 +346,8 @@ done:
 JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist(JNIEnv *env, jclass clss, jlong fcpl_id)
 {
-    hbool_t persist = FALSE;
-    herr_t  status  = FAIL;
+    bool   persist = false;
+    herr_t status  = FAIL;
 
     UNUSED(clss);
 

@@ -1649,7 +1649,7 @@ error:
         H5Oclose(oid);
         H5Aclose(attr_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     dump_indent -= COL;
 }
 

@@ -473,7 +473,7 @@ H5F__efc_release_real(H5F_efc_t *efc)
     efc->tag = H5F_EFC_TAG_DEFAULT;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_release_real() */
 
 /*-------------------------------------------------------------------------
@@ -557,7 +557,7 @@ H5F__efc_destroy(H5F_efc_t *efc)
     (void)H5FL_FREE(H5F_efc_t, efc);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__efc_destroy() */
 
 /*-------------------------------------------------------------------------

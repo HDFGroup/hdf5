@@ -82,7 +82,7 @@
 /* Files for testing file space paging */
 #define FSPACE_OUT "h5repack_fspace_OUT.h5"   /* The output file */
 #define NELMTS(X)  (sizeof(X) / sizeof(X[0])) /* # of elements */
-const char *H5REPACK_FSPACE_FNAMES[] = {
+static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */
     "h5repack_default.h5",            /* 1 */
     "h5repack_page_persist.h5",       /* 2 */
@@ -101,7 +101,7 @@ const char *H5REPACK_FSPACE_FNAMES[] = {
 /* obj and region references in attr of compound and vlen type */
 #define FNAME_ATTR_REF "h5repack_attr_refs.h5"
 
-const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
+static const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 
@@ -2303,7 +2303,7 @@ out:
         H5Tclose(tid);
         H5Pclose(gcplid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2373,7 +2373,7 @@ out:
         H5Gclose(rid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2441,7 +2441,7 @@ out:
         H5Gclose(g2id);
         H5Gclose(g3id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2515,7 +2515,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2600,7 +2600,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2670,7 +2670,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2743,7 +2743,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2851,7 +2851,7 @@ error:
         H5Sclose(sid);
         H5Dclose(dsid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -2953,7 +2953,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3137,7 +3137,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3235,7 +3235,7 @@ out:
         H5Dclose(did);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3331,7 +3331,7 @@ error:
         H5Pclose(dcpl);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 
@@ -3404,7 +3404,7 @@ error:
 
         H5Sclose(s_sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(s_buf);
 
@@ -3547,7 +3547,7 @@ error:
         H5Pclose(dcpl2);
         H5Pclose(dcpl3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf1);
     HDfree(buf2);
@@ -3604,7 +3604,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3686,7 +3686,7 @@ out:
         H5Sclose(m_sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3740,7 +3740,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3800,7 +3800,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -3870,7 +3870,7 @@ out:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fd >= 0)
         HDclose(fd);
 
@@ -4099,9 +4099,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -4323,9 +4325,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 2, dims2, "enum2D", tid, 0) < 0)
         goto out;
@@ -4531,9 +4535,11 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (write_dset(loc_id, 3, dims3, "enum3D", tid, 0) < 0)
         goto out;
@@ -4640,7 +4646,7 @@ out:
         H5Dclose(did);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -4749,7 +4755,7 @@ out:
         H5Dclose(did1);
         H5Dclose(did2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return retval;
 }
@@ -4990,9 +4996,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     */
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 1, dims, "enum", tid, buf45) < 0)
         goto out;
@@ -5293,9 +5301,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 2, dims2, "enum2D", tid, buf452) < 0)
         goto out;
@@ -5737,9 +5747,11 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
     if ((tid = H5Tcreate(H5T_ENUM, sizeof(e_t))) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "RED", (val = 0, &val)) < 0)
+    val = 0;
+    if (H5Tenum_insert(tid, "RED", &val) < 0)
         goto out;
-    if (H5Tenum_insert(tid, "GREEN", (val = 1, &val)) < 0)
+    val = 1;
+    if (H5Tenum_insert(tid, "GREEN", &val) < 0)
         goto out;
     if (make_attr(loc_id, 3, dims3, "enum3D", tid, buf453) < 0)
         goto out;
@@ -5888,7 +5900,7 @@ out:
         H5Sclose(sid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -5941,7 +5953,7 @@ out:
     {
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6003,7 +6015,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6044,7 +6056,7 @@ out:
         H5Aclose(aid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -6170,7 +6182,7 @@ out:
         H5Dclose(did);
         H5Gclose(gid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end make_named_dtype() */
 

@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"ntypes", NULL};
+static const char *FILENAME[] = {"ntypes", NULL};
 
 #define DIM0 100
 #define DIM1 200
@@ -292,7 +292,7 @@ error:
         H5Tclose(dtype);
         H5Sclose(space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(ipoints2);
     HDfree(icheck2);
@@ -381,10 +381,7 @@ test_compound_dtype2(hid_t file)
 #else
 #error "Unknown 'long' size"
 #endif
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I32BE) < 0)
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tinsert(tid2, "ll2", HOFFSET(s2, ll2), H5T_STD_I64BE) < 0)
         TEST_ERROR;
 #else
@@ -397,10 +394,7 @@ test_compound_dtype2(hid_t file)
         TEST_ERROR;
     if (H5Tinsert(tid, "st", HOFFSET(s1, st), tid2) < 0)
         TEST_ERROR;
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U32BE) < 0)
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tinsert(tid, "l", HOFFSET(s1, l), H5T_STD_U64BE) < 0)
         TEST_ERROR;
 #else
@@ -532,10 +526,7 @@ test_compound_dtype2(hid_t file)
         TEST_ERROR;
     if (H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_LLONG))
         TEST_ERROR;
-#if H5_SIZEOF_LONG_LONG == 4
-    if (H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I32LE))
-        TEST_ERROR;
-#elif H5_SIZEOF_LONG_LONG == 8
+#if H5_SIZEOF_LONG_LONG == 8
     if (H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I64LE))
         TEST_ERROR;
 #else
@@ -623,7 +614,7 @@ error:
         H5Tclose(dtype);
         H5Tclose(native_type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -834,7 +825,7 @@ error:
         H5Tclose(native_type);
         H5Tclose(tid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1073,7 +1064,7 @@ error:
         H5Tclose(tid_m);
         H5Tclose(tid_m2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1298,7 +1289,7 @@ error:
         H5Tclose(tid2);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1455,7 +1446,7 @@ error:
         H5Tclose(tid);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1641,7 +1632,7 @@ error:
         H5Tclose(tid3);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -1788,7 +1779,7 @@ error:
         H5Tclose(tid);
         H5Tclose(tid_m);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(ipoints3);
     HDfree(icheck3);
@@ -1995,7 +1986,7 @@ error:
         H5Tclose(tid_m);
         H5Tclose(tid_m2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_vl_type() */
@@ -2133,7 +2124,7 @@ error:
         H5Tclose(sid1);
         H5Tclose(tid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_vlstr_dtype() */
@@ -2253,7 +2244,7 @@ error:
         H5Tclose(tid1);
         H5Tclose(sid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_str_dtype() */
@@ -2424,7 +2415,7 @@ error:
         H5Tclose(native_type);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_refer_dtype() */
@@ -2636,7 +2627,7 @@ error:
         H5Dclose(dset2);
         H5Dclose(dset1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_refer_dtype2() */
@@ -2733,7 +2724,7 @@ error:
         H5Dclose(dset);
         H5Dclose(dataset);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_opaque_dtype */
@@ -2887,7 +2878,7 @@ error:
         H5Dclose(dataset1);
         H5Dclose(dataset2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* test_bitfield_dtype */
@@ -3097,7 +3088,7 @@ error:
         H5Fclose(fid1);
         H5Fclose(fid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_ninteger() */
@@ -3175,7 +3166,7 @@ error:
         H5Fclose(file);
         h5_cleanup(FILENAME, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");

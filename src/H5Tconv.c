@@ -1041,12 +1041,12 @@ done:                                                                           
 
 /* Swap two elements (I & J) of an array using a temporary variable */
 #define H5_SWAP_BYTES(ARRAY, I, J)                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         uint8_t _tmp;                                                                                        \
         _tmp     = ARRAY[I];                                                                                 \
         ARRAY[I] = ARRAY[J];                                                                                 \
         ARRAY[J] = _tmp;                                                                                     \
-    }
+    } while (0)
 
 /* Minimum size of variable-length conversion buffer */
 #define H5T_VLEN_MIN_CONF_BUF_SIZE 4096

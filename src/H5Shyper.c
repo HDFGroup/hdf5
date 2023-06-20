@@ -540,7 +540,7 @@ H5S__hyper_get_op_gen(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++);
+    FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++)
 } /* end H5S__hyper_op_gen() */
 
 /*-------------------------------------------------------------------------
@@ -4041,13 +4041,13 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
                         UINT16ENCODE(pp, diminfo[u].start);
                         UINT16ENCODE(pp, diminfo[u].stride);
                         if (diminfo[u].count == H5S_UNLIMITED)
-                            UINT16ENCODE(pp, H5S_UINT16_MAX)
+                            UINT16ENCODE(pp, H5S_UINT16_MAX);
                         else
-                            UINT16ENCODE(pp, diminfo[u].count)
+                            UINT16ENCODE(pp, diminfo[u].count);
                         if (diminfo[u].block == H5S_UNLIMITED)
-                            UINT16ENCODE(pp, H5S_UINT16_MAX)
+                            UINT16ENCODE(pp, H5S_UINT16_MAX);
                         else
-                            UINT16ENCODE(pp, diminfo[u].block)
+                            UINT16ENCODE(pp, diminfo[u].block);
                     } /* end for */
                     break;
 
@@ -4057,13 +4057,13 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
                         UINT32ENCODE(pp, diminfo[u].start);
                         UINT32ENCODE(pp, diminfo[u].stride);
                         if (diminfo[u].count == H5S_UNLIMITED)
-                            UINT32ENCODE(pp, H5S_UINT32_MAX)
+                            UINT32ENCODE(pp, H5S_UINT32_MAX);
                         else
-                            UINT32ENCODE(pp, diminfo[u].count)
+                            UINT32ENCODE(pp, diminfo[u].count);
                         if (diminfo[u].block == H5S_UNLIMITED)
-                            UINT32ENCODE(pp, H5S_UINT32_MAX)
+                            UINT32ENCODE(pp, H5S_UINT32_MAX);
                         else
-                            UINT32ENCODE(pp, diminfo[u].block)
+                            UINT32ENCODE(pp, diminfo[u].block);
                     } /* end for */
                     break;
 
@@ -4073,13 +4073,13 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
                         UINT64ENCODE(pp, diminfo[u].start);
                         UINT64ENCODE(pp, diminfo[u].stride);
                         if (diminfo[u].count == H5S_UNLIMITED)
-                            UINT64ENCODE(pp, H5S_UINT64_MAX)
+                            UINT64ENCODE(pp, H5S_UINT64_MAX);
                         else
-                            UINT64ENCODE(pp, diminfo[u].count)
+                            UINT64ENCODE(pp, diminfo[u].count);
                         if (diminfo[u].block == H5S_UNLIMITED)
-                            UINT64ENCODE(pp, H5S_UINT64_MAX)
+                            UINT64ENCODE(pp, H5S_UINT64_MAX);
                         else
-                            UINT64ENCODE(pp, diminfo[u].block)
+                            UINT64ENCODE(pp, diminfo[u].block);
                     } /* end for */
                     if (version == H5S_HYPER_VERSION_2)
                         len += (4 * space->extent.rank * 8);
@@ -5081,7 +5081,7 @@ H5S__hyper_unlim_dim(const H5S_t *space)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim);
+    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim)
 } /* end H5S__hyper_unlim_dim() */
 
 /*--------------------------------------------------------------------------

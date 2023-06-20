@@ -76,8 +76,8 @@
         }                                                                                                    \
     } while (0)
 
-const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
-                          "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
+static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
+                                 "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
 
 #define TESTFILE "bad_compound.h5"
 
@@ -315,7 +315,7 @@ test_copy(void)
     {
         status = H5Tclose(H5T_NATIVE_SCHAR);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Should not be able to close a predefined type!");
@@ -599,7 +599,7 @@ test_compound_1(void)
     {
         ret = H5Tinsert(complex_id, "compound", (size_t)0, complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("Inserted compound datatype into itself?");
     } /* end if */
@@ -616,7 +616,7 @@ test_compound_1(void)
     {
         ret = H5Tset_size(complex_id, sizeof(double));
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -625,7 +625,7 @@ test_compound_1(void)
     {
         size = H5Tget_precision(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -635,7 +635,7 @@ test_compound_1(void)
     {
         ret = H5Tset_precision(complex_id, size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -644,7 +644,7 @@ test_compound_1(void)
     {
         ret = H5Tget_pad(complex_id, &lsb, &msb);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -653,7 +653,7 @@ test_compound_1(void)
     {
         size = H5Tget_ebias(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -662,7 +662,7 @@ test_compound_1(void)
     {
         lsb = H5Tget_inpad(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (lsb >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -671,7 +671,7 @@ test_compound_1(void)
     {
         cset = H5Tget_cset(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (cset > -1) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -680,7 +680,7 @@ test_compound_1(void)
     {
         strpad = H5Tget_strpad(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (strpad > -1) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -689,7 +689,7 @@ test_compound_1(void)
     {
         offset = H5Tget_offset(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (offset >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -704,7 +704,7 @@ test_compound_1(void)
     {
         sign = H5Tget_sign(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (sign > -1) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -713,7 +713,7 @@ test_compound_1(void)
     {
         tag = H5Tget_tag(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (tag) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -722,7 +722,7 @@ test_compound_1(void)
     {
         super = H5Tget_super(complex_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (super >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -1412,7 +1412,7 @@ test_compound_7(void)
     {
         ret = H5Tinsert(tid2, "d", HOFFSET(struct s2, d), H5T_NATIVE_DOUBLE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDprintf("Inserted field 'd'?\n");
@@ -1424,7 +1424,7 @@ test_compound_7(void)
     {
         ret = H5Tset_size(tid2, sizeof(struct s1) / 2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDprintf("Shrunk compound type?\n");
@@ -1656,7 +1656,7 @@ test_compound_8(void)
     {
         ret = H5Tpack(tid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         AT();
@@ -2563,7 +2563,7 @@ test_compound_12(void)
     {
         ret = H5Tset_size(complex_id, size);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDputs("  Tries to cut off the last member. Should have failed.");
@@ -3461,7 +3461,7 @@ error:
         H5Sclose(space_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_compound_15_attr() */
@@ -3783,7 +3783,7 @@ test_compound_18(void)
     {
         did = H5Dcreate2(file, "dataset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (did > 0) {
         H5Dclose(did);
         FAIL_PUTS_ERROR("created dataset with bad compound datatype");
@@ -3798,7 +3798,7 @@ test_compound_18(void)
     {
         aid = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (aid > 0) {
         H5Aclose(aid);
         FAIL_PUTS_ERROR("created attribute with bad compound datatype");
@@ -3809,7 +3809,7 @@ test_compound_18(void)
     {
         ret = H5Tcommit2(file, "cmpnd", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("committed named datatype with bad compound datatype");
     } /* end if */
@@ -3838,7 +3838,7 @@ test_compound_18(void)
         {
             tid = H5Topen2(file, "cmpnd", H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (tid > 0) {
             H5Tclose(tid);
             FAIL_PUTS_ERROR("opened named datatype with bad compound datatype");
@@ -3849,7 +3849,7 @@ test_compound_18(void)
         {
             did = H5Dopen2(file, "dataset", H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (did > 0) {
             H5Dclose(did);
             FAIL_PUTS_ERROR("opened dataset with bad compound datatype");
@@ -3864,7 +3864,7 @@ test_compound_18(void)
         {
             aid = H5Aopen(gid, "attr", H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (aid > 0) {
             H5Aclose(aid);
             FAIL_PUTS_ERROR("opened attribute with bad compound datatype");
@@ -3953,27 +3953,32 @@ test_query(void)
         HDprintf("Can't create enumerate type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "RED", (enum_val = 10, &enum_val)) < 0) {
+    enum_val = 10;
+    if (H5Tenum_insert(tid2, "RED", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "GREEN", (enum_val = 11, &enum_val)) < 0) {
+    enum_val = 11;
+    if (H5Tenum_insert(tid2, "GREEN", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "BLUE", (enum_val = 12, &enum_val)) < 0) {
+    enum_val = 12;
+    if (H5Tenum_insert(tid2, "BLUE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "ORANGE", (enum_val = 13, &enum_val)) < 0) {
+    enum_val = 13;
+    if (H5Tenum_insert(tid2, "ORANGE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if (H5Tenum_insert(tid2, "YELLOW", (enum_val = 14, &enum_val)) < 0) {
+    enum_val = 14;
+    if (H5Tenum_insert(tid2, "YELLOW", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
@@ -4122,7 +4127,7 @@ error:
         H5Tclose(tid2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -4163,7 +4168,7 @@ test_transient(hid_t fapl)
     {
         status = H5Tset_precision(H5T_NATIVE_INT, (size_t)256);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Predefined types should not be modifiable!");
@@ -4173,7 +4178,7 @@ test_transient(hid_t fapl)
     {
         status = H5Tclose(H5T_NATIVE_INT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Predefined types should not be closable!");
@@ -4191,7 +4196,7 @@ test_transient(hid_t fapl)
     {
         ret_id = H5Acreate2(type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret_id >= 0) {
         H5_FAILED();
         HDputs("    Attributes should not be allowed for transient types!");
@@ -4213,7 +4218,7 @@ test_transient(hid_t fapl)
     {
         status = H5Tset_precision(t2, (size_t)256);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Dataset datatypes should not be modifiable!");
@@ -4236,7 +4241,7 @@ test_transient(hid_t fapl)
     {
         status = H5Tset_precision(t2, (size_t)256);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Dataset datatypes should not be modifiable!");
@@ -4277,7 +4282,7 @@ error:
         H5Dclose(dset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -4320,7 +4325,7 @@ test_named(hid_t fapl)
         status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT,
                             H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Predefined types should not be committable!");
@@ -4345,7 +4350,7 @@ test_named(hid_t fapl)
     {
         status = H5Tset_precision(type, (size_t)256);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Committed type is not constant!");
@@ -4358,7 +4363,7 @@ test_named(hid_t fapl)
         status =
             H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Committed types should not be recommitted!");
@@ -4532,7 +4537,7 @@ test_named(hid_t fapl)
         status =
             H5Tcommit2(file, "test_named_3 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Types should not be committable to a read-only file!");
@@ -4546,7 +4551,7 @@ test_named(hid_t fapl)
     {
         status = H5Tcommit_anon(file, type, H5P_DEFAULT, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Types should not be committable to a read-only file!");
@@ -4572,7 +4577,7 @@ error:
         H5Dclose(dset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -5010,7 +5015,7 @@ error:
         H5Tclose(src_type);
         H5Tclose(dst_type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -5081,7 +5086,7 @@ error:
         H5Tclose(c_type);
         H5Tclose(f_type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -5159,7 +5164,7 @@ test_conv_str_3(void)
     {
         ret = H5Tset_precision(type, nelmts);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5168,7 +5173,7 @@ test_conv_str_3(void)
     {
         size = H5Tget_ebias(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5177,7 +5182,7 @@ test_conv_str_3(void)
     {
         inpad = H5Tget_inpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (inpad > -1) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5186,7 +5191,7 @@ test_conv_str_3(void)
     {
         sign = H5Tget_sign(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (sign > -1) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5195,7 +5200,7 @@ test_conv_str_3(void)
     {
         tag = H5Tget_tag(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (tag) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5204,7 +5209,7 @@ test_conv_str_3(void)
     {
         super = H5Tget_super(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (super >= 0) {
         FAIL_PUTS_ERROR("Operation not allowed for this type.");
     } /* end if */
@@ -5218,7 +5223,7 @@ error:
         H5Tclose(type);
         H5Tclose(super);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -5267,7 +5272,8 @@ test_conv_enum_1(void)
     for (i = 0; i < 26; i++) {
         s[0] = (char)('A' + i);
         H5Tenum_insert(t1, s, &i);
-        H5Tenum_insert(t2, s, (val = i * 1000 + i, &val));
+        val = i * 1000 + i;
+        H5Tenum_insert(t2, s, &val);
     } /* end for */
 
     /* Initialize the buffer */
@@ -5299,7 +5305,7 @@ error:
         H5Tclose(t1);
         H5Tclose(t2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -5538,7 +5544,7 @@ test_bitfield_funcs(void)
     {
         size = H5Tget_ebias(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5549,7 +5555,7 @@ test_bitfield_funcs(void)
     {
         inpad = H5Tget_inpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (inpad > -1) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5560,7 +5566,7 @@ test_bitfield_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (cset > -1) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5571,7 +5577,7 @@ test_bitfield_funcs(void)
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (strpad > -1) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5582,7 +5588,7 @@ test_bitfield_funcs(void)
     {
         ret = H5Tset_sign(type, H5T_SGN_2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5593,7 +5599,7 @@ test_bitfield_funcs(void)
     {
         tag = H5Tget_tag(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (tag) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5604,7 +5610,7 @@ test_bitfield_funcs(void)
     {
         super = H5Tget_super(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (super >= 0) {
         H5_FAILED();
         HDprintf("Operation not allowed for this type.\n");
@@ -5732,7 +5738,7 @@ opaque_check(int tag_it)
     {
         status = H5Tconvert(st, dt, (size_t)OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDprintf("    opaque conversion should have failed but succeeded\n");
@@ -5804,7 +5810,7 @@ opaque_long(void)
     {
         ret = H5Tset_tag(dt, long_tag);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -5863,7 +5869,7 @@ opaque_funcs(void)
     {
         ret = H5Tset_precision(type, (size_t)32);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5873,7 +5879,7 @@ opaque_funcs(void)
     {
         ret = H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5883,7 +5889,7 @@ opaque_funcs(void)
     {
         size = H5Tget_ebias(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (size > 0) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5893,7 +5899,7 @@ opaque_funcs(void)
     {
         inpad = H5Tget_inpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (inpad > -1) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5903,7 +5909,7 @@ opaque_funcs(void)
     {
         cset = H5Tget_cset(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (cset > -1) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5913,7 +5919,7 @@ opaque_funcs(void)
     {
         strpad = H5Tget_strpad(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (strpad > -1) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5923,7 +5929,7 @@ opaque_funcs(void)
     {
         ret = H5Tset_offset(type, (size_t)16);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5933,7 +5939,7 @@ opaque_funcs(void)
     {
         sign = H5Tget_sign(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (sign > -1) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -5943,7 +5949,7 @@ opaque_funcs(void)
     {
         super = H5Tget_super(type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (super >= 0) {
         HDprintf("Operation not allowed for this type.\n");
         TEST_ERROR;
@@ -6043,27 +6049,32 @@ test_encode(void)
         HDprintf("Can't create enumerate type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "RED", (enum_val = 0, &enum_val)) < 0) {
+    enum_val = 0;
+    if (H5Tenum_insert(tid2, "RED", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "GREEN", (enum_val = 1, &enum_val)) < 0) {
+    enum_val = 1;
+    if (H5Tenum_insert(tid2, "GREEN", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "BLUE", (enum_val = 2, &enum_val)) < 0) {
+    enum_val = 2;
+    if (H5Tenum_insert(tid2, "BLUE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "ORANGE", (enum_val = 3, &enum_val)) < 0) {
+    enum_val = 3;
+    if (H5Tenum_insert(tid2, "ORANGE", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
     }
-    if (H5Tenum_insert(tid2, "YELLOW", (enum_val = 4, &enum_val)) < 0) {
+    enum_val = 4;
+    if (H5Tenum_insert(tid2, "YELLOW", &enum_val) < 0) {
         H5_FAILED();
         HDprintf("Can't insert field into enumeration type\n");
         goto error;
@@ -6100,7 +6111,7 @@ test_encode(void)
     {
         ret_id = H5Tdecode(cmpd_buf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret_id != FAIL) {
         H5_FAILED();
         HDprintf("Decoded an empty buffer!\n");
@@ -6452,7 +6463,7 @@ test_encode(void)
     {
         ret = H5Tclose(decoded_tid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL) {
         H5_FAILED();
         HDprintf("Decoded datatype should have been closed\n");
@@ -6463,7 +6474,7 @@ test_encode(void)
     {
         ret = H5Tclose(decoded_tid2);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL) {
         H5_FAILED();
         HDprintf("Decoded datatype should have been closed\n");
@@ -6474,7 +6485,7 @@ test_encode(void)
     {
         ret = H5Tclose(decoded_tid3);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL) {
         H5_FAILED();
         HDprintf("Decoded datatype should have been closed\n");
@@ -6525,7 +6536,7 @@ error:
         H5Tclose(decoded_tid3);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -6713,7 +6724,7 @@ error:
         H5Fclose(file);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* end test_latest() */
@@ -6910,7 +6921,7 @@ error:
     {
         H5Pclose(dxpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 #endif /* H5_SIZEOF_INT==4 && H5_SIZEOF_FLOAT==4 */
 } /* end test_int_float_except() */
@@ -7144,7 +7155,7 @@ test_set_order(void)
 error:
     H5E_BEGIN_TRY
     H5Tclose(dtype);
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_set_order() */
 
@@ -7312,7 +7323,7 @@ error:
     H5Tclose(cmpd);
     H5Tclose(cmpd_array);
     H5Fclose(file);
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_set_order_compound() */
 
@@ -7575,7 +7586,7 @@ error:
         H5Dclose(dset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (tag_ret)
         H5free_memory(tag_ret);
     return 1;
@@ -7802,7 +7813,7 @@ error:
         H5Fclose(filea2);
         H5Fclose(fileb);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_delete_obj_named() */
 
@@ -8004,7 +8015,7 @@ error:
         H5Fclose(attr_fid);
         H5Fclose(type_fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_delete_obj_named_fileid() */
 
@@ -8091,7 +8102,7 @@ test_deprec(hid_t fapl)
     {
         status = H5Tcommit1(file, "test_named_1 (should not exist)", H5T_NATIVE_INT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Predefined types should not be committable!");
 
@@ -8110,7 +8121,7 @@ test_deprec(hid_t fapl)
     {
         status = H5Tset_precision(type, (size_t)256);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Committed type is not constant!");
 
@@ -8119,7 +8130,7 @@ test_deprec(hid_t fapl)
     {
         status = H5Tcommit1(file, "test_named_2 (should not exist)", type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0)
         FAIL_PUTS_ERROR("    Committed types should not be recommitted!");
 
@@ -8152,7 +8163,7 @@ test_deprec(hid_t fapl)
     {
         status = H5Tcommit1(file, "test_named_3 (should not exist)", type);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    Types should not be committable to a read-only file!");
@@ -8174,7 +8185,7 @@ error:
         H5Tclose(type);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -8435,7 +8446,7 @@ error:
         H5Sclose(sid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -8578,7 +8589,7 @@ error:
         H5Tclose(base_dtype);
         H5Tclose(mem_dtype);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return ret;
 } /* end of verify_version */
 
@@ -8780,7 +8791,7 @@ test_versionbounds(void)
             {
                 ret = H5Pset_libver_bounds(fapl, versions[low], versions[high]);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
                 continue;
@@ -8847,7 +8858,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_versionbounds() */
 

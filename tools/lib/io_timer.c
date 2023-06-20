@@ -33,7 +33,7 @@
 #define MICROSECOND 1000000.0F
 
 /* global variables */
-io_time_t *timer_g; /* timer: global for stub functions     */
+static io_time_t *timer_g; /* timer: global for stub functions     */
 
 /*
  * Function:  sub_time

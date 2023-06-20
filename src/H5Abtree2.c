@@ -306,8 +306,8 @@ H5A__dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_U
     H5MM_memcpy(raw, nrecord->id.id, (size_t)H5O_FHEAP_ID_LEN);
     raw += H5O_FHEAP_ID_LEN;
     *raw++ = nrecord->flags;
-    UINT32ENCODE(raw, nrecord->corder)
-    UINT32ENCODE(raw, nrecord->hash)
+    UINT32ENCODE(raw, nrecord->corder);
+    UINT32ENCODE(raw, nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_name_encode() */
@@ -336,8 +336,8 @@ H5A__dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_U
     H5MM_memcpy(nrecord->id.id, raw, (size_t)H5O_FHEAP_ID_LEN);
     raw += H5O_FHEAP_ID_LEN;
     nrecord->flags = *raw++;
-    UINT32DECODE(raw, nrecord->corder)
-    UINT32DECODE(raw, nrecord->hash)
+    UINT32DECODE(raw, nrecord->corder);
+    UINT32DECODE(raw, nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_name_decode() */
@@ -459,7 +459,7 @@ H5A__dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR
     H5MM_memcpy(raw, nrecord->id.id, (size_t)H5O_FHEAP_ID_LEN);
     raw += H5O_FHEAP_ID_LEN;
     *raw++ = nrecord->flags;
-    UINT32ENCODE(raw, nrecord->corder)
+    UINT32ENCODE(raw, nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_encode() */

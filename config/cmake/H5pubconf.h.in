@@ -14,13 +14,13 @@
 #ifndef H5_CONFIG_H_
 #define H5_CONFIG_H_
 
-/* Define if the Windows virtual file driver should be compiled */
+/* Define if this is a Windows machine */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
 /* Define if using MinGW */
 #cmakedefine H5_HAVE_MINGW @H5_HAVE_MINGW@
 
-/* Define if on the Windows platform and default WIN32 API */
+/* Define if on the Windows platform and using the Win32 API */
 #cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
 
 /* Define if using a Windows compiler (i.e. Visual Studio) */
@@ -155,9 +155,6 @@
 /* Define to 1 if you have the `gethostname' function. */
 #cmakedefine H5_HAVE_GETHOSTNAME @H5_HAVE_GETHOSTNAME@
 
-/* Define to 1 if you have the `getpwuid' function. */
-#cmakedefine H5_HAVE_GETPWUID @H5_HAVE_GETPWUID@
-
 /* Define to 1 if you have the `getrusage' function. */
 #cmakedefine H5_HAVE_GETRUSAGE @H5_HAVE_GETRUSAGE@
 
@@ -270,15 +267,6 @@
 
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
-
-/* Define to 1 if you have the `siglongjmp' function. */
-#cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
-
-/* Define to 1 if you have the `sigprocmask' function. */
-#cmakedefine H5_HAVE_SIGPROCMASK @H5_HAVE_SIGPROCMASK@
-
-/* Define to 1 if you have the `sigsetjmp' function. */
-#cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
 
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@

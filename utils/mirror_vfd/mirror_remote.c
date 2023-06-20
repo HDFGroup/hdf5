@@ -10,9 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Common operations for "remote" processes for the Mirror VFD.
- *
- * Jacob Smith, 2020-03-06
+/*
+ * Common operations for "remote" processes for the mirror VFD
  */
 
 #include "mirror_remote.h"
@@ -31,19 +30,19 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
 {
     FILE        *stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
-    hbool_t      custom    = FALSE;
+    bool         custom    = false;
 
     if (info != NULL && info->magic == MIRROR_LOG_INFO_MAGIC) {
         stream    = info->stream;
         verbosity = info->verbosity;
-        custom    = TRUE;
+        custom    = true;
     }
 
     if (level == V_NONE) {
         return;
     }
     else if (level <= verbosity) {
-        if (custom == TRUE && info->prefix[0] != '\0') {
+        if (custom == true && info->prefix[0] != '\0') {
             HDfprintf(stream, "%s", info->prefix);
         }
 

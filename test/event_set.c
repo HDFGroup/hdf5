@@ -21,9 +21,9 @@
 
 #define EVENT_SET_NUM_CONNECTOR_IDS 2
 
-const char *FILENAME[] = {"event_set_1", NULL};
+static const char *FILENAME[] = {"event_set_1", NULL};
 
-hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
+static hid_t connector_ids_g[EVENT_SET_NUM_CONNECTOR_IDS];
 
 herr_t fake_wait_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
 herr_t fake_wait_request_free(void *req);
@@ -238,7 +238,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -645,7 +645,7 @@ error:
     {
         H5ESclose(es_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 

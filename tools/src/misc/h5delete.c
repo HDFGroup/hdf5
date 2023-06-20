@@ -57,7 +57,7 @@ main(int argc, char *argv[])
         /* Only uses the environment variable at this time */
         ret = (int)H5Fdelete(name, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (ret < 0 && !quiet)
         HDfprintf(stderr, "Unable to delete storage at: %s\n", name);

@@ -1132,7 +1132,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
         entry_ptr = cache_ptr->il_head;
         while (entry_ptr != NULL) {
             if (entry_ptr->is_dirty)
-                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
             entry_ptr = entry_ptr->il_next;
         }
 

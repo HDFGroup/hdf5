@@ -58,7 +58,7 @@
 #define FSPACE_THRHD_DEF 1 /* Default: no alignment threshold */
 #define FSPACE_ALIGN_DEF 1 /* Default: no alignment */
 
-const char *FILENAME[] = {"frspace", NULL};
+static const char *FILENAME[] = {"frspace", NULL};
 
 typedef struct frspace_state_t {
     hsize_t tot_space;         /* Total amount of space tracked              */
@@ -551,7 +551,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_fs_create() */
 
@@ -899,7 +899,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_fs_sect_add() */
 
@@ -1271,7 +1271,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_fs_sect_find() */
 
@@ -1747,7 +1747,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_fs_sect_merge() */
 
@@ -2111,7 +2111,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_sect_shrink() */
 
@@ -2386,7 +2386,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_sect_change_class() */
 
@@ -2764,7 +2764,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_sect_extend() */
 
@@ -2868,7 +2868,7 @@ error:
             H5FS_close(f, frsp);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_fs_sect_iterate() */
 
@@ -2927,7 +2927,7 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

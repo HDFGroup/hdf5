@@ -24,7 +24,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
+static const char *FILENAME[] = {"cmpd_dset", "src_subset", "dst_subset", NULL};
 
 const char *DSET_NAME[] = {"contig_src_subset", "chunk_src_subset", "contig_dst_subset", "chunk_dst_subset",
                            NULL};

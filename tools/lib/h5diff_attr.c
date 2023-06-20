@@ -304,7 +304,7 @@ done:
         H5Aclose(attr1_id);
         H5Aclose(attr2_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
@@ -585,7 +585,7 @@ done:
         H5Sclose(space1_id);
         H5Sclose(space2_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
 
@@ -678,7 +678,7 @@ done:
         H5Aclose(attr1_id);
         H5Aclose(attr2_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5TOOLS_ENDDEBUG(" - errstat:%d", opts->err_stat);
     return nfound_total;

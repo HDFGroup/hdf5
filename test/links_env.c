@@ -25,10 +25,10 @@
 #define TMPDIR        "tmp_links_env/"
 #define NAME_BUF_SIZE 1024
 
-const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
-                          "extlinks_env1",        /* 1: target file */
-                          TMPDIR "extlinks_env1", /* 2 */
-                          NULL};
+static const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
+                                 "extlinks_env1",        /* 1: target file */
+                                 TMPDIR "extlinks_env1", /* 2 */
+                                 NULL};
 
 static int external_link_env(hid_t fapl, hbool_t new_format);
 
@@ -107,7 +107,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
     if (gid < 0) {
@@ -131,7 +131,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end external_link_env() */
 

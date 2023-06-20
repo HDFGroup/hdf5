@@ -27,15 +27,15 @@
 #define EDGE_V3_FILE   "h5fc_edge_v3.h5"
 #define ERR_LEVEL_FILE "h5fc_err_level.h5"
 
-const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
-                          "h5fc_ext1_s.h5",   /* 1 */
-                          "h5fc_ext1_f.h5",   /* 2 */
-                          "h5fc_ext2_is.h5",  /* 3 */
-                          "h5fc_ext2_if.h5",  /* 4 */
-                          "h5fc_ext2_sf.h5",  /* 5 */
-                          "h5fc_ext3_isf.h5", /* 6 */
-                          "h5fc_ext_none.h5", /* 7 */
-                          NULL};
+static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
+                                 "h5fc_ext1_s.h5",   /* 1 */
+                                 "h5fc_ext1_f.h5",   /* 2 */
+                                 "h5fc_ext2_is.h5",  /* 3 */
+                                 "h5fc_ext2_if.h5",  /* 4 */
+                                 "h5fc_ext2_sf.h5",  /* 5 */
+                                 "h5fc_ext3_isf.h5", /* 6 */
+                                 "h5fc_ext_none.h5", /* 7 */
+                                 NULL};
 
 #define GROUP "GROUP"
 
@@ -293,7 +293,7 @@ error:
         H5Fclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_non() */
 
@@ -373,7 +373,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_edge() */
 
@@ -518,7 +518,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_err_level() */
 
@@ -774,7 +774,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* end gen_ext() */
 
