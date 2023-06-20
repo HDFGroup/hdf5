@@ -14,7 +14,7 @@ set (examples
     H5Fcreate
     H5F_examples
     H5G_examples
-    H5I_examples
+    #H5I_examples
     #H5LDget_dset_elmts
     H5O_examples
     H5P_examples
