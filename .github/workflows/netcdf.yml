@@ -35,7 +35,7 @@ jobs:
     - name: Install HDF5
       run: |
         ./autogen.sh
-        ./configure --prefix=/usr/local --disable-static --enable-shared --enable-hl --with-szlib
+        ./configure --prefix=/usr/local --disable-tests --disable-static --enable-shared --enable-hl --with-szlib
         make -j
         sudo make install -j
     - name: Checkout netCDF
