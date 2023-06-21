@@ -442,33 +442,6 @@ done:
 } /* end H5F_flush_tagged_metadata */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_evict_tagged_metadata
- *
- * Purpose:     Evicts metadata from the cache with specified tag.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Mike McGreevy
- *              September 9, 2010
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_evict_tagged_metadata(H5F_t *f, haddr_t tag)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Evict the object's metadata */
-    if (H5AC_evict_tagged_metadata(f, tag, TRUE) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_evict_tagged_metadata */
-
-/*-------------------------------------------------------------------------
  * Function:    H5F__evict_cache_entries
  *
  * Purpose:     To evict all cache entries except the pinned superblock entry
