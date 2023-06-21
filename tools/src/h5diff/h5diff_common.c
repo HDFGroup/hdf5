@@ -641,6 +641,12 @@ usage(void)
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
+                   "                           If none of the above options are used to specify a VOL for a file, then\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(rawoutstream,
                    "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
