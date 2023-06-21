@@ -219,9 +219,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "     --vol-info           VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                          opening the HDF5 file specified\n");
-    PRINTVALSTREAM(rawoutstream, "                          If none of the above options are used to specify a VOL, then\n");
-    PRINTVALSTREAM(rawoutstream, "                          the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
-    PRINTVALSTREAM(rawoutstream, "                          if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                          the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                          if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --vfd-value          Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                          HDF5 file specified\n");
