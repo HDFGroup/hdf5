@@ -1317,16 +1317,12 @@ H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
             if (H5AC_unprotect(hdr->f, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
-                /* Note: don't push error on stack, leave that to next higher level,
-                 *      since many times the B-tree is searched in order to determine
-                 *      if an object exists in the B-tree or not. -QAK
-                 */
-#ifdef OLD_WAY
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
-#else     /* OLD_WAY */
+            /* Note: don't push error on stack, leave that to next higher level,
+             *       since many times the B-tree is searched in order to determine
+             *       if an object exists in the B-tree or not.
+             */
             HGOTO_DONE(FAIL)
-#endif    /* OLD_WAY */
-        } /* end if */
+        }
         else {
             /* Make callback for current record */
             if ((op)(H5B2_LEAF_NREC(leaf, hdr, idx), op_data, &changed) < 0) {

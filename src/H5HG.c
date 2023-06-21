@@ -169,10 +169,6 @@ H5HG__create(H5F_t *f, size_t size)
      * align the pointer, but this might not be the case.
      */
     n = (size_t)H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
-#ifdef OLD_WAY
-    /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    HDmemset(p, 0, n);
-#endif /* OLD_WAY */
     p += n;
 
     /* The freespace object */
@@ -184,10 +180,6 @@ H5HG__create(H5F_t *f, size_t size)
     UINT16ENCODE(p, 0); /*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
     H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
-#ifdef OLD_WAY
-    /* Don't bother zeroing out the rest of the info in the heap -QAK */
-    HDmemset(p, 0, (size_t)((heap->chunk + heap->size) - p));
-#endif /* OLD_WAY */
 
     /* Add this heap to the beginning of the CWFS list */
     if (H5F_cwfs_add(f, heap) < 0)
@@ -537,14 +529,8 @@ H5HG_insert(H5F_t *f, size_t size, const void *obj, H5HG_t *hobj /*out*/)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "unable to allocate global heap object")
 
     /* Copy data into the heap */
-    if (size > 0) {
+    if (size > 0)
         H5MM_memcpy(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f), obj, size);
-#ifdef OLD_WAY
-        /* Don't bother zeroing out the rest of the info in the heap -QAK */
-        HDmemset(heap->obj[idx].begin + H5HG_SIZEOF_OBJHDR(f) + size, 0,
-                 need - (H5HG_SIZEOF_OBJHDR(f) + size));
-#endif /* OLD_WAY */
-    }  /* end if */
     heap_flags |= H5AC__DIRTIED_FLAG;
 
     /* Return value */
