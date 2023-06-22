@@ -1748,9 +1748,11 @@ int
 main(void)
 {
 #ifdef H5_HAVE_ROS3_VFD
-    int         nerrors        = 0;
-    const char *bucket_url_env = NULL;
-
+    int         nerrors                   = 0;
+    const char *bucket_url_env            = NULL;
+    const char *aws_region_env            = NULL;
+    const char *aws_access_key_id_env     = NULL;
+    const char *aws_secret_access_key_env = NULL;
 #endif /* H5_HAVE_ROS3_VFD */
 
     HDprintf("Testing ros3 VFD functionality.\n");
@@ -1800,23 +1802,43 @@ main(void)
      * load credentials and prepare fapls *
      **************************************/
 
+    aws_region_env            = HDgetenv("HDF5_AWS_REGION");
+    aws_access_key_id_env     = HDgetenv("HDF5_AWS_ACCESS_KEY_ID");
+    aws_secret_access_key_env = HDgetenv("HDF5_AWS_SECRET_ACCESS_KEY");
+
     /* "clear" profile data strings */
     s3_test_aws_access_key_id[0]     = '\0';
     s3_test_aws_secret_access_key[0] = '\0';
     s3_test_aws_region[0]            = '\0';
 
-    /* attempt to load test credentials
-     * if unable, certain tests will be skipped
+    /* Check for environment variables first, if not found then try to find
+     * a config or credentials file.
+     *
+     * If one environment variable is set, they should ALL be set.
      */
-    if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
-                                                 s3_test_aws_secret_access_key, s3_test_aws_region)) {
-        s3_test_credentials_loaded = 1;
-        HDstrncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region,
-                  H5FD_ROS3_MAX_REGION_LEN);
-        HDstrncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
+    if (aws_region_env != NULL && aws_access_key_id_env != NULL && aws_secret_access_key_env != NULL) {
+        HDstrncpy(restricted_access_fa.aws_region, (const char *)aws_region_env, H5FD_ROS3_MAX_REGION_LEN);
+        HDstrncpy(restricted_access_fa.secret_id, (const char *)aws_access_key_id_env,
                   H5FD_ROS3_MAX_SECRET_ID_LEN);
-        HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
+        HDstrncpy(restricted_access_fa.secret_key, (const char *)aws_secret_access_key_env,
                   H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        s3_test_credentials_loaded = 1;
+    }
+    else {
+        /* Attempt to load test credentials if unable, certain tests will be skipped */
+        if (SUCCEED == H5FD_s3comms_load_aws_profile(S3_TEST_PROFILE_NAME, s3_test_aws_access_key_id,
+                                                     s3_test_aws_secret_access_key, s3_test_aws_region)) {
+            s3_test_credentials_loaded = 1;
+            HDstrncpy(restricted_access_fa.aws_region, (const char *)s3_test_aws_region,
+                      H5FD_ROS3_MAX_REGION_LEN);
+            HDstrncpy(restricted_access_fa.secret_id, (const char *)s3_test_aws_access_key_id,
+                      H5FD_ROS3_MAX_SECRET_ID_LEN);
+            HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
+                      H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        }
+    }
+
+    if (s3_test_credentials_loaded) {
     }
 
     /******************
