@@ -110,7 +110,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
-            ros3_vfd: OFF
+            ros3_vfd: ON
             toolchain: "config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
@@ -463,30 +463,31 @@ jobs:
       - name: Dump matrix context
         run: echo '${{ toJSON(matrix) }}'
 
-      - name: Install CMake Dependencies (Linux)
-        run: sudo apt-get install ninja-build doxygen graphviz
-        if: matrix.os == 'ubuntu-latest'
-
-      - name: Install Autotools Dependencies (Linux, serial)
+      # Only CMake need ninja-build, but we just install it unilaterally
+      # libssl, etc. are needed for the ros3 VFD
+      - name: Install Linux Dependencies
         run: |
            sudo apt update
-           sudo apt install automake autoconf libtool libtool-bin
-           sudo apt install gcc-12 g++-12 gfortran-12
+           sudo apt-get install ninja-build doxygen graphviz
            sudo apt install libssl3 libssl-dev libcurl4 libcurl4-openssl-dev
+           sudo apt install gcc-12 g++-12 gfortran-12
            echo "CC=gcc-12" >> $GITHUB_ENV
            echo "CXX=g++-12" >> $GITHUB_ENV
            echo "FC=gfortran-12" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-latest'
+
+      # CMake gets libaec from fetchcontent
+      - name: Install Autotools Dependencies (Linux)
+        run: |
+           sudo apt install automake autoconf libtool libtool-bin
            sudo apt install libaec0 libaec-dev
-        if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
+        if: (matrix.generator == 'autogen')
 
       - name: Install Autotools Dependencies (Linux, parallel)
         run: |
-           sudo apt update
-           sudo apt install automake autoconf libtool libtool-bin
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
-           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
 
       - name: Install Dependencies (Windows)
