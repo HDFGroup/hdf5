@@ -1329,7 +1329,7 @@ PROGRAM async_test
      IF(.NOT.registered)THEN
         ! No VOL found registered
         async_enabled = .FALSE.
-        IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
+        IF(mpi_rank==0) WRITE(*,'(A)') "NATIVE"
      ELSE
         ! (2) Check if the VOL is async compatible
         CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, hdferror)
@@ -1338,12 +1338,12 @@ PROGRAM async_test
         CALL check("h5pget_vol_cap_flags_f", hdferror, total_error)
         CALL h5pclose_f(plist_id, hdferror)
         CALL check("h5pcreate_f", hdferror, total_error)
-        IF(H5VL_CAP_FLAG_ASYNC_F.EQ.1_C_INT64_T) async_enabled = .TRUE.
+        IF(IAND(cap_flags,H5VL_CAP_FLAG_ASYNC_F).EQ.0_C_INT64_T) async_enabled = .FALSE.
         IF(async_enabled .EQV. .FALSE.)THEN
            ! No async compatible VOL found
-           IF(mpi_rank==0) WRITE(*,'(A,/)') "NATIVE"
+           IF(mpi_rank==0) WRITE(*,'(A)') "NATIVE"
         ELSE
-           IF(mpi_rank==0) WRITE(*,'(A,/)') TRIM(vol_connector_name)
+           IF(mpi_rank==0) WRITE(*,'(A)') TRIM(vol_connector_name)
            CALL H5Vlregister_connector_by_name_f(TRIM(vol_connector_name), vol_id, hdferror)
            CALL check("H5Vlregister_connector_by_name_f", hdferror, total_error)
         ENDIF
@@ -1358,6 +1358,8 @@ PROGRAM async_test
         STOP
      ENDIF
   ENDIF
+
+  IF(mpi_rank==0) WRITE(*,'(A,L1,/)') "VOL SUPPORTS ASYNC OPERATIONS: ", async_enabled
 
   ! H5ES API TESTING
   ret_total_error = 0
