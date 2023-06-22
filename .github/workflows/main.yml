@@ -573,11 +573,21 @@ jobs:
       # NORMAL
 
       - name: Autotools Run Tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: us-east-2
+          HDF5_ROS3_TEST_BUCKET_URL: https://s3.us-east-2.amazonaws.com/hdf5ros3
         run: make check -j2
         working-directory: ${{ runner.workspace }}/build
         if: (matrix.generator == 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
 
       - name: CMake Run Tests
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: us-east-2
+          HDF5_ROS3_TEST_BUCKET_URL: https://s3.us-east-2.amazonaws.com/hdf5ros3
         run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
         if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! (matrix.thread_safety.enabled)
