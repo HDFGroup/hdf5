@@ -1816,7 +1816,7 @@ main(void)
      *
      * If one environment variable is set, they should ALL be set.
      */
-    if (aws_region_env != NULL && aws_access_key_id_env != NULL && aws_secret_access_key_env != NULL) {
+    if ((aws_region_env != NULL) && (aws_access_key_id_env != NULL) && (aws_secret_access_key_env != NULL)) {
         HDstrncpy(restricted_access_fa.aws_region, (const char *)aws_region_env, H5FD_ROS3_MAX_REGION_LEN);
         HDstrncpy(restricted_access_fa.secret_id, (const char *)aws_access_key_id_env,
                   H5FD_ROS3_MAX_SECRET_ID_LEN);
@@ -1836,9 +1836,6 @@ main(void)
             HDstrncpy(restricted_access_fa.secret_key, (const char *)s3_test_aws_secret_access_key,
                       H5FD_ROS3_MAX_SECRET_KEY_LEN);
         }
-    }
-
-    if (s3_test_credentials_loaded) {
     }
 
     /******************
