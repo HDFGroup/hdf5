@@ -574,8 +574,8 @@ jobs:
 
       - name: Autotools Run Tests
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           region: us-east-2
           HDF5_ROS3_TEST_BUCKET_URL: https://s3.us-east-2.amazonaws.com/hdf5ros3
         run: make check -j2
@@ -584,8 +584,8 @@ jobs:
 
       - name: CMake Run Tests
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           region: us-east-2
           HDF5_ROS3_TEST_BUCKET_URL: https://s3.us-east-2.amazonaws.com/hdf5ros3
         run: ctest . --parallel 2 -C ${{ matrix.build_mode.cmake }} -V
