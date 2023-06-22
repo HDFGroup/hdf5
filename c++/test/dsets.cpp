@@ -1379,7 +1379,7 @@ test_operator(H5File &file)
 static herr_t
 test_read_string(H5File &file)
 {
-    SUBTEST("DataSet::read(H5std_string)")
+    SUBTEST("DataSet::read(H5std_string)");
     try {
         const H5std_string  DATASET_NAME("test_read_string");
         const unsigned long NX           = 8;
