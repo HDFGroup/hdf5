@@ -24,12 +24,16 @@ tools, and services at [The HDF Group's website](https://www.hdfgroup.org/).
 DOCUMENTATION
 -------------
 This release is fully functional for the API described in the documentation.
-    
+
    https://portal.hdfgroup.org/display/HDF5/The+HDF5+API
 
 Full Documentation and Programming Resources for this release can be found at
 
    https://portal.hdfgroup.org/display/HDF5
+
+The latest doxygen documentation generated on changes to develop is available at:
+
+   https://hdfgroup.github.io/hdf5/
 
 See the [RELEASE.txt](/release_docs/RELEASE.txt) file in the [release_docs/](/release_docs/) directory for information specific
 to the features and updates included in this release of the library.
