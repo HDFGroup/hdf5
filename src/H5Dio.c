@@ -827,24 +827,6 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 #endif /* H5_HAVE_PARALLEL */
     }
 
-#ifdef OLD_WAY
-    /*
-     * This was taken out because it can be called in a parallel program with
-     * independent access, causing the metadata cache to get corrupted. Its been
-     * disabled for all types of access (serial as well as parallel) to make the
-     * modification time consistent for all programs. -QAK
-     *
-     * We should set a value in the dataset's shared information instead and flush
-     * it to the file when the dataset is being closed. -QAK
-     */
-    /*
-     * Update modification time.  We have to do this explicitly because
-     * writing to a dataset doesn't necessarily change the object header.
-     */
-    if (H5O_touch(&(dataset->oloc), FALSE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time")
-#endif /* OLD_WAY */
-
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++) {

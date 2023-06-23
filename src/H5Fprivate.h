@@ -604,7 +604,6 @@ H5_DLL herr_t H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_m
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);
-H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t *f, haddr_t tag);
 
 /* Functions that verify a piece of metadata with checksum */
 H5_DLL herr_t H5F_get_checksums(const uint8_t *buf, size_t chk_size, uint32_t *s_chksum, uint32_t *c_chksum);

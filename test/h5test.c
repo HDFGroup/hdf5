@@ -320,15 +320,11 @@ h5_restore_err(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:  h5_reset
+ * Function:    h5_reset
  *
- * Purpose:  Reset the library by closing it.
+ * Purpose:     Reset the library by closing it
  *
- * Return:  void
- *
- * Programmer:  Robb Matzke
- *              Friday, November 20, 1998
- *
+ * Return:      void
  *-------------------------------------------------------------------------
  */
 void
@@ -342,36 +338,6 @@ h5_reset(void)
     HDassert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
-
-/*
- * I commented this chunk of code out because it's not clear what diagnostics
- *      were being output and under what circumstances, and creating this file
- *      is throwing off debugging some of the tests.  I can't see any _direct_
- *      harm in keeping this section of code, but I can't see any _direct_
- *      benefit right now either.  If we figure out under which circumstances
- *      diagnostics are being output, we should enable this behavior based on
- *      appropriate configure flags/macros.  QAK - 2007/12/20
- */
-#ifdef OLD_WAY
-    {
-        char filename[1024];
-
-        /*
-         * Cause the library to emit some diagnostics early so they don't
-         * interfere with other formatted output.
-         */
-        HDsnprintf(filename, sizeof(filename), "/tmp/h5emit-%05d.h5", HDgetpid());
-        H5E_BEGIN_TRY
-        {
-            hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-            hid_t grp  = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            H5Gclose(grp);
-            H5Fclose(file);
-            HDunlink(filename);
-        }
-        H5E_END_TRY
-    }
-#endif /* OLD_WAY */
 }
 
 /*-------------------------------------------------------------------------

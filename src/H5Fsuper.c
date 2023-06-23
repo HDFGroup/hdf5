@@ -568,22 +568,21 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
      * Make sure that the data is not truncated. One case where this is
      * possible is if the first file of a family of files was opened
      * individually.
-     */
-    /* Can skip this test when it is not the initial file open--
-     * H5F__super_read() call from H5F_evict_tagged_metadata() for
-     * refreshing object.
+     *
+     * Can skip this test when it is not the initial file open.
+     *
      * When flushing file buffers and fractal heap is involved,
      * the library will allocate actual space for tmp addresses
      * via the file layer.  The aggregator allocates a block,
      * thus the eoa might be greater than eof.
      * Note: the aggregator is changed again after being reset
      * earlier before H5AC_flush due to allocation of tmp addresses.
-     */
-    /* The EOF check must be skipped when the file is opened for SWMR read,
+     *
+     * The EOF check must be skipped when the file is opened for SWMR read,
      * as the file can appear truncated if only part of it has been
      * been flushed to disk by the SWMR writer process.
-     */
-    /* The EOF check is also skipped when the private property
+     *
+     * The EOF check is also skipped when the private property
      * H5F_ACS_SKIP_EOF_CHECK_NAME exists in the fapl.
      * This property is enabled by the tool h5clear with these
      * two options: (1) --filesize (2) --increment
@@ -604,7 +603,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
             (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
             sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
             skip_eof_check = TRUE;
-    } /* end if */
+    }
     if (!skip_eof_check && initial_read) {
         if (HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
@@ -615,7 +614,7 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                         "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu",
                         (unsigned long long)eof, (unsigned long long)sblock->base_addr,
                         (unsigned long long)udata.stored_eof)
-    } /* end if */
+    }
 
     /*
      * Tell the file driver how much address space has already been

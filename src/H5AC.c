@@ -2308,14 +2308,15 @@ done:
 /*------------------------------------------------------------------------------
  * Function:    H5AC_evict_tagged_metadata()
  *
- * Purpose:     Wrapper for cache level function which flushes all metadata
+ * Purpose:     Wrapper for cache level function which evicts all metadata
  *              that contains the specific tag.
  *
+ *              The match_global parameter determines if the global file
+ *              data (e.g., global heaps, shared object header messages)
+ *              should be checked. This is false when closing objects
+ *              and true when flushing.
+ *
  * Return:      SUCCEED on success, FAIL otherwise.
- *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
- *
  *------------------------------------------------------------------------------
  */
 herr_t
