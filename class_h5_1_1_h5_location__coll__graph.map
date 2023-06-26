@@ -1,0 +1,4 @@
+<map id="H5Location" name="H5Location">
+<area shape="rect" id="node1" title="H5Location is an abstract base class, added in version 1.8.12." alt="" coords="13,80,107,107"/>
+<area shape="rect" id="node2" href="$class_h5_1_1_id_component.html" title="Class IdComponent provides wrappers of the C functions that operate on an HDF5 identifier." alt="" coords="5,5,115,32"/>
+</map>

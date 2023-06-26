@@ -1,0 +1,5 @@
+<map id="AbstractDs" name="AbstractDs">
+<area shape="rect" id="node1" title="AbstractDs is an abstract base class, inherited by Attribute and DataSet." alt="" coords="49,5,142,32"/>
+<area shape="rect" id="node2" href="$class_h5_1_1_attribute.html" title="Class Attribute operates on HDF5 attributes." alt="" coords="5,80,84,107"/>
+<area shape="rect" id="node3" href="$class_h5_1_1_data_set.html" title="Class DataSet operates on HDF5 datasets." alt="" coords="109,80,183,107"/>
+</map>
