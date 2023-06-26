@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
               name: docs-doxygen
-              path: ${{ github.workspace }}
+              path: ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
 
       - name: Zip Folder
         run: zip -r ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip . -i ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen
@@ -131,10 +131,6 @@ jobs:
         run: |
               ls -l ${{ github.workspace }}
               ls ${{ runner.workspace }}
-
-#      - name: Create .nojekyll
-#        run: touch ${{ github.workspace }}/${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen/.nojekyll
-#        shell: bash
 
       - name: dev-only-docs
         uses: peaceiris/actions-gh-pages@v3
