@@ -805,7 +805,8 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
-    use_vector = (file->cls->read_vector != NULL) && (!skip_vector_cb);;
+    use_vector = (file->cls->read_vector != NULL) && (!skip_vector_cb);
+    ;
 
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
