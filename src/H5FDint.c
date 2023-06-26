@@ -805,7 +805,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
-    use_vector = file->cls->read_vector != NULL;
+    use_vector = (file->cls->read_vector != NULL) && (!skip_vector_cb);;
 
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
@@ -910,7 +910,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
 
             /* Check if we're using vector I/O */
-            if (!skip_vector_cb && use_vector) {
+            if (use_vector) {
                 /* Check if we need to extend the arrays */
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
@@ -1000,7 +1000,7 @@ H5FD__read_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_t
     }
 
     /* Issue vector read call if appropriate */
-    if (!skip_vector_cb && use_vector) {
+    if (use_vector) {
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
         if ((file->cls->read_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
@@ -1029,7 +1029,7 @@ done:
     }
 
     /* Cleanup vector arrays */
-    if (!skip_vector_cb && use_vector) {
+    if (use_vector) {
         if (addrs != addrs_local)
             addrs = H5MM_xfree(addrs);
         if (sizes != sizes_local)
@@ -1457,7 +1457,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
-    use_vector = file->cls->write_vector != NULL;
+    use_vector = (file->cls->write_vector != NULL) && (!skip_vector_cb);
 
     if (count > 0) {
         /* Verify that the first elements of the element_sizes and bufs arrays are
@@ -1562,7 +1562,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
 
             /* Check if we're using vector I/O */
-            if (!skip_vector_cb && use_vector) {
+            if (use_vector) {
                 /* Check if we need to extend the arrays */
                 if (vec_arr_nused == vec_arr_nalloc) {
                     /* Check if we're using the static arrays */
@@ -1652,7 +1652,7 @@ H5FD__write_selection_translate(uint32_t skip_vector_cb, H5FD_t *file, H5FD_mem_
     }
 
     /* Issue vector write call if appropriate */
-    if (!skip_vector_cb && use_vector) {
+    if (use_vector) {
         H5_CHECK_OVERFLOW(vec_arr_nused, size_t, uint32_t)
         if ((file->cls->write_vector)(file, dxpl_id, (uint32_t)vec_arr_nused, types, addrs, sizes, vec_bufs) <
             0)
@@ -1681,7 +1681,7 @@ done:
     }
 
     /* Cleanup vector arrays */
-    if (!skip_vector_cb && use_vector) {
+    if (use_vector) {
         if (addrs != addrs_local)
             addrs = H5MM_xfree(addrs);
         if (sizes != sizes_local)
