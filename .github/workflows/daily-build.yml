@@ -26,7 +26,7 @@ jobs:
     needs: [call-workflow-tarball, call-workflow-ctest]
     permissions:
       contents: write # In order to allow tag creation
-    uses: ./.github/workflows/release.yml
+    uses: ./.github/workflows/release-files.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
