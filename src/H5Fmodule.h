@@ -265,7 +265,7 @@
  * </tr>
  * <tr>
  * <td>#H5garbage_collect</td>
- * <td>Garbage collects on all free-lists of all types.</td>
+ * <td>Collects garbage on all free-lists of all types.</td>
  * </tr>
  * <tr>
  * <td>#H5get_libversion</td>
@@ -343,15 +343,15 @@
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_config</td>
- * <td>Obtain current metadata cache configuration for target file.</td>
+ * <td>Obtains current metadata cache configuration for target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_hit_rate</td>
- * <td>Obtain target file’s metadata cache hit rate.</td>
+ * <td>Obtains target file’s metadata cache hit rate.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mdc_size</td>
- * <td>Obtain current metadata cache size data for specified file.</td>
+ * <td>Obtains current metadata cache size data for specified file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fget_mpi_atomicity</td>
@@ -391,15 +391,15 @@
  * </tr>
  * <tr>
  * <td>#H5Freset_mdc_hit_rate_stats</td>
- * <td>Reset hit rate statistics counters for the target file.</td>
+ * <td>Resets hit rate statistics counters for the target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fset_mdc_config</td>
- * <td>Use to configure metadata cache of target file.</td>
+ * <td>Configures metadata cache of target file.</td>
  * </tr>
  * <tr>
  * <td>#H5Fset_mpi_atomicity</td>
- * <td>Use to set the MPI atomicity mode.</td>
+ * <td>Sets the MPI atomicity mode.</td>
  * </tr>
  * <tr>
  * <td>#H5Funmount</td>
