@@ -114,13 +114,13 @@ static herr_t H5FD__mpio_vector_build_types(
     MPI_Offset *mpi_off, H5_flexible_const_ptr_t *mpi_bufs_base, int *size_i, MPI_Datatype *buf_type,
     hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
 
-static herr_t
-H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
-                           haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
-                           size_t dst_element_sizes[], MPI_Datatype *final_ftype,
-                           hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
-                           hbool_t *final_mtype_is_derived, int *size_i,
-                           H5_flexible_const_ptr_t *mpi_bufs_base);
+static herr_t H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces,
+                                          H5S_t **mem_spaces, haddr_t offsets[],
+                                          H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
+                                          size_t dst_element_sizes[], MPI_Datatype *final_ftype,
+                                          hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
+                                          hbool_t *final_mtype_is_derived, int *size_i,
+                                          H5_flexible_const_ptr_t *mpi_bufs_base);
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
@@ -2820,11 +2820,11 @@ done:
  */
 static herr_t
 H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
-                           haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
-                           size_t dst_element_sizes[], MPI_Datatype *final_ftype,
-                           hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
-                           hbool_t *final_mtype_is_derived, int *size_i,
-                           H5_flexible_const_ptr_t *mpi_bufs_base)
+                            haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
+                            size_t dst_element_sizes[], MPI_Datatype *final_ftype,
+                            hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
+                            hbool_t *final_mtype_is_derived, int *size_i,
+                            H5_flexible_const_ptr_t *mpi_bufs_base)
 {
 
     MPI_Datatype *piece_mtype           = NULL;
