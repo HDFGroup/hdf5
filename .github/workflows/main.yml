@@ -1,4 +1,4 @@
-name: hdf5 dev CI
+name: hdf5 1.10 CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:

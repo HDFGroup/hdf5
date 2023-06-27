@@ -4,6 +4,7 @@ name: hdf5 1.10 daily build
 on:
   workflow_dispatch:
   schedule:
+    - branches: [ hdf5_1_10 ]
     - cron: "4 0 * * *"
 
 permissions:
