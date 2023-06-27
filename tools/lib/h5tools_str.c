@@ -122,9 +122,9 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
         int    nchars = -1;
         size_t avail  = str->nalloc - str->len;
 
-        HDva_start(ap, fmt);
+        va_start(ap, fmt);
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
-        HDva_end(ap);
+        va_end(ap);
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when
          * buffer is smaller than source string. On Unix, this function

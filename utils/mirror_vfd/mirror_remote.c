@@ -59,9 +59,9 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
 
         if (format != NULL) {
             va_list args;
-            HDva_start(args, format);
+            va_start(args, format);
             HDvfprintf(stream, format, args);
-            HDva_end(args);
+            va_end(args);
         }
 
         HDfprintf(stream, "\n");

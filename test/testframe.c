@@ -574,9 +574,9 @@ TestErrPrintf(const char *format, ...)
     num_errs++;
 
     /* Print the requested information */
-    HDva_start(arglist, format);
+    va_start(arglist, format);
     ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
     return ret_value;
