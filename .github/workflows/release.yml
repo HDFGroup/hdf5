@@ -3,7 +3,7 @@ name: hdf5 1.12 release build
 # Controls when the action will run. Triggers the workflow on a manual run
 on:
   workflow_dispatch:
-    - inputs:
+    inputs:
       tag:
         description: 'Release version tag'
         type: string
