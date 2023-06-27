@@ -1,4 +1,4 @@
-name: hdfeos5
+name: hdfeos5 1.12
 
 on:
   workflow_dispatch:
