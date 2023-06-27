@@ -3349,8 +3349,8 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
-        if (H5FDread_vector_from_selection(_file, type, dxpl_id, count, mem_space_ids, file_space_ids,
-                                           offsets, element_sizes, bufs) < 0)
+        if (H5FD_read_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids,
+                                            offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read vector from selection failed")
     }
 
@@ -3636,7 +3636,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
-        if (H5FDwrite_vector_from_selection(_file, type, dxpl_id, count, mem_space_ids, file_space_ids,
+        if (H5FD_write_vector_from_selection(_file, type, count, mem_space_ids, file_space_ids,
                                             offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write vector from selection failed")
     }

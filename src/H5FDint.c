@@ -2028,6 +2028,206 @@ done:
 } /* end H5FD_write_selection_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FD_read_vector_from_selection
+ *
+ * Purpose:     Internal routine for H5FDread_vector_from_selection()
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ * Programmer:  NAF -- 5/19/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                                hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                                size_t element_sizes[], void *bufs[])
+{
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert((mem_space_ids) || (count == 0));
+    HDassert((file_space_ids) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    HDassert((count == 0) || (element_sizes[0] != 0));
+    HDassert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                               element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_read_vector_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_write_vector_from_selection
+ *
+ * Purpose:     Internal routine for H5FDwrite_vector_from_selection()
+ *
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ * Programmer:  NAF -- 5/19/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
+                                 hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
+                                 size_t element_sizes[], const void *bufs[])
+{
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert((mem_space_ids) || (count == 0));
+    HDassert((file_space_ids) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    HDassert((count == 0) || (element_sizes[0] != 0));
+    HDassert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB, file, type, count, mem_space_ids, file_space_ids, offsets,
+                                element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_write_vector_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_read_from_selection
+ *
+ * Purpose:     Internal routine for H5FDread_from_selection()
+ *
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ * Programmer:  NAF -- 5/19/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
+{
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert((mem_space_ids) || (count == 0));
+    HDassert((file_space_ids) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    HDassert((count == 0) || (element_sizes[0] != 0));
+    HDassert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                               file_space_ids, offsets, element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_read_from_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_write_from_selection
+ *
+ * Purpose:     Internal routine for H5FDwrite_from_selection()
+ *
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully.
+ *
+ *              Failure:    FAIL
+ *                          One or more writes failed.
+ *
+ * Programmer:  NAF -- 5/19/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                          hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+{
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert((mem_space_ids) || (count == 0));
+    HDassert((file_space_ids) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
+
+    /* Verify that the first elements of the element_sizes and bufs arrays are
+     * valid. */
+    HDassert((count == 0) || (element_sizes[0] != 0));
+    HDassert((count == 0) || (bufs[0] != NULL));
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_selection_id(SKIP_SELECTION_CB | SKIP_VECTOR_CB, file, type, count, mem_space_ids,
+                                file_space_ids, offsets, element_sizes, bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_write_from_selection() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_set_eoa
  *
  * Purpose:     Private version of H5FDset_eoa()
