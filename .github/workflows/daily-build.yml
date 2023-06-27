@@ -3,9 +3,6 @@ name: hdf5 1.14 daily build
 # Controls when the action will run. Triggers the workflow on a schedule
 on:
   workflow_dispatch:
-  schedule:
-    - branches: [ hdf5_1_14 ]
-    - cron: "6 0 * * *"
 
 permissions:
   contents: read
