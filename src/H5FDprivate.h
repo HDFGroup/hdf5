@@ -161,22 +161,20 @@ H5_DLL herr_t  H5FD_write_selection_id(uint32_t skip_cb, H5FD_t *file, H5FD_mem_
                                        size_t element_sizes[], const void *bufs[]);
 
 H5_DLL herr_t H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                               hid_t mem_space_ids[], hid_t file_space_ids[], 
-                                               haddr_t offsets[], size_t element_sizes[], void *bufs[]);
+                                              hid_t mem_space_ids[], hid_t file_space_ids[],
+                                              haddr_t offsets[], size_t element_sizes[], void *bufs[]);
 
 H5_DLL herr_t H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                               hid_t mem_space_ids[], hid_t file_space_ids[], 
+                                               hid_t mem_space_ids[], hid_t file_space_ids[],
                                                haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
-H5_DLL herr_t H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                       hid_t mem_space_ids[], hid_t file_space_ids[], 
-                                       haddr_t offsets[], size_t element_sizes[], void *bufs[]);
+H5_DLL herr_t H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                       hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                       void *bufs[]);
 
-
-H5_DLL herr_t H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                        hid_t mem_space_ids[], hid_t file_space_ids[], 
-                                        haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
-
+H5_DLL herr_t H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                        const void *bufs[]);
 
 H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);

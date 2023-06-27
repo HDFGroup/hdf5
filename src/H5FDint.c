@@ -2043,11 +2043,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
-                                size_t element_sizes[], void *bufs[])
+H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                void *bufs[])
 {
-    herr_t   ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2093,11 +2093,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count,
-                                 hid_t mem_space_ids[], hid_t file_space_ids[], haddr_t offsets[],
-                                 size_t element_sizes[], const void *bufs[])
+H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                 hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                 const void *bufs[])
 {
-    herr_t   ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2146,7 +2146,7 @@ herr_t
 H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
                          hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[])
 {
-    herr_t   ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2194,9 +2194,10 @@ done:
  */
 herr_t
 H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
-                          hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+                          hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                          const void *bufs[])
 {
-    herr_t   ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2225,7 +2226,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_write_from_selection() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_set_eoa
