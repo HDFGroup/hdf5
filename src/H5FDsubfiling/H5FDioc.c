@@ -528,8 +528,8 @@ H5FD__ioc_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
     /* Encode driver name */
-    HDstrncpy(name, "IOC", 9);
-    name[8] = '\0';
+    HDstrncpy(name, "IOC", 3);
+    name[4] = '\0';
 
     /* Encode configuration structure magic number */
     UINT32ENCODE(p, file->fa.magic);
@@ -573,7 +573,7 @@ H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
-    if (HDstrncmp(name, "IOC", 9))
+    if (HDstrncmp(name, "IOC", 3))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
 
     /* Decode configuration structure magic number */
