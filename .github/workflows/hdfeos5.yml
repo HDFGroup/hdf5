@@ -1,4 +1,4 @@
-name: hdfeos5
+name: hdfeos5 dev
 
 on:
   workflow_dispatch:
