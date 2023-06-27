@@ -621,7 +621,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
            my_dataset = dset3
            dsetname = DSET3_NAME
            !     CASE DEFAULT
-           !        CALL HDassert(0.AND."Toomanydatasets!")
+           !        CALL assert(0.AND."Toomanydatasets!")
         END SELECT
 
 
@@ -1487,7 +1487,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
 
@@ -1536,7 +1536,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Delete attributes from compact storage
@@ -1552,7 +1552,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
 
                  !  Verify the attribute information for first attribute in appropriate order
-                 ! HDmemset(&ainfo, 0, sizeof(ainfo));
+                 ! memset(&ainfo, 0, sizeof(ainfo));
 
 !EP                 CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, 0_HSIZE_T, &
                  CALL h5aget_info_by_idx_f(my_dataset, ".", idx_type, order, hzero, &
@@ -1602,7 +1602,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               CASE (2)
                  my_dataset = dset3
                  !     CASE DEFAULT
-                 !        CALL HDassert(0.AND."Toomanydatasets!")
+                 !        CALL assert(0.AND."Toomanydatasets!")
               END SELECT
 
               !  Create more attributes, to push into dense form
@@ -1667,7 +1667,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
                  ENDIF
 
                  !  Verify the name for first attribute in appropriate order
-                 ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                 ! memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 
                  size = 7 ! *CHECK* if not the correct size
                  CALL h5aget_name_by_idx_f(my_dataset, ".", idx_type, order,INT(0,hsize_t), &
