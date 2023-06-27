@@ -4,6 +4,16 @@ name: hdf5 1.14 release
 on:
   workflow_call:
     inputs:
+      use_tag:
+        description: 'Release version tag'
+        type: string
+        required: false
+        default: snapshot-1.14
+      use_environ:
+        description: 'Environment to locate files'
+        type: string
+        required: true
+        default: snapshots
       file_base:
         description: "The common base name of the source tarballs"
         required: true
@@ -41,9 +51,10 @@ jobs:
         id: "tag_create"
         with:
           commit_sha: ${{ inputs.file_sha }}
-          tag: "snapshot"
+          tag: "${{ inputs.use_tag }}"
           force_push_tag: true
           message: "Latest snapshot"
+        if: ${{ inputs.use_environ == 'snapshots' }}
 
       # Print result using the action output.
       - run: |
@@ -52,7 +63,7 @@ jobs:
   PreRelease-getfiles:
     runs-on: ubuntu-latest
     needs: create-tag
-    environment: snapshots_1_14
+    environment: ${{ inputs.use_environ }}
     permissions:
         contents: write
     steps:
@@ -107,7 +118,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "snapshot_1_14"
+          tag_name: "${{ inputs.use_tag }}"
           prerelease: true
           files: |
               ${{ steps.get-file-base.outputs.FILE_BASE }}.doxygen.zip

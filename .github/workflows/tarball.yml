@@ -4,19 +4,16 @@ name: hdf5 1.14 tarball
 on:
   workflow_call:
     inputs:
-      use_tag:
-        description: 'Release version tag'
-        type: string
-        required: false
-        default: snapshot
+#      use_tag:
+#        description: 'Release version tag'
+#        type: string
+#        required: false
+#        default: snapshot-1.14
       use_environ:
         description: 'Environment to locate files'
-        type: choice
+        type: string
         required: true
         default: snapshots
-        options:
-        - snapshots
-        - release
     outputs:
       has_changes:
         description: "Whether there were changes the previous day"
@@ -101,7 +98,7 @@ jobs:
           if [ ${{ inputs.use_environ }} == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true' ]; then
             FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            FILE_NAME_BASE=$(echo "hdf5-${{ version }}-${{ patch }}")
+            FILE_NAME_BASE=$(echo "hdf5-")$(echo "bin/h5vers")
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
