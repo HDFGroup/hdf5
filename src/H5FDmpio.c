@@ -2847,6 +2847,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
     hbool_t                 extend_dst_sizes = FALSE;
     hbool_t                 extend_bufs      = FALSE;
     H5_flexible_const_ptr_t buf;
+    H5_flexible_const_ptr_t thebuf;
     size_t                  src_element_size, dst_element_size;
 
     herr_t ret_value = SUCCEED;
@@ -2889,18 +2890,28 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
         j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
         for (i = 1; i < num_pieces; i++) {
+            if (!extend_bufs) {
+                if (bufs[i].cvp == NULL) {
+                    extend_bufs = TRUE;
+                    thebuf         = bufs[i - 1];
+                    break;
+                }
+                else
+                    thebuf = bufs[i];
+            }
 
             if (io_op_write) {
-                if (bufs[i].cvp < bufs[j].cvp)
+                if (thebuf.cvp < thebuf.cvp)
                     j = i;
             }
             else {
-                if (bufs[i].vp < bufs[j].vp)
+                if (thebuf.vp < thebuf.vp)
                     j = i;
             }
         }
 
         *mpi_bufs_base = bufs[j];
+        extend_bufs = FALSE;
 
         /* Obtain MPI derived datatype from all individual pieces */
         /* Iterate over selected pieces for this process */
