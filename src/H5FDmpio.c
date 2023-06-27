@@ -3349,7 +3349,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         if (H5FD_mpio_debug_r_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
-        if(_file->base_addr > 0) {
+        if (_file->base_addr > 0) {
             /* Undo base address addition in internal routines before passing down to the mpio driver */
             for (i = 0; i < count; i++) {
                 HDassert(offsets[i] >= _file->base_addr);
@@ -3644,7 +3644,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
         if (H5FD_mpio_debug_w_flag)
             HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
-        if(_file->base_addr > 0) {
+        if (_file->base_addr > 0) {
             /* Undo base address addition in internal routines before passing down to the mpio driver */
             for (i = 0; i < count; i++) {
                 HDassert(offsets[i] >= _file->base_addr);
