@@ -115,7 +115,7 @@ static herr_t H5FD__mpio_vector_build_types(
     hbool_t *buf_type_created, MPI_Datatype *file_type, hbool_t *file_type_created, char *unused);
 
 static herr_t
-H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
+H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
                            haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
                            size_t dst_element_sizes[], MPI_Datatype *final_ftype,
                            hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
@@ -2806,7 +2806,7 @@ done:
 } /* end H5FD__mpio_write_vector() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_selection_build_types
+ * Function:    H5FD__selection_build_types
  *
  * Purpose:     ??
  *              (derived from H5D__link_piece_collective_io() in src/H5Dmpio.c)
@@ -2819,7 +2819,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
+H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **file_spaces, H5S_t **mem_spaces,
                            haddr_t offsets[], H5_flexible_const_ptr_t bufs[], size_t src_element_sizes[],
                            size_t dst_element_sizes[], MPI_Datatype *final_ftype,
                            hbool_t *final_ftype_is_derived, MPI_Datatype *final_mtype,
@@ -2851,7 +2851,7 @@ H5FD_selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fil
 
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     if (num_pieces) {
 
@@ -3064,7 +3064,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 
-} /* H5FD_selection_build_types() */
+} /* H5FD__selection_build_types() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__mpio_read_selection
@@ -3202,7 +3202,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
                 HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve file dataspace from ID")
         }
 
-        if (H5FD_selection_build_types(
+        if (H5FD__selection_build_types(
                 FALSE, count, s_file_spaces, s_mem_spaces, s_offsets, (H5_flexible_const_ptr_t *)s_bufs,
                 s_element_sizes, s_element_sizes, &final_ftype, &final_ftype_is_derived, &final_mtype,
                 &final_mtype_is_derived, &size_i, (H5_flexible_const_ptr_t *)&mpi_bufs_base) < 0)
@@ -3528,8 +3528,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
                 HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, H5I_INVALID_HID, "can't retrieve memory dataspace from ID")
         }
 
-        /* Do i need to do mpi_bufs_base?? */
-        if (H5FD_selection_build_types(
+        if (H5FD__selection_build_types(
                 TRUE, count, s_file_spaces, s_mem_spaces, s_offsets, (H5_flexible_const_ptr_t *)s_bufs,
                 s_element_sizes, s_element_sizes, &final_ftype, &final_ftype_is_derived, &final_mtype,
                 &final_mtype_is_derived, &size_i, (H5_flexible_const_ptr_t *)&mpi_bufs_base) < 0)
