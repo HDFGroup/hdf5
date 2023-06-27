@@ -14,12 +14,17 @@ permissions:
 jobs:
   call-workflow-tarball:
     uses: ./.github/workflows/tarball.yml
+    with:
+      #use_tag: snapshot
+      use_environ: snapshots
 
   call-workflow-ctest:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      #use_tag: snapshot
+      #use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
@@ -31,5 +36,7 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: snapshot
+      use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
