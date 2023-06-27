@@ -2893,7 +2893,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
             if (!extend_bufs) {
                 if (bufs[i].cvp == NULL) {
                     extend_bufs = TRUE;
-                    thebuf         = bufs[i - 1];
+                    thebuf      = bufs[i - 1];
                     break;
                 }
                 else
@@ -2911,7 +2911,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
         }
 
         *mpi_bufs_base = bufs[j];
-        extend_bufs = FALSE;
+        extend_bufs    = FALSE;
 
         /* Obtain MPI derived datatype from all individual pieces */
         /* Iterate over selected pieces for this process */
