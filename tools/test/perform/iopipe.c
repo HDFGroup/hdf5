@@ -99,10 +99,10 @@ synchronize(void)
 #else
     int H5_ATTR_NDEBUG_UNUSED status;
 
-    status = HDsystem("sync");
+    status = system("sync");
     HDassert(status >= 0);
 
-    status = HDsystem("df >/dev/null");
+    status = system("df >/dev/null");
     HDassert(status >= 0);
 #endif
 }
