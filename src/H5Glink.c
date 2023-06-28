@@ -416,18 +416,18 @@ H5G__link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type, H5_iter_orde
     /* Pick appropriate sorting routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_name_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
+            qsort(ltable->lnks, ltable->nlinks, sizeof(H5O_link_t), H5G__link_cmp_corder_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */

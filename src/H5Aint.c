@@ -1885,18 +1885,18 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
     /* Pick appropriate comparison routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
