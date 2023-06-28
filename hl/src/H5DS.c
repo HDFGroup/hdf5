@@ -16,7 +16,7 @@
 #include "H5TBprivate.h"
 
 /* Local routines */
-static herr_t H5DS_is_reserved(hid_t did, hbool_t *is_reserved);
+static herr_t H5DS_is_reserved(hid_t did, bool *is_reserved);
 
 /*-------------------------------------------------------------------------
  * Function: H5DSwith_new_ref
@@ -34,8 +34,8 @@ static herr_t H5DS_is_reserved(hid_t did, hbool_t *is_reserved);
 herr_t
 H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
 {
-    hbool_t config_flag = FALSE;
-    hbool_t native      = FALSE;
+    bool config_flag = false;
+    bool native      = false;
 
     if (!with_new_ref)
         return FAIL;
@@ -44,7 +44,7 @@ H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
         return FAIL;
 
 #ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
-    config_flag = TRUE;
+    config_flag = true;
 #endif
 
     *with_new_ref = (config_flag || !native);
@@ -161,7 +161,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     nds_list_t *ndsbuf_w   = NULL;
     H5R_ref_t   nref_to_ds = {0};
     H5R_ref_t   nref_j;
-    hbool_t     is_new_ref;
+    bool        is_new_ref;
 
     hvl_t      *buf = NULL; /* VL buffer to store in the attribute */
     hid_t       dsid_j;     /* DS dataset ID in DIMENSION_LIST */
@@ -171,7 +171,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     size_t      len;
     int         found_ds = 0;
     htri_t      is_scale;
-    hbool_t     is_reserved;
+    bool        is_reserved;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -227,7 +227,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     /* Check if the dataset is a "reserved" dataset (image, table) */
     if (H5DS_is_reserved(did, &is_reserved) < 0)
         return FAIL;
-    if (is_reserved == TRUE)
+    if (is_reserved == true)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -310,7 +310,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
 
         /* allocate and initialize the VL */
-        buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+        buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
         if (buf == NULL)
             goto out;
 
@@ -322,11 +322,11 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
         /* store the REF information in the index of the dataset that has the DS */
         buf[idx].len = 1;
         if (is_new_ref) {
-            buf[idx].p                   = HDmalloc(1 * sizeof(H5R_ref_t));
+            buf[idx].p                   = malloc(1 * sizeof(H5R_ref_t));
             ((H5R_ref_t *)buf[idx].p)[0] = nref_to_ds;
         }
         else {
-            buf[idx].p                    = HDmalloc(1 * sizeof(hobj_ref_t));
+            buf[idx].p                    = malloc(1 * sizeof(hobj_ref_t));
             ((hobj_ref_t *)buf[idx].p)[0] = ref_to_ds;
         }
         /* write the attribute with the reference */
@@ -344,9 +344,9 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(buf[idx].p);
+        free(buf[idx].p);
         buf[idx].p = NULL;
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     }
 
@@ -366,7 +366,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
 
         /* allocate and initialize the VL */
-        buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+        buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
         if (buf == NULL)
             goto out;
 
@@ -421,11 +421,11 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
                 buf[idx].len++;
                 len = buf[idx].len;
                 if (is_new_ref) {
-                    buf[idx].p                         = HDrealloc(buf[idx].p, len * sizeof(H5R_ref_t));
+                    buf[idx].p                         = realloc(buf[idx].p, len * sizeof(H5R_ref_t));
                     ((H5R_ref_t *)buf[idx].p)[len - 1] = nref_to_ds;
                 }
                 else {
-                    buf[idx].p                          = HDrealloc(buf[idx].p, len * sizeof(hobj_ref_t));
+                    buf[idx].p                          = realloc(buf[idx].p, len * sizeof(hobj_ref_t));
                     ((hobj_ref_t *)buf[idx].p)[len - 1] = ref_to_ds;
                 }
             } /* end if */
@@ -433,11 +433,11 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
                 /* store the REF information in the index of the dataset that has the DS */
                 buf[idx].len = 1;
                 if (is_new_ref) {
-                    buf[idx].p                   = HDmalloc(sizeof(H5R_ref_t));
+                    buf[idx].p                   = malloc(sizeof(H5R_ref_t));
                     ((H5R_ref_t *)buf[idx].p)[0] = nref_to_ds;
                 }
                 else {
-                    buf[idx].p                    = HDmalloc(sizeof(hobj_ref_t));
+                    buf[idx].p                    = malloc(sizeof(hobj_ref_t));
                     ((hobj_ref_t *)buf[idx].p)[0] = ref_to_ds;
                 }
             } /* end else */
@@ -460,7 +460,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     } /* has_dimlist */
 
@@ -554,14 +554,14 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
 
         nelmts++;
         if (is_new_ref) {
-            ndsbuf = (nds_list_t *)HDmalloc((size_t)nelmts * sizeof(nds_list_t));
+            ndsbuf = (nds_list_t *)malloc((size_t)nelmts * sizeof(nds_list_t));
             if (ndsbuf == NULL)
                 goto out;
             if (H5Aread(aid, ntid, ndsbuf) < 0)
                 goto out;
         }
         else {
-            dsbuf = (ds_list_t *)HDmalloc((size_t)nelmts * sizeof(ds_list_t));
+            dsbuf = (ds_list_t *)malloc((size_t)nelmts * sizeof(ds_list_t));
             if (dsbuf == NULL)
                 goto out;
             if (H5Aread(aid, ntid, dsbuf) < 0)
@@ -580,12 +580,12 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
         /* Allocate new buffer to copy old references and add new one */
 
         if (is_new_ref) {
-            ndsbuf_w = (nds_list_t *)HDmalloc((size_t)nelmts * sizeof(nds_list_t));
+            ndsbuf_w = (nds_list_t *)malloc((size_t)nelmts * sizeof(nds_list_t));
             if (ndsbuf_w == NULL)
                 goto out;
         }
         else {
-            dsbuf_w = (ds_list_t *)HDmalloc((size_t)nelmts * sizeof(ds_list_t));
+            dsbuf_w = (ds_list_t *)malloc((size_t)nelmts * sizeof(ds_list_t));
             if (dsbuf_w == NULL)
                 goto out;
         }
@@ -653,15 +653,15 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
         if (H5Tclose(ntid) < 0)
             goto out;
         if (is_new_ref) {
-            HDfree(ndsbuf);
+            free(ndsbuf);
             dsbuf = NULL;
-            HDfree(ndsbuf_w);
+            free(ndsbuf_w);
             dsbuf = NULL;
         }
         else {
-            HDfree(dsbuf);
+            free(dsbuf);
             dsbuf = NULL;
-            HDfree(dsbuf_w);
+            free(dsbuf_w);
             dsbuf = NULL;
         }
     } /* has_reflist */
@@ -684,11 +684,11 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     /* error zone */
 out:
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (dsbuf)
-        HDfree(dsbuf);
+        free(dsbuf);
     if (dsbuf_w)
-        HDfree(dsbuf_w);
+        free(dsbuf_w);
 
     H5E_BEGIN_TRY
     {
@@ -754,7 +754,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     int          found_dset = 0, found_ds = 0;
     int          have_ds = 0;
     htri_t       is_scale;
-    hbool_t      is_new_ref;
+    bool         is_new_ref;
     unsigned int tmp_idx;
     hid_t        tmp_id;
 
@@ -853,7 +853,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
         goto out;
 
     /* allocate and initialize the VL */
-    buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+    buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
     if (buf == NULL)
         goto out;
 
@@ -915,7 +915,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
                     }
                     len = --buf[idx].len;
                     if (len == 0) {
-                        HDfree(buf[idx].p);
+                        free(buf[idx].p);
                         buf[idx].p = NULL;
                     }
                     /* Since a reference to a dim. scale can be inserted only once,
@@ -958,7 +958,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     if (H5Aclose(aid) < 0)
         goto out;
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /*-------------------------------------------------------------------------
@@ -984,22 +984,22 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
         goto out;
 
     if (is_new_ref) {
-        ndsbuf = (nds_list_t *)HDmalloc((size_t)nelmts * sizeof(nds_list_t));
+        ndsbuf = (nds_list_t *)malloc((size_t)nelmts * sizeof(nds_list_t));
         if (ndsbuf == NULL)
             goto out;
         if (H5Aread(aid, ntid, ndsbuf) < 0)
             goto out;
-        ndsbuf_w = (nds_list_t *)HDmalloc((size_t)nelmts * sizeof(nds_list_t));
+        ndsbuf_w = (nds_list_t *)malloc((size_t)nelmts * sizeof(nds_list_t));
         if (ndsbuf_w == NULL)
             goto out;
     }
     else {
-        dsbuf = (ds_list_t *)HDmalloc((size_t)nelmts * sizeof(ds_list_t));
+        dsbuf = (ds_list_t *)malloc((size_t)nelmts * sizeof(ds_list_t));
         if (dsbuf == NULL)
             goto out;
         if (H5Aread(aid, ntid, dsbuf) < 0)
             goto out;
-        dsbuf_w = (ds_list_t *)HDmalloc((size_t)nelmts * sizeof(ds_list_t));
+        dsbuf_w = (ds_list_t *)malloc((size_t)nelmts * sizeof(ds_list_t));
         if (dsbuf_w == NULL)
             goto out;
     }
@@ -1152,14 +1152,14 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     if (H5Tclose(ntid) < 0)
         goto out;
     if (is_new_ref) {
-        HDfree(ndsbuf);
-        HDfree(ndsbuf_w);
+        free(ndsbuf);
+        free(ndsbuf_w);
         ndsbuf   = NULL;
         ndsbuf_w = NULL;
     }
     else {
-        HDfree(dsbuf);
-        HDfree(dsbuf_w);
+        free(dsbuf);
+        free(dsbuf_w);
         dsbuf   = NULL;
         dsbuf_w = NULL;
     }
@@ -1176,15 +1176,15 @@ out:
         H5Tclose(tid);
 
         if (ndsbuf) {
-            HDfree(ndsbuf);
+            free(ndsbuf);
             ndsbuf = NULL;
         }
         if (ndsbuf_w) {
-            HDfree(ndsbuf_w);
+            free(ndsbuf_w);
             ndsbuf_w = NULL;
         }
         if (dsbuf) {
-            HDfree(dsbuf);
+            free(dsbuf);
             dsbuf = NULL;
         }
         if (buf) {
@@ -1192,9 +1192,9 @@ out:
                free the pointers allocated when we read data in */
             for (i = 0; i < rank; i++) {
                 if (buf[i].p)
-                    HDfree(buf[i].p);
+                    free(buf[i].p);
             }
-            HDfree(buf);
+            free(buf);
             buf = NULL;
         }
     }
@@ -1247,7 +1247,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
     int         i;
     int         found_dset = 0, found_ds = 0;
     htri_t      is_scale;
-    hbool_t     is_new_ref;
+    bool        is_new_ref;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1337,7 +1337,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
 
         /* allocate and initialize the VL */
-        buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+        buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
         if (buf == NULL)
             goto out;
 
@@ -1396,7 +1396,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     } /* has_dimlist */
 
@@ -1433,14 +1433,14 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
 
         if (is_new_ref) {
-            ndsbuf = (nds_list_t *)HDmalloc((size_t)nelmts * sizeof(nds_list_t));
+            ndsbuf = (nds_list_t *)malloc((size_t)nelmts * sizeof(nds_list_t));
             if (ndsbuf == NULL)
                 goto out;
             if (H5Aread(aid, ntid, ndsbuf) < 0)
                 goto out;
         }
         else {
-            dsbuf = (ds_list_t *)HDmalloc((size_t)nelmts * sizeof(ds_list_t));
+            dsbuf = (ds_list_t *)malloc((size_t)nelmts * sizeof(ds_list_t));
             if (dsbuf == NULL)
                 goto out;
             if (H5Aread(aid, ntid, dsbuf) < 0)
@@ -1515,11 +1515,11 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
 
         if (ndsbuf) {
-            HDfree(ndsbuf);
+            free(ndsbuf);
             ndsbuf = NULL;
         }
         if (dsbuf) {
-            HDfree(dsbuf);
+            free(dsbuf);
             dsbuf = NULL;
         }
     } /* has_reflist */
@@ -1541,15 +1541,15 @@ out:
     H5E_END_TRY
 
     if (buf) {
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     }
     if (ndsbuf) {
-        HDfree(ndsbuf);
+        free(ndsbuf);
         ndsbuf = NULL;
     }
     if (dsbuf) {
-        HDfree(dsbuf);
+        free(dsbuf);
         dsbuf = NULL;
     }
     return FAIL;
@@ -1611,7 +1611,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     int        nscales;
     htri_t     has_dimlist;
     int        i;
-    hbool_t    is_new_ref;
+    bool       is_new_ref;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1672,7 +1672,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
             goto out;
 
         /* allocate and initialize the VL */
-        buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+        buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
 
         if (buf == NULL)
             goto out;
@@ -1748,7 +1748,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
         if (H5Aclose(aid) < 0)
             goto out;
 
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     } /* if has_dimlist */
 
@@ -1759,7 +1759,7 @@ out:
     {
         if (buf) {
             H5Treclaim(tid, sid, H5P_DEFAULT, buf);
-            HDfree(buf);
+            free(buf);
         }
         H5Sclose(sid);
         H5Aclose(aid);
@@ -1799,7 +1799,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         char const **const_buf; /* buf calls */
     } u;
 
-    HDmemset(&u, 0, sizeof(u));
+    memset(&u, 0, sizeof(u));
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1862,7 +1862,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
             goto out;
 
         /* allocate and initialize */
-        u.const_buf = (char const **)HDmalloc((size_t)rank * sizeof(char *));
+        u.const_buf = (char const **)malloc((size_t)rank * sizeof(char *));
 
         if (u.const_buf == NULL)
             goto out;
@@ -1885,7 +1885,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         if (H5Aclose(aid) < 0)
             goto out;
         if (u.const_buf) {
-            HDfree(u.const_buf);
+            free(u.const_buf);
             u.const_buf = NULL;
         }
     }
@@ -1904,7 +1904,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
             goto out;
 
         /* allocate and initialize */
-        u.buf = (char **)HDmalloc((size_t)rank * sizeof(char *));
+        u.buf = (char **)malloc((size_t)rank * sizeof(char *));
 
         if (u.buf == NULL)
             goto out;
@@ -1915,7 +1915,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
 
         /* free the ptr that will be replaced by label */
         if (u.buf[idx])
-            HDfree(u.buf[idx]);
+            free(u.buf[idx]);
 
         /* store the label information in the required index */
         u.const_buf[idx] = label;
@@ -1930,7 +1930,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         /* free all the ptr's from the H5Aread() */
         for (i = 0; i < (unsigned int)rank; i++) {
             if (u.buf[i])
-                HDfree(u.buf[i]);
+                free(u.buf[i]);
         }
 
         /* close */
@@ -1939,7 +1939,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
         if (H5Aclose(aid) < 0)
             goto out;
         if (u.buf) {
-            HDfree(u.buf);
+            free(u.buf);
             u.buf = NULL;
         }
     }
@@ -1955,9 +1955,9 @@ out:
         /* free all the ptr's from the H5Aread() */
         for (i = 0; i < (unsigned int)rank; i++) {
             if (u.buf[i])
-                HDfree(u.buf[i]);
+                free(u.buf[i]);
         }
-        HDfree(u.buf);
+        free(u.buf);
     }
     H5E_BEGIN_TRY
     {
@@ -2054,7 +2054,7 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
         goto out;
 
     /* allocate and initialize */
-    buf = (char **)HDmalloc((size_t)rank * sizeof(char *));
+    buf = (char **)malloc((size_t)rank * sizeof(char *));
 
     if (buf == NULL)
         goto out;
@@ -2066,14 +2066,14 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     /* do only if the label name exists for the dimension */
     if (buf[idx] != NULL) {
         /* get the real string length */
-        nbytes = HDstrlen(buf[idx]);
+        nbytes = strlen(buf[idx]);
 
         /* compute the string length which will fit into the user's buffer */
         copy_len = MIN(size - 1, nbytes);
 
         /* copy all/some of the name */
         if (label) {
-            HDmemcpy(label, buf[idx], copy_len);
+            memcpy(label, buf[idx], copy_len);
 
             /* terminate the string */
             label[copy_len] = '\0';
@@ -2082,7 +2082,7 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     /* free all the ptr's from the H5Aread() */
     for (i = 0; i < rank; i++) {
         if (buf[i])
-            HDfree(buf[i]);
+            free(buf[i]);
     }
 
     /* close */
@@ -2091,7 +2091,7 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     if (H5Aclose(aid) < 0)
         goto out;
     if (buf) {
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     }
 
@@ -2103,9 +2103,9 @@ out:
         /* free all the ptr's from the H5Aread() */
         for (i = 0; i < rank; i++) {
             if (buf[i])
-                HDfree(buf[i]);
+                free(buf[i]);
         }
-        HDfree(buf);
+        free(buf);
     }
     H5E_BEGIN_TRY
     {
@@ -2192,7 +2192,7 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
         goto out;
 
     /* allocate a temporary buffer */
-    buf = (char *)HDmalloc(nbytes * sizeof(char));
+    buf = (char *)malloc(nbytes * sizeof(char));
     if (buf == NULL)
         goto out;
 
@@ -2205,7 +2205,7 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
 
     /* copy all/some of the name */
     if (name) {
-        HDmemcpy(name, buf, copy_len);
+        memcpy(name, buf, copy_len);
 
         /* terminate the string */
         name[copy_len] = '\0';
@@ -2219,7 +2219,7 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
     if (H5Sclose(sid) < 0)
         goto out;
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     return (ssize_t)(nbytes - 1);
 
@@ -2233,7 +2233,7 @@ out:
     }
     H5E_END_TRY
     if (buf)
-        HDfree(buf);
+        free(buf);
     return FAIL;
 }
 
@@ -2315,7 +2315,7 @@ H5DSis_scale(hid_t did)
             goto out;
         }
 
-        buf = (char *)HDmalloc((size_t)string_size * sizeof(char));
+        buf = (char *)malloc((size_t)string_size * sizeof(char));
         if (buf == NULL)
             goto out;
 
@@ -2324,10 +2324,10 @@ H5DSis_scale(hid_t did)
             goto out;
 
         /* compare strings */
-        if (HDstrncmp(buf, DIMENSION_SCALE_CLASS, MIN(HDstrlen(DIMENSION_SCALE_CLASS), HDstrlen(buf))) == 0)
+        if (strncmp(buf, DIMENSION_SCALE_CLASS, MIN(strlen(DIMENSION_SCALE_CLASS), strlen(buf))) == 0)
             is_ds = 1;
 
-        HDfree(buf);
+        free(buf);
 
         if (H5Tclose(tid) < 0)
             goto out;
@@ -2337,7 +2337,7 @@ H5DSis_scale(hid_t did)
     }
 out:
     if (is_ds < 0) {
-        HDfree(buf);
+        free(buf);
         H5E_BEGIN_TRY
         {
             H5Aclose(aid);
@@ -2427,7 +2427,7 @@ H5DSget_num_scales(hid_t did, unsigned int idx)
             goto out;
 
         /* allocate and initialize the VL */
-        buf = (hvl_t *)HDmalloc((size_t)rank * sizeof(hvl_t));
+        buf = (hvl_t *)malloc((size_t)rank * sizeof(hvl_t));
         if (buf == NULL)
             goto out;
 
@@ -2446,7 +2446,7 @@ H5DSget_num_scales(hid_t did, unsigned int idx)
             goto out;
         if (H5Aclose(aid) < 0)
             goto out;
-        HDfree(buf);
+        free(buf);
         buf = NULL;
     } /* has_dimlist */
 
@@ -2463,7 +2463,7 @@ out:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     return FAIL;
 }
@@ -2478,7 +2478,7 @@ out:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
+H5DS_is_reserved(hid_t did, bool *is_reserved)
 {
     htri_t has_class;
     hid_t  tid = H5I_INVALID_HID;
@@ -2490,7 +2490,7 @@ H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
     if ((has_class = H5Aexists(did, "CLASS")) < 0)
         return FAIL;
     if (has_class == 0) {
-        *is_reserved = FALSE;
+        *is_reserved = false;
         return SUCCEED;
     }
 
@@ -2510,21 +2510,21 @@ H5DS_is_reserved(hid_t did, hbool_t *is_reserved)
     /* Allocate buffer large enough to hold string */
     if ((string_size = H5Tget_size(tid)) == 0)
         goto error;
-    if (NULL == (buf = HDmalloc(string_size * sizeof(char))))
+    if (NULL == (buf = malloc(string_size * sizeof(char))))
         goto error;
 
     /* Read the attribute */
     if (H5Aread(aid, tid, buf) < 0)
         goto error;
 
-    if (HDstrncmp(buf, IMAGE_CLASS, MIN(HDstrlen(IMAGE_CLASS), HDstrlen(buf))) == 0 ||
-        HDstrncmp(buf, PALETTE_CLASS, MIN(HDstrlen(PALETTE_CLASS), HDstrlen(buf))) == 0 ||
-        HDstrncmp(buf, TABLE_CLASS, MIN(HDstrlen(TABLE_CLASS), HDstrlen(buf))) == 0)
-        *is_reserved = TRUE;
+    if (strncmp(buf, IMAGE_CLASS, MIN(strlen(IMAGE_CLASS), strlen(buf))) == 0 ||
+        strncmp(buf, PALETTE_CLASS, MIN(strlen(PALETTE_CLASS), strlen(buf))) == 0 ||
+        strncmp(buf, TABLE_CLASS, MIN(strlen(TABLE_CLASS), strlen(buf))) == 0)
+        *is_reserved = true;
     else
-        *is_reserved = FALSE;
+        *is_reserved = false;
 
-    HDfree(buf);
+    free(buf);
 
     if (H5Tclose(tid) < 0)
         goto error;
@@ -2541,7 +2541,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return FAIL;
 }

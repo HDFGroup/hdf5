@@ -251,7 +251,7 @@ test_dataset_append_rows_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -387,7 +387,7 @@ test_dataset_append_rows(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -524,7 +524,7 @@ test_dataset_append_columns(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -687,7 +687,7 @@ test_dataset_append_BUG1(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -850,7 +850,7 @@ test_dataset_append_BUG2(hid_t fid)
             if (buf[i][j] != rbuf[i][j])
                 TEST_ERROR;
 
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1009,7 +1009,7 @@ test_dataset_append_less(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
@@ -1166,7 +1166,7 @@ test_dataset_append_vary(hid_t fid)
                 TEST_ERROR;
 
     /* Clear the dataset */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)

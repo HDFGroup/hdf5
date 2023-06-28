@@ -84,7 +84,7 @@ H5PTcreate(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_si
             goto error;
 
     /* Get memory for the table identifier */
-    table = (htbl_t *)HDmalloc(sizeof(htbl_t));
+    table = (htbl_t *)malloc(sizeof(htbl_t));
     if (table == NULL) {
         goto error;
     }
@@ -153,7 +153,7 @@ error:
     if (table) {
         if (table->type_id != H5I_INVALID_HID)
             H5Tclose(table->type_id);
-        HDfree(table);
+        free(table);
     }
 
     return ret_value;
@@ -203,7 +203,7 @@ H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk
             goto error;
 
     /* Get memory for the table identifier */
-    table = (htbl_t *)HDmalloc(sizeof(htbl_t));
+    table = (htbl_t *)malloc(sizeof(htbl_t));
     if (table == NULL) {
         goto error;
     }
@@ -267,7 +267,7 @@ error:
     if (table) {
         if (table->type_id != H5I_INVALID_HID)
             H5Tclose(table->type_id);
-        HDfree(table);
+        free(table);
     }
 
     return ret_value;
@@ -310,7 +310,7 @@ H5PTopen(hid_t loc_id, const char *dset_name)
                  H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)H5PT_free_id)) < 0)
             goto error;
 
-    table = (htbl_t *)HDmalloc(sizeof(htbl_t));
+    table = (htbl_t *)malloc(sizeof(htbl_t));
     if (table == NULL) {
         goto error;
     }
@@ -370,7 +370,7 @@ error:
             H5Tclose(table->type_id);
         if (table->dset_id != H5I_INVALID_HID)
             H5Dclose(table->dset_id);
-        HDfree(table);
+        free(table);
     }
 
     return ret_value;
@@ -387,7 +387,7 @@ error:
 static herr_t
 H5PT_free_id(void *id, void H5_ATTR_UNUSED **_ctx)
 {
-    HDfree(id);
+    free(id);
     return SUCCEED;
 }
 
@@ -422,7 +422,7 @@ H5PT_close(htbl_t *table)
     if (H5Tclose(table->type_id) < 0)
         goto error;
 
-    HDfree(table);
+    free(table);
 
     return SUCCEED;
 
@@ -432,7 +432,7 @@ error:
         H5Dclose(table->dset_id);
         H5Tclose(table->type_id);
         H5E_END_TRY
-        HDfree(table);
+        free(table);
     }
     return FAIL;
 }
