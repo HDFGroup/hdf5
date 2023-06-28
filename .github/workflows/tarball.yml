@@ -110,7 +110,7 @@ jobs:
 
       - name: Create snapshot file base name
         id: create-file-base
-        if: '${{ inputs.use_environ }}' == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true'
+        if: ${{ inputs.use_environ }} == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true'
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
           bin/bbrelease -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
@@ -118,7 +118,7 @@ jobs:
 
       - name: Create release file base name
         id: create-rel-base
-        if: '${{ inputs.use_environ }}' == 'release'
+        if: ${{ inputs.use_environ }} == 'release'
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
           bin/release -d $GITHUB_WORKSPACE gzip zip cmake-tgz cmake-zip 
