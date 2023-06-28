@@ -4,12 +4,12 @@ name: hdf5 1.12 release build
 on:
   workflow_dispatch:
     inputs:
-      tag:
+      use_tag:
         description: 'Release version tag'
         type: string
         required: false
-        default: snapshot
-      environment:
+        default: snapshot-1.12
+      use_environ:
         description: 'Environment to locate files'
         type: choice
         required: true
@@ -38,16 +38,16 @@ jobs:
     needs: log-the-inputs
     uses: ./.github/workflows/tarball.yml
     with:
-      use_tag: ${{ inputs.tag }}
-      use_environ: ${{ inputs.environment }}
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
   call-workflow-ctest:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
-      use_tag: ${{ inputs.tag }}
-      use_environ: ${{ inputs.environment }}
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
   call-workflow-release:
     needs: [call-workflow-tarball, call-workflow-ctest]
@@ -58,6 +58,6 @@ jobs:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
-      use_tag: ${{ inputs.tag }}
-      use_environ: ${{ inputs.environment }}
+      use_tag: ${{ inputs.use_tag }}
+      use_environ: ${{ inputs.use_environ }}
 
