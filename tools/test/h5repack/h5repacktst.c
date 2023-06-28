@@ -222,7 +222,7 @@ main(void)
      */
     TESTING("    files with file space info setting--no options (-S, -P, -T, -G) are set");
     j = 0; /* #0 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -239,7 +239,7 @@ main(void)
 
     TESTING("    files with file space info setting--all options -S, -P, -T, -G are set");
     ++j; /* #1 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -259,7 +259,7 @@ main(void)
 
     TESTING("    files with file space info setting--options -S and -T are set");
     ++j; /* #2 */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     fname = H5REPACK_FSPACE_FNAMES[j];
     if (h5repack_init(&pack_options, 0, FALSE) < 0)
         GOERROR;
@@ -278,7 +278,7 @@ main(void)
     if (h5_using_default_driver(NULL)) {
         TESTING("    files with file space info setting-- options -S and -P are set & -L");
         ++j; /* #3 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -296,7 +296,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -P and -T are set & -L");
         ++j; /* #4 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -314,7 +314,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S and -G are set & -L");
         ++j; /* #5 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -332,7 +332,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S, -P, -T, -G are set");
         ++j; /* #6 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, FALSE) < 0)
             GOERROR;
@@ -352,7 +352,7 @@ main(void)
 
         TESTING("    files with file space info setting-- options -S, -T, -G are set & -L");
         ++j; /* #7 */
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         fname = H5REPACK_FSPACE_FNAMES[j];
         if (h5repack_init(&pack_options, 0, TRUE) < 0)
             GOERROR;
@@ -2040,7 +2040,7 @@ make_testfiles(void)
      * default: strategy=FSM_AGGR, persist=FALSE, threshold=1
      * default: inpage=4096
      */
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
     if (H5Fclose(fid) < 0)
@@ -2061,7 +2061,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2080,7 +2080,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2103,7 +2103,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_page_size(fcpl, (hsize_t)8192) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2125,7 +2125,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_page_size(fcpl, (hsize_t)FS_PAGESIZE_DEF) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2145,7 +2145,7 @@ make_testfiles(void)
             return -1;
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_AGGR, FALSE, (hsize_t)1) < 0)
             return -1;
-        HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+        assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
         if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             return -1;
         if (H5Fclose(fid) < 0)
@@ -2168,7 +2168,7 @@ make_testfiles(void)
         return -1;
     if (H5Pset_file_space_page_size(fcpl, (hsize_t)8192) < 0)
         return -1;
-    HDassert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
+    assert(j < NELMTS(H5REPACK_FSPACE_FNAMES));
     if ((fid = H5Fcreate(H5REPACK_FSPACE_FNAMES[++j], H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
         return -1;
     if (H5Fclose(fid) < 0)
@@ -3787,7 +3787,7 @@ make_userblock(void)
 
     /* Write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nwritten == USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
 
     /* Close file */
     HDclose(fd);
@@ -3852,7 +3852,7 @@ verify_userblock(const char *filename)
 
     /* Read userblock data */
     nread = HDread(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nread == USERBLOCK_SIZE);
+    assert(nread == USERBLOCK_SIZE);
 
     /* Verify userblock data */
     for (u = 0; u < USERBLOCK_SIZE; u++)
@@ -3902,7 +3902,7 @@ make_userblock_file(void)
 
     /* write userblock data */
     nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
-    HDassert(nwritten == USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
 
     /* close file */
     HDclose(fd);

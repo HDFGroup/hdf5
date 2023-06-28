@@ -118,8 +118,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate space for I/O pipeline message */
     if (NULL == (pline = H5FL_CALLOC(H5O_pline_t)))
@@ -276,8 +276,8 @@ H5O__pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    HDassert(p);
-    HDassert(mesg);
+    assert(p);
+    assert(mesg);
 
     /* Message header */
     *p++ = (uint8_t)pline->version;
@@ -534,18 +534,18 @@ H5O__pline_reset(void *mesg)
      *       other API calls so DO NOT ASSUME THAT ANY VALUES ARE SANE.
      */
 
-    HDassert(pline);
+    assert(pline);
 
     /* Free the filter information and array */
     if (pline->filter) {
         /* Free information for each filter */
         for (i = 0; i < pline->nused; i++) {
             if (pline->filter[i].name && pline->filter[i].name != pline->filter[i]._name)
-                HDassert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
+                assert((HDstrlen(pline->filter[i].name) + 1) > H5Z_COMMON_NAME_LEN);
             if (pline->filter[i].name != pline->filter[i]._name)
                 pline->filter[i].name = (char *)H5MM_xfree(pline->filter[i].name);
             if (pline->filter[i].cd_values && pline->filter[i].cd_values != pline->filter[i]._cd_values)
-                HDassert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
+                assert(pline->filter[i].cd_nelmts > H5Z_COMMON_CD_VALUES);
             if (pline->filter[i].cd_values != pline->filter[i]._cd_values)
                 pline->filter[i].cd_values = (unsigned *)H5MM_xfree(pline->filter[i].cd_values);
         } /* end for */
@@ -580,7 +580,7 @@ H5O__pline_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_pline_t, mesg);
 
@@ -613,9 +613,9 @@ H5O__pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(pline_src);
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(pline_src);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
@@ -656,11 +656,11 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(pline);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(pline);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
               pline->nalloc);
@@ -721,8 +721,8 @@ H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(pline);
+    assert(f);
+    assert(pline);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(pline->version, H5O_pline_ver_bounds[H5F_LOW_BOUND(f)]);

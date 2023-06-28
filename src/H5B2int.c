@@ -153,9 +153,9 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Slide records in parent node up one space, to make room for promoted record */
     if (idx < internal->nrec) {
@@ -350,7 +350,7 @@ H5B2__split_root(H5B2_hdr_t *hdr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Update depth of B-tree */
     hdr->depth++;
@@ -437,8 +437,8 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
+    assert(hdr);
+    assert(internal);
 
     /* Check for the kind of B-tree node to redistribute */
     if (depth > 1) {
@@ -582,7 +582,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
             (uint16_t)(*left_nrec - new_left_nrec); /* Number of records to move from left node to right */
 
         /* Sanity check */
-        HDassert(*left_nrec > *right_nrec);
+        assert(*left_nrec > *right_nrec);
 
         /* Slide records in right node up */
         HDmemmove(H5B2_NAT_NREC(right_native, hdr, move_nrec), H5B2_NAT_NREC(right_native, hdr, 0),
@@ -716,9 +716,9 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to redistribute */
     if (depth > 1) {
@@ -806,8 +806,8 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
         uint16_t curr_middle_nrec = *middle_nrec;
 
         /* Sanity check rounding */
-        HDassert(new_middle_nrec <= new_left_nrec);
-        HDassert(new_middle_nrec <= new_right_nrec);
+        assert(new_middle_nrec <= new_left_nrec);
+        assert(new_middle_nrec <= new_right_nrec);
 
         /* Move records into left node */
         if (new_left_nrec > *left_nrec) {
@@ -1135,10 +1135,10 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node_ptr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(curr_node_ptr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to split */
     if (depth > 1) {
@@ -1317,10 +1317,10 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node_ptr);
-    HDassert(internal);
-    HDassert(internal_flags_ptr);
+    assert(hdr);
+    assert(curr_node_ptr);
+    assert(internal);
+    assert(internal_flags_ptr);
 
     /* Check for the kind of B-tree node to split */
     if (depth > 1) {
@@ -1565,8 +1565,8 @@ H5B2__insert(H5B2_hdr_t *hdr, void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(udata);
+    assert(hdr);
+    assert(udata);
 
     /* Check if the root node is allocated yet */
     if (!H5_addr_defined(hdr->root.addr)) {
@@ -1631,9 +1631,9 @@ H5B2__iterate_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
-    HDassert(op);
+    assert(hdr);
+    assert(curr_node);
+    assert(op);
 
     /* Protect current node & set up variables */
     if (depth > 0) {
@@ -1748,8 +1748,8 @@ H5B2__delete_node(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, v
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
+    assert(hdr);
+    assert(curr_node);
 
     if (depth > 0) {
         H5B2_internal_t *internal; /* Pointer to internal node */
@@ -1830,10 +1830,10 @@ H5B2__node_size(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node, voi
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(curr_node);
-    HDassert(btree_size);
-    HDassert(depth > 0);
+    assert(hdr);
+    assert(curr_node);
+    assert(btree_size);
+    assert(depth > 0);
 
     /* Lock the current B-tree node */
     if (NULL ==
@@ -1883,8 +1883,8 @@ H5B2__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
@@ -1918,11 +1918,11 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(node_ptr);
-    HDassert(old_parent);
-    HDassert(new_parent);
+    assert(hdr);
+    assert(depth > 0);
+    assert(node_ptr);
+    assert(old_parent);
+    assert(new_parent);
 
     /* Check the node's entry status in the metadata cache */
     if (H5AC_get_entry_status(hdr->f, node_ptr->addr, &node_status) < 0)
@@ -1949,7 +1949,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
                 update_deps = TRUE;
             } /* end if */
             else
-                HDassert(child_int->parent == new_parent);
+                assert(child_int->parent == new_parent);
         } /* end if */
         else {
             H5B2_leaf_t *child_leaf;
@@ -1966,13 +1966,13 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_t *node
                 update_deps = TRUE;
             } /* end if */
             else
-                HDassert(child_leaf->parent == new_parent);
+                assert(child_leaf->parent == new_parent);
         } /* end else */
 
         /* Update flush dependencies if necessary */
         if (update_deps) {
             /* Sanity check */
-            HDassert(parent_ptr);
+            assert(parent_ptr);
 
             /* Switch the flush dependency for the node */
             if (H5B2__destroy_flush_depend((H5AC_info_t *)old_parent, (H5AC_info_t *)child) < 0)
@@ -2014,12 +2014,12 @@ H5B2__update_child_flush_depends(H5B2_hdr_t *hdr, unsigned depth, H5B2_node_ptr_
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(hdr);
-    HDassert(depth > 1);
-    HDassert(node_ptrs);
-    HDassert(start_idx <= end_idx);
-    HDassert(old_parent);
-    HDassert(new_parent);
+    assert(hdr);
+    assert(depth > 1);
+    assert(node_ptrs);
+    assert(start_idx <= end_idx);
+    assert(old_parent);
+    assert(new_parent);
 
     /* Loop over children */
     for (u = start_idx; u < end_idx; u++)
@@ -2051,8 +2051,8 @@ H5B2__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(parent_entry);
-    HDassert(child_entry);
+    assert(parent_entry);
+    assert(child_entry);
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)

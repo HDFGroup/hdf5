@@ -177,8 +177,8 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
+    assert(f);
+    assert(ainfo);
 
     /* Set fractal heap creation parameters */
     /* XXX: Give some control of these to applications? */
@@ -206,7 +206,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
         /* Retrieve the heap's ID length in the file */
         if (H5HF_get_id_len(fheap, &fheap_id_len) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
-        HDassert(fheap_id_len == H5O_FHEAP_ID_LEN);
+        assert(fheap_id_len == H5O_FHEAP_ID_LEN);
     }
 #endif /* NDEBUG */
 
@@ -279,9 +279,9 @@ H5A__dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(attr);
-    HDassert(user_attr);
-    HDassert(took_ownership);
+    assert(attr);
+    assert(user_attr);
+    assert(took_ownership);
 
     /*
      *  If there is an attribute already stored in "user_attr",
@@ -343,9 +343,9 @@ H5A__dense_open(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(name);
+    assert(f);
+    assert(ainfo);
+    assert(name);
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -434,9 +434,9 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(attr);
+    assert(f);
+    assert(ainfo);
+    assert(attr);
 
     /* Check if attributes are shared in this file */
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
@@ -459,7 +459,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
                 HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
             /* Attributes can't be "unique be shareable" yet */
-            HDassert(!(mesg_flags & H5O_MSG_FLAG_SHAREABLE));
+            assert(!(mesg_flags & H5O_MSG_FLAG_SHAREABLE));
         } /* end else */
 
         /* Retrieve the address of the shared message's fractal heap */
@@ -481,7 +481,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     /* Check for inserting shared attribute */
     if (mesg_flags & H5O_MSG_FLAG_SHARED) {
         /* Sanity check */
-        HDassert(attr_sharable);
+        assert(attr_sharable);
 
         /* Use heap ID for shared message heap */
         udata.id = attr->sh_loc.u.heap_id;
@@ -535,7 +535,7 @@ H5A__dense_insert(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     /* Check if we should create a creation order index v2 B-tree record */
     if (ainfo->index_corder) {
         /* Open the creation order index v2 B-tree */
-        HDassert(H5_addr_defined(ainfo->corder_bt2_addr));
+        assert(H5_addr_defined(ainfo->corder_bt2_addr));
         if (NULL == (bt2_corder = H5B2_open(f, ainfo->corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
@@ -582,8 +582,8 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(record);
-    HDassert(new_heap_id);
+    assert(record);
+    assert(new_heap_id);
 
     /* Update record's heap ID */
     record->id = *new_heap_id;
@@ -619,8 +619,8 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(record);
-    HDassert(op_data);
+    assert(record);
+    assert(op_data);
 
     /* Check for modifying shared attribute */
     if (record->flags & H5O_MSG_FLAG_SHARED) {
@@ -687,7 +687,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 
             if (H5HF_get_obj_len(op_data->fheap, &record->id, &obj_len) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get object size")
-            HDassert(obj_len == attr_size);
+            assert(obj_len == attr_size);
         }
 #endif /* NDEBUG */
         /* Update existing attribute in heap */
@@ -732,11 +732,11 @@ H5A__dense_write(H5F_t *f, const H5O_ainfo_t *ainfo, H5A_t *attr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(H5_addr_defined(ainfo->fheap_addr));
-    HDassert(H5_addr_defined(ainfo->name_bt2_addr));
-    HDassert(attr);
+    assert(f);
+    assert(ainfo);
+    assert(H5_addr_defined(ainfo->fheap_addr));
+    assert(H5_addr_defined(ainfo->name_bt2_addr));
+    assert(attr);
 
     /* Check if attributes are shared in this file */
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
@@ -872,10 +872,10 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(old_name);
-    HDassert(new_name);
+    assert(f);
+    assert(ainfo);
+    assert(old_name);
+    assert(new_name);
 
     /* Check if attributes are shared in this file */
     if ((attr_sharable = H5SM_type_shared(f, H5O_ATTR_ID)) < 0)
@@ -922,7 +922,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index")
     if (attr_exists == FALSE)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute in name index")
-    HDassert(attr_copy);
+    assert(attr_copy);
 
     /* Check if message is already shared */
     if ((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr_copy)) < 0)
@@ -946,7 +946,7 @@ H5A__dense_rename(H5F_t *f, const H5O_ainfo_t *ainfo, const char *old_name, cons
         hbool_t corder_attr_exists; /* Attribute exists in v2 B-tree */
 
         /* Open the creation order index v2 B-tree */
-        HDassert(H5_addr_defined(ainfo->corder_bt2_addr));
+        assert(H5_addr_defined(ainfo->corder_bt2_addr));
         if (NULL == (bt2_corder = H5B2_open(f, ainfo->corder_bt2_addr, NULL)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation index")
 
@@ -1099,7 +1099,7 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 break;
 
             default:
-                HDassert("unknown attribute op type" && 0);
+                assert("unknown attribute op type" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type")
 #endif    /* NDEBUG */
@@ -1148,11 +1148,11 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(H5_addr_defined(ainfo->fheap_addr));
-    HDassert(H5_addr_defined(ainfo->name_bt2_addr));
-    HDassert(attr_op);
+    assert(f);
+    assert(ainfo);
+    assert(H5_addr_defined(ainfo->fheap_addr));
+    assert(H5_addr_defined(ainfo->name_bt2_addr));
+    assert(attr_op);
 
     /* Determine the address of the index to use */
     if (idx_type == H5_INDEX_NAME) {
@@ -1161,14 +1161,14 @@ H5A__dense_iterate(H5F_t *f, hid_t loc_id, const H5O_ainfo_t *ainfo, H5_index_t 
          *      table and sorting it.
          */
         if (order == H5_ITER_NATIVE) {
-            HDassert(H5_addr_defined(ainfo->name_bt2_addr));
+            assert(H5_addr_defined(ainfo->name_bt2_addr));
             bt2_addr = ainfo->name_bt2_addr;
         } /* end if */
         else
             bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+        assert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
@@ -1343,9 +1343,9 @@ H5A__dense_remove(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(name && *name);
+    assert(f);
+    assert(ainfo);
+    assert(name && *name);
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -1445,7 +1445,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         /* Call fractal heap 'op' routine, to make copy of attribute to remove */
         if (H5HF_op(fheap, &record->id, H5A__dense_copy_fh_cb, &fh_udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, FAIL, "attribute removal callback failed")
-        HDassert(fh_udata.attr);
+        assert(fh_udata.attr);
 
         /* Use the attribute's shared location */
         use_sh_loc = FALSE;
@@ -1468,7 +1468,7 @@ H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.corder = fh_udata.attr->shared->crt_idx;
         } /* end if */
         else {
-            HDassert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
+            assert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
 
             /* Set up the user data for the v2 B-tree 'record remove' callback */
             other_bt2_udata.f            = bt2_udata->f;
@@ -1555,8 +1555,8 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
+    assert(f);
+    assert(ainfo);
 
     /* Determine the address of the index to use */
     if (idx_type == H5_INDEX_NAME) {
@@ -1566,13 +1566,13 @@ H5A__dense_remove_by_idx(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type
          */
         if (order == H5_ITER_NATIVE) {
             bt2_addr = ainfo->name_bt2_addr;
-            HDassert(H5_addr_defined(bt2_addr));
+            assert(H5_addr_defined(bt2_addr));
         } /* end if */
         else
             bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+        assert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
@@ -1680,10 +1680,10 @@ H5A__dense_exists(H5F_t *f, const H5O_ainfo_t *ainfo, const char *name, hbool_t 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(name);
-    HDassert(attr_exists);
+    assert(f);
+    assert(ainfo);
+    assert(name);
+    assert(attr_exists);
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))
@@ -1825,8 +1825,8 @@ H5A__dense_delete(H5F_t *f, H5O_ainfo_t *ainfo)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(ainfo);
+    assert(f);
+    assert(ainfo);
 
     /* Open the fractal heap */
     if (NULL == (fheap = H5HF_open(f, ainfo->fheap_addr)))

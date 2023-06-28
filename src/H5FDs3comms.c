@@ -276,7 +276,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         ret = HDsnprintf(nvcat, catwrite, "%s: %s", name, value);
         if (ret < 0 || (size_t)ret > catlen)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot concatenate `%s: %s", name, value);
-        HDassert(catlen == HDstrlen(nvcat));
+        assert(catlen == HDstrlen(nvcat));
 
         /* create new_node, should we need it
          */
@@ -320,8 +320,8 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
     /* sanity-check pointer passed in
      */
-    HDassert((*L) != NULL);
-    HDassert((*L)->magic == S3COMMS_HRB_NODE_MAGIC);
+    assert((*L) != NULL);
+    assert((*L)->magic == S3COMMS_HRB_NODE_MAGIC);
     node_ptr = (*L);
 
     /* Check whether to modify/remove first node in list
@@ -365,7 +365,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             HDprintf("MAGIC OK? %s\n", (node_ptr->magic == S3COMMS_HRB_NODE_MAGIC) ? "YES" : "NO");
             HDfflush(stdout);
 #endif
-            HDassert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
+            assert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
             node_ptr->magic += 1ul;
 #if S3COMMS_DEBUG
             HDprintf("FREEING POINTER\n");
@@ -448,7 +448,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                  * APPEND NEW NODE *
                  *******************/
 
-                HDassert(HDstrcmp(lowername, node_ptr->lowername) > 0);
+                assert(HDstrcmp(lowername, node_ptr->lowername) > 0);
                 new_node->name      = namecpy;
                 new_node->value     = valuecpy;
                 new_node->lowername = lowername;
@@ -471,7 +471,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                  * INSERT NEW NODE *
                  *******************/
 
-                HDassert(HDstrcmp(lowername, node_ptr->lowername) > 0);
+                assert(HDstrcmp(lowername, node_ptr->lowername) > 0);
                 new_node->name      = namecpy;
                 new_node->value     = valuecpy;
                 new_node->lowername = lowername;
@@ -501,7 +501,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 H5MM_xfree(tmp->name);
                 H5MM_xfree(tmp->value);
 
-                HDassert(tmp->magic == S3COMMS_HRB_NODE_MAGIC);
+                assert(tmp->magic == S3COMMS_HRB_NODE_MAGIC);
                 tmp->magic += 1ul;
                 H5MM_xfree(tmp);
 
@@ -522,7 +522,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 H5MM_xfree(node_ptr->value);
                 H5MM_xfree(node_ptr->cat);
 
-                HDassert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
+                assert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
                 new_node->magic += 1ul;
                 H5MM_xfree(new_node);
                 H5MM_xfree(lowername);
@@ -555,7 +555,7 @@ done:
         if (valuecpy != NULL)
             H5MM_xfree(valuecpy);
         if (new_node != NULL) {
-            HDassert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
+            assert(new_node->magic == S3COMMS_HRB_NODE_MAGIC);
             new_node->magic += 1ul;
             H5MM_xfree(new_node);
         }
@@ -709,7 +709,7 @@ H5FD_s3comms_hrb_init_request(const char *_verb, const char *_resource, const ch
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, NULL, "no space for resource string");
         *res = '/';
         H5MM_memcpy((&res[1]), _resource, (reslen + 1));
-        HDassert((reslen + 1) == HDstrlen(res));
+        assert((reslen + 1) == HDstrlen(res));
     } /* end if (else resource string not starting with '/') */
 
     verblen = HDstrlen(_verb) + 1;
@@ -794,7 +794,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     H5MM_xfree(handle->region);
     H5MM_xfree(handle->signing_key);
 
-    HDassert(handle->httpverb != NULL);
+    assert(handle->httpverb != NULL);
     H5MM_xfree(handle->httpverb);
 
     if (FAIL == H5FD_s3comms_free_purl(handle->purl))
@@ -906,7 +906,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_HEADERDATA, &sds))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while setting CURL option (CURLOPT_HEADERDATA).");
 
-    HDassert(handle->httpverb == NULL);
+    assert(handle->httpverb == NULL);
     handle->httpverb = (char *)H5MM_malloc(sizeof(char) * 16);
     if (handle->httpverb == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "unable to allocate space for S3 request HTTP verb");
@@ -1044,8 +1044,8 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
         /* probably a malformed url, but could be internal error */
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCREATE, NULL, "unable to create parsed url structure");
 
-    HDassert(purl != NULL); /* if above passes, this must be true */
-    HDassert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
+    assert(purl != NULL); /* if above passes, this must be true */
+    assert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
 
     handle = (s3r_t *)H5MM_malloc(sizeof(s3r_t));
     if (handle == NULL)
@@ -1137,7 +1137,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
      * FINAL PREPARATION *
      *********************/
 
-    HDassert(handle->httpverb != NULL);
+    assert(handle->httpverb != NULL);
     H5MM_memcpy(handle->httpverb, "GET", 4);
 
     ret_value = handle;
@@ -1236,7 +1236,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (null) curlhandle.")
     if (handle->purl == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "handle has bad (null) url.")
-    HDassert(handle->purl->magic == S3COMMS_PARSED_URL_MAGIC);
+    assert(handle->purl->magic == S3COMMS_PARSED_URL_MAGIC);
     if (offset > handle->filesize || (len + offset) > handle->filesize)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to read past EoF")
 
@@ -1297,9 +1297,9 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             char *bytesrange_ptr = NULL; /* pointer past "bytes=" portion */
 
             bytesrange_ptr = HDstrchr(rangebytesstr, '=');
-            HDassert(bytesrange_ptr != NULL);
+            assert(bytesrange_ptr != NULL);
             bytesrange_ptr++; /* move to first char past '=' */
-            HDassert(*bytesrange_ptr != '\0');
+            assert(*bytesrange_ptr != '\0');
 
             if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_RANGE, bytesrange_ptr))
                 HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL,
@@ -1356,7 +1356,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
                                                 (const char *)handle->purl->path, "HTTP/1.1");
         if (request == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not allocate hrb_t request.");
-        HDassert(request->magic == S3COMMS_HRB_MAGIC);
+        assert(request->magic == S3COMMS_HRB_MAGIC);
 
         now = gmnow();
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
@@ -1366,27 +1366,27 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-date header")
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "x-amz-content-sha256", (const char *)EMPTY_SHA256))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set x-amz-content-sha256 header")
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         if (rangebytesstr != NULL) {
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Range", rangebytesstr))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set range header")
             if (headers == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-            HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+            assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
         }
 
         if (FAIL == H5FD_s3comms_hrb_node_set(&headers, "Host", handle->purl->host))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to set host header")
         if (headers == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem building headers list.");
-        HDassert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
+        assert(headers->magic == S3COMMS_HRB_NODE_MAGIC);
 
         request->first_header = headers;
 
@@ -1426,7 +1426,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
         node = request->first_header;
         while (node != NULL) {
-            HDassert(node->magic == S3COMMS_HRB_NODE_MAGIC);
+            assert(node->magic == S3COMMS_HRB_NODE_MAGIC);
             curlheaders = curl_slist_append(curlheaders, (const char *)node->cat);
             if (curlheaders == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not append header to curl slist.");
@@ -1515,10 +1515,10 @@ done:
         while (headers != NULL)
             if (FAIL == H5FD_s3comms_hrb_node_set(&headers, headers->name, NULL))
                 HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header node")
-        HDassert(NULL == headers);
+        assert(NULL == headers);
         if (FAIL == H5FD_s3comms_hrb_destroy(&request))
             HDONE_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot release header request structure")
-        HDassert(NULL == request);
+        assert(NULL == request);
     }
 
     if (curlh != NULL) {
@@ -1567,7 +1567,7 @@ gmnow(void)
     if ((time_t)(-1) != HDtime(now_ptr))
         ret_value = HDgmtime(now_ptr);
 
-    HDassert(ret_value != NULL);
+    assert(ret_value != NULL);
 
     return ret_value;
 } /* end gmnow() */
@@ -1644,7 +1644,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
 
     if (http_request == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hrb object cannot be null.");
-    HDassert(http_request->magic == S3COMMS_HRB_MAGIC);
+    assert(http_request->magic == S3COMMS_HRB_MAGIC);
 
     if (canonical_request_dest == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "canonical request destination cannot be null.");
@@ -1667,7 +1667,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     node = http_request->first_header; /* assumed sorted */
     while (node != NULL) {
 
-        HDassert(node->magic == S3COMMS_HRB_NODE_MAGIC);
+        assert(node->magic == S3COMMS_HRB_NODE_MAGIC);
 
         ret = HDsnprintf(tmpstr, 256, "%s:%s\n", node->lowername, node->value);
         if (ret < 0 || ret >= 256)
@@ -1794,7 +1794,7 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
 #endif
 
     if (purl != NULL) {
-        HDassert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
+        assert(purl->magic == S3COMMS_PARSED_URL_MAGIC);
         if (purl->scheme != NULL)
             H5MM_xfree(purl->scheme);
         if (purl->host != NULL)
@@ -2237,7 +2237,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     if (tmpstr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid SCHEME construction: probably not URL");
     len = tmpstr - curstr;
-    HDassert((0 <= len) && (len < urllen));
+    assert((0 <= len) && (len < urllen));
 
     /* check for restrictions */
     for (i = 0; i < len; i++) {

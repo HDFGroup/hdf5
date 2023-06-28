@@ -68,7 +68,7 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
         goto error;
     if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
         goto error;
-    HDassert(100 == dims[0] && 100 == dims[1]);
+    assert(100 == dims[0] && 100 == dims[1]);
 
     /* Read some data */
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)

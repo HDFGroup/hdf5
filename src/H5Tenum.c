@@ -92,14 +92,14 @@ H5T__enum_create(const H5T_t *parent)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(parent);
+    assert(parent);
 
     /* Build new type */
     if (NULL == (ret_value = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     ret_value->shared->type   = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
-    HDassert(ret_value->shared->parent);
+    assert(ret_value->shared->parent);
     ret_value->shared->size = ret_value->shared->parent->shared->size;
 
 done:
@@ -177,9 +177,9 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(dt);
-    HDassert(name && *name);
-    HDassert(value);
+    assert(dt);
+    assert(name && *name);
+    assert(value);
 
     /* The name and value had better not already exist */
     for (i = 0; i < dt->shared->u.enumer.nmembs; i++) {
@@ -276,8 +276,8 @@ H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value /*out*/)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(dt);
-    HDassert(value);
+    assert(dt);
+    assert(value);
 
     H5MM_memcpy(value, (uint8_t *)dt->shared->u.enumer.value + (membno * dt->shared->size), dt->shared->size);
 
@@ -365,9 +365,9 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dt && H5T_ENUM == dt->shared->type);
-    HDassert(value);
-    HDassert(name || 0 == size);
+    assert(dt && H5T_ENUM == dt->shared->type);
+    assert(value);
+    assert(name || 0 == size);
 
     if (name && size > 0)
         *name = '\0';
@@ -495,9 +495,9 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dt && H5T_ENUM == dt->shared->type);
-    HDassert(name && *name);
-    HDassert(value);
+    assert(dt && H5T_ENUM == dt->shared->type);
+    assert(name && *name);
+    assert(value);
 
     /* Sanity check */
     if (dt->shared->u.enumer.nmembs == 0)

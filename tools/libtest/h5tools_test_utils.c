@@ -532,8 +532,8 @@ test_parse_tuple(void)
 
         /* SETUP
          */
-        HDassert(parsed == NULL);
-        HDassert(cpy == NULL);
+        assert(parsed == NULL);
+        assert(cpy == NULL);
         tc = cases[i];
         if (show_progress == TRUE) {
             HDprintf("testing %d: %s...\n", i, tc.test_msg);
@@ -551,8 +551,8 @@ test_parse_tuple(void)
                 JSVERIFY_STR(tc.exp_elems[elem_i], parsed[elem_i], NULL)
             }
             /* TEARDOWN */
-            HDassert(parsed != NULL);
-            HDassert(cpy != NULL);
+            assert(parsed != NULL);
+            assert(cpy != NULL);
             HDfree(parsed);
             parsed = NULL;
             HDfree(cpy);
@@ -623,7 +623,7 @@ test_populate_ros3_fa(void)
     show_progress = TRUE;
 #endif /* H5TOOLS_UTILS_TEST_DEBUG */
 
-    HDassert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
+    assert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
 
     /*********
      * TESTS *
@@ -747,7 +747,7 @@ test_populate_ros3_fa(void)
             HDprintf("region overflow\n");
         }
 
-        HDassert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
+        assert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
@@ -817,7 +817,7 @@ test_populate_ros3_fa(void)
             HDprintf("id overflow\n");
         }
 
-        HDassert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
+        assert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
@@ -924,7 +924,7 @@ test_populate_ros3_fa(void)
             HDprintf("key overflow\n");
         }
 
-        HDassert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
+        assert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
         JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
         JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)

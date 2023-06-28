@@ -86,10 +86,10 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_na
     hssize_t snpoints;                             /* Number of elements in dataset */
     hsize_t  start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
 
-    HDassert(fid >= 0);
-    HDassert(sym_name);
-    HDassert(record);
-    HDassert(rec_sid >= 0);
+    assert(fid >= 0);
+    assert(sym_name);
+    assert(record);
+    assert(rec_sid >= 0);
 
     /* Open dataset for symbol */
     if ((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
@@ -204,9 +204,9 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     unsigned        v;                   /* Local index variable */
     hbool_t         use_log_vfd = FALSE; /* Use the log VFD (set this manually) */
 
-    HDassert(filename);
-    HDassert(nseconds != 0);
-    HDassert(poll_time != 0);
+    assert(filename);
+    assert(nseconds != 0);
+    assert(poll_time != 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record read, also) */

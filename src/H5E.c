@@ -169,7 +169,7 @@ H5E_init(void)
 #endif /* H5_HAVE_THREADSAFE */
 
     /* Allocate the HDF5 error class */
-    HDassert(H5E_ERR_CLS_g == (-1));
+    assert(H5E_ERR_CLS_g == (-1));
     HDsnprintf(lib_vers, sizeof(lib_vers), "%u.%u.%u%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
                (HDstrlen(H5_VERS_SUBRELEASE) > 0 ? "-" H5_VERS_SUBRELEASE : ""));
     if (NULL == (cls = H5E__register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, lib_vers)))
@@ -338,7 +338,7 @@ H5E__get_stack(void)
          */
         estack = (H5E_t *)HDmalloc(sizeof(H5E_t));
 #endif /* H5_HAVE_WIN_THREADS */
-        HDassert(estack);
+        assert(estack);
 
         /* Set the thread-specific info */
         estack->nused = 0;
@@ -374,7 +374,7 @@ H5E__free_class(H5E_cls_t *cls)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Free error class structure */
     cls->cls_name = (char *)H5MM_xfree((void *)cls->cls_name);
@@ -445,9 +445,9 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls_name);
-    HDassert(lib_name);
-    HDassert(version);
+    assert(cls_name);
+    assert(lib_name);
+    assert(version);
 
     /* Allocate space for new error class */
     if (NULL == (cls = H5FL_CALLOC(H5E_cls_t)))
@@ -527,7 +527,7 @@ H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Iterate over all the messages and delete those in this error class */
     if (H5I_iterate(H5I_ERROR_MSG, H5E__close_msg_cb, cls, FALSE) < 0)
@@ -596,7 +596,7 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(cls);
+    assert(cls);
 
     /* Get the class's name */
     len = (ssize_t)HDstrlen(cls->cls_name);
@@ -636,7 +636,7 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(err_msg);
+    assert(err_msg);
 
     /* Close the message if it is in the class being closed */
     if (err_msg->cls == cls) {
@@ -700,7 +700,7 @@ H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(err);
+    assert(err);
 
     /* Release message */
     err->msg = (char *)H5MM_xfree((void *)err->msg);
@@ -777,9 +777,9 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(cls);
-    HDassert(msg_type == H5E_MAJOR || msg_type == H5E_MINOR);
-    HDassert(msg_str);
+    assert(cls);
+    assert(msg_type == H5E_MAJOR || msg_type == H5E_MINOR);
+    assert(msg_str);
 
     /* Allocate new message object */
     if (NULL == (msg = H5FL_MALLOC(H5E_msg_t)))
@@ -1052,7 +1052,7 @@ H5E__set_current_stack(H5E_t *estack)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(estack);
+    assert(estack);
 
     /* Get a pointer to the current error stack */
     if (NULL == (current_stack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean'
@@ -1150,7 +1150,7 @@ H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(estack);
+    assert(estack);
 
     /* Release the stack's error information */
     H5E_clear_stack(estack);
@@ -1225,7 +1225,7 @@ H5E__get_num(const H5E_t *estack)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(estack);
+    assert(estack);
 
     FUNC_LEAVE_NOAPI((ssize_t)estack->nused)
 } /* end H5E__get_num() */
@@ -1757,8 +1757,8 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(dst_stack);
-    HDassert(src_stack);
+    assert(dst_stack);
+    assert(src_stack);
 
     /* Copy the errors from the source stack to the destination stack */
     for (u = 0; u < src_stack->nused; u++) {

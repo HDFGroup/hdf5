@@ -623,9 +623,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
 #endif
-#ifndef HDassert
-#define HDassert(X) assert(X)
-#endif
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
 #endif
@@ -1233,7 +1230,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)                                                            \
     {                                                                                                        \
         casttype _tmp_overflow = (casttype)(var);                                                            \
-        HDassert((var) == (vartype)_tmp_overflow);                                                           \
+        assert((var) == (vartype)_tmp_overflow);                                                             \
     }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1247,7 +1244,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1257,8 +1254,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1268,8 +1265,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_dst >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_dst >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1277,8 +1274,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1670,9 +1667,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         if (!func_check) {                                                                                   \
             /* Check function naming status */                                                               \
-            HDassert(asrt &&                                                                                 \
-                     "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "   \
-                     "H5private.h (this is usually due to an incorrect number of underscores)");             \
+            assert(asrt &&                                                                                   \
+                   "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "     \
+                   "H5private.h (this is usually due to an incorrect number of underscores)");               \
                                                                                                              \
             /* Don't check again */                                                                          \
             func_check = TRUE;                                                                               \
