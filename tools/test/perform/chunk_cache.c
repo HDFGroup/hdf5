@@ -264,13 +264,12 @@ check_partial_chunks_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > 0.0)
-        HDprintf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %zu\n",
-                 (end_t - start_t), nbytes_global);
+        printf("1. Partial chunks: total read time is %lf; number of bytes being read from file is %zu\n",
+               (end_t - start_t), nbytes_global);
     else
-        HDprintf(
-            "1. Partial chunks: no total read time because timer is not available; number of bytes being "
-            "read from file is %zu\n",
-            nbytes_global);
+        printf("1. Partial chunks: no total read time because timer is not available; number of bytes being "
+               "read from file is %zu\n",
+               nbytes_global);
 
     H5Dclose(dataset);
     H5Sclose(filespace);
@@ -343,13 +342,12 @@ check_hash_value_perf(hid_t file)
     end_t = H5_get_time();
 
     if ((end_t - start_t) > 0.0)
-        HDprintf("2. Hash value: total read time is %lf; number of bytes being read from file is %zu\n",
-                 (end_t - start_t), nbytes_global);
+        printf("2. Hash value: total read time is %lf; number of bytes being read from file is %zu\n",
+               (end_t - start_t), nbytes_global);
     else
-        HDprintf(
-            "2. Hash value: no total read time because timer is not available; number of bytes being read "
-            "from file is %zu\n",
-            nbytes_global);
+        printf("2. Hash value: no total read time because timer is not available; number of bytes being read "
+               "from file is %zu\n",
+               nbytes_global);
 
     H5Dclose(dataset);
     H5Sclose(filespace);
@@ -407,6 +405,6 @@ main(void)
     return 0;
 
 error:
-    HDfprintf(stderr, "*** ERRORS DETECTED ***\n");
+    fprintf(stderr, "*** ERRORS DETECTED ***\n");
     return 1;
 }

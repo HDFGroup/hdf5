@@ -196,8 +196,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     for (i = 0; i < DSET_SELECT_DIM; i++)
         if (rbuf[i] != (dtrans ? trans_wbuf[i] : wbuf[i])) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
 
@@ -211,8 +211,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
         for (i = 0; i < DSET_SELECT_DIM; i++)
             if (rbuf[i] != (2 * trans_wbuf[i])) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d\n", i);
+                printf("    Read different values than written.\n");
+                printf("    At index %d\n", i);
                 TEST_ERROR;
             }
     }
@@ -337,8 +337,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (rbuf[4 * i + 0] != wbuf[4 * i + 0] || rbuf[4 * i + 1] != wbuf[4 * i + 1] ||
             rbuf[4 * i + 2] != wbuf[4 * i + 2] || rbuf[4 * i + 3] != wbuf[4 * i + 3]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
 
@@ -351,8 +351,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (rbuf[4 * i + 0] != wbuf[4 * i + 3] || rbuf[4 * i + 1] != wbuf[4 * i + 2] ||
             rbuf[4 * i + 2] != wbuf[4 * i + 1] || rbuf[4 * i + 3] != wbuf[4 * i + 0]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
 
@@ -486,8 +486,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     for (i = 0; i < DSET_SELECT_DIM; i++)
         if (rbuf[i] != (long long)(dtrans ? trans_wbuf[i] : wbuf[i])) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
 
@@ -501,8 +501,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         for (i = 0; i < DSET_SELECT_DIM; i++)
             if (rbuf[i] != (long long)(5 * (10 - trans_wbuf[i]))) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d\n", i);
+                printf("    Read different values than written.\n");
+                printf("    At index %d\n", i);
                 TEST_ERROR;
             }
     }
@@ -629,8 +629,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     for (i = 0; i < DSET_SELECT_DIM; i++)
         if (rbuf[i] != (dtrans ? trans_wbuf[i] : wbuf[i])) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
 
@@ -644,8 +644,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
         for (i = 0; i < DSET_SELECT_DIM; i++)
             if (rbuf[i] != (2 * (10 + trans_wbuf[i]))) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d\n", i);
+                printf("    Read different values than written.\n");
+                printf("    At index %d\n", i);
                 TEST_ERROR;
             }
     }
@@ -812,8 +812,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b || s1_wbuf[i].c != s1_rbuf[i].c ||
             s1_wbuf[i].d != s1_rbuf[i].d) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
     }
@@ -858,8 +858,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s1_rbuf[i].a != s1_wbuf[i].a || s1_rbuf[i].b != ((4 * i) + 1) || s1_rbuf[i].c != s1_wbuf[i].c ||
             s1_rbuf[i].d != ((4 * i) + 3)) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
     }
@@ -893,8 +893,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             s1_rbuf[i].c != ((4 * i) + DSET_SELECT_DIM + 2) ||
             s1_rbuf[i].d != ((4 * i) + (2 * DSET_SELECT_DIM) + 3)) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
     }
@@ -944,8 +944,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s2_wbuf[i].a != s2_rbuf[i].a || s2_wbuf[i].b != s2_rbuf[i].b || s2_wbuf[i].c != s2_rbuf[i].c ||
             s2_wbuf[i].d != s2_rbuf[i].d) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         }
     }
@@ -1180,8 +1180,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         for (j = 0; j < DSET_SELECT_DIM; j++)
             if (rbufi[i][j] != (dtrans ? trans_wbufi[i][j] : wbufi[i][j])) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
 
@@ -1196,8 +1196,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             for (j = 0; j < DSET_SELECT_DIM; j++)
                 if (rbufi[i][j] != (2 * trans_wbufi[i][j])) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j);
                     TEST_ERROR;
                 }
     }
@@ -1244,8 +1244,8 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         for (j = 0; j < DSET_SELECT_DIM; j++) {
             if (lrbufi[i][j] != (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j])) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
         }
@@ -1504,8 +1504,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (wbufi[i][j].a != rbufi[i][j].a || wbufi[i][j].b != rbufi[i][j].b ||
                 wbufi[i][j].c != rbufi[i][j].c || wbufi[i][j].d != rbufi[i][j].d) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
         }
@@ -1564,8 +1564,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                 if (wbufi[i][j].a != rbufi[i][j].a || ((4 * (int)j) + 1) != rbufi[i][j].b ||
                     wbufi[i][j].c != rbufi[i][j].c || ((4 * (int)j) + 3) != rbufi[i][j].d) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j);
                     TEST_ERROR;
                 }
             }
@@ -1574,8 +1574,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     if ((4 * (int)j) != rbufi[i][j].a || ((4 * (int)j) + 1) != rbufi[i][j].b ||
                         ((4 * (int)j) + 2) != rbufi[i][j].c || ((4 * (int)j) + 3) != rbufi[i][j].d) {
                         H5_FAILED();
-                        HDprintf("    Read different values than written.\n");
-                        HDprintf("    For dset %d at index %d\n", i, j);
+                        printf("    Read different values than written.\n");
+                        printf("    For dset %d at index %d\n", i, j);
                         TEST_ERROR;
                     }
             }
@@ -1630,8 +1630,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (wbufi[0][j].a != rbufi[0][j].a || ((4 * (int)j) + 1) != rbufi[0][j].b ||
             wbufi[0][j].c != rbufi[0][j].c || ((4 * (int)j) + 3) != rbufi[0][j].d) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    For dset0 at index %d\n", j);
+            printf("    Read different values than written.\n");
+            printf("    For dset0 at index %d\n", j);
             TEST_ERROR;
         }
 
@@ -1641,8 +1641,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             rbufi[mm][j].b != ((4 * (int)j) + 1) || rbufi[mm][j].c != ((4 * (int)j) + 2) ||
             rbufi[mm][j].d != ((4 * (int)j) + (2 * DSET_SELECT_DIM) + 3)) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    For dset1 at index %d\n", j);
+            printf("    Read different values than written.\n");
+            printf("    For dset1 at index %d\n", j);
             TEST_ERROR;
         }
 
@@ -1655,8 +1655,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (rbufi[i][j].a != (4 * (int)j) || rbufi[i][j].b != ((4 * (int)j) + 1) ||
                 rbufi[i][j].c != ((4 * (int)j) + 2) || rbufi[i][j].d != ((4 * (int)j) + 3)) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
     }
@@ -1721,8 +1721,8 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (s2_wbufi[i][j].a != s2_rbufi[i][j].a || s2_wbufi[i][j].b != s2_rbufi[i][j].b ||
                 s2_wbufi[i][j].c != s2_rbufi[i][j].c || s2_wbufi[i][j].d != s2_rbufi[i][j].d) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
 
@@ -1937,8 +1937,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     rbufi[i][(int)ss * j + 2] != wbufi[i][(int)ss * j + 2] ||
                     rbufi[i][(int)ss * j + 3] != wbufi[i][(int)ss * j + 3]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j);
                     TEST_ERROR;
                 }
         }
@@ -2012,8 +2012,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     lrbufi[i][(int)ss * j + 6] != lwbufi[i][(int)ss * j + 6] ||
                     lrbufi[i][(int)ss * j + 7] != lwbufi[i][(int)ss * j + 7]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j);
                     TEST_ERROR;
                 }
         }
@@ -2074,8 +2074,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (srbufi[i][(int)ss * j + 0] != swbufi[i][(int)ss * j + 0] ||
                 srbufi[i][(int)ss * j + 1] != swbufi[i][(int)ss * j + 1]) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j);
                 TEST_ERROR;
             }
 
@@ -2550,8 +2550,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                         for (j = 0; j < DSET_SELECT_DIM; j++)
                             if (rbufi1[i][j] != wbufi1[i][j]) {
                                 H5_FAILED();
-                                HDprintf("    Read different values than written.\n");
-                                HDprintf("    For dset %d at index %d\n", i, j);
+                                printf("    Read different values than written.\n");
+                                printf("    For dset %d at index %d\n", i, j);
                                 TEST_ERROR;
                             }
 
@@ -2562,8 +2562,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                             for (j = 0; j < DSET_SELECT_DIM; j++)
                                 if (l_rbufi2[i][j] != LONG_MAX) {
                                     H5_FAILED();
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j);
                                     TEST_ERROR;
                                 }
                         }
@@ -2571,8 +2571,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                             for (j = 0; j < DSET_SELECT_DIM; j++)
                                 if (s_rbufi2[i][j] != SHRT_MAX) {
                                     H5_FAILED();
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j);
                                 }
                         }
 
@@ -2586,8 +2586,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                                     s3_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
                                     s3_rbufi3[i][j].d != s1_wbufi3[i][j].d) {
                                     H5_FAILED();
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j);
                                 }
                         }
                         else if (s == SETTING_B) {
@@ -2597,8 +2597,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                                     s1_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
                                     s1_rbufi3[i][j].d != (DSET_SELECT_DIM + j)) {
                                     H5_FAILED();
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j);
                                 }
                         }
 
@@ -2745,7 +2745,7 @@ test_set_get_select_io_mode(hid_t fid)
     long                    wbuf[DSET_SELECT_DIM];
     H5D_selection_io_mode_t selection_io_mode;
 
-    HDprintf("\n");
+    printf("\n");
     TESTING("H5Pget/set_selection_io_mode()");
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -3069,7 +3069,7 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 
     int errs = 0;
 
-    HDprintf("\n");
+    printf("\n");
     TESTING("H5Pget_no_selection_io_cause()");
 
     errs += test_no_selection_io_cause_mode(filename, fapl, TEST_DISABLE_BY_API);
@@ -3088,7 +3088,7 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
 #endif
 
     if (errs) {
-        HDprintf(" FAILED\n");
+        printf(" FAILED\n");
         return FAIL;
     }
     else {
@@ -3265,7 +3265,7 @@ main(void)
         goto error;
 
     printf("\n===================================\n");
-    HDprintf("All selection I/O dataset tests passed.\n");
+    printf("All selection I/O dataset tests passed.\n");
     printf("===================================\n");
 
     h5_cleanup(FILENAME, fapl);
@@ -3274,7 +3274,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d SELECTION I/O DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d SELECTION I/O DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     HDexit(EXIT_FAILURE);
 
 } /* end main() */

@@ -195,7 +195,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     HDmemset(entries_to_clear, 0, sizeof(entries_to_clear));
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
+    fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
 
     HDmemset(tbl_buf, 0, sizeof(tbl_buf));
 
@@ -204,7 +204,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
         HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + u)));
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
 
-    HDfprintf(stdout, "%s", tbl_buf);
+    fprintf(stdout, "%s", tbl_buf);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     if (f->shared->coll_md_write) {
@@ -269,12 +269,12 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     for (u = 0; u <= (unsigned)mpi_size; u++)
         HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %u", candidate_assignment_table[u]);
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
-    HDfprintf(stdout, "%s", tbl_buf);
+    fprintf(stdout, "%s", tbl_buf);
 
-    HDfprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
-              last_entry_to_flush);
+    fprintf(stdout, "%s:%d: flush entries [%u, %u].\n", __func__, mpi_rank, first_entry_to_flush,
+            last_entry_to_flush);
 
-    HDfprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
+    fprintf(stdout, "%s:%d: marking entries.\n", __func__, mpi_rank);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     for (u = 0; u < num_candidates; u++) {
@@ -355,8 +355,8 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: num candidates/to clear/to flush = %u/%u/%u.\n", __func__, mpi_rank,
-              num_candidates, total_entries_to_clear, total_entries_to_flush);
+    fprintf(stdout, "%s:%d: num candidates/to clear/to flush = %u/%u/%u.\n", __func__, mpi_rank,
+            num_candidates, total_entries_to_clear, total_entries_to_flush);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     /* We have now marked all the entries on the candidate list for
@@ -684,14 +684,13 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
         if (entry_ptr == NULL) {
 #ifdef H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR " not in cache.\n", u,
-                      addr);
+            fprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR " not in cache.\n", u, addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if (!entry_ptr->is_dirty) {
 #ifdef H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %" PRIuHADDR " is not dirty!?!\n", addr);
+            fprintf(stdout, "H5C_mark_entries_as_clean: entry %" PRIuHADDR " is not dirty!?!\n", addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
         } /* end else-if */

@@ -1002,12 +1002,12 @@ done:                                                                           
 #define CI_PRINT_STATS(STYPE, DTYPE)                                                                         \
     {                                                                                                        \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {                                       \
-            HDfprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);              \
+            fprintf(H5DEBUG(T), "      %zu src elements aligned on %zu-byte boundaries\n",                   \
+                    ((H5T_conv_hw_t *)cdata->priv)->s_aligned, H5T_NATIVE_##STYPE##_ALIGN_g);                \
         }                                                                                                    \
         if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->d_aligned) {                                       \
-            HDfprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                 \
-                      ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);              \
+            fprintf(H5DEBUG(T), "      %zu dst elements aligned on %zu-byte boundaries\n",                   \
+                    ((H5T_conv_hw_t *)cdata->priv)->d_aligned, H5T_NATIVE_##DTYPE##_ALIGN_g);                \
         }                                                                                                    \
     }
 
@@ -2869,9 +2869,8 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
         case H5T_CONV_FREE:
 #ifdef H5T_DEBUG
             if (H5DEBUG(T)) {
-                HDfprintf(H5DEBUG(T), "      Using %s mapping function%s\n",
-                          priv->length ? "O(1)" : "O(log N)",
-                          priv->length ? "" : ", where N is the number of enum members");
+                fprintf(H5DEBUG(T), "      Using %s mapping function%s\n", priv->length ? "O(1)" : "O(log N)",
+                        priv->length ? "" : ", where N is the number of enum members");
             }
 #endif
             if (priv) {

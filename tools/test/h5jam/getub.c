@@ -36,8 +36,8 @@ static void
 usage(const char *prog)
 {
     HDfflush(stdout);
-    HDfprintf(stdout, "usage: %s -c nb file] \n", prog);
-    HDfprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
+    fprintf(stdout, "usage: %s -c nb file] \n", prog);
+    fprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
 }
 
 /*-------------------------------------------------------------------------

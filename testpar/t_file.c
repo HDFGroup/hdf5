@@ -66,7 +66,7 @@ test_split_comm_access(void)
 
     filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Split Communicator access test on file %s\n", filename);
+        printf("Split Communicator access test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -137,7 +137,7 @@ test_page_buffer_access(void)
     filename = (const char *)GetTestParameters();
 
     if (VERBOSE_MED)
-        HDprintf("Page Buffer Usage in Parallel %s\n", filename);
+        printf("Page Buffer Usage in Parallel %s\n", filename);
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
     VRFY((fapl >= 0), "create_faccess_plist succeeded");

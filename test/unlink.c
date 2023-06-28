@@ -1490,12 +1490,12 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if ((group = H5Gcreate2(file, groupname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
-            HDprintf("group %s creation failed\n", groupname);
+            printf("group %s creation failed\n", groupname);
             goto error;
         } /* end if */
         if (H5Gclose(group) < 0) {
             H5_FAILED();
-            HDprintf("closing group %s failed\n", groupname);
+            printf("closing group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -1505,7 +1505,7 @@ test_create_unlink(const char *msg, hid_t fapl)
         HDsnprintf(groupname, sizeof(groupname), "%s %u", GROUPNAME, u);
         if (H5Ldelete(file, groupname, H5P_DEFAULT) < 0) {
             H5_FAILED();
-            HDprintf("Unlinking group %s failed\n", groupname);
+            printf("Unlinking group %s failed\n", groupname);
             goto error;
         } /* end if */
     }     /* end for */
@@ -3022,12 +3022,12 @@ main(void)
 
             /* Get FAPL cache settings */
             if (H5Pget_cache(fapl_small_mdc, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-                HDprintf("H5Pget_cache failed\n");
+                printf("H5Pget_cache failed\n");
 
             /* Change FAPL cache settings */
             mdc_nelmts = 1;
             if (H5Pset_cache(fapl_small_mdc, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-                HDprintf("H5Pset_cache failed\n");
+                printf("H5Pset_cache failed\n");
 
             /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
             nerrors += test_create_unlink("create and unlink large number of objects with small cache",
@@ -3075,7 +3075,7 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
         HDexit(EXIT_FAILURE);
     }
 

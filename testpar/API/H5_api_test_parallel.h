@@ -162,15 +162,15 @@ extern char H5_api_test_parallel_filename[];
                                                           MPI_LOR, MPI_COMM_WORLD))                          \
     {                                                                                                        \
         if (MAINPROCESS)                                                                                     \
-            HDprintf(                                                                                        \
+            printf(                                                                                          \
                 "    failed to collect consensus about whether non-collective operation was successful\n");  \
         goto error;                                                                                          \
     }                                                                                                        \
                                                                                                              \
     if (ind_op_failed) {                                                                                     \
         if (MAINPROCESS)                                                                                     \
-            HDprintf("    failure detected during non-collective operation - all other ranks will now fail " \
-                     "too\n");                                                                               \
+            printf("    failure detected during non-collective operation - all other ranks will now fail "   \
+                   "too\n");                                                                                 \
         goto error;                                                                                          \
     }                                                                                                        \
     }

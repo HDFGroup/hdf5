@@ -1390,10 +1390,10 @@ test_select_hyper_stride(hid_t xfer_plist)
         tbuf  = wbuf + loc1[i];
         tbuf2 = rbuf + loc2[i];
         if (*tbuf != *tbuf2) {
-            HDprintf("%d: hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n", __LINE__, i,
-                     (int)loc1[i], i, (int)loc2[i]);
-            HDprintf("wbuf=%p, tbuf=%p, rbuf=%p, tbuf2=%p\n", (void *)wbuf, (void *)tbuf, (void *)rbuf,
-                     (void *)tbuf2);
+            printf("%d: hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n", __LINE__, i, (int)loc1[i],
+                   i, (int)loc2[i]);
+            printf("wbuf=%p, tbuf=%p, rbuf=%p, tbuf2=%p\n", (void *)wbuf, (void *)tbuf, (void *)rbuf,
+                   (void *)tbuf2);
             TestErrPrintf("*tbuf=%u, *tbuf2=%u\n", (unsigned)*tbuf, (unsigned)*tbuf2);
         } /* end if */
     }     /* end for */
@@ -1835,14 +1835,14 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
                         (k >= start[2] && k < (start[2] + count[2])) &&
                         (l >= start[3] && l < (start[3] + count[3]))) {
                         if (*tbuf != *tbuf2) {
-                            HDprintf("Error: hyperslab values don't match!\n");
+                            printf("Error: hyperslab values don't match!\n");
                             TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n", __LINE__,
                                           i, j, k, l, (unsigned)*tbuf, (unsigned)*tbuf2);
                         } /* end if */
                     }     /* end if */
                     else {
                         if (*tbuf2 != 0) {
-                            HDprintf("Error: invalid data in read buffer!\n");
+                            printf("Error: invalid data in read buffer!\n");
                             TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n", __LINE__,
                                           i, j, k, l, (unsigned)*tbuf, (unsigned)*tbuf2);
                         } /* end if */
@@ -5316,10 +5316,10 @@ test_select_hyper_union_stagger(void)
     /* Verify input data */
     for (i = 0; i < 8; i++) {
         if (data[input_loc[i][0]][input_loc[i][1]] != data_out[output_loc[i][0]][output_loc[i][1]]) {
-            HDprintf("input data #%d is wrong!\n", i);
-            HDprintf("input_loc=[%d][%d]\n", input_loc[i][0], input_loc[i][1]);
-            HDprintf("output_loc=[%d][%d]\n", output_loc[i][0], output_loc[i][1]);
-            HDprintf("data=%d\n", data[input_loc[i][0]][input_loc[i][1]]);
+            printf("input data #%d is wrong!\n", i);
+            printf("input_loc=[%d][%d]\n", input_loc[i][0], input_loc[i][1]);
+            printf("output_loc=[%d][%d]\n", output_loc[i][0], output_loc[i][1]);
+            printf("data=%d\n", data[input_loc[i][0]][input_loc[i][1]]);
             TestErrPrintf("data_out=%d\n", data_out[output_loc[i][0]][output_loc[i][1]]);
         } /* end if */
     }     /* end for */
@@ -5795,14 +5795,14 @@ test_select_hyper_and_2d(void)
         for (j = 0; j < SPACE2_DIM2; j++, tbuf++) {
             if ((i >= 5 && i <= 9) && (j >= 5 && j <= 9)) {
                 if (*tbuf != *tbuf2)
-                    HDprintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                    printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
-                    HDprintf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                    printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -5936,14 +5936,14 @@ test_select_hyper_xor_2d(void)
                 ((i >= 5 && i <= 9) && ((j >= 0 && j <= 4) || (j >= 10 && j <= 14))) ||
                 ((i >= 10 && i <= 14) && (j >= 5 && j <= 14))) {
                 if (*tbuf != *tbuf2)
-                    HDprintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                    printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
-                    HDprintf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                    printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -6075,14 +6075,14 @@ test_select_hyper_notb_2d(void)
         for (j = 0; j < SPACE2_DIM2; j++, tbuf++) {
             if (((i >= 0 && i <= 4) && (j >= 0 && j <= 9)) || ((i >= 5 && i <= 9) && (j >= 0 && j <= 4))) {
                 if (*tbuf != *tbuf2)
-                    HDprintf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
-                             i, j, (int)*tbuf, (int)*tbuf2);
+                    printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n", __LINE__,
+                           i, j, (int)*tbuf, (int)*tbuf2);
                 tbuf2++;
             } /* end if */
             else {
                 if (*tbuf != 0)
-                    HDprintf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
-                             (int)*tbuf);
+                    printf("%d: hyperslab element has wrong value!, i=%d, j=%d, *tbuf=%d\n", __LINE__, i, j,
+                           (int)*tbuf);
             } /* end else */
         }     /* end for */
 
@@ -6262,14 +6262,14 @@ test_select_hyper_iter2(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim
 
     if (*tbuf != **tbuf2) {
         TestErrPrintf("Error in hyperslab iteration!\n");
-        HDprintf("location: { ");
+        printf("location: { ");
         for (u = 0; u < ndim; u++) {
-            HDprintf("%2d", (int)point[u]);
+            printf("%2d", (int)point[u]);
             if (u < (ndim - 1))
-                HDprintf(", ");
+                printf(", ");
         } /* end for */
-        HDprintf("}\n");
-        HDprintf("*tbuf=%d, **tbuf2=%d\n", *tbuf, **tbuf2);
+        printf("}\n");
+        printf("*tbuf=%d, **tbuf2=%d\n", *tbuf, **tbuf2);
         return (-1);
     } /* end if */
     else {
@@ -16148,7 +16148,7 @@ test_select(void)
     test_select_hyper_contig_dr(H5T_STD_U16BE, H5P_DEFAULT);
     test_select_hyper_contig_dr(H5T_STD_U16BE, plist_id);
 #else
-    HDprintf("** SKIPPED a test due to file creation issues\n");
+    printf("** SKIPPED a test due to file creation issues\n");
 #endif
 #if 0
     test_select_hyper_checker_board_dr(H5T_STD_U16LE, H5P_DEFAULT);
@@ -16156,7 +16156,7 @@ test_select(void)
     test_select_hyper_checker_board_dr(H5T_STD_U16BE, H5P_DEFAULT);
     test_select_hyper_checker_board_dr(H5T_STD_U16BE, plist_id);
 #else
-    HDprintf("** SKIPPED a test due to assertion in HDF5\n");
+    printf("** SKIPPED a test due to assertion in HDF5\n");
 #endif
     test_select_hyper_copy();    /* Test hyperslab selection copying code */
     test_select_point_copy();    /* Test point selection copying code */
@@ -16261,7 +16261,7 @@ test_select(void)
     test_select_hyper_chunk_offset();
     test_select_hyper_chunk_offset2();
 #else
-    HDprintf("** SKIPPED a test due to assertion in HDF5\n");
+    printf("** SKIPPED a test due to assertion in HDF5\n");
 #endif
 
     /* Test selection bounds with & without offsets */

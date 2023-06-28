@@ -50,21 +50,21 @@
 static void
 usage(const char *progname)
 {
-    HDfprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2|-family_to_single] SRC DST\n",
-              progname);
-    HDfprintf(stderr, "   -v     Produce verbose output\n");
-    HDfprintf(stderr, "   -V     Print a version number and exit\n");
-    HDfprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
-    HDfprintf(stderr, "   -m N   The destination member size or 1GB\n");
-    HDfprintf(stderr, "   -family_to_sec2   Deprecated version of -family_to_single (below)\n");
-    HDfprintf(stderr, "   -family_to_single   Change file driver from family to the default single-file VFD "
-                      "(windows or sec2)\n");
-    HDfprintf(stderr, "   SRC    The name of the source file\n");
-    HDfprintf(stderr, "   DST    The name of the destination files\n");
-    HDfprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
-                      "'k' for kB.\n");
-    HDfprintf(stderr, "File family names include an integer printf "
-                      "format such as '%%d'\n");
+    fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] [-family_to_sec2|-family_to_single] SRC DST\n",
+            progname);
+    fprintf(stderr, "   -v     Produce verbose output\n");
+    fprintf(stderr, "   -V     Print a version number and exit\n");
+    fprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
+    fprintf(stderr, "   -m N   The destination member size or 1GB\n");
+    fprintf(stderr, "   -family_to_sec2   Deprecated version of -family_to_single (below)\n");
+    fprintf(stderr, "   -family_to_single   Change file driver from family to the default single-file VFD "
+                    "(windows or sec2)\n");
+    fprintf(stderr, "   SRC    The name of the source file\n");
+    fprintf(stderr, "   DST    The name of the destination files\n");
+    fprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
+                    "'k' for kB.\n");
+    fprintf(stderr, "File family names include an integer printf "
+                    "format such as '%%d'\n");
     HDexit(EXIT_FAILURE);
 }
 
@@ -202,8 +202,8 @@ main(int argc, char *argv[])
             argno++;
         }
         else if (!HDstrcmp(argv[argno], "-V")) {
-            HDprintf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
-                     H5_VERS_RELEASE);
+            printf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
+                   H5_VERS_RELEASE);
             HDexit(EXIT_SUCCESS);
         }
         else if (!HDstrcmp(argv[argno], "-family_to_sec2")) {
@@ -252,7 +252,7 @@ main(int argc, char *argv[])
     }
     src_size = src_act_size = sb.st_size;
     if (verbose)
-        HDfprintf(stderr, "< %s\n", src_name);
+        fprintf(stderr, "< %s\n", src_name);
 
     /*
      * Get the name for the destination file and open the first member.
@@ -268,7 +268,7 @@ main(int argc, char *argv[])
         HDexit(EXIT_FAILURE);
     }
     if (verbose)
-        HDfprintf(stderr, "> %s\n", dst_name);
+        fprintf(stderr, "> %s\n", dst_name);
 
     /* No more arguments */
     if (argno < argc)
@@ -298,7 +298,7 @@ main(int argc, char *argv[])
                 HDexit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
-                HDfprintf(stderr, "%s: short read\n", src_name);
+                fprintf(stderr, "%s: short read\n", src_name);
                 HDexit(EXIT_FAILURE);
             }
             for (i = 0; i < n; i++) {
@@ -328,7 +328,7 @@ main(int argc, char *argv[])
                 HDexit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
-                HDfprintf(stderr, "%s: short write\n", dst_name);
+                fprintf(stderr, "%s: short write\n", dst_name);
                 HDexit(EXIT_FAILURE);
             }
             need_seek = FALSE;
@@ -367,11 +367,11 @@ main(int argc, char *argv[])
             }
             src_act_size = sb.st_size;
             if (src_act_size > src_size) {
-                HDfprintf(stderr, "%s: member truncated to %lu bytes\n", src_name, (unsigned long)src_size);
+                fprintf(stderr, "%s: member truncated to %lu bytes\n", src_name, (unsigned long)src_size);
             }
             src_offset = 0;
             if (verbose)
-                HDfprintf(stderr, "< %s\n", src_name);
+                fprintf(stderr, "< %s\n", src_name);
         }
 
         /*
@@ -408,7 +408,7 @@ main(int argc, char *argv[])
             dst_offset = 0;
             need_seek  = FALSE;
             if (verbose)
-                HDfprintf(stderr, "> %s\n", dst_name);
+                fprintf(stderr, "> %s\n", dst_name);
         }
     }
 

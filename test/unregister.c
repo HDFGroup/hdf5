@@ -155,7 +155,7 @@ test_unregister_filters(hid_t fapl_id)
     H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -206,7 +206,7 @@ test_unregister_filters(hid_t fapl_id)
     H5E_END_TRY
     if (ret >= 0) {
         H5_FAILED();
-        HDprintf("    Line %d: Should not be able to unregister filter\n", __LINE__);
+        printf("    Line %d: Should not be able to unregister filter\n", __LINE__);
         goto error;
     }
 
@@ -298,7 +298,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All filter unregistration tests passed.\n");
+    printf("All filter unregistration tests passed.\n");
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
@@ -309,7 +309,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

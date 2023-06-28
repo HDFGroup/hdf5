@@ -106,6 +106,13 @@ usage(const char *prog)
                    "      --vol-info         VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream,
+                   "                         If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                         the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                         if that environment variable is unset) will be used\n");
+    PRINTVALSTREAM(rawoutstream,
                    "      --vfd-value        Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "      --vfd-name         Name of the VFL driver to use for opening the\n");
@@ -320,7 +327,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: Creating groups with latest version of the format\n", h5tools_getprogname());
+            printf("%s: Creating groups with latest version of the format\n", h5tools_getprogname());
     }
 
     /* Attempt to open an existing HDF5 file first */
@@ -354,7 +361,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
+            printf("%s: Creating parent groups\n", h5tools_getprogname());
     }
 
     /* Loop over creating requested groups */
@@ -375,7 +382,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: created group '%s'\n", h5tools_getprogname(), params_g.groups[curr_group]);
+            printf("%s: created group '%s'\n", h5tools_getprogname(), params_g.groups[curr_group]);
     } /* end for */
 
     /* Close link creation property list */

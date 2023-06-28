@@ -212,8 +212,8 @@ main(int argc, char *argv[])
 error:
     HDfflush(stdout);
     HDfflush(stderr);
-    HDprintf("*** ERROR ***\n");
-    HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
+    printf("*** ERROR ***\n");
+    printf("THERE WAS A REAL ERROR IN t_pflush1.\n");
     HDfflush(stdout);
 
     if (data_g)

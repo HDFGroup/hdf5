@@ -80,7 +80,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                       (((VAR1)[i][j] <= (TYPE)((VAR2)[i][j])) &&                                             \
                        (((VAR1)[i][j] + (TOL)) > (TYPE)((VAR2)[i][j]))))) {                                  \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
+                    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");                \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -96,7 +96,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
                 if (!(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + (TOL))) &&                                      \
                       ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - (TOL))))) {                                     \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: Conversion failed to match computed data\n");              \
+                    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");                \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -111,7 +111,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             for (j = 0; j < COLS; j++) {                                                                     \
                 if ((VAR1)[i][j] != (VAR2)[i][j]) {                                                          \
                     H5_FAILED();                                                                             \
-                    HDfprintf(stderr, "    ERROR: data  failed to match computed data\n");                   \
+                    fprintf(stderr, "    ERROR: data  failed to match computed data\n");                     \
                     goto error;                                                                              \
                 }                                                                                            \
             }                                                                                                \
@@ -307,7 +307,7 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
         }                                                                                                    \
         else {                                                                                               \
             H5_FAILED();                                                                                     \
-            HDfprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");  \
+            fprintf(stderr, "    ERROR: Data transform allowed invalid TRANSFORM transform to be set\n");    \
             goto error;                                                                                      \
         }                                                                                                    \
     } while (0)

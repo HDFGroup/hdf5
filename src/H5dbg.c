@@ -87,24 +87,24 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
     /*
      * Print the buffer in a VMS-style octal dump.
      */
-    HDfprintf(stream, "%*sData follows (`__' indicates free region)...\n", indent, "");
+    fprintf(stream, "%*sData follows (`__' indicates free region)...\n", indent, "");
     for (u = 0; u < buf_size; u += 16) {
         uint8_t c;
 
-        HDfprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
+        fprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
 
         /* Print the hex values */
         for (v = 0; v < 16; v++) {
             if (u + v < buf_size) {
                 if (marker[u + v])
-                    HDfprintf(stream, "__ ");
+                    fprintf(stream, "__ ");
                 else {
                     c = buf[buf_offset + u + v];
-                    HDfprintf(stream, "%02x ", c);
+                    fprintf(stream, "%02x ", c);
                 } /* end else */
             }     /* end if */
             else
-                HDfprintf(stream, "   ");
+                fprintf(stream, "   ");
 
             if (7 == v)
                 HDfputc(' ', stream);

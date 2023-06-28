@@ -214,6 +214,6 @@ error:
     }
     H5E_END_TRY
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

@@ -90,37 +90,37 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Tree type ID:",
-              ((shared->type->id) == H5B_SNODE_ID
-                   ? "H5B_SNODE_ID"
-                   : ((shared->type->id) == H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Dirty flag:", bt->cache_info.is_dirty ? "True" : "False");
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Level:", bt->level);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of left sibling:", bt->left);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of right sibling:", bt->right);
-    HDfprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth, "Number of children (max):", bt->nchildren,
-              shared->two_k);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Tree type ID:",
+            ((shared->type->id) == H5B_SNODE_ID
+                 ? "H5B_SNODE_ID"
+                 : ((shared->type->id) == H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Dirty flag:", bt->cache_info.is_dirty ? "True" : "False");
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Level:", bt->level);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of left sibling:", bt->left);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of right sibling:", bt->right);
+    fprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth, "Number of children (max):", bt->nchildren,
+            shared->two_k);
 
     /*
      * Print the child addresses
      */
     for (u = 0; u < bt->nchildren; u++) {
-        HDfprintf(stream, "%*sChild %d...\n", indent, "", u);
-        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(3, fwidth) - 3,
-                  "Address:", bt->child[u]);
+        fprintf(stream, "%*sChild %d...\n", indent, "", u);
+        fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(3, fwidth) - 3,
+                "Address:", bt->child[u]);
 
         /* If there is a key debugging routine, use it to display the left & right keys */
         if (type->debug_key) {
             /* Decode the 'left' key & print it */
-            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(3, fwidth) - 3, "Left Key:");
+            fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(3, fwidth) - 3, "Left Key:");
             assert(H5B_NKEY(bt, shared, u));
             (void)(type->debug_key)(stream, indent + 6, MAX(6, fwidth) - 6, H5B_NKEY(bt, shared, u), udata);
 
             /* Decode the 'right' key & print it */
-            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(3, fwidth) - 3, "Right Key:");
+            fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(3, fwidth) - 3, "Right Key:");
             assert(H5B_NKEY(bt, shared, u + 1));
             (void)(type->debug_key)(stream, indent + 6, MAX(6, fwidth) - 6, H5B_NKEY(bt, shared, u + 1),
                                     udata);
@@ -172,7 +172,7 @@ H5B__assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 
     if (0 == ncalls++) {
         if (H5DEBUG(B))
-            HDfprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
+            fprintf(H5DEBUG(B), "H5B: debugging B-trees (expensive)\n");
     } /* end if */
 
     /* Get shared info for B-tree */

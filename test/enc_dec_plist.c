@@ -192,7 +192,7 @@ main(void)
             HDputs(msg);
 
             if (VERBOSE_MED)
-                HDprintf("Encode/Decode DCPLs\n");
+                printf("Encode/Decode DCPLs\n");
 
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("Default DCPL Encoding/Decoding");
@@ -242,7 +242,7 @@ main(void)
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("DCPL Encoding/Decoding for virtual layout");
             if (high < H5F_LIBVER_V110)
-                HDprintf(" SKIPPED: virtual layout not supported yet\n");
+                printf(" SKIPPED: virtual layout not supported yet\n");
 
             else {
                 if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -679,6 +679,6 @@ main(void)
     return 0;
 
 error:
-    HDprintf("***** Plist Encode/Decode tests FAILED! *****\n");
+    printf("***** Plist Encode/Decode tests FAILED! *****\n");
     return 1;
 }

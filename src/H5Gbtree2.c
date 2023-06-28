@@ -335,9 +335,9 @@ H5G__dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%x, ", indent, "", fwidth, "Record:", (unsigned)nrecord->hash);
+    fprintf(stream, "%*s%-*s {%x, ", indent, "", fwidth, "Record:", (unsigned)nrecord->hash);
     for (u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
-        HDfprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
+        fprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G__dense_btree2_name_debug() */
@@ -483,9 +483,9 @@ H5G__dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void 
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%llu, ", indent, "", fwidth, "Record:", (unsigned long long)nrecord->corder);
+    fprintf(stream, "%*s%-*s {%llu, ", indent, "", fwidth, "Record:", (unsigned long long)nrecord->corder);
     for (u = 0; u < H5G_DENSE_FHEAP_ID_LEN; u++)
-        HDfprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
+        fprintf(stderr, "%02x%s", nrecord->id[u], (u < (H5G_DENSE_FHEAP_ID_LEN - 1) ? " " : "}\n"));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5G__dense_btree2_corder_debug() */

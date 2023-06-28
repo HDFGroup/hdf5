@@ -579,7 +579,7 @@ fake_vol_info_to_str(const void *info, char **str)
 
     /* Verify the info is correct before continuing */
     if (val != INT_MAX) {
-        HDprintf("The value of info (%d) is incorrect\n", val);
+        printf("The value of info (%d) is incorrect\n", val);
         return FAIL;
     }
 
@@ -2345,7 +2345,7 @@ test_get_vol_name(void)
     /* Skip the connectors other than the native and pass_through connector */
     if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or internal pass_through connector\n");
+        printf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2655,7 +2655,7 @@ main(void)
     nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         HDexit(EXIT_FAILURE);
     }
 

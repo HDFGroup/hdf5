@@ -739,9 +739,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfopen
 #define HDfopen(S, M) fopen(S, M)
 #endif
-#ifndef HDfprintf
-#define HDfprintf fprintf
-#endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif
@@ -939,9 +936,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
-#endif
-#ifndef HDprintf
-#define HDprintf printf /*varargs*/
 #endif
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)

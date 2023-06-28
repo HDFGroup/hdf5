@@ -615,13 +615,13 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
         if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) {                     \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("Can't read data\n");                                                                   \
+            printf("Can't read data\n");                                                                     \
             goto error;                                                                                      \
         }                                                                                                    \
         if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
-            HDprintf("incorrect read data\n");                                                               \
+            printf("incorrect read data\n");                                                                 \
             goto error;                                                                                      \
         }                                                                                                    \
     } /* TSOHM_S1H_VERIFY_DATA() definition */
@@ -1524,21 +1524,21 @@ static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
     HDputs(name);
-    HDprintf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
-    HDprintf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
-             (unsigned long long)(sizes->first_dset - sizes->empty_size));
-    HDprintf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
-             (unsigned long long)(sizes->second_dset - sizes->first_dset));
-    HDprintf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
-             (unsigned long long)(sizes->dsets1 - sizes->second_dset));
-    HDprintf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
-             (unsigned long long)(sizes->dsets2 - sizes->dsets1));
-    HDprintf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
-             (unsigned long long)(sizes->interleaved - sizes->dsets2));
-    HDprintf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
-             (unsigned long long)(sizes->attrs1 - sizes->interleaved));
-    HDprintf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
-             (unsigned long long)(sizes->attrs2 - sizes->attrs1));
+    printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+    printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset,
+           (unsigned long long)(sizes->first_dset - sizes->empty_size));
+    printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset,
+           (unsigned long long)(sizes->second_dset - sizes->first_dset));
+    printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1,
+           (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+    printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2,
+           (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+    printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved,
+           (unsigned long long)(sizes->interleaved - sizes->dsets2));
+    printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1,
+           (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+    printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2,
+           (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 } /* size2_dump_struct */
 #endif /* NOT_NOW */
 
@@ -3279,7 +3279,7 @@ test_sohm_extlink(void)
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 

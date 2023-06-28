@@ -146,12 +146,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     for (i = 0; i < hs_size[0]; i++) {
         for (j = 0; j < hs_size[1]; j++) {
             if (points[i * size[1] + (size_t)hs_offset[1] + j] != check[i * hs_size[1] + j]) {
-                HDfprintf(stderr, "    Read different values than written.\n");
-                HDfprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
-                          (unsigned long)(hs_offset[1] + j));
-                HDfprintf(stderr, "    At original: %d\n",
-                          (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
-                HDfprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
+                fprintf(stderr, "    Read different values than written.\n");
+                fprintf(stderr, "    At index %lu,%lu\n", (unsigned long)(i),
+                        (unsigned long)(hs_offset[1] + j));
+                fprintf(stderr, "    At original: %d\n", (int)points[i * size[1] + (size_t)hs_offset[1] + j]);
+                fprintf(stderr, "    At returned: %d\n", (int)check[i * hs_size[1] + j]);
                 VRFY(FALSE, "");
             }
         }
@@ -228,7 +227,7 @@ test_filter_read(void)
     filename = GetTestParameters();
 
     if (VERBOSE_MED)
-        HDprintf("Parallel reading of dataset written with filters %s\n", filename);
+        printf("Parallel reading of dataset written with filters %s\n", filename);
 
     /*----------------------------------------------------------
      * STEP 0: Test without filters.

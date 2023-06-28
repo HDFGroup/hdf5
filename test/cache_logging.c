@@ -165,16 +165,16 @@ main(void)
     /* Reset library */
     h5_reset();
 
-    HDprintf("Testing basic metadata cache logging functionality.\n");
+    printf("Testing basic metadata cache logging functionality.\n");
 
     nerrors += test_logging_api();
 
     if (nerrors) {
-        HDprintf("***** %d Metadata cache logging TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Metadata cache logging TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         HDexit(EXIT_FAILURE);
     }
 
-    HDprintf("All Metadata Cache Logging tests passed.\n");
+    printf("All Metadata Cache Logging tests passed.\n");
 
     HDexit(EXIT_SUCCESS);
 }

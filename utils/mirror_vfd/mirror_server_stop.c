@@ -60,15 +60,15 @@ struct mshs_opts {
 static void
 usage(void)
 {
-    HDprintf("mirror_server_stop [options]\n"
-             "System-independent Mirror Server shutdown program.\n"
-             "Sends shutdown message to Mirror Server at given IP:port\n"
-             "\n"
-             "Options:\n"
-             "    -h | --help Print this usage message and exit.\n"
-             "    --ip=ADDR   IP Address of remote server (default %s)\n"
-             "    --port=PORT Handshake port of remote server (default %d)\n",
-             MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
+    printf("mirror_server_stop [options]\n"
+           "System-independent Mirror Server shutdown program.\n"
+           "Sends shutdown message to Mirror Server at given IP:port\n"
+           "\n"
+           "Options:\n"
+           "    -h | --help Print this usage message and exit.\n"
+           "    --ip=ADDR   IP Address of remote server (default %s)\n"
+           "    --port=PORT Handshake port of remote server (default %d)\n",
+           MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
 } /* end usage() */
 
 /* ----------------------------------------------------------------------------
@@ -102,7 +102,7 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
             opts->portno = HDatoi(argv[i] + 7);
         }
         else {
-            HDprintf("Unrecognized option: '%s'\n", argv[i]);
+            printf("Unrecognized option: '%s'\n", argv[i]);
             usage();
             opts->magic++; /* invalidate for sanity */
             return -1;
@@ -133,13 +133,13 @@ send_shutdown(struct mshs_opts *opts)
     struct sockaddr_in target_addr;
 
     if (opts->magic != MSHS_OPTS_MAGIC) {
-        HDprintf("invalid options structure\n");
+        printf("invalid options structure\n");
         return -1;
     }
 
     live_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0) {
-        HDprintf("ERROR socket()\n");
+        printf("ERROR socket()\n");
         return -1;
     }
 
@@ -149,27 +149,27 @@ send_shutdown(struct mshs_opts *opts)
     HDmemset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
 
     if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
-        HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
         return -1;
     }
 
     if (HDwrite(live_socket, "SHUTDOWN", 9) == -1) {
-        HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
         return -1;
     }
 
     /* Read & verify response from port connection.  */
     if (HDread(live_socket, &mybuf, sizeof(mybuf)) == -1) {
-        HDprintf("ERROR read() can't receive data\n");
+        printf("ERROR read() can't receive data\n");
         return -1;
     }
     if (HDstrncmp("CLOSING", mybuf, 8)) {
-        HDprintf("ERROR read() didn't receive data from server\n");
+        printf("ERROR read() didn't receive data from server\n");
         return -1;
     }
 
     if (HDclose(live_socket) < 0) {
-        HDprintf("ERROR close() can't close socket\n");
+        printf("ERROR close() can't close socket\n");
         return -1;
     }
 
@@ -183,7 +183,7 @@ main(int argc, char **argv)
     struct mshs_opts opts;
 
     if (parse_args(argc, argv, &opts) < 0) {
-        HDprintf("Unable to parse arguments\n");
+        printf("Unable to parse arguments\n");
         HDexit(EXIT_FAILURE);
     }
 
@@ -193,7 +193,7 @@ main(int argc, char **argv)
     }
 
     if (send_shutdown(&opts) < 0) {
-        HDprintf("Unable to send shutdown command\n");
+        printf("Unable to send shutdown command\n");
         HDexit(EXIT_FAILURE);
     }
 
@@ -206,7 +206,7 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    HDprintf("Mirror VFD not built -- unable to perform shutdown.\n");
+    printf("Mirror VFD not built -- unable to perform shutdown.\n");
     HDexit(EXIT_FAILURE);
 }
 

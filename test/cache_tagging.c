@@ -4532,7 +4532,7 @@ check_invalid_tag_application(void)
     PASSED();
 #else
     SKIPPED();
-    HDprintf("    test skipped because sanity checking on tag value is disabled.\n");
+    printf("    test skipped because sanity checking on tag value is disabled.\n");
 #endif /* H5C_DO_TAGGING_SANITY_CHECKS */
 
     return 0;
@@ -4601,13 +4601,13 @@ main(void)
         if (test_type == TEST_DEFAULT) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ default fcpl:\n");
+                printf("Testing standard tag application cases w/ default fcpl:\n");
             fcpl = fcpl_default;
         }
         else if (test_type == TEST_SHMESG) {
 
             if (!nerrs)
-                HDprintf("Testing standard tag application cases w/ shared messages:\n");
+                printf("Testing standard tag application cases w/ shared messages:\n");
             fcpl = fcpl_shmesg_all;
         }
         else {
@@ -4638,7 +4638,7 @@ main(void)
     } /* end for */
 
     if (!nerrs)
-        HDprintf("Testing other specific tag application cases:\n");
+        printf("Testing other specific tag application cases:\n");
     if (!nerrs)
         nerrs += check_group_creation_tags();
     if (!nerrs)

@@ -157,9 +157,9 @@ main(void)
 
         if (HDstrcmp(s, buf) != 0) {
             H5_FAILED();
-            HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
-            HDprintf("    got: \"%s\"\n", s);
-            HDprintf("    ans: \"%s\"\n", buf);
+            printf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
+            printf("    got: \"%s\"\n", s);
+            printf("    ans: \"%s\"\n", buf);
             goto error;
         }
 
@@ -194,7 +194,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
+                printf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }

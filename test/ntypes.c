@@ -152,8 +152,8 @@ test_atomic_dtype(hid_t file)
         for (j = 0; j < DIM1; j++)
             if (ipoints2->arr[i][j] != icheck2->arr[i][j]) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
 
@@ -563,8 +563,8 @@ test_compound_dtype2(hid_t file)
                 temp_point->st.c2 != temp_check->st.c2 || temp_point->st.l2 != temp_check->st.l2 ||
                 temp_point->st.ll2 != temp_check->st.ll2 || temp_point->l != temp_check->l) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
         }     /* end for */
@@ -783,8 +783,8 @@ test_compound_dtype(hid_t file)
             if (temp_point->c != temp_check->c || temp_point->i != temp_check->i ||
                 temp_point->l != temp_check->l) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
 
@@ -1012,16 +1012,16 @@ test_compound_dtype3(hid_t file)
         for (j = 0; j < DIM1; j++, temp_point++, temp_check++) {
             if (temp_point->c != temp_check->c || temp_point->l != temp_check->l) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
 
             for (k = 0; k < 5; k++) {
                 if (temp_point->a[k] != temp_check->a[k]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    At index %d,%d,%d\n", i, j, k);
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d,%d\n", i, j, k);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -1240,16 +1240,16 @@ test_compound_opaque(hid_t file)
         for (j = 0; j < DIM1; j++, temp_point++, temp_check++) {
             if (temp_point->c != temp_check->c || temp_point->l != temp_check->l) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
                 goto error;
             } /* end if */
 
             for (k = 0; k < 5; k++) {
                 if (temp_point->o[k] != temp_check->o[k]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    At index %d,%d,%d\n", i, j, k);
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d,%d\n", i, j, k);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -1413,9 +1413,9 @@ test_enum_dtype(hid_t file)
         for (j = 0; j < DIM1; j++)
             if (spoints2->arr[i][j] != scheck2->arr[i][j]) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf(" spoints2[i][j]=%hd, scheck2[i][j]=%hd\n", spoints2->arr[i][j], scheck2->arr[i][j]);
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                printf(" spoints2[i][j]=%hd, scheck2[i][j]=%hd\n", spoints2->arr[i][j], scheck2->arr[i][j]);
                 goto error;
             } /* end if */
 
@@ -1588,8 +1588,8 @@ test_array_dtype(hid_t file)
                 if (temp_point->c != temp_check->c || temp_point->i != temp_check->i ||
                     temp_point->l != temp_check->l) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    At index %d,%d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d\n", i, j);
                     goto error;
                 } /* end if */
 
@@ -1744,8 +1744,8 @@ test_array_dtype2(hid_t file)
             for (k = 0; k < 5; k++)
                 if (icheck3->arr[i][j][k] != ipoints3->arr[i][j][k]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    At index %d,%d\n", i, j);
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d\n", i, j);
                     goto error;
                 } /* end if */
 
@@ -1820,7 +1820,7 @@ test_vl_dtype(hid_t file)
         wdata[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (NULL == wdata[i].p) {
             H5_FAILED();
-            HDprintf("    Cannot allocate memory for VL data! i=%u\n", (unsigned)i);
+            printf("    Cannot allocate memory for VL data! i=%u\n", (unsigned)i);
             goto error;
         } /* end if */
         wdata[i].len = i + 1;
@@ -1828,7 +1828,7 @@ test_vl_dtype(hid_t file)
             t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (NULL == t1->p) {
                 H5_FAILED();
-                HDprintf("    Cannot allocate memory for VL data! i=%u, j=%u\n", (unsigned)i, (unsigned)j);
+                printf("    Cannot allocate memory for VL data! i=%u, j=%u\n", (unsigned)i, (unsigned)j);
                 goto error;
             } /* end if */
             t1->len = j + 1;
@@ -1900,15 +1900,15 @@ test_vl_dtype(hid_t file)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (wdata[i].len != rdata[i].len) {
             H5_FAILED();
-            HDprintf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
-                     (int)wdata[i].len, (int)i, (int)rdata[i].len);
+            printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
+                   (int)wdata[i].len, (int)i, (int)rdata[i].len);
             goto error;
         } /* end if */
         for (t1 = (hvl_t *)wdata[i].p, t2 = (hvl_t *)rdata[i].p, j = 0; j < rdata[i].len; j++, t1++, t2++) {
             if (t1->len != t2->len) {
                 H5_FAILED();
-                HDprintf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
-                         (int)wdata[i].len, (int)i, (int)rdata[i].len);
+                printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n", (int)i,
+                       (int)wdata[i].len, (int)i, (int)rdata[i].len);
                 goto error;
             } /* end if */
 
@@ -1924,8 +1924,8 @@ test_vl_dtype(hid_t file)
             for (k = 0; k < t2->len; k++) {
                 if (((unsigned int *)t1->p)[k] != ((unsigned int *)tmp)[k]) {
                     H5_FAILED();
-                    HDprintf("    VL data don't match!, wdata[%u].p=%d, rdata[%u].p=%u\n", (unsigned)i,
-                             ((unsigned int *)t1->p)[k], (unsigned)i, ((unsigned int *)tmp)[k]);
+                    printf("    VL data don't match!, wdata[%u].p=%d, rdata[%u].p=%u\n", (unsigned)i,
+                           ((unsigned int *)t1->p)[k], (unsigned)i, ((unsigned int *)tmp)[k]);
                     goto error;
                 } /* end if */
             }     /* end for */
@@ -2075,14 +2075,14 @@ test_vlstr_dtype(hid_t file)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             H5_FAILED();
-            HDprintf("    VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                     (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+            printf("    VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
+                   (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             goto error;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
-            HDprintf("    VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
-                     (int)i, rdata[i]);
+            printf("    VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
+                   rdata[i]);
             goto error;
         } /* end if */
     }     /* end for */
@@ -2206,14 +2206,14 @@ test_str_dtype(hid_t file)
     for (i = 0; i < SPACE1_DIM1; i++) {
         if (HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             H5_FAILED();
-            HDprintf("    data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
-                     (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
+            printf("    data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i,
+                   (int)HDstrlen(wdata[i]), (int)i, (int)HDstrlen(rdata[i]));
             goto error;
         } /* end if */
         if (HDstrcmp(wdata[i], rdata[i]) != 0) {
             H5_FAILED();
-            HDprintf("    data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
-                     rdata[i]);
+            printf("    data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i,
+                   rdata[i]);
             goto error;
         } /* end if */
     }     /* end for */
@@ -2697,8 +2697,8 @@ test_opaque_dtype(hid_t file)
     for (i = 0; i < sizeof(rbuf); i++)
         if (rbuf[i] != wbuf[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %u\n", (unsigned)i);
+            printf("    Read different values than written.\n");
+            printf("    At index %u\n", (unsigned)i);
             goto error;
         } /* end if */
 
@@ -2817,8 +2817,8 @@ test_bitfield_dtype(hid_t file)
     for (i = 0; i < BITFIELD_ENUMB * 4; i++) {
         if (*p != wbuf[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %zu\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %zu\n", i);
             TEST_ERROR;
         }
         p++;
@@ -2850,8 +2850,8 @@ test_bitfield_dtype(hid_t file)
     for (i = 0; i < BITFIELD_ENUMB; i++) {
         if (intr[i] != intw[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %zu\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %zu\n", i);
             TEST_ERROR;
         }
     }
@@ -3027,13 +3027,13 @@ test_ninteger(void)
 
     /* check */
     if (H5Tget_precision(nid1) != H5Tget_precision(nid2)) {
-        HDprintf("    Precision differ.\n");
+        printf("    Precision differ.\n");
         TEST_ERROR;
     } /* end if */
 
     /* compare dataset creation property lists */
     if (H5Pequal(dcpl1, dcpl2) <= 0) {
-        HDprintf("    Property lists differ.\n");
+        printf("    Property lists differ.\n");
         TEST_ERROR;
     } /* end if */
 
@@ -3041,8 +3041,8 @@ test_ninteger(void)
     for (i = 0; i < DIM3; i++)
         if (buf[i] != chk[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -3155,7 +3155,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All native datatype tests passed.\n");
+    printf("All native datatype tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
@@ -3169,7 +3169,7 @@ error:
     H5E_END_TRY
 
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
 
     return 1;
 }

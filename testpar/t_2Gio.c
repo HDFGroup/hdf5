@@ -96,18 +96,18 @@ MPI_Comm    test_comm = MPI_COMM_WORLD;
 static void
 usage(void)
 {
-    HDprintf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-             "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    HDprintf("\t-m<n_datasets>"
-             "\tset number of datasets for the multiple dataset test\n");
-    HDprintf("\t-n<n_groups>"
-             "\tset number of groups for the multiple group test\n");
-    HDprintf("\t-f <prefix>\tfilename prefix\n");
-    HDprintf("\t-2\t\tuse Split-file together with MPIO\n");
-    HDprintf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", BIG_X_FACTOR,
-             BIG_Y_FACTOR);
-    HDprintf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
-    HDprintf("\n");
+    printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
+           "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+    printf("\t-m<n_datasets>"
+           "\tset number of datasets for the multiple dataset test\n");
+    printf("\t-n<n_groups>"
+           "\tset number of groups for the multiple group test\n");
+    printf("\t-f <prefix>\tfilename prefix\n");
+    printf("\t-2\t\tuse Split-file together with MPIO\n");
+    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", BIG_X_FACTOR,
+           BIG_Y_FACTOR);
+    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
+    printf("\n");
 }
 
 /*
@@ -189,7 +189,7 @@ parse_options(int argc, char **argv)
                 case 'h': /* print help message--return with nerrors set */
                     return (1);
                 default:
-                    HDprintf("Illegal option(%s)\n", *argv);
+                    printf("Illegal option(%s)\n", *argv);
                     nerrors++;
                     return (1);
             }
@@ -198,12 +198,12 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0) {
-        HDprintf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+        printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
         nerrors++;
         return (1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0) {
-        HDprintf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+        printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
         nerrors++;
         return (1);
     }
@@ -211,7 +211,7 @@ parse_options(int argc, char **argv)
     /* Make sure datasets can be divided into equal portions by the processes */
     if ((dim0 % mpi_size) || (dim1 % mpi_size)) {
         if (MAINPROCESS)
-            HDprintf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n", dim0, dim1, mpi_size);
+            printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n", dim0, dim1, mpi_size);
         nerrors++;
         return (1);
     }
@@ -224,15 +224,15 @@ parse_options(int argc, char **argv)
 
         for (i = 0; i < n; i++)
             if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
-                HDprintf("h5_fixname failed\n");
+                printf("h5_fixname failed\n");
                 nerrors++;
                 return (1);
             }
 
         if (MAINPROCESS) {
-            HDprintf("Test filenames are:\n");
+            printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
-                HDprintf("    %s\n", filenames[i]);
+                printf("    %s\n", filenames[i]);
         }
     }
 
@@ -317,7 +317,7 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
             start[0]  = (hsize_t)mpi_rank * block[0];
             start[1]  = 0;
             if (VERBOSE_MED)
-                HDprintf("slab_set BYROW\n");
+                printf("slab_set BYROW\n");
             break;
         case BYCOL:
             /* Each process takes a block of columns. */
@@ -330,7 +330,7 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
             start[0]  = 0;
             start[1]  = (hsize_t)mpi_rank * block[1];
             if (VERBOSE_MED)
-                HDprintf("slab_set BYCOL\n");
+                printf("slab_set BYCOL\n");
             break;
         case ZROW:
             /* Similar to BYROW except process 0 gets 0 row */
@@ -343,7 +343,7 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
             start[0]  = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[0] : 0);
             start[1]  = 0;
             if (VERBOSE_MED)
-                HDprintf("slab_set ZROW\n");
+                printf("slab_set ZROW\n");
             break;
         case ZCOL:
             /* Similar to BYCOL except process 0 gets 0 column */
@@ -356,11 +356,11 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
             start[0]  = 0;
             start[1]  = (hsize_t)(mpi_rank ? (hsize_t)mpi_rank * block[1] : 0);
             if (VERBOSE_MED)
-                HDprintf("slab_set ZCOL\n");
+                printf("slab_set ZCOL\n");
             break;
         default:
             /* Unknown mode.  Set it to cover the whole dataset. */
-            HDprintf("unknown slab_set mode (%d)\n", mode);
+            printf("unknown slab_set mode (%d)\n", mode);
             block[0]  = (hsize_t)dim0;
             block[1]  = (hsize_t)dim1;
             stride[0] = block[0];
@@ -370,16 +370,16 @@ slab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[], hsize_t s
             start[0]  = 0;
             start[1]  = 0;
             if (VERBOSE_MED)
-                HDprintf("slab_set wholeset\n");
+                printf("slab_set wholeset\n");
             break;
     }
     if (VERBOSE_MED) {
-        HDprintf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
     }
 }
 
@@ -417,15 +417,15 @@ point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], s
                     }
 
     if (VERBOSE_MED) {
-        HDprintf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
-                 "datapoints=%lu\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1],
-                 (unsigned long)(block[0] * block[1] * count[0] * count[1]));
+        printf("start[]=(%lu, %lu), count[]=(%lu, %lu), stride[]=(%lu, %lu), block[]=(%lu, %lu), total "
+               "datapoints=%lu\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1],
+               (unsigned long)(block[0] * block[1] * count[0] * count[1]));
         k = 0;
         for (i = 0; i < num_points; i++) {
-            HDprintf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
+            printf("(%d, %d)\n", (int)coords[k], (int)coords[k + 1]);
             k += 2;
         }
     }
@@ -460,19 +460,19 @@ dataset_print(hsize_t start[], hsize_t block[], DATATYPE *dataset)
     hsize_t   i, j;
 
     /* print the column heading */
-    HDprintf("%-8s", "Cols:");
+    printf("%-8s", "Cols:");
     for (j = 0; j < block[1]; j++) {
-        HDprintf("%3lu ", (unsigned long)(start[1] + j));
+        printf("%3lu ", (unsigned long)(start[1] + j));
     }
-    HDprintf("\n");
+    printf("\n");
 
     /* print the slab data */
     for (i = 0; i < block[0]; i++) {
-        HDprintf("Row %2lu: ", (unsigned long)(i + start[0]));
+        printf("Row %2lu: ", (unsigned long)(i + start[0]));
         for (j = 0; j < block[1]; j++) {
-            HDprintf("%03d ", *dataptr++);
+            printf("%03d ", *dataptr++);
         }
-        HDprintf("\n");
+        printf("\n");
     }
 }
 
@@ -488,14 +488,14 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
-        HDprintf("dataset_vrfy dumping:::\n");
-        HDprintf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-                 (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
-                 (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
-                 (unsigned long)block[0], (unsigned long)block[1]);
-        HDprintf("original values:\n");
+        printf("dataset_vrfy dumping:::\n");
+        printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+               (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0],
+               (unsigned long)count[1], (unsigned long)stride[0], (unsigned long)stride[1],
+               (unsigned long)block[0], (unsigned long)block[1]);
+        printf("original values:\n");
         dataset_print(start, block, original);
-        HDprintf("compared values:\n");
+        printf("compared values:\n");
         dataset_print(start, block, dataset);
     }
 
@@ -504,9 +504,9 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
         for (j = 0; j < block[1]; j++) {
             if (*dataset != *original) {
                 if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED) {
-                    HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-                             (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
-                             (unsigned long)(j + start[1]), *(original), *(dataset));
+                    printf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
+                           (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
+                           (unsigned long)(j + start[1]), *(original), *(dataset));
                 }
                 dataset++;
                 original++;
@@ -514,9 +514,9 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
         }
     }
     if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-        HDprintf("[more errors ...]\n");
+        printf("[more errors ...]\n");
     if (vrfyerrs)
-        HDprintf("%d errors found in dataset_vrfy\n", vrfyerrs);
+        printf("%d errors found in dataset_vrfy\n", vrfyerrs);
     return (vrfyerrs);
 }
 
@@ -577,9 +577,9 @@ MpioTest2G(MPI_Comm comm)
     MPI_Comm_rank(comm, &mpi_rank);
 
     if (mpi_rank == 0) {
-        HDprintf("Using %d process on dataset shape "
-                 "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
-                 mpi_size, shape[0], shape[1], shape[2]);
+        printf("Using %d process on dataset shape "
+               "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
+               mpi_size, shape[0], shape[1], shape[2]);
     }
 
     /*
@@ -606,7 +606,7 @@ MpioTest2G(MPI_Comm comm)
         tot_size_bytes *= shape[i];
     }
     if (mpi_rank == 0) {
-        HDprintf("Dataset of %zu bytes\n", tot_size_bytes);
+        printf("Dataset of %zu bytes\n", tot_size_bytes);
     }
     filespace = H5Screate_simple(3, shape, NULL);
     VRFY((filespace >= 0), "H5Screate_simple succeeded");
@@ -681,7 +681,7 @@ MpioTest2G(MPI_Comm comm)
     H5Fclose(file_id);
 
     free(data);
-    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank);
+    printf("Proc %d - MpioTest2G test succeeded\n", mpi_rank);
 
     if (mpi_rank == 0)
         HDremove(FILENAME[1]);
@@ -729,7 +729,7 @@ dataset_writeInd(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Independent write test on file %s\n", filename);
+        printf("Independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -806,7 +806,7 @@ dataset_writeInd(void)
 
     /* setup dimensions again to write with zero rows for process 0 */
     if (VERBOSE_MED)
-        HDprintf("writeInd by some with zero row\n");
+        printf("writeInd by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -869,7 +869,7 @@ dataset_readInd(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Independent read test on file %s\n", filename);
+        printf("Independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -1002,7 +1002,7 @@ dataset_writeAll(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Collective write test on file %s\n", filename);
+        printf("Collective write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -1121,7 +1121,7 @@ dataset_writeAll(void)
 
     /* setup dimensions again to writeAll with zero rows for process 0 */
     if (VERBOSE_MED)
-        HDprintf("writeAll by some with zero row\n");
+        printf("writeAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -1186,7 +1186,7 @@ dataset_writeAll(void)
 
     /* setup dimensions again to writeAll with zero columns for process 0 */
     if (VERBOSE_MED)
-        HDprintf("writeAll by some with zero col\n");
+        printf("writeAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -1518,7 +1518,7 @@ dataset_readAll(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Collective read test on file %s\n", filename);
+        printf("Collective read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -1615,7 +1615,7 @@ dataset_readAll(void)
 
     /* setup dimensions again to readAll with zero columns for process 0 */
     if (VERBOSE_MED)
-        HDprintf("readAll by some with zero col\n");
+        printf("readAll by some with zero col\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZCOL);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -1682,7 +1682,7 @@ dataset_readAll(void)
 
     /* setup dimensions again to readAll with zero rows for process 0 */
     if (VERBOSE_MED)
-        HDprintf("readAll by some with zero row\n");
+        printf("readAll by some with zero row\n");
     slab_set(mpi_rank, mpi_size, start, count, stride, block, ZROW);
     ret = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
@@ -1932,7 +1932,7 @@ extend_writeInd(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent write test on file %s\n", filename);
+        printf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -1984,7 +1984,7 @@ extend_writeInd(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if (VERBOSE_MED)
-        HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+        printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, MAX_RANK, chunk_dims);
@@ -2148,7 +2148,7 @@ extend_writeInd2(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent write test #2 on file %s\n", filename);
+        printf("Extend independent write test #2 on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -2205,8 +2205,8 @@ extend_writeInd2(void)
     if (VERBOSE_MED) {
         MESG("writing at offset zero: ");
         for (i = 0; i < (int)orig_size; i++)
-            HDprintf("%s%d", i ? ", " : "", written[i]);
-        HDprintf("\n");
+            printf("%s%d", i ? ", " : "", written[i]);
+        printf("\n");
     }
     ret = H5Dwrite(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, written);
     VRFY((ret >= 0), "H5Dwrite succeeded");
@@ -2218,15 +2218,15 @@ extend_writeInd2(void)
     VRFY((ret >= 0), "H5Dread succeeded");
     for (i = 0; i < (int)orig_size; i++)
         if (written[i] != retrieved[i]) {
-            HDprintf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
-                     written[i], i, retrieved[i]);
+            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
+                   written[i], i, retrieved[i]);
             nerrors++;
         }
     if (VERBOSE_MED) {
         MESG("read at offset zero: ");
         for (i = 0; i < (int)orig_size; i++)
-            HDprintf("%s%d", i ? ", " : "", retrieved[i]);
-        HDprintf("\n");
+            printf("%s%d", i ? ", " : "", retrieved[i]);
+        printf("\n");
     }
 
     /* -------------------------
@@ -2248,8 +2248,8 @@ extend_writeInd2(void)
     if (VERBOSE_MED) {
         MESG("writing at offset 10: ");
         for (i = 0; i < (int)orig_size; i++)
-            HDprintf("%s%d", i ? ", " : "", written[i]);
-        HDprintf("\n");
+            printf("%s%d", i ? ", " : "", written[i]);
+        printf("\n");
     }
     ret = H5Sselect_hyperslab(fs, H5S_SELECT_SET, &orig_size, NULL, &one, &orig_size);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded");
@@ -2263,15 +2263,15 @@ extend_writeInd2(void)
     VRFY((ret >= 0), "H5Dread succeeded");
     for (i = 0; i < (int)orig_size; i++)
         if (written[i] != retrieved[i]) {
-            HDprintf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
-                     written[i], i, retrieved[i]);
+            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n", __LINE__, i,
+                   written[i], i, retrieved[i]);
             nerrors++;
         }
     if (VERBOSE_MED) {
         MESG("read at offset 10: ");
         for (i = 0; i < (int)orig_size; i++)
-            HDprintf("%s%d", i ? ", " : "", retrieved[i]);
-        HDprintf("\n");
+            printf("%s%d", i ? ", " : "", retrieved[i]);
+        printf("\n");
     }
 
     /* Close dataset collectively */
@@ -2310,7 +2310,7 @@ extend_readInd(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent read test on file %s\n", filename);
+        printf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -2492,7 +2492,7 @@ extend_writeAll(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent write test on file %s\n", filename);
+        printf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -2544,7 +2544,7 @@ extend_writeAll(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if (VERBOSE_MED)
-        HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+        printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, MAX_RANK, chunk_dims);
@@ -2730,7 +2730,7 @@ extend_readAll(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent read test on file %s\n", filename);
+        printf("Extend independent read test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -2921,7 +2921,7 @@ compress_readAll(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Collective chunked dataset read test on file %s\n", filename);
+        printf("Collective chunked dataset read test on file %s\n", filename);
 
     /* Retrieve MPI parameters */
     MPI_Comm_size(comm, &mpi_size);
@@ -3041,8 +3041,8 @@ compress_readAll(void)
             /* Verify data read */
             for (u = 0; u < dim; u++)
                 if (data_orig[u] != data_read[u]) {
-                    HDprintf("Line #%d: written!=retrieved: data_orig[%u]=%d, data_read[%u]=%d\n", __LINE__,
-                             (unsigned)u, data_orig[u], (unsigned)u, data_read[u]);
+                    printf("Line #%d: written!=retrieved: data_orig[%u]=%d, data_read[%u]=%d\n", __LINE__,
+                           (unsigned)u, data_orig[u], (unsigned)u, data_read[u]);
                     nerrors++;
                 }
 
@@ -3113,7 +3113,7 @@ none_selection_chunk(void)
 
     filename = GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend independent write test on file %s\n", filename);
+        printf("Extend independent write test on file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -3144,7 +3144,7 @@ none_selection_chunk(void)
 
     /* set up dataset storage chunk sizes and creation property list */
     if (VERBOSE_MED)
-        HDprintf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
+        printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, MAX_RANK, chunk_dims);
@@ -3710,8 +3710,8 @@ test_actual_io_mode(int selection_mode)
         VRFY((actual_io_mode_write == actual_io_mode_expected), message);
     }
     else {
-        HDfprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank, actual_chunk_opt_mode_write,
-                  actual_io_mode_write);
+        fprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank, actual_chunk_opt_mode_write,
+                actual_io_mode_write);
     }
 
     /* To test that the property is successfully reset to the default, we perform some
@@ -3798,7 +3798,7 @@ actual_io_mode_tests(void)
     if (mpi_size > 2)
         test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX);
     else
-        HDfprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
+        fprintf(stdout, "Multi Chunk Mixed test requires 3 processes minimum\n");
 
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
@@ -4260,11 +4260,11 @@ dataset_atomicity(void)
     dim1     = 32;
     filename = GetTestParameters();
     if (facc_type != FACC_MPIO) {
-        HDprintf("Atomicity tests will not work without the MPIO VFD\n");
+        printf("Atomicity tests will not work without the MPIO VFD\n");
         return;
     }
     if (VERBOSE_MED)
-        HDprintf("atomic writes to file %s\n", filename);
+        printf("atomic writes to file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(test_comm, &mpi_size);
@@ -4394,9 +4394,9 @@ dataset_atomicity(void)
         j = 0;
         k = 0;
         for (i = 0; i < dim0; i++) {
-            HDprintf("\n");
+            printf("\n");
             for (j = 0; j < dim1; j++)
-                HDprintf("%d ", read_buf[k++]);
+                printf("%d ", read_buf[k++]);
         }
     }
 
@@ -4410,8 +4410,8 @@ dataset_atomicity(void)
              "Atomicity Test Failed Process %d: Value read should be 0 or 5\n");
         for (i = 1; i < buf_size; i++) {
             if (read_buf[i] != compare) {
-                HDprintf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i,
-                         read_buf[i], compare);
+                printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank, i,
+                       read_buf[i], compare);
                 nerrors++;
             }
         }
@@ -4494,11 +4494,11 @@ dataset_atomicity(void)
             j = 0;
             k = 0;
             for (i = 0; i < dim0; i++) {
-                HDprintf("\n");
+                printf("\n");
                 for (j = 0; j < dim1; j++)
-                    HDprintf("%d ", read_buf[k++]);
+                    printf("%d ", read_buf[k++]);
             }
-            HDprintf("\n");
+            printf("\n");
         }
     }
 
@@ -4531,8 +4531,8 @@ dataset_atomicity(void)
                     continue;
                 }
                 else if (compare != read_buf[k]) {
-                    HDprintf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank,
-                             k, read_buf[k], compare);
+                    printf("Atomicity Test Failed Process %d: read_buf[%d] is %d, should be %d\n", mpi_rank,
+                           k, read_buf[k], compare);
                     nerrors++;
                 }
                 k++;
@@ -4645,22 +4645,22 @@ main(int argc, char **argv)
     dim2 = BIG_Z_FACTOR;
 
     if (MAINPROCESS) {
-        HDprintf("===================================\n");
-        HDprintf("2 GByte IO TESTS START\n");
-        HDprintf("2 MPI ranks will run the tests...\n");
-        HDprintf("===================================\n");
+        printf("===================================\n");
+        printf("2 GByte IO TESTS START\n");
+        printf("2 MPI ranks will run the tests...\n");
+        printf("===================================\n");
         h5_show_hostname();
     }
 
     if (H5dont_atexit() < 0) {
-        HDprintf("Failed to turn off atexit processing. Continue.\n");
+        printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
 
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = malloc(PATH_MAX))) {
-            HDprintf("couldn't allocate filename array\n");
+            printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
     }
@@ -4675,7 +4675,7 @@ main(int argc, char **argv)
         if (mpi_rank >= 2)
             rank_color = 1;
         if (MPI_Comm_split(test_comm, rank_color, mpi_rank, &test_comm) != MPI_SUCCESS) {
-            HDprintf("MPI returned an error. Exiting\n");
+            printf("MPI returned an error. Exiting\n");
         }
     }
 

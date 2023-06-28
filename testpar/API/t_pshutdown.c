@@ -70,7 +70,7 @@ main(int argc, char **argv)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         if (MAINPROCESS) {
             puts("SKIPPED");
-            HDprintf(
+            printf(
                 "    API functions for basic file, group, or dataset aren't supported with this connector\n");
             fflush(stdout);
         }

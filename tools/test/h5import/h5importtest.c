@@ -163,8 +163,8 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++)
-                (void)HDfprintf(sp, "%10u", b8i3[k][i][j]);
-            (void)HDfprintf(sp, "\n");
+                (void)fprintf(sp, "%10u", b8i3[k][i][j]);
+            (void)fprintf(sp, "\n");
         }
     }
     (void)HDfclose(sp);
@@ -178,8 +178,8 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++)
-                (void)HDfprintf(sp, "%10u", b16i3[k][i][j]);
-            (void)HDfprintf(sp, "\n");
+                (void)fprintf(sp, "%10u", b16i3[k][i][j]);
+            (void)fprintf(sp, "\n");
         }
     }
     (void)HDfclose(sp);
@@ -193,8 +193,8 @@ main(void)
     for (k = 0; k < npln; k++) {
         for (i = 0; i < nrow; i++) {
             for (j = 0; j < ncol; j++)
-                (void)HDfprintf(sp, "%10d", b32i3[k][i][j]);
-            (void)HDfprintf(sp, "\n");
+                (void)fprintf(sp, "%10d", b32i3[k][i][j]);
+            (void)fprintf(sp, "\n");
         }
     }
     (void)HDfclose(sp);
@@ -216,16 +216,16 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binin32.conf", "w");
-    (void)HDfprintf(sp, "PATH /int/bin/32-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS IN\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    32\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 5 3 4\n");
-    (void)HDfprintf(sp, "CHUNKED-DIMENSION-SIZES 1 2 1\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /int/bin/32-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS IN\n");
+    (void)fprintf(sp, "INPUT-SIZE    32\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 1 2 1\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
     /*-------------------------------------------------------------------------
@@ -244,15 +244,15 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binuin32.conf", "w");
-    (void)HDfprintf(sp, "PATH /int/buin/32-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS UIN\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    32\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 5 3 4\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /int/buin/32-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS UIN\n");
+    (void)fprintf(sp, "INPUT-SIZE    32\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
     /*-------------------------------------------------------------------------
@@ -271,17 +271,17 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binin16.conf", "w");
-    (void)HDfprintf(sp, "PATH /int/bin/16-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS IN\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    16\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 2 3 4\n");
-    (void)HDfprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
-    (void)HDfprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /int/bin/16-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS IN\n");
+    (void)fprintf(sp, "INPUT-SIZE    16\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 2 3 4\n");
+    (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
     /*-------------------------------------------------------------------------
@@ -299,17 +299,17 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binuin16.conf", "w");
-    (void)HDfprintf(sp, "PATH /int/buin/16-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS UIN\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    16\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 2 3 4\n");
-    (void)HDfprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
-    (void)HDfprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /int/buin/16-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS UIN\n");
+    (void)fprintf(sp, "INPUT-SIZE    16\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER BE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 2 3 4\n");
+    (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 8\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
     /*-------------------------------------------------------------------------
@@ -328,20 +328,20 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binin8.conf", "w");
-    (void)HDfprintf(sp, "PATH /int/bin/8-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS IN\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    8\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-CLASS IN\n");
-    (void)HDfprintf(sp, "OUTPUT-SIZE    16\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 5 3 4\n");
-    (void)HDfprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
-    (void)HDfprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 -1\n");
-    (void)HDfprintf(sp, "COMPRESSION-PARAM 3\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /int/bin/8-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS IN\n");
+    (void)fprintf(sp, "INPUT-SIZE    8\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-CLASS IN\n");
+    (void)fprintf(sp, "OUTPUT-SIZE    16\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 -1 -1\n");
+    (void)fprintf(sp, "COMPRESSION-PARAM 3\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
 #endif /* UNICOS */
@@ -366,18 +366,18 @@ main(void)
     (void)HDfclose(sp);
 
     sp = HDfopen("binfp64.conf", "w");
-    (void)HDfprintf(sp, "PATH /fp/bin/64-bit\n");
-    (void)HDfprintf(sp, "INPUT-CLASS FP\n");
-    (void)HDfprintf(sp, "INPUT-SIZE    64\n");
-    (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-    (void)HDfprintf(sp, "RANK 3\n");
-    (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE IEEE\n");
-    (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
-    (void)HDfprintf(sp, "DIMENSION-SIZES 5 3 4\n");
-    (void)HDfprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
-    (void)HDfprintf(sp, "MAXIMUM-DIMENSIONS -1 6 7\n");
-    (void)HDfprintf(sp, "COMPRESSION-PARAM 8\n");
-    (void)HDfprintf(sp, "\n");
+    (void)fprintf(sp, "PATH /fp/bin/64-bit\n");
+    (void)fprintf(sp, "INPUT-CLASS FP\n");
+    (void)fprintf(sp, "INPUT-SIZE    64\n");
+    (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+    (void)fprintf(sp, "RANK 3\n");
+    (void)fprintf(sp, "OUTPUT-ARCHITECTURE IEEE\n");
+    (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+    (void)fprintf(sp, "DIMENSION-SIZES 5 3 4\n");
+    (void)fprintf(sp, "CHUNKED-DIMENSION-SIZES 2 2 2\n");
+    (void)fprintf(sp, "MAXIMUM-DIMENSIONS -1 6 7\n");
+    (void)fprintf(sp, "COMPRESSION-PARAM 8\n");
+    (void)fprintf(sp, "\n");
     (void)HDfclose(sp);
 
     /*-------------------------------------------------------------------------
@@ -393,21 +393,21 @@ main(void)
         for (i = 0; i < 4; i++) {
             char c = bin8w[i];
             if (HDfwrite(&c, sizeof(char), 1, sp) != 1)
-                HDprintf("error writing file\n");
+                printf("error writing file\n");
         }
         HDfclose(sp);
 
         sp = HDfopen("binin8w.conf", "w");
-        (void)HDfprintf(sp, "INPUT-CLASS IN\n");
-        (void)HDfprintf(sp, "INPUT-SIZE    8\n");
-        (void)HDfprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
-        (void)HDfprintf(sp, "RANK 1\n");
-        (void)HDfprintf(sp, "OUTPUT-CLASS IN\n");
-        (void)HDfprintf(sp, "OUTPUT-SIZE    8\n");
-        (void)HDfprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
-        (void)HDfprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
-        (void)HDfprintf(sp, "DIMENSION-SIZES 4\n");
-        (void)HDfprintf(sp, "\n");
+        (void)fprintf(sp, "INPUT-CLASS IN\n");
+        (void)fprintf(sp, "INPUT-SIZE    8\n");
+        (void)fprintf(sp, "INPUT-BYTE-ORDER %s\n", machine_order);
+        (void)fprintf(sp, "RANK 1\n");
+        (void)fprintf(sp, "OUTPUT-CLASS IN\n");
+        (void)fprintf(sp, "OUTPUT-SIZE    8\n");
+        (void)fprintf(sp, "OUTPUT-ARCHITECTURE STD\n");
+        (void)fprintf(sp, "OUTPUT-BYTE-ORDER LE\n");
+        (void)fprintf(sp, "DIMENSION-SIZES 4\n");
+        (void)fprintf(sp, "\n");
         (void)HDfclose(sp);
     }
     return (EXIT_SUCCESS);

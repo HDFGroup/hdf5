@@ -143,7 +143,7 @@ test_timer_system_user(void)
      */
     if (timer.initial.system < 0.0 || timer.initial.user < 0.0) {
         SKIPPED();
-        HDprintf("NOTE: No suitable way to get system/user times on this platform.\n");
+        printf("NOTE: No suitable way to get system/user times on this platform.\n");
         return 0;
     }
 
@@ -380,7 +380,7 @@ main(void)
 
     h5_reset();
 
-    HDprintf("Testing platform-independent timer functionality.\n");
+    printf("Testing platform-independent timer functionality.\n");
 
     nerrors += test_time_formatting() < 0 ? 1 : 0;
     nerrors += test_timer_system_user() < 0 ? 1 : 0;
@@ -388,12 +388,11 @@ main(void)
     nerrors += test_timer_functionality() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors,
-                 nerrors > 1 ? "S" : "");
+        printf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return 1;
     }
     else {
-        HDprintf("All platform-independent timer tests passed.\n");
+        printf("All platform-independent timer tests passed.\n");
         return 0;
     }
 }

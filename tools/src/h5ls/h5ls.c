@@ -239,6 +239,11 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                   If none of the above options are used to specify a VOL, then\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                   the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream, "                   if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd-value     Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "   --vfd-name      Name of the VFL driver to use for opening the\n");
@@ -2596,14 +2601,14 @@ is_valid_args(void)
     hbool_t ret = TRUE;
 
     if (recursive_g && grp_literal_g) {
-        HDfprintf(rawerrorstream, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
+        fprintf(rawerrorstream, "Error: 'recursive' option not compatible with 'group info' option!\n\n");
         ret = FALSE;
         goto out;
     }
 
     if (no_dangling_link_g && !follow_symlink_g) {
-        HDfprintf(rawerrorstream,
-                  "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
+        fprintf(rawerrorstream,
+                "Error: --no-dangling-links must be used along with --follow-symlinks option!\n\n");
         ret = FALSE;
         goto out;
     }
@@ -2839,23 +2844,23 @@ main(int argc, char *argv[])
 
             start = strchr(argv[argno], '=');
             if (start == NULL) {
-                HDfprintf(rawerrorstream,
-                          "Error: Unable to parse null credentials tuple\n"
-                          "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
+                fprintf(rawerrorstream,
+                        "Error: Unable to parse null credentials tuple\n"
+                        "    For anonymous access, omit \"--s3-cred\" and use only \"--vfd=ros3\"\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
             start++;
 
             if (h5tools_parse_ros3_fapl_tuple(start, ',', &ros3_fa) < 0) {
-                HDfprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
+                fprintf(rawerrorstream, "Error: failed to parse S3 VFD credential info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
             vfd_info.info = &ros3_fa;
 #else
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
+            fprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();
             leave(EXIT_FAILURE);
 #endif
@@ -2871,14 +2876,14 @@ main(int argc, char *argv[])
             }
 
             if (h5tools_parse_hdfs_fapl_tuple(start, ',', &hdfs_fa) < 0) {
-                HDfprintf(rawerrorstream, "Error: failed to parse HDFS VFD configuration info\n\n");
+                fprintf(rawerrorstream, "Error: failed to parse HDFS VFD configuration info\n\n");
                 usage();
                 leave(EXIT_FAILURE);
             }
 
             vfd_info.info = &hdfs_fa;
 #else
-            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
+            fprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             usage();
             leave(EXIT_FAILURE);
 #endif
@@ -2955,7 +2960,7 @@ main(int argc, char *argv[])
             }     /* end for */
         }
         else {
-            HDfprintf(stderr, "Unknown argument: %s\n", argv[argno]);
+            fprintf(stderr, "Unknown argument: %s\n", argv[argno]);
             usage();
             leave(EXIT_FAILURE);
         }
@@ -3043,7 +3048,7 @@ main(int argc, char *argv[])
         } /* end while */
 
         if (file_id < 0) {
-            HDfprintf(rawerrorstream, "%s: unable to open file\n", argv[argno - 1]);
+            fprintf(rawerrorstream, "%s: unable to open file\n", argv[argno - 1]);
             free(fname);
             err_exit = 1;
             continue;
@@ -3056,7 +3061,7 @@ main(int argc, char *argv[])
             iter.base_len -= oname[iter.base_len - 1] == '/';
             x = oname;
             if (NULL == (oname = HDstrdup(oname))) {
-                HDfprintf(rawerrorstream, "memory allocation failed\n");
+                fprintf(rawerrorstream, "memory allocation failed\n");
                 leave(EXIT_FAILURE);
             }
             *x = '\0';
@@ -3140,7 +3145,7 @@ main(int argc, char *argv[])
 
     if (fapl_id != H5P_DEFAULT) {
         if (0 < H5Pclose(fapl_id)) {
-            HDfprintf(rawerrorstream, "Error: Unable to set close fapl entry\n\n");
+            fprintf(rawerrorstream, "Error: Unable to set close fapl entry\n\n");
             leave(EXIT_FAILURE);
         }
     }

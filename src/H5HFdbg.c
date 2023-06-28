@@ -139,7 +139,7 @@ H5HF_id_print(H5HF_t *fh, const void *_id, FILE *stream, int indent, int fwidth)
         id_type = 'T';
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
+        fprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -152,8 +152,8 @@ H5HF_id_print(H5HF_t *fh, const void *_id, FILE *stream, int indent, int fwidth)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve heap ID length")
 
     /* Display the heap ID */
-    HDfprintf(stream, "%*s%-*s (%c, %" PRIuHSIZE " , %zu)\n", indent, "", fwidth,
-              "Heap ID info: (type, offset, length)", id_type, obj_off, obj_len);
+    fprintf(stream, "%*s%-*s (%c, %" PRIuHSIZE " , %zu)\n", indent, "", fwidth,
+            "Heap ID info: (type, offset, length)", id_type, obj_off, obj_len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -188,31 +188,30 @@ H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fw
      * Print the values.
      */
     /* Creation parameter values */
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Doubling table width:", dtable->cparam.width);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Starting block size:", dtable->cparam.start_block_size);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Max. direct block size:", dtable->cparam.max_direct_size);
-    HDfprintf(stream, "%*s%-*s %u (bits)\n", indent, "", fwidth,
-              "Max. index size:", dtable->cparam.max_index);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Starting # of rows in root indirect block:", dtable->cparam.start_root_rows);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Doubling table width:", dtable->cparam.width);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "Starting block size:", dtable->cparam.start_block_size);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "Max. direct block size:", dtable->cparam.max_direct_size);
+    fprintf(stream, "%*s%-*s %u (bits)\n", indent, "", fwidth, "Max. index size:", dtable->cparam.max_index);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Starting # of rows in root indirect block:", dtable->cparam.start_root_rows);
 
     /* Run-time varying parameter values */
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Table's root address:", dtable->table_addr);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Current # of rows in root indirect block:", dtable->curr_root_rows);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Table's root address:", dtable->table_addr);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Current # of rows in root indirect block:", dtable->curr_root_rows);
 
     /* Computed values */
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Max. # of rows in root indirect block:", dtable->max_root_rows);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Max. # of direct rows in any indirect block:", dtable->max_direct_rows);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "# of bits for IDs in first row:", dtable->first_row_bits);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "# of IDs in first row:", dtable->num_id_first_row);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Max. # of rows in root indirect block:", dtable->max_root_rows);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Max. # of direct rows in any indirect block:", dtable->max_direct_rows);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "# of bits for IDs in first row:", dtable->first_row_bits);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "# of IDs in first row:", dtable->num_id_first_row);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__dtable_debug() */
@@ -243,70 +242,70 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
     assert(fwidth >= 0);
 
     /* Print opening message */
-    HDfprintf(stream, "%*sFractal Heap Header...\n", indent, "");
+    fprintf(stream, "%*sFractal Heap Header...\n", indent, "");
 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Heap is:", hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Objects stored in 'debugging' format:", hdr->debug_objs ? "TRUE" : "FALSE");
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "'Write once' flag:", hdr->write_once ? "TRUE" : "FALSE");
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "'Huge' object IDs have wrapped:", hdr->huge_ids_wrapped ? "TRUE" : "FALSE");
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Free space in managed blocks:", hdr->total_man_free);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Managed space data block size:", hdr->man_size);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Total managed space allocated:", hdr->man_alloc_size);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Offset of managed space iterator:", hdr->man_iter_off);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Number of managed objects in heap:", hdr->man_nobjs);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Address of free space manager for managed blocks:", hdr->fs_addr);
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Max. size of managed object:", (unsigned long)hdr->max_man_size);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "'Huge' object space used:", hdr->huge_size);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Number of 'huge' objects in heap:", hdr->huge_nobjs);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "ID of next 'huge' object:", hdr->huge_next_id);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Address of v2 B-tree for 'huge' objects:", hdr->huge_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "'Tiny' object space used:", hdr->tiny_size);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Number of 'tiny' objects in heap:", hdr->tiny_nobjs);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Heap is:", hdr->man_dtable.curr_root_rows > 0 ? "Indirect" : "Direct");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Objects stored in 'debugging' format:", hdr->debug_objs ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "'Write once' flag:", hdr->write_once ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "'Huge' object IDs have wrapped:", hdr->huge_ids_wrapped ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Free space in managed blocks:", hdr->total_man_free);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Managed space data block size:", hdr->man_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Total managed space allocated:", hdr->man_alloc_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Offset of managed space iterator:", hdr->man_iter_off);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Number of managed objects in heap:", hdr->man_nobjs);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Address of free space manager for managed blocks:", hdr->fs_addr);
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            "Max. size of managed object:", (unsigned long)hdr->max_man_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "'Huge' object space used:", hdr->huge_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Number of 'huge' objects in heap:", hdr->huge_nobjs);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "ID of next 'huge' object:", hdr->huge_next_id);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Address of v2 B-tree for 'huge' objects:", hdr->huge_bt2_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "'Tiny' object space used:", hdr->tiny_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Number of 'tiny' objects in heap:", hdr->tiny_nobjs);
 
-    HDfprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
+    fprintf(stream, "%*sManaged Objects Doubling-Table Info...\n", indent, "");
     H5HF__dtable_debug(&hdr->man_dtable, stream, indent + 3, MAX(0, fwidth - 3));
 
     /* Print information about I/O filters */
     if (hdr->filter_len > 0) {
-        HDfprintf(stream, "%*sI/O filter Info...\n", indent, "");
+        fprintf(stream, "%*sI/O filter Info...\n", indent, "");
         if (hdr->man_dtable.curr_root_rows == 0) {
-            HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "Compressed size of root direct block:", hdr->pline_root_direct_size);
-            HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "Filter mask for root direct block:", hdr->pline_root_direct_filter_mask);
+            fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
+                    "Compressed size of root direct block:", hdr->pline_root_direct_size);
+            fprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
+                    "Filter mask for root direct block:", hdr->pline_root_direct_filter_mask);
         } /* end if */
         H5O_debug_id(H5O_PLINE_ID, hdr->f, &(hdr->pline), stream, indent + 3, MAX(0, fwidth - 3));
     } /* end if */
 
     /* Print internal (runtime) information, if requested */
     if (dump_internal) {
-        HDfprintf(stream, "%*sFractal Heap Header Internal Information:\n", indent, "");
+        fprintf(stream, "%*sFractal Heap Header Internal Information:\n", indent, "");
 
         /* Dump root iblock, if there is one */
-        HDfprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Root indirect block flags:", hdr->root_iblock_flags);
-        HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Root indirect block pointer:", (void *)hdr->root_iblock);
+        fprintf(stream, "%*s%-*s %x\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Root indirect block flags:", hdr->root_iblock_flags);
+        fprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Root indirect block pointer:", (void *)hdr->root_iblock);
         if (hdr->root_iblock)
             H5HF_iblock_print(hdr->root_iblock, dump_internal, stream, indent + 3, fwidth);
     } /* end if */
@@ -417,8 +416,8 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         len = end - start;
 
         HDsnprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
-        HDfprintf(udata->stream, "%*s%-*s %8zu, %8zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
-                  temp_str, start, len);
+        fprintf(udata->stream, "%*s%-*s %8zu, %8zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
+                temp_str, start, len);
         udata->sect_count++;
 
         /* Mark this node's free space & check for overlaps w/other sections */
@@ -431,7 +430,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 
         /* Flag overlaps */
         if (overlap)
-            HDfprintf(udata->stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
+            fprintf(udata->stream, "***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
         else
             udata->amount_free += len;
     } /* end if */
@@ -486,17 +485,17 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap direct block")
 
     /* Print opening message */
-    HDfprintf(stream, "%*sFractal Heap Direct Block...\n", indent, "");
+    fprintf(stream, "%*sFractal Heap Direct Block...\n", indent, "");
 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Address of fractal heap that owns this block:", hdr->heap_addr);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Offset of direct block in heap:", dblock->block_off);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Address of fractal heap that owns this block:", hdr->heap_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Offset of direct block in heap:", dblock->block_off);
     blk_prefix_size = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of block header:", blk_prefix_size);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of block header:", blk_prefix_size);
 
     /* Allocate space for the free space markers */
     if (NULL == (marker = (uint8_t *)H5MM_calloc(dblock->size)))
@@ -521,7 +520,7 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
         udata.amount_free = 0;
 
         /* Print header */
-        HDfprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
+        fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
 
         /* Iterate over the free space sections, to detect overlaps with this block */
         if (H5FS_sect_iterate(f, hdr->fspace, H5HF_dblock_debug_cb, &udata) < 0)
@@ -536,14 +535,14 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
 
         /* Check for no free space */
         if (amount_free == 0)
-            HDfprintf(stream, "%*s<none>\n", indent + 3, "");
+            fprintf(stream, "%*s<none>\n", indent + 3, "");
     } /* end if */
     else
         amount_free = 0;
 
-    HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of available space for data used:",
-              (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) /
-               (double)(dblock->size - blk_prefix_size)));
+    fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of available space for data used:",
+            (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) /
+             (double)(dblock->size - blk_prefix_size)));
 
     /*
      * Print the data in a VMS-style octal dump.
@@ -594,44 +593,44 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
     hdr = iblock->hdr;
 
     /* Print opening message */
-    HDfprintf(stream, "%*sFractal Heap Indirect Block...\n", indent, "");
+    fprintf(stream, "%*sFractal Heap Indirect Block...\n", indent, "");
 
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Address of fractal heap that owns this block:", hdr->heap_addr);
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
-              "Offset of indirect block in heap:", iblock->block_off);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of indirect block:", iblock->size);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Current # of rows:", iblock->nrows);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. # of rows:", iblock->max_rows);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Max direct block rows:", hdr->man_dtable.max_direct_rows);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Address of fractal heap that owns this block:", hdr->heap_addr);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE " \n", indent, "", fwidth,
+            "Offset of indirect block in heap:", iblock->block_off);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of indirect block:", iblock->size);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Current # of rows:", iblock->nrows);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. # of rows:", iblock->max_rows);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Max direct block rows:", hdr->man_dtable.max_direct_rows);
 
     /* Print the entry tables */
     if (hdr->filter_len > 0)
-        HDfprintf(stream, "%*sDirect Block Entries: (address/compressed size/filter mask)\n", indent, "");
+        fprintf(stream, "%*sDirect Block Entries: (address/compressed size/filter mask)\n", indent, "");
     else
-        HDfprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
+        fprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
     for (u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
         HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (block size: %lu)", (unsigned)u,
                    (unsigned long)hdr->man_dtable.row_block_size[u]);
-        HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
+        fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
         for (v = 0; v < hdr->man_dtable.cparam.width; v++) {
             size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
             HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
             if (hdr->filter_len > 0)
-                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "/%6zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
-                          temp_str, iblock->ents[off].addr, iblock->filt_ents[off].size,
-                          iblock->filt_ents[off].filter_mask);
+                fprintf(stream, "%*s%-*s %9" PRIuHADDR "/%6zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
+                        temp_str, iblock->ents[off].addr, iblock->filt_ents[off].size,
+                        iblock->filt_ents[off].filter_mask);
             else
-                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
-                          iblock->ents[off].addr);
+                fprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
+                        iblock->ents[off].addr);
         } /* end for */
     }     /* end for */
-    HDfprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
+    fprintf(stream, "%*sIndirect Block Entries:\n", indent, "");
     if (iblock->nrows > hdr->man_dtable.max_direct_rows) {
         unsigned first_row_bits;    /* Number of bits used bit addresses in first row */
         unsigned num_indirect_rows; /* Number of rows of blocks in each indirect block */
@@ -642,30 +641,29 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
             num_indirect_rows = (H5VM_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
             HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (# of rows: %u)", (unsigned)u,
                        num_indirect_rows);
-            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
+            fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
             for (v = 0; v < hdr->man_dtable.cparam.width; v++) {
                 size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
                 HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
-                HDfprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
-                          iblock->ents[off].addr);
+                fprintf(stream, "%*s%-*s %9" PRIuHADDR "\n", indent + 6, "", MAX(0, fwidth - 6), temp_str,
+                        iblock->ents[off].addr);
             } /* end for */
         }     /* end for */
     }         /* end if */
     else
-        HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "<none>");
+        fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), "<none>");
 
     /* Print internal (runtime) information, if requested */
     if (dump_internal) {
-        HDfprintf(stream, "%*sFractal Indirect Block Internal Information:\n", indent, "");
+        fprintf(stream, "%*sFractal Indirect Block Internal Information:\n", indent, "");
 
         /* Print general information */
-        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Reference count:", iblock->rc);
+        fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3), "Reference count:", iblock->rc);
 
         /* Print parent's information */
-        HDfprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Parent indirect block address:", (void *)iblock->parent);
+        fprintf(stream, "%*s%-*s %p\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Parent indirect block address:", (void *)iblock->parent);
         if (iblock->parent)
             H5HF_iblock_print(iblock->parent, TRUE, stream, indent + 6, fwidth);
     } /* end if */
@@ -758,17 +756,16 @@ H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     assert(udata);
 
     /* Print generic section information */
-    HDfprintf(
-        udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
-        (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE
-             ? "single"
-             : (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW
-                    ? "first row"
-                    : (sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW ? "normal row" : "unknown"))));
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
-              "Section address:", sect->sect_info.addr);
-    HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
-              "Section size:", sect->sect_info.size);
+    fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
+            (sect->sect_info.type == H5HF_FSPACE_SECT_SINGLE
+                 ? "single"
+                 : (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW
+                        ? "first row"
+                        : (sect->sect_info.type == H5HF_FSPACE_SECT_NORMAL_ROW ? "normal row" : "unknown"))));
+    fprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
+            "Section address:", sect->sect_info.addr);
+    fprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
+            "Section size:", sect->sect_info.size);
 
     /* Dump section-specific debugging information */
     if (H5FS_sect_debug(udata->fspace, _sect, udata->stream, udata->indent + 3, MAX(0, udata->fwidth - 3)) <

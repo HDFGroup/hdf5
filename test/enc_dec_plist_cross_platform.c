@@ -27,7 +27,7 @@ int
 main(void)
 {
     if (VERBOSE_MED)
-        HDprintf("Encode/Decode property list endianness\n");
+        printf("Encode/Decode property list endianness\n");
 
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");
@@ -224,6 +224,6 @@ test_plists(const char *filename_prefix)
     return 1;
 
 error:
-    HDprintf("***** Plist Encode/Decode tests FAILED! *****\n");
+    printf("***** Plist Encode/Decode tests FAILED! *****\n");
     return -1;
 }

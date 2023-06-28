@@ -328,11 +328,11 @@ H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Metadata Cache Image Block address:", mdci->addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Metadata Cache Image Block address:", mdci->addr);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Metadata Cache Image Block size in bytes:", mdci->size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Metadata Cache Image Block size in bytes:", mdci->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mdci_debug() */

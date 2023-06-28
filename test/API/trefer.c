@@ -3266,7 +3266,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &wbuf[0]);
@@ -3285,7 +3285,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3304,7 +3304,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Deprecated object reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf_deprec[0], fid1, "/Group1/Dataset1", H5R_OBJECT1, H5I_INVALID_HID);
@@ -3320,7 +3320,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Deprecated object reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3342,7 +3342,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     /* Store first dataset region */
     ret = H5Rcreate_region(fid1, "/Group1/Dataset1", sid1, H5P_DEFAULT, &wbuf_reg[0]);
@@ -3358,7 +3358,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3378,7 +3378,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
+        printf("--- Deprecated region reference create time: %lfs\n", t / MAX_ITER_CREATE);
 
     t = 0;
     for (i = 0; i < MAX_ITER_WRITE; i++) {
@@ -3390,7 +3390,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
+        printf("--- Deprecated region reference  write time: %lfs\n", t / MAX_ITER_WRITE);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3424,7 +3424,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -3470,7 +3470,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Deprecated object reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -3492,7 +3492,7 @@ test_reference_perf(void)
         CHECK(ret, FAIL, "H5Rdestroy");
     }
     if (VERBOSE_MED)
-        HDprintf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_reg);
@@ -3516,7 +3516,7 @@ test_reference_perf(void)
         t += t2 - t1;
     }
     if (VERBOSE_MED)
-        HDprintf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
+        printf("--- Deprecated region reference read time: %lfs\n", t / MAX_ITER_READ);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);

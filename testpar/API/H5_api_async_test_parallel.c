@@ -84,7 +84,7 @@ test_one_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf(
+            printf(
                 "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
@@ -127,13 +127,13 @@ test_one_dataset_io(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset write\n");
+        printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset read\n");
+        printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
     }
 
@@ -154,7 +154,7 @@ test_one_dataset_io(void)
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't select hyperslab for dataset write\n");
+        printf("    couldn't select hyperslab for dataset write\n");
         goto error;
     }
 
@@ -164,7 +164,7 @@ test_one_dataset_io(void)
 
         if ((mspace_id = H5Screate_simple(1, mdims, NULL)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create memory dataspace\n");
+            printf("    couldn't create memory dataspace\n");
             goto error;
         }
     }
@@ -206,7 +206,7 @@ test_one_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(single_dset_eswait);
                 } /* end if */
 
@@ -247,7 +247,7 @@ test_one_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(single_dset_dclose);
                 } /* end if */
 
@@ -292,7 +292,7 @@ test_one_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(single_dset_dflush);
                 } /* end if */
 
@@ -345,7 +345,7 @@ test_one_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(single_dset_fclose);
                 } /* end if */
 
@@ -449,7 +449,7 @@ test_multi_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf(
+            printf(
                 "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
@@ -485,13 +485,13 @@ test_multi_dataset_io(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset write\n");
+        printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset read\n");
+        printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
     }
 
@@ -512,7 +512,7 @@ test_multi_dataset_io(void)
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't select hyperslab for dataset write\n");
+        printf("    couldn't select hyperslab for dataset write\n");
         goto error;
     }
 
@@ -522,7 +522,7 @@ test_multi_dataset_io(void)
 
         if ((mspace_id = H5Screate_simple(1, mdims, NULL)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create memory dataspace\n");
+            printf("    couldn't create memory dataspace\n");
             goto error;
         }
     }
@@ -587,7 +587,7 @@ test_multi_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_dset_open);
                 } /* end if */
 
@@ -668,7 +668,7 @@ test_multi_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_dset_close);
                 } /* end if */
 
@@ -775,7 +775,7 @@ test_multi_file_dataset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf(
+            printf(
                 "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         }
 
@@ -807,13 +807,13 @@ test_multi_file_dataset_io(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset write\n");
+        printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset read\n");
+        printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
     }
 
@@ -834,7 +834,7 @@ test_multi_file_dataset_io(void)
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't select hyperslab for dataset write\n");
+        printf("    couldn't select hyperslab for dataset write\n");
         goto error;
     }
 
@@ -844,7 +844,7 @@ test_multi_file_dataset_io(void)
 
         if ((mspace_id = H5Screate_simple(1, mdims, NULL)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create memory dataspace\n");
+            printf("    couldn't create memory dataspace\n");
             goto error;
         }
     }
@@ -919,7 +919,7 @@ test_multi_file_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_file_dset_open);
                 } /* end if */
 
@@ -994,7 +994,7 @@ test_multi_file_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_file_dset_dclose);
                 } /* end if */
 
@@ -1092,7 +1092,7 @@ test_multi_file_dataset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_file_dset_fclose);
                 } /* end if */
 
@@ -1198,7 +1198,7 @@ test_multi_file_grp_dset_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf(
+            printf(
                 "    API functions for basic file, group, or dataset aren't supported with this connector\n");
         }
 
@@ -1230,13 +1230,13 @@ test_multi_file_grp_dset_io(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset write\n");
+        printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset read\n");
+        printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
     }
 
@@ -1257,7 +1257,7 @@ test_multi_file_grp_dset_io(void)
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't select hyperslab for dataset write\n");
+        printf("    couldn't select hyperslab for dataset write\n");
         goto error;
     }
 
@@ -1267,7 +1267,7 @@ test_multi_file_grp_dset_io(void)
 
         if ((mspace_id = H5Screate_simple(1, mdims, NULL)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create memory dataspace\n");
+            printf("    couldn't create memory dataspace\n");
             goto error;
         }
     }
@@ -1382,7 +1382,7 @@ test_multi_file_grp_dset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_file_grp_dset_no_kick);
                 } /* end if */
 
@@ -1508,7 +1508,7 @@ test_multi_file_grp_dset_io(void)
             for (i = 0; i < data_size / sizeof(int); i++)
                 if (write_buf[i] != read_buf[i]) {
                     H5_FAILED();
-                    HDprintf("    data verification failed\n");
+                    printf("    data verification failed\n");
                     PART_ERROR(multi_file_grp_dset_kick);
                 } /* end if */
 
@@ -1619,8 +1619,8 @@ test_set_extent(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, or flush aren't supported "
-                     "with this connector\n");
+            printf("    API functions for basic file, dataset, dataset more, or flush aren't supported "
+                   "with this connector\n");
         }
 
         return 0;
@@ -1635,13 +1635,13 @@ test_set_extent(void)
 
     if (NULL == (maxdims = malloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate max dataspace dimension buffer\n");
+        printf("    couldn't allocate max dataspace dimension buffer\n");
         TEST_ERROR;
     }
 
     if (NULL == (cdims = malloc(SET_EXTENT_TEST_SPACE_RANK * sizeof(hsize_t)))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate chunk dimension buffer\n");
+        printf("    couldn't allocate chunk dimension buffer\n");
         TEST_ERROR;
     }
 
@@ -1687,13 +1687,13 @@ test_set_extent(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset write\n");
+        printf("    couldn't allocate buffer for dataset write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for dataset read\n");
+        printf("    couldn't allocate buffer for dataset read\n");
         TEST_ERROR;
     }
 
@@ -1714,7 +1714,7 @@ test_set_extent(void)
 
     if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't select hyperslab for dataset write\n");
+        printf("    couldn't select hyperslab for dataset write\n");
         goto error;
     }
 
@@ -1724,7 +1724,7 @@ test_set_extent(void)
 
         if ((mspace_id = H5Screate_simple(1, mdims, NULL)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create memory dataspace\n");
+            printf("    couldn't create memory dataspace\n");
             goto error;
         }
     }
@@ -1766,7 +1766,7 @@ test_set_extent(void)
 
             if (H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't select hyperslab for dataset write\n");
+                printf("    couldn't select hyperslab for dataset write\n");
                 goto error;
             }
 
@@ -1821,7 +1821,7 @@ test_set_extent(void)
     for (i = 0; i < data_size / sizeof(int); i++)
         if (write_buf[i] != read_buf[i]) {
             H5_FAILED();
-            HDprintf("    data verification failed, expected %d but got %d\n", write_buf[i], read_buf[i]);
+            printf("    data verification failed, expected %d but got %d\n", write_buf[i], read_buf[i]);
             goto error;
         } /* end if */
 
@@ -1952,8 +1952,8 @@ test_attribute_exists(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                     "supported with this connector\n");
+            printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                   "supported with this connector\n");
         }
 
         return 0;
@@ -2105,8 +2105,8 @@ test_attribute_io(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                     "supported with this connector\n");
+            printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                   "supported with this connector\n");
         }
 
         return 0;
@@ -2152,13 +2152,13 @@ test_attribute_io(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute write\n");
+        printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute read\n");
+        printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
     }
 
@@ -2191,7 +2191,7 @@ test_attribute_io(void)
     for (i = 0; i < data_size / sizeof(int); i++)
         if (write_buf[i] != read_buf[i]) {
             H5_FAILED();
-            HDprintf("    data verification failed\n");
+            printf("    data verification failed\n");
             goto error;
         } /* end if */
 
@@ -2217,7 +2217,7 @@ test_attribute_io(void)
     for (i = 0; i < data_size / sizeof(int); i++)
         if (write_buf[i] != read_buf[i]) {
             H5_FAILED();
-            HDprintf("    data verification failed\n");
+            printf("    data verification failed\n");
             goto error;
         } /* end if */
 
@@ -2312,8 +2312,8 @@ test_attribute_io_tconv(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, attribute, or flush aren't supported with this "
-                     "connector\n");
+            printf("    API functions for basic file, attribute, or flush aren't supported with this "
+                   "connector\n");
         }
 
         return 0;
@@ -2350,13 +2350,13 @@ test_attribute_io_tconv(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute write\n");
+        printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute read\n");
+        printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
     }
 
@@ -2387,7 +2387,7 @@ test_attribute_io_tconv(void)
     for (i = 0; i < data_size / sizeof(int); i++)
         if (write_buf[i] != read_buf[i]) {
             H5_FAILED();
-            HDprintf("    data verification failed\n");
+            printf("    data verification failed\n");
             goto error;
         } /* end if */
 
@@ -2414,7 +2414,7 @@ test_attribute_io_tconv(void)
     for (i = 0; i < data_size / sizeof(int); i++)
         if (write_buf[i] != read_buf[i]) {
             H5_FAILED();
-            HDprintf("    data verification failed\n");
+            printf("    data verification failed\n");
             goto error;
         } /* end if */
 
@@ -2516,8 +2516,8 @@ test_attribute_io_compound(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                     "supported with this connector\n");
+            printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+                   "supported with this connector\n");
         }
 
         return 0;
@@ -2579,19 +2579,19 @@ test_attribute_io_compound(void)
 
     if (NULL == (write_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute write\n");
+        printf("    couldn't allocate buffer for attribute write\n");
         TEST_ERROR;
     }
 
     if (NULL == (read_buf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute read\n");
+        printf("    couldn't allocate buffer for attribute read\n");
         TEST_ERROR;
     }
 
     if (NULL == (fbuf = malloc(data_size))) {
         H5_FAILED();
-        HDprintf("    couldn't allocate buffer for attribute read verification\n");
+        printf("    couldn't allocate buffer for attribute read verification\n");
         TEST_ERROR;
     }
 
@@ -2630,12 +2630,12 @@ test_attribute_io_compound(void)
     for (i = 0; i < data_size / sizeof(tattr_cmpd_t); i++) {
         if (read_buf[i].a != fbuf[i].a) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'a'\n");
+            printf("    data verification failed for field 'a'\n");
             goto error;
         } /* end if */
         if (read_buf[i].b != fbuf[i].b) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'b'\n");
+            printf("    data verification failed for field 'b'\n");
             goto error;
         } /* end if */
     }
@@ -2660,12 +2660,12 @@ test_attribute_io_compound(void)
     for (i = 0; i < data_size / sizeof(tattr_cmpd_t); i++) {
         if (read_buf[i].a != fbuf[i].a) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'a'\n");
+            printf("    data verification failed for field 'a'\n");
             goto error;
         } /* end if */
         if (read_buf[i].b != -2) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'b'\n");
+            printf("    data verification failed for field 'b'\n");
             goto error;
         } /* end if */
     }
@@ -2690,19 +2690,19 @@ test_attribute_io_compound(void)
     for (i = 0; i < data_size / sizeof(tattr_cmpd_t); i++) {
         if (read_buf[i].a != -2) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'a'\n");
+            printf("    data verification failed for field 'a'\n");
             goto error;
         } /* end if */
         if (read_buf[i].b != fbuf[i].b) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'b'\n");
+            printf("    data verification failed for field 'b'\n");
             goto error;
         } /* end if */
     }
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier failed\n");
+        printf("    MPI_Barrier failed\n");
         goto error;
     }
 
@@ -2746,19 +2746,19 @@ test_attribute_io_compound(void)
     for (i = 0; i < data_size / sizeof(tattr_cmpd_t); i++) {
         if (read_buf[i].a != fbuf[i].a) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'a'\n");
+            printf("    data verification failed for field 'a'\n");
             goto error;
         } /* end if */
         if (read_buf[i].b != fbuf[i].b) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'b'\n");
+            printf("    data verification failed for field 'b'\n");
             goto error;
         } /* end if */
     }
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier failed\n");
+        printf("    MPI_Barrier failed\n");
         goto error;
     }
 
@@ -2802,12 +2802,12 @@ test_attribute_io_compound(void)
     for (i = 0; i < data_size / sizeof(tattr_cmpd_t); i++) {
         if (read_buf[i].a != fbuf[i].a) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'a'\n");
+            printf("    data verification failed for field 'a'\n");
             goto error;
         } /* end if */
         if (read_buf[i].b != fbuf[i].b) {
             H5_FAILED();
-            HDprintf("    data verification failed for field 'b'\n");
+            printf("    data verification failed for field 'b'\n");
             goto error;
         } /* end if */
     }
@@ -2916,8 +2916,8 @@ test_group(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, group more or flush aren't "
-                     "supported with this connector\n");
+            printf("    API functions for basic file, group, group more or flush aren't "
+                   "supported with this connector\n");
         }
 
         return 0;
@@ -3098,8 +3098,8 @@ test_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
-                     "aren't supported with this connector\n");
+            printf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
+                   "aren't supported with this connector\n");
         }
 
         return 0;
@@ -3179,7 +3179,7 @@ test_link(void)
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier failed\n");
+        printf("    MPI_Barrier failed\n");
         goto error;
     }
 
@@ -3218,7 +3218,7 @@ test_link(void)
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier failed\n");
+        printf("    MPI_Barrier failed\n");
         goto error;
     }
 
@@ -3256,7 +3256,7 @@ test_link(void)
 
     if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
         H5_FAILED();
-        HDprintf("    MPI_Barrier failed\n");
+        printf("    MPI_Barrier failed\n");
         goto error;
     }
 
@@ -3353,8 +3353,8 @@ test_ocopy_orefresh(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file, group, dataset, object more, flush, or refresh "
-                     "aren't supported with this connector\n");
+            printf("    API functions for basic file, group, dataset, object more, flush, or refresh "
+                   "aren't supported with this connector\n");
         }
 
         return 0;
@@ -3423,7 +3423,7 @@ test_ocopy_orefresh(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             H5_FAILED();
-            HDprintf("    MPI_Barrier failed\n");
+            printf("    MPI_Barrier failed\n");
             goto error;
         }
     }
@@ -3508,7 +3508,7 @@ test_file_reopen(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    API functions for basic file or file more aren't supported with this connector\n");
+            printf("    API functions for basic file or file more aren't supported with this connector\n");
         }
 
         return 0;
@@ -3595,17 +3595,17 @@ H5_api_async_test_parallel(void)
     int    nerrors;
 
     if (MAINPROCESS) {
-        HDprintf("**********************************************\n");
-        HDprintf("*                                            *\n");
-        HDprintf("*      API Parallel Async Tests              *\n");
-        HDprintf("*                                            *\n");
-        HDprintf("**********************************************\n\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*      API Parallel Async Tests              *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
     }
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC)) {
         if (MAINPROCESS) {
             SKIPPED();
-            HDprintf("    Async APIs aren't supported with this connector\n");
+            printf("    Async APIs aren't supported with this connector\n");
         }
 
         return 0;
@@ -3616,19 +3616,19 @@ H5_api_async_test_parallel(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    MPI_Barrier() failed!\n");
+                printf("    MPI_Barrier() failed!\n");
         }
     }
 
     if (MAINPROCESS) {
-        HDprintf("\n");
-        HDprintf("Cleaning up testing files\n");
+        printf("\n");
+        printf("Cleaning up testing files\n");
     }
 
     cleanup_files();
 
     if (MAINPROCESS) {
-        HDprintf("\n * Re-testing with independent metadata reads *\n");
+        printf("\n * Re-testing with independent metadata reads *\n");
     }
 
     coll_metadata_read = FALSE;
@@ -3638,13 +3638,13 @@ H5_api_async_test_parallel(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    MPI_Barrier() failed!\n");
+                printf("    MPI_Barrier() failed!\n");
         }
     }
 
     if (MAINPROCESS) {
-        HDprintf("\n");
-        HDprintf("Cleaning up testing files\n");
+        printf("\n");
+        printf("Cleaning up testing files\n");
     }
 
     cleanup_files();
@@ -3658,14 +3658,14 @@ int
 H5_api_async_test_parallel(void)
 {
     if (MAINPROCESS) {
-        HDprintf("**********************************************\n");
-        HDprintf("*                                            *\n");
-        HDprintf("*      API Parallel Async Tests              *\n");
-        HDprintf("*                                            *\n");
-        HDprintf("**********************************************\n\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*      API Parallel Async Tests              *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
     }
 
-    HDprintf("SKIPPED due to no async support in HDF5 library\n");
+    printf("SKIPPED due to no async support in HDF5 library\n");
 
     return 0;
 }

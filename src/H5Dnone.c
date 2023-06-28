@@ -469,7 +469,7 @@ H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     assert(storage);
     assert(stream);
 
-    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
+    fprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__none_idx_dump() */

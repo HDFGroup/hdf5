@@ -23,7 +23,7 @@
 int
 main(void)
 {
-    HDfprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
+    fprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
@@ -100,7 +100,7 @@ test_error(hid_t file)
     H5E_auto2_t old_func;
     void       *old_data = NULL;
 
-    HDfprintf(stderr, "\nTesting error API based on data I/O\n");
+    fprintf(stderr, "\nTesting error API based on data I/O\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -390,12 +390,12 @@ static herr_t
 dump_error(hid_t estack)
 {
     /* Print errors in library default way */
-    HDfprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
     if (H5Eprint2(estack, stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
-    HDfprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
     if (H5Ewalk2(estack, H5E_WALK_UPWARD, custom_print_cb, stderr) < 0)
         TEST_ERROR;
 
@@ -434,11 +434,11 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if (H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
         TEST_ERROR;
 
-    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
-              err_desc->func_name, err_desc->line);
-    HDfprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
-    HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
-    HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+            err_desc->func_name, err_desc->line);
+    fprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
+    fprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
+    fprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
 
     return 0;
 
@@ -744,7 +744,7 @@ test_filter_error(const char *fname, hid_t fapl)
     hid_t       dataset  = -1;
     int         buf[20];
 
-    HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
+    fprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
 
     /* Open the file */
     if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
@@ -793,7 +793,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
-    HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
+    fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
     /* Initialize errors */
     if (init_error() < 0)
@@ -900,7 +900,7 @@ main(void)
     free(icheck2);
     free(icheck2_data);
 
-    HDfprintf(stderr, "\nAll error API tests passed.\n");
+    fprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
@@ -909,7 +909,7 @@ error:
     free(icheck2);
     free(icheck2_data);
 
-    HDfprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
+    fprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;
 }
 #endif /* H5_USE_16_API */

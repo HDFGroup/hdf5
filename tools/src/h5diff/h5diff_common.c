@@ -95,11 +95,11 @@ check_options(diff_opt_t *opts)
      * These options are mutually exclusive.
      */
     if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
-        HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
-        HDprintf("use no more than one.\n");
-        HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
-                 "Reference Manual'.\n",
-                 PROGRAMNAME);
+        printf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
+        printf("use no more than one.\n");
+        printf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
+               "Reference Manual'.\n",
+               PROGRAMNAME);
         h5diff_exit(EXIT_FAILURE);
     }
 }
@@ -218,7 +218,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 /* create linked list of excluding objects */
                 if ((exclude_node = (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) ==
                     NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -250,7 +250,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 /* create linked list of excluding objects */
                 if ((exclude_attr_node =
                          (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) == NULL) {
-                    HDprintf("Error: lack of memory!\n");
+                    printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }
 
@@ -276,7 +276,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->delta_bool = 1;
 
                 if (check_d_input(H5_optarg) == -1) {
-                    HDprintf("<-d %s> is not a valid option\n", H5_optarg);
+                    printf("<-d %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -287,7 +287,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case 'p':
                 opts->percent_bool = 1;
                 if (check_p_input(H5_optarg) == -1) {
-                    HDprintf("<-p %s> is not a valid option\n", H5_optarg);
+                    printf("<-p %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -301,7 +301,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case 'n':
                 opts->count_bool = 1;
                 if (check_n_input(H5_optarg) == -1) {
-                    HDprintf("<-n %s> is not a valid option\n", H5_optarg);
+                    printf("<-n %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
@@ -392,7 +392,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             errno                     = 0;
             onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
             if (errno == ERANGE) {
-                HDprintf("Invalid onion revision specified for file 1\n");
+                printf("Invalid onion revision specified for file 1\n");
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -409,7 +409,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             errno                     = 0;
             onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
             if (errno == ERANGE) {
-                HDprintf("Invalid onion revision specified for file 2\n");
+                printf("Invalid onion revision specified for file 2\n");
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
@@ -480,20 +480,20 @@ print_info(diff_opt_t *opts)
         return;
 
     if (opts->cmn_objs == 0) {
-        HDprintf("No common objects found. Files are not comparable.\n");
+        printf("No common objects found. Files are not comparable.\n");
         if (!opts->mode_verbose)
-            HDprintf("Use -v for a list of objects.\n");
+            printf("Use -v for a list of objects.\n");
     }
 
     if (opts->not_cmp == 1) {
         if (opts->mode_list_not_cmp == 0) {
-            HDprintf("--------------------------------\n");
-            HDprintf("Some objects are not comparable\n");
-            HDprintf("--------------------------------\n");
+            printf("--------------------------------\n");
+            printf("Some objects are not comparable\n");
+            printf("--------------------------------\n");
             if (opts->mode_verbose)
-                HDprintf("Use -c for a list of objects without details of differences.\n");
+                printf("Use -c for a list of objects without details of differences.\n");
             else
-                HDprintf("Use -c for a list of objects.\n");
+                printf("Use -c for a list of objects.\n");
         }
     }
 }
@@ -640,6 +640,13 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info-2            VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                           opening the second HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "                           If none of the above options are used to "
+                                 "specify a VOL for a file, then\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "                           the VOL named by HDF5_VOL_CONNECTOR (or the native VOL connector,\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "                           if that environment variable is unset) will be used\n");
     PRINTVALSTREAM(rawoutstream,
                    "   --vfd-value-1           Value (ID) of the VFL driver to use for opening the\n");
     PRINTVALSTREAM(rawoutstream, "                           first HDF5 file specified\n");

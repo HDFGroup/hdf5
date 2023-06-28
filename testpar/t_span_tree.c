@@ -934,8 +934,8 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: dims/checker_edge_size = %d %d %d %d %d / %d\n", fcnName, mpi_rank,
-                  (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4], checker_edge_size);
+        fprintf(stdout, "%s:%d: dims/checker_edge_size = %d %d %d %d %d / %d\n", fcnName, mpi_rank,
+                (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4], checker_edge_size);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
@@ -957,8 +957,8 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: sel_rank/sel_offset = %d/%d.\n", fcnName, mpi_rank, sel_rank, sel_offset);
-        HDfprintf(stdout, "%s:%d: tgt_rank/ds_offset = %d/%d.\n", fcnName, mpi_rank, tgt_rank, ds_offset);
+        fprintf(stdout, "%s:%d: sel_rank/sel_offset = %d/%d.\n", fcnName, mpi_rank, sel_rank, sel_offset);
+        fprintf(stdout, "%s:%d: tgt_rank/ds_offset = %d/%d.\n", fcnName, mpi_rank, tgt_rank, ds_offset);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
@@ -992,8 +992,8 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: base_count/offset_count = %d/%d.\n", fcnName, mpi_rank, base_count,
-                  offset_count);
+        fprintf(stdout, "%s:%d: base_count/offset_count = %d/%d.\n", fcnName, mpi_rank, base_count,
+                offset_count);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
@@ -1116,26 +1116,25 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
                             if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
 
-                                HDfprintf(stdout, "%s%d: *** first_selection = %d ***\n", fcnName, mpi_rank,
-                                          (int)first_selection);
-                                HDfprintf(stdout, "%s:%d: i/j/k/l/m = %d/%d/%d/%d/%d\n", fcnName, mpi_rank, i,
-                                          j, k, l, m);
-                                HDfprintf(stdout, "%s:%d: start = %d %d %d %d %d.\n", fcnName, mpi_rank,
-                                          (int)start[0], (int)start[1], (int)start[2], (int)start[3],
-                                          (int)start[4]);
-                                HDfprintf(stdout, "%s:%d: stride = %d %d %d %d %d.\n", fcnName, mpi_rank,
-                                          (int)stride[0], (int)stride[1], (int)stride[2], (int)stride[3],
-                                          (int)stride[4]);
-                                HDfprintf(stdout, "%s:%d: count = %d %d %d %d %d.\n", fcnName, mpi_rank,
-                                          (int)count[0], (int)count[1], (int)count[2], (int)count[3],
-                                          (int)count[4]);
-                                HDfprintf(stdout, "%s:%d: block = %d %d %d %d %d.\n", fcnName, mpi_rank,
-                                          (int)block[0], (int)block[1], (int)block[2], (int)block[3],
-                                          (int)block[4]);
-                                HDfprintf(stdout, "%s:%d: n-cube extent dims = %d.\n", fcnName, mpi_rank,
-                                          H5Sget_simple_extent_ndims(tgt_sid));
-                                HDfprintf(stdout, "%s:%d: selection rank = %d.\n", fcnName, mpi_rank,
-                                          sel_rank);
+                                fprintf(stdout, "%s%d: *** first_selection = %d ***\n", fcnName, mpi_rank,
+                                        (int)first_selection);
+                                fprintf(stdout, "%s:%d: i/j/k/l/m = %d/%d/%d/%d/%d\n", fcnName, mpi_rank, i,
+                                        j, k, l, m);
+                                fprintf(stdout, "%s:%d: start = %d %d %d %d %d.\n", fcnName, mpi_rank,
+                                        (int)start[0], (int)start[1], (int)start[2], (int)start[3],
+                                        (int)start[4]);
+                                fprintf(stdout, "%s:%d: stride = %d %d %d %d %d.\n", fcnName, mpi_rank,
+                                        (int)stride[0], (int)stride[1], (int)stride[2], (int)stride[3],
+                                        (int)stride[4]);
+                                fprintf(stdout, "%s:%d: count = %d %d %d %d %d.\n", fcnName, mpi_rank,
+                                        (int)count[0], (int)count[1], (int)count[2], (int)count[3],
+                                        (int)count[4]);
+                                fprintf(stdout, "%s:%d: block = %d %d %d %d %d.\n", fcnName, mpi_rank,
+                                        (int)block[0], (int)block[1], (int)block[2], (int)block[3],
+                                        (int)block[4]);
+                                fprintf(stdout, "%s:%d: n-cube extent dims = %d.\n", fcnName, mpi_rank,
+                                        H5Sget_simple_extent_ndims(tgt_sid));
+                                fprintf(stdout, "%s:%d: selection rank = %d.\n", fcnName, mpi_rank, sel_rank);
                             }
 #endif
 
@@ -1181,8 +1180,8 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s%d: H5Sget_select_npoints(tgt_sid) = %d.\n", fcnName, mpi_rank,
-                  (int)H5Sget_select_npoints(tgt_sid));
+        fprintf(stdout, "%s%d: H5Sget_select_npoints(tgt_sid) = %d.\n", fcnName, mpi_rank,
+                (int)H5Sget_select_npoints(tgt_sid));
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
@@ -1202,9 +1201,9 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s%d: H5Sget_select_npoints(tgt_sid) = %d.\n", fcnName, mpi_rank,
-                  (int)H5Sget_select_npoints(tgt_sid));
-        HDfprintf(stdout, "%s%d: done.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s%d: H5Sget_select_npoints(tgt_sid) = %d.\n", fcnName, mpi_rank,
+                (int)H5Sget_select_npoints(tgt_sid));
+        fprintf(stdout, "%s%d: done.\n", fcnName, mpi_rank);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
@@ -1300,12 +1299,12 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
 
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s mpi_rank = %d.\n", fcnName, mpi_rank);
-        HDfprintf(stdout, "%s rank = %d.\n", fcnName, rank);
-        HDfprintf(stdout, "%s edge_size = %d.\n", fcnName, edge_size);
-        HDfprintf(stdout, "%s checker_edge_size = %d.\n", fcnName, checker_edge_size);
-        HDfprintf(stdout, "%s first_expected_val = %d.\n", fcnName, (int)first_expected_val);
-        HDfprintf(stdout, "%s starts_in_checker = %d.\n", fcnName, (int)buf_starts_in_checker);
+        fprintf(stdout, "%s mpi_rank = %d.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s rank = %d.\n", fcnName, rank);
+        fprintf(stdout, "%s edge_size = %d.\n", fcnName, edge_size);
+        fprintf(stdout, "%s checker_edge_size = %d.\n", fcnName, checker_edge_size);
+        fprintf(stdout, "%s first_expected_val = %d.\n", fcnName, (int)first_expected_val);
+        fprintf(stdout, "%s starts_in_checker = %d.\n", fcnName, (int)buf_starts_in_checker);
     }
 #endif
 
@@ -1356,14 +1355,14 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
                     z = 0;
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
                     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-                        HDfprintf(stdout, "%d, %d, %d, %d, %d:", i, j, k, l, m);
+                        fprintf(stdout, "%d, %d, %d, %d, %d:", i, j, k, l, m);
                     }
 #endif
                     in_checker = start_in_checker[3];
                     do {
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
                         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-                            HDfprintf(stdout, " %d", (int)(*val_ptr));
+                            fprintf(stdout, " %d", (int)(*val_ptr));
                         }
 #endif
                         if (z >= checker_edge_size) {
@@ -1398,7 +1397,7 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
                     } while ((rank >= (test_max_rank - 4)) && (m < edge_size));
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
                     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-                        HDfprintf(stdout, "\n");
+                        fprintf(stdout, "\n");
                     }
 #endif
                     l++;
@@ -1506,8 +1505,8 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: chunk_edge_size = %d.\n", fcnName, mpi_rank, (int)chunk_edge_size);
-        HDfprintf(stdout, "%s:%d: use_collective_io = %d.\n", fcnName, mpi_rank, (int)use_collective_io);
+        fprintf(stdout, "%s:%d: chunk_edge_size = %d.\n", fcnName, mpi_rank, (int)chunk_edge_size);
+        fprintf(stdout, "%s:%d: use_collective_io = %d.\n", fcnName, mpi_rank, (int)use_collective_io);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1519,10 +1518,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     large_ds_slice_size = (size_t)(10 * 10 * 10 * 10);
 
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n", fcnName, mpi_rank,
-                  (int)small_ds_size, (int)small_ds_slice_size);
-        HDfprintf(stdout, "%s:%d: large ds size / slice size = %d / %d.\n", fcnName, mpi_rank,
-                  (int)large_ds_size, (int)large_ds_slice_size);
+        fprintf(stdout, "%s:%d: small ds size / slice size = %d / %d.\n", fcnName, mpi_rank,
+                (int)small_ds_size, (int)small_ds_slice_size);
+        fprintf(stdout, "%s:%d: large ds size / slice size = %d / %d.\n", fcnName, mpi_rank,
+                (int)large_ds_size, (int)large_ds_slice_size);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1602,10 +1601,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: small_dims[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)small_dims[0],
-                  (int)small_dims[1], (int)small_dims[2], (int)small_dims[3], (int)small_dims[4]);
-        HDfprintf(stdout, "%s:%d: large_dims[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)large_dims[0],
-                  (int)large_dims[1], (int)large_dims[2], (int)large_dims[3], (int)large_dims[4]);
+        fprintf(stdout, "%s:%d: small_dims[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)small_dims[0],
+                (int)small_dims[1], (int)small_dims[2], (int)small_dims[3], (int)small_dims[4]);
+        fprintf(stdout, "%s:%d: large_dims[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)large_dims[0],
+                (int)large_dims[1], (int)large_dims[2], (int)large_dims[3], (int)large_dims[4]);
     }
 #endif
 
@@ -1661,9 +1660,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-            HDfprintf(stdout, "%s:%d: small chunk dims[] = %d %d %d %d %d\n", fcnName, mpi_rank,
-                      (int)small_chunk_dims[0], (int)small_chunk_dims[1], (int)small_chunk_dims[2],
-                      (int)small_chunk_dims[3], (int)small_chunk_dims[4]);
+            fprintf(stdout, "%s:%d: small chunk dims[] = %d %d %d %d %d\n", fcnName, mpi_rank,
+                    (int)small_chunk_dims[0], (int)small_chunk_dims[1], (int)small_chunk_dims[2],
+                    (int)small_chunk_dims[3], (int)small_chunk_dims[4]);
         }
 #endif
 
@@ -1682,9 +1681,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-            HDfprintf(stdout, "%s:%d: large chunk dims[] = %d %d %d %d %d\n", fcnName, mpi_rank,
-                      (int)large_chunk_dims[0], (int)large_chunk_dims[1], (int)large_chunk_dims[2],
-                      (int)large_chunk_dims[3], (int)large_chunk_dims[4]);
+            fprintf(stdout, "%s:%d: large chunk dims[] = %d %d %d %d %d\n", fcnName, mpi_rank,
+                    (int)large_chunk_dims[0], (int)large_chunk_dims[1], (int)large_chunk_dims[2],
+                    (int)large_chunk_dims[3], (int)large_chunk_dims[4]);
         }
 #endif
 
@@ -1710,8 +1709,8 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: small/large ds id = %d / %d.\n", fcnName, mpi_rank, (int)small_dataset,
-                  (int)large_dataset);
+        fprintf(stdout, "%s:%d: small/large ds id = %d / %d.\n", fcnName, mpi_rank, (int)small_dataset,
+                (int)large_dataset);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1743,15 +1742,15 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: settings for small data set initialization.\n", fcnName, mpi_rank);
-        HDfprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
-                  (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
-        HDfprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
-                  (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
-        HDfprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
-                  (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
-        HDfprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
-                  (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
+        fprintf(stdout, "%s:%d: settings for small data set initialization.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0], (int)start[1],
+                (int)start[2], (int)start[3], (int)start[4]);
+        fprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
+                (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
+        fprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0], (int)count[1],
+                (int)count[2], (int)count[3], (int)count[4]);
+        fprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0], (int)block[1],
+                (int)block[2], (int)block[3], (int)block[4]);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1768,15 +1767,15 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-            HDfprintf(stdout, "%s:%d: added settings for main process.\n", fcnName, mpi_rank);
-            HDfprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
-                      (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
-            HDfprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
-                      (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
-            HDfprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
-                      (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
-            HDfprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
-                      (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
+            fprintf(stdout, "%s:%d: added settings for main process.\n", fcnName, mpi_rank);
+            fprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
+                    (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
+            fprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
+                    (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
+            fprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
+                    (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
+            fprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
+                    (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
         }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1796,7 +1795,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     /* write the initial value of the small data set to file */
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: writing init value of small ds to file.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: writing init value of small ds to file.\n", fcnName, mpi_rank);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
     ret = H5Dwrite(small_dataset, dset_type, mem_small_ds_sid, file_small_ds_sid, xfer_plist, small_ds_buf_0);
@@ -1850,15 +1849,15 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: settings for large data set initialization.\n", fcnName, mpi_rank);
-        HDfprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
-                  (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
-        HDfprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
-                  (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
-        HDfprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
-                  (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
-        HDfprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
-                  (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
+        fprintf(stdout, "%s:%d: settings for large data set initialization.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0], (int)start[1],
+                (int)start[2], (int)start[3], (int)start[4]);
+        fprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
+                (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
+        fprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0], (int)count[1],
+                (int)count[2], (int)count[3], (int)count[4]);
+        fprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0], (int)block[1],
+                (int)block[2], (int)block[3], (int)block[4]);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1870,10 +1869,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s%d: H5Sget_select_npoints(mem_large_ds_sid) = %d.\n", fcnName, mpi_rank,
-                  (int)H5Sget_select_npoints(mem_large_ds_sid));
-        HDfprintf(stdout, "%s%d: H5Sget_select_npoints(file_large_ds_sid) = %d.\n", fcnName, mpi_rank,
-                  (int)H5Sget_select_npoints(file_large_ds_sid));
+        fprintf(stdout, "%s%d: H5Sget_select_npoints(mem_large_ds_sid) = %d.\n", fcnName, mpi_rank,
+                (int)H5Sget_select_npoints(mem_large_ds_sid));
+        fprintf(stdout, "%s%d: H5Sget_select_npoints(file_large_ds_sid) = %d.\n", fcnName, mpi_rank,
+                (int)H5Sget_select_npoints(file_large_ds_sid));
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1883,15 +1882,15 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-            HDfprintf(stdout, "%s:%d: added settings for main process.\n", fcnName, mpi_rank);
-            HDfprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
-                      (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
-            HDfprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
-                      (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
-            HDfprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
-                      (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
-            HDfprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
-                      (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
+            fprintf(stdout, "%s:%d: added settings for main process.\n", fcnName, mpi_rank);
+            fprintf(stdout, "%s:%d: start[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)start[0],
+                    (int)start[1], (int)start[2], (int)start[3], (int)start[4]);
+            fprintf(stdout, "%s:%d: stride[] = %d %d %d %d %d\n", fcnName, mpi_rank, (int)stride[0],
+                    (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
+            fprintf(stdout, "%s:%d: count[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)count[0],
+                    (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
+            fprintf(stdout, "%s:%d: block[]  = %d %d %d %d %d\n", fcnName, mpi_rank, (int)block[0],
+                    (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
         }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1903,10 +1902,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
         if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-            HDfprintf(stdout, "%s%d: H5Sget_select_npoints(mem_large_ds_sid) = %d.\n", fcnName, mpi_rank,
-                      (int)H5Sget_select_npoints(mem_large_ds_sid));
-            HDfprintf(stdout, "%s%d: H5Sget_select_npoints(file_large_ds_sid) = %d.\n", fcnName, mpi_rank,
-                      (int)H5Sget_select_npoints(file_large_ds_sid));
+            fprintf(stdout, "%s%d: H5Sget_select_npoints(mem_large_ds_sid) = %d.\n", fcnName, mpi_rank,
+                    (int)H5Sget_select_npoints(mem_large_ds_sid));
+            fprintf(stdout, "%s%d: H5Sget_select_npoints(file_large_ds_sid) = %d.\n", fcnName, mpi_rank,
+                    (int)H5Sget_select_npoints(file_large_ds_sid));
         }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
     }
@@ -1932,12 +1931,12 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
 
         rank = H5Sget_simple_extent_dims(mem_large_ds_sid, dims, max_dims);
-        HDfprintf(stdout, "%s:%d: mem_large_ds_sid dims[%d] = %d %d %d %d %d\n", fcnName, mpi_rank, rank,
-                  (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
+        fprintf(stdout, "%s:%d: mem_large_ds_sid dims[%d] = %d %d %d %d %d\n", fcnName, mpi_rank, rank,
+                (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
 
         rank = H5Sget_simple_extent_dims(file_large_ds_sid, dims, max_dims);
-        HDfprintf(stdout, "%s:%d: file_large_ds_sid dims[%d] = %d %d %d %d %d\n", fcnName, mpi_rank, rank,
-                  (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
+        fprintf(stdout, "%s:%d: file_large_ds_sid dims[%d] = %d %d %d %d %d\n", fcnName, mpi_rank, rank,
+                (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -1950,10 +1949,10 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     /* write the initial value of the large data set to file */
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: writing init value of large ds to file.\n", fcnName, mpi_rank);
-        HDfprintf(stdout, "%s:%d: large_dataset = %d.\n", fcnName, mpi_rank, (int)large_dataset);
-        HDfprintf(stdout, "%s:%d: mem_large_ds_sid = %d, file_large_ds_sid = %d.\n", fcnName, mpi_rank,
-                  (int)mem_large_ds_sid, (int)file_large_ds_sid);
+        fprintf(stdout, "%s:%d: writing init value of large ds to file.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: large_dataset = %d.\n", fcnName, mpi_rank, (int)large_dataset);
+        fprintf(stdout, "%s:%d: mem_large_ds_sid = %d, file_large_ds_sid = %d.\n", fcnName, mpi_rank,
+                (int)mem_large_ds_sid, (int)file_large_ds_sid);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -2042,7 +2041,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: H5Dread() returns.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: H5Dread() returns.\n", fcnName, mpi_rank);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -2139,7 +2138,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-        HDfprintf(stdout, "%s:%d: H5Dread() returns.\n", fcnName, mpi_rank);
+        fprintf(stdout, "%s:%d: H5Dread() returns.\n", fcnName, mpi_rank);
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__RUN_TEST__DEBUG */
 
@@ -2197,8 +2196,8 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
             if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
-                HDfprintf(stdout, "%s:%d: unexpected value at index %d: %d.\n", fcnName, mpi_rank, (int)i,
-                          (int)(*ptr_1));
+                fprintf(stdout, "%s:%d: unexpected value at index %d: %d.\n", fcnName, mpi_rank, (int)i,
+                        (int)(*ptr_1));
             }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG */
 

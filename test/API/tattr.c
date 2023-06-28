@@ -576,7 +576,7 @@ test_attr_flush(hid_t fapl)
             TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
     }
     else {
-        HDprintf("** SKIPPED attribute pre-read due to fill values not being supported **\n");
+        printf("** SKIPPED attribute pre-read due to fill values not being supported **\n");
     }
 
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
@@ -936,10 +936,10 @@ test_attr_compound_read(hid_t fapl)
     for (i = 0; i < ATTR4_DIM1; i++)
         for (j = 0; j < ATTR4_DIM2; j++)
             if (HDmemcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct)) != 0) {
-                HDprintf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
-                         __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
-                HDprintf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
-                         __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
+                printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
+                       __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
+                printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
+                       __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
                 TestErrPrintf(
                     "%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",
                     __LINE__, i, j, attr_data4[i][j].c, i, j, read_data4[i][j].c);
@@ -1082,8 +1082,8 @@ test_attr_scalar_read(hid_t fapl)
 
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(rdata, attr_data5))
-        HDprintf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Aread",
-                 (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
+        printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Aread",
+               (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);
@@ -7160,8 +7160,8 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for iterate aren't "
-                 "supported with this connector\n");
+        printf("    API functions for iterate aren't "
+               "supported with this connector\n");
         return 1;
     }
 

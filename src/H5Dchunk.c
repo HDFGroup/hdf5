@@ -7284,20 +7284,19 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Print header if not already displayed */
         if (!udata->header_displayed) {
-            HDfprintf(udata->stream, "           Flags    Bytes     Address          Logical Offset\n");
-            HDfprintf(udata->stream,
-                      "        ========== ======== ========== ==============================\n");
+            fprintf(udata->stream, "           Flags    Bytes     Address          Logical Offset\n");
+            fprintf(udata->stream, "        ========== ======== ========== ==============================\n");
 
             /* Set flag that the headers has been printed */
             udata->header_displayed = TRUE;
         } /* end if */
 
         /* Print information about this chunk */
-        HDfprintf(udata->stream, "        0x%08x %8" PRIu32 " %10" PRIuHADDR " [", chunk_rec->filter_mask,
-                  chunk_rec->nbytes, chunk_rec->chunk_addr);
+        fprintf(udata->stream, "        0x%08x %8" PRIu32 " %10" PRIuHADDR " [", chunk_rec->filter_mask,
+                chunk_rec->nbytes, chunk_rec->chunk_addr);
         for (u = 0; u < udata->ndims; u++)
-            HDfprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""),
-                      (chunk_rec->scaled[u] * udata->chunk_dim[u]));
+            fprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""),
+                    (chunk_rec->scaled[u] * udata->chunk_dim[u]));
         HDfputs("]\n", udata->stream);
     } /* end if */
 
@@ -7391,11 +7390,11 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
         HGOTO_DONE(SUCCEED)
 
     if (headers) {
-        HDfprintf(H5DEBUG(AC), "H5D: raw data cache statistics\n");
-        HDfprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n", "Layer", "Hits", "Misses", "MissRate",
-                  "Inits", "Flushes");
-        HDfprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n", "-----", "----", "------", "--------",
-                  "-----", "-------");
+        fprintf(H5DEBUG(AC), "H5D: raw data cache statistics\n");
+        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s+%-8s\n", "Layer", "Hits", "Misses", "MissRate",
+                "Inits", "Flushes");
+        fprintf(H5DEBUG(AC), "   %-18s %8s %8s %8s %8s-%-8s\n", "-----", "----", "------", "--------",
+                "-----", "-------");
     }
 
 #ifdef H5AC_DEBUG
@@ -7417,9 +7416,9 @@ H5D__chunk_stats(const H5D_t *dset, hbool_t headers)
             HDsnprintf(ascii, sizeof(ascii), "%7.2f%%", miss_rate);
         }
 
-        HDfprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n", "raw data chunks", rdcc->stats.nhits,
-                  rdcc->stats.nmisses, ascii, rdcc->stats.ninits,
-                  (long)(rdcc->stats.nflushes) - (long)(rdcc->stats.ninits));
+        fprintf(H5DEBUG(AC), "   %-18s %8u %8u %7s %8d+%-9ld\n", "raw data chunks", rdcc->stats.nhits,
+                rdcc->stats.nmisses, ascii, rdcc->stats.ninits,
+                (long)(rdcc->stats.nflushes) - (long)(rdcc->stats.ninits));
     }
 
 done:

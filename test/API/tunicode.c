@@ -783,15 +783,15 @@ dump_string(const char *string)
     size_t length;
     size_t x;
 
-    HDprintf("The string was:\n %s", string);
-    HDprintf("Or in hex:\n");
+    printf("The string was:\n %s", string);
+    printf("Or in hex:\n");
 
     length = HDstrlen(string);
 
     for (x = 0; x < length; x++)
-        HDprintf("%x ", string[x] & (0x000000FF));
+        printf("%x ", string[x] & (0x000000FF));
 
-    HDprintf("\n");
+    printf("\n");
 }
 
 /* Main test.

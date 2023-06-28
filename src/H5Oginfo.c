@@ -324,12 +324,12 @@ H5O__ginfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. compact links:", ginfo->max_compact);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Min. dense links:", ginfo->min_dense);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Estimated # of objects in group:", ginfo->est_num_entries);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Estimated length of object in group's name:", ginfo->est_name_len);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. compact links:", ginfo->max_compact);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Min. dense links:", ginfo->min_dense);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Estimated # of objects in group:", ginfo->est_num_entries);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Estimated length of object in group's name:", ginfo->est_name_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__ginfo_debug() */

@@ -63,7 +63,7 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 #define LOGPRINT(lvl, ...)                                                                                   \
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
-            HDfprintf(g_log_stream, __VA_ARGS__);                                                            \
+            fprintf(g_log_stream, __VA_ARGS__);                                                              \
             HDfflush(g_log_stream);                                                                          \
         }                                                                                                    \
     } while (0)
@@ -274,16 +274,16 @@ error:
         }                                                                                                    \
         if (_x != (len)) {                                                                                   \
             size_t _y = 0;                                                                                   \
-            HDprintf("First bytes differ at %zu\n", _x);                                                     \
-            HDprintf("exp  ");                                                                               \
+            printf("First bytes differ at %zu\n", _x);                                                       \
+            printf("exp  ");                                                                                 \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                HDprintf("%02X", (unsigned char)(exp)[_y]);                                                  \
+                printf("%02X", (unsigned char)(exp)[_y]);                                                    \
             }                                                                                                \
-            HDprintf("\nact  ");                                                                             \
+            printf("\nact  ");                                                                               \
             for (_y = _x; _y < (len); _y++) {                                                                \
-                HDprintf("%02X", (unsigned char)(act)[_y]);                                                  \
+                printf("%02X", (unsigned char)(act)[_y]);                                                    \
             }                                                                                                \
-            HDprintf("\n");                                                                                  \
+            printf("\n");                                                                                    \
         }                                                                                                    \
     } while (0); /* end PRINT_BUFFER_DIFF */
 
@@ -1963,7 +1963,7 @@ test_on_disk_zoo(const struct mt_opts *opts)
         validate_zoo(file_id, grp_name, 0); /* sanity-check */
 
     if (!pass) {
-        HDprintf("%s", failure_mssg);
+        printf("%s", failure_mssg);
         TEST_ERROR;
     }
 
@@ -2095,7 +2095,7 @@ test_vanishing_datasets(const struct mt_opts *opts)
     if (H5Gget_info(file_id, &group_info) < 0)
         TEST_ERROR;
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in rw file: %" PRIuHSIZE "\n", group_info.nlinks);
+        fprintf(stderr, "links in rw file: %" PRIuHSIZE "\n", group_info.nlinks);
         TEST_ERROR;
     }
     if (H5Fclose(file_id) < 0)
@@ -2105,7 +2105,7 @@ test_vanishing_datasets(const struct mt_opts *opts)
     if (H5Gget_info(file_id, &group_info) < 0)
         TEST_ERROR;
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in wo file: %" PRIuHSIZE "\n", group_info.nlinks);
+        fprintf(stderr, "links in wo file: %" PRIuHSIZE "\n", group_info.nlinks);
         TEST_ERROR;
     }
     if (H5Fclose(file_id) < 0)
@@ -2304,7 +2304,7 @@ parse_args(int argc, char **argv, struct mt_opts *opts)
         else if (!HDstrncmp(argv[i], "--port=", 7))
             opts->portno = HDatoi(argv[i] + 7);
         else {
-            HDprintf("Unrecognized option: '%s'\n", argv[i]);
+            printf("Unrecognized option: '%s'\n", argv[i]);
             return -1;
         }
     } /* end for each argument from command line */
@@ -2334,7 +2334,7 @@ confirm_server(struct mt_opts *opts)
 
     live_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (live_socket < 0) {
-        HDprintf("ERROR socket()\n");
+        printf("ERROR socket()\n");
         return -1;
     }
 
@@ -2346,25 +2346,25 @@ confirm_server(struct mt_opts *opts)
     while (1) {
         if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
             if (attempt > 10) {
-                HDprintf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
+                printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));
                 return -1;
             }
 
             /* Close socket during sleep() */
             if (HDclose(live_socket) < 0) {
-                HDprintf("ERROR close() can't close socket\n");
+                printf("ERROR close() can't close socket\n");
                 return -1;
             }
             live_socket = -1;
 
             attempt++;
             HDsleep(1);
-            HDprintf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
+            printf("attempt #%u: ERROR connect() (%d)\n%s\n", attempt, errno, HDstrerror(errno));
 
             /* Re-open socket for retry */
             live_socket = socket(AF_INET, SOCK_STREAM, 0);
             if (live_socket < 0) {
-                HDprintf("ERROR socket()\n");
+                printf("ERROR socket()\n");
                 return -1;
             }
         }
@@ -2374,22 +2374,22 @@ confirm_server(struct mt_opts *opts)
 
     /* Request confirmation from the server */
     if (HDwrite(live_socket, "CONFIRM", 8) == -1) {
-        HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        printf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
         return -1;
     }
 
     /* Read & verify response from port connection.  */
     if (HDread(live_socket, &mybuf, sizeof(mybuf)) == -1) {
-        HDprintf("ERROR read() can't receive data\n");
+        printf("ERROR read() can't receive data\n");
         return -1;
     }
     if (HDstrncmp("ALIVE", mybuf, 6)) {
-        HDprintf("ERROR read() didn't receive data from server\n");
+        printf("ERROR read() didn't receive data from server\n");
         return -1;
     }
 
     if (HDclose(live_socket) < 0) {
-        HDprintf("ERROR close() can't close socket\n");
+        printf("ERROR close() can't close socket\n");
         return -1;
     }
 
@@ -2415,7 +2415,7 @@ main(int argc, char **argv)
 
     g_log_stream = stdout; /* default debug/logging output stream */
 
-    HDprintf("Testing Mirror VFD functionality.\n");
+    printf("Testing Mirror VFD functionality.\n");
 
     /* SETUP */
 
@@ -2430,12 +2430,12 @@ main(int argc, char **argv)
     }
 
     if (parse_args(argc, argv, &opts) < 0) {
-        HDprintf("Unable to parse arguments\n");
+        printf("Unable to parse arguments\n");
         HDexit(EXIT_FAILURE);
     }
 
     if (confirm_server(&opts) < 0) {
-        HDprintf("Unable to confirm server is running\n");
+        printf("Unable to confirm server is running\n");
         HDexit(EXIT_FAILURE);
     }
 
@@ -2477,11 +2477,11 @@ main(int argc, char **argv)
     }
 
     if (nerrors) {
-        HDprintf("***** %d Mirror VFD TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Mirror VFD TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
     }
 
-    HDprintf("All Mirror Virtual File Driver tests passed.\n");
+    printf("All Mirror Virtual File Driver tests passed.\n");
     return EXIT_SUCCESS;
 } /* end main() */
 
@@ -2490,8 +2490,8 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    HDprintf("Testing Mirror VFD functionality.\n");
-    HDprintf("SKIPPED - Mirror VFD not built.\n");
+    printf("Testing Mirror VFD functionality.\n");
+    printf("SKIPPED - Mirror VFD not built.\n");
     return EXIT_SUCCESS;
 }
 

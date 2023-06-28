@@ -43,7 +43,7 @@ main(int argc, char *argv[])
      * This is an integer index into the FILE_NAMES array.
      */
     if (argc != 2) {
-        HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
+        fprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
         return EXIT_FAILURE;
     }
 
@@ -134,7 +134,7 @@ main(int argc, char *argv[])
         TEST_ERROR;
     free(buffer);
 
-    HDfprintf(stderr, "SWMR writer exited successfully\n");
+    fprintf(stderr, "SWMR writer exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -156,7 +156,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfprintf(stderr, "ERROR: SWMR writer exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR writer exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

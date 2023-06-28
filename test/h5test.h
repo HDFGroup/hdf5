@@ -90,7 +90,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  */
 #define AT()                                                                                                 \
     do {                                                                                                     \
-        HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                  \
+        printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                    \
     } while (0)
 
 /*
@@ -104,13 +104,13 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  */
 #define TESTING(WHAT)                                                                                        \
     do {                                                                                                     \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
+        printf("Testing %-62s", WHAT);                                                                       \
         HDfflush(stdout);                                                                                    \
         n_tests_run_g++;                                                                                     \
     } while (0)
 #define TESTING_2(WHAT)                                                                                      \
     do {                                                                                                     \
-        HDprintf("  Testing %-60s", WHAT);                                                                   \
+        printf("  Testing %-60s", WHAT);                                                                     \
         HDfflush(stdout);                                                                                    \
         n_tests_run_g++;                                                                                     \
     } while (0)
@@ -174,7 +174,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  */
 #define TESTING_MULTIPART(WHAT)                                                                              \
     do {                                                                                                     \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
+        printf("Testing %-62s", WHAT);                                                                       \
         HDputs("");                                                                                          \
         HDfflush(stdout);                                                                                    \
     } while (0)

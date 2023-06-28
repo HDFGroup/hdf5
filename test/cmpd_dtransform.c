@@ -92,7 +92,7 @@ main(void)
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
     if (H5Pset_data_transform(dxpl_id, expr) < 0) {
-        HDprintf("**** ERROR: H5Pset_data_transform (expression: %s) ****\n", expr);
+        printf("**** ERROR: H5Pset_data_transform (expression: %s) ****\n", expr);
         FAIL_STACK_ERROR;
     }
 

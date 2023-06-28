@@ -393,8 +393,8 @@ H5FD__subfiling_term(void)
             }
 #ifdef H5FD_SUBFILING_DEBUG
             else
-                HDprintf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was "
-                         "called - an HDF5 ID was probably left unclosed\n");
+                printf("** WARNING **: HDF5 is terminating the Subfiling VFD after MPI_Finalize() was "
+                       "called - an HDF5 ID was probably left unclosed\n");
 #endif
         }
 

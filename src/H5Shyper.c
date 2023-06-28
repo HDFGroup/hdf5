@@ -297,12 +297,12 @@ H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned de
     FUNC_ENTER_PACKAGE_NOERR
 
     while (span) {
-        HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", __func__,
-                  depth * 2, "", depth, (void *)span, span->low, span->high, (void *)span->next);
+        fprintf(f, "%s: %*sdepth=%u, span=%p, (%" PRIuHSIZE ", %" PRIuHSIZE "), next=%p\n", __func__,
+                depth * 2, "", depth, (void *)span, span->low, span->high, (void *)span->next);
         if (span->down) {
-            HDfprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
-                      __func__, (depth + 1) * 2, "", (void *)span->down, span->down->count,
-                      span->down->low_bounds[0], span->down->high_bounds[0], (void *)span->down->head);
+            fprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
+                    __func__, (depth + 1) * 2, "", (void *)span->down, span->down->count,
+                    span->down->low_bounds[0], span->down->high_bounds[0], (void *)span->down->head);
             H5S__hyper_print_spans_helper(f, span->down->head, depth + 1);
         } /* end if */
         span = span->next;
@@ -317,9 +317,9 @@ H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
     FUNC_ENTER_PACKAGE_NOERR
 
     if (span_lst != NULL) {
-        HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n",
-                  __func__, (void *)span_lst, span_lst->count, span_lst->low_bounds[0],
-                  span_lst->high_bounds[0], (void *)span_lst->head);
+        fprintf(f, "%s: spans=%p, count=%u, bounds[0]={%" PRIuHSIZE ", %" PRIuHSIZE "}, head=%p\n", __func__,
+                (void *)span_lst, span_lst->count, span_lst->low_bounds[0], span_lst->high_bounds[0],
+                (void *)span_lst->head);
         H5S__hyper_print_spans_helper(f, span_lst->head, 0);
     } /* end if */
 
@@ -344,21 +344,21 @@ H5S__hyper_print_diminfo_helper(FILE *f, const char *field, unsigned ndims, cons
     FUNC_ENTER_PACKAGE_NOERR
 
     if (dinfo != NULL) {
-        HDfprintf(f, "%s: %s: start=[", __func__, field);
+        fprintf(f, "%s: %s: start=[", __func__, field);
         for (u = 0; u < ndims; u++)
-            HDfprintf(f, "%" PRIuHSIZE "%s", dinfo[u].start, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: stride=[", __func__, field);
+            fprintf(f, "%" PRIuHSIZE "%s", dinfo[u].start, (u < (ndims - 1) ? ", " : "]\n"));
+        fprintf(f, "%s: %s: stride=[", __func__, field);
         for (u = 0; u < ndims; u++)
-            HDfprintf(f, "%" PRIuHSIZE "%s", dinfo[u].stride, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: count=[", __func__, field);
+            fprintf(f, "%" PRIuHSIZE "%s", dinfo[u].stride, (u < (ndims - 1) ? ", " : "]\n"));
+        fprintf(f, "%s: %s: count=[", __func__, field);
         for (u = 0; u < ndims; u++)
-            HDfprintf(f, "%" PRIuHSIZE "%s", dinfo[u].count, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: block=[", __func__, field);
+            fprintf(f, "%" PRIuHSIZE "%s", dinfo[u].count, (u < (ndims - 1) ? ", " : "]\n"));
+        fprintf(f, "%s: %s: block=[", __func__, field);
         for (u = 0; u < ndims; u++)
-            HDfprintf(f, "%" PRIuHSIZE "%s", dinfo[u].block, (u < (ndims - 1) ? ", " : "]\n"));
+            fprintf(f, "%" PRIuHSIZE "%s", dinfo[u].block, (u < (ndims - 1) ? ", " : "]\n"));
     } /* end if */
     else
-        HDfprintf(f, "%s: %s==NULL\n", __func__, field);
+        fprintf(f, "%s: %s==NULL\n", __func__, field);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -413,32 +413,32 @@ H5S__hyper_print_spans_dfs(FILE *f, const H5S_hyper_span_info_t *span_lst, unsig
     } /* end while */
 
     for (u = 0; u < depth; u++)
-        HDfprintf(f, "\t");
-    HDfprintf(f, "DIM[%u]: ref_count=%u, #elems=%u, head=%p, tail=%p, actual_tail=%p, matched=%d\n", depth,
-              span_lst->count, num_elems, (void *)span_lst->head, (void *)span_lst->tail, (void *)actual_tail,
-              (span_lst->tail == actual_tail));
+        fprintf(f, "\t");
+    fprintf(f, "DIM[%u]: ref_count=%u, #elems=%u, head=%p, tail=%p, actual_tail=%p, matched=%d\n", depth,
+            span_lst->count, num_elems, (void *)span_lst->head, (void *)span_lst->tail, (void *)actual_tail,
+            (span_lst->tail == actual_tail));
 
     for (u = 0; u < depth; u++)
-        HDfprintf(f, "\t");
-    HDfprintf(f, "low_bounds=[");
+        fprintf(f, "\t");
+    fprintf(f, "low_bounds=[");
     for (u = 0; u < dims - 1; u++)
-        HDfprintf(f, "%" PRIuHSIZE ",", span_lst->low_bounds[u]);
-    HDfprintf(f, "%" PRIuHSIZE "]\n", span_lst->low_bounds[dims - 1]);
+        fprintf(f, "%" PRIuHSIZE ",", span_lst->low_bounds[u]);
+    fprintf(f, "%" PRIuHSIZE "]\n", span_lst->low_bounds[dims - 1]);
 
     for (u = 0; u < depth; u++)
-        HDfprintf(f, "\t");
-    HDfprintf(f, "high_bounds=[");
+        fprintf(f, "\t");
+    fprintf(f, "high_bounds=[");
     for (u = 0; u < dims - 1; u++)
-        HDfprintf(f, "%" PRIuHSIZE ",", span_lst->high_bounds[u]);
-    HDfprintf(f, "%" PRIuHSIZE "]\n", span_lst->high_bounds[dims - 1]);
+        fprintf(f, "%" PRIuHSIZE ",", span_lst->high_bounds[u]);
+    fprintf(f, "%" PRIuHSIZE "]\n", span_lst->high_bounds[dims - 1]);
 
     cur_elem = span_lst->head;
     elem_idx = 0;
     while (cur_elem) {
         for (u = 0; u < depth; u++)
-            HDfprintf(f, "\t");
-        HDfprintf(f, "ELEM[%u]: ptr=%p, low=%" PRIuHSIZE ", high=%" PRIuHSIZE ", down=%p\n", elem_idx++,
-                  (void *)cur_elem, cur_elem->low, cur_elem->high, (void *)cur_elem->down);
+            fprintf(f, "\t");
+        fprintf(f, "ELEM[%u]: ptr=%p, low=%" PRIuHSIZE ", high=%" PRIuHSIZE ", down=%p\n", elem_idx++,
+                (void *)cur_elem, cur_elem->low, cur_elem->high, (void *)cur_elem->down);
         if (cur_elem->down)
             H5S__hyper_print_spans_dfs(f, cur_elem->down, depth + 1, dims);
         cur_elem = cur_elem->next;
@@ -474,37 +474,37 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
 
     assert(hslab);
 
-    HDfprintf(f, "=======================\n");
-    HDfprintf(f, "SPACE: span_lst=%p, #dims=%u, offset_changed=%d\n", (void *)hslab->span_lst, dims,
-              space->select.offset_changed);
+    fprintf(f, "=======================\n");
+    fprintf(f, "SPACE: span_lst=%p, #dims=%u, offset_changed=%d\n", (void *)hslab->span_lst, dims,
+            space->select.offset_changed);
 
-    HDfprintf(f, "       offset=[");
+    fprintf(f, "       offset=[");
     for (u = 0; u < dims - 1; u++)
-        HDfprintf(f, "%lld,", space->select.offset[u]);
-    HDfprintf(f, "%lld]\n", space->select.offset[dims - 1]);
+        fprintf(f, "%lld,", space->select.offset[u]);
+    fprintf(f, "%lld]\n", space->select.offset[dims - 1]);
 
-    HDfprintf(f, "       low_bounds=[");
+    fprintf(f, "       low_bounds=[");
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
         for (u = 0; u < dims - 1; u++)
-            HDfprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->diminfo.low_bounds[u]);
-        HDfprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->diminfo.low_bounds[dims - 1]);
+            fprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->diminfo.low_bounds[u]);
+        fprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->diminfo.low_bounds[dims - 1]);
     } /* end if */
     else {
         for (u = 0; u < dims - 1; u++)
-            HDfprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->span_lst->low_bounds[u]);
-        HDfprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->span_lst->low_bounds[dims - 1]);
+            fprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->span_lst->low_bounds[u]);
+        fprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->span_lst->low_bounds[dims - 1]);
     } /* end else */
 
-    HDfprintf(f, "       high_bounds=[");
+    fprintf(f, "       high_bounds=[");
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
         for (u = 0; u < dims - 1; u++)
-            HDfprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->diminfo.high_bounds[u]);
-        HDfprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->diminfo.high_bounds[dims - 1]);
+            fprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->diminfo.high_bounds[u]);
+        fprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->diminfo.high_bounds[dims - 1]);
     } /* end if */
     else {
         for (u = 0; u < dims - 1; u++)
-            HDfprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->span_lst->high_bounds[u]);
-        HDfprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->span_lst->high_bounds[dims - 1]);
+            fprintf(f, "%" PRIuHSIZE ",", space->select.sel_info.hslab->span_lst->high_bounds[u]);
+        fprintf(f, "%" PRIuHSIZE "]\n", space->select.sel_info.hslab->span_lst->high_bounds[dims - 1]);
     } /* end else */
 
     /* Print out diminfo, if it's valid */
@@ -514,7 +514,7 @@ H5S__hyper_print_space_dfs(FILE *f, const H5S_t *space)
     /* Start print out the highest-order of dimension */
     if (hslab->span_lst)
         H5S__hyper_print_spans_dfs(f, hslab->span_lst, 0, dims);
-    HDfprintf(f, "=======================\n\n");
+    fprintf(f, "=======================\n\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_print_space_dfs() */

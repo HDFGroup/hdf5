@@ -70,13 +70,13 @@ test_create_group_under_root(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
@@ -84,7 +84,7 @@ test_create_group_under_root(void)
     if ((parent_gid =
              H5Gcreate2(file_id, GROUP_CREATE_UNDER_ROOT_GNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", GROUP_CREATE_UNDER_ROOT_GNAME);
+        printf("    couldn't create group '%s'\n", GROUP_CREATE_UNDER_ROOT_GNAME);
         goto error;
     }
 
@@ -124,20 +124,20 @@ test_create_group_under_existing_group(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file\n");
+        printf("    couldn't open file\n");
         goto error;
     }
 
     /* Open the already-existing group (/group_tests) in the file as the parent */
     if ((parent_group_id = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open group\n");
+        printf("    couldn't open group\n");
         goto error;
     }
 
@@ -146,7 +146,7 @@ test_create_group_under_existing_group(void)
     if ((child_group_id = H5Gcreate2(parent_group_id, GROUP_CREATE_UNDER_GROUP_REL_GNAME, H5P_DEFAULT,
                                      H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group using relative path: %s\n", GROUP_CREATE_UNDER_GROUP_REL_GNAME);
+        printf("    couldn't create group using relative path: %s\n", GROUP_CREATE_UNDER_GROUP_REL_GNAME);
         goto error;
     }
 
@@ -155,7 +155,7 @@ test_create_group_under_existing_group(void)
     if ((grandchild_group_id = H5Gcreate2(parent_group_id, GROUP_CREATE_UNDER_GROUP_ABS_GNAME, H5P_DEFAULT,
                                           H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group using absolute path: %s\n", GROUP_CREATE_UNDER_GROUP_ABS_GNAME);
+        printf("    couldn't create group using absolute path: %s\n", GROUP_CREATE_UNDER_GROUP_ABS_GNAME);
         goto error;
     }
 
@@ -202,38 +202,38 @@ test_create_many_groups(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
     if ((parent_group_id = H5Gcreate2(container_group, MANY_GROUP_CREATIONS_GNAME, H5P_DEFAULT, H5P_DEFAULT,
                                       H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", MANY_GROUP_CREATIONS_GNAME);
+        printf("    couldn't create group '%s'\n", MANY_GROUP_CREATIONS_GNAME);
         goto error;
     }
 
     /* Create multiple groups under the parent group */
-    HDprintf("\n");
+    printf("\n");
     for (i = 0; i < GROUP_NUMB_MANY; i++) {
-        HDprintf("\r %u/%u", i + 1, GROUP_NUMB_MANY);
+        printf("\r %u/%u", i + 1, GROUP_NUMB_MANY);
         sprintf(group_name, "group %02u", i);
         if ((child_group_id =
                  H5Gcreate2(parent_group_id, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create group '%s'\n", group_name);
+            printf("    couldn't create group '%s'\n", group_name);
             goto error;
         }
 
@@ -280,19 +280,19 @@ test_create_deep_groups(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
@@ -300,11 +300,11 @@ test_create_deep_groups(void)
     if ((group_id = H5Gcreate2(container_group, DEEP_GROUP_CREATIONS_GNAME, H5P_DEFAULT, H5P_DEFAULT,
                                H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", DEEP_GROUP_CREATIONS_GNAME);
+        printf("    couldn't create group '%s'\n", DEEP_GROUP_CREATIONS_GNAME);
         goto error;
     }
 
-    HDprintf("\n");
+    printf("\n");
     if (create_group_recursive(group_id, 1) < 0)
         TEST_ERROR;
 
@@ -340,7 +340,7 @@ create_group_recursive(hid_t parent_gid, unsigned counter)
     hid_t child_gid = H5I_INVALID_HID;
     char  gname[NAME_BUF_SIZE];
 
-    HDprintf("\r %u/%u", counter, GROUP_DEPTH);
+    printf("\r %u/%u", counter, GROUP_DEPTH);
     if (counter == 1)
         sprintf(gname, "2nd_child_group");
     else if (counter == 2)
@@ -349,7 +349,7 @@ create_group_recursive(hid_t parent_gid, unsigned counter)
         sprintf(gname, "%dth_child_group", counter + 1);
     if ((child_gid = H5Gcreate2(parent_gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", gname);
+        printf("    couldn't create group '%s'\n", gname);
         goto error;
     }
 
@@ -389,19 +389,19 @@ test_create_intermediate_group(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
@@ -536,7 +536,7 @@ test_create_group_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
@@ -544,7 +544,7 @@ test_create_group_invalid_params(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
@@ -565,7 +565,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with invalid loc_id!\n");
+                printf("    created group with invalid loc_id!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_loc_id);
             }
@@ -586,7 +586,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with a NULL name!\n");
+                printf("    created group with a NULL name!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_grp_name);
             }
@@ -599,7 +599,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with an invalid group name of ''!\n");
+                printf("    created group with an invalid group name of ''!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_grp_name);
             }
@@ -621,7 +621,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with invalid LCPL!\n");
+                printf("    created group with invalid LCPL!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_lcpl);
             }
@@ -643,7 +643,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with invalid GCPL!\n");
+                printf("    created group with invalid GCPL!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_gcpl);
             }
@@ -665,7 +665,7 @@ test_create_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created group with invalid GAPL!\n");
+                printf("    created group with invalid GAPL!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gcreate_invalid_gapl);
             }
@@ -711,25 +711,25 @@ test_create_anonymous_group(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file\n");
+        printf("    couldn't open file\n");
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open group\n");
+        printf("    couldn't open group\n");
         goto error;
     }
 
     if ((new_group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create anonymous group\n");
+        printf("    couldn't create anonymous group\n");
         goto error;
     }
 
@@ -771,7 +771,7 @@ test_create_anonymous_group_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
@@ -779,13 +779,13 @@ test_create_anonymous_group_invalid_params(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file\n");
+        printf("    couldn't open file\n");
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open group\n");
+        printf("    couldn't open group\n");
         goto error;
     }
 
@@ -805,7 +805,7 @@ test_create_anonymous_group_invalid_params(void)
 
             if (new_group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created anonymous group with invalid loc_id!\n");
+                printf("    created anonymous group with invalid loc_id!\n");
                 H5Gclose(new_group_id);
                 PART_ERROR(H5Gcreate_anon_invalid_loc_id);
             }
@@ -826,7 +826,7 @@ test_create_anonymous_group_invalid_params(void)
 
             if (new_group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created anonymous group with invalid GCPL!\n");
+                printf("    created anonymous group with invalid GCPL!\n");
                 H5Gclose(new_group_id);
                 PART_ERROR(H5Gcreate_anon_invalid_gcpl);
             }
@@ -847,7 +847,7 @@ test_create_anonymous_group_invalid_params(void)
 
             if (new_group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    created anonymous group with invalid GAPL!\n");
+                printf("    created anonymous group with invalid GAPL!\n");
                 H5Gclose(new_group_id);
                 PART_ERROR(H5Gcreate_anon_invalid_gapl);
             }
@@ -896,13 +896,13 @@ test_open_nonexistent_group(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file\n");
+        printf("    couldn't open file\n");
         goto error;
     }
 
@@ -914,7 +914,7 @@ test_open_nonexistent_group(void)
 
     if (group_id >= 0) {
         H5_FAILED();
-        HDprintf("    opened non-existent group!\n");
+        printf("    opened non-existent group!\n");
         goto error;
     }
 
@@ -951,7 +951,7 @@ test_open_group_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
@@ -959,7 +959,7 @@ test_open_group_invalid_params(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
@@ -979,7 +979,7 @@ test_open_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    opened group using an invalid loc_id!\n");
+                printf("    opened group using an invalid loc_id!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gopen_invalid_loc_id);
             }
@@ -1000,7 +1000,7 @@ test_open_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    opened group using a NULL name!\n");
+                printf("    opened group using a NULL name!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gopen_invalid_grp_name);
             }
@@ -1013,7 +1013,7 @@ test_open_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    opened group using an invalid name of ''!\n");
+                printf("    opened group using an invalid name of ''!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gopen_invalid_grp_name);
             }
@@ -1034,7 +1034,7 @@ test_open_group_invalid_params(void)
 
             if (group_id >= 0) {
                 H5_FAILED();
-                HDprintf("    opened group using an invalid GAPL!\n");
+                printf("    opened group using an invalid GAPL!\n");
                 H5Gclose(group_id);
                 PART_ERROR(H5Gopen_invalid_gapl);
             }
@@ -1079,7 +1079,7 @@ test_close_group_invalid_id(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic group aren't supported with this connector\n");
+        printf("    API functions for basic group aren't supported with this connector\n");
         return 0;
     }
 
@@ -1091,7 +1091,7 @@ test_close_group_invalid_id(void)
 
     if (err_ret >= 0) {
         H5_FAILED();
-        HDprintf("    close a group with an invalid ID!\n");
+        printf("    close a group with an invalid ID!\n");
         goto error;
     }
 
@@ -1123,8 +1123,8 @@ test_group_property_lists(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GET_PLIST) || !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, property list, or creation order aren't supported "
-                 "with this connector\n");
+        printf("    API functions for basic file, group, property list, or creation order aren't supported "
+               "with this connector\n");
         return 0;
     }
 
@@ -1132,25 +1132,25 @@ test_group_property_lists(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file\n");
+        printf("    couldn't open file\n");
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
     if ((gcpl_id1 = H5Pcreate(H5P_GROUP_CREATE)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create GCPL\n");
+        printf("    couldn't create GCPL\n");
         goto error;
     }
 
     if (H5Pset_link_creation_order(gcpl_id1, dummy_prop_val) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't set property on GCPL\n");
+        printf("    couldn't set property on GCPL\n");
         goto error;
     }
 
@@ -1158,7 +1158,7 @@ test_group_property_lists(void)
     if ((group_id1 = H5Gcreate2(container_group, GROUP_PROPERTY_LIST_TEST_GROUP_NAME1, H5P_DEFAULT, gcpl_id1,
                                 H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group\n");
+        printf("    couldn't create group\n");
         goto error;
     }
 
@@ -1166,7 +1166,7 @@ test_group_property_lists(void)
     if ((group_id2 = H5Gcreate2(container_group, GROUP_PROPERTY_LIST_TEST_GROUP_NAME2, H5P_DEFAULT,
                                 H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group\n");
+        printf("    couldn't create group\n");
         goto error;
     }
 
@@ -1185,13 +1185,13 @@ test_group_property_lists(void)
              * does not */
             if ((gcpl_id1 = H5Gget_create_plist(group_id1)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get GCPL\n");
+                printf("    couldn't get GCPL\n");
                 PART_ERROR(H5Gget_create_plist);
             }
 
             if ((gcpl_id2 = H5Gget_create_plist(group_id2)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get GCPL\n");
+                printf("    couldn't get GCPL\n");
                 PART_ERROR(H5Gget_create_plist);
             }
 
@@ -1200,15 +1200,15 @@ test_group_property_lists(void)
 
             if (H5Pget_link_creation_order(gcpl_id1, &dummy_prop_val) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve GCPL property value\n");
+                printf("    couldn't retrieve GCPL property value\n");
                 PART_ERROR(H5Gget_create_plist);
             }
 
             if (dummy_prop_val != GROUP_PROPERTY_LIST_TEST_DUMMY_VAL) {
                 H5_FAILED();
-                HDprintf("    retrieved GCPL property value '%llu' did not match expected value '%llu'\n",
-                         (unsigned long long)dummy_prop_val,
-                         (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
+                printf("    retrieved GCPL property value '%llu' did not match expected value '%llu'\n",
+                       (unsigned long long)dummy_prop_val,
+                       (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
                 PART_ERROR(H5Gget_create_plist);
             }
 
@@ -1216,16 +1216,16 @@ test_group_property_lists(void)
 
             if (H5Pget_link_creation_order(gcpl_id2, &dummy_prop_val) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve GCPL property value\n");
+                printf("    couldn't retrieve GCPL property value\n");
                 PART_ERROR(H5Gget_create_plist);
             }
 
             if (dummy_prop_val == GROUP_PROPERTY_LIST_TEST_DUMMY_VAL) {
                 H5_FAILED();
-                HDprintf("    retrieved GCPL property value '%llu' matched control value '%llu' when it "
-                         "shouldn't have\n",
-                         (unsigned long long)dummy_prop_val,
-                         (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
+                printf("    retrieved GCPL property value '%llu' matched control value '%llu' when it "
+                       "shouldn't have\n",
+                       (unsigned long long)dummy_prop_val,
+                       (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
                 PART_ERROR(H5Gget_create_plist);
             }
 
@@ -1278,26 +1278,26 @@ test_group_property_lists(void)
             if ((group_id1 = H5Gopen2(container_group, GROUP_PROPERTY_LIST_TEST_GROUP_NAME1, H5P_DEFAULT)) <
                 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open group\n");
+                printf("    couldn't open group\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
             if ((group_id2 = H5Gopen2(container_group, GROUP_PROPERTY_LIST_TEST_GROUP_NAME2, H5P_DEFAULT)) <
                 0) {
                 H5_FAILED();
-                HDprintf("    couldn't open group\n");
+                printf("    couldn't open group\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
             if ((gcpl_id1 = H5Gget_create_plist(group_id1)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get property list\n");
+                printf("    couldn't get property list\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
             if ((gcpl_id2 = H5Gget_create_plist(group_id2)) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get property list\n");
+                printf("    couldn't get property list\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
@@ -1306,15 +1306,15 @@ test_group_property_lists(void)
 
             if (H5Pget_link_creation_order(gcpl_id1, &dummy_prop_val) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve GCPL property value\n");
+                printf("    couldn't retrieve GCPL property value\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
             if (dummy_prop_val != GROUP_PROPERTY_LIST_TEST_DUMMY_VAL) {
                 H5_FAILED();
-                HDprintf("    retrieved GCPL property value '%llu' did not match expected value '%llu'\n",
-                         (unsigned long long)dummy_prop_val,
-                         (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
+                printf("    retrieved GCPL property value '%llu' did not match expected value '%llu'\n",
+                       (unsigned long long)dummy_prop_val,
+                       (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
@@ -1322,16 +1322,16 @@ test_group_property_lists(void)
 
             if (H5Pget_link_creation_order(gcpl_id2, &dummy_prop_val) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't retrieve GCPL property value\n");
+                printf("    couldn't retrieve GCPL property value\n");
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
             if (dummy_prop_val == GROUP_PROPERTY_LIST_TEST_DUMMY_VAL) {
                 H5_FAILED();
-                HDprintf("    retrieved GCPL property value '%llu' matched control value '%llu' when it "
-                         "shouldn't have\n",
-                         (unsigned long long)dummy_prop_val,
-                         (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
+                printf("    retrieved GCPL property value '%llu' matched control value '%llu' when it "
+                       "shouldn't have\n",
+                       (unsigned long long)dummy_prop_val,
+                       (unsigned long long)GROUP_PROPERTY_LIST_TEST_DUMMY_VAL);
                 PART_ERROR(H5Gget_create_plist_reopened);
             }
 
@@ -1395,7 +1395,7 @@ test_get_group_info(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or group aren't supported with this connector\n");
+        printf("    API functions for basic file or group aren't supported with this connector\n");
         return 0;
     }
 
@@ -1403,26 +1403,26 @@ test_get_group_info(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
     if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create a GCPL\n");
+        printf("    couldn't create a GCPL\n");
         goto error;
     }
 
     if (vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER) {
         if (H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't enable link creation order tracking and indexing on GCPL\n");
+            printf("    couldn't enable link creation order tracking and indexing on GCPL\n");
             goto error;
         }
     }
@@ -1430,7 +1430,7 @@ test_get_group_info(void)
     if ((parent_group_id = H5Gcreate2(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, H5P_DEFAULT, gcpl_id,
                                       H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", GROUP_GET_INFO_TEST_GROUP_NAME);
+        printf("    couldn't create group '%s'\n", GROUP_GET_INFO_TEST_GROUP_NAME);
         goto error;
     }
 
@@ -1442,7 +1442,7 @@ test_get_group_info(void)
 
         if ((group_id = H5Gcreate2(parent_group_id, group_name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) {
             H5_FAILED();
-            HDprintf("    couldn't create group '%s'\n", group_name);
+            printf("    couldn't create group '%s'\n", group_name);
             goto error;
         }
 
@@ -1463,14 +1463,14 @@ test_get_group_info(void)
             /* Retrieve information about the parent group */
             if (H5Gget_info(parent_group_id, &group_info) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get group info\n");
+                printf("    couldn't get group info\n");
                 PART_ERROR(H5Gget_info);
             }
 
             if (group_info.nlinks != GROUP_GET_INFO_TEST_GROUP_NUMB) {
                 H5_FAILED();
-                HDprintf("    group's number of links '%lu' doesn't match expected value '%u'\n",
-                         group_info.nlinks, (unsigned int)GROUP_GET_INFO_TEST_GROUP_NUMB);
+                printf("    group's number of links '%lu' doesn't match expected value '%u'\n",
+                       group_info.nlinks, (unsigned int)GROUP_GET_INFO_TEST_GROUP_NUMB);
                 PART_ERROR(H5Gget_info);
             }
 
@@ -1480,8 +1480,8 @@ test_get_group_info(void)
              */
             if (group_info.max_corder != GROUP_GET_INFO_TEST_GROUP_NUMB) {
                 H5_FAILED();
-                HDprintf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
-                         (long long)group_info.max_corder, (long long)GROUP_GET_INFO_TEST_GROUP_NUMB);
+                printf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
+                       (long long)group_info.max_corder, (long long)GROUP_GET_INFO_TEST_GROUP_NUMB);
                 PART_ERROR(H5Gget_info);
             }
 
@@ -1491,14 +1491,14 @@ test_get_group_info(void)
                 group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                 group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                 H5_FAILED();
-                HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                 PART_ERROR(H5Gget_info);
             }
 
             /* Assume that mounted should be FALSE in this case */
             if (group_info.mounted != FALSE) {
                 H5_FAILED();
-                HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                 PART_ERROR(H5Gget_info);
             }
 
@@ -1516,14 +1516,14 @@ test_get_group_info(void)
             if (H5Gget_info_by_name(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, &group_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
-                HDprintf("    couldn't get group info by name\n");
+                printf("    couldn't get group info by name\n");
                 PART_ERROR(H5Gget_info_by_name);
             }
 
             if (group_info.nlinks != GROUP_GET_INFO_TEST_GROUP_NUMB) {
                 H5_FAILED();
-                HDprintf("    group's number of links '%lu' doesn't match expected value '%u'\n",
-                         group_info.nlinks, (unsigned int)GROUP_GET_INFO_TEST_GROUP_NUMB);
+                printf("    group's number of links '%lu' doesn't match expected value '%u'\n",
+                       group_info.nlinks, (unsigned int)GROUP_GET_INFO_TEST_GROUP_NUMB);
                 PART_ERROR(H5Gget_info_by_name);
             }
 
@@ -1533,8 +1533,8 @@ test_get_group_info(void)
              */
             if (group_info.max_corder != GROUP_GET_INFO_TEST_GROUP_NUMB) {
                 H5_FAILED();
-                HDprintf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
-                         (long long)group_info.max_corder, (long long)GROUP_GET_INFO_TEST_GROUP_NUMB);
+                printf("    group's max creation order '%lld' doesn't match expected value '%lld'\n",
+                       (long long)group_info.max_corder, (long long)GROUP_GET_INFO_TEST_GROUP_NUMB);
                 PART_ERROR(H5Gget_info_by_name);
             }
 
@@ -1544,14 +1544,14 @@ test_get_group_info(void)
                 group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                 group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                 H5_FAILED();
-                HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                 PART_ERROR(H5Gget_info_by_name);
             }
 
             /* Assume that mounted should be FALSE in this case */
             if (group_info.mounted != FALSE) {
                 H5_FAILED();
-                HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                 PART_ERROR(H5Gget_info_by_name);
             }
 
@@ -1565,7 +1565,7 @@ test_get_group_info(void)
 
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
-                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking isn't supported with this VOL connector\n");
                 PART_EMPTY(H5Gget_info_by_idx_crt_order_increasing);
             }
 
@@ -1576,21 +1576,21 @@ test_get_group_info(void)
                 if (H5Gget_info_by_idx(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
                                        H5_ITER_INC, (hsize_t)i, &group_info, H5P_DEFAULT) < 0) {
                     H5_FAILED();
-                    HDprintf("    couldn't get group info for group at index %u\n", i);
+                    printf("    couldn't get group info for group at index %u\n", i);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_increasing);
                 }
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%lu' doesn't match expected value '%d'\n",
-                             group_info.nlinks, 0);
+                    printf("    group's number of links '%lu' doesn't match expected value '%d'\n",
+                           group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_increasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
-                             (long long)group_info.max_corder, 0);
+                    printf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
+                           (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_increasing);
                 }
 
@@ -1600,14 +1600,14 @@ test_get_group_info(void)
                     group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                     group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                     H5_FAILED();
-                    HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                    printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                     PART_ERROR(H5Gget_info_by_idx_crt_order_increasing);
                 }
 
                 /* Assume that mounted should be FALSE in this case */
                 if (group_info.mounted != FALSE) {
                     H5_FAILED();
-                    HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                    printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                     PART_ERROR(H5Gget_info_by_idx_crt_order_increasing);
                 }
             }
@@ -1622,7 +1622,7 @@ test_get_group_info(void)
 
             if (!(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
                 SKIPPED();
-                HDprintf("    creation order tracking isn't supported with this VOL connector\n");
+                printf("    creation order tracking isn't supported with this VOL connector\n");
                 PART_EMPTY(H5Gget_info_by_idx_crt_order_decreasing);
             }
 
@@ -1633,21 +1633,21 @@ test_get_group_info(void)
                 if (H5Gget_info_by_idx(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, H5_INDEX_CRT_ORDER,
                                        H5_ITER_DEC, (hsize_t)i, &group_info, H5P_DEFAULT) < 0) {
                     H5_FAILED();
-                    HDprintf("    couldn't get group info for group at index %u\n", i);
+                    printf("    couldn't get group info for group at index %u\n", i);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_decreasing);
                 }
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%lu' doesn't match expected value '%d'\n",
-                             group_info.nlinks, 0);
+                    printf("    group's number of links '%lu' doesn't match expected value '%d'\n",
+                           group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_decreasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
-                             (long long)group_info.max_corder, 0);
+                    printf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
+                           (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_crt_order_decreasing);
                 }
 
@@ -1657,14 +1657,14 @@ test_get_group_info(void)
                     group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                     group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                     H5_FAILED();
-                    HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                    printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                     PART_ERROR(H5Gget_info_by_idx_crt_order_decreasing);
                 }
 
                 /* Assume that mounted should be FALSE in this case */
                 if (group_info.mounted != FALSE) {
                     H5_FAILED();
-                    HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                    printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                     PART_ERROR(H5Gget_info_by_idx_crt_order_decreasing);
                 }
             }
@@ -1684,21 +1684,21 @@ test_get_group_info(void)
                 if (H5Gget_info_by_idx(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, H5_INDEX_NAME,
                                        H5_ITER_INC, (hsize_t)i, &group_info, H5P_DEFAULT) < 0) {
                     H5_FAILED();
-                    HDprintf("    couldn't get group info for group at index %u\n", i);
+                    printf("    couldn't get group info for group at index %u\n", i);
                     PART_ERROR(H5Gget_info_by_idx_name_order_increasing);
                 }
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%lu' doesn't match expected value '%d'\n",
-                             group_info.nlinks, 0);
+                    printf("    group's number of links '%lu' doesn't match expected value '%d'\n",
+                           group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_increasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
-                             (long long)group_info.max_corder, 0);
+                    printf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
+                           (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_increasing);
                 }
 
@@ -1708,14 +1708,14 @@ test_get_group_info(void)
                     group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                     group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                     H5_FAILED();
-                    HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                    printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                     PART_ERROR(H5Gget_info_by_idx_name_order_increasing);
                 }
 
                 /* Assume that mounted should be FALSE in this case */
                 if (group_info.mounted != FALSE) {
                     H5_FAILED();
-                    HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                    printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                     PART_ERROR(H5Gget_info_by_idx_name_order_increasing);
                 }
             }
@@ -1735,22 +1735,21 @@ test_get_group_info(void)
                 if (H5Gget_info_by_idx(container_group, GROUP_GET_INFO_TEST_GROUP_NAME, H5_INDEX_NAME,
                                        H5_ITER_DEC, (hsize_t)i, &group_info, H5P_DEFAULT) < 0) {
                     H5_FAILED();
-                    HDprintf("    couldn't get group info for group at index %u\n", i);
+                    printf("    couldn't get group info for group at index %u\n", i);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
                 if (group_info.nlinks != 0) {
                     H5_FAILED();
-                    HDprintf("    group's number of links '%" PRIuHSIZE
-                             "' doesn't match expected value '%d'\n",
-                             group_info.nlinks, 0);
+                    printf("    group's number of links '%" PRIuHSIZE "' doesn't match expected value '%d'\n",
+                           group_info.nlinks, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
                 if (group_info.max_corder != 0) {
                     H5_FAILED();
-                    HDprintf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
-                             (long long)group_info.max_corder, 0);
+                    printf("    group's max creation order '%lld' doesn't match expected value '%d'\n",
+                           (long long)group_info.max_corder, 0);
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
@@ -1760,14 +1759,14 @@ test_get_group_info(void)
                     group_info.storage_type != H5G_STORAGE_TYPE_DENSE &&
                     group_info.storage_type != H5G_STORAGE_TYPE_UNKNOWN) {
                     H5_FAILED();
-                    HDprintf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
+                    printf("    group info's 'storage_type' field wasn't set to a meaningful value\n");
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
 
                 /* Assume that mounted should be FALSE in this case */
                 if (group_info.mounted != FALSE) {
                     H5_FAILED();
-                    HDprintf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
+                    printf("    group info's 'mounted' field was TRUE when it should have been FALSE\n");
                     PART_ERROR(H5Gget_info_by_idx_name_order_decreasing);
                 }
             }
@@ -1823,8 +1822,8 @@ test_get_group_info_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, or more group aren't supported with this "
-                 "connector\n");
+        printf("    API functions for basic file, or more group aren't supported with this "
+               "connector\n");
         return 0;
     }
 
@@ -1832,7 +1831,7 @@ test_get_group_info_invalid_params(void)
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
@@ -1852,7 +1851,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info with an invalid loc_id!\n");
+                printf("    retrieved info of group using H5Gget_info with an invalid loc_id!\n");
                 PART_ERROR(H5Gget_info_invalid_loc_id);
             }
 
@@ -1872,7 +1871,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info with invalid group info pointer!\n");
+                printf("    retrieved info of group using H5Gget_info with invalid group info pointer!\n");
                 PART_ERROR(H5Gget_info_invalid_grp_info_pointer);
             }
 
@@ -1892,7 +1891,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_name with an invalid loc_id!\n");
+                printf("    retrieved info of group using H5Gget_info_by_name with an invalid loc_id!\n");
                 PART_ERROR(H5Gget_info_by_name_invalid_loc_id);
             }
 
@@ -1912,7 +1911,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_name with a NULL name!\n");
+                printf("    retrieved info of group using H5Gget_info_by_name with a NULL name!\n");
                 PART_ERROR(H5Gget_info_by_name_invalid_grp_name);
             }
 
@@ -1924,8 +1923,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf(
-                    "    retrieved info of group using H5Gget_info_by_name with an invalid name of ''!\n");
+                printf("    retrieved info of group using H5Gget_info_by_name with an invalid name of ''!\n");
                 PART_ERROR(H5Gget_info_by_name_invalid_grp_name);
             }
 
@@ -1945,8 +1943,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_name with an invalid group info "
-                         "pointer!\n");
+                printf("    retrieved info of group using H5Gget_info_by_name with an invalid group info "
+                       "pointer!\n");
                 PART_ERROR(H5Gget_info_by_name_invalid_grp_info_pointer);
             }
 
@@ -1966,7 +1964,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_name with an invalid LAPL!\n");
+                printf("    retrieved info of group using H5Gget_info_by_name with an invalid LAPL!\n");
                 PART_ERROR(H5Gget_info_by_name_invalid_lapl);
             }
 
@@ -1987,7 +1985,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with an invalid loc_id!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with an invalid loc_id!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_loc_id);
             }
 
@@ -2008,7 +2006,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with a NULL group name!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with a NULL group name!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_grp_name);
             }
 
@@ -2021,8 +2019,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with an invalid group name of "
-                         "''!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with an invalid group name of "
+                       "''!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_grp_name);
             }
 
@@ -2043,8 +2041,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with invalid index type "
-                         "H5_INDEX_UNKNOWN!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with invalid index type "
+                       "H5_INDEX_UNKNOWN!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_index_type);
             }
 
@@ -2057,8 +2055,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with invalid index type "
-                         "H5_INDEX_N!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with invalid index type "
+                       "H5_INDEX_N!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_index_type);
             }
 
@@ -2079,8 +2077,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with invalid iteration order "
-                         "H5_ITER_UNKNOWN!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with invalid iteration order "
+                       "H5_ITER_UNKNOWN!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_iter_order);
             }
 
@@ -2093,8 +2091,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with invalid iteration order "
-                         "H5_ITER_N!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with invalid iteration order "
+                       "H5_ITER_N!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_iter_order);
             }
 
@@ -2114,8 +2112,8 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with an invalid group info "
-                         "pointer!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with an invalid group info "
+                       "pointer!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_grp_info_pointer);
             }
 
@@ -2136,7 +2134,7 @@ test_get_group_info_invalid_params(void)
 
             if (err_ret >= 0) {
                 H5_FAILED();
-                HDprintf("    retrieved info of group using H5Gget_info_by_idx with an invalid LAPL!\n");
+                printf("    retrieved info of group using H5Gget_info_by_idx with an invalid LAPL!\n");
                 PART_ERROR(H5Gget_info_by_idx_invalid_lapl);
             }
 
@@ -2181,34 +2179,34 @@ test_flush_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
-                 "connector\n");
+        printf("    API functions for basic file, group, or flush refresh aren't supported with this "
+               "connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
     if ((group_id = H5Gcreate2(container_group, GROUP_FLUSH_GNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
         0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", GROUP_FLUSH_GNAME);
+        printf("    couldn't create group '%s'\n", GROUP_FLUSH_GNAME);
         goto error;
     }
 
     /* Flush the group */
     if (H5Gflush(group_id) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't flush the group '%s'\n", GROUP_FLUSH_GNAME);
+        printf("    couldn't flush the group '%s'\n", GROUP_FLUSH_GNAME);
         goto error;
     }
 
@@ -2249,7 +2247,7 @@ test_flush_group_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for group flush aren't supported with this connector\n");
+        printf("    API functions for group flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -2261,7 +2259,7 @@ test_flush_group_invalid_params(void)
 
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    flushed group with invalid ID!\n");
+        printf("    flushed group with invalid ID!\n");
         goto error;
     }
 
@@ -2289,34 +2287,34 @@ test_refresh_group(void)
     if (!(vol_cap_flags_g & (H5VL_CAP_FLAG_FILE_BASIC)) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, or flush refresh aren't supported with this "
-                 "connector\n");
+        printf("    API functions for basic file, group, or flush refresh aren't supported with this "
+               "connector\n");
         return 0;
     }
 
     if ((file_id = H5Fopen(H5_api_test_filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open file '%s'\n", H5_api_test_filename);
+        printf("    couldn't open file '%s'\n", H5_api_test_filename);
         goto error;
     }
 
     if ((container_group = H5Gopen2(file_id, GROUP_TEST_GROUP_NAME, H5P_DEFAULT)) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't open container group\n");
+        printf("    couldn't open container group\n");
         goto error;
     }
 
     if ((group_id = H5Gcreate2(container_group, GROUP_REFRESH_GNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
         0) {
         H5_FAILED();
-        HDprintf("    couldn't create group '%s'\n", GROUP_REFRESH_GNAME);
+        printf("    couldn't create group '%s'\n", GROUP_REFRESH_GNAME);
         goto error;
     }
 
     /* Refresh the group */
     if (H5Grefresh(group_id) < 0) {
         H5_FAILED();
-        HDprintf("    couldn't refresh the group '%s'\n", GROUP_REFRESH_GNAME);
+        printf("    couldn't refresh the group '%s'\n", GROUP_REFRESH_GNAME);
         goto error;
     }
 
@@ -2357,7 +2355,7 @@ test_refresh_group_invalid_params(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for group refresh aren't supported with this connector\n");
+        printf("    API functions for group refresh aren't supported with this connector\n");
         return 0;
     }
 
@@ -2369,7 +2367,7 @@ test_refresh_group_invalid_params(void)
 
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    refreshed group with invalid ID!\n");
+        printf("    refreshed group with invalid ID!\n");
         goto error;
     }
 
@@ -2387,17 +2385,17 @@ H5_api_group_test(void)
     size_t i;
     int    nerrors;
 
-    HDprintf("**********************************************\n");
-    HDprintf("*                                            *\n");
-    HDprintf("*              API Group Tests               *\n");
-    HDprintf("*                                            *\n");
-    HDprintf("**********************************************\n\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*              API Group Tests               *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
 
     for (i = 0, nerrors = 0; i < ARRAY_LENGTH(group_tests); i++) {
         nerrors += (*group_tests[i])() ? 1 : 0;
     }
 
-    HDprintf("\n");
+    printf("\n");
 
     return nerrors;
 }

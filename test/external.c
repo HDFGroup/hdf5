@@ -149,7 +149,7 @@ test_non_extendible(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("   got: %d\n    ans: 1\n", n);
+        printf("   got: %d\n    ans: 1\n", n);
         goto error;
     }
 
@@ -159,13 +159,13 @@ test_non_extendible(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
+        printf("    got: %" PRIuHSIZE "\n    ans: %" PRIuHSIZE "\n", file_size, max_size[0] * sizeof(int));
         goto error;
     }
 
@@ -418,7 +418,7 @@ test_unlimited(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("    got: %d\n    ans: 1\n", n);
+        printf("    got: %d\n    ans: 1\n", n);
         goto error;
     } /* end if */
 
@@ -427,13 +427,13 @@ test_unlimited(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -482,12 +482,12 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
     }
     for (i = 0; i < n_external_files; i++) {
         if (HDsnprintf(exname, AEF_EXNAME_MAX_LEN, "ext%d.data", i + 1) > AEF_EXNAME_MAX_LEN) {
-            HDfprintf(stderr, "External file %d overflows name buffer\n", i + 1);
+            fprintf(stderr, "External file %d overflows name buffer\n", i + 1);
             HDfflush(stderr);
             return -1;
         }
         if (H5Pset_external(dcpl_id, exname, offset, max_ext_size) < 0) {
-            HDfprintf(stderr, "Problem adding external file %s\n", exname);
+            fprintf(stderr, "Problem adding external file %s\n", exname);
             HDfflush(stderr);
             return -1;
         }
@@ -1527,6 +1527,6 @@ error:
     }
     H5E_END_TRY
     nerrors = MAX(1, nerrors);
-    HDprintf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */

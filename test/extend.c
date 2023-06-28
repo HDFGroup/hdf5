@@ -115,10 +115,10 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
             for (k = 0; k < N2X; k++)
                 for (m = 0; m < N2Y; m++)
                     if (buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
-                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
-                                 buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                        printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
+                               buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
         }             /* end for */
@@ -218,10 +218,10 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
             for (k = 0; k < N2X; k++)
                 for (m = 0; m < N2Y; m++)
                     if (buf2[k][m] != buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]) {
-                        HDprintf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
-                        HDprintf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
-                        HDprintf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
-                                 buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
+                        printf("    i=%d, j=%d, k=%d, m=%d\n", i, j, k, m);
+                        printf("    buf2[%d][%d]=%d\n", k, m, buf2[k][m]);
+                        printf("    buf1[%d][%d]=%d\n", (i % 2) * N2X + k, (j % 2) * N2Y + m,
+                               buf1[(i % 2) * N2X + k][(j % 2) * N2Y + m]);
                         TEST_ERROR;
                     } /* end if */
         }             /* end for */
@@ -338,11 +338,11 @@ main(void)
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
+        printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
         HDexit(EXIT_FAILURE);
     } /* end if */
 
-    HDprintf("All extend tests passed.\n");
+    printf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     free(buf1);
@@ -359,6 +359,6 @@ error:
     free(buf2);
     free(buf2_data);
 
-    HDprintf("*** One or more extend tests failed ***\n");
+    printf("*** One or more extend tests failed ***\n");
     HDexit(EXIT_FAILURE);
 } /* end main() */

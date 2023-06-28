@@ -242,27 +242,27 @@ H5PB_print_stats(const H5PB_t *page_buf)
 
     assert(page_buf);
 
-    HDprintf("PAGE BUFFER STATISTICS:\n");
+    printf("PAGE BUFFER STATISTICS:\n");
 
-    HDprintf("******* METADATA\n");
-    HDprintf("\t Total Accesses: %u\n", page_buf->accesses[0]);
-    HDprintf("\t Hits: %u\n", page_buf->hits[0]);
-    HDprintf("\t Misses: %u\n", page_buf->misses[0]);
-    HDprintf("\t Evictions: %u\n", page_buf->evictions[0]);
-    HDprintf("\t Bypasses: %u\n", page_buf->bypasses[0]);
-    HDprintf("\t Hit Rate = %f%%\n",
-             ((double)page_buf->hits[0] / (page_buf->accesses[0] - page_buf->bypasses[0])) * 100);
-    HDprintf("*****************\n\n");
+    printf("******* METADATA\n");
+    printf("\t Total Accesses: %u\n", page_buf->accesses[0]);
+    printf("\t Hits: %u\n", page_buf->hits[0]);
+    printf("\t Misses: %u\n", page_buf->misses[0]);
+    printf("\t Evictions: %u\n", page_buf->evictions[0]);
+    printf("\t Bypasses: %u\n", page_buf->bypasses[0]);
+    printf("\t Hit Rate = %f%%\n",
+           ((double)page_buf->hits[0] / (page_buf->accesses[0] - page_buf->bypasses[0])) * 100);
+    printf("*****************\n\n");
 
-    HDprintf("******* RAWDATA\n");
-    HDprintf("\t Total Accesses: %u\n", page_buf->accesses[1]);
-    HDprintf("\t Hits: %u\n", page_buf->hits[1]);
-    HDprintf("\t Misses: %u\n", page_buf->misses[1]);
-    HDprintf("\t Evictions: %u\n", page_buf->evictions[1]);
-    HDprintf("\t Bypasses: %u\n", page_buf->bypasses[1]);
-    HDprintf("\t Hit Rate = %f%%\n",
-             ((double)page_buf->hits[1] / (page_buf->accesses[1] - page_buf->bypasses[0])) * 100);
-    HDprintf("*****************\n\n");
+    printf("******* RAWDATA\n");
+    printf("\t Total Accesses: %u\n", page_buf->accesses[1]);
+    printf("\t Hits: %u\n", page_buf->hits[1]);
+    printf("\t Misses: %u\n", page_buf->misses[1]);
+    printf("\t Evictions: %u\n", page_buf->evictions[1]);
+    printf("\t Bypasses: %u\n", page_buf->bypasses[1]);
+    printf("\t Hit Rate = %f%%\n",
+           ((double)page_buf->hits[1] / (page_buf->accesses[1] - page_buf->bypasses[0])) * 100);
+    printf("*****************\n\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5PB_print_stats */

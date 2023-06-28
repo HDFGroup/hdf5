@@ -18,9 +18,9 @@ static void usage(void);
 static void
 usage(void)
 {
-    HDfprintf(stdout, "\n");
-    HDfprintf(stdout, "Usage error!\n");
-    HDfprintf(stdout, "Usage: clear_open_chk filename\n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "Usage error!\n");
+    fprintf(stdout, "Usage: clear_open_chk filename\n");
 } /* usage() */
 
 /*-------------------------------------------------------------------------
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
 
     /* Try opening the file */
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
-        HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
+        fprintf(stderr, "clear_open_chk: unable to open the file\n");
         free(fname);
         HDexit(EXIT_FAILURE);
     }
@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 
     /* Close the file */
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "clear_open_chk: cannot close the file\n");
+        fprintf(stderr, "clear_open_chk: cannot close the file\n");
         HDexit(EXIT_FAILURE);
     }
 

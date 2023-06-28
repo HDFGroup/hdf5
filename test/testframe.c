@@ -72,13 +72,13 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
 {
     /* Sanity checking */
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
-        HDprintf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
+        printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
         HDexit(EXIT_FAILURE);
-    } /* end if */
+    }
     if (HDstrlen(TheName) >= MAXTESTNAME) {
-        HDprintf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
+        printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
         HDexit(EXIT_FAILURE);
-    } /* end if */
+    }
 
     /* Check for increasing the Test array size */
     if (Index >= TestAlloc) {
@@ -87,15 +87,15 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
 
         /* Reallocate array */
         if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
-            HDprintf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
-                     newAlloc);
+            printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
+                   newAlloc);
             HDexit(EXIT_FAILURE);
-        } /* end if */
+        }
 
         /* Update info */
         Test      = newTest;
         TestAlloc = newAlloc;
-    } /* end if */
+    }
 
     /* Set up test function */
     HDstrcpy(Test[Index].Description, TheDescr);
@@ -624,7 +624,7 @@ SetTest(const char *testname, int action)
             break;
         default:
             /* error */
-            HDprintf("*** ERROR: Unknown action (%d) for SetTest\n", action);
+            printf("*** ERROR: Unknown action (%d) for SetTest\n", action);
             break;
     }
 }

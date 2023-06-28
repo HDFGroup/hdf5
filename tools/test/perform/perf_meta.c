@@ -399,8 +399,7 @@ create_attrs_1(void)
             attr_t.avg = attr_t.total / (NUM_ATTRS * NUM_DSETS);
 
         /* Print out the performance result */
-        HDfprintf(stderr, "1.  Create %d attributes for each of %d existing datasets\n", NUM_ATTRS,
-                  NUM_DSETS);
+        fprintf(stderr, "1.  Create %d attributes for each of %d existing datasets\n", NUM_ATTRS, NUM_DSETS);
         print_perf(open_t, close_t, attr_t);
     }
 
@@ -500,7 +499,7 @@ create_attrs_2(void)
             attr_t.avg = attr_t.total / (NUM_ATTRS * NUM_DSETS);
 
         /* Print out the performance result */
-        HDfprintf(stderr, "2.  Create %d attributes for each of %d new datasets\n", NUM_ATTRS, NUM_DSETS);
+        fprintf(stderr, "2.  Create %d attributes for each of %d new datasets\n", NUM_ATTRS, NUM_DSETS);
         print_perf(create_t, close_t, attr_t);
     }
 
@@ -608,8 +607,8 @@ create_attrs_3(void)
         attr_t.avg  = attr_t.total / (NUM_ATTRS * NUM_DSETS);
 
         /* Print out the performance result */
-        HDfprintf(stderr, "3.  Create %d attributes for each of %d existing datasets for %d times\n",
-                  BATCH_ATTRS, NUM_DSETS, loop_num);
+        fprintf(stderr, "3.  Create %d attributes for each of %d existing datasets for %d times\n",
+                BATCH_ATTRS, NUM_DSETS, loop_num);
         print_perf(open_t, close_t, attr_t);
     }
 
@@ -715,13 +714,13 @@ perf(p_time *perf_t, double start_t, double end_t)
 void
 print_perf(p_time open_t, p_time close_t, p_time attr_t)
 {
-    HDfprintf(stderr, "\t%s:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", open_t.func, open_t.avg, open_t.max,
-              open_t.min);
-    HDfprintf(stderr, "\tH5Dclose:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", close_t.avg, close_t.max,
-              close_t.min);
+    fprintf(stderr, "\t%s:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", open_t.func, open_t.avg, open_t.max,
+            open_t.min);
+    fprintf(stderr, "\tH5Dclose:\t\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", close_t.avg, close_t.max,
+            close_t.min);
     if (NUM_ATTRS)
-        HDfprintf(stderr, "\tH5A(create & close):\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", attr_t.avg,
-                  attr_t.max, attr_t.min);
+        fprintf(stderr, "\tH5A(create & close):\tavg=%.6fs;\tmax=%.6fs;\tmin=%.6fs\n", attr_t.avg, attr_t.max,
+                attr_t.min);
 }
 
 /*-------------------------------------------------------------------------
@@ -761,7 +760,7 @@ main(int argc, char **argv)
 #ifdef H5_HAVE_PARALLEL
     if (facc_type == FACC_DEFAULT || (facc_type != FACC_DEFAULT && MAINPROCESS))
 #endif /*H5_HAVE_PARALLEL*/
-        HDfprintf(stderr, "\t\tPerformance result of metadata for datasets and attributes\n\n");
+        fprintf(stderr, "\t\tPerformance result of metadata for datasets and attributes\n\n");
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 #ifdef H5_HAVE_PARALLEL

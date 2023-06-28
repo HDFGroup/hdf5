@@ -186,14 +186,14 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const 
     FUNC_ENTER_PACKAGE_NOERR
 
     if (sohm->location == H5SM_IN_HEAP)
-        HDfprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
-                  "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
-                  sohm->u.heap_loc.ref_count);
+        fprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
+                "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
+                sohm->u.heap_loc.ref_count);
     else {
         assert(sohm->location == H5SM_IN_OH);
-        HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
-                  "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
-                  sohm->u.mesg_loc.index);
+        fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
+                "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
+                sohm->u.mesg_loc.index);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

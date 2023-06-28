@@ -245,12 +245,12 @@ H5O__btreek_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Chunked storage internal B-tree 'K' value:", mesg->btree_k[H5B_CHUNK_ID]);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Symbol table node internal B-tree 'K' value:", mesg->btree_k[H5B_SNODE_ID]);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-              "Symbol table node leaf 'K' value:", mesg->sym_leaf_k);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Chunked storage internal B-tree 'K' value:", mesg->btree_k[H5B_CHUNK_ID]);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Symbol table node internal B-tree 'K' value:", mesg->btree_k[H5B_SNODE_ID]);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+            "Symbol table node leaf 'K' value:", mesg->sym_leaf_k);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__btreek_debug() */
