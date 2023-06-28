@@ -520,29 +520,29 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth, "Rank:", (unsigned long)(sdim->rank));
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth, "Rank:", (unsigned long)(sdim->rank));
 
     if (sdim->rank > 0) {
         unsigned u; /* local counting variable */
 
-        HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+        fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
-            HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
-        HDfprintf(stream, "}\n");
+            fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
+        fprintf(stream, "}\n");
 
-        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
         if (sdim->max) {
-            HDfprintf(stream, "{");
+            fprintf(stream, "{");
             for (u = 0; u < sdim->rank; u++) {
                 if (H5S_UNLIMITED == sdim->max[u])
-                    HDfprintf(stream, "%sUNLIM", u ? ", " : "");
+                    fprintf(stream, "%sUNLIM", u ? ", " : "");
                 else
-                    HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
+                    fprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
             } /* end for */
-            HDfprintf(stream, "}\n");
+            fprintf(stream, "}\n");
         } /* end if */
         else
-            HDfprintf(stream, "CONSTANT\n");
+            fprintf(stream, "CONSTANT\n");
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

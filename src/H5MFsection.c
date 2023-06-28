@@ -471,9 +471,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
+        fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
+                __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */
@@ -496,9 +495,8 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->meta_aggr);
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr,
-                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n",
-                          __func__, sect->sect_info.addr, sect->sect_info.size);
+                fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins metadata aggregator\n",
+                        __func__, sect->sect_info.addr, sect->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
@@ -518,9 +516,9 @@ H5MF__sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
                 /* Set the aggregator to operate on */
                 udata->aggr = &(udata->f->shared->sdata_aggr);
 #ifdef H5MF_ALLOC_DEBUG_MORE
-                HDfprintf(stderr,
-                          "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins small data aggregator\n",
-                          __func__, sect->sect_info.addr, sect->sect_info.size);
+                fprintf(stderr,
+                        "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, adjoins small data aggregator\n",
+                        __func__, sect->sect_info.addr, sect->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
                 /* Indicate shrinking can occur */
@@ -627,8 +625,8 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Entering, section {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
-              (*sect)->sect_info.addr, (*sect)->sect_info.size);
+    fprintf(stderr, "%s: Entering, section {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
+            (*sect)->sect_info.addr, (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     /* Do not adjust the section raw data or global heap data */
@@ -648,15 +646,15 @@ H5MF__sect_small_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
         *flags &= (unsigned)~H5FS_ADD_RETURNED_SPACE;
         *flags |= H5FS_PAGE_END_NO_ADD;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: section is dropped\n", __func__);
+        fprintf(stderr, "%s: section is dropped\n", __func__);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     }  /* end if */
     /* Adjust the section if it is not at page end but its size + prem is at page end */
     else if (prem <= H5F_PGEND_META_THRES(udata->f)) {
         (*sect)->sect_info.size += prem;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr, "%s: section is adjusted {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
-                  (*sect)->sect_info.addr, (*sect)->sect_info.size);
+        fprintf(stderr, "%s: section is adjusted {%" PRIuHADDR ", %" PRIuHSIZE "}\n", __func__,
+                (*sect)->sect_info.addr, (*sect)->sect_info.size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
     }  /* end if */
 
@@ -704,7 +702,7 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
             ret_value = FALSE;
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -808,7 +806,7 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
     ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
-    HDfprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
+    fprintf(stderr, "%s: Leaving: ret_value = %d\n", __func__, ret_value);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -896,9 +894,8 @@ H5MF__sect_large_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
         /* Set the shrinking type */
         udata->shrink = H5MF_SHRINK_EOA;
 #ifdef H5MF_ALLOC_DEBUG_MORE
-        HDfprintf(stderr,
-                  "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
-                  __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
+        fprintf(stderr, "%s: section {%" PRIuHADDR ", %" PRIuHSIZE "}, shrinks file, eoa = %" PRIuHADDR "\n",
+                __func__, sect->sect_info.addr, sect->sect_info.size, eoa);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 
         /* Indicate shrinking can occur */

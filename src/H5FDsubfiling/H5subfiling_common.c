@@ -268,7 +268,7 @@ H5_get_subfiling_object(int64_t object_id)
     }
 #ifdef H5_SUBFILING_DEBUG
     else
-        HDprintf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
+        printf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
 #endif
 
 done:
@@ -990,7 +990,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                     errno          = 0;
                     ioc_select_val = HDstrtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
-                        HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
+                        printf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
                         ioc_select_val = 1;
                     }
 
@@ -1017,9 +1017,9 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 errno          = 0;
                 ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
-                    HDprintf("invalid IOC selection strategy string '%s' for strategy "
-                             "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_sel_str);
+                    printf("invalid IOC selection strategy string '%s' for strategy "
+                           "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
+                           ioc_sel_str);
 
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
@@ -1053,9 +1053,9 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 errno          = 0;
                 ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
-                    HDprintf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
-                             "defaulting to SELECT_IOC_ONE_PER_NODE\n",
-                             ioc_sel_str);
+                    printf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
+                           "defaulting to SELECT_IOC_ONE_PER_NODE\n",
+                           ioc_sel_str);
 
                     ioc_select_val     = 1;
                     ioc_selection_type = SELECT_IOC_ONE_PER_NODE;
@@ -3122,7 +3122,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
 
     /* Retrieve the subfiling object for the newly-created context ID */
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
-        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
+        printf("%s: couldn't get subfiling object from context ID\n", __func__);
         goto done;
     }
 

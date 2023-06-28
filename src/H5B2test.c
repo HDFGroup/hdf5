@@ -306,7 +306,7 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record, const
 
     HDassert(record);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_debug() */
@@ -436,8 +436,8 @@ H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record, cons
 
     HDassert(record);
 
-    HDfprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
-              "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
+    fprintf(stream, "%*s%-*s (%" PRIuHSIZE ", %" PRIuHSIZE ")\n", indent, "", fwidth,
+            "Record:", ((const H5B2_test_rec_t *)record)->key, ((const H5B2_test_rec_t *)record)->val);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test2_debug() */

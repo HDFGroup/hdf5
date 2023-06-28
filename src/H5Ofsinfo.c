@@ -375,48 +375,48 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
     switch (fsinfo->strategy) {
         case H5F_FSPACE_STRATEGY_FSM_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_FSM_AGGR");
             break;
 
         case H5F_FSPACE_STRATEGY_PAGE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_PAGE");
             break;
 
         case H5F_FSPACE_STRATEGY_AGGR:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_AGGR");
             break;
 
         case H5F_FSPACE_STRATEGY_NONE:
-            HDfprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
+            fprintf(stream, "%s\n", "H5F_FSPACE_STRATEGY_NONE");
             break;
 
         case H5F_FSPACE_STRATEGY_NTYPES:
         default:
-            HDfprintf(stream, "%s\n", "unknown");
+            fprintf(stream, "%s\n", "unknown");
     } /* end switch */
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-              "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Free-space section threshold:", fsinfo->threshold);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Free-space section threshold:", fsinfo->threshold);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "File space page size:", fsinfo->page_size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "File space page size:", fsinfo->page_size);
 
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-              "Page end metadata threshold:", fsinfo->pgend_meta_thres);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+            "Page end metadata threshold:", fsinfo->pgend_meta_thres);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
 
     if (fsinfo->persist) {
         for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

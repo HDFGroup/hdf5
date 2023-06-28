@@ -91,9 +91,9 @@
 #ifdef H5R_DEBUG
 #define H5R_LOG_DEBUG(...)                                                                                   \
     do {                                                                                                     \
-        HDfprintf(stdout, " # %s(): ", __func__);                                                            \
-        HDfprintf(stdout, __VA_ARGS__);                                                                      \
-        HDfprintf(stdout, "\n");                                                                             \
+        fprintf(stdout, " # %s(): ", __func__);                                                              \
+        fprintf(stdout, __VA_ARGS__);                                                                        \
+        fprintf(stdout, "\n");                                                                               \
         HDfflush(stdout);                                                                                    \
     } while (0)
 static const char *

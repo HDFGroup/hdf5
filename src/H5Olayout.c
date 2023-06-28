@@ -1351,96 +1351,95 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
     switch (mesg->type) {
         case H5D_CHUNKED:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Chunked");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Chunked");
 
             /* Chunk # of dims & size */
-            HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                      "Number of dimensions:", (unsigned long)(mesg->u.chunk.ndims));
-            HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
+            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+                    "Number of dimensions:", (unsigned long)(mesg->u.chunk.ndims));
+            fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
             for (u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
-                HDfprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
-            HDfprintf(stream, "}\n");
+                fprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
+            fprintf(stream, "}\n");
 
             /* Index information */
             switch (mesg->u.chunk.idx_type) {
                 case H5D_CHUNK_IDX_BTREE:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "v1 B-tree");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "v1 B-tree");
                     break;
 
                 case H5D_CHUNK_IDX_NONE:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Implicit");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Implicit");
                     break;
 
                 case H5D_CHUNK_IDX_SINGLE:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Single Chunk");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Single Chunk");
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Fixed Array");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Fixed Array");
                     /* (Should print the fixed array creation parameters) */
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Extensible Array");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "Extensible Array");
                     /* (Should print the extensible array creation parameters) */
                     break;
 
                 case H5D_CHUNK_IDX_BT2:
-                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "v2 B-tree");
+                    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Index Type:", "v2 B-tree");
                     /* (Should print the v2-Btree creation parameters) */
                     break;
 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
-                    HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Index Type:", "Unknown",
-                              (unsigned)mesg->u.chunk.idx_type);
+                    fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Index Type:", "Unknown",
+                            (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Index address:", mesg->storage.u.chunk.idx_addr);
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.contig.size);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Data address:", mesg->storage.u.contig.addr);
+            fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+                    "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-                      "Data Size:", mesg->storage.u.compact.size);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
+            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.compact.size);
             break;
 
         case H5D_VIRTUAL:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Virtual");
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
-            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
-                      "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Virtual");
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
+            fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
+                    "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
             for (u = 0; u < mesg->storage.u.virt.list_nused; u++) {
-                HDfprintf(stream, "%*sMapping %zu:\n", indent, "", u);
-                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Virtual selection:", "<Not yet implemented>");
-                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source file name:", mesg->storage.u.virt.list[u].source_file_name);
-                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source dataset name:", mesg->storage.u.virt.list[u].source_dset_name);
-                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
-                          "Source selection:", "<Not yet implemented>");
+                fprintf(stream, "%*sMapping %zu:\n", indent, "", u);
+                fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                        "Virtual selection:", "<Not yet implemented>");
+                fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                        "Source file name:", mesg->storage.u.virt.list[u].source_file_name);
+                fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                        "Source dataset name:", mesg->storage.u.virt.list[u].source_dset_name);
+                fprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                        "Source selection:", "<Not yet implemented>");
             } /* end for */
             break;
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
-            HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Type:", "Unknown",
-                      (unsigned)mesg->type);
+            fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Type:", "Unknown",
+                    (unsigned)mesg->type);
             break;
     } /* end switch */
 

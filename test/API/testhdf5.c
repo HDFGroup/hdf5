@@ -377,13 +377,13 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
             if (mpi_rank == 0)
-                HDprintf("*** Hint ***\n"
-                         "You can use environment variable HDF5_PARAPREFIX to "
-                         "run parallel test files in a\n"
-                         "different directory or to add file type prefix. e.g.,\n"
-                         "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                         "   export HDF5_PARAPREFIX\n"
-                         "*** End of Hint ***\n");
+                printf("*** Hint ***\n"
+                       "You can use environment variable HDF5_PARAPREFIX to "
+                       "run parallel test files in a\n"
+                       "different directory or to add file type prefix. e.g.,\n"
+                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                       "   export HDF5_PARAPREFIX\n"
+                       "*** End of Hint ***\n");
 
             explained = TRUE;
 #ifdef HDF5_PARAPREFIX
@@ -560,25 +560,25 @@ main(int argc, char *argv[])
     (void)argv;
 #endif
 
-    HDprintf("===================================\n");
-    HDprintf("HDF5 TESTS START\n");
-    HDprintf("===================================\n");
+    printf("===================================\n");
+    printf("HDF5 TESTS START\n");
+    printf("===================================\n");
 
     /* Initialize testing framework */
     /* TestInit(argv[0], NULL, NULL); */
 
     /* Tests are generally arranged from least to most complexity... */
     /* AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL); */
-    HDprintf("** CONFIGURE DEFINITIONS **\n");
+    printf("** CONFIGURE DEFINITIONS **\n");
     test_configure();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("metadata", test_metadata, cleanup_metadata, "Encoding/decoding metadata", NULL); */
 
     /* AddTest("checksum", test_checksum, cleanup_checksum, "Checksum algorithm", NULL); */
-    HDprintf("** CHECKSUM ALGORITHM **\n");
+    printf("** CHECKSUM ALGORITHM **\n");
     test_checksum();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("tst", test_tst, NULL,  "Ternary Search Trees", NULL); */
 
@@ -589,89 +589,89 @@ main(int argc, char *argv[])
     /* AddTest("refstr", test_refstr, NULL,  "Reference Counted Strings", NULL); */
 
     /* AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL); */
-    HDprintf("** LOW-LEVEL FILE I/O **\n");
+    printf("** LOW-LEVEL FILE I/O **\n");
     test_file();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("objects", test_h5o, cleanup_h5o, "Generic Object Functions", NULL); */
-    HDprintf("** GENERIC OBJECT FUNCTIONS **\n");
+    printf("** GENERIC OBJECT FUNCTIONS **\n");
     test_h5o();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL); */
-    HDprintf("** DATASPACES **\n");
+    printf("** DATASPACES **\n");
     test_h5s();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("coords",  test_coords,  cleanup_coords,  "Dataspace coordinates", NULL); */
-    HDprintf("** DATASPACE COORDINATES **\n");
+    printf("** DATASPACE COORDINATES **\n");
     test_coords();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("sohm", test_sohm, cleanup_sohm,  "Shared Object Header Messages", NULL); */
 
     /* AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL); */
-    HDprintf("** ATTRIBUTES **\n");
+    printf("** ATTRIBUTES **\n");
     test_attr();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("select", test_select, cleanup_select,  "Selections", NULL); */
-    HDprintf("** SELECTIONS **\n");
+    printf("** SELECTIONS **\n");
     test_select();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL); */
-    HDprintf("** TIME DATATYPES**\n");
+    printf("** TIME DATATYPES**\n");
     test_time();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("ref_deprec", test_reference_deprec, cleanup_reference_deprec,  "Deprecated References", NULL);
      */
 
     /* AddTest("ref", test_reference, cleanup_reference,  "References", NULL); */
-    HDprintf("** REFERENCES **\n");
+    printf("** REFERENCES **\n");
     test_reference();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL); */
-    HDprintf("** VARIABLE-LENGTH DATATYPES **\n");
+    printf("** VARIABLE-LENGTH DATATYPES **\n");
     test_vltypes();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL); */
-    HDprintf("** VARIABLE-LENGTH STRINGS **\n");
+    printf("** VARIABLE-LENGTH STRINGS **\n");
     test_vlstrings();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL); */
-    HDprintf("** GROUP & ATTRIBUTE ITERATION **\n");
+    printf("** GROUP & ATTRIBUTE ITERATION **\n");
     test_iterate();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL); */
-    HDprintf("** ARRAY DATATYPES **\n");
+    printf("** ARRAY DATATYPES **\n");
     test_array();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL); */
-    HDprintf("** GENERIC PROPERTIES **\n");
+    printf("** GENERIC PROPERTIES **\n");
     test_genprop();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("unicode", test_unicode, cleanup_unicode,  "UTF-8 Encoding", NULL); */
-    HDprintf("** UTF-8 ENCODING **\n");
+    printf("** UTF-8 ENCODING **\n");
     test_unicode();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL); */
-    HDprintf("** USER-CREATED IDENTIFIERS **\n");
+    printf("** USER-CREATED IDENTIFIERS **\n");
     test_ids();
-    HDprintf("\n");
+    printf("\n");
 
     /* AddTest("misc", test_misc, cleanup_misc,  "Miscellaneous", NULL); */
-    HDprintf("** MISCELLANEOUS **\n");
+    printf("** MISCELLANEOUS **\n");
     test_misc();
-    HDprintf("\n");
+    printf("\n");
 
     /* Display testing information */
     /* TestInfo(argv[0]); */
@@ -690,7 +690,7 @@ main(int argc, char *argv[])
     if (/* GetTestCleanup() && */ !getenv("HDF5_NOCLEANUP")) {
         /* TestCleanup(); */
 
-        HDprintf("TEST CLEANUP\n");
+        printf("TEST CLEANUP\n");
 
         H5E_BEGIN_TRY
         cleanup_configure();
@@ -712,7 +712,7 @@ main(int argc, char *argv[])
         cleanup_misc();
         H5E_END_TRY;
 
-        HDprintf("\n");
+        printf("\n");
     }
 
     /* Release test infrastructure */
@@ -721,11 +721,11 @@ main(int argc, char *argv[])
     /* Exit failure if errors encountered; else exit success. */
     /* No need to print anything since PerformTests() already does. */
     if (nerrors /* GetTestNumErrs() */ > 0) {
-        HDprintf("** HDF5 tests failed with %d errors **\n", nerrors);
+        printf("** HDF5 tests failed with %d errors **\n", nerrors);
         HDexit(EXIT_FAILURE);
     }
     else {
-        HDprintf("** HDF5 tests ran successfully **\n");
+        printf("** HDF5 tests ran successfully **\n");
         HDexit(EXIT_SUCCESS);
     }
 } /* end main() */

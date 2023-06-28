@@ -167,7 +167,7 @@ H5C__trace_write_log_message(H5C_log_trace_udata_t *trace_udata)
 
     /* Write the log message and flush */
     n_chars = HDstrlen(trace_udata->message);
-    if ((int)n_chars != HDfprintf(trace_udata->outfile, "%s", trace_udata->message))
+    if ((int)n_chars != fprintf(trace_udata->outfile, "%s", trace_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
     HDmemset((void *)(trace_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 
@@ -249,7 +249,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
     HDsetbuf(trace_udata->outfile, NULL);
 
     /* Write the header */
-    HDfprintf(trace_udata->outfile, "### HDF5 metadata cache trace file version 1 ###\n");
+    fprintf(trace_udata->outfile, "### HDF5 metadata cache trace file version 1 ###\n");
 
 done:
     if (file_name)

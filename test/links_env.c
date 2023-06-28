@@ -182,11 +182,11 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n", nerrors,
-                 1 == nerrors ? "" : "s");
+        printf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n", nerrors,
+               1 == nerrors ? "" : "s");
         HDexit(EXIT_FAILURE);
     }
-    HDprintf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
+    printf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
 
     /* clean up tmp_links_env directory created by external link tests */
     HDrmdir(TMPDIR);

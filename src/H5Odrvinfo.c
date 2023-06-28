@@ -301,8 +301,8 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
+    fprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__drvinfo_debug() */

@@ -224,18 +224,18 @@ H5G__node_debug_key(FILE *stream, int indent, int fwidth, const void *_key, cons
 
     HDassert(key);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:", (unsigned)key->offset);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:", (unsigned)key->offset);
 
     if (udata->heap) {
         const char *s;
 
-        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
 
         if ((s = (const char *)H5HL_offset_into(udata->heap, key->offset)) != NULL)
-            HDfprintf(stream, "%s\n", s);
+            fprintf(stream, "%s\n", s);
     } /* end if */
     else
-        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cannot get name; heap address not specified\n");
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cannot get name; heap address not specified\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__node_debug_key() */
@@ -1478,28 +1478,27 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, had
             HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to debug B-tree node");
     } /* end if */
     else {
-        HDfprintf(stream, "%*sSymbol Table Node...\n", indent, "");
-        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                  "Dirty:", sn->cache_info.is_dirty ? "Yes" : "No");
-        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Size of Node (in bytes):", (unsigned)sn->node_size);
-        HDfprintf(stream, "%*s%-*s %u of %u\n", indent, "", fwidth, "Number of Symbols:", sn->nsyms,
-                  (unsigned)(2 * H5F_SYM_LEAF_K(f)));
+        fprintf(stream, "%*sSymbol Table Node...\n", indent, "");
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Dirty:", sn->cache_info.is_dirty ? "Yes" : "No");
+        fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                "Size of Node (in bytes):", (unsigned)sn->node_size);
+        fprintf(stream, "%*s%-*s %u of %u\n", indent, "", fwidth, "Number of Symbols:", sn->nsyms,
+                (unsigned)(2 * H5F_SYM_LEAF_K(f)));
 
         indent += 3;
         fwidth = MAX(0, fwidth - 3);
         for (u = 0; u < sn->nsyms; u++) {
-            HDfprintf(stream, "%*sSymbol %u:\n", indent - 3, "", u);
+            fprintf(stream, "%*sSymbol %u:\n", indent - 3, "", u);
 
             if (heap) {
                 const char *s = (const char *)H5HL_offset_into(heap, sn->entry[u].name_off);
 
                 if (s)
-                    HDfprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", s);
+                    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", s);
             } /* end if */
             else
-                HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
-                          "Warning: Invalid heap address given, name not displayed!");
+                fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+                        "Warning: Invalid heap address given, name not displayed!");
 
             H5G__ent_debug(sn->entry + u, stream, indent, fwidth, heap);
         } /* end for */

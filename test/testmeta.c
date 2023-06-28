@@ -101,7 +101,7 @@ main(void)
     for (j = 0; j < NDATAOBJECTS; j++) {
         /* Removed print statement as it would lock system resources on Windows */
         /*
-         * HDprintf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
+         * printf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
          * HDfflush(stdout);
          */
         floatval = (float)j;
@@ -110,7 +110,7 @@ main(void)
         HDsnprintf(name, sizeof(name), "/DataArray/%06d", j);
         group_id = H5Gcreate2(file_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (group_id < 0) {
-            HDfprintf(stderr, "Failed to create DataArray group.\n");
+            fprintf(stderr, "Failed to create DataArray group.\n");
             status = H5Fclose(file_id);
             return -1;
         }
@@ -127,7 +127,7 @@ main(void)
             dataset_id = H5Dcreate2(group_id, name, H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT,
                                     H5P_DEFAULT);
             if (dataset_id < 0) {
-                HDfprintf(stderr, "Failed to create DataArray dataset.\n");
+                fprintf(stderr, "Failed to create DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
@@ -135,7 +135,7 @@ main(void)
             /* Write the data array data */
             status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
             if (status < 0) {
-                HDfprintf(stderr, "Failed to write DataArray dataset.\n");
+                fprintf(stderr, "Failed to write DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
@@ -148,7 +148,7 @@ main(void)
         /* Open NumDataObj dataset */
         dataset_id = H5Dopen2(file_id, "/NumDataObj", H5P_DEFAULT);
         if (dataset_id < 0) {
-            HDfprintf(stderr, "Failed to open NumDataObj dataset.\n");
+            fprintf(stderr, "Failed to open NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
         }
@@ -157,7 +157,7 @@ main(void)
         numdataobj = j + 1;
         status     = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &numdataobj);
         if (status < 0) {
-            HDfprintf(stderr, "Failed to write NumDataObj dataset.\n");
+            fprintf(stderr, "Failed to write NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
         }
@@ -172,7 +172,7 @@ main(void)
             HDsnprintf(name, sizeof(name), "/ExtArray%06d", i);
             dataset_id = H5Dopen2(file_id, name, H5P_DEFAULT);
             if (dataset_id < 0) {
-                HDfprintf(stderr, "Failed to open ExtArray dataset.\n");
+                fprintf(stderr, "Failed to open ExtArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             } /* end if */
@@ -181,7 +181,7 @@ main(void)
             dims[0] = (hsize_t)j + 1;
             status  = H5Dset_extent(dataset_id, dims);
             if (status < 0) {
-                HDfprintf(stderr, "Failed to extend DataArray dataset.\n");
+                fprintf(stderr, "Failed to extend DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             } /* end if */
@@ -198,7 +198,7 @@ main(void)
             status   = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start, stride, count, NULL);
             status   = H5Dwrite(dataset_id, type_id, memspace_id, dataspace_id, H5P_DEFAULT, &floatval);
             if (status < 0) {
-                HDfprintf(stderr, "Failed to write DataArray dataset.\n");
+                fprintf(stderr, "Failed to write DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
             }
@@ -214,7 +214,7 @@ main(void)
     /* Close the file */
     status = H5Fclose(file_id);
 
-    HDprintf("\n");
+    printf("\n");
 
     return 0;
 }

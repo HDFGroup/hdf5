@@ -222,13 +222,13 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_hrb_node_set.");
-    HDprintf("NAME: %s\n", name);
-    HDprintf("VALUE: %s\n", value);
-    HDprintf("LIST:\n->");
+    fprintf(stdout, "called H5FD_s3comms_hrb_node_set.");
+    printf("NAME: %s\n", name);
+    printf("VALUE: %s\n", value);
+    printf("LIST:\n->");
     for (node_ptr = (*L); node_ptr != NULL; node_ptr = node_ptr->next)
-        HDfprintf(stdout, "{%s}\n->", node_ptr->cat);
-    HDprintf("(null)\n");
+        fprintf(stdout, "{%s}\n->", node_ptr->cat);
+    printf("(null)\n");
     HDfflush(stdout);
     node_ptr = NULL;
 #endif
@@ -301,7 +301,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove node from empty list")
         else {
 #if S3COMMS_DEBUG
-            HDprintf("CREATE NEW\n");
+            printf("CREATE NEW\n");
             HDfflush(stdout);
 #endif
             /*******************
@@ -332,7 +332,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
         if (value == NULL) {
 #if S3COMMS_DEBUG
-            HDprintf("REMOVE HEAD\n");
+            printf("REMOVE HEAD\n");
             HDfflush(stdout);
 #endif
             /***************
@@ -342,39 +342,39 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             *L = node_ptr->next;
 
 #if S3COMMS_DEBUG
-            HDprintf("FREEING CAT (node)\n");
+            printf("FREEING CAT (node)\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(node_ptr->cat);
 #if S3COMMS_DEBUG
-            HDprintf("FREEING LOWERNAME (node)\n");
+            printf("FREEING LOWERNAME (node)\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(node_ptr->lowername);
 #if S3COMMS_DEBUG
-            HDprintf("FREEING NAME (node)\n");
+            printf("FREEING NAME (node)\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(node_ptr->name);
 #if S3COMMS_DEBUG
-            HDprintf("FREEING VALUE (node)\n");
+            printf("FREEING VALUE (node)\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(node_ptr->value);
 #if S3COMMS_DEBUG
-            HDprintf("MAGIC OK? %s\n", (node_ptr->magic == S3COMMS_HRB_NODE_MAGIC) ? "YES" : "NO");
+            printf("MAGIC OK? %s\n", (node_ptr->magic == S3COMMS_HRB_NODE_MAGIC) ? "YES" : "NO");
             HDfflush(stdout);
 #endif
             HDassert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
             node_ptr->magic += 1ul;
 #if S3COMMS_DEBUG
-            HDprintf("FREEING POINTER\n");
+            printf("FREEING POINTER\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(node_ptr);
 
 #if S3COMMS_DEBUG
-            HDprintf("FREEING WORKING LOWERNAME\n");
+            printf("FREEING WORKING LOWERNAME\n");
             HDfflush(stdout);
 #endif
             H5MM_xfree(lowername);
@@ -382,7 +382,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         }
         else {
 #if S3COMMS_DEBUG
-            HDprintf("MODIFY HEAD\n");
+            printf("MODIFY HEAD\n");
             HDfflush(stdout);
 #endif
             /***************
@@ -412,7 +412,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove a node 'before' head")
         else {
 #if S3COMMS_DEBUG
-            HDprintf("PREPEND NEW HEAD\n");
+            printf("PREPEND NEW HEAD\n");
             HDfflush(stdout);
 #endif
             /*******************
@@ -441,7 +441,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node")
             else {
 #if S3COMMS_DEBUG
-                HDprintf("APPEND A NODE\n");
+                printf("APPEND A NODE\n");
                 HDfflush(stdout);
 #endif
                 /*******************
@@ -464,7 +464,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trying to remove absent node")
             else {
 #if S3COMMS_DEBUG
-                HDprintf("INSERT A NODE\n");
+                printf("INSERT A NODE\n");
                 HDfflush(stdout);
 #endif
                 /*******************
@@ -493,7 +493,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
                 node_ptr->next  = tmp->next;
 
 #if S3COMMS_DEBUG
-                HDprintf("REMOVE A NODE\n");
+                printf("REMOVE A NODE\n");
                 HDfflush(stdout);
 #endif
                 H5MM_xfree(tmp->cat);
@@ -510,7 +510,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             }
             else {
 #if S3COMMS_DEBUG
-                HDprintf("MODIFY A NODE\n");
+                printf("MODIFY A NODE\n");
                 HDfflush(stdout);
 #endif
                 /*****************
@@ -609,7 +609,7 @@ H5FD_s3comms_hrb_destroy(hrb_t **_buf)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_hrb_destroy.\n");
+    fprintf(stdout, "called H5FD_s3comms_hrb_destroy.\n");
 #endif
 
     if (_buf != NULL && *_buf != NULL) {
@@ -673,7 +673,7 @@ H5FD_s3comms_hrb_init_request(const char *_verb, const char *_resource, const ch
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_hrb_init_request.\n");
+    fprintf(stdout, "called H5FD_s3comms_hrb_init_request.\n");
 #endif
 
     if (_resource == NULL)
@@ -780,7 +780,7 @@ H5FD_s3comms_s3r_close(s3r_t *handle)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_s3r_close.\n");
+    fprintf(stdout, "called H5FD_s3comms_s3r_close.\n");
 #endif
 
     if (handle == NULL)
@@ -885,7 +885,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_s3r_getsize.\n");
+    fprintf(stdout, "called H5FD_s3comms_s3r_getsize.\n");
 #endif
 
     if (handle == NULL)
@@ -934,7 +934,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "No HTTP metadata")
 #if S3COMMS_DEBUG
     else
-        HDfprintf(stderr, "GETSIZE: OK\n");
+        fprintf(stderr, "GETSIZE: OK\n");
 #endif
 
     /******************
@@ -1034,7 +1034,7 @@ H5FD_s3comms_s3r_open(const char *url, const char *region, const char *id, const
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_s3r_open.\n");
+    fprintf(stdout, "called H5FD_s3comms_s3r_open.\n");
 #endif
 
     if (url == NULL || url[0] == '\0')
@@ -1221,7 +1221,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_s3r_read.\n");
+    fprintf(stdout, "called H5FD_s3comms_s3r_read.\n");
 #endif
 
     /**************************************
@@ -1282,8 +1282,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
     }
 
 #if S3COMMS_DEBUG
-    HDfprintf(stderr, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
-              offset, offset + len, len);
+    fprintf(stderr, "%s: Bytes %" PRIuHADDR " - %" PRIuHADDR ", Request Size: %zu\n", handle->httpverb,
+            offset, offset + len, len);
 #endif
 
     /*******************
@@ -1465,8 +1465,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         if (p_status != CURLE_OK) {
             if (CURLE_OK != curl_easy_getinfo(curlh, CURLINFO_RESPONSE_CODE, &httpcode))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem getting response code")
-            HDfprintf(stderr, "CURL ERROR CODE: %d\nHTTP CODE: %d\n", p_status, httpcode);
-            HDfprintf(stderr, "%s\n", curl_easy_strerror(p_status));
+            fprintf(stderr, "CURL ERROR CODE: %d\nHTTP CODE: %d\n", p_status, httpcode);
+            fprintf(stderr, "%s\n", curl_easy_strerror(p_status));
             HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "problem while performing request.");
         }
         if (CURLE_OK != curl_easy_setopt(curlh, CURLOPT_ERRORBUFFER, NULL))
@@ -1481,19 +1481,19 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
 
 #if S3COMMS_DEBUG
     if (dest != NULL) {
-        HDfprintf(stderr, "len: %d\n", (int)len);
-        HDfprintf(stderr, "CHECKING FOR BUFFER OVERFLOW\n");
+        fprintf(stderr, "len: %d\n", (int)len);
+        fprintf(stderr, "CHECKING FOR BUFFER OVERFLOW\n");
         if (sds == NULL)
-            HDfprintf(stderr, "sds is NULL!\n");
+            fprintf(stderr, "sds is NULL!\n");
         else {
-            HDfprintf(stderr, "sds: 0x%lx\n", (long long)sds);
-            HDfprintf(stderr, "sds->size: %d\n", (int)sds->size);
+            fprintf(stderr, "sds: 0x%lx\n", (long long)sds);
+            fprintf(stderr, "sds->size: %d\n", (int)sds->size);
             if (len > sds->size)
-                HDfprintf(stderr, "buffer overwrite\n");
+                fprintf(stderr, "buffer overwrite\n");
         }
     }
     else
-        HDfprintf(stderr, "performed on entire file\n");
+        fprintf(stderr, "performed on entire file\n");
 #endif
 
 done:
@@ -1639,7 +1639,7 @@ H5FD_s3comms_aws_canonical_request(char *canonical_request_dest, int _cr_size, c
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_aws_canonical_request.\n");
+    fprintf(stdout, "called H5FD_s3comms_aws_canonical_request.\n");
 #endif
 
     if (http_request == NULL)
@@ -1746,7 +1746,7 @@ H5FD_s3comms_bytes_to_hex(char *dest, const unsigned char *msg, size_t msg_len, 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_bytes_to_hex.\n");
+    fprintf(stdout, "called H5FD_s3comms_bytes_to_hex.\n");
 #endif
 
     if (dest == NULL)
@@ -1790,7 +1790,7 @@ H5FD_s3comms_free_purl(parsed_url_t *purl)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if S3COMMS_DEBUG
-    HDprintf("called H5FD_s3comms_free_purl.\n");
+    printf("called H5FD_s3comms_free_purl.\n");
 #endif
 
     if (purl != NULL) {
@@ -1853,7 +1853,7 @@ H5FD_s3comms_HMAC_SHA256(const unsigned char *key, size_t key_len, const char *m
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_HMAC_SHA256.\n");
+    fprintf(stdout, "called H5FD_s3comms_HMAC_SHA256.\n");
 #endif
 
     if (dest == NULL)
@@ -1943,7 +1943,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
     FUNC_ENTER_PACKAGE
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called load_aws_creds_from_file.\n");
+    fprintf(stdout, "called load_aws_creds_from_file.\n");
 #endif
 
     /* format target line for start of profile */
@@ -2063,7 +2063,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_load_aws_profile.\n");
+    fprintf(stdout, "called H5FD_s3comms_load_aws_profile.\n");
 #endif
 
 #ifdef H5_HAVE_WIN32_API
@@ -2148,7 +2148,7 @@ H5FD_s3comms_nlowercase(char *dest, const char *s, size_t len)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_nlowercase.\n");
+    fprintf(stdout, "called H5FD_s3comms_nlowercase.\n");
 #endif
 
     if (dest == NULL)
@@ -2211,7 +2211,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDprintf("called H5FD_s3comms_parse_url.\n");
+    printf("called H5FD_s3comms_parse_url.\n");
 #endif
 
     if (str == NULL || *str == '\0')
@@ -2427,7 +2427,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_percent_encode_char.\n");
+    fprintf(stdout, "called H5FD_s3comms_percent_encode_char.\n");
 #endif
 
     if (repr == NULL)
@@ -2435,8 +2435,8 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
 
 #if S3COMMS_DEBUG
     H5FD_s3comms_bytes_to_hex((char *)hex, s, 1, FALSE);
-    HDfprintf(stdout, "    CHAR: \'%s\'\n", s);
-    HDfprintf(stdout, "    CHAR-HEX: \"%s\"\n", hex);
+    fprintf(stdout, "    CHAR: \'%s\'\n", s);
+    fprintf(stdout, "    CHAR-HEX: \"%s\"\n", hex);
 #endif
 
     if (c <= (unsigned char)0x7f) {
@@ -2444,7 +2444,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
          * and single percent-code
          */
 #if S3COMMS_DEBUG
-        HDfprintf(stdout, "    SINGLE-BYTE\n");
+        fprintf(stdout, "    SINGLE-BYTE\n");
 #endif
         *repr_len     = 3;
         chars_written = HDsnprintf(repr, 4, "%%%02X", c);
@@ -2459,7 +2459,7 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
         unsigned int  stack_size = 0;
         unsigned char stack[4]   = {0, 0, 0, 0};
 #if S3COMMS_DEBUG
-        HDfprintf(stdout, "    MULTI-BYTE\n");
+        fprintf(stdout, "    MULTI-BYTE\n");
 #endif
         stack_size = 0;
         k          = (unsigned int)c;
@@ -2479,13 +2479,13 @@ H5FD_s3comms_percent_encode_char(char *repr, const unsigned char c, size_t *repr
          */
 
 #if S3COMMS_DEBUG
-        HDfprintf(stdout, "    STACK:\n    {\n");
+        fprintf(stdout, "    STACK:\n    {\n");
         for (i = 0; i < stack_size; i++) {
             H5FD_s3comms_bytes_to_hex((char *)hex, (&stack[i]), 1, FALSE);
             hex[2] = 0;
-            HDfprintf(stdout, "      %s,\n", hex);
+            fprintf(stdout, "      %s,\n", hex);
         }
-        HDfprintf(stdout, "    }\n");
+        fprintf(stdout, "    }\n");
 #endif
 
         /****************
@@ -2575,7 +2575,7 @@ H5FD_s3comms_signing_key(unsigned char *md, const char *secret, const char *regi
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_signing_key.\n");
+    fprintf(stdout, "called H5FD_s3comms_signing_key.\n");
 #endif
 
     if (md == NULL)
@@ -2667,7 +2667,7 @@ H5FD_s3comms_tostringtosign(char *dest, const char *req, const char *now, const 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_tostringtosign.\n");
+    fprintf(stdout, "called H5FD_s3comms_tostringtosign.\n");
 #endif
 
     if (dest == NULL)
@@ -2754,7 +2754,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "called H5FD_s3comms_trim.\n");
+    fprintf(stdout, "called H5FD_s3comms_trim.\n");
 #endif
 
     if (dest == NULL)
@@ -2844,7 +2844,7 @@ H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_s
     FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
-    HDfprintf(stdout, "H5FD_s3comms_uriencode called.\n");
+    fprintf(stdout, "H5FD_s3comms_uriencode called.\n");
 #endif
 
     if (s == NULL)

@@ -1016,7 +1016,7 @@ test_unlink(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
+        printf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     H5E_BEGIN_TRY
@@ -1026,7 +1026,7 @@ test_unlink(hid_t fapl)
     H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
-        HDprintf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
+        printf("    %d: Unmount by name should not have been allowed!\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Funmount(mnt, ".") < 0)

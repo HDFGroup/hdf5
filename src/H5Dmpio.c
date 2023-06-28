@@ -432,7 +432,7 @@ static FILE             *debug_stream             = NULL;
 #define H5D_MPIO_DEBUG(rank, string)                                                                         \
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
-            HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                    \
+            fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                      \
             HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
@@ -441,7 +441,7 @@ static FILE             *debug_stream             = NULL;
 #define H5D_MPIO_DEBUG_VA(rank, string, ...)                                                                 \
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
-            HDfprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);       \
+            fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);         \
             HDfflush(debug_stream);                                                                          \
         }                                                                                                    \
     } while (0)
@@ -1150,7 +1150,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
 
         /* Print a short header for this I/O operation */
         time_now = HDtime(NULL);
-        HDfprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
+        fprintf(debug_log_file, "##### %s", HDasctime(HDlocaltime(&time_now)));
 
         debug_stream = debug_log_file;
     }
@@ -1356,7 +1356,7 @@ done:
 #ifdef H5Dmpio_DEBUG
     /* Close debugging log file */
     if (debug_log_file) {
-        HDfprintf(debug_log_file, "##############\n\n");
+        fprintf(debug_log_file, "##############\n\n");
         if (EOF == HDfclose(debug_log_file))
             HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file")
         debug_stream = H5DEBUG(D);

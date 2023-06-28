@@ -177,20 +177,20 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
-                  farray_stats.hdr_size, state->hdr_size);
+        fprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR;
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
-                  farray_stats.dblk_size, state->dblk_size);
+        fprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
+                farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR;
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
-                  farray_stats.nelmts, state->nelmts);
+        fprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+                farray_stats.nelmts, state->nelmts);
         TEST_ERROR;
     }
 
@@ -1642,7 +1642,7 @@ main(void)
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));

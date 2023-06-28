@@ -303,8 +303,8 @@ H5FA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
 
     /* Print element */
     HDsnprintf(temp_str, sizeof(temp_str), "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
-              (unsigned long long)*(const uint64_t *)elmt);
+    fprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+            (unsigned long long)*(const uint64_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FA__test_debug() */

@@ -139,15 +139,15 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     if (!stream)
         stream = stderr;
 
-    HDfprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
+    fprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
-    HDfprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
+    fprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
-        HDfprintf(stream, "  Back trace follows.");
+        fprintf(stream, "  Back trace follows.");
     HDfputc('\n', stream);
 
     for (i = fstack->nused - 1; i >= 0; --i)
-        HDfprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
+        fprintf(stream, "%*s#%03d: Routine: %s\n", indent, "", i, fstack->rec[i]);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_print_stack() */

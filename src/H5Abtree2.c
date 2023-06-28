@@ -363,8 +363,8 @@ H5A__dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u, %08" PRIx32 "}\n", indent, "", fwidth,
-              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder, nrecord->hash);
+    fprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u, %08" PRIx32 "}\n", indent, "", fwidth,
+            "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder, nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_name_debug() */
@@ -514,8 +514,8 @@ H5A__dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void 
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u}\n", indent, "", fwidth,
-              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder);
+    fprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u}\n", indent, "", fwidth,
+            "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_debug() */

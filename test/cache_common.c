@@ -710,20 +710,20 @@ deserialize(const void *image, size_t H5_ATTR_NDEBUG_UNUSED len, void *udata, hb
         (!entry->at_main_addr && entry->written_to_alt_addr)) {
         if ((type == PICO_ENTRY_TYPE) || (type == VARIABLE_ENTRY_TYPE) || (type == NOTIFY_ENTRY_TYPE)) {
             if ((*((const char *)image)) != (char)(idx & 0xFF)) {
-                HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
-                HDfprintf(stdout, "*image = 0x%x\n", (int)(*((const char *)image)));
-                HDfprintf(stdout, "expected *image = 0x%x\n", (int)(idx & 0xFF));
+                fprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
+                fprintf(stdout, "*image = 0x%x\n", (int)(*((const char *)image)));
+                fprintf(stdout, "expected *image = 0x%x\n", (int)(idx & 0xFF));
             } /* end if */
             HDassert((*((const char *)image)) == (char)(idx & 0xFF));
         } /* end if */
         else {
             if ((*(((const char *)image) + 2)) != (char)(idx & 0xFF)) {
-                HDfprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
-                HDfprintf(stdout, "*image = 0x%" PRIx8 " 0x%" PRIx8 " 0x%" PRIx8 "\n",
-                          (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
-                          (*(((const uint8_t *)image) + 2)));
-                HDfprintf(stdout, "expected *image = 0x%02" PRIx32 "%02" PRIx32 "\n", (uint32_t)idx & 0xFF,
-                          (((uint32_t)idx & 0xFF00) >> 8));
+                fprintf(stdout, "type = %d, idx = %d, addr = 0x%lx.\n", type, idx, (long)addr);
+                fprintf(stdout, "*image = 0x%" PRIx8 " 0x%" PRIx8 " 0x%" PRIx8 "\n",
+                        (*((const uint8_t *)image)), (*(((const uint8_t *)image) + 1)),
+                        (*(((const uint8_t *)image) + 2)));
+                fprintf(stdout, "expected *image = 0x%02" PRIx32 "%02" PRIx32 "\n", (uint32_t)idx & 0xFF,
+                        (((uint32_t)idx & 0xFF00) >> 8));
             } /* end if */
             HDassert((*((const char *)image)) == (char)(type & 0xFF));
             HDassert((*(((const char *)image) + 1)) == (char)((idx & 0xFF00) >> 8));
@@ -2769,9 +2769,9 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", __func__,
-                          (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
-                          (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
+                fprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", __func__,
+                        (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
+                        (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
             }
             pass         = FALSE;
             failure_mssg = "non zero index len/sizes after H5C_flush_cache() with invalidate.";
@@ -2912,16 +2912,16 @@ insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
 
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
-            HDfprintf(stdout, "result = %d\n", (int)result);
-            HDfprintf(stdout, "entry_ptr->header.is_protected = %d\n",
+            fprintf(stdout, "result = %d\n", (int)result);
+            fprintf(stdout, "entry_ptr->header.is_protected = %d\n",
                       (int)(entry_ptr->header.is_protected));
-            HDfprintf(stdout,
+            fprintf(stdout,
             "entry_ptr->header.type != types[type] = %d\n",
                       (int)(entry_ptr->header.type != types[type]));
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "entry_ptr->size != entry_ptr->header.size = %d\n",
                       (int)(entry_ptr->size != entry_ptr->header.size));
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "entry_ptr->addr != entry_ptr->header.addr = %d\n",
                        (int)(entry_ptr->addr != entry_ptr->header.addr));
 #endif
@@ -3160,22 +3160,22 @@ protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
              * again.
              *                              - JRM
              */
-            HDfprintf(stdout, "( cache_entry_ptr != (void *)entry_ptr ) = %d\n",
+            fprintf(stdout, "( cache_entry_ptr != (void *)entry_ptr ) = %d\n",
                       (int)( cache_entry_ptr != (void *)entry_ptr ));
-            HDfprintf(stdout, "cache_entry_ptr = 0x%lx, entry_ptr = 0x%lx\n",
+            fprintf(stdout, "cache_entry_ptr = 0x%lx, entry_ptr = 0x%lx\n",
                       (long)cache_entry_ptr, (long)entry_ptr);
-            HDfprintf(stdout, "entry_ptr->header.is_protected = %d\n",
+            fprintf(stdout, "entry_ptr->header.is_protected = %d\n",
                       (int)(entry_ptr->header.is_protected));
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "( entry_ptr->header.type != types[type] ) = %d\n",
                       (int)( entry_ptr->header.type != types[type] ));
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "entry_ptr->size = %d, entry_ptr->header.size = %d\n",
                       (int)(entry_ptr->size), (int)(entry_ptr->header.size));
-            HDfprintf(stdout,
+            fprintf(stdout,
                       "entry_ptr->addr = %d, entry_ptr->header.addr = %d\n",
                       (int)(entry_ptr->addr), (int)(entry_ptr->header.addr));
-            HDfprintf(stdout,
+            fprintf(stdout,
                     "entry_ptr->verify_ct = %d, entry_ptr->max_verify_ct = %d\n",
                     entry_ptr->verify_ct, entry_ptr->max_verify_ct);
             H5Eprint2(H5E_DEFAULT, stdout);
@@ -3518,7 +3518,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        fprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
         cache_ptr = file_ptr->shared->cache;
@@ -3537,14 +3537,14 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             int32_t tmp_idx;
 
             if (verbose)
-                HDfprintf(stdout, "%d:%d: ", type, idx);
+                fprintf(stdout, "%d:%d: ", type, idx);
 
             tmp_idx = idx + lag;
             if (pass && do_inserts && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
                 ((tmp_idx % 2) == 0) && !entry_in_cache(cache_ptr, type, tmp_idx)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "1(i, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "1(i, %d, %d) ", type, tmp_idx);
 
                 insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3556,7 +3556,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 3) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "2(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "2(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
 
@@ -3568,7 +3568,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 3) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "3(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "3(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3580,7 +3580,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && do_moves && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 3) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "4(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
+                    fprintf(stdout, "4(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
 
                 move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
 
@@ -3592,7 +3592,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 5) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "5(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "5(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
 
@@ -3604,7 +3604,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 5) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "6(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "6(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3617,7 +3617,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 9) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "7(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "7(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
@@ -3629,7 +3629,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 11) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "8(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "8(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
@@ -3641,7 +3641,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 13) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "9(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "9(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
 
@@ -3653,7 +3653,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 9) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "10(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "10(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3665,7 +3665,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 11) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "11(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "11(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3677,7 +3677,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 if (pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 13) == 0) {
 
                     if (verbose)
-                        HDfprintf(stdout, "12(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "12(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3688,7 +3688,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
             if (pass && (idx >= 0) && (idx <= local_max_index)) {
                 if (verbose)
-                    HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
+                    fprintf(stdout, "13(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
 
@@ -3700,7 +3700,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 7) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "14(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "14(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3712,7 +3712,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && (tmp_idx % 7) == 0) {
 
                 if (verbose)
-                    HDfprintf(stdout, "15(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "15(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
 
@@ -3726,7 +3726,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                     switch (tmp_idx % 4) {
                         case 0: /* we just did an insert */
                             if (verbose)
-                                HDfprintf(stdout, "16(u, %d, %d) ", type, tmp_idx);
+                                fprintf(stdout, "16(u, %d, %d) ", type, tmp_idx);
 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3737,7 +3737,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                         case 1:
                             if ((entries[type])[tmp_idx].is_dirty) {
                                 if (verbose)
-                                    HDfprintf(stdout, "17(u, %d, %d) ", type, tmp_idx);
+                                    fprintf(stdout, "17(u, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
 
@@ -3746,7 +3746,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                             } /* end if */
                             else {
                                 if (verbose)
-                                    HDfprintf(stdout, "18(u, %d, %d) ", type, tmp_idx);
+                                    fprintf(stdout, "18(u, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx,
                                                 (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
@@ -3758,7 +3758,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                         case 2: /* we just did an insert */
                             if (verbose)
-                                HDfprintf(stdout, "19(u-del, %d, %d) ", type, tmp_idx);
+                                fprintf(stdout, "19(u-del, %d, %d) ", type, tmp_idx);
 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
 
@@ -3769,7 +3769,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                         case 3:
                             if ((entries[type])[tmp_idx].is_dirty) {
                                 if (verbose)
-                                    HDfprintf(stdout, "20(u-del, %d, %d) ", type, tmp_idx);
+                                    fprintf(stdout, "20(u-del, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
 
@@ -3778,7 +3778,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                             } /* end if */
                             else {
                                 if (verbose)
-                                    HDfprintf(stdout, "21(u-del, %d, %d) ", type, tmp_idx);
+                                    fprintf(stdout, "21(u-del, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx,
                                                 (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET) |
@@ -3799,7 +3799,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 tmp_idx = idx - lag;
                 if (pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index)) {
                     if (verbose)
-                        HDfprintf(stdout, "22(u, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "22(u, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx,
                                     (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
@@ -3810,7 +3810,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             }     /* end elseif */
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             idx++;
         } /* end while */
@@ -3850,7 +3850,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        fprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
 
@@ -3877,7 +3877,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                 (((idx + lag) % 2) == 0) && (!entry_in_cache(cache_ptr, type, (idx + lag)))) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
+                    fprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
                 insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
@@ -3888,12 +3888,12 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p, %d, %d) ", type, i);
+                        fprintf(stdout, "(p, %d, %d) ", type, i);
 
                     protect_entry(file_ptr, type, i);
 
                     if (verbose)
-                        HDfprintf(stdout, "(u, %d, %d) ", type, i);
+                        fprintf(stdout, "(u, %d, %d) ", type, i);
 
                     unprotect_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
@@ -3901,7 +3901,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
             }
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             idx++;
         }
@@ -3942,7 +3942,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): Entering.\n", __func__);
+        fprintf(stdout, "%s(): Entering.\n", __func__);
 
     if (pass) {
 
@@ -3970,7 +3970,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 ((tmp_idx % 2) == 1) && (!entry_in_cache(cache_ptr, type, tmp_idx))) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(i, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(i, %d, %d) ", type, tmp_idx);
 
                 insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
@@ -3979,7 +3979,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 3) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
             }
@@ -3988,7 +3988,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 3) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
@@ -3998,7 +3998,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 ((tmp_idx % 3) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
+                    fprintf(stdout, "(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
 
                 move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
             }
@@ -4007,7 +4007,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 5) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, (idx - lag + 3));
             }
@@ -4016,7 +4016,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 5) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
@@ -4026,7 +4026,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 9 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
                 }
@@ -4035,7 +4035,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 11 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
                 }
@@ -4044,7 +4044,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 13 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(p-ro, %d, %d) ", type, tmp_idx);
 
                     protect_entry_ro(file_ptr, type, tmp_idx);
                 }
@@ -4053,7 +4053,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 9 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
                 }
@@ -4062,7 +4062,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 11 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
                 }
@@ -4071,7 +4071,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && (tmp_idx >= 0) && (tmp_idx < local_max_index) && (tmp_idx % 13 == 0)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
+                        fprintf(stdout, "(u-ro, %d, %d) ", type, tmp_idx);
 
                     unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
                 }
@@ -4080,7 +4080,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (idx >= 0) && (idx <= local_max_index)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
             }
@@ -4089,7 +4089,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 7) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
             }
@@ -4098,7 +4098,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (tmp_idx >= 0) && (tmp_idx <= local_max_index) && ((tmp_idx % 7) == 0)) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
             }
@@ -4153,7 +4153,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 if ((pass) && ((idx + lag) >= 0) && ((idx + lag) <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
+                        fprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
                     unprotect_entry(file_ptr, type, idx + lag,
                                     (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
@@ -4161,7 +4161,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             }
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             idx--;
         }
@@ -4202,7 +4202,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        fprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
 
@@ -4229,7 +4229,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                 (((idx + lag) % 2) == 0) && (!entry_in_cache(cache_ptr, type, (idx + lag)))) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
+                    fprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
                 insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
@@ -4240,12 +4240,12 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p, %d, %d) ", type, i);
+                        fprintf(stdout, "(p, %d, %d) ", type, i);
 
                     protect_entry(file_ptr, type, i);
 
                     if (verbose)
-                        HDfprintf(stdout, "(u, %d, %d) ", type, i);
+                        fprintf(stdout, "(u, %d, %d) ", type, i);
 
                     unprotect_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
@@ -4253,7 +4253,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
             }
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             idx--;
         }
@@ -4293,7 +4293,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        fprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
         int i;
@@ -4321,7 +4321,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
                 (((idx + lag) % 3) == 0) && (!entry_in_cache(cache_ptr, type, (idx + lag)))) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
+                    fprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
                 insert_entry(file_ptr, type, (idx + lag), H5C__NO_FLAGS_SET);
             }
@@ -4329,7 +4329,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if ((pass) && (idx >= 0) && (idx <= local_max_index[type])) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
             }
@@ -4337,14 +4337,14 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
             if ((pass) && ((idx - lag) >= 0) && ((idx - lag) <= local_max_index[type])) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
+                    fprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
                 unprotect_entry(file_ptr, type, idx - lag,
                                 (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
             }
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             type++;
         }
@@ -4387,7 +4387,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        fprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
 
@@ -4421,7 +4421,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                     (!entry_in_cache(cache_ptr, type, i))) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(i, %d, %d) ", type, i);
+                        fprintf(stdout, "(i, %d, %d) ", type, i);
 
                     insert_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
@@ -4429,7 +4429,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p, %d, %d) ", type, i);
+                        fprintf(stdout, "(p, %d, %d) ", type, i);
 
                     protect_entry(file_ptr, type, i);
                 }
@@ -4437,14 +4437,14 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u, %d, %d) ", type, i);
+                        fprintf(stdout, "(u, %d, %d) ", type, i);
 
                     unprotect_entry(file_ptr, type, i,
                                     (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                 }
 
                 if (verbose)
-                    HDfprintf(stdout, "\n");
+                    fprintf(stdout, "\n");
 
                 type++;
             }
@@ -4489,7 +4489,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int32_t local_max_index[NUMBER_OF_ENTRY_TYPES] = {0};
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        fprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
         int i;
@@ -4512,7 +4512,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if (verbose) /* 1 */
-        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
+        fprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
 
     while ((pass) && ((idx + lag) >= 0)) {
         type = NUMBER_OF_ENTRY_TYPES - 1;
@@ -4522,7 +4522,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
                 (((idx - lag) % 3) == 0) && (!entry_in_cache(cache_ptr, type, (idx - lag)))) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
+                    fprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
                 insert_entry(file_ptr, type, (idx - lag), H5C__NO_FLAGS_SET);
             }
@@ -4530,7 +4530,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && (idx >= 0) && (idx <= local_max_index[type])) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
+                    fprintf(stdout, "(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
             }
@@ -4538,14 +4538,14 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
             if ((pass) && ((idx + lag) >= 0) && ((idx + lag) <= local_max_index[type])) {
 
                 if (verbose)
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
+                    fprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
                 unprotect_entry(file_ptr, type, idx + lag,
                                 (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
             }
 
             if (verbose)
-                HDfprintf(stdout, "\n");
+                fprintf(stdout, "\n");
 
             type--;
         }
@@ -4554,7 +4554,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose) /* 2 */
-        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
+        fprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
 
     if ((pass) && (display_stats)) {
 
@@ -4562,7 +4562,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose)
-        HDfprintf(stdout, "%s: exiting.\n", __func__);
+        fprintf(stdout, "%s: exiting.\n", __func__);
 
 } /* col_major_scan_backward() */
 
@@ -4594,7 +4594,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index = -1;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        fprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
 
@@ -4628,7 +4628,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                     (!entry_in_cache(cache_ptr, type, i))) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(i, %d, %d) ", type, i);
+                        fprintf(stdout, "(i, %d, %d) ", type, i);
 
                     insert_entry(file_ptr, type, i, H5C__NO_FLAGS_SET);
                 }
@@ -4636,7 +4636,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(p, %d, %d) ", type, i);
+                        fprintf(stdout, "(p, %d, %d) ", type, i);
 
                     protect_entry(file_ptr, type, i);
                 }
@@ -4644,14 +4644,14 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                 if ((pass) && (i >= 0) && (i <= local_max_index)) {
 
                     if (verbose)
-                        HDfprintf(stdout, "(u, %d, %d) ", type, i);
+                        fprintf(stdout, "(u, %d, %d) ", type, i);
 
                     unprotect_entry(file_ptr, type, i,
                                     (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
                 }
 
                 if (verbose)
-                    HDfprintf(stdout, "\n");
+                    fprintf(stdout, "\n");
 
                 type++;
             }
@@ -5019,8 +5019,8 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
     /* dump data to stdout if requested */
     if ((pass) && (dump_data)) {
 
-        HDfprintf(stdout, "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n", (long)cache_hits,
-                  (long)cache_accesses, hit_rate);
+        fprintf(stdout, "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n", (long)cache_hits,
+                (long)cache_accesses, hit_rate);
     }
 
     if ((pass) && (cache_accesses > min_accesses) && (hit_rate < min_hit_rate)) {
@@ -5136,8 +5136,8 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
     /* dump data to stdout if requested */
     if ((pass) && (dump_data)) {
 
-        HDfprintf(stdout, "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n", (long)max_size,
-                  (long)min_clean_size, (long)cur_size, (long)cur_num_entries);
+        fprintf(stdout, "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n", (long)max_size,
+                (long)min_clean_size, (long)cur_size, (long)cur_num_entries);
     }
 
 } /* check_and_validate_cache_size() */
@@ -5331,22 +5331,22 @@ dump_LRU(H5F_t * file_ptr)
 
     entry_ptr = cache_ptr->LRU_head_ptr;
 
-    HDfprintf(stdout,
+    fprintf(stdout,
               "\n\nIndex len/size/clean size/dirty size = %u/%lld/%lld/%lld\n",
               cache_ptr->index_len, (long long)(cache_ptr->index_size),
               (long long)(cache_ptr->clean_index_size),
               (long long)(cache_ptr->dirty_index_size));
-    HDfprintf(stdout, "\nLRU len/size = %d/%lld.\n\n",
+    fprintf(stdout, "\nLRU len/size = %d/%lld.\n\n",
               cache_ptr->LRU_list_len, (long long)(cache_ptr->LRU_list_size));
 
     if ( entry_ptr != NULL )
     {
-        HDfprintf(stdout, "%s%s%s", hdr_0, hdr_1, hdr_2);
+        fprintf(stdout, "%s%s%s", hdr_0, hdr_1, hdr_2);
     }
 
     while ( entry_ptr != NULL )
     {
-        HDfprintf(stdout,
+        fprintf(stdout,
                   "  %3d     %d     %10lld  0x%010llx  %s(%d)\n",
                   i,
                   (int)(entry_ptr->is_dirty),
@@ -5360,7 +5360,7 @@ dump_LRU(H5F_t * file_ptr)
 
     if ( cache_ptr->LRU_list_len > 0 )
     {
-        HDfprintf(stdout, "%s\n", hdr_2);
+        fprintf(stdout, "%s\n", hdr_2);
     }
 
     return;

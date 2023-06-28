@@ -89,7 +89,7 @@ typedef struct H5FD_splitter_t {
 #if H5FD_SPLITTER_DEBUG_OP_CALLS
 #define H5FD_SPLITTER_LOG_CALL(name)                                                                         \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
+        printf("called %s()\n", (name));                                                                     \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else

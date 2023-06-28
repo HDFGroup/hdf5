@@ -168,15 +168,15 @@ check_io_mode(hid_t dxpl, unsigned chunked)
         if (actual_io_mode != H5D_MPIO_CHUNK_COLLECTIVE) {
             nerrors++;
             if (MAINPROCESS)
-                HDprintf("\n     Failed: Incorrect I/O mode (expected chunked, returned %u)",
-                         (unsigned)actual_io_mode);
+                printf("\n     Failed: Incorrect I/O mode (expected chunked, returned %u)",
+                       (unsigned)actual_io_mode);
         }
     }
     else if (actual_io_mode != H5D_MPIO_CONTIGUOUS_COLLECTIVE) {
         nerrors++;
         if (MAINPROCESS)
-            HDprintf("\n     Failed: Incorrect I/O mode (expected contiguous, returned %u)",
-                     (unsigned)actual_io_mode);
+            printf("\n     Failed: Incorrect I/O mode (expected contiguous, returned %u)",
+                   (unsigned)actual_io_mode);
     }
 
 } /* check_io_mode() */
@@ -289,9 +289,9 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
     for (i = 0; i < (int)block[0]; i++)
         if (rbuf[i] != (dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
-            HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %d, %d\n", i + (int)start[0], dtrans ? trans_wbuf[i] : wbuf[i],
-                     rbuf[i]);
+            printf("\n     Error in first data verification:\n");
+            printf("     At index %d: %d, %d\n", i + (int)start[0], dtrans ? trans_wbuf[i] : wbuf[i],
+                   rbuf[i]);
             break;
         }
 
@@ -305,8 +305,8 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans, unsigned mwbuf)
         for (i = 0; i < (int)block[0]; i++)
             if (rbuf[i] != (2 * trans_wbuf[i])) {
                 nerrors++;
-                HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %d\n", i + (int)start[0], 2 * trans_wbuf[i], rbuf[i]);
+                printf("\n     Error in second data verification:.\n");
+                printf("     At index %d: %d, %d\n", i + (int)start[0], 2 * trans_wbuf[i], rbuf[i]);
                 break;
             }
     }
@@ -436,8 +436,8 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (rbuf[4 * i + 0] != wbuf[4 * i + 0] || rbuf[4 * i + 1] != wbuf[4 * i + 1] ||
             rbuf[4 * i + 2] != wbuf[4 * i + 2] || rbuf[4 * i + 3] != wbuf[4 * i + 3]) {
             nerrors++;
-            HDprintf("\n     Error in data verification:\n");
-            HDprintf("\n     Error in data verification at index %d\n", i + (int)start[0]);
+            printf("\n     Error in data verification:\n");
+            printf("\n     Error in data verification at index %d\n", i + (int)start[0]);
             break;
         }
     }
@@ -451,7 +451,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (rbuf[4 * i + 0] != wbuf[4 * i + 3] || rbuf[4 * i + 1] != wbuf[4 * i + 2] ||
             rbuf[4 * i + 2] != wbuf[4 * i + 1] || rbuf[4 * i + 3] != wbuf[4 * i + 0]) {
             nerrors++;
-            HDprintf("\n     Error in data verification at index %d\n", i + (int)start[0]);
+            printf("\n     Error in data verification at index %d\n", i + (int)start[0]);
             break;
         }
     }
@@ -587,9 +587,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
     for (i = 0; i < (int)block[0]; i++)
         if (rbuf[i] != (long long)(dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
-            HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
-                     (long long)(dtrans ? trans_wbuf[i] : wbuf[i]), rbuf[i]);
+            printf("\n     Error in first data verification:\n");
+            printf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                   (long long)(dtrans ? trans_wbuf[i] : wbuf[i]), rbuf[i]);
             break;
         }
 
@@ -603,9 +603,9 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsign
         for (i = 0; i < (int)block[0]; i++)
             if (rbuf[i] != (long long)(100 - trans_wbuf[i])) {
                 nerrors++;
-                HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
-                         (long long)(100 - trans_wbuf[i]), rbuf[i]);
+                printf("\n     Error in second data verification:.\n");
+                printf("     At index %d: %lld, %lld\n", i + (int)start[0], (long long)(100 - trans_wbuf[i]),
+                       rbuf[i]);
                 break;
             }
     }
@@ -736,8 +736,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
     for (i = 0; i < (int)block[0]; i++)
         if (rbuf[i] != (dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
-            HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %d, %d\n", i + (int)start[0], wbuf[i], rbuf[i]);
+            printf("\n     Error in first data verification:\n");
+            printf("     At index %d: %d, %d\n", i + (int)start[0], wbuf[i], rbuf[i]);
             break;
         }
 
@@ -751,9 +751,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsig
         for (i = 0; i < (int)block[0]; i++)
             if (rbuf[i] != (2 * (10 + trans_wbuf[i]))) {
                 nerrors++;
-                HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %d\n", i + (int)start[0], (2 * (10 - trans_wbuf[i])),
-                         rbuf[i]);
+                printf("\n     Error in second data verification:.\n");
+                printf("     At index %d: %d, %d\n", i + (int)start[0], (2 * (10 - trans_wbuf[i])), rbuf[i]);
                 break;
             }
     }
@@ -929,10 +928,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b || s1_wbuf[i].c != s1_rbuf[i].c ||
             s1_wbuf[i].d != s1_rbuf[i].d) {
             nerrors++;
-            HDprintf("\n     Error in 1st data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
-                     s1_rbuf[i].a, s1_wbuf[i].b, s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c, s1_wbuf[i].d,
-                     s1_rbuf[i].d);
+            printf("\n     Error in 1st data verification:\n");
+            printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                   s1_rbuf[i].a, s1_wbuf[i].b, s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c, s1_wbuf[i].d,
+                   s1_rbuf[i].d);
             break;
         }
 
@@ -977,10 +976,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s1_rbuf[i].a != s1_wbuf[i].a || s1_rbuf[i].b != (4 * (i + (int)start[0]) + 1) ||
             s1_rbuf[i].c != s1_wbuf[i].c || s1_rbuf[i].d != (4 * (i + (int)start[0]) + 3)) {
             nerrors++;
-            HDprintf("\n     Error in 2nd data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
-                     s1_rbuf[i].a, (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c,
-                     (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
+            printf("\n     Error in 2nd data verification:\n");
+            printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                   s1_rbuf[i].a, (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c,
+                   (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
             break;
         }
 
@@ -1014,12 +1013,12 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             s1_rbuf[i].c != (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2) ||
             s1_rbuf[i].d != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3)) {
             nerrors++;
-            HDprintf("\n     Error in 3rd data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0],
-                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
-                     (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
-                     (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
-                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
+            printf("\n     Error in 3rd data verification:\n");
+            printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0],
+                   ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
+                   (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
+                   (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
+                   ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
             break;
         }
 
@@ -1068,10 +1067,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (s2_wbuf[i].a != s2_rbuf[i].a || s2_wbuf[i].b != s2_rbuf[i].b || s2_wbuf[i].c != s2_rbuf[i].c ||
             s2_wbuf[i].d != s2_rbuf[i].d) {
             nerrors++;
-            HDprintf("\n     Error in 4th data verification:\n");
-            HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", i + (int)start[0], s2_wbuf[i].a,
-                     s2_rbuf[i].a, s2_wbuf[i].b, s2_rbuf[i].b, s2_wbuf[i].c, s2_rbuf[i].c, s2_wbuf[i].d,
-                     s2_rbuf[i].d);
+            printf("\n     Error in 4th data verification:\n");
+            printf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", i + (int)start[0], s2_wbuf[i].a,
+                   s2_rbuf[i].a, s2_wbuf[i].b, s2_rbuf[i].b, s2_wbuf[i].c, s2_rbuf[i].c, s2_wbuf[i].d,
+                   s2_rbuf[i].d);
             break;
         }
 
@@ -1234,9 +1233,9 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
         for (i = 0; i < (int)block[0]; i++)
             if (lrbuf[i] != (dtrans ? trans_lwbuf[i] : lwbuf[i])) {
                 nerrors++;
-                HDprintf("\n     Error in first data verification:\n");
-                HDprintf("     At index %d: %ld, %ld\n", i + (int)start[0],
-                         dtrans ? trans_lwbuf[i] : lwbuf[i], lrbuf[i]);
+                printf("\n     Error in first data verification:\n");
+                printf("     At index %d: %ld, %ld\n", i + (int)start[0], dtrans ? trans_lwbuf[i] : lwbuf[i],
+                       lrbuf[i]);
                 break;
             }
     }
@@ -1290,9 +1289,9 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     if (mpi_rank) {
         for (i = 0; i < (int)block[0]; i++)
             if (srbuf[i] != (short)(dtrans ? trans_lwbuf[i] : lwbuf[i])) {
-                HDprintf("\n     Error in second data verification:\n");
-                HDprintf("     At index %d: %d, %d\n", i + (int)start[0],
-                         (short)(dtrans ? trans_lwbuf[i] : lwbuf[i]), srbuf[i]);
+                printf("\n     Error in second data verification:\n");
+                printf("     At index %d: %d, %d\n", i + (int)start[0],
+                       (short)(dtrans ? trans_lwbuf[i] : lwbuf[i]), srbuf[i]);
                 break;
             }
     }
@@ -1351,9 +1350,9 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, unsigned 
     if (mpi_rank) {
         for (i = 0; i < (int)block[0]; i++)
             if (llrbuf[i] != (long long)(dtrans ? trans_swbuf[i] : swbuf[i])) {
-                HDprintf("\n     Error in third data verification:\n");
-                HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
-                         (long long)(dtrans ? trans_swbuf[i] : swbuf[i]), llrbuf[i]);
+                printf("\n     Error in third data verification:\n");
+                printf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                       (long long)(dtrans ? trans_swbuf[i] : swbuf[i]), llrbuf[i]);
                 break;
             }
     }
@@ -1562,9 +1561,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         for (j = 0; j < (int)block[0]; j++)
             if (rbufi[i][j] != (dtrans ? trans_wbufi[i][j] : wbufi[i][j])) {
                 nerrors++;
-                HDprintf("\n     Error in 1st data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d, %d\n", j + (int)start[0],
-                         dtrans ? trans_wbufi[i][j] : wbufi[i][j], rbufi[i][j]);
+                printf("\n     Error in 1st data verification for dset %d:\n", i);
+                printf("     At index %d: %d, %d\n", j + (int)start[0],
+                       dtrans ? trans_wbufi[i][j] : wbufi[i][j], rbufi[i][j]);
                 break;
             }
 
@@ -1579,9 +1578,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
             for (j = 0; j < (int)block[0]; j++)
                 if (rbufi[i][j] != (2 * trans_wbufi[i][j])) {
                     nerrors++;
-                    HDprintf("\n     Error in 1st (with dtrans) data verification for dset %d:\n", i);
-                    HDprintf("     At index %d: %d, %d\n", j + (int)start[0], 2 * trans_wbufi[i][j],
-                             rbufi[i][j]);
+                    printf("\n     Error in 1st (with dtrans) data verification for dset %d:\n", i);
+                    printf("     At index %d: %d, %d\n", j + (int)start[0], 2 * trans_wbufi[i][j],
+                           rbufi[i][j]);
                     break;
                 }
     }
@@ -1628,9 +1627,9 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans, unsigned m
         for (j = 0; j < (int)block[0]; j++) {
             if (lrbufi[i][j] != (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j])) {
                 nerrors++;
-                HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %ld/%ld\n", j + (int)start[0],
-                         (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j]), lrbufi[i][j]);
+                printf("\n     Error in 2nd data verification for dset %d:\n", i);
+                printf("     At index %d: %ld/%ld\n", j + (int)start[0],
+                       (dtrans ? (2 * trans_lwbufi[i][j]) : lwbufi[i][j]), lrbufi[i][j]);
                 break;
             }
         }
@@ -1866,10 +1865,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (wbufi[i][j].a != rbufi[i][j].a || wbufi[i][j].b != rbufi[i][j].b ||
                 wbufi[i][j].c != rbufi[i][j].c || wbufi[i][j].d != rbufi[i][j].d) {
                 nerrors++;
-                HDprintf("\n     Error in 1st data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[i][j].a,
-                         rbufi[i][j].a, wbufi[i][j].b, rbufi[i][j].b, wbufi[i][j].c, rbufi[i][j].c,
-                         wbufi[i][j].d, rbufi[i][j].d);
+                printf("\n     Error in 1st data verification for dset %d:\n", i);
+                printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[i][j].a,
+                       rbufi[i][j].a, wbufi[i][j].b, rbufi[i][j].b, wbufi[i][j].c, rbufi[i][j].c,
+                       wbufi[i][j].d, rbufi[i][j].d);
 
                 break;
             }
@@ -1929,10 +1928,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                 if (wbufi[i][j].a != rbufi[i][j].a || (4 * (j + (int)start[0]) + 1) != rbufi[i][j].b ||
                     wbufi[i][j].c != rbufi[i][j].c || (4 * (j + (int)start[0]) + 3) != rbufi[i][j].d) {
                     nerrors++;
-                    HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                    HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
-                             wbufi[i][j].a, rbufi[i][j].a, (4 * (j + (int)start[0]) + 1), rbufi[i][j].b,
-                             wbufi[i][j].c, rbufi[i][j].c, (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
+                    printf("\n     Error in 2nd data verification for dset %d:\n", i);
+                    printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[i][j].a,
+                           rbufi[i][j].a, (4 * (j + (int)start[0]) + 1), rbufi[i][j].b, wbufi[i][j].c,
+                           rbufi[i][j].c, (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
                     break;
                 }
         }
@@ -1943,11 +1942,11 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     (4 * (j + (int)start[0]) + 2) != rbufi[i][j].c ||
                     (4 * (j + (int)start[0]) + 3) != rbufi[i][j].d) {
                     nerrors++;
-                    HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                    HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
-                             (4 * (j + (int)start[0])), rbufi[i][j].a, (4 * (j + (int)start[0]) + 1),
-                             rbufi[i][j].b, (4 * (j + (int)start[0]) + 2), rbufi[i][j].c,
-                             (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
+                    printf("\n     Error in 2nd data verification for dset %d:\n", i);
+                    printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                           (4 * (j + (int)start[0])), rbufi[i][j].a, (4 * (j + (int)start[0]) + 1),
+                           rbufi[i][j].b, (4 * (j + (int)start[0]) + 2), rbufi[i][j].c,
+                           (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
                     break;
                 }
         }
@@ -2004,10 +2003,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
         if (wbufi[0][j].a != rbufi[0][j].a || ((4 * (j + (int)start[0])) + 1) != rbufi[0][j].b ||
             wbufi[0][j].c != rbufi[0][j].c || ((4 * (j + (int)start[0])) + 3) != rbufi[0][j].d) {
             nerrors++;
-            HDprintf("\n     Error in 3rd data verification for dset0:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[0][j].a,
-                     rbufi[0][j].a, (4 * (j + (int)start[0]) + 1), rbufi[0][j].b, wbufi[0][j].c,
-                     rbufi[0][j].c, (4 * (j + (int)start[0]) + 3), rbufi[0][j].d);
+            printf("\n     Error in 3rd data verification for dset0:\n");
+            printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[0][j].a,
+                   rbufi[0][j].a, (4 * (j + (int)start[0]) + 1), rbufi[0][j].b, wbufi[0][j].c, rbufi[0][j].c,
+                   (4 * (j + (int)start[0]) + 3), rbufi[0][j].d);
             break;
         }
 
@@ -2018,11 +2017,11 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             rbufi[mm][j].c != ((4 * (j + (int)start[0])) + 2) ||
             rbufi[mm][j].d != ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3)) {
             nerrors++;
-            HDprintf("\n     Error in 3rd data verification for dset %d:\n", mm);
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
-                     ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)), rbufi[mm][j].a,
-                     ((4 * (j + (int)start[0])) + 1), rbufi[mm][j].b, ((4 * (j + (int)start[0])) + 2),
-                     rbufi[mm][j].c, ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), rbufi[mm][j].d);
+            printf("\n     Error in 3rd data verification for dset %d:\n", mm);
+            printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                   ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)), rbufi[mm][j].a,
+                   ((4 * (j + (int)start[0])) + 1), rbufi[mm][j].b, ((4 * (j + (int)start[0])) + 2),
+                   rbufi[mm][j].c, ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), rbufi[mm][j].d);
             break;
         }
 
@@ -2037,11 +2036,11 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                 rbufi[i][j].c != ((4 * (j + (int)start[0])) + 2) ||
                 rbufi[i][j].d != ((4 * (j + (int)start[0])) + 3)) {
                 nerrors++;
-                HDprintf("\n     Error in 3rd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
-                         ((4 * (j + (int)start[0]))), rbufi[i][j].a, ((4 * (j + (int)start[0])) + 1),
-                         rbufi[i][j].b, ((4 * (j + (int)start[0])) + 2), rbufi[i][j].c,
-                         ((4 * (j + (int)start[0])) + 3), rbufi[i][j].d);
+                printf("\n     Error in 3rd data verification for dset %d:\n", i);
+                printf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                       ((4 * (j + (int)start[0]))), rbufi[i][j].a, ((4 * (j + (int)start[0])) + 1),
+                       rbufi[i][j].b, ((4 * (j + (int)start[0])) + 2), rbufi[i][j].c,
+                       ((4 * (j + (int)start[0])) + 3), rbufi[i][j].d);
                 break;
             }
     }
@@ -2107,10 +2106,10 @@ test_multi_dsets_cmpd_with_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (s2_rbufi[i][j].a != s2_wbufi[i][j].a || s2_rbufi[i][j].b != s2_wbufi[i][j].b ||
                 s2_rbufi[i][j].c != s2_wbufi[i][j].c || s2_rbufi[i][j].d != s2_wbufi[i][j].d) {
                 nerrors++;
-                HDprintf("\n     Error in 3rd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", j + (int)start[0],
-                         s2_wbufi[i][j].a, s2_rbufi[i][j].a, s2_wbufi[i][j].b, s2_rbufi[i][j].b,
-                         s2_wbufi[i][j].c, s2_rbufi[i][j].c, s2_wbufi[i][j].d, s2_rbufi[i][j].d);
+                printf("\n     Error in 3rd data verification for dset %d:\n", i);
+                printf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", j + (int)start[0],
+                       s2_wbufi[i][j].a, s2_rbufi[i][j].a, s2_wbufi[i][j].b, s2_rbufi[i][j].b,
+                       s2_wbufi[i][j].c, s2_rbufi[i][j].c, s2_wbufi[i][j].d, s2_rbufi[i][j].d);
                 break;
             }
     }
@@ -2312,8 +2311,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     rbufi[i][(int)ss * j + 2] != wbufi[i][(int)ss * j + 2] ||
                     rbufi[i][(int)ss * j + 3] != wbufi[i][(int)ss * j + 3]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                     P_TEST_ERROR;
                 }
         }
@@ -2387,8 +2386,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
                     lrbufi[i][(int)ss * j + 6] != lwbufi[i][(int)ss * j + 6] ||
                     lrbufi[i][(int)ss * j + 7] != lwbufi[i][(int)ss * j + 7]) {
                     H5_FAILED();
-                    HDprintf("    Read different values than written.\n");
-                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                    printf("    Read different values than written.\n");
+                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                     P_TEST_ERROR;
                 }
         }
@@ -2449,8 +2448,8 @@ test_multi_dsets_size_change_no_bkg(hid_t fid, unsigned chunked, unsigned mwbuf)
             if (srbufi[i][(int)ss * j + 0] != swbufi[i][(int)ss * j + 0] ||
                 srbufi[i][(int)ss * j + 1] != swbufi[i][(int)ss * j + 1]) {
                 H5_FAILED();
-                HDprintf("    Read different values than written.\n");
-                HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                printf("    Read different values than written.\n");
+                printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                 P_TEST_ERROR;
             }
 
@@ -2785,8 +2784,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
         for (j = 0; j < save_block0; j++)
             if (l_rbufi[0][j] != (dtrans ? (long)trans_wbufi[0][j] : (long)wbufi[0][j])) {
                 nerrors++;
-                HDprintf("     Verify dset0 at index %d: %ld, %ld\n", j + (int)start[0],
-                         dtrans ? (long)trans_wbufi[0][j] : (long)wbufi[0][j], l_rbufi[0][j]);
+                printf("     Verify dset0 at index %d: %ld, %ld\n", j + (int)start[0],
+                       dtrans ? (long)trans_wbufi[0][j] : (long)wbufi[0][j], l_rbufi[0][j]);
                 break;
             }
     }
@@ -2796,8 +2795,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
         for (j = 0; j < (int)block[0]; j++)
             if (l_rbufi[mm][j] != (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j])) {
                 nerrors++;
-                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", mm, j + (int)start[0],
-                         (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j]), l_rbufi[mm][j]);
+                printf("     Verify dset %d at index %d: %ld, %ld\n", mm, j + (int)start[0],
+                       (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j]), l_rbufi[mm][j]);
                 break;
             }
 
@@ -2805,8 +2804,8 @@ test_multi_dsets_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans, un
         for (j = 0; j < (int)dims[0]; j++)
             if (l_rbufi[ll][j] != (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j])) {
                 nerrors++;
-                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", ll, j,
-                         (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j]), l_rbufi[ll][j]);
+                printf("     Verify dset %d at index %d: %ld, %ld\n", ll, j,
+                       (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j]), l_rbufi[ll][j]);
                 break;
             }
     }
@@ -3253,8 +3252,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                         for (j = 0; j < (int)block[0]; j++)
                             if (rbufi1[i][j] != wbufi1[i][j]) {
                                 nerrors++;
-                                HDprintf("    Read different values than written.\n");
-                                HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                printf("    Read different values than written.\n");
+                                printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                 break;
                             }
 
@@ -3265,8 +3264,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                             for (j = 0; j < (int)block[0]; j++)
                                 if (l_rbufi2[i][j] != LONG_MAX) {
                                     nerrors++;
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
                         }
@@ -3274,8 +3273,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                             for (j = 0; j < (int)block[0]; j++)
                                 if (s_rbufi2[i][j] != SHRT_MAX) {
                                     nerrors++;
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
                         }
@@ -3290,8 +3289,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                                     s3_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
                                     s3_rbufi3[i][j].d != s1_wbufi3[i][j].d) {
                                     nerrors++;
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
                         }
@@ -3302,8 +3301,8 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
                                     s1_rbufi3[i][j].c != s1_wbufi3[i][j].c ||
                                     s1_rbufi3[i][j].d != (DSET_SELECT_DIM + j + (int)start[0])) {
                                     nerrors++;
-                                    HDprintf("    Read different values than written.\n");
-                                    HDprintf("    For dset %d at index %d\n", i, j + (int)start[0]);
+                                    printf("    Read different values than written.\n");
+                                    printf("    For dset %d at index %d\n", i, j + (int)start[0]);
                                     break;
                                 }
                         }
@@ -3769,9 +3768,9 @@ main(int argc, char *argv[])
     if (MAINPROCESS) {
         printf("\n===================================\n");
         if (nerrors)
-            HDprintf("***Parallel selection I/O dataset tests detected %d errors***\n", nerrors);
+            printf("***Parallel selection I/O dataset tests detected %d errors***\n", nerrors);
         else
-            HDprintf("Parallel selection I/O dataset tests finished with no errors\n");
+            printf("Parallel selection I/O dataset tests finished with no errors\n");
         printf("===================================\n");
     }
 

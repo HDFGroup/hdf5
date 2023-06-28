@@ -538,8 +538,8 @@ H5C_dest(H5F_t *f)
 
 #ifdef H5C_DO_SANITY_CHECKS
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0)
-        HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
-                  cache_ptr->get_entry_ptr_from_addr_counter);
+        fprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
+                cache_ptr->get_entry_ptr_from_addr_counter);
 #endif /* H5C_DO_SANITY_CHECKS */
 
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);

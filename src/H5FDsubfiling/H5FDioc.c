@@ -91,7 +91,7 @@ typedef struct H5FD_ioc_t {
 #ifdef H5FD_IOC_DEBUG
 #define H5FD_IOC_LOG_CALL(name)                                                                              \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
+        printf("called %s()\n", (name));                                                                     \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else
@@ -1488,7 +1488,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
 #endif
 
                 H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1527,7 +1527,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
 #endif
 
                 if (ENOENT != errno)

@@ -78,9 +78,9 @@ check_test_file(char *name, size_t name_length, hid_t fapl_id)
             val = (int)(i + (i * j) + j);
             if (data_g[(i * 100) + j] != val) {
                 H5_FAILED();
-                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
-                         data_g[(i * 100) + j]);
-                HDprintf("    should be %d\n", val);
+                printf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
+                       data_g[(i * 100) + j]);
+                printf("    should be %d\n", val);
             }
         }
     }

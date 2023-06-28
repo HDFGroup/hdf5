@@ -34,7 +34,7 @@ my_errx(int code, const char *fmt, ...)
 {
     va_list ap;
 
-    (void)HDfprintf(stderr, "thread_id: ");
+    (void)fprintf(stderr, "thread_id: ");
     va_start(ap, fmt);
     (void)HDvfprintf(stderr, fmt, ap);
     va_end(ap);
@@ -176,11 +176,11 @@ my_err(int code, const char *fmt, ...)
     va_list ap;
     int     errno_copy = errno;
 
-    (void)HDfprintf(stderr, "thread_id: ");
+    (void)fprintf(stderr, "thread_id: ");
     va_start(ap, fmt);
     (void)HDvfprintf(stderr, fmt, ap);
     va_end(ap);
-    (void)HDfprintf(stderr, ": %s\n", HDstrerror(errno_copy));
+    (void)fprintf(stderr, ": %s\n", HDstrerror(errno_copy));
     HDexit(code);
 }
 
@@ -318,7 +318,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stderr, "not implemented in this configuration.\n");
+    fprintf(stderr, "not implemented in this configuration.\n");
     return EXIT_SUCCESS;
 }
 #endif /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/

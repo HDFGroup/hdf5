@@ -415,7 +415,7 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
 
     /* Print element */
     HDsnprintf(temp_str, sizeof(temp_str), "Element #%" PRIuHSIZE ":", idx);
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, temp_str, *(const haddr_t *)elmt);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, temp_str, *(const haddr_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_debug() */
@@ -675,8 +675,8 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
 
     /* Print element */
     HDsnprintf(temp_str, sizeof(temp_str), "Element #%" PRIuHSIZE ":", idx);
-    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %u, %0x}\n", indent, "", fwidth, temp_str, elmt->addr,
-              elmt->nbytes, elmt->filter_mask);
+    fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %u, %0x}\n", indent, "", fwidth, temp_str, elmt->addr,
+            elmt->nbytes, elmt->filter_mask);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_filt_debug() */
@@ -1590,7 +1590,7 @@ H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     HDassert(storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
+    fprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_idx_dump() */

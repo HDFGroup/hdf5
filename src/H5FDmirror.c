@@ -81,47 +81,47 @@ typedef struct H5FD_mirror_t {
         ssize_t              bytes_written = 0;                                                              \
         const unsigned char *b             = NULL;                                                           \
                                                                                                              \
-        HDfprintf(stdout, "%s bytes:\n```\n", (label));                                                      \
+        fprintf(stdout, "%s bytes:\n```\n", (label));                                                        \
                                                                                                              \
         /* print whole lines */                                                                              \
         while ((len - bytes_written) >= 32) {                                                                \
             b = (const unsigned char *)(buf) + bytes_written;                                                \
-            HDfprintf(stdout,                                                                                \
-                      "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"                                             \
-                      " %02X%02X%02X%02X %02X%02X%02X%02X"                                                   \
-                      " %02X%02X%02X%02X %02X%02X%02X%02X"                                                   \
-                      " %02X%02X%02X%02X %02X%02X%02X%02X\n",                                                \
-                      bytes_written, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10],      \
-                      b[11], b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19], b[20], b[21], b[22],    \
-                      b[23], b[24], b[25], b[26], b[27], b[28], b[29], b[30], b[31]);                        \
+            fprintf(stdout,                                                                                  \
+                    "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"                                               \
+                    " %02X%02X%02X%02X %02X%02X%02X%02X"                                                     \
+                    " %02X%02X%02X%02X %02X%02X%02X%02X"                                                     \
+                    " %02X%02X%02X%02X %02X%02X%02X%02X\n",                                                  \
+                    bytes_written, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], \
+                    b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23],      \
+                    b[24], b[25], b[26], b[27], b[28], b[29], b[30], b[31]);                                 \
             bytes_written += 32;                                                                             \
         }                                                                                                    \
                                                                                                              \
         /* start partial line */                                                                             \
         if (len > bytes_written) {                                                                           \
-            HDfprintf(stdout, "%04zX ", bytes_written);                                                      \
+            fprintf(stdout, "%04zX ", bytes_written);                                                        \
         }                                                                                                    \
                                                                                                              \
         /* partial line blocks */                                                                            \
         while ((len - bytes_written) >= 4) {                                                                 \
-            HDfprintf(stdout, " %02X%02X%02X%02X", (buf)[bytes_written], (buf)[bytes_written + 1],           \
-                      (buf)[bytes_written + 2], (buf)[bytes_written + 3]);                                   \
+            fprintf(stdout, " %02X%02X%02X%02X", (buf)[bytes_written], (buf)[bytes_written + 1],             \
+                    (buf)[bytes_written + 2], (buf)[bytes_written + 3]);                                     \
             bytes_written += 4;                                                                              \
         }                                                                                                    \
                                                                                                              \
         /* block separator before partial block */                                                           \
         if (len > bytes_written) {                                                                           \
-            HDfprintf(stdout, " ");                                                                          \
+            fprintf(stdout, " ");                                                                            \
         }                                                                                                    \
                                                                                                              \
         /* partial block individual bytes */                                                                 \
         while (len > bytes_written) {                                                                        \
-            HDfprintf(stdout, "%02X", (buf)[bytes_written++]);                                               \
+            fprintf(stdout, "%02X", (buf)[bytes_written++]);                                                 \
         }                                                                                                    \
                                                                                                              \
         /* end partial line */                                                                               \
-        HDfprintf(stdout, "\n");                                                                             \
-        HDfprintf(stdout, "```\n");                                                                          \
+        fprintf(stdout, "\n");                                                                               \
+        fprintf(stdout, "```\n");                                                                            \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else
@@ -131,7 +131,7 @@ typedef struct H5FD_mirror_t {
 #if MIRROR_DEBUG_OP_CALLS
 #define LOG_OP_CALL(name)                                                                                    \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
+        printf("called %s()\n", (name));                                                                     \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else

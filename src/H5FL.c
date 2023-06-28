@@ -198,9 +198,9 @@ H5FL_term_package(void)
         /* Dump information about all the outstanding allocations */
         while (trk != NULL) {
             /* Print information about the outstanding block */
-            HDfprintf(stderr, "%s: Outstanding allocation:\n", __func__);
-            HDfprintf(stderr, "\tPtr: %p, File: %s, Function: %s, Line: %d\n",
-                      (((unsigned char *)trk) + sizeof(H5FL_track_t)), trk->file, trk->func, trk->line);
+            fprintf(stderr, "%s: Outstanding allocation:\n", __func__);
+            fprintf(stderr, "\tPtr: %p, File: %s, Function: %s, Line: %d\n",
+                    (((unsigned char *)trk) + sizeof(H5FL_track_t)), trk->file, trk->func, trk->line);
             H5CS_print_stack(trk->stack, stderr);
 
             /* Advance to next node */
@@ -622,8 +622,8 @@ H5FL__reg_term(void)
         tmp = H5FL_reg_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_reg_gc_head.first->list->name,
-                 (int)H5FL_reg_gc_head.first->list->allocated);
+        printf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_reg_gc_head.first->list->name,
+               (int)H5FL_reg_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         /* Check if the list has allocations outstanding */
         if (H5FL_reg_gc_head.first->list->allocated > 0) {
@@ -1323,8 +1323,8 @@ H5FL__blk_term(void)
         tmp = H5FL_blk_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_blk_gc_head.first->pq->name,
-                 (int)H5FL_blk_gc_head.first->pq->allocated);
+        printf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_blk_gc_head.first->pq->name,
+               (int)H5FL_blk_gc_head.first->pq->allocated);
 #endif /* H5FL_DEBUG */
 
         /* Check if the list has allocations outstanding */
@@ -1866,8 +1866,8 @@ H5FL__arr_term(void)
 
         /* Check if the list has allocations outstanding */
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_arr_gc_head.first->list->name,
-                 (int)H5FL_arr_gc_head.first->list->allocated);
+        printf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_arr_gc_head.first->list->name,
+               (int)H5FL_arr_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         if (H5FL_arr_gc_head.first->list->allocated > 0) {
             /* Add free list to the list of nodes with allocations open still */
@@ -2457,8 +2457,8 @@ H5FL__fac_term_all(void)
         tmp = H5FL_fac_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->size = %d, head->allocated = %d\n", __func__,
-                 (int)H5FL_fac_gc_head.first->list->size, (int)H5FL_fac_gc_head.first->list->allocated);
+        printf("%s: head->size = %d, head->allocated = %d\n", __func__,
+               (int)H5FL_fac_gc_head.first->list->size, (int)H5FL_fac_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
 
         /* The list cannot have any allocations outstanding */
