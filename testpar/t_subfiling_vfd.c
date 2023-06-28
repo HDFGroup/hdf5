@@ -1883,8 +1883,8 @@ test_subfiling_h5fuse(void)
         pid_t tmppid;
         int   status;
 
-        pid = HDfork();
-        VRFY(pid >= 0, "HDfork succeeded");
+        pid = fork();
+        VRFY(pid >= 0, "fork succeeded");
 
         if (pid == 0) {
             char *tmp_filename;
@@ -1906,11 +1906,11 @@ test_subfiling_h5fuse(void)
             args[6] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
-            HDexecvp("env", args);
+            execvp("env", args);
         }
         else {
-            tmppid = HDwaitpid(pid, &status, 0);
-            VRFY(tmppid >= 0, "HDwaitpid succeeded");
+            tmppid = waitpid(pid, &status, 0);
+            VRFY(tmppid >= 0, "waitpid succeeded");
 
             if (WIFEXITED(status)) {
                 int ret;
