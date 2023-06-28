@@ -2052,18 +2052,18 @@ H5FD_read_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, h
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
@@ -2102,18 +2102,18 @@ H5FD_write_vector_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
@@ -2151,18 +2151,18 @@ H5FD_read_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t me
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
@@ -2202,18 +2202,18 @@ H5FD_write_from_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t m
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(file->cls);
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Call private function */
     /* (Note compensating for base address addition in internal routine) */
@@ -2367,7 +2367,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/)
 } /* end H5FD_driver_query() */
 
 /*
- * Comparison routine used by HDqsort in H5FD__sort_io_req_real()
+ * Comparison routine used by qsort in H5FD__sort_io_req_real()
  */
 static int
 H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
@@ -2379,8 +2379,8 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(H5_addr_defined(addr_1));
-    HDassert(H5_addr_defined(addr_2));
+    assert(H5_addr_defined(addr_1));
+    assert(H5_addr_defined(addr_2));
 
     /* Compare the addresses */
     if (H5_addr_gt(addr_1, addr_2))
@@ -2409,7 +2409,7 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
 
     /* scan the offsets array to see if it is sorted */
     for (i = 1; i < count; i++) {
-        HDassert(H5_addr_defined(addrs[i - 1]));
+        assert(H5_addr_defined(addrs[i - 1]));
 
         if (H5_addr_gt(addrs[i - 1], addrs[i]))
             break;
@@ -2439,13 +2439,13 @@ H5FD__sort_io_req_real(size_t count, haddr_t *addrs, hbool_t *was_sorted, struct
         }
 
         /* sort the srt_tmp array */
-        HDqsort(*srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
+        qsort(*srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
 
         /* verify no duplicate entries */
         i = 1;
 
         for (i = 1; i < count; i++) {
-            HDassert(H5_addr_lt((*srt_tmp)[i - 1].addr, (*srt_tmp)[i].addr));
+            assert(H5_addr_lt((*srt_tmp)[i - 1].addr, (*srt_tmp)[i].addr));
 
             if (H5_addr_eq(addrs[i - 1], addrs[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addrs in array")
@@ -2654,25 +2654,25 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
 
     /* Sanity checks */
 
-    HDassert(selection_was_sorted);
+    assert(selection_was_sorted);
 
-    HDassert((mem_space_ids) || (count == 0));
-    HDassert((file_space_ids) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert((mem_space_ids) || (count == 0));
+    assert((file_space_ids) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the element_sizes and bufs arrays are
      * valid.
      */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0].cvp != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0].cvp != NULL));
 
-    HDassert((count == 0) || ((s_mem_space_ids_ptr) && (NULL == *s_mem_space_ids_ptr)));
-    HDassert((count == 0) || ((s_file_space_ids_ptr) && (NULL == *s_file_space_ids_ptr)));
-    HDassert((count == 0) || ((s_offsets_ptr) && (NULL == *s_offsets_ptr)));
-    HDassert((count == 0) || ((s_element_sizes_ptr) && (NULL == *s_element_sizes_ptr)));
-    HDassert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
+    assert((count == 0) || ((s_mem_space_ids_ptr) && (NULL == *s_mem_space_ids_ptr)));
+    assert((count == 0) || ((s_file_space_ids_ptr) && (NULL == *s_file_space_ids_ptr)));
+    assert((count == 0) || ((s_offsets_ptr) && (NULL == *s_offsets_ptr)));
+    assert((count == 0) || ((s_element_sizes_ptr) && (NULL == *s_element_sizes_ptr)));
+    assert((count == 0) || ((s_bufs_ptr) && (NULL == *s_bufs_ptr)));
 
     if (H5FD__sort_io_req_real(count, offsets, selection_was_sorted, &srt_tmp) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets")
@@ -2715,8 +2715,8 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted selection(s)")
         }
 
-        HDassert(element_sizes[0] != 0);
-        HDassert(bufs[0].cvp != NULL);
+        assert(element_sizes[0] != 0);
+        assert(bufs[0].cvp != NULL);
 
         /* Scan the element_sizes and bufs array to determine if the fixed
          * element_sizes / bufs optimization is in use, and if so, to determine
@@ -2732,8 +2732,8 @@ H5FD_sort_selection_io_req(hbool_t *selection_was_sorted, uint32_t _count, hid_t
                 fixed_bufs_index = i - 1;
         }
 
-        HDassert(fixed_element_sizes_index <= count);
-        HDassert(fixed_bufs_index <= count);
+        assert(fixed_element_sizes_index <= count);
+        assert(fixed_bufs_index <= count);
 
         /* Populate the sorted arrays.  Note that the index stored in srt_tmp
          * refers to the index in the unsorted array, while the position of

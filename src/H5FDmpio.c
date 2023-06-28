@@ -2962,7 +2962,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
 
             /* Sanity check */
             if (is_permuted)
-                HDassert(permute_map);
+                assert(permute_map);
 
             if (H5S_mpio_space_type(mem_spaces[i], dst_element_size, &piece_mtype[i],
                                     &piece_mpi_mem_counts[i], &(piece_mmt_is_derived_array[i]),
@@ -2984,7 +2984,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
 
             /* Sanity check */
             if (is_permuted)
-                HDassert(!permute_map);
+                assert(!permute_map);
 
             /* Piece address relative to the first piece addr
              * Assign piece address to MPI displacement
@@ -3143,22 +3143,22 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
+        fprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert((count == 0) || (mem_space_ids));
-    HDassert((count == 0) || (file_space_ids));
-    HDassert((count == 0) || (offsets));
-    HDassert((count == 0) || (element_sizes));
-    HDassert((count == 0) || (bufs));
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert((count == 0) || (mem_space_ids));
+    assert((count == 0) || (file_space_ids));
+    assert((count == 0) || (offsets));
+    assert((count == 0) || (element_sizes));
+    assert((count == 0) || (bufs));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
@@ -3225,7 +3225,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
+            fprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
@@ -3234,13 +3234,13 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
+                fprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
             /* Check whether we should read from rank 0 and broadcast to other ranks */
             if (H5CX_get_mpio_rank0_bcast()) {
 #ifdef H5FDmpio_DEBUG
                 if (H5FD_mpio_debug_r_flag)
-                    HDfprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
+                    fprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
                 rank0_bcast = TRUE;
@@ -3266,7 +3266,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
         else {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
             /* Perform independent read operation */
@@ -3334,7 +3334,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__,
+            fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__,
                       file->mpi_rank, (long)mpi_off, (long long)bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
@@ -3348,12 +3348,12 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
     else {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
         if (_file->base_addr > 0) {
             /* Undo base address addition in internal routines before passing down to the mpio driver */
             for (i = 0; i < count; i++) {
-                HDassert(offsets[i] >= _file->base_addr);
+                assert(offsets[i] >= _file->base_addr);
                 offsets[i] -= _file->base_addr;
             }
         }
@@ -3391,7 +3391,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
+        fprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3472,25 +3472,25 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering: count=%u\n", __func__, file->mpi_rank, count);
+        fprintf(stderr, "%s: (%d) Entering: count=%u\n", __func__, file->mpi_rank, count);
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert((count == 0) || (mem_space_ids));
-    HDassert((count == 0) || (file_space_ids));
-    HDassert((count == 0) || (offsets));
-    HDassert((count == 0) || (element_sizes));
-    HDassert((count == 0) || (bufs));
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert((count == 0) || (mem_space_ids));
+    assert((count == 0) || (file_space_ids));
+    assert((count == 0) || (offsets));
+    assert((count == 0) || (element_sizes));
+    assert((count == 0) || (bufs));
 
     /* Verify that the first elements of the element_sizes and bufs arrays are
      * valid. */
-    HDassert((count == 0) || (element_sizes[0] != 0));
-    HDassert((count == 0) || (bufs[0] != NULL));
+    assert((count == 0) || (element_sizes[0] != 0));
+    assert((count == 0) || (bufs[0] != NULL));
 
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
-    HDassert(!H5CX_get_mpi_file_flushing());
+    assert(!H5CX_get_mpi_file_flushing());
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
@@ -3556,7 +3556,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
+            fprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
@@ -3567,7 +3567,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
+                fprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
 
             /* Perform collective write operation */
@@ -3586,7 +3586,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+                fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
             /* Perform independent write operation */
             if (MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, mpi_bufs_base, size_i,
@@ -3624,7 +3624,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
+            fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
                       file->mpi_rank, (long)mpi_off, (long long)bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
@@ -3643,12 +3643,12 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
+            fprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
         if (_file->base_addr > 0) {
             /* Undo base address addition in internal routines before passing down to the mpio driver */
             for (i = 0; i < count; i++) {
-                HDassert(offsets[i] >= _file->base_addr);
+                assert(offsets[i] >= _file->base_addr);
                 offsets[i] -= _file->base_addr;
             }
         }
@@ -3686,7 +3686,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
+        fprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
