@@ -132,7 +132,7 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
     H5FD_ioc_config_t       ioc_conf;
     hid_t                   ret_value = H5I_INVALID_HID;
 
-    HDassert(!custom_config || custom_cfg);
+    assert(!custom_config || custom_cfg);
 
     if ((ret_value = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
@@ -955,7 +955,7 @@ test_selection_strategies(void)
                 VRFY(HDsetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA, criteria_buf, 1) >= 0,
                      "HDsetenv succeeded");
 
-                HDassert(num_active_ranks == mpi_size || num_active_ranks == 1);
+                assert(num_active_ranks == mpi_size || num_active_ranks == 1);
 
                 if ((num_active_ranks == mpi_size) || (mpi_rank == 0)) {
                     h5_stat_t file_info;
@@ -2099,7 +2099,7 @@ parse_subfiling_env_vars(void)
     }
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
-        HDassert(config_dir);
+        assert(config_dir);
 
         HDstrncpy(config_dir, env_value, PATH_MAX);
 

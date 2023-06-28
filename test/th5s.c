@@ -1772,7 +1772,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
 
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             } /* end switch */
 
@@ -1797,7 +1797,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                     expected_enc_size = (uint8_t)(expected_version == 3 ? 4 : 8);
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             } /* end switch */
 
@@ -1822,7 +1822,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                     expected_enc_size = 8;
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             }
 
@@ -1847,7 +1847,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                     expected_enc_size = 8;
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             } /* end switch */
 
@@ -1872,7 +1872,7 @@ test_h5s_encode_regular_hyper(H5F_libver_t low, H5F_libver_t high)
                     expected_enc_size = 8;
                     break;
                 default:
-                    HDassert(0);
+                    assert(0);
                     break;
             }
 
@@ -1966,7 +1966,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
                 break;
 
             default:
-                HDassert(0);
+                assert(0);
                 break;
         }
 
@@ -1995,7 +1995,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
                 break;
 
             default:
-                HDassert(0);
+                assert(0);
                 break;
         }
 
@@ -2008,7 +2008,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
         VERIFY(is_regular, FALSE, "H5Sis_regular_hyperslab");
 
         /* Verify the version and encoded size expected for the configuration */
-        HDassert(expected_enc_size <= 255);
+        assert(expected_enc_size <= 255);
         ret = test_h5s_check_encoding(fapl, sid, expected_version, (uint8_t)expected_enc_size,
                                       expected_to_fail);
         CHECK(ret, FAIL, "test_h5s_check_encoding");

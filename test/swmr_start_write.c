@@ -71,7 +71,7 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
     hid_t sid;  /* Dataspace ID */
     hid_t aid;  /* Attribute ID */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -145,7 +145,7 @@ create_datasets(hid_t fid, int comp_level, hbool_t verbose, FILE *verbose_file, 
     hsize_t  chunk_dims[2] = {1, CHUNK_SIZE};    /* Chunk dimensions */
     unsigned u, v;                               /* Local index variable */
 
-    HDassert(index_type);
+    assert(index_type);
 
     /* Create datatype for creating datasets */
     if ((tid = create_symbol_datatype()) < 0)
@@ -219,7 +219,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
     unsigned long rec_to_flush;                         /* # of records left to write before flush */
     unsigned long u, v;                                 /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */

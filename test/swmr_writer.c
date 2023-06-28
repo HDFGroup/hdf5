@@ -75,7 +75,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
     unsigned u, v;                /* Local index variable */
     hbool_t  use_log_vfd = FALSE; /* Use the log VFD (set this manually) */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -155,7 +155,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
     unsigned long rec_to_flush;                         /* # of records left to write before flush */
     unsigned long u, v;                                 /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */

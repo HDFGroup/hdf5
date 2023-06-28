@@ -133,12 +133,12 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     hid_t       large_ds_dcpl_id = H5P_DEFAULT;
     herr_t      ret; /* Generic return value */
 
-    HDassert(edge_size >= 6);
-    HDassert(edge_size >= chunk_edge_size);
-    HDassert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
-    HDassert(1 < small_rank);
-    HDassert(small_rank < large_rank);
-    HDassert(large_rank <= PAR_SS_DR_MAX_RANK);
+    assert(edge_size >= 6);
+    assert(edge_size >= chunk_edge_size);
+    assert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
+    assert(1 < small_rank);
+    assert(small_rank < large_rank);
+    assert(large_rank <= PAR_SS_DR_MAX_RANK);
 
     tv_ptr->test_num          = test_num;
     tv_ptr->edge_size         = edge_size;
@@ -153,7 +153,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     /* the VRFY() macro needs the local variable mpi_rank -- set it up now */
     mpi_rank = tv_ptr->mpi_rank;
 
-    HDassert(tv_ptr->mpi_size >= 1);
+    assert(tv_ptr->mpi_size >= 1);
 
     tv_ptr->mpi_comm = MPI_COMM_WORLD;
     tv_ptr->mpi_info = MPI_INFO_NULL;
@@ -167,8 +167,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     /* used by checker board tests only */
     tv_ptr->small_ds_offset = PAR_SS_DR_MAX_RANK - tv_ptr->small_rank;
 
-    HDassert(0 < tv_ptr->small_ds_offset);
-    HDassert(tv_ptr->small_ds_offset < PAR_SS_DR_MAX_RANK);
+    assert(0 < tv_ptr->small_ds_offset);
+    assert(tv_ptr->small_ds_offset < PAR_SS_DR_MAX_RANK);
 
     for (i = 0; i < tv_ptr->large_rank - 1; i++) {
 
@@ -180,8 +180,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     /* used by checker board tests only */
     tv_ptr->large_ds_offset = PAR_SS_DR_MAX_RANK - tv_ptr->large_rank;
 
-    HDassert(0 <= tv_ptr->large_ds_offset);
-    HDassert(tv_ptr->large_ds_offset < PAR_SS_DR_MAX_RANK);
+    assert(0 <= tv_ptr->large_ds_offset);
+    assert(tv_ptr->large_ds_offset < PAR_SS_DR_MAX_RANK);
 
     /* set up the start, stride, count, and block pointers */
     /* used by contiguous tests only */
@@ -234,7 +234,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     HDmemset(tv_ptr->large_ds_slice_buf, 0, sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
 
     filename = (const char *)GetTestParameters();
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 #if CONTIG_HS_DR_PIO_TEST__SETUP__DEBUG
     if (MAINPROCESS) {
 
@@ -1070,8 +1070,8 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                                  (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= tv_ptr->large_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= tv_ptr->large_ds_size);
 
                     for (n = 0; n < tv_ptr->large_ds_size; n++) {
 
@@ -1346,8 +1346,8 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     start_index = (size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size;
                     stop_index  = start_index + tv_ptr->small_ds_slice_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= tv_ptr->small_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= tv_ptr->small_ds_size);
 
                     for (n = 0; n < tv_ptr->small_ds_size; n++) {
 
@@ -1635,8 +1635,8 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                                  (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index < tv_ptr->large_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index < tv_ptr->large_ds_size);
 
                     for (n = 0; n < tv_ptr->large_ds_size; n++) {
 
@@ -2049,20 +2049,20 @@ ckrbrd_hs_dr_pio_test__slct_ckrbrd(const int mpi_rank, const hid_t tgt_sid, cons
     hsize_t block[PAR_SS_DR_MAX_RANK];
     herr_t  ret; /* Generic return value */
 
-    HDassert(edge_size >= 6);
-    HDassert(0 < checker_edge_size);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(0 < sel_rank);
-    HDassert(sel_rank <= tgt_rank);
-    HDassert(tgt_rank <= test_max_rank);
-    HDassert(test_max_rank <= PAR_SS_DR_MAX_RANK);
+    assert(edge_size >= 6);
+    assert(0 < checker_edge_size);
+    assert(checker_edge_size <= edge_size);
+    assert(0 < sel_rank);
+    assert(sel_rank <= tgt_rank);
+    assert(tgt_rank <= test_max_rank);
+    assert(test_max_rank <= PAR_SS_DR_MAX_RANK);
 
     sel_offset = test_max_rank - sel_rank;
-    HDassert(sel_offset >= 0);
+    assert(sel_offset >= 0);
 
     n_cube_offset = test_max_rank - tgt_rank;
-    HDassert(n_cube_offset >= 0);
-    HDassert(n_cube_offset <= sel_offset);
+    assert(n_cube_offset >= 0);
+    assert(n_cube_offset <= sel_offset);
 
 #if CKRBRD_HS_DR_PIO_TEST__SELECT_CHECKER_BOARD__DEBUG
     fprintf(stdout, "%s:%d: edge_size/checker_edge_size = %d/%d\n", fcnName, mpi_rank, edge_size,
@@ -2380,13 +2380,13 @@ ckrbrd_hs_dr_pio_test__verify_data(uint32_t *buf_ptr, const int rank, const int 
     int       v, w, x, y, z;     /* to track position in checker */
     const int test_max_rank = 5; /* code changes needed if this is increased */
 
-    HDassert(buf_ptr != NULL);
-    HDassert(0 < rank);
-    HDassert(rank <= test_max_rank);
-    HDassert(edge_size >= 6);
-    HDassert(0 < checker_edge_size);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(test_max_rank <= PAR_SS_DR_MAX_RANK);
+    assert(buf_ptr != NULL);
+    assert(0 < rank);
+    assert(rank <= test_max_rank);
+    assert(edge_size >= 6);
+    assert(0 < checker_edge_size);
+    assert(checker_edge_size <= edge_size);
+    assert(test_max_rank <= PAR_SS_DR_MAX_RANK);
 
 #if CKRBRD_HS_DR_PIO_TEST__VERIFY_DATA__DEBUG
 
@@ -2675,11 +2675,11 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     tv_ptr->start[3] = (hsize_t)l;
                     tv_ptr->start[4] = 0;
 
-                    HDassert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
 
                     ckrbrd_hs_dr_pio_test__slct_ckrbrd(
                         tv_ptr->mpi_rank, tv_ptr->file_large_ds_sid_0, tv_ptr->large_rank, tv_ptr->edge_size,
@@ -2899,11 +2899,11 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     tv_ptr->start[3] = (hsize_t)l;
                     tv_ptr->start[4] = 0;
 
-                    HDassert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
 
                     ckrbrd_hs_dr_pio_test__slct_ckrbrd(
                         tv_ptr->mpi_rank, tv_ptr->mem_large_ds_sid, tv_ptr->large_rank, tv_ptr->edge_size,
@@ -2964,8 +2964,8 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     }
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG */
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= tv_ptr->large_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= tv_ptr->large_ds_size);
 
                     for (u = 0; u < start_index; u++) {
 
@@ -3221,11 +3221,11 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     tv_ptr->start[3] = (hsize_t)l;
                     tv_ptr->start[4] = 0;
 
-                    HDassert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
 
                     ckrbrd_hs_dr_pio_test__slct_ckrbrd(
                         tv_ptr->mpi_rank, tv_ptr->mem_large_ds_sid, tv_ptr->large_rank, tv_ptr->edge_size,
@@ -3271,8 +3271,8 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     start_index = (size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size;
                     stop_index  = start_index + tv_ptr->small_ds_slice_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= tv_ptr->small_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= tv_ptr->small_ds_size);
 
                     data_ok = TRUE;
 
@@ -3514,11 +3514,11 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     tv_ptr->start[3] = (hsize_t)l;
                     tv_ptr->start[4] = 0;
 
-                    HDassert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
-                    HDassert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[0] == 0) || (0 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[1] == 0) || (1 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[2] == 0) || (2 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[3] == 0) || (3 < tv_ptr->small_ds_offset + 1));
+                    assert((tv_ptr->start[4] == 0) || (4 < tv_ptr->small_ds_offset + 1));
 
                     ckrbrd_hs_dr_pio_test__slct_ckrbrd(
                         tv_ptr->mpi_rank, tv_ptr->file_large_ds_sid_1, tv_ptr->large_rank, tv_ptr->edge_size,
@@ -3567,8 +3567,8 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                                  (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index < tv_ptr->large_ds_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index < tv_ptr->large_ds_size);
 
                     data_ok = TRUE;
 

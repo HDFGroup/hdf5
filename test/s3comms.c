@@ -535,7 +535,7 @@ test_aws_canonical_request(void)
         /* create HTTP request object with given verb, resource/path
          */
         hrb = H5FD_s3comms_hrb_init_request(C->verb, C->resource, "HTTP/1.1");
-        HDassert(hrb->body == NULL);
+        assert(hrb->body == NULL);
 
         /* Create headers list from test case input
          */
@@ -557,9 +557,9 @@ test_aws_canonical_request(void)
         while (node != NULL) {
             FAIL_IF(FAIL == H5FD_s3comms_hrb_node_set(&node, node->name, NULL));
         }
-        HDassert(NULL == node);
+        assert(NULL == node);
         FAIL_IF(FAIL == H5FD_s3comms_hrb_destroy(&hrb));
-        HDassert(NULL == hrb);
+        assert(NULL == hrb);
 
     } /* for each test case */
 
@@ -580,7 +580,7 @@ test_aws_canonical_request(void)
              "signed headers destination cannot be null")
 
     FAIL_IF(FAIL == H5FD_s3comms_hrb_destroy(&hrb))
-    HDassert(NULL == hrb);
+    assert(NULL == hrb);
 
     PASSED();
     return 0;
@@ -590,7 +590,7 @@ error:
     if (node != NULL) {
         while (node != NULL)
             (void)H5FD_s3comms_hrb_node_set(&node, node->name, NULL);
-        HDassert(node == NULL);
+        assert(node == NULL);
     }
     if (hrb != NULL) {
         (void)H5FD_s3comms_hrb_destroy(&hrb);
@@ -1272,7 +1272,7 @@ test_HMAC_SHA256(void)
         }
         else {
             dest = (char *)HDmalloc(sizeof(char) * cases[i].dest_size);
-            HDassert(dest != NULL);
+            assert(dest != NULL);
         }
 
         JSVERIFY(
@@ -1285,7 +1285,7 @@ test_HMAC_SHA256(void)
                 /* print out how wrong things are, and then fail
                  */
                 dest = (char *)HDrealloc(dest, cases[i].dest_size + 1);
-                HDassert(dest != NULL);
+                assert(dest != NULL);
                 dest[cases[i].dest_size] = 0;
                 fprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
@@ -1606,7 +1606,7 @@ test_parse_url(void)
      *********/
 
     for (i = 0; i < ncases; i++) {
-        HDassert(purl == NULL);
+        assert(purl == NULL);
 
         JSVERIFY(cases[i].exp_ret, H5FD_s3comms_parse_url(cases[i].url, &purl), cases[i].msg)
 
@@ -2217,7 +2217,7 @@ test_signing_key(void)
 
     for (i = 0; i < ncases; i++) {
         key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
-        HDassert(key != NULL);
+        assert(key != NULL);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when),
                  NULL)
@@ -2234,7 +2234,7 @@ test_signing_key(void)
      ***************/
 
     key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
-    HDassert(key != NULL);
+    assert(key != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when),
              "destination cannot be NULL")
@@ -2396,9 +2396,9 @@ test_trim(void)
     TESTING("s3comms trim");
 
     for (i = 0; i < n_cases; i++) {
-        HDassert(str == NULL);
+        assert(str == NULL);
         str = (char *)HDmalloc(sizeof(char) * cases[i].in_len);
-        HDassert(str != NULL);
+        assert(str != NULL);
         HDstrncpy(str, cases[i].in, cases[i].in_len);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_trim(dest, str, cases[i].in_len, &dest_len), NULL)
@@ -2414,9 +2414,9 @@ test_trim(void)
              "should not fail when trimming a null string");
     JSVERIFY(0, dest_len, "trimming NULL string writes 0 characters")
 
-    HDassert(str == NULL);
+    assert(str == NULL);
     str = (char *)HDmalloc(sizeof(char *) * 11);
-    HDassert(str != NULL);
+    assert(str != NULL);
     HDmemcpy(str, "some text ", 11); /* string with null terminator */
     JSVERIFY(FAIL, H5FD_s3comms_trim(NULL, str, 10, &dest_len), "destination for trim cannot be NULL");
     HDfree(str);
@@ -2529,7 +2529,7 @@ test_uriencode(void)
      ***************/
 
     dest = (char *)HDmalloc(sizeof(char) * 15);
-    HDassert(dest != NULL);
+    assert(dest != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
              "destination cannot be NULL");

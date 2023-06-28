@@ -476,8 +476,8 @@ index_rec_cb(const void *_record, void *_op_data)
     const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
     H5B2_test_rec_t       *search = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record);
-    HDassert(search);
+    assert(record);
+    assert(search);
 
     search->key = record->key;
     search->val = record->val;
@@ -554,7 +554,7 @@ modify_rec_cb(void *_record, void *_op_data, hbool_t *changed)
     H5B2_test_rec_t *record = (H5B2_test_rec_t *)_record;
     H5B2_test_rec_t *modify = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record->key == modify->key);
+    assert(record->key == modify->key);
     record->val = modify->val;
     *changed    = TRUE;
 

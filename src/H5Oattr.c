@@ -132,8 +132,8 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (attr = H5FL_CALLOC(H5A_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -332,9 +332,9 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(attr);
+    assert(f);
+    assert(p);
+    assert(attr);
 
     /* Check whether datatype and dataspace are shared */
     if ((is_type_shared = H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt)) < 0)
@@ -434,7 +434,7 @@ H5O__attr_copy(const void *_src, void *_dst)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(_src);
+    assert(_src);
 
     /* copy */
     if (NULL == (ret_value = (H5A_t *)H5A__copy((H5A_t *)_dst, (const H5A_t *)_src)))
@@ -469,7 +469,7 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(attr);
+    assert(attr);
 
     /* Common size information */
     ret_value = 1 + /*version               */
@@ -499,7 +499,7 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
                      attr->shared->ds_size +  /*dataspace		*/
                      attr->shared->data_size; /*the data itself	*/
     else
-        HDassert(0 && "Bad attribute version");
+        assert(0 && "Bad attribute version");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__attr_size() */
@@ -545,7 +545,7 @@ H5O__attr_free(void *mesg)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(mesg);
+    assert(mesg);
 
     if (H5A__close(attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, FAIL, "unable to close attribute object")
@@ -575,8 +575,8 @@ H5O__attr_delete(H5F_t *f, H5O_t *oh, void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
-    HDassert(f);
-    HDassert(attr);
+    assert(f);
+    assert(attr);
 
     /* Decrement reference count on datatype in file */
     if ((H5O_MSG_DTYPE->del)(f, oh, attr->shared->dt) < 0)
@@ -612,8 +612,8 @@ H5O__attr_link(H5F_t *f, H5O_t *oh, void *_mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(attr);
+    assert(f);
+    assert(attr);
 
     /* Re-share attribute's datatype and dataspace to increment their
      * reference count if they're shared.
@@ -653,9 +653,9 @@ H5O__attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *native_src, 
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(deleted);
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(deleted);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
      * the message version allowed by the destination file's high bound.
@@ -696,10 +696,10 @@ H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(native_src);
-    HDassert(file_dst);
-    HDassert(cpy_info);
-    HDassert(!cpy_info->copy_without_attr);
+    assert(native_src);
+    assert(file_dst);
+    assert(cpy_info);
+    assert(!cpy_info->copy_without_attr);
 
     /* Mark datatype as being on disk now.  This step used to be done in a lower level
      * by H5O_dtype_decode.  But it has been moved up.  Not an ideal place, but no better
@@ -765,8 +765,8 @@ H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(attr);
-    HDassert(crt_idx);
+    assert(attr);
+    assert(crt_idx);
 
     /* Get the attribute's creation index */
     *crt_idx = attr->shared->crt_idx;
@@ -793,7 +793,7 @@ H5O__attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(attr);
+    assert(attr);
 
     /* Set the creation index */
     attr->shared->crt_idx = crt_idx;
@@ -830,10 +830,10 @@ H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidt
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth, "Name:", mesg->shared->name);
     switch (mesg->shared->encoding) {

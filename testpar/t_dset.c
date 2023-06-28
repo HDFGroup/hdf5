@@ -2966,13 +2966,13 @@ test_actual_io_mode(int selection_mode)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    HDassert(mpi_size >= 1);
+    assert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
     mpi_info = MPI_INFO_NULL;
 
     filename = (const char *)GetTestParameters();
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 
     /* Setup the file access template */
     fapl = create_faccess_plist(mpi_comm, mpi_info, facc_type);
@@ -3490,7 +3490,7 @@ test_no_collective_cause_mode(int selection_mode)
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    HDassert(mpi_size >= 1);
+    assert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
     mpi_info = MPI_INFO_NULL;
@@ -3532,7 +3532,7 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     filename = (const char *)GetTestParameters();
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 
     /* Setup the file access template */
     fapl = create_faccess_plist(mpi_comm, mpi_info, l_facc_type);
@@ -4169,7 +4169,7 @@ test_dense_attr(void)
 
     /* get filename */
     filename = (const char *)GetTestParameters();
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

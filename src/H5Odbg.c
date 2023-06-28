@@ -108,24 +108,23 @@ H5O__assert(const H5O_t *oh)
         free_space += oh->chunk[u].gap;
 
         /* Check for valid raw data image */
-        HDassert(oh->chunk[u].image);
-        HDassert(oh->chunk[u].size > (size_t)H5O_SIZEOF_CHKHDR_OH(oh));
+        assert(oh->chunk[u].image);
+        assert(oh->chunk[u].size > (size_t)H5O_SIZEOF_CHKHDR_OH(oh));
 
         /* All chunks must be allocated on disk */
-        HDassert(H5_addr_defined(oh->chunk[u].addr));
+        assert(H5_addr_defined(oh->chunk[u].addr));
 
         /* Version specific checks */
         if (oh->version > H5O_VERSION_1) {
             /* Make certain that the magic number is correct for each chunk */
-            HDassert(
-                !HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
+            assert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
 
             /* Check for valid gap size */
-            HDassert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
+            assert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
         } /* end if */
         else
             /* Gaps should never occur in version 1 of the format */
-            HDassert(oh->chunk[u].gap == 0);
+            assert(oh->chunk[u].gap == 0);
     } /* end for */
 
     /* Check for correct chunk #0 size flags */
@@ -133,13 +132,13 @@ H5O__assert(const H5O_t *oh)
         uint64_t chunk0_size = oh->chunk[0].size - (size_t)H5O_SIZEOF_HDR(oh);
 
         if (chunk0_size <= 255)
-            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
+            assert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
         else if (chunk0_size <= 65535)
-            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_2);
+            assert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_2);
         else if (chunk0_size <= 4294967295)
-            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_4);
+            assert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_4);
         else
-            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_8);
+            assert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_8);
     } /* end if */
 
     /* Loop over all messages in object header */
@@ -157,7 +156,7 @@ H5O__assert(const H5O_t *oh)
             H5O_cont_t                   *cont        = (H5O_cont_t *)curr_msg->native;
             hbool_t H5_ATTR_NDEBUG_UNUSED found_chunk = FALSE; /* Found a chunk that matches */
 
-            HDassert(cont);
+            assert(cont);
 
             /* Increment # of continuation messages found */
             cont_msgs_found++;
@@ -166,12 +165,12 @@ H5O__assert(const H5O_t *oh)
             /* (and only one) */
             for (v = 0; v < oh->nchunks; v++) {
                 if (H5_addr_eq(cont->addr, oh->chunk[v].addr) && cont->size == oh->chunk[v].size) {
-                    HDassert(cont->chunkno == v);
-                    HDassert(!found_chunk);
+                    assert(cont->chunkno == v);
+                    assert(!found_chunk);
                     found_chunk = TRUE;
                 } /* end if */
             }     /* end for */
-            HDassert(found_chunk);
+            assert(found_chunk);
 
             meta_space += curr_tot_size;
         } /* end if */
@@ -180,42 +179,42 @@ H5O__assert(const H5O_t *oh)
             mesg_space += curr_msg->raw_size;
 
             /* Make sure the message has a native form if it is marked dirty */
-            HDassert(curr_msg->native || !curr_msg->dirty);
+            assert(curr_msg->native || !curr_msg->dirty);
         } /* end else */
 
         /* Make certain that the message is in a valid chunk */
-        HDassert(curr_msg->chunkno < oh->nchunks);
+        assert(curr_msg->chunkno < oh->nchunks);
 
         /* Make certain null messages aren't in chunks with gaps */
         if (H5O_NULL_ID == curr_msg->type->id)
-            HDassert(oh->chunk[curr_msg->chunkno].gap == 0);
+            assert(oh->chunk[curr_msg->chunkno].gap == 0);
 
         /* Make certain that the message is completely in a chunk message area */
-        HDassert(curr_tot_size <= (oh->chunk[curr_msg->chunkno].size) -
-                                      (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
+        assert(curr_tot_size <= (oh->chunk[curr_msg->chunkno].size) -
+                                    (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
         if (curr_msg->chunkno == 0)
-            HDassert(curr_hdr >=
-                     oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+            assert(curr_hdr >=
+                   oh->chunk[curr_msg->chunkno].image + (H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
         else
-            HDassert(curr_hdr >= oh->chunk[curr_msg->chunkno].image +
-                                     (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
-        HDassert(curr_msg->raw + curr_msg->raw_size <=
-                 (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) -
-                     (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
+            assert(curr_hdr >= oh->chunk[curr_msg->chunkno].image +
+                                   (H5O_SIZEOF_CHKHDR_OH(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+        assert(curr_msg->raw + curr_msg->raw_size <=
+               (oh->chunk[curr_msg->chunkno].image + oh->chunk[curr_msg->chunkno].size) -
+                   (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[curr_msg->chunkno].gap));
 
         /* Make certain that no other messages overlap this message */
         for (v = 0, tmp_msg = &oh->mesg[0]; v < oh->nmesgs; v++, tmp_msg++) {
             if (u != v)
-                HDassert(!((tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) >= curr_hdr &&
-                           (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) < (curr_hdr + curr_tot_size)));
+                assert(!((tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) >= curr_hdr &&
+                         (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) < (curr_hdr + curr_tot_size)));
         } /* end for */
     }     /* end for */
 
     /* Sanity check that the # of cont. messages is correct for the # of chunks */
-    HDassert(oh->nchunks == (cont_msgs_found + 1));
+    assert(oh->nchunks == (cont_msgs_found + 1));
 
     /* Sanity check that all the bytes are accounted for */
-    HDassert(hdr_size == (free_space + meta_space + mesg_space));
+    assert(hdr_size == (free_space + meta_space + mesg_space));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__assert() */
@@ -243,15 +242,15 @@ H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int ind
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    assert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id]; /* map the type ID to the actual type object */
-    HDassert(type);
-    HDassert(type->debug);
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(type);
+    assert(type->debug);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Call the debug method in the class */
     if ((ret_value = (type->debug)(f, mesg, stream, indent, fwidth)) < 0)
@@ -284,12 +283,12 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(oh);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* debug */
     fprintf(stream, "%*sObject Header...\n", indent, "");
@@ -435,7 +434,7 @@ H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int
                 flag_printed = TRUE;
             } /* end if */
             if (oh->mesg[i].flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
-                HDassert(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN);
+                assert(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN);
                 fprintf(stream, "%sWU", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
@@ -517,11 +516,11 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Set up the object location */
     loc.file         = f;

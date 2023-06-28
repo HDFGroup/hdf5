@@ -92,7 +92,7 @@ H5SM__bt2_crt_context(void *_f)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Allocate callback context */
     if (NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
@@ -129,7 +129,7 @@ H5SM__bt2_dst_context(void *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(ctx);
+    assert(ctx);
 
     /* Release callback context */
     ctx = H5FL_FREE(H5SM_bt2_ctx_t, ctx);
@@ -190,7 +190,7 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const 
                 "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
                 sohm->u.heap_loc.ref_count);
     else {
-        HDassert(sohm->location == H5SM_IN_OH);
+        assert(sohm->location == H5SM_IN_OH);
         fprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
                 "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
                 sohm->u.mesg_loc.index);

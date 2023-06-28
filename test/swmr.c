@@ -2491,7 +2491,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /*
@@ -2574,9 +2574,9 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 2 pipes */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
-    if (HDpipe(in_pdf) < 0)
+    if (pipe(in_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -2768,7 +2768,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      *  will fail with H5Fstart_swmr_write()
      */
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -2844,7 +2844,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -2924,7 +2924,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5232,7 +5232,7 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5309,7 +5309,7 @@ test_file_lock_concur(hid_t in_fapl)
      * Case 2: 1) RDWR 2) RDONLY : should fail
      */
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5387,7 +5387,7 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5465,7 +5465,7 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5629,7 +5629,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5707,7 +5707,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5785,7 +5785,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5862,7 +5862,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 4: 1) RDWR|SWMR_WRITE 2) RDWR|SWMR_WRITE : should fail
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -5939,7 +5939,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 5: 1) RDWR|SWMR_WRITE 2) RDONLY|SWMR_READ : should succeed
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6019,7 +6019,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 6: 1) RDWR|SWMR_WRITE 2) RDONLY : should fail
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6097,7 +6097,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6175,7 +6175,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6253,7 +6253,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6334,7 +6334,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6412,7 +6412,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6490,7 +6490,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
@@ -6669,7 +6669,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         TEST_ERROR;
 
     /* Fork child process */
@@ -7166,9 +7166,9 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Create 2 pipes */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
-    if (HDpipe(in_pdf) < 0)
+    if (pipe(in_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */

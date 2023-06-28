@@ -75,7 +75,7 @@ open_skeleton(const char *filename, unsigned verbose, unsigned old)
     hsize_t  dim[2]; /* Dataspace dimensions */
     unsigned u, v;   /* Local index variable */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -146,7 +146,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
     hsize_t       dim[2] = {1, 0}; /* Dataspace dimensions */
     unsigned long u, v;            /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Remove records from random datasets, according to frequency distribution */
     shrink_to_flush = flush_count;

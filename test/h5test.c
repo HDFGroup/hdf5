@@ -314,7 +314,7 @@ void
 h5_restore_err(void)
 {
     /* Restore the original error reporting routine */
-    HDassert(err_func != NULL);
+    assert(err_func != NULL);
     H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
     err_func = NULL;
 }
@@ -335,7 +335,7 @@ h5_reset(void)
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
-    HDassert(err_func == NULL);
+    assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 }
@@ -365,7 +365,7 @@ h5_test_init(void)
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
-    HDassert(err_func == NULL);
+    assert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 } /* end h5_test_init() */
@@ -1178,7 +1178,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
                 }     /* end for */
             }
             else {
-                HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     /* Create the filename to query */
                     HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
@@ -1358,7 +1358,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     int          len;
     static char *env = NULL;
 
-    HDassert(name);
+    assert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -1366,7 +1366,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     if (mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        HDassert(root < mpi_size);
+        assert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -1599,16 +1599,16 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
 
     /* Write messages to signal file, if provided */
     if (arg2 != NULL) {
-        HDassert(arg1);
+        assert(arg1);
         fprintf(signalfile, "%s\n%s\n", arg1, arg2);
     } /* end if */
     else if (arg1 != NULL) {
-        HDassert(arg2 == NULL);
+        assert(arg2 == NULL);
         fprintf(signalfile, "%s\n", arg1);
     } /* end if */
     else {
-        HDassert(arg1 == NULL);
-        HDassert(arg2 == NULL);
+        assert(arg1 == NULL);
+        assert(arg2 == NULL);
     } /* end else */
 
     HDfclose(signalfile);
@@ -2162,7 +2162,7 @@ h5_using_default_driver(const char *drv_name)
 {
     hbool_t ret_val = TRUE;
 
-    HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
+    assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
@@ -2194,8 +2194,8 @@ h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
     hid_t         driver_id  = H5I_INVALID_HID;
     herr_t        ret_value  = SUCCEED;
 
-    HDassert(fapl_id >= 0);
-    HDassert(driver_is_parallel);
+    assert(fapl_id >= 0);
+    assert(driver_is_parallel);
 
     if (fapl_id == H5P_DEFAULT)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
@@ -2237,8 +2237,8 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatib
     hid_t         driver_id  = H5I_INVALID_HID;
     herr_t        ret_value  = SUCCEED;
 
-    HDassert(fapl_id >= 0);
-    HDassert(default_vfd_compatible);
+    assert(fapl_id >= 0);
+    assert(default_vfd_compatible);
 
     if (fapl_id == H5P_DEFAULT)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;

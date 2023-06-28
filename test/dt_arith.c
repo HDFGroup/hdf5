@@ -1805,7 +1805,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -1857,7 +1857,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -1910,7 +1910,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -1962,7 +1962,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2014,7 +2014,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2066,7 +2066,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2118,7 +2118,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2170,7 +2170,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2222,7 +2222,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -2274,13 +2274,13 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
 
         /* Make certain that there isn't some weird number of destination bits */
-        HDassert(dst_nbits % 8 == 0);
+        assert(dst_nbits % 8 == 0);
 
         /* Are the two results the same? */
         for (k = (dst_size - (dst_nbits / 8)); k < dst_size; k++)
@@ -2456,7 +2456,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -2510,7 +2510,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -2554,7 +2554,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -2625,7 +2625,7 @@ test_conv_int_2(void)
     HDfflush(stdout);
 
     buf = (char *)HDcalloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
-    HDassert(buf);
+    assert(buf);
 
     for (i = 1; i <= TMP_BUF_DIM1; i++) {
         for (j = 1; j <= TMP_BUF_DIM1; j++) {
@@ -3308,7 +3308,7 @@ done:
         HDexit(MIN((int)fails_all_tests, 254));
     else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
         HDexit(EXIT_SUCCESS);
-    HDassert(0 && "Should not reach this point!");
+    assert(0 && "Should not reach this point!");
     return 1;
 #else
     /* Restore the default error handler (set in h5_reset()) */
@@ -3337,7 +3337,7 @@ error:
         HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
     else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
         HDexit(EXIT_FAILURE);
-    HDassert(0 && "Should not reach this point!");
+    assert(0 && "Should not reach this point!");
     return 1;
 #else
     /* Restore the default error handler (set in h5_reset()) */
@@ -3765,7 +3765,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3817,7 +3817,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3869,7 +3869,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case FLT_LDOUBLE:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3900,7 +3900,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3931,7 +3931,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3962,7 +3962,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -3993,7 +3993,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4024,7 +4024,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4055,7 +4055,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4086,7 +4086,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4117,7 +4117,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4148,7 +4148,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
@@ -4179,13 +4179,13 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 case INT_ULLONG:
                 case OTHER:
                 default:
-                    HDassert(0 && "Unknown type");
+                    assert(0 && "Unknown type");
                     break;
             }
         }
 
         /* Make certain that there isn't some weird number of destination bits */
-        HDassert(dst_nbits % 8 == 0);
+        assert(dst_nbits % 8 == 0);
 
         /* For Intel machines, the size of "long double" is 12 bytes, precision
          * is 80 bits; for AMD processors, the size of "long double" is 16 bytes,
@@ -4382,7 +4382,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -4445,7 +4445,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -4495,7 +4495,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case OTHER:
             default:
-                HDassert(0 && "Unknown type");
+                assert(0 && "Unknown type");
                 break;
         }
 
@@ -4552,7 +4552,7 @@ error:
     if (run_test == TEST_NORMAL)
         return MAX((int)fails_all_tests, 1);
     else {
-        HDassert(run_test == TEST_DENORM || run_test == TEST_SPECIAL);
+        assert(run_test == TEST_DENORM || run_test == TEST_SPECIAL);
         return 1;
     }
 }

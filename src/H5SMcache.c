@@ -134,9 +134,9 @@ H5SM__cache_table_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(udata->f);
-    HDassert(image_len);
+    assert(udata);
+    assert(udata->f);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = H5SM_TABLE_SIZE(udata->f);
@@ -168,7 +168,7 @@ H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNU
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(image);
+    assert(image);
 
     /* Get stored and computed checksums */
     H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
@@ -210,17 +210,17 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->f);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->f);
     f = udata->f;
-    HDassert(dirty);
+    assert(dirty);
 
     /* Verify that we're reading version 0 of the table; this is the only
      * version defined so far.
      */
-    HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
+    assert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
     if (NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
@@ -228,13 +228,13 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
 
     /* Read number of indexes and version from file superblock */
     table->num_indexes = H5F_SOHM_NINDEXES(f);
-    HDassert(table->num_indexes > 0);
+    assert(table->num_indexes > 0);
 
     /* Compute the size of the SOHM table header on disk.  This is the "table"
      * itself plus each index within the table
      */
     table->table_size = H5SM_TABLE_SIZE(f);
-    HDassert(table->table_size == len);
+    assert(table->table_size == len);
 
     /* Check magic number */
     if (HDmemcmp(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
@@ -286,7 +286,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (const uint8_t *)_image) == table->table_size);
+    assert((size_t)(image - (const uint8_t *)_image) == table->table_size);
 
     /* Set return value */
     ret_value = table;
@@ -323,9 +323,9 @@ H5SM__cache_table_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(table);
-    HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
-    HDassert(image_len);
+    assert(table);
+    assert(table->cache_info.type == H5AC_SOHM_TABLE);
+    assert(image_len);
 
     *image_len = table->table_size;
 
@@ -357,16 +357,16 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(table);
-    HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
-    HDassert(table->table_size == len);
+    assert(f);
+    assert(image);
+    assert(table);
+    assert(table->cache_info.type == H5AC_SOHM_TABLE);
+    assert(table->table_size == len);
 
     /* Verify that we're writing version 0 of the table; this is the only
      * version defined so far.
      */
-    HDassert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
+    assert(H5F_SOHM_VERS(f) == HDF5_SHAREDHEADER_VERSION);
 
     /* Encode magic number */
     H5MM_memcpy(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -407,7 +407,7 @@ H5SM__cache_table_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_
     UINT32ENCODE(image, computed_chksum);
 
     /* sanity check */
-    HDassert((size_t)(image - ((uint8_t *)_image)) == table->table_size);
+    assert((size_t)(image - ((uint8_t *)_image)) == table->table_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__cache_table_serialize() */
@@ -438,8 +438,8 @@ H5SM__cache_table_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(table);
-    HDassert(table->cache_info.type == H5AC_SOHM_TABLE);
+    assert(table);
+    assert(table->cache_info.type == H5AC_SOHM_TABLE);
 
     /* Destroy Shared Object Header Message table */
     if (H5SM__table_free(table) < 0)
@@ -472,10 +472,10 @@ H5SM__cache_list_get_initial_load_size(void *_udata, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(udata);
-    HDassert(udata->header);
-    HDassert(udata->header->list_size > 0);
-    HDassert(image_len);
+    assert(udata);
+    assert(udata->header);
+    assert(udata->header->list_size > 0);
+    assert(image_len);
 
     /* Set the image length size */
     *image_len = udata->header->list_size;
@@ -509,8 +509,8 @@ H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, vo
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(udata);
+    assert(image);
+    assert(udata);
 
     /* Exact size with checksum at the end */
     chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
@@ -554,12 +554,12 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(image);
-    HDassert(len > 0);
-    HDassert(udata);
-    HDassert(udata->header);
-    HDassert(udata->header->list_size == len);
-    HDassert(dirty);
+    assert(image);
+    assert(len > 0);
+    assert(udata);
+    assert(udata->header);
+    assert(udata->header->list_size == len);
+    assert(dirty);
 
     /* Allocate space for the SOHM list data structure */
     if (NULL == (list = H5FL_MALLOC(H5SM_list_t)))
@@ -591,7 +591,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (const uint8_t *)_image) <= udata->header->list_size);
+    assert((size_t)(image - (const uint8_t *)_image) <= udata->header->list_size);
 
     /* Initialize the rest of the array */
     for (u = udata->header->num_messages; u < udata->header->list_max; u++)
@@ -631,10 +631,10 @@ H5SM__cache_list_image_len(const void *_thing, size_t *image_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(list);
-    HDassert(list->cache_info.type == H5AC_SOHM_LIST);
-    HDassert(list->header);
-    HDassert(image_len);
+    assert(list);
+    assert(list->cache_info.type == H5AC_SOHM_LIST);
+    assert(list->header);
+    assert(image_len);
 
     *image_len = list->header->list_size;
 
@@ -669,12 +669,12 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(image);
-    HDassert(list);
-    HDassert(list->cache_info.type == H5AC_SOHM_LIST);
-    HDassert(list->header);
-    HDassert(list->header->list_size == len);
+    assert(f);
+    assert(image);
+    assert(list);
+    assert(list->cache_info.type == H5AC_SOHM_LIST);
+    assert(list->header);
+    assert(list->header->list_size == len);
 
     /* Encode magic number */
     H5MM_memcpy(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -693,14 +693,14 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
         } /* end if */
     }     /* end for */
 
-    HDassert(mesgs_serialized == list->header->num_messages);
+    assert(mesgs_serialized == list->header->num_messages);
 
     /* Compute checksum on buffer */
     computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (uint8_t *)_image), 0);
     UINT32ENCODE(image, computed_chksum);
 
     /* sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= list->header->list_size);
+    assert((size_t)(image - (uint8_t *)_image) <= list->header->list_size);
 
     /* Clear memory */
     HDmemset(image, 0, (list->header->list_size - (size_t)(image - (uint8_t *)_image)));
@@ -735,8 +735,8 @@ H5SM__cache_list_free_icr(void *_thing)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(list);
-    HDassert(list->cache_info.type == H5AC_SOHM_LIST);
+    assert(list);
+    assert(list->cache_info.type == H5AC_SOHM_LIST);
 
     /* Destroy Shared Object Header Message list */
     if (H5SM__list_free(list) < 0)

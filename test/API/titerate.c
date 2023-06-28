@@ -205,7 +205,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Sort the dataset names */
-        HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+        qsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
         /* Iterate through the datasets in the root group in various ways */
         file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -749,7 +749,7 @@ test_iter_group_large(hid_t fapl)
         CHECK(ret, FAIL, "H5Tclose");
 
         /* Need to sort the names in the root group, cause that's what the library does */
-        HDqsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
+        qsort(names, (size_t)(ITER_NGROUPS + 2), sizeof(iter_info), iter_strcmp2);
 
         /* Iterate through the file to see members of the root group */
         curr_name = &names[0];
@@ -848,7 +848,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    HDqsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(dnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
@@ -905,7 +905,7 @@ test_grp_memb_funcs(hid_t fapl)
     VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Sort the dataset names */
-    HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+    qsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Compare object names */
     for (i = 0; i < (int)ginfo.nlinks; i++) {

@@ -79,8 +79,8 @@ H5O__btreek_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -133,9 +133,9 @@ H5O__btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* Store version and non-default v1 B-tree 'K' values */
     *p++ = H5O_BTREEK_VERSION;
@@ -170,7 +170,7 @@ H5O__btreek_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(mesg);
+    assert(mesg);
 
     if (!dest && NULL == (dest = (H5O_btreek_t *)H5MM_malloc(sizeof(H5O_btreek_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -209,7 +209,7 @@ H5O__btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     ret_value = 1 + /* Version number */
                 2 + /* Chunked storage internal B-tree 'K' value */
@@ -239,11 +239,11 @@ H5O__btreek_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
             "Chunked storage internal B-tree 'K' value:", mesg->btree_k[H5B_CHUNK_ID]);

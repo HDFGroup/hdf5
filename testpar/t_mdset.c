@@ -1775,7 +1775,7 @@ rr_obj_hdr_flush_confusion(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    HDassert(mpi_size > 2);
+    assert(mpi_size > 2);
 
     is_reader = mpi_rank % 2;
     mrc       = MPI_Comm_split(MPI_COMM_WORLD, is_reader, mpi_rank, &comm);
@@ -2579,7 +2579,7 @@ chunk_align_bug_1(void)
     align = (hsize_t)file_size + CHUNK_SIZE + EXTRA_ALIGN;
 
     /* Set aggregator size and alignment, disable metadata aggregator */
-    HDassert(AGGR_SIZE > CHUNK_SIZE);
+    assert(AGGR_SIZE > CHUNK_SIZE);
     ret = H5Pset_small_data_block_size(fapl_id, AGGR_SIZE);
     VRFY((ret >= 0), "H5Pset_small_data_block_size succeeded");
     ret = H5Pset_meta_block_size(fapl_id, 0);

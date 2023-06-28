@@ -87,8 +87,8 @@ H5FA_get_stats(const H5FA_t *fa, H5FA_stat_t *stats)
 #endif /* H5FA_DEBUG */
 
     /* Check arguments */
-    HDassert(fa);
-    HDassert(stats);
+    assert(fa);
+    assert(stats);
 
     /* Copy fixed array statistics */
     H5MM_memcpy(stats, &fa->hdr->stats, sizeof(fa->hdr->stats));

@@ -1038,21 +1038,21 @@ lower_dim_size_comp_test__select_checker_board(const int mpi_rank, const hid_t t
     }
 #endif /* LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG */
 
-    HDassert(0 < checker_edge_size);
-    HDassert(0 < sel_rank);
-    HDassert(sel_rank <= tgt_rank);
-    HDassert(tgt_rank <= test_max_rank);
-    HDassert(test_max_rank <= LDSCT_DS_RANK);
+    assert(0 < checker_edge_size);
+    assert(0 < sel_rank);
+    assert(sel_rank <= tgt_rank);
+    assert(tgt_rank <= test_max_rank);
+    assert(test_max_rank <= LDSCT_DS_RANK);
 
     sel_offset = test_max_rank - sel_rank;
-    HDassert(sel_offset >= 0);
+    assert(sel_offset >= 0);
 
     ds_offset = test_max_rank - tgt_rank;
-    HDassert(ds_offset >= 0);
-    HDassert(ds_offset <= sel_offset);
+    assert(ds_offset >= 0);
+    assert(ds_offset <= sel_offset);
 
-    HDassert((hsize_t)checker_edge_size <= dims[sel_offset]);
-    HDassert(dims[sel_offset] == 10);
+    assert((hsize_t)checker_edge_size <= dims[sel_offset]);
+    assert(dims[sel_offset] == 10);
 
 #if LOWER_DIM_SIZE_COMP_TEST__SELECT_CHECKER_BOARD__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
@@ -1388,13 +1388,13 @@ lower_dim_size_comp_test__verify_data(uint32_t *buf_ptr,
     int       v, w, x, y, z;     /* to track position in checker */
     const int test_max_rank = 5; /* code changes needed if this is increased */
 
-    HDassert(buf_ptr != NULL);
-    HDassert(0 < rank);
-    HDassert(rank <= test_max_rank);
-    HDassert(edge_size >= 6);
-    HDassert(0 < checker_edge_size);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(test_max_rank <= LDSCT_DS_RANK);
+    assert(buf_ptr != NULL);
+    assert(0 < rank);
+    assert(rank <= test_max_rank);
+    assert(edge_size >= 6);
+    assert(0 < checker_edge_size);
+    assert(checker_edge_size <= edge_size);
+    assert(test_max_rank <= LDSCT_DS_RANK);
 
 #if LOWER_DIM_SIZE_COMP_TEST__VERIFY_DATA__DEBUG
     if (mpi_rank == LOWER_DIM_SIZE_COMP_TEST_DEBUG_TARGET_RANK) {
@@ -1597,7 +1597,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
-    HDassert(mpi_size >= 1);
+    assert(mpi_size >= 1);
 
     mpi_comm = MPI_COMM_WORLD;
     mpi_info = MPI_INFO_NULL;
@@ -1666,7 +1666,7 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     /* get the file name */
 
     filename = (const char *)PARATESTFILE /* GetTestParameters() */;
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 
     /* ----------------------------------------
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
@@ -2159,9 +2159,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     stop_index = start_index + (int)small_ds_slice_size;
 
-    HDassert(0 <= start_index);
-    HDassert(start_index < stop_index);
-    HDassert(stop_index <= (int)large_ds_size);
+    assert(0 <= start_index);
+    assert(start_index < stop_index);
+    assert(stop_index <= (int)large_ds_size);
 
     ptr_1 = large_ds_buf_1;
 
@@ -2259,9 +2259,9 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
 
     stop_index = start_index + (int)small_ds_slice_size;
 
-    HDassert(0 <= start_index);
-    HDassert(start_index < stop_index);
-    HDassert(stop_index <= (int)small_ds_size);
+    assert(0 <= start_index);
+    assert(start_index < stop_index);
+    assert(stop_index <= (int)small_ds_size);
 
     ptr_1 = small_ds_buf_1;
 
@@ -2489,11 +2489,11 @@ link_chunk_collective_io_test(void)
         return;
     }
 
-    HDassert(mpi_size > 0);
+    assert(mpi_size > 0);
 
     /* get the file name */
     filename = (const char *)PARATESTFILE /* GetTestParameters() */;
-    HDassert(filename != NULL);
+    assert(filename != NULL);
 
     /* setup file access template */
     acc_tpl = create_faccess_plist(mpi_comm, mpi_info, facc_type);

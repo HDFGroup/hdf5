@@ -224,9 +224,9 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
-    HDassert(file->dirty_list);
-    HDassert(start <= end);
+    assert(file);
+    assert(file->dirty_list);
+    assert(start <= end);
 
     /* Adjust the dirty region to the nearest block boundaries */
     if (start % file->bstore_page_size != 0)
@@ -323,7 +323,7 @@ H5FD__core_destroy_dirty_list(H5FD_core_t *file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Destroy the list, including any remaining list elements */
     if (file->dirty_list) {
@@ -361,7 +361,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
@@ -407,8 +407,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
-        HDassert(bytes_wrote > 0);
-        HDassert((size_t)bytes_wrote <= size);
+        assert(bytes_wrote > 0);
+        assert((size_t)bytes_wrote <= size);
 
         size -= (size_t)bytes_wrote;
         ptr = (unsigned char *)ptr + bytes_wrote;
@@ -757,7 +757,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
-    HDassert(H5P_DEFAULT != fapl_id);
+    assert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
@@ -777,8 +777,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial file image info")
 
     /* If the file image exists and this is an open, make sure the file doesn't exist */
-    HDassert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
-             ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
+    assert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
+           ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
     HDmemset(&sb, 0, sizeof(sb));
     if ((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if (HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW) >= 0)
@@ -937,8 +937,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 
-                    HDassert(bytes_read >= 0);
-                    HDassert((size_t)bytes_read <= size);
+                    assert(bytes_read >= 0);
+                    assert((size_t)bytes_read <= size);
 
                     mem += bytes_read;
                     size -= (size_t)bytes_read;
@@ -1333,8 +1333,8 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
@@ -1392,8 +1392,8 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (REGION_OVERFLOW(addr, size))
@@ -1561,7 +1561,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* if we are closing and not using backing store, do nothing */
     if (!closing || file->backing_store) {
@@ -1662,7 +1662,7 @@ H5FD__core_lock(H5FD_t *_file, hbool_t rw)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Only set the lock if there is a file descriptor. If no file
      * descriptor, this is a no-op.
@@ -1707,7 +1707,7 @@ H5FD__core_unlock(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (file->fd >= 0)
         if (HDflock(file->fd, LOCK_UN) < 0) {
@@ -1743,7 +1743,7 @@ H5FD__core_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")

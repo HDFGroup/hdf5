@@ -112,9 +112,9 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* create the datasets */
 
@@ -423,9 +423,9 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
@@ -1004,9 +1004,9 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* open the datasets */
 
@@ -6621,7 +6621,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 #if H5C_COLLECT_CACHE_STATS
     if (pass) {
 
-        HDassert(cache_ptr);
+        assert(cache_ptr);
 
         if (cache_ptr->images_loaded != 0) {
 
@@ -7654,7 +7654,7 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
 
     if (verbose) {
 
-        HDassert(cache_ptr);
+        assert(cache_ptr);
 
         fprintf(stdout, "index size / index dirty size = %lld / %lld\n", (long long)(cache_ptr->index_size),
                 (long long)(cache_ptr->dirty_index_size));

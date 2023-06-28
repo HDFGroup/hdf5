@@ -130,9 +130,9 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(buf != NULL);
-    HDassert(header != NULL);
-    HDassert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
+    assert(buf != NULL);
+    assert(header != NULL);
+    assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature")
@@ -208,11 +208,11 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(buf != NULL);
-    HDassert(checksum != NULL);
-    HDassert(header != NULL);
-    HDassert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
-    HDassert(0 == (header->flags & 0xFF000000)); /* max three bits long */
+    assert(buf != NULL);
+    assert(checksum != NULL);
+    assert(header != NULL);
+    assert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
+    assert(0 == (header->flags & 0xFF000000)); /* max three bits long */
 
     HDmemcpy(ptr, H5FD_ONION_HEADER_SIGNATURE, 4);
     ptr += 4;

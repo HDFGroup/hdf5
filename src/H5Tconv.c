@@ -745,8 +745,8 @@
                 case H5T_CONV_CONV:                                                                          \
                     /* Initialize source & destination strides */                                            \
                     if (buf_stride) {                                                                        \
-                        HDassert(buf_stride >= sizeof(ST));                                                  \
-                        HDassert(buf_stride >= sizeof(DT));                                                  \
+                        assert(buf_stride >= sizeof(ST));                                                    \
+                        assert(buf_stride >= sizeof(DT));                                                    \
                         s_stride = d_stride = (ssize_t)buf_stride;                                           \
                     }                                                                                        \
                     else {                                                                                   \
@@ -870,13 +870,13 @@ done:                                                                           
 #define H5T_CONV_SET_PREC_Y                                                                                  \
     /* Get source & destination precisions into a variable */                                                \
     tclass = st->shared->type;                                                                               \
-    HDassert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                  \
+    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                    \
     if (tclass == H5T_INTEGER)                                                                               \
         sprec = st->shared->u.atomic.prec;                                                                   \
     else                                                                                                     \
         sprec = 1 + st->shared->u.atomic.u.f.msize;                                                          \
     tclass = dt->shared->type;                                                                               \
-    HDassert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                  \
+    assert(tclass == H5T_INTEGER || tclass == H5T_FLOAT);                                                    \
     if (tclass == H5T_INTEGER)                                                                               \
         dprec = dt->shared->u.atomic.prec;                                                                   \
     else                                                                                                     \
@@ -1773,11 +1773,11 @@ H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf)
-                    HDassert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                    assert((dp >= sp && dp < sp + src->shared->size) ||
+                           (sp >= dp && sp < dp + dst->shared->size));
                 else
-                    HDassert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                    assert((dp < sp && dp + dst->shared->size <= sp) ||
+                           (sp < dp && sp + src->shared->size <= dp));
 #endif
 
                 /*
@@ -1938,9 +1938,9 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
             int H5_ATTR_NDEBUG_UNUSED status;
 
             status = H5I_dec_ref(src_memb_id[i]);
-            HDassert(status >= 0);
+            assert(status >= 0);
             status = H5I_dec_ref(dst_memb_id[src2dst[i]]);
-            HDassert(status >= 0);
+            assert(status >= 0);
         } /* end if */
 
     H5MM_xfree(src2dst);
@@ -2055,12 +2055,12 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 
                 type = H5T_copy(src->shared->u.compnd.memb[i].type, H5T_COPY_ALL);
                 tid  = H5I_register(H5I_DATATYPE, type, FALSE);
-                HDassert(tid >= 0);
+                assert(tid >= 0);
                 priv->src_memb_id[i] = tid;
 
                 type = H5T_copy(dst->shared->u.compnd.memb[src2dst[i]].type, H5T_COPY_ALL);
                 tid  = H5I_register(H5I_DATATYPE, type, FALSE);
-                HDassert(tid >= 0);
+                assert(tid >= 0);
                 priv->dst_memb_id[src2dst[i]] = tid;
             } /* end if */
         }     /* end for */
@@ -2182,8 +2182,8 @@ H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(cdata);
-    HDassert(cdata->priv);
+    assert(cdata);
+    assert(cdata->priv);
 
     priv = (H5T_conv_struct_t *)(cdata->priv);
 
@@ -2271,8 +2271,8 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
              */
             if (NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
-            HDassert(priv);
-            HDassert(bkg && cdata->need_bkg);
+            assert(priv);
+            assert(bkg && cdata->need_bkg);
 
             if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
@@ -2367,7 +2367,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                         offset -= dst_memb->size;
                     HDmemmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
                 } /* end for */
-                HDassert(0 == offset);
+                assert(0 == offset);
 
                 /*
                  * Update pointers
@@ -2543,9 +2543,9 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
             if (cdata->recalc && H5T__conv_struct_init(src, dst, cdata) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data")
             priv = (H5T_conv_struct_t *)(cdata->priv);
-            HDassert(priv);
+            assert(priv);
             src2dst = priv->src2dst;
-            HDassert(bkg && cdata->need_bkg);
+            assert(bkg && cdata->need_bkg);
 
             /*
              * Insure that members are sorted.
@@ -2769,7 +2769,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
             }
         } /* end for */
 
-        HDassert(domain[1] >= domain[0]);
+        assert(domain[1] >= domain[0]);
         length = (unsigned)(domain[1] - domain[0]) + 1;
         if (src->shared->u.enumer.nmembs < 2 ||
             (double)length / src->shared->u.enumer.nmembs < (double)(1.2F)) {
@@ -2789,8 +2789,8 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
                     n = *(
                         (int *)((void *)((uint8_t *)src->shared->u.enumer.value + (i * src->shared->size))));
                 n -= priv->base;
-                HDassert(n >= 0 && (unsigned)n < priv->length);
-                HDassert(map[n] < 0);
+                assert(n >= 0 && (unsigned)n < priv->length);
+                assert(map[n] < 0);
                 map[n] = priv->src2dst[i];
             } /* end for */
 
@@ -2990,7 +2990,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                         "can't handle conversion exception")
                     } /* end if */
                     else {
-                        HDassert(priv->src2dst[md] >= 0);
+                        assert(priv->src2dst[md] >= 0);
                         H5MM_memcpy(d,
                                     (uint8_t *)dst->shared->u.enumer.value +
                                         ((unsigned)priv->src2dst[md] * dst->shared->size),
@@ -3188,8 +3188,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
             /* Initialize source & destination strides */
             if (buf_stride) {
-                HDassert(buf_stride >= src->shared->size);
-                HDassert(buf_stride >= dst->shared->size);
+                assert(buf_stride >= src->shared->size);
+                assert(buf_stride >= dst->shared->size);
                 H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
                 s_stride = d_stride = (ssize_t)buf_stride;
             } /* end if */
@@ -3271,9 +3271,9 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                 /* Check if we need to go backwards through the buffer */
                 if (d_stride > s_stride) {
                     /* Sanity check */
-                    HDassert(s_stride > 0);
-                    HDassert(d_stride > 0);
-                    HDassert(b_stride >= 0);
+                    assert(s_stride > 0);
+                    assert(d_stride > 0);
+                    assert(b_stride >= 0);
 
                     /* Compute the number of "safe" destination elements at */
                     /* the end of the buffer (Those which don't overlap with */
@@ -3380,7 +3380,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                              * the sequence into the background buffer */
                             if (nested) {
                                 /* Sanity check */
-                                HDassert(write_to_file);
+                                assert(write_to_file);
 
                                 /* Get length of background element sequence */
                                 if ((*(dst->shared->u.vlen.cls->getlen))(dst->shared->u.vlen.file, b,
@@ -3430,7 +3430,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 size_t   u;
 
                                 /* Sanity check */
-                                HDassert(write_to_file);
+                                assert(write_to_file);
 
                                 tmp = (uint8_t *)tmp_buf + seq_len * dst_base_size;
                                 for (u = seq_len; u < bg_seq_len; u++, tmp += dst_base_size) {
@@ -3522,8 +3522,8 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
              */
             if (NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-            HDassert(H5T_ARRAY == src->shared->type);
-            HDassert(H5T_ARRAY == dst->shared->type);
+            assert(H5T_ARRAY == src->shared->type);
+            assert(H5T_ARRAY == dst->shared->type);
 
             /* Check the number and sizes of the dimensions */
             if (src->shared->u.array.ndims != dst->shared->u.array.ndims)
@@ -3695,12 +3695,12 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
             if (NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-            HDassert(src->shared->u.atomic.u.r.cls);
+            assert(src->shared->u.atomic.u.r.cls);
 
             /* Initialize source & destination strides */
             if (buf_stride) {
-                HDassert(buf_stride >= src->shared->size);
-                HDassert(buf_stride >= dst->shared->size);
+                assert(buf_stride >= src->shared->size);
+                assert(buf_stride >= dst->shared->size);
                 H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
                 s_stride = d_stride = (ssize_t)buf_stride;
             } /* end if */
@@ -3725,9 +3725,9 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 /* Check if we need to go backwards through the buffer */
                 if (d_stride > s_stride) {
                     /* Sanity check */
-                    HDassert(s_stride > 0);
-                    HDassert(d_stride > 0);
-                    HDassert(b_stride >= 0);
+                    assert(s_stride > 0);
+                    assert(d_stride > 0);
+                    assert(b_stride >= 0);
 
                     /* Compute the number of "safe" destination elements at */
                     /* the end of the buffer (Those which don't overlap with */
@@ -3963,12 +3963,12 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
-                    HDassert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                    assert((dp >= sp && dp < sp + src->shared->size) ||
+                           (sp >= dp && sp < dp + dst->shared->size));
                 }
                 else {
-                    HDassert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                    assert((dp < sp && dp + dst->shared->size <= sp) ||
+                           (sp < dp && sp + src->shared->size <= dp));
                 }
 #endif
 
@@ -4230,14 +4230,14 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                  * Set padding areas in destination.
                  */
                 if (dst->shared->u.atomic.offset > 0) {
-                    HDassert(H5T_PAD_ZERO == dst->shared->u.atomic.lsb_pad ||
-                             H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad);
+                    assert(H5T_PAD_ZERO == dst->shared->u.atomic.lsb_pad ||
+                           H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset,
                                  (hbool_t)(H5T_PAD_ONE == dst->shared->u.atomic.lsb_pad));
                 }
                 if (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec != 8 * dst->shared->size) {
-                    HDassert(H5T_PAD_ZERO == dst->shared->u.atomic.msb_pad ||
-                             H5T_PAD_ONE == dst->shared->u.atomic.msb_pad);
+                    assert(H5T_PAD_ZERO == dst->shared->u.atomic.msb_pad ||
+                           H5T_PAD_ONE == dst->shared->u.atomic.msb_pad);
                     H5T__bit_set(d, dst->shared->u.atomic.offset + dst->shared->u.atomic.prec,
                                  8 * dst->shared->size -
                                      (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec),
@@ -4427,12 +4427,12 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
-                    HDassert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                    assert((dp >= sp && dp < sp + src_p->shared->size) ||
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
-                    HDassert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                    assert((dp < sp && dp + dst_p->shared->size <= sp) ||
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
 
@@ -4451,7 +4451,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else if (H5T_ORDER_VAX == src.order) {
                     tsize = src_p->shared->size;
-                    HDassert(0 == tsize % 2);
+                    assert(0 == tsize % 2);
 
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = s[i];
@@ -4632,7 +4632,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                  * the source exponent bias.
                  */
                 if (0 == expo || H5T_NORM_NONE == src.u.f.norm) {
-                    HDassert(bitno >= 0);
+                    assert(bitno >= 0);
                     expo -= (int64_t)((src.u.f.ebias - 1) + (src.u.f.msize - (size_t)bitno));
                 }
                 else if (H5T_NORM_IMPLIED == src.u.f.norm) {
@@ -4712,7 +4712,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                  */
                 if (msize > 0 && mrsh <= dst.u.f.msize && mrsh + msize > dst.u.f.msize) {
                     bitno = (ssize_t)(mrsh + msize - dst.u.f.msize);
-                    HDassert(bitno >= 0 && (size_t)bitno <= msize);
+                    assert(bitno >= 0 && (size_t)bitno <= msize);
                     /* If the 1st bit being cut off is set and source isn't denormalized.*/
                     if (H5T__bit_get_d(s, (mpos + (size_t)bitno) - 1, (size_t)1) && !denormalized) {
                         /* Don't do rounding if exponent is 111...110 and mantissa is 111...11.
@@ -4806,11 +4806,11 @@ padding:
                  * Set external padding areas
                  */
                 if (dst.offset > 0) {
-                    HDassert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
+                    assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
-                    HDassert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
+                    assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
                                  (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
                 }
@@ -4829,7 +4829,7 @@ padding:
                 }
                 else if (H5T_ORDER_VAX == dst.order && reverse) {
                     tsize = dst_p->shared->size;
-                    HDassert(0 == tsize % 2);
+                    assert(0 == tsize % 2);
 
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = d[i];
@@ -4994,15 +4994,15 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (src->shared->size == dst->shared->size || buf_stride) {
-                    HDassert(s == d);
+                    assert(s == d);
                 }
                 else if (d == dbuf) {
-                    HDassert((dp >= sp && dp < sp + src->shared->size) ||
-                             (sp >= dp && sp < dp + dst->shared->size));
+                    assert((dp >= sp && dp < sp + src->shared->size) ||
+                           (sp >= dp && sp < dp + dst->shared->size));
                 }
                 else {
-                    HDassert((dp < sp && dp + dst->shared->size <= sp) ||
-                             (sp < dp && sp + src->shared->size <= dp));
+                    assert((dp < sp && dp + dst->shared->size <= sp) ||
+                           (sp < dp && sp + src->shared->size <= dp));
                 }
 #endif
 
@@ -8527,12 +8527,12 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
-                    HDassert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                    assert((dp >= sp && dp < sp + src_p->shared->size) ||
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
-                    HDassert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                    assert((dp < sp && dp + dst_p->shared->size <= sp) ||
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
                 /*
@@ -8550,7 +8550,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
                 else if (H5T_ORDER_VAX == src.order) {
                     tsize = src_p->shared->size;
-                    HDassert(0 == tsize % 2);
+                    assert(0 == tsize % 2);
 
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = s[i];
@@ -8960,11 +8960,11 @@ padding:
                  * Set padding areas in destination.
                  */
                 if (dst.offset > 0) {
-                    HDassert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
+                    assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
-                    HDassert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
+                    assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
                                  (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
                 }
@@ -9160,12 +9160,12 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d == dbuf) {
-                    HDassert((dp >= sp && dp < sp + src_p->shared->size) ||
-                             (sp >= dp && sp < dp + dst_p->shared->size));
+                    assert((dp >= sp && dp < sp + src_p->shared->size) ||
+                           (sp >= dp && sp < dp + dst_p->shared->size));
                 }
                 else {
-                    HDassert((dp < sp && dp + dst_p->shared->size <= sp) ||
-                             (sp < dp && sp + src_p->shared->size <= dp));
+                    assert((dp < sp && dp + dst_p->shared->size <= sp) ||
+                           (sp < dp && sp + src_p->shared->size <= dp));
                 }
 #endif
 
@@ -9372,11 +9372,11 @@ padding:
                  * Set padding areas in destination.
                  */
                 if (dst.offset > 0) {
-                    HDassert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
+                    assert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
                     H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE == dst.lsb_pad));
                 }
                 if (dst.offset + dst.prec != 8 * dst_p->shared->size) {
-                    HDassert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
+                    assert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
                     H5T__bit_set(d, dst.offset + dst.prec, 8 * dst_p->shared->size - (dst.offset + dst.prec),
                                  (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
                 }
@@ -9395,7 +9395,7 @@ padding:
                 }
                 else if (H5T_ORDER_VAX == dst.order && reverse) {
                     tsize = dst_p->shared->size;
-                    HDassert(0 == tsize % 2);
+                    assert(0 == tsize % 2);
 
                     for (i = 0; i < tsize; i += 4) {
                         tmp1 = d[i];
@@ -9465,8 +9465,8 @@ H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(s);
-    HDassert(size);
+    assert(s);
+    assert(size);
 
     if (H5T_ORDER_VAX == order) {
         for (i = 0; i < size; i += 2) {
@@ -9508,9 +9508,9 @@ H5T_reclaim(hid_t type_id, H5S_t *space, void *buf)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-    HDassert(space);
-    HDassert(buf);
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
+    assert(space);
+    assert(buf);
 
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
@@ -9548,15 +9548,15 @@ H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned H5_ATTR_UNUSED ndim, const 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(elem);
-    HDassert(dt);
+    assert(elem);
+    assert(dt);
 
     if (dt->shared->type == H5T_REFERENCE) {
         if (H5T__ref_reclaim(elem, dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't reclaim ref elements")
     }
     else {
-        HDassert(op_data);
+        assert(op_data);
 
         /* Allow vlen reclaim to recurse into that routine */
         if (H5T__vlen_reclaim(elem, dt, (H5T_vlen_alloc_info_t *)op_data) < 0)

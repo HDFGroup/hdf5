@@ -380,13 +380,13 @@ test_create(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    HDassert(space >= 0);
+    assert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    HDassert(space >= 0);
+    assert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -455,13 +455,13 @@ test_create(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    HDassert(create_parms >= 0);
+    assert(create_parms >= 0);
 
     /* Attempt to create a dataset with invalid chunk sizes */
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    HDassert(status >= 0);
+    assert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms,
@@ -477,7 +477,7 @@ test_create(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     dataset =
         H5Dcreate2(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, create_parms, H5P_DEFAULT);
@@ -499,11 +499,11 @@ test_create(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    HDassert(create_parms >= 0);
+    assert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     dataset = H5Dcreate2(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT, create_parms,
                          H5P_DEFAULT);
@@ -576,7 +576,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         /* Create a small conversion buffer to test strip mining */
         tconv_buf = HDmalloc((size_t)1000);
         xfer      = H5Pcreate(H5P_DATASET_XFER);
-        HDassert(xfer >= 0);
+        assert(xfer >= 0);
         if (H5Pset_buffer(xfer, (size_t)1000, tconv_buf, NULL) < 0)
             goto error;
 
@@ -7850,7 +7850,7 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
     long inc;
     long maxinc;
 
-    HDassert(0 < nelts);
+    assert(0 < nelts);
 
     *offsetp = HDrandom() % nelts;
 
@@ -7907,7 +7907,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
 
     TESTING(testname);
 
-    HDassert(NPOINTS < 100);
+    assert(NPOINTS < 100);
 
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 
@@ -7953,7 +7953,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
         H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
-        HDassert(!check2[chunk_row][chunk_col]);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0]                            = (hsize_t)chunk_row * csize[0];
@@ -8113,7 +8113,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
         H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
-        HDassert(!check2[chunk_row][chunk_col]);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0]                            = (hsize_t)chunk_row * csize[0];
@@ -8251,7 +8251,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
         H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
         H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
         ofs = (ofs + inc) % (rows * cols);
-        HDassert(!check2[chunk_row][chunk_col]);
+        assert(!check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
         coord[i][0]                            = (hsize_t)chunk_row * csize[0];
@@ -8428,13 +8428,13 @@ test_deprec(hid_t file)
     dims[0] = 256;
     dims[1] = 512;
     space   = H5Screate_simple(2, dims, NULL);
-    HDassert(space >= 0);
+    assert(space >= 0);
 
     /* Create a small data space for compact dataset */
     small_dims[0] = 16;
     small_dims[1] = 8;
     small_space   = H5Screate_simple(2, small_dims, NULL);
-    HDassert(space >= 0);
+    assert(space >= 0);
 
     /*
      * Create a dataset using the default dataset creation properties.    We're
@@ -8493,7 +8493,7 @@ test_deprec(hid_t file)
      * layout.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    HDassert(create_parms >= 0);
+    assert(create_parms >= 0);
 
     /* Add the deflate filter, if available */
 #if defined H5_HAVE_FILTER_DEFLATE
@@ -8529,7 +8529,7 @@ test_deprec(hid_t file)
     csize[0] = dims[0] * 2;
     csize[1] = dims[1] * 2;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    HDassert(status >= 0);
+    assert(status >= 0);
     H5E_BEGIN_TRY
     {
         dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms);
@@ -8544,7 +8544,7 @@ test_deprec(hid_t file)
     csize[0] = 5;
     csize[1] = 100;
     status   = H5Pset_chunk(create_parms, 2, csize);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_CHUNKED, H5T_NATIVE_DOUBLE, space, create_parms)) < 0)
         goto error;
@@ -8569,11 +8569,11 @@ test_deprec(hid_t file)
      * Create a compact dataset, then close it.
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
-    HDassert(create_parms >= 0);
+    assert(create_parms >= 0);
     status = H5Pset_layout(create_parms, H5D_COMPACT);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Pset_alloc_time(create_parms, H5D_ALLOC_TIME_EARLY);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     if ((dataset = H5Dcreate1(file, DSET_DEPREC_NAME_COMPACT, H5T_NATIVE_DOUBLE, small_space, create_parms)) <
         0)
@@ -10879,7 +10879,7 @@ test_fixed_array(hid_t fapl)
                 H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
                 H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
                 ofs = (ofs + inc) % (rows * cols);
-                HDassert(!chunks[chunk_row][chunk_col]);
+                assert(!chunks[chunk_row][chunk_col]);
 
                 wbuf[i] = chunks[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
                 coord[i][0]                            = (hsize_t)chunk_row * chunk_dim2[0];
@@ -11029,7 +11029,7 @@ test_fixed_array(hid_t fapl)
                 H5_CHECKED_ASSIGN(chunk_row, int, ofs / cols, long);
                 H5_CHECKED_ASSIGN(chunk_col, int, ofs % cols, long);
                 ofs = (ofs + inc) % (rows * cols);
-                HDassert(!chunks_big[chunk_row][chunk_col]);
+                assert(!chunks_big[chunk_row][chunk_col]);
 
                 wbuf_big[i] = chunks_big[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
                 coord_big[i][0]                                = (hsize_t)chunk_row * chunk_dim2[0];
@@ -13252,7 +13252,7 @@ scatter_cb(void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/, void *_sc
 
     /* Calculate number of elements */
     nelmts = MIN(scatter_info->block, scatter_info->size);
-    HDassert(nelmts > 0);
+    assert(nelmts > 0);
 
     /* Set output variables */
     *src_buf            = (void *)scatter_info->src_buf;
@@ -13551,7 +13551,7 @@ gather_cb(const void *dst_buf, size_t dst_buf_bytes_used, void *_gather_info)
     size_t         nelmts; /* Number of elements in src_buf */
     int            i;      /* Local index variable */
 
-    HDassert(dst_buf_bytes_used > 0);
+    assert(dst_buf_bytes_used > 0);
 
     /* Calculate number of elements */
     nelmts = dst_buf_bytes_used / sizeof(gather_info->expect_dst_buf[0]);
@@ -13913,7 +13913,7 @@ scatter_error_cb_fail(void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/
 
     /* Calculate number of elements */
     nelmts = MIN(scatter_info->block, scatter_info->size);
-    HDassert(nelmts > 0);
+    assert(nelmts > 0);
 
     /* Set output variables */
     *src_buf            = (void *)scatter_info->src_buf;
@@ -13930,7 +13930,7 @@ scatter_error_cb_null(void **src_buf /*out*/, size_t *src_buf_bytes_used /*out*/
 
     /* Calculate number of elements */
     nelmts = MIN(scatter_info->block, scatter_info->size);
-    HDassert(nelmts > 0);
+    assert(nelmts > 0);
 
     /* Set output variables */
     *src_buf            = NULL;

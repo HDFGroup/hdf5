@@ -50,10 +50,10 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(f);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Get property list */
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
@@ -125,7 +125,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 
             /* Build up a simulated root group symbol table entry */
             root_oloc = H5G_oloc(f->shared->root_grp);
-            HDassert(root_oloc);
+            assert(root_oloc);
             root_ent.type   = H5G_NOTHING_CACHED;
             root_ent.header = root_oloc->addr;
 

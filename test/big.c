@@ -270,7 +270,7 @@ enough_room(hid_t fapl)
         fd[i] = -1;
 
     /* Get file name template */
-    HDassert(H5FD_FAMILY == H5Pget_driver(fapl));
+    assert(H5FD_FAMILY == H5Pget_driver(fapl));
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create files */

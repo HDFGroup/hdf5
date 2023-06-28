@@ -99,8 +99,8 @@ H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(sect);
-    HDassert(udata);
+    assert(sect);
+    assert(udata);
 
     /* Print generic section information */
     fprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth, "Section type:",
@@ -150,10 +150,10 @@ H5MF_sects_debug(H5F_t *f, haddr_t fs_addr, FILE *stream, int indent, int fwidth
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     for (type = H5F_MEM_PAGE_DEFAULT; type < H5F_MEM_PAGE_NTYPES; type++)
         if (H5_addr_eq(f->shared->fs_addr[type], fs_addr)) {
@@ -215,8 +215,8 @@ H5MF__sects_dump(H5F_t *f, FILE *stream)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(stream);
+    assert(f);
+    assert(stream);
 
     /* Retrieve the 'eoa' for the file */
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))

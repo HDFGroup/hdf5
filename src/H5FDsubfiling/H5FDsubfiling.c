@@ -585,7 +585,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     char    *h5_require_ioc;
     herr_t   ret_value = SUCCEED;
 
-    HDassert(config_out);
+    assert(config_out);
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
@@ -668,7 +668,7 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_SUBFILING_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown H5FD_subfiling_config_t version");
@@ -706,7 +706,7 @@ H5FD__subfiling_sb_size(H5FD_t *_file)
     H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
     hsize_t              ret_value  = 0;
 
-    HDassert(file);
+    assert(file);
 
     /* Configuration structure magic number */
     ret_value += sizeof(uint32_t);
@@ -1012,7 +1012,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
 
-    HDassert(id_out_ptr != NULL);
+    assert(id_out_ptr != NULL);
 
     if (FALSE == H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a file access property list");
@@ -1091,7 +1091,7 @@ H5FD__subfiling_fapl_free(void *_fa)
     H5FD_subfiling_config_t *fa        = (H5FD_subfiling_config_t *)_fa;
     herr_t                   ret_value = SUCCEED;
 
-    HDassert(fa != NULL); /* sanity check */
+    assert(fa != NULL); /* sanity check */
 
     if (fa->ioc_fapl_id >= 0 && H5I_dec_ref(fa->ioc_fapl_id) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
@@ -1318,7 +1318,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(file_ptr);
+    assert(file_ptr);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
@@ -1404,8 +1404,8 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_subfiling_t *f2        = (const H5FD_subfiling_t *)_f2;
     int                     ret_value = 0;
 
-    HDassert(f1);
-    HDassert(f2);
+    assert(f1);
+    assert(f2);
 
     ret_value = H5FD_cmp(f1->sf_file, f2->sf_file);
 
@@ -1585,8 +1585,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(file_ptr && file_ptr->pub.cls);
-    HDassert(buf);
+    assert(file_ptr && file_ptr->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5_addr_defined(addr))
@@ -1636,8 +1636,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
      * underlying I/O operations.
      */
     sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
-    HDassert(sf_context);
-    HDassert(sf_context->topology);
+    assert(sf_context);
+    assert(sf_context->topology);
 
     num_subfiles = sf_context->sf_num_subfiles;
 
@@ -1820,8 +1820,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
     int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(file_ptr && file_ptr->pub.cls);
-    HDassert(buf);
+    assert(file_ptr && file_ptr->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5_addr_defined(addr))
@@ -1868,8 +1868,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
      * underlying I/O operations.
      */
     sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
-    HDassert(sf_context);
-    HDassert(sf_context->topology);
+    assert(sf_context);
+    assert(sf_context->topology);
 
     num_subfiles = sf_context->sf_num_subfiles;
 
@@ -2137,8 +2137,8 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         H5FD_mem_t type;
         haddr_t    eoa;
 
-        HDassert((count == 0) || (sizes[0] != 0));
-        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+        assert((count == 0) || (sizes[0] != 0));
+        assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
@@ -2254,7 +2254,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
     H5FD_mpio_xfer_t  xfer_mode = H5FD_MPIO_INDEPENDENT;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
-    HDassert(file_ptr != NULL); /* sanity check */
+    assert(file_ptr != NULL); /* sanity check */
 
     /* Check arguments
      * RAW - Do we really need to check arguments once again?
@@ -2297,8 +2297,8 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         H5FD_mem_t type;
         haddr_t    eoa;
 
-        HDassert((count == 0) || (sizes[0] != 0));
-        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+        assert((count == 0) || (sizes[0] != 0));
+        assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
@@ -2390,7 +2390,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    HDassert(file);
+    assert(file);
 
     /* Extend the file to make sure it's large enough */
     if (!H5_addr_eq(file->eoa, file->last_eoa)) {
@@ -2469,7 +2469,7 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct  */
     herr_t            ret_value = SUCCEED;                   /* Return value       */
 
-    HDassert(file);
+    assert(file);
 
     if (file->fa.require_ioc) {
 #ifdef VERBOSE
@@ -2502,7 +2502,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
     H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct */
     herr_t            ret_value = SUCCEED;                   /* Return value             */
 
-    HDassert(file);
+    assert(file);
 
     if (H5FD_unlock(file->sf_file) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file");
@@ -2581,14 +2581,14 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
     herr_t            ret_value = SUCCEED; /* Return value */
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_SUBFILING == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_SUBFILING == file->pub.driver_id);
 
     switch (op_code) {
 
         case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
 
             /*
              * Return a separate MPI communicator to the caller so
@@ -2603,14 +2603,14 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
             break;
 
         case H5FD_CTL_GET_MPI_RANK_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
         case H5FD_CTL_GET_MPI_SIZE_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
@@ -2740,17 +2740,17 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int     num_subfiles         = 0;
     herr_t  ret_value            = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->sf_stripe_size > 0);
-    HDassert(sf_context->sf_blocksize_per_stripe > 0);
-    HDassert(sf_context->sf_num_subfiles > 0);
-    HDassert(sf_context->topology);
-    HDassert(mem_buf_offset);
-    HDassert(target_file_offset);
-    HDassert(io_block_len);
-    HDassert(first_subfile_index);
-    HDassert(n_subfiles_used);
-    HDassert(max_io_req_per_subfile);
+    assert(sf_context);
+    assert(sf_context->sf_stripe_size > 0);
+    assert(sf_context->sf_blocksize_per_stripe > 0);
+    assert(sf_context->sf_num_subfiles > 0);
+    assert(sf_context->topology);
+    assert(mem_buf_offset);
+    assert(target_file_offset);
+    assert(io_block_len);
+    assert(first_subfile_index);
+    assert(n_subfiles_used);
+    assert(max_io_req_per_subfile);
 
     *first_subfile_index    = 0;
     *n_subfiles_used        = 0;
@@ -2808,8 +2808,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     /* Determine the size of data written to the first and last stripes */
     start_length = MIN(data_size, (stripe_size - offset_in_stripe));
     final_length = (start_length == data_size ? 0 : final_offset % stripe_size);
-    HDassert(start_length <= stripe_size);
-    HDassert(final_length <= stripe_size);
+    assert(start_length <= stripe_size);
+    assert(final_length <= stripe_size);
 
     /*
      * Determine which subfile the I/O request begins in and which
@@ -2960,8 +2960,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 }
 
                 if (thin_uniform_section) {
-                    HDassert(iovec_depth > 1);
-                    HDassert(num_full_stripes > 1);
+                    assert(iovec_depth > 1);
+                    assert(num_full_stripes > 1);
 
                     iovec_depth--;
                     num_full_stripes--;
@@ -3033,7 +3033,7 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
             row_offset += block_size;
         }
 
-        HDassert(offset_in_block <= block_size);
+        assert(offset_in_block <= block_size);
     }
 
     if (total_bytes != data_size)
@@ -3077,11 +3077,11 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3176,11 +3176,11 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3308,11 +3308,11 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert(iovec_depth > 0);
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
@@ -3418,11 +3418,11 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
     int64_t total_bytes = 0;
     herr_t  ret_value   = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(mem_offset_out);
-    HDassert(target_file_offset_out);
-    HDassert(io_block_len_out);
-    HDassert((iovec_depth > 0) || (target_datasize == 0));
+    assert(sf_context);
+    assert(mem_offset_out);
+    assert(target_file_offset_out);
+    assert(io_block_len_out);
+    assert((iovec_depth > 0) || (target_datasize == 0));
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;

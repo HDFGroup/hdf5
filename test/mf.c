@@ -159,8 +159,8 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state)
 {
     H5FS_stat_t frspace_stats; /* Statistics about the heap */
 
-    HDassert(f);
-    HDassert(frsp);
+    assert(f);
+    assert(frsp);
 
     /* Get statistics for free-space and verify they are correct */
     if (H5FS_stat_info(f, frsp, &frspace_stats) < 0)
@@ -7755,7 +7755,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
     hbool_t    relax;
     H5FD_mem_t mt;
 
-    HDassert(is_multi_or_split);
+    assert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 

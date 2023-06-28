@@ -393,7 +393,7 @@ H5FD__log_fapl_copy(const void *_old_fa)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(old_fa);
+    assert(old_fa);
 
     /* Allocate the new FAPL info */
     if (NULL == (new_fa = (H5FD_log_fapl_t *)H5MM_calloc(sizeof(H5FD_log_fapl_t))))
@@ -586,15 +586,15 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         file->iosize = fa->buf_size;
         if (file->fa.flags & H5FD_LOG_FILE_READ) {
             file->nread = (unsigned char *)H5MM_calloc(file->iosize);
-            HDassert(file->nread);
+            assert(file->nread);
         }
         if (file->fa.flags & H5FD_LOG_FILE_WRITE) {
             file->nwrite = (unsigned char *)H5MM_calloc(file->iosize);
-            HDassert(file->nwrite);
+            assert(file->nwrite);
         }
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             file->flavor = (unsigned char *)H5MM_calloc(file->iosize);
-            HDassert(file->flavor);
+            assert(file->flavor);
         }
 
         /* Set the log file pointer */
@@ -677,7 +677,7 @@ H5FD__log_close(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     /* Initialize timer */
     H5_timer_init(&close_timer);
@@ -950,7 +950,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
     /* Retain the (first) flavor of the information written to the file */
     if (file->fa.flags != 0) {
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
-            HDassert(addr < file->iosize);
+            assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
             HDmemset(&file->flavor[addr], (int)type, (size_t)size);
         }
@@ -989,7 +989,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     if (file->fa.flags != 0) {
         /* Reset the flavor of the information in the file */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
-            HDassert(addr < file->iosize);
+            assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
             HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
         }
@@ -1056,7 +1056,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
             /* Retain the flavor of the space allocated by the extension */
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
-                HDassert(addr < file->iosize);
+                assert(addr < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
                 HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
             }
@@ -1074,7 +1074,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
             /* Reset the flavor of the space freed by the shrink */
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
-                HDassert((addr + size) < file->iosize);
+                assert((addr + size) < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
                 HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
             }
@@ -1178,8 +1178,8 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Initialize timer */
     H5_timer_init(&read_timer);
@@ -1197,7 +1197,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         /* Log information about the number of times these locations are read */
         if (file->fa.flags & H5FD_LOG_FILE_READ) {
-            HDassert((addr + size) < file->iosize);
+            assert((addr + size) < file->iosize);
             while (tmp_size-- > 0)
                 file->nread[tmp_addr++]++;
         }
@@ -1304,8 +1304,8 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             break;
         }
 
-        HDassert(bytes_read >= 0);
-        HDassert((size_t)bytes_read <= size);
+        assert(bytes_read >= 0);
+        assert((size_t)bytes_read <= size);
 
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
@@ -1333,11 +1333,11 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         /* Verify that we are reading in the type of data we allocated in this location */
         if (file->flavor) {
-            HDassert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[orig_addr] ||
-                     (H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT);
-            HDassert(type == H5FD_MEM_DEFAULT ||
-                     type == (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] ||
-                     (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] == H5FD_MEM_DEFAULT);
+            assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[orig_addr] ||
+                   (H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT);
+            assert(type == H5FD_MEM_DEFAULT ||
+                   type == (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] ||
+                   (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] == H5FD_MEM_DEFAULT);
         }
 
         /* Add the read time, if we're tracking that.
@@ -1392,19 +1392,19 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(size > 0);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(size > 0);
+    assert(buf);
 
     /* Initialize timer */
     H5_timer_init(&write_timer);
 
     /* Verify that we are writing out the type of data we allocated in this location */
     if (file->flavor) {
-        HDassert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[addr] ||
-                 (H5FD_mem_t)file->flavor[addr] == H5FD_MEM_DEFAULT);
-        HDassert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[(addr + size) - 1] ||
-                 (H5FD_mem_t)file->flavor[(addr + size) - 1] == H5FD_MEM_DEFAULT);
+        assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[addr] ||
+               (H5FD_mem_t)file->flavor[addr] == H5FD_MEM_DEFAULT);
+        assert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[(addr + size) - 1] ||
+               (H5FD_mem_t)file->flavor[(addr + size) - 1] == H5FD_MEM_DEFAULT);
     }
 
     /* Check for overflow conditions */
@@ -1420,7 +1420,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         haddr_t tmp_addr = addr;
 
         /* Log information about the number of times these locations are read */
-        HDassert((addr + size) < file->iosize);
+        assert((addr + size) < file->iosize);
         while (tmp_size-- > 0)
             file->nwrite[tmp_addr++]++;
     }
@@ -1520,8 +1520,8 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
-        HDassert(bytes_wrote > 0);
-        HDassert((size_t)bytes_wrote <= size);
+        assert(bytes_wrote > 0);
+        assert((size_t)bytes_wrote <= size);
 
         size -= (size_t)bytes_wrote;
         addr += (haddr_t)bytes_wrote;
@@ -1603,7 +1603,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Extend the file to make sure it's large enough */
     if (!H5_addr_eq(file->eoa, file->eof)) {
@@ -1712,7 +1712,7 @@ H5FD__log_lock(H5FD_t *_file, hbool_t rw)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     /* Set exclusive or shared lock based on rw status */
     lock_flags = rw ? LOCK_EX : LOCK_SH;
@@ -1752,7 +1752,7 @@ H5FD__log_unlock(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (HDflock(file->fd, LOCK_UN) < 0) {
         if (file->ignore_disabled_file_locks && ENOSYS == errno) {
@@ -1785,7 +1785,7 @@ H5FD__log_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     if (HDremove(filename) < 0)
         HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")

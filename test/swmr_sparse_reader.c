@@ -91,10 +91,10 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     hsize_t start[2] = {0, 0}; /* Hyperslab selection values */
     hsize_t count[2] = {1, 1}; /* Hyperslab selection values */
 
-    HDassert(fid >= 0);
-    HDassert(symbol);
-    HDassert(record);
-    HDassert(rec_sid >= 0);
+    assert(fid >= 0);
+    assert(symbol);
+    assert(record);
+    assert(rec_sid >= 0);
 
     /* Open dataset for symbol */
     if ((dsid = H5Dopen2(fid, symbol->name, H5P_DEFAULT)) < 0)
@@ -181,8 +181,8 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
     unsigned long u;                             /* Local index variable */
     hid_t         fapl;
 
-    HDassert(filename);
-    HDassert(poll_time != 0);
+    assert(filename);
+    assert(poll_time != 0);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)

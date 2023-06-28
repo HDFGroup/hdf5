@@ -230,7 +230,7 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
 
     /* Allocate information for each super block */
     tparam->sblk_info = (H5EA_sblk_info_t *)HDmalloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
-    HDassert(tparam->sblk_info);
+    assert(tparam->sblk_info);
 
     /* Compute information about each super block */
     start_idx  = 0;
@@ -1299,7 +1299,7 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
 
     /* Allocate space for the element iteration object */
     eiter = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
-    HDassert(eiter);
+    assert(eiter);
 
     /* Initialize the element iteration object */
     eiter->idx           = 0;
@@ -1329,7 +1329,7 @@ eiter_fw_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx++;
@@ -1356,7 +1356,7 @@ eiter_fw_max(const void *in_eiter)
     const eiter_fw_t *eiter = (const eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)(eiter->idx - 1));
@@ -1382,10 +1382,10 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1439,7 +1439,7 @@ static int
 eiter_fw_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
     HDfree(eiter);
@@ -1486,7 +1486,7 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
 
     /* Allocate space for the element iteration object */
     eiter = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
-    HDassert(eiter);
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->idx = cnt - 1;
@@ -1529,7 +1529,7 @@ eiter_rv_next(void *in_eiter)
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx--;
@@ -1556,7 +1556,7 @@ eiter_rv_max(const void *in_eiter)
     const eiter_rv_t *eiter = (const eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1582,10 +1582,10 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
     eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(cparam);
-    HDassert(tparam);
-    HDassert(state);
+    assert(eiter);
+    assert(cparam);
+    assert(tparam);
+    assert(state);
 
     /* Compute the state of the extensible array */
     state->hdr_size       = EA_HDR_SIZE;
@@ -1664,7 +1664,7 @@ static int
 eiter_rv_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
     HDfree(eiter);
@@ -1710,11 +1710,11 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
 
     /* Allocate space for the element iteration object */
     eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
     eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1759,7 +1759,7 @@ eiter_rnd_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx[eiter->pos];
@@ -1791,7 +1791,7 @@ eiter_rnd_max(const void *in_eiter)
     const eiter_rnd_t *eiter = (const eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1816,8 +1816,8 @@ eiter_rnd_term(void *in_eiter)
     eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
-    HDassert(eiter->idx);
+    assert(eiter);
+    assert(eiter->idx);
 
     /* Free shuffled index array */
     HDfree(eiter->idx);
@@ -1859,11 +1859,11 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
 
     /* Allocate space for the element iteration object */
     eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(eiter);
+    assert(eiter);
 
     /* Allocate space for the array of shuffled indices */
     eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
-    HDassert(eiter->idx);
+    assert(eiter->idx);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1876,7 +1876,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
 
         /* Allocate temporary index array */
         tmp_idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)sparse_cnt);
-        HDassert(tmp_idx);
+        assert(tmp_idx);
 
         /* Initialize temporary index array, for shuffling */
         for (u = 0; u < (size_t)sparse_cnt; u++)
@@ -1941,7 +1941,7 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
 
     /* Allocate space for the element iteration object */
     eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
-    HDassert(eiter);
+    assert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1973,7 +1973,7 @@ eiter_cyc_next(void *in_eiter)
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->pos;
@@ -2007,7 +2007,7 @@ eiter_cyc_max(const void *in_eiter)
     const eiter_cyc_t *eiter = (const eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -2032,7 +2032,7 @@ eiter_cyc_term(void *in_eiter)
     eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(eiter);
+    assert(eiter);
 
     /* Free iteration object */
     HDfree(eiter);

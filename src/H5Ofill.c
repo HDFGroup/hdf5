@@ -196,8 +196,8 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (fill = H5FL_CALLOC(H5O_fill_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message")
@@ -336,8 +336,8 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (fill = H5FL_CALLOC(H5O_fill_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value message")
@@ -415,9 +415,9 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(p);
-    HDassert(fill && NULL == fill->type);
+    assert(f);
+    assert(p);
+    assert(fill && NULL == fill->type);
 
     /* Version */
     *p++ = (uint8_t)fill->version;
@@ -446,12 +446,12 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
         uint8_t flags = 0; /* Fill value setting flags */
 
         /* Encode space allocation time */
-        HDassert(fill->alloc_time == (H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time));
+        assert(fill->alloc_time == (H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time));
         flags =
             (uint8_t)(flags | ((H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time) << H5O_FILL_SHIFT_ALLOC_TIME));
 
         /* Encode fill value writing time */
-        HDassert(fill->fill_time == (H5O_FILL_MASK_FILL_TIME & fill->fill_time));
+        assert(fill->fill_time == (H5O_FILL_MASK_FILL_TIME & fill->fill_time));
         flags = (uint8_t)(flags | ((H5O_FILL_MASK_FILL_TIME & fill->fill_time) << H5O_FILL_SHIFT_FILL_TIME));
 
         /* Check if we need to encode a fill value size */
@@ -463,7 +463,7 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             *p++ = (uint8_t)flags;
 
             /* Sanity check */
-            HDassert(!fill->buf);
+            assert(!fill->buf);
         } /* end if */
         else if (fill->size > 0) {
             /* Indicate that a fill value size is present */
@@ -476,7 +476,7 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             INT32ENCODE(p, fill->size);
 
             /* Encode the fill value */
-            HDassert(fill->buf);
+            assert(fill->buf);
             H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
             H5MM_memcpy(p, fill->buf, (size_t)fill->size);
         } /* end if */
@@ -485,7 +485,7 @@ H5O__fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
             *p++ = (uint8_t)flags;
 
             /* Sanity check */
-            HDassert(!fill->buf);
+            assert(!fill->buf);
         } /* end else */
     }     /* end else */
 
@@ -511,9 +511,9 @@ H5O__fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(p);
-    HDassert(fill && NULL == fill->type);
+    assert(f);
+    assert(p);
+    assert(fill && NULL == fill->type);
 
     UINT32ENCODE(p, fill->size);
     if (fill->buf)
@@ -547,7 +547,7 @@ H5O__fill_copy(const void *_src, void *_dst)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(src);
+    assert(src);
 
     if (!dst && NULL == (dst = H5FL_MALLOC(H5O_fill_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill message")
@@ -665,8 +665,8 @@ H5O__fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(fill);
+    assert(f);
+    assert(fill);
 
     /* Determine size for different versions */
     if (fill->version < H5O_FILL_VERSION_3) {
@@ -711,7 +711,7 @@ H5O__fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fill);
+    assert(fill);
 
     FUNC_LEAVE_NOAPI(4 + (size_t)fill->size)
 } /* end H5O__fill_old_size() */
@@ -736,7 +736,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(fill);
+    assert(fill);
 
     if (fill->buf) {
         if (fill->type && H5T_detect_class(fill->type, H5T_VLEN, FALSE) > 0) {
@@ -800,7 +800,7 @@ H5O__fill_reset(void *_fill)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fill);
+    assert(fill);
 
     /* Reset dynamic fields */
     H5O_fill_reset_dyn(fill);
@@ -830,7 +830,7 @@ H5O__fill_free(void *fill)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fill);
+    assert(fill);
 
     fill = H5FL_FREE(H5O_fill_t, fill);
 
@@ -860,8 +860,8 @@ H5O__fill_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, hb
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
@@ -892,11 +892,11 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(fill);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(fill);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
     switch (fill->alloc_time) {
@@ -996,9 +996,9 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(fill);
-    HDassert(dset_type);
-    HDassert(fill_changed);
+    assert(fill);
+    assert(dset_type);
+    assert(fill_changed);
 
     /* No-op cases */
     if (!fill->buf || !fill->type || 0 == H5T_cmp(fill->type, dset_type, FALSE)) {
@@ -1090,8 +1090,8 @@ H5O_fill_set_version(H5F_t *f, H5O_fill_t *fill)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(fill);
+    assert(f);
+    assert(fill);
 
     /* Upgrade to the version indicated by the file's low bound if higher */
     version = MAX(fill->version, H5O_fill_ver_bounds[H5F_LOW_BOUND(f)]);

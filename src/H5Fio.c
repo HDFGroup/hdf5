@@ -88,9 +88,9 @@ H5F_shared_block_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(buf);
-    HDassert(H5_addr_defined(addr));
+    assert(f_sh);
+    assert(buf);
+    assert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5_addr_le(f_sh->tmp_addr, (addr + size)))
@@ -130,10 +130,10 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(buf);
-    HDassert(H5_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(buf);
+    assert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5_addr_le(f->shared->tmp_addr, (addr + size)))
@@ -173,10 +173,10 @@ H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
-    HDassert(buf);
-    HDassert(H5_addr_defined(addr));
+    assert(f_sh);
+    assert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
+    assert(buf);
+    assert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5_addr_le(f_sh->tmp_addr, (addr + size)))
@@ -216,11 +216,11 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
-    HDassert(buf);
-    HDassert(H5_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    assert(buf);
+    assert(H5_addr_defined(addr));
 
     /* Check for attempting I/O on 'temporary' file address */
     if (H5_addr_le(f->shared->tmp_addr, (addr + size)))
@@ -262,12 +262,12 @@ H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(f_sh);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
@@ -307,12 +307,12 @@ H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert((mem_spaces) || (count == 0));
-    HDassert((file_spaces) || (count == 0));
-    HDassert((offsets) || (count == 0));
-    HDassert((element_sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(f_sh);
+    assert((mem_spaces) || (count == 0));
+    assert((file_spaces) || (count == 0));
+    assert((offsets) || (count == 0));
+    assert((element_sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* Treat global heap as raw data */
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
@@ -335,11 +335,11 @@ H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], h
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(f_sh);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /*
      * Note that we don't try to map global heap data to raw
@@ -349,7 +349,7 @@ H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], h
      */
 #ifndef NDEBUG
     for (uint32_t i = 0; i < count; i++)
-        HDassert(types[i] != H5FD_MEM_GHEAP);
+        assert(types[i] != H5FD_MEM_GHEAP);
 #endif
 
     /* Pass down to file driver layer (bypass page buffer for now) */
@@ -380,11 +380,11 @@ H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(f_sh);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /*
      * Note that we don't try to map global heap data to raw
@@ -394,7 +394,7 @@ H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], 
      */
 #ifndef NDEBUG
     for (uint32_t i = 0; i < count; i++)
-        HDassert(types[i] != H5FD_MEM_GHEAP);
+        assert(types[i] != H5FD_MEM_GHEAP);
 #endif
 
     /* Pass down to file driver layer (bypass page buffer for now) */
@@ -460,8 +460,8 @@ H5F__evict_cache_entries(H5F_t *f)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Evict all except pinned entries in the cache */
     if (H5AC_evict(f) < 0)
@@ -515,8 +515,8 @@ H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum /*out*
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments */
-    HDassert(buf);
-    HDassert(buf_size);
+    assert(buf);
+    assert(buf_size);
 
     /* Return the stored checksum */
     if (s_chksum) {

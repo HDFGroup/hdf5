@@ -99,9 +99,9 @@ H5F_cwfs_add(H5F_t *f, H5HG_heap_t *heap)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(heap);
+    assert(f);
+    assert(f->shared);
+    assert(heap);
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -158,9 +158,9 @@ H5F_cwfs_find_free_heap(H5F_t *f, size_t need, haddr_t *addr)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(addr);
+    assert(f);
+    assert(f->shared);
+    assert(addr);
 
     /* Note that we don't have metadata cache locks on the entries in
      * f->shared->cwfs.
@@ -254,9 +254,9 @@ H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(heap);
+    assert(f);
+    assert(f->shared);
+    assert(heap);
 
     for (u = 0; u < f->shared->ncwfs; u++)
         if (f->shared->cwfs[u] == heap) {
@@ -296,8 +296,8 @@ H5F_cwfs_remove_heap(H5F_shared_t *shared, H5HG_heap_t *heap)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(shared);
-    HDassert(heap);
+    assert(shared);
+    assert(heap);
 
     /* Remove the heap from the CWFS list */
     for (u = 0; u < shared->ncwfs; u++) {

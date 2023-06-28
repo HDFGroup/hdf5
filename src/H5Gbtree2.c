@@ -223,8 +223,8 @@ H5G__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check hash value */
     if (bt2_udata->name_hash < bt2_rec->hash)
@@ -235,7 +235,7 @@ H5G__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
         H5G_fh_ud_cmp_t fh_udata; /* User data for fractal heap 'op' callback */
 
         /* Sanity check */
-        HDassert(bt2_udata->name_hash == bt2_rec->hash);
+        assert(bt2_udata->name_hash == bt2_rec->hash);
 
         /* Prepare user data for callback */
         /* down */
@@ -393,8 +393,8 @@ H5G__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, i
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check creation order value */
     if (bt2_udata->corder < bt2_rec->corder)

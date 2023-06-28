@@ -151,7 +151,7 @@ construct_test_file(int test_file_index)
     /* setup the file name */
     if (pass) {
 
-        HDassert(FILENAMES[test_file_index]);
+        assert(FILENAMES[test_file_index]);
 
         if (h5_fixname(FILENAMES[test_file_index], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
@@ -414,9 +414,9 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* create the datasets */
 
@@ -731,9 +731,9 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
 
     if ( show_progress ) fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     if ( show_progress ) fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
@@ -832,7 +832,7 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
-    HDassert(!create_file || config_fsm);
+    assert(!create_file || config_fsm);
 
     if (pass) {
         /* opening the file both read only and with a cache image
@@ -2053,7 +2053,7 @@ serial_insert_cache_image(int file_name_idx, int mpi_size)
     /* 1) setup the file name */
     if (pass) {
 
-        HDassert(FILENAMES[file_name_idx]);
+        assert(FILENAMES[file_name_idx]);
 
         if (h5_fixname(FILENAMES[file_name_idx], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 
@@ -2389,9 +2389,9 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
     if (show_progress)
         fprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    HDassert(0 <= min_dset);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset < MAX_NUM_DSETS);
+    assert(0 <= min_dset);
+    assert(min_dset <= max_dset);
+    assert(max_dset < MAX_NUM_DSETS);
 
     /* open the datasets */
 
@@ -3179,7 +3179,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
     /* setup the file name */
     if (pass) {
 
-        HDassert(FILENAMES[test_file_index]);
+        assert(FILENAMES[test_file_index]);
 
         if (h5_fixname(FILENAMES[test_file_index], H5P_DEFAULT, filename, sizeof(filename)) == NULL) {
 

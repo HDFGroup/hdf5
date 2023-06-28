@@ -227,7 +227,7 @@ H5_make_time(struct tm *tm)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(tm);
+    assert(tm);
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
@@ -398,7 +398,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     static hbool_t       is_initialized = FALSE;
     BOOL                 err;
 
-    HDassert(tvs);
+    assert(tvs);
 
     if (!is_initialized) {
         /* NOTE: This is just a pseudo handle and does not need to be closed. */
@@ -650,8 +650,8 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(name);
-    HDassert(extpath);
+    assert(name);
+    assert(extpath);
 
     /* Clear external path pointer to begin with */
     *extpath = NULL;
@@ -705,10 +705,10 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             size_t cwdlen;
             size_t path_len;
 
-            HDassert(cwdpath);
+            assert(cwdpath);
             cwdlen = HDstrlen(cwdpath);
-            HDassert(cwdlen);
-            HDassert(new_name);
+            assert(cwdlen);
+            assert(new_name);
             path_len = cwdlen + HDstrlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -725,7 +725,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         char *ptr = NULL;
 
         H5_GET_LAST_DELIMITER(full_path, ptr)
-        HDassert(ptr);
+        assert(ptr);
         *++ptr   = '\0';
         *extpath = full_path;
     } /* end if */
@@ -762,7 +762,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path2);
+    assert(path2);
 
     if (path1)
         path1_len = HDstrlen(path1);
@@ -1084,7 +1084,7 @@ H5_dirname(const char *path, char **dirname)
             else {
                 /* Pathname of form "dir/filename" */
                 len = sep - path;
-                HDassert(len >= 0);
+                assert(len >= 0);
 
                 out = H5MM_strndup(path, (size_t)len);
             }
@@ -1186,7 +1186,7 @@ H5_basename(const char *path, char **basename)
                     c_ptr--;
 
                 len = sep - c_ptr;
-                HDassert(len >= 0);
+                assert(len >= 0);
 
                 out = H5MM_strndup(c_ptr, (size_t)len);
             }
@@ -1388,8 +1388,8 @@ char *
 H5_strcasestr(const char *haystack, const char *needle)
 {
     /* Check arguments. */
-    HDassert(haystack);
-    HDassert(needle);
+    assert(haystack);
+    assert(needle);
 
     /* begin once from each character of haystack, until needle is found */
     do {

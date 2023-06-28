@@ -89,13 +89,13 @@ H5B2__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(H5_addr_defined(obj_addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(type);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(H5_addr_defined(obj_addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(type);
 
     /* Load the B-tree header  */
     if (NULL == (hdr = H5B2__hdr_protect(f, addr, f, H5AC__READ_ONLY_FLAG)))
@@ -169,15 +169,15 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(type);
-    HDassert(H5_addr_defined(hdr_addr));
-    HDassert(H5_addr_defined(obj_addr));
-    HDassert(nrec > 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(type);
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
+    assert(nrec > 0);
 
     /* Load the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
@@ -222,7 +222,7 @@ H5B2__int_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
         /* Print record */
         HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
-        HDassert(H5B2_INT_NREC(internal, hdr, u));
+        assert(H5B2_INT_NREC(internal, hdr, u));
         (void)(type->debug)(stream, indent + 6, MAX(0, fwidth - 6), H5B2_INT_NREC(internal, hdr, u),
                             hdr->cb_ctx);
     } /* end for */
@@ -270,15 +270,15 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(type);
-    HDassert(H5_addr_defined(hdr_addr));
-    HDassert(H5_addr_defined(obj_addr));
-    HDassert(nrec > 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(type);
+    assert(H5_addr_defined(hdr_addr));
+    assert(H5_addr_defined(obj_addr));
+    assert(nrec > 0);
 
     /* Load the B-tree header */
     if (NULL == (hdr = H5B2__hdr_protect(f, hdr_addr, f, H5AC__READ_ONLY_FLAG)))
@@ -316,7 +316,7 @@ H5B2__leaf_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, c
         /* Print record */
         HDsnprintf(temp_str, sizeof(temp_str), "Record #%u:", u);
         fprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3), temp_str);
-        HDassert(H5B2_LEAF_NREC(leaf, hdr, u));
+        assert(H5B2_LEAF_NREC(leaf, hdr, u));
         (void)(type->debug)(stream, indent + 6, MAX(0, fwidth - 6), H5B2_LEAF_NREC(leaf, hdr, u),
                             hdr->cb_ctx);
     } /* end for */

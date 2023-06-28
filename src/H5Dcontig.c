@@ -163,8 +163,8 @@ H5D__contig_alloc(H5F_t *f, H5O_storage_contig_t *storage /*out */)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(storage);
+    assert(f);
+    assert(storage);
 
     /* Allocate space for the contiguous data */
     if (HADDR_UNDEF == (storage->addr = H5MF_alloc(f, H5FD_MEM_DRAW, storage->size)))
@@ -211,11 +211,11 @@ H5D__contig_fill(H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
-    HDassert(H5_addr_defined(dset->shared->layout.storage.u.contig.addr));
-    HDassert(dset->shared->layout.storage.u.contig.size > 0);
-    HDassert(dset->shared->space);
-    HDassert(dset->shared->type);
+    assert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
+    assert(H5_addr_defined(dset->shared->layout.storage.u.contig.addr));
+    assert(dset->shared->layout.storage.u.contig.size > 0);
+    assert(dset->shared->space);
+    assert(dset->shared->type);
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
@@ -359,8 +359,8 @@ H5D__contig_delete(H5F_t *f, const H5O_storage_t *storage)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(storage);
+    assert(f);
+    assert(storage);
 
     /* Free the file space for the chunk */
     if (H5MF_xfree(f, H5FD_MEM_DRAW, storage->u.contig.addr, storage->u.contig.size) < 0)
@@ -396,8 +396,8 @@ H5D__contig_construct(H5F_t *f, H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /*
      * The maximum size of the dataset cannot exceed the storage size.
@@ -467,8 +467,8 @@ H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, const H5D_t *dset, hid_t H5_ATTR_UNUSE
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(dset);
+    assert(f);
+    assert(dset);
 
     /* Compute the size of the contiguous storage for versions of the
      * layout message less than version 3 because versions 1 & 2 would
@@ -535,7 +535,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(storage);
+    assert(storage);
 
     /* Set return value */
     ret_value = (hbool_t)H5_addr_defined(storage->u.contig.addr);
@@ -561,7 +561,7 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(shared_dset);
+    assert(shared_dset);
 
     FUNC_LEAVE_NOAPI(shared_dset->cache.contig.sieve_size > 0)
 } /* end H5D__contig_is_data_cached() */
@@ -721,8 +721,8 @@ H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Add piece if it exists */
     if (dinfo->layout_io_info.contig_piece_info) {
-        HDassert(io_info->sel_pieces);
-        HDassert(io_info->pieces_added < io_info->piece_count);
+        assert(io_info->sel_pieces);
+        assert(io_info->pieces_added < io_info->piece_count);
 
         /* Add contiguous data block to sel_pieces */
         io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
@@ -757,10 +757,10 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_info->dset);
-    HDassert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_info->dset);
+    assert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
 
     dataset = dset_info->dset;
 
@@ -782,7 +782,7 @@ H5D__contig_may_use_select_io(H5D_io_info_t *io_info, const H5D_dset_io_info_t *
     else {
         hbool_t page_buf_enabled;
 
-        HDassert(dset_info->layout_ops.writevv == H5D__contig_writevv);
+        assert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
@@ -817,11 +817,11 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dinfo);
-    HDassert(dinfo->buf.vp);
-    HDassert(dinfo->mem_space);
-    HDassert(dinfo->file_space);
+    assert(io_info);
+    assert(dinfo);
+    assert(dinfo->buf.vp);
+    assert(dinfo->mem_space);
+    assert(dinfo->file_space);
 
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         /* Only perform I/O if not performing multi dataset I/O or type conversion,
@@ -842,12 +842,12 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         else {
             if (dinfo->layout_io_info.contig_piece_info) {
                 /* Add to mdset selection I/O arrays */
-                HDassert(io_info->mem_spaces);
-                HDassert(io_info->file_spaces);
-                HDassert(io_info->addrs);
-                HDassert(io_info->element_sizes);
-                HDassert(io_info->rbufs);
-                HDassert(io_info->pieces_added < io_info->piece_count);
+                assert(io_info->mem_spaces);
+                assert(io_info->file_spaces);
+                assert(io_info->addrs);
+                assert(io_info->element_sizes);
+                assert(io_info->rbufs);
+                assert(io_info->pieces_added < io_info->piece_count);
 
                 io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
                 io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
@@ -894,11 +894,11 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(io_info);
-    HDassert(dinfo);
-    HDassert(dinfo->buf.cvp);
-    HDassert(dinfo->mem_space);
-    HDassert(dinfo->file_space);
+    assert(io_info);
+    assert(dinfo);
+    assert(dinfo->buf.cvp);
+    assert(dinfo->mem_space);
+    assert(dinfo->file_space);
 
     if (io_info->use_select_io == H5D_SELECTION_IO_MODE_ON) {
         /* Only perform I/O if not performing multi dataset I/O or type conversion,
@@ -919,12 +919,12 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         else {
             if (dinfo->layout_io_info.contig_piece_info) {
                 /* Add to mdset selection I/O arrays */
-                HDassert(io_info->mem_spaces);
-                HDassert(io_info->file_spaces);
-                HDassert(io_info->addrs);
-                HDassert(io_info->element_sizes);
-                HDassert(io_info->wbufs);
-                HDassert(io_info->pieces_added < io_info->piece_count);
+                assert(io_info->mem_spaces);
+                assert(io_info->file_spaces);
+                assert(io_info->addrs);
+                assert(io_info->element_sizes);
+                assert(io_info->wbufs);
+                assert(io_info->pieces_added < io_info->piece_count);
 
                 io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
                 io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
@@ -978,7 +978,7 @@ H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsi
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(io_info);
+    assert(io_info);
 
     if (H5D__contig_writevv(io_info, dset_info, (size_t)1, &dset_curr_seq, &dset_len, &dset_off, (size_t)1,
                             &mem_curr_seq, &mem_len, &mem_off) < 0)
@@ -1212,14 +1212,14 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1531,14 +1531,14 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(io_info);
-    HDassert(dset_info);
-    HDassert(dset_curr_seq);
-    HDassert(dset_len_arr);
-    HDassert(dset_off_arr);
-    HDassert(mem_curr_seq);
-    HDassert(mem_len_arr);
-    HDassert(mem_off_arr);
+    assert(io_info);
+    assert(dset_info);
+    assert(dset_curr_seq);
+    assert(dset_len_arr);
+    assert(dset_off_arr);
+    assert(mem_curr_seq);
+    assert(mem_len_arr);
+    assert(mem_off_arr);
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1595,7 +1595,7 @@ H5D__contig_flush(H5D_t *dset)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dset);
+    assert(dset);
 
     /* Flush any data in sieve buffer */
     if (H5D__flush_sieve_buf(dset) < 0)
@@ -1621,7 +1621,7 @@ H5D__contig_io_term(H5D_io_info_t H5_ATTR_UNUSED *io_info, H5D_dset_io_info_t *d
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(di);
+    assert(di);
 
     /* Free piece info */
     if (di->layout_io_info.contig_piece_info) {
@@ -1686,11 +1686,11 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f_src);
-    HDassert(storage_src);
-    HDassert(f_dst);
-    HDassert(storage_dst);
-    HDassert(dt_src);
+    assert(f_src);
+    assert(storage_src);
+    assert(f_dst);
+    assert(storage_dst);
+    assert(dt_src);
 
     /* Allocate space for destination raw data */
     if (H5D__contig_alloc(f_dst, storage_dst) < 0)
@@ -1787,7 +1787,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     } /* end else */
 
     /* Allocate space for copy buffer */
-    HDassert(buf_size);
+    assert(buf_size);
     if (NULL == (buf = H5FL_BLK_MALLOC(type_conv, buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
 

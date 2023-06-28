@@ -128,8 +128,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(pp && *pp);
-    HDassert(dt && dt->shared);
+    assert(pp && *pp);
+    assert(dt && dt->shared);
 
     /* XXX NOTE!
      *
@@ -810,8 +810,8 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(pp && *pp);
-    HDassert(dt);
+    assert(pp && *pp);
+    assert(dt);
 
     /* skip the type and class bit-field for now */
     *pp += 4;
@@ -904,7 +904,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
                 case H5T_ORDER_VAX: /*turn on 1st and 6th (reserved before adding VAX) bits*/
                     flags |= 0x41;
-                    HDassert(dt->shared->version >= H5O_DTYPE_VERSION_3);
+                    assert(dt->shared->version >= H5O_DTYPE_VERSION_3);
                     break;
 
                 case H5T_ORDER_MIXED:
@@ -984,13 +984,13 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             flags = (unsigned)(flags | ((dt->shared->u.atomic.u.f.sign << 8) & 0xff00));
             UINT16ENCODE(*pp, dt->shared->u.atomic.offset);
             UINT16ENCODE(*pp, dt->shared->u.atomic.prec);
-            HDassert(dt->shared->u.atomic.u.f.epos <= 255);
+            assert(dt->shared->u.atomic.u.f.epos <= 255);
             *(*pp)++ = (uint8_t)(dt->shared->u.atomic.u.f.epos);
-            HDassert(dt->shared->u.atomic.u.f.esize <= 255);
+            assert(dt->shared->u.atomic.u.f.esize <= 255);
             *(*pp)++ = (uint8_t)(dt->shared->u.atomic.u.f.esize);
-            HDassert(dt->shared->u.atomic.u.f.mpos <= 255);
+            assert(dt->shared->u.atomic.u.f.mpos <= 255);
             *(*pp)++ = (uint8_t)(dt->shared->u.atomic.u.f.mpos);
-            HDassert(dt->shared->u.atomic.u.f.msize <= 255);
+            assert(dt->shared->u.atomic.u.f.msize <= 255);
             *(*pp)++ = (uint8_t)(dt->shared->u.atomic.u.f.msize);
             UINT32ENCODE(*pp, dt->shared->u.atomic.u.f.ebias);
             break;
@@ -1019,11 +1019,11 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             /*
              * Character string types... (not fully implemented)
              */
-            HDassert(dt->shared->u.atomic.order == H5T_ORDER_NONE);
-            HDassert(dt->shared->u.atomic.prec == 8 * dt->shared->size);
-            HDassert(dt->shared->u.atomic.offset == 0);
-            HDassert(dt->shared->u.atomic.lsb_pad == H5T_PAD_ZERO);
-            HDassert(dt->shared->u.atomic.msb_pad == H5T_PAD_ZERO);
+            assert(dt->shared->u.atomic.order == H5T_ORDER_NONE);
+            assert(dt->shared->u.atomic.prec == 8 * dt->shared->size);
+            assert(dt->shared->u.atomic.offset == 0);
+            assert(dt->shared->u.atomic.lsb_pad == H5T_PAD_ZERO);
+            assert(dt->shared->u.atomic.msb_pad == H5T_PAD_ZERO);
 
             flags = (unsigned)(flags | (dt->shared->u.atomic.u.s.pad & 0x0f));
             flags = (unsigned)(flags | ((((unsigned)dt->shared->u.atomic.u.s.cset) & 0x0f) << 4));
@@ -1118,11 +1118,11 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             for (i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 /* Sanity check */
                 /* (compound datatypes w/array members must be encoded w/version >= 2) */
-                HDassert(dt->shared->u.compnd.memb[i].type->shared->type != H5T_ARRAY ||
-                         dt->shared->version >= H5O_DTYPE_VERSION_2);
+                assert(dt->shared->u.compnd.memb[i].type->shared->type != H5T_ARRAY ||
+                       dt->shared->version >= H5O_DTYPE_VERSION_2);
 
                 /* Check that the version is at least as great as the member */
-                HDassert(dt->shared->version >= dt->shared->u.compnd.memb[i].type->shared->version);
+                assert(dt->shared->version >= dt->shared->u.compnd.memb[i].type->shared->version);
 
                 /* Name */
                 HDstrcpy((char *)(*pp), dt->shared->u.compnd.memb[i].name);
@@ -1185,7 +1185,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_ENUM:
             /* Check that the version is at least as great as the parent */
-            HDassert(dt->shared->version >= dt->shared->parent->shared->version);
+            assert(dt->shared->version >= dt->shared->parent->shared->version);
 
             /*
              * Enumeration datatypes...
@@ -1221,7 +1221,7 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_VLEN: /* Variable length datatypes...  */
             /* Check that the version is at least as great as the parent */
-            HDassert(dt->shared->version >= dt->shared->parent->shared->version);
+            assert(dt->shared->version >= dt->shared->parent->shared->version);
 
             flags |= (dt->shared->u.vlen.type & 0x0f);
             if (dt->shared->u.vlen.type == H5T_VLEN_STRING) {
@@ -1236,16 +1236,16 @@ H5O__dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_ARRAY: /* Array datatypes */
             /* Double-check the number of dimensions */
-            HDassert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
+            assert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
 
             /* Check that the version is valid */
-            HDassert(dt->shared->version >= H5O_DTYPE_VERSION_2);
+            assert(dt->shared->version >= H5O_DTYPE_VERSION_2);
 
             /* Check that the version is at least as great as the parent */
-            HDassert(dt->shared->version >= dt->shared->parent->shared->version);
+            assert(dt->shared->version >= dt->shared->parent->shared->version);
 
             /* Encode the number of dimensions */
-            HDassert(dt->shared->u.array.ndims <= UCHAR_MAX);
+            assert(dt->shared->u.array.ndims <= UCHAR_MAX);
             *(*pp)++ = (uint8_t)dt->shared->u.array.ndims;
 
             /* Drop this information for Version 3 of the format */
@@ -1321,8 +1321,8 @@ H5O__dtype_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate datatype message */
     if (NULL == (dt = H5T__alloc()))
@@ -1378,9 +1378,9 @@ H5O__dtype_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(dt);
+    assert(f);
+    assert(p);
+    assert(dt);
 
     /* encode */
     if (H5O__dtype_encode_helper(&p, dt) < 0)
@@ -1417,7 +1417,7 @@ H5O__dtype_copy(const void *_src, void *_dst)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(src);
+    assert(src);
 
     /* Copy */
     if (NULL == (dst = H5T_copy(src, H5T_COPY_ALL)))
@@ -1462,8 +1462,8 @@ H5O__dtype_size(const H5F_t *f, const void *_mesg)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(f);
-    HDassert(dt);
+    assert(f);
+    assert(dt);
 
     /* Set the common size information */
     ret_value = 4 + /* Type, class & flags */
@@ -1616,7 +1616,7 @@ H5O__dtype_free(void *mesg)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(mesg);
+    assert(mesg);
 
     /* Release the datatype */
     if (H5T_close_real((H5T_t *)mesg) < 0)
@@ -1646,17 +1646,17 @@ H5O__dtype_set_share(void *_mesg /*in,out*/, const H5O_shared_t *sh)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(dt);
-    HDassert(sh);
+    assert(dt);
+    assert(sh);
 
     /* Make sure the shared message location is initialized, so that it
      * either has valid sharing information or is set to 0.
      */
-    HDassert(sh->type <= H5O_SHARE_TYPE_HERE);
+    assert(sh->type <= H5O_SHARE_TYPE_HERE);
 
     /* Make sure we're not sharing a committed type in the heap */
-    HDassert(sh->type == H5O_SHARE_TYPE_COMMITTED ||
-             (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
+    assert(sh->type == H5O_SHARE_TYPE_COMMITTED ||
+           (dt->shared->state != H5T_STATE_OPEN && dt->shared->state != H5T_STATE_NAMED));
 
     /* Copy the shared information */
     if (H5O_set_shared(&(dt->sh_loc), sh) < 0)
@@ -1702,7 +1702,7 @@ H5O__dtype_can_share(const void *_mesg)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(mesg);
+    assert(mesg);
 
     /* Don't share immutable datatypes */
     if ((tri_ret = H5T_is_immutable(mesg)) > 0)
@@ -1746,10 +1746,10 @@ H5O__dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(file_src);
-    HDassert(dt_src);
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(file_src);
+    assert(dt_src);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version as indicated by the destination file's high bound */
@@ -1841,14 +1841,14 @@ H5O__dtype_shared_post_copy_upd(const H5O_loc_t H5_ATTR_UNUSED *src_oloc, const 
     FUNC_ENTER_PACKAGE
 
     if (dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
-        HDassert(H5T_is_named(dt_dst));
+        assert(H5T_is_named(dt_dst));
         if (H5O_loc_reset(&(dt_dst->oloc)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to reset location")
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
     else
-        HDassert(!H5T_is_named(dt_dst));
+        assert(!H5T_is_named(dt_dst));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1885,11 +1885,11 @@ H5O__dtype_debug(H5F_t *f, const void *mesg, FILE *stream, int indent, int fwidt
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(dt);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(dt);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     switch (dt->shared->type) {
         case H5T_INTEGER:

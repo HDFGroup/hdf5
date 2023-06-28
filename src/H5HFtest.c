@@ -80,8 +80,8 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(cparam);
+    assert(fh);
+    assert(cparam);
 
     /* Get fractal heap creation parameters */
     if (fh->hdr->id_len == (unsigned)(1 + fh->hdr->heap_off_size + fh->hdr->heap_len_size))
@@ -118,8 +118,8 @@ H5HF_cmp_cparam_test(const H5HF_create_t *cparam1, const H5HF_create_t *cparam2)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(cparam1);
-    HDassert(cparam2);
+    assert(cparam1);
+    assert(cparam2);
 
     /* Compare doubling table parameters */
     if (cparam1->managed.width < cparam2->managed.width)
@@ -234,7 +234,7 @@ H5HF_get_max_root_rows(const H5HF_t *fh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
+    assert(fh);
 
     /* Return max. # of rows in root indirect block */
     ret_value = fh->hdr->man_dtable.max_root_rows;
@@ -264,7 +264,7 @@ H5HF_get_dtable_width_test(const H5HF_t *fh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
+    assert(fh);
 
     /* Return width of doubling table */
     ret_value = fh->hdr->man_dtable.cparam.width;
@@ -294,7 +294,7 @@ H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
+    assert(fh);
 
     /* Return max. # of direct blocks in any indirect block */
     ret_value = fh->hdr->man_dtable.max_direct_rows;
@@ -328,8 +328,8 @@ H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(pos);
+    assert(fh);
+    assert(pos);
 
     /* Return max. # of direct blocks in this indirect block row */
     ret_value = pos + (fh->hdr->man_dtable.max_direct_bits - fh->hdr->man_dtable.first_row_bits) + 1;
@@ -359,7 +359,7 @@ H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
+    assert(fh);
 
     /* Return direct block free space */
     ret_value = fh->hdr->man_dtable.row_block_size[row];
@@ -390,7 +390,7 @@ H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
+    assert(fh);
 
     /* Return direct block free space */
     ret_value = fh->hdr->man_dtable.row_tot_dblock_free[row];
@@ -420,10 +420,10 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(fh->hdr);
-    HDassert(id);
-    HDassert(obj_off);
+    assert(fh);
+    assert(fh->hdr);
+    assert(id);
+    assert(obj_off);
 
     /* Get the offset for a 'normal' heap ID */
     id++;
@@ -453,8 +453,8 @@ H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(id);
-    HDassert(obj_type);
+    assert(id);
+    assert(obj_type);
 
     /* Get the type for a heap ID */
     *obj_type = (uint8_t)(*id & H5HF_ID_TYPE_MASK);
@@ -481,10 +481,10 @@ H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(fh->hdr);
-    HDassert(max_len);
-    HDassert(len_extended);
+    assert(fh);
+    assert(fh->hdr);
+    assert(max_len);
+    assert(len_extended);
 
     /* Retrieve information about tiny object's ID encoding in a heap */
     *max_len      = fh->hdr->tiny_max_len;
@@ -512,9 +512,9 @@ H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, hbool_t *ids_direct)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check arguments. */
-    HDassert(fh);
-    HDassert(fh->hdr);
-    HDassert(ids_direct);
+    assert(fh);
+    assert(fh->hdr);
+    assert(ids_direct);
 
     /* Retrieve information about tiny object's ID encoding in a heap */
     if (next_id)

@@ -96,10 +96,10 @@ H5FD__extend(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Get current end-of-allocated space address */
     eoa = file->cls->get_eoa(file, type);
@@ -151,10 +151,10 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 #endif /* H5FD_ALLOC_DEBUG */
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Check for query driver and call it */
     if (file->cls->query)
@@ -203,7 +203,7 @@ H5FD__alloc_real(H5FD_t *file, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr
 
     /* Post-condition sanity check */
     if (!file->paged_aggr && file->alignment > 1 && orig_size >= file->threshold)
-        HDassert(!(ret_value % file->alignment));
+        assert(!(ret_value % file->alignment));
 
     /* Convert absolute file offset to relative address */
     ret_value -= file->base_addr;
@@ -241,10 +241,10 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, H5F_t *f, hsize_t size, haddr_t *frag_
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the real 'alloc' routine */
     ret_value = H5FD__alloc_real(file, type, size, frag_addr, frag_size);
@@ -280,10 +280,10 @@ H5FD__free_real(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
 #ifdef H5FD_ALLOC_DEBUG
     fprintf(stderr, "%s: type = %u, addr = %" PRIuHADDR ", size = %" PRIuHSIZE "\n", __func__, (unsigned)type,
@@ -365,10 +365,10 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t addr, hsize_t size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(size > 0);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(size > 0);
 
     /* Call the real 'free' routine */
     if (H5FD__free_real(file, type, addr, size) < 0)
@@ -409,11 +409,11 @@ H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, H5F_t *f, haddr_t blk_end, hsize_
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
-    HDassert(file);
-    HDassert(file->cls);
-    HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
-    HDassert(extra_requested > 0);
-    HDassert(f);
+    assert(file);
+    assert(file->cls);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
+    assert(extra_requested > 0);
+    assert(f);
 
     /* Retrieve the end of the address space */
     if (HADDR_UNDEF == (eoa = file->cls->get_eoa(file, type)))

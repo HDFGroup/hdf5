@@ -85,9 +85,9 @@ H5G__ent_decode_vec(const H5F_t *f, const uint8_t **pp, const uint8_t *p_end, H5
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     /* decode entries */
     for (u = 0; u < n; u++) {
@@ -126,9 +126,9 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     if (H5_IS_BUFFER_OVERFLOW(*pp, ent->name_off, p_end))
         HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
@@ -154,7 +154,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, const uint8
             break;
 
         case H5G_CACHED_STAB:
-            HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+            assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
             if (H5_IS_BUFFER_OVERFLOW(*pp, H5F_SIZEOF_ADDR(f) * 2, p_end))
                 HGOTO_ERROR(H5E_FILE, H5E_OVERFLOW, FAIL, "image pointer is out of bounds")
             H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
@@ -204,9 +204,9 @@ H5G__ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsign
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
-    HDassert(ent);
+    assert(f);
+    assert(pp);
+    assert(ent);
 
     /* encode entries */
     for (u = 0; u < n; u++)
@@ -242,8 +242,8 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(pp);
+    assert(f);
+    assert(pp);
 
     /* Check for actual entry to encode */
     if (ent) {
@@ -259,7 +259,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
                 break;
 
             case H5G_CACHED_STAB:
-                HDassert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+                assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
                 H5F_addr_encode(f, pp, ent->cache.stab.btree_addr);
                 H5F_addr_encode(f, pp, ent->cache.stab.heap_addr);
                 break;
@@ -319,9 +319,9 @@ H5G__ent_copy(H5G_entry_t *dst, H5G_entry_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(src);
-    HDassert(dst);
-    HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
+    assert(src);
+    assert(dst);
+    assert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */
     H5MM_memcpy(dst, src, sizeof(H5G_entry_t));
@@ -356,7 +356,7 @@ H5G__ent_reset(H5G_entry_t *ent)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
-    HDassert(ent);
+    assert(ent);
 
     /* Clear the symbol table entry to an empty state */
     HDmemset(ent, 0, sizeof(H5G_entry_t));
@@ -388,10 +388,10 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(heap);
-    HDassert(name);
-    HDassert(lnk);
+    assert(f);
+    assert(heap);
+    assert(name);
+    assert(lnk);
 
     /* Reset the new entry */
     H5G__ent_reset(ent);
@@ -427,7 +427,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
                     if ((stab_exists = H5O_msg_exists(&targ_oloc, H5O_STAB_ID)) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to check for STAB message")
 
-                    HDassert(!stab_exists);
+                    assert(!stab_exists);
                 } /* end else */
 #endif            /* NDEBUG */
             }     /* end if */

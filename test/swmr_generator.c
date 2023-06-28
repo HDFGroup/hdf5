@@ -97,8 +97,8 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 #endif                /* FILLVAL_WORKS */
     unsigned u, v;    /* Local index variable */
 
-    HDassert(filename);
-    HDassert(index_type);
+    assert(filename);
+    assert(index_type);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)

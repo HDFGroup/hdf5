@@ -54,11 +54,11 @@ H5FD__onion_ingest_revision_record(H5FD_onion_revision_record_t *r_out, H5FD_t *
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(r_out);
-    HDassert(raw_file);
-    HDassert(history);
-    HDassert(history->record_locs);
-    HDassert(history->n_revisions > 0);
+    assert(r_out);
+    assert(raw_file);
+    assert(history);
+    assert(history->record_locs);
+    assert(history->n_revisions > 0);
 
     high  = history->n_revisions - 1;
     range = high;
@@ -186,7 +186,7 @@ H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(aix);
+    assert(aix);
 
     if (H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
         HGOTO_DONE(FALSE)
@@ -230,11 +230,11 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(aix);
-    HDassert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
-    HDassert(entry_out);
+    assert(aix);
+    assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
+    assert(entry_out);
     if (aix->n_entries != 0)
-        HDassert(aix->list);
+        assert(aix->list);
 
     high  = aix->n_entries - 1;
     range = high;
@@ -250,7 +250,7 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
 
     /* Winnow down to first of found or one element */
     while (range > 0) {
-        HDassert(high < aix->n_entries);
+        assert(high < aix->n_entries);
         n = low + (range / 2);
         x = &(aix->list[n]);
         if (x->logical_page == logical_page) {
@@ -267,7 +267,7 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
         range = high - low;
     }
 
-    HDassert(high == low); /* one element */
+    assert(high == low); /* one element */
 
     /* n == low/high check because we may have tested it already above */
     if ((n != low || n != high) && (aix->list[low].logical_page == logical_page)) {
@@ -294,8 +294,8 @@ H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(rix);
-    HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    assert(rix);
+    assert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
 
     for (size_t i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
         H5FD_onion_revision_index_hash_chain_node_t *next = NULL;
@@ -305,7 +305,7 @@ H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
             rix->_hash_table_n_keys_populated -= 1;
 
         while (node != NULL) {
-            HDassert(H5FD_ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR == node->version);
+            assert(H5FD_ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR == node->version);
 
             next = node->next;
             H5MM_xfree(node);
@@ -338,8 +338,8 @@ H5FD__onion_revision_index_init(uint32_t page_size)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(0 != page_size);
-    HDassert(POWER_OF_TWO(page_size));
+    assert(0 != page_size);
+    assert(POWER_OF_TWO(page_size));
 
     if (NULL == (rix = H5MM_calloc(sizeof(H5FD_onion_revision_index_t))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "cannot allocate index")
@@ -392,9 +392,9 @@ H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(rix);
-    HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
-    HDassert(rix->_hash_table);
+    assert(rix);
+    assert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    assert(rix->_hash_table);
 
     if (NULL == (new_table = H5MM_calloc(new_size * sizeof(H5FD_onion_revision_index_hash_chain_node_t *))))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate new hash table")
@@ -454,9 +454,9 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(rix);
-    HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
-    HDassert(entry);
+    assert(rix);
+    assert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    assert(entry);
 
     /* Resize and re-hash table if necessary */
     if (rix->n_entries >= (rix->_hash_table_size * 2) ||
@@ -466,7 +466,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     }
 
     key = entry->logical_page & (rix->_hash_table_size - 1);
-    HDassert(key < rix->_hash_table_size);
+    assert(key < rix->_hash_table_size);
 
     if (NULL == rix->_hash_table[key]) {
         /* Key maps to empty bucket */
@@ -527,13 +527,13 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(rix);
-    HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
-    HDassert(rix->_hash_table);
-    HDassert(entry_out);
+    assert(rix);
+    assert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    assert(rix->_hash_table);
+    assert(entry_out);
 
     key = logical_page & (rix->_hash_table_size - 1);
-    HDassert(key < rix->_hash_table_size);
+    assert(key < rix->_hash_table_size);
 
     if (rix->_hash_table[key] != NULL) {
         H5FD_onion_revision_index_hash_chain_node_t *node = NULL;
@@ -599,10 +599,10 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(buf != NULL);
-    HDassert(record != NULL);
-    HDassert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
-    HDassert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
+    assert(buf != NULL);
+    assert(record != NULL);
+    assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
+    assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
     if (HDstrncmp((const char *)buf, H5FD_ONION_REVISION_RECORD_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
@@ -756,12 +756,12 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(checksum != NULL);
-    HDassert(buf != NULL);
-    HDassert(record != NULL);
-    HDassert(vers_u32 < 0x100);
-    HDassert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
-    HDassert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
+    assert(checksum != NULL);
+    assert(buf != NULL);
+    assert(record != NULL);
+    assert(vers_u32 < 0x100);
+    assert(H5FD_ONION_REVISION_RECORD_VERSION_CURR == record->version);
+    assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
     page_size = (uint32_t)(1 << record->archival_index.page_size_log2);
 
@@ -780,7 +780,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     if (record->archival_index.n_entries > 0) {
         uint64_t page_size_log2 = record->archival_index.page_size_log2;
 
-        HDassert(record->archival_index.list != NULL);
+        assert(record->archival_index.list != NULL);
         for (uint64_t i = 0; i < record->archival_index.n_entries; i++) {
             uint32_t                  sum       = 0;
             H5FD_onion_index_entry_t *entry     = NULL;
@@ -797,7 +797,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     }
 
     if (record->comment_size > 0) {
-        HDassert(record->comment != NULL && *record->comment != '\0');
+        assert(record->comment != NULL && *record->comment != '\0');
         HDmemcpy(ptr, record->comment, record->comment_size);
         ptr += record->comment_size;
     }
@@ -856,11 +856,11 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(rix);
-    HDassert(aix);
-    HDassert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
-    HDassert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
-    HDassert(aix->page_size_log2 == rix->page_size_log2);
+    assert(rix);
+    assert(aix);
+    assert(H5FD_ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    assert(H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
+    assert(aix->page_size_log2 == rix->page_size_log2);
 
     /* If the revision index is empty there is nothing to archive */
     if (rix->n_entries == 0)
@@ -882,8 +882,8 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
     }
 
     /* Sort the new archival list */
-    HDqsort(new_aix.list, new_aix.n_entries, sizeof(H5FD_onion_index_entry_t),
-            H5FD__onion_archival_index_list_sort_cmp);
+    qsort(new_aix.list, new_aix.n_entries, sizeof(H5FD_onion_index_entry_t),
+          H5FD__onion_archival_index_list_sort_cmp);
 
     /* Add the old archival index entries to a 'kept' list containing the
      * old archival list entries that are not also included in the revision
@@ -924,8 +924,8 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
     }
 
     /* Sort this list */
-    HDqsort(aix->list, aix->n_entries, sizeof(H5FD_onion_index_entry_t),
-            H5FD__onion_archival_index_list_sort_cmp);
+    qsort(aix->list, aix->n_entries, sizeof(H5FD_onion_index_entry_t),
+          H5FD__onion_archival_index_list_sort_cmp);
 
 done:
     /* Free the temporary lists */

@@ -91,8 +91,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     if (NULL == (mesg = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "memory allocation failed")
@@ -798,9 +798,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(p);
+    assert(f);
+    assert(mesg);
+    assert(p);
 
     /* Message version */
     *p++ = (uint8_t)((mesg->version < H5O_LAYOUT_VERSION_3) ? H5O_LAYOUT_VERSION_3 : mesg->version);
@@ -835,7 +835,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
         case H5D_CHUNKED:
             if (mesg->version < H5O_LAYOUT_VERSION_4) {
                 /* Number of dimensions */
-                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 *p++ = (uint8_t)mesg->u.chunk.ndims;
 
                 /* B-tree address */
@@ -850,11 +850,11 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 *p++ = mesg->u.chunk.flags;
 
                 /* Number of dimensions */
-                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                assert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 *p++ = (uint8_t)mesg->u.chunk.ndims;
 
                 /* Encoded # of bytes for each chunk dimension */
-                HDassert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
+                assert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
                 *p++ = (uint8_t)mesg->u.chunk.enc_bytes_per_dim;
 
                 /* Dimension sizes */
@@ -956,7 +956,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* Allocate destination message, if necessary */
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_layout_t)))
@@ -971,7 +971,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
             /* Deep copy the buffer for compact datasets also */
             if (mesg->storage.u.compact.size > 0) {
                 /* Sanity check */
-                HDassert(mesg->storage.u.compact.buf);
+                assert(mesg->storage.u.compact.buf);
 
                 /* Allocate memory for the raw data */
                 if (NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
@@ -982,7 +982,7 @@ H5O__layout_copy(const void *_mesg, void *_dest)
                             dest->storage.u.compact.size);
             } /* end if */
             else
-                HDassert(dest->storage.u.compact.buf == NULL);
+                assert(dest->storage.u.compact.buf == NULL);
             break;
 
         case H5D_CONTIGUOUS:
@@ -1042,8 +1042,8 @@ H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     /* Compute serialized size */
     /* (including possibly compact data) */
@@ -1110,7 +1110,7 @@ H5O__layout_free(void *_mesg)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     /* Free resources within the message */
     H5O__layout_reset(mesg);
@@ -1141,9 +1141,9 @@ H5O__layout_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(open_oh);
-    HDassert(mesg);
+    assert(f);
+    assert(open_oh);
+    assert(mesg);
 
     /* Perform different actions, depending on the type of storage */
     switch (mesg->type) {
@@ -1203,8 +1203,8 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(cpy_info);
-    HDassert(cpy_info->file_dst);
+    assert(cpy_info);
+    assert(cpy_info->file_dst);
 
     /* Check to ensure that the version of the message to be copied does not exceed
        the message version allowed by the destination file's high bound */
@@ -1243,9 +1243,9 @@ H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(file_src);
-    HDassert(layout_src);
-    HDassert(file_dst);
+    assert(file_src);
+    assert(layout_src);
+    assert(file_dst);
 
     /* Copy the layout information */
     if (NULL == (layout_dst = (H5O_layout_t *)H5O__layout_copy(layout_src, NULL)))
@@ -1345,11 +1345,11 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mesg);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
     switch (mesg->type) {

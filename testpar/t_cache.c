@@ -745,8 +745,8 @@ init_data(void)
     haddr_t       addr = BASE_ADDR;
 
     /* this must hold so moves don't change entry size. */
-    HDassert((NUM_DATA_ENTRIES / 2) % 20 == 0);
-    HDassert((virt_num_data_entries / 2) % 20 == 0);
+    assert((NUM_DATA_ENTRIES / 2) % 20 == 0);
+    assert((virt_num_data_entries / 2) % 20 == 0);
 
     for (i = 0; i < NUM_DATA_ENTRIES; i++) {
         data[i].base_addr     = addr;
@@ -768,7 +768,7 @@ init_data(void)
         data_index[i] = i;
 
         addr += addr_offsets[j];
-        HDassert(addr > data[i].base_addr);
+        assert(addr > data[i].base_addr);
 
         j = (j + 1) % num_addr_offsets;
     }
@@ -2131,20 +2131,20 @@ datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
     int           idx;
     struct datum *entry_ptr;
 
-    HDassert(udata_ptr);
-    HDassert(image_len_ptr);
+    assert(udata_ptr);
+    assert(image_len_ptr);
 
     idx = addr_to_datum_index(addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
 
     entry_ptr = &(data[idx]);
 
-    HDassert(addr == entry_ptr->base_addr);
-    HDassert(!entry_ptr->global_pinned);
-    HDassert(!entry_ptr->local_pinned);
+    assert(addr == entry_ptr->base_addr);
+    assert(!entry_ptr->global_pinned);
+    assert(!entry_ptr->local_pinned);
 
     if (callbacks_verbose) {
 
@@ -2180,21 +2180,21 @@ datum_deserialize(const void H5_ATTR_NDEBUG_UNUSED *image_ptr, H5_ATTR_UNUSED si
     int           idx;
     struct datum *entry_ptr = NULL;
 
-    HDassert(image_ptr != NULL);
+    assert(image_ptr != NULL);
 
     idx = addr_to_datum_index(addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
 
     entry_ptr = &(data[idx]);
 
-    HDassert(addr == entry_ptr->base_addr);
-    HDassert(!entry_ptr->global_pinned);
-    HDassert(!entry_ptr->local_pinned);
+    assert(addr == entry_ptr->base_addr);
+    assert(!entry_ptr->global_pinned);
+    assert(!entry_ptr->local_pinned);
 
-    HDassert(dirty_ptr);
+    assert(dirty_ptr);
 
     if (callbacks_verbose) {
 
@@ -2235,19 +2235,19 @@ datum_image_len(const void *thing, size_t *image_len)
     int                 idx;
     const struct datum *entry_ptr;
 
-    HDassert(thing);
-    HDassert(image_len);
+    assert(thing);
+    assert(image_len);
 
     entry_ptr = (const struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
-    HDassert(&(data[idx]) == entry_ptr);
-    HDassert(entry_ptr->local_len > 0);
-    HDassert(entry_ptr->local_len <= entry_ptr->len);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
+    assert(&(data[idx]) == entry_ptr);
+    assert(entry_ptr->local_len > 0);
+    assert(entry_ptr->local_len <= entry_ptr->len);
 
     if (callbacks_verbose) {
         fprintf(stdout, "%d: image_len() idx = %d, addr = %ld, len = %d.\n", world_mpi_rank, idx,
@@ -2255,7 +2255,7 @@ datum_image_len(const void *thing, size_t *image_len)
         fflush(stdout);
     }
 
-    HDassert(entry_ptr->header.addr == entry_ptr->base_addr);
+    assert(entry_ptr->header.addr == entry_ptr->base_addr);
 
     *image_len = entry_ptr->local_len;
 
@@ -2282,28 +2282,28 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
     struct datum      *entry_ptr;
     struct H5AC_aux_t *aux_ptr;
 
-    HDassert(thing_ptr);
-    HDassert(image_ptr);
+    assert(thing_ptr);
+    assert(image_ptr);
 
     entry_ptr = (struct datum *)thing_ptr;
 
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(f->shared->cache->aux_ptr);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(f->shared->cache->aux_ptr);
 
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
 
-    HDassert(aux_ptr);
+    assert(aux_ptr);
 
     entry_ptr->aux_ptr = aux_ptr;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
-    HDassert(&(data[idx]) == entry_ptr);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
+    assert(&(data[idx]) == entry_ptr);
 
     if (callbacks_verbose) {
 
@@ -2312,17 +2312,17 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
         fflush(stdout);
     }
 
-    HDassert(entry_ptr->header.addr == entry_ptr->base_addr);
-    HDassert((entry_ptr->header.size == entry_ptr->len) || (entry_ptr->header.size == entry_ptr->local_len));
+    assert(entry_ptr->header.addr == entry_ptr->base_addr);
+    assert((entry_ptr->header.size == entry_ptr->len) || (entry_ptr->header.size == entry_ptr->local_len));
 
-    HDassert(entry_ptr->header.is_dirty == entry_ptr->dirty);
+    assert(entry_ptr->header.is_dirty == entry_ptr->dirty);
 
     datum_flushes++;
 
     if (entry_ptr->header.is_pinned) {
 
         datum_pinned_flushes++;
-        HDassert(entry_ptr->global_pinned || entry_ptr->local_pinned);
+        assert(entry_ptr->global_pinned || entry_ptr->local_pinned);
     }
 
     return (ret_value);
@@ -2352,16 +2352,16 @@ datum_notify(H5C_notify_action_t action, void *thing)
     struct mssg_t      mssg;
     int                idx;
 
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
-    HDassert(&(data[idx]) == entry_ptr);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
+    assert(&(data[idx]) == entry_ptr);
 
     if (callbacks_verbose) {
 
@@ -2370,14 +2370,14 @@ datum_notify(H5C_notify_action_t action, void *thing)
         fflush(stdout);
     }
 
-    HDassert(entry_ptr->header.addr == entry_ptr->base_addr);
+    assert(entry_ptr->header.addr == entry_ptr->base_addr);
     /* Skip this check when the entry is being dirtied, since the resize
      * operation sends the message before the len/local_len is updated
      * (after the resize operation completes successfully) (QAK - 2016/10/19)
      */
     if (H5AC_NOTIFY_ACTION_ENTRY_DIRTIED != action)
-        HDassert((entry_ptr->header.size == entry_ptr->len) ||
-                 (entry_ptr->header.size == entry_ptr->local_len));
+        assert((entry_ptr->header.size == entry_ptr->len) ||
+               (entry_ptr->header.size == entry_ptr->local_len));
 
     switch (action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
@@ -2520,11 +2520,11 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 fflush(stdout);
             }
 
-            HDassert(entry_ptr->aux_ptr);
+            assert(entry_ptr->aux_ptr);
             aux_ptr            = entry_ptr->aux_ptr;
             entry_ptr->aux_ptr = NULL;
 
-            HDassert(entry_ptr->header.is_dirty); /* JRM */
+            assert(entry_ptr->header.is_dirty); /* JRM */
 
             if ((file_mpi_rank != 0) && (entry_ptr->dirty) &&
                 (aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY)) {
@@ -2600,7 +2600,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
             if (entry_ptr->header.is_pinned) {
 
                 datum_pinned_flushes++;
-                HDassert(entry_ptr->global_pinned || entry_ptr->local_pinned);
+                assert(entry_ptr->global_pinned || entry_ptr->local_pinned);
             }
             break;
 
@@ -2641,7 +2641,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
 
             if (entry_ptr->header.is_pinned) {
                 datum_pinned_clears++;
-                HDassert(entry_ptr->global_pinned || entry_ptr->local_pinned);
+                assert(entry_ptr->global_pinned || entry_ptr->local_pinned);
             } /* end if */
 
             break;
@@ -2725,16 +2725,16 @@ datum_free_icr(void *thing)
     int           idx;
     struct datum *entry_ptr;
 
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (struct datum *)thing;
 
     idx = addr_to_datum_index(entry_ptr->base_addr);
 
-    HDassert(idx >= 0);
-    HDassert(idx < NUM_DATA_ENTRIES);
-    HDassert(idx < virt_num_data_entries);
-    HDassert(&(data[idx]) == entry_ptr);
+    assert(idx >= 0);
+    assert(idx < NUM_DATA_ENTRIES);
+    assert(idx < virt_num_data_entries);
+    assert(&(data[idx]) == entry_ptr);
 
     if (callbacks_verbose) {
 
@@ -2743,13 +2743,13 @@ datum_free_icr(void *thing)
         fflush(stdout);
     }
 
-    HDassert(entry_ptr->header.addr == entry_ptr->base_addr);
-    HDassert((entry_ptr->header.size == entry_ptr->len) || (entry_ptr->header.size == entry_ptr->local_len));
+    assert(entry_ptr->header.addr == entry_ptr->base_addr);
+    assert((entry_ptr->header.size == entry_ptr->len) || (entry_ptr->header.size == entry_ptr->local_len));
 
-    HDassert(!(entry_ptr->header.is_dirty));
-    HDassert(!(entry_ptr->global_pinned));
-    HDassert(!(entry_ptr->local_pinned));
-    HDassert(!(entry_ptr->header.is_pinned));
+    assert(!(entry_ptr->header.is_dirty));
+    assert(!(entry_ptr->global_pinned));
+    assert(!(entry_ptr->local_pinned));
+    assert(!(entry_ptr->header.is_pinned));
 
     datum_destroys++;
 
@@ -2781,15 +2781,15 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
     herr_t        result;
     struct datum *entry_ptr;
 
-    HDassert(file_ptr);
-    HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-    HDassert(idx < virt_num_data_entries);
+    assert(file_ptr);
+    assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+    assert(idx < virt_num_data_entries);
 
     entry_ptr = &(data[idx]);
 
-    HDassert(!(entry_ptr->locked));
-    HDassert(!(entry_ptr->global_pinned));
-    HDassert(!(entry_ptr->local_pinned));
+    assert(!(entry_ptr->locked));
+    assert(!(entry_ptr->global_pinned));
+    assert(!(entry_ptr->local_pinned));
 
     entry_ptr->dirty = FALSE;
 
@@ -2805,8 +2805,8 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
             }
         }
 
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
-        HDassert(!((entry_ptr->header).is_dirty));
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(!((entry_ptr->header).is_dirty));
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->base_addr, NULL, &in_cache, NULL, NULL, NULL, NULL,
                                       NULL, NULL, NULL);
@@ -2852,14 +2852,14 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
     herr_t        result;
     struct datum *entry_ptr;
 
-    HDassert(cache_ptr);
-    HDassert(file_ptr);
-    HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-    HDassert(idx < virt_num_data_entries);
+    assert(cache_ptr);
+    assert(file_ptr);
+    assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+    assert(idx < virt_num_data_entries);
 
     entry_ptr = &(data[idx]);
 
-    HDassert(!(entry_ptr->locked));
+    assert(!(entry_ptr->locked));
 
     insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0);
 
@@ -2904,18 +2904,18 @@ insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
         if (insert_pinned) {
 
-            HDassert(entry_ptr->header.is_pinned);
+            assert(entry_ptr->header.is_pinned);
             entry_ptr->global_pinned = TRUE;
             global_pins++;
         }
         else {
 
-            HDassert(!(entry_ptr->header.is_pinned));
+            assert(!(entry_ptr->header.is_pinned));
             entry_ptr->global_pinned = FALSE;
         }
 
-        /* HDassert( entry_ptr->header.is_dirty ); */
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        /* assert( entry_ptr->header.is_dirty ); */
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
     }
 
     return;
@@ -2947,18 +2947,18 @@ local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, in
         int     i;
         int     idx;
 
-        HDassert(file_ptr);
-        HDassert(0 <= min_idx);
-        HDassert(min_idx < max_idx);
-        HDassert(max_idx < NUM_DATA_ENTRIES);
-        HDassert(max_idx < virt_num_data_entries);
-        HDassert(0 <= min_count);
-        HDassert(min_count < max_count);
+        assert(file_ptr);
+        assert(0 <= min_idx);
+        assert(min_idx < max_idx);
+        assert(max_idx < NUM_DATA_ENTRIES);
+        assert(max_idx < virt_num_data_entries);
+        assert(0 <= min_count);
+        assert(min_count < max_count);
 
         count = (HDrand() % (max_count - min_count)) + min_count;
 
-        HDassert(min_count <= count);
-        HDassert(count <= max_count);
+        assert(min_count <= count);
+        assert(count <= max_count);
 
         for (i = 0; i < count; i++) {
             local_pin_random_entry(file_ptr, min_idx, max_idx);
@@ -2966,8 +2966,8 @@ local_pin_and_unpin_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, in
 
         count = (HDrand() % (max_count - min_count)) + min_count;
 
-        HDassert(min_count <= count);
-        HDassert(count <= max_count);
+        assert(min_count <= count);
+        assert(count <= max_count);
 
         i   = 0;
         idx = 0;
@@ -3006,16 +3006,16 @@ local_pin_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert(0 <= min_idx);
-        HDassert(min_idx < max_idx);
-        HDassert(max_idx < NUM_DATA_ENTRIES);
-        HDassert(max_idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert(0 <= min_idx);
+        assert(min_idx < max_idx);
+        assert(max_idx < NUM_DATA_ENTRIES);
+        assert(max_idx < virt_num_data_entries);
 
         do {
             idx = (HDrand() % (max_idx - min_idx)) + min_idx;
-            HDassert(min_idx <= idx);
-            HDassert(idx <= max_idx);
+            assert(min_idx <= idx);
+            assert(idx <= max_idx);
         } while (data[idx].global_pinned || data[idx].local_pinned);
 
         pin_entry(file_ptr, idx, FALSE, FALSE);
@@ -3046,7 +3046,7 @@ local_unpin_all_entries(H5F_t *file_ptr, hbool_t via_unprotect)
 
         int idx;
 
-        HDassert(file_ptr);
+        assert(file_ptr);
 
         idx = 0;
 
@@ -3083,10 +3083,10 @@ local_unpin_next_pinned_entry(H5F_t *file_ptr, int start_idx, hbool_t via_unprot
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert(0 <= start_idx);
-        HDassert(start_idx < NUM_DATA_ENTRIES);
-        HDassert(start_idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert(0 <= start_idx);
+        assert(start_idx < NUM_DATA_ENTRIES);
+        assert(start_idx < virt_num_data_entries);
 
         idx = start_idx;
 
@@ -3135,14 +3135,14 @@ lock_and_unlock_random_entries(H5F_t *file_ptr, int min_idx, int max_idx, int mi
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert(0 <= min_count);
-        HDassert(min_count < max_count);
+        assert(file_ptr);
+        assert(0 <= min_count);
+        assert(min_count < max_count);
 
         count = (HDrand() % (max_count - min_count)) + min_count;
 
-        HDassert(min_count <= count);
-        HDassert(count <= max_count);
+        assert(min_count <= count);
+        assert(count <= max_count);
 
         for (i = 0; i < count; i++) {
             lock_and_unlock_random_entry(file_ptr, min_idx, max_idx);
@@ -3174,16 +3174,16 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert(0 <= min_idx);
-        HDassert(min_idx < max_idx);
-        HDassert(max_idx < NUM_DATA_ENTRIES);
-        HDassert(max_idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert(0 <= min_idx);
+        assert(min_idx < max_idx);
+        assert(max_idx < NUM_DATA_ENTRIES);
+        assert(max_idx < virt_num_data_entries);
 
         idx = (HDrand() % (max_idx - min_idx)) + min_idx;
 
-        HDassert(min_idx <= idx);
-        HDassert(idx <= max_idx);
+        assert(min_idx <= idx);
+        assert(idx <= max_idx);
 
         lock_entry(file_ptr, idx);
         unlock_entry(file_ptr, idx, H5AC__NO_FLAGS_SET);
@@ -3214,12 +3214,12 @@ lock_entry(H5F_t *file_ptr, int32_t idx)
 
     if (nerrors == 0) {
 
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert(!(entry_ptr->locked));
+        assert(!(entry_ptr->locked));
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, &(types[0]), entry_ptr->base_addr,
                                                             &entry_ptr->base_addr, H5AC__NO_FLAGS_SET);
@@ -3239,7 +3239,7 @@ lock_entry(H5F_t *file_ptr, int32_t idx)
             entry_ptr->locked = TRUE;
         }
 
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
     }
 
     return;
@@ -3267,13 +3267,13 @@ mark_entry_dirty(int32_t idx)
 
     if (nerrors == 0) {
 
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert(entry_ptr->locked || entry_ptr->global_pinned);
-        HDassert(!(entry_ptr->local_pinned));
+        assert(entry_ptr->locked || entry_ptr->global_pinned);
+        assert(!(entry_ptr->local_pinned));
 
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
@@ -3317,15 +3317,15 @@ pin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty)
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert(!(entry_ptr->global_pinned));
-        HDassert(!(entry_ptr->local_pinned));
-        HDassert(!(dirty && (!global)));
+        assert(!(entry_ptr->global_pinned));
+        assert(!(entry_ptr->local_pinned));
+        assert(!(dirty && (!global)));
 
         lock_entry(file_ptr, idx);
 
@@ -3336,8 +3336,8 @@ pin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty)
 
         unlock_entry(file_ptr, idx, flags);
 
-        HDassert((entry_ptr->header).is_pinned);
-        HDassert((!dirty) || ((entry_ptr->header).is_dirty));
+        assert((entry_ptr->header).is_pinned);
+        assert((!dirty) || ((entry_ptr->header).is_dirty));
 
         if (global) {
 
@@ -3377,12 +3377,12 @@ pin_protected_entry(int32_t idx, hbool_t global)
     herr_t        result;
     struct datum *entry_ptr;
 
-    HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-    HDassert(idx < virt_num_data_entries);
+    assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+    assert(idx < virt_num_data_entries);
 
     entry_ptr = &(data[idx]);
 
-    HDassert(entry_ptr->locked);
+    assert(entry_ptr->locked);
 
     if (nerrors == 0) {
 
@@ -3412,7 +3412,7 @@ pin_protected_entry(int32_t idx, hbool_t global)
             local_pins++;
         }
 
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
     }
 
     return;
@@ -3448,19 +3448,19 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 
     if ((nerrors == 0) && (old_idx != new_idx)) {
 
-        HDassert(file_ptr);
-        HDassert((0 <= old_idx) && (old_idx < NUM_DATA_ENTRIES));
-        HDassert(old_idx < virt_num_data_entries);
-        HDassert((0 <= new_idx) && (new_idx < NUM_DATA_ENTRIES));
-        HDassert(new_idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert((0 <= old_idx) && (old_idx < NUM_DATA_ENTRIES));
+        assert(old_idx < virt_num_data_entries);
+        assert((0 <= new_idx) && (new_idx < NUM_DATA_ENTRIES));
+        assert(new_idx < virt_num_data_entries);
 
         old_entry_ptr = &(data[old_idx]);
         new_entry_ptr = &(data[new_idx]);
 
-        HDassert(((old_entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
-        HDassert(!(old_entry_ptr->header.is_protected));
-        HDassert(!(old_entry_ptr->locked));
-        HDassert(old_entry_ptr->len == new_entry_ptr->len);
+        assert(((old_entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(!(old_entry_ptr->header.is_protected));
+        assert(!(old_entry_ptr->locked));
+        assert(old_entry_ptr->len == new_entry_ptr->len);
 
         old_addr = old_entry_ptr->base_addr;
         new_addr = new_entry_ptr->base_addr;
@@ -3504,7 +3504,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
         }
         else {
 
-            HDassert(((old_entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+            assert(((old_entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
 
             if (!(old_entry_ptr->header.is_dirty)) {
 
@@ -3529,7 +3529,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
             }
             else {
 
-                HDassert(old_entry_ptr->header.is_dirty);
+                assert(old_entry_ptr->header.is_dirty);
             }
         }
     }
@@ -3629,18 +3629,18 @@ resize_entry(int32_t idx, size_t new_size)
 
     if (nerrors == 0) {
 
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
-        HDassert(!(entry_ptr->locked));
-        HDassert((entry_ptr->global_pinned) && (!entry_ptr->local_pinned));
-        HDassert((entry_ptr->header.size == entry_ptr->len) ||
-                 (entry_ptr->header.size == entry_ptr->local_len));
-        HDassert(new_size > 0);
-        HDassert(new_size <= entry_ptr->len);
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(!(entry_ptr->locked));
+        assert((entry_ptr->global_pinned) && (!entry_ptr->local_pinned));
+        assert((entry_ptr->header.size == entry_ptr->len) ||
+               (entry_ptr->header.size == entry_ptr->local_len));
+        assert(new_size > 0);
+        assert(new_size <= entry_ptr->len);
 
         result = H5AC_resize_entry((void *)entry_ptr, new_size);
 
@@ -3653,9 +3653,9 @@ resize_entry(int32_t idx, size_t new_size)
         }
         else {
 
-            HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
-            HDassert(entry_ptr->header.is_dirty);
-            HDassert(entry_ptr->header.size == new_size);
+            assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+            assert(entry_ptr->header.is_dirty);
+            assert(entry_ptr->header.size == new_size);
 
             entry_ptr->dirty     = TRUE;
             entry_ptr->local_len = new_size;
@@ -3701,9 +3701,9 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
     H5C_t              *cache_ptr = NULL;
     haddr_t             actual_base_addr;
 
-    HDassert(fid_ptr != NULL);
-    HDassert(file_ptr_ptr != NULL);
-    HDassert(cache_ptr_ptr != NULL);
+    assert(fid_ptr != NULL);
+    assert(file_ptr_ptr != NULL);
+    assert(cache_ptr_ptr != NULL);
 
     fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
@@ -3934,8 +3934,8 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
     hbool_t       proceed = TRUE;
     unsigned      u       = 0;
 
-    HDassert(world_mpi_rank != world_server_mpi_rank);
-    HDassert((num_writes == 0) || (written_entries_tbl != NULL));
+    assert(world_mpi_rank != world_server_mpi_rank);
+    assert((num_writes == 0) || (written_entries_tbl != NULL));
 
     /* barrier to ensure that all other processes are ready to leave
      * the sync point as well.
@@ -4040,8 +4040,8 @@ setup_rand(void)
 
     if ((use_predefined_seeds) && (world_mpi_size == num_predefined_seeds)) {
 
-        HDassert(world_mpi_rank >= 0);
-        HDassert(world_mpi_rank < world_mpi_size);
+        assert(world_mpi_rank >= 0);
+        assert(world_mpi_rank < world_mpi_size);
 
         seed = predefined_seeds[world_mpi_rank];
         fprintf(stdout, "%d:%s: predefined_seed = %d.\n", world_mpi_rank, __func__, seed);
@@ -4561,13 +4561,13 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert(entry_ptr->locked);
+        assert(entry_ptr->locked);
 
         dirtied = ((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG);
 
@@ -4595,13 +4595,13 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
             entry_ptr->locked = FALSE;
         }
 
-        HDassert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
+        assert(((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE);
 
         if (((flags & H5AC__DIRTIED_FLAG) != 0) && ((flags & H5C__DELETED_FLAG) == 0) &&
             (!(((world_mpi_rank == 0) && (entry_ptr->flushed)) ||
                ((world_mpi_rank != 0) && (entry_ptr->cleared))))) {
-            HDassert(entry_ptr->header.is_dirty);
-            HDassert(entry_ptr->dirty);
+            assert(entry_ptr->header.is_dirty);
+            assert(entry_ptr->dirty);
         }
     }
 
@@ -4631,16 +4631,16 @@ unpin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty, hbool_t
 
     if (nerrors == 0) {
 
-        HDassert(file_ptr);
-        HDassert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
-        HDassert(idx < virt_num_data_entries);
+        assert(file_ptr);
+        assert((0 <= idx) && (idx < NUM_DATA_ENTRIES));
+        assert(idx < virt_num_data_entries);
 
         entry_ptr = &(data[idx]);
 
-        HDassert((entry_ptr->header).is_pinned);
-        HDassert(!(entry_ptr->global_pinned && entry_ptr->local_pinned));
-        HDassert((global && entry_ptr->global_pinned) || (!global && entry_ptr->local_pinned));
-        HDassert(!(dirty && (!global)));
+        assert((entry_ptr->header).is_pinned);
+        assert(!(entry_ptr->global_pinned && entry_ptr->local_pinned));
+        assert((global && entry_ptr->global_pinned) || (!global && entry_ptr->local_pinned));
+        assert(!(dirty && (!global)));
 
         if (via_unprotect) {
 
@@ -4671,7 +4671,7 @@ unpin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty, hbool_t
             }
         }
 
-        HDassert(!((entry_ptr->header).is_pinned));
+        assert(!((entry_ptr->header).is_pinned));
 
         if (global) {
 
@@ -5129,8 +5129,8 @@ smoke_check_1(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -5327,8 +5327,8 @@ smoke_check_2(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -5488,10 +5488,10 @@ smoke_check_3(int metadata_write_strategy)
 
                 pin_entry(file_ptr, i, TRUE, dirty);
 
-                HDassert(!dirty || data[i].header.is_dirty);
-                HDassert(data[i].header.is_pinned);
-                HDassert(data[i].global_pinned);
-                HDassert(!data[i].local_pinned);
+                assert(!dirty || data[i].header.is_dirty);
+                assert(data[i].header.is_pinned);
+                assert(data[i].global_pinned);
+                assert(!data[i].local_pinned);
             }
 
             if (i > 100) {
@@ -5526,8 +5526,8 @@ smoke_check_3(int metadata_write_strategy)
                 hbool_t via_unprotect = ((((unsigned)i) & 0x02) == 0);
                 hbool_t dirty         = ((((unsigned)i) & 0x04) == 0);
 
-                HDassert(data[i].global_pinned);
-                HDassert(!data[i].local_pinned);
+                assert(data[i].global_pinned);
+                assert(!data[i].local_pinned);
 
                 unpin_entry(file_ptr, i, TRUE, dirty, via_unprotect);
             }
@@ -5612,8 +5612,8 @@ smoke_check_3(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -5785,10 +5785,10 @@ smoke_check_4(int metadata_write_strategy)
 
                 pin_entry(file_ptr, i, TRUE, dirty);
 
-                HDassert(!dirty || data[i].header.is_dirty);
-                HDassert(data[i].header.is_pinned);
-                HDassert(data[i].global_pinned);
-                HDassert(!data[i].local_pinned);
+                assert(!dirty || data[i].header.is_dirty);
+                assert(data[i].header.is_pinned);
+                assert(data[i].global_pinned);
+                assert(!data[i].local_pinned);
             }
 
             if (i > 100) {
@@ -5819,8 +5819,8 @@ smoke_check_4(int metadata_write_strategy)
                 hbool_t via_unprotect = ((((unsigned)i) & 0x02) == 0);
                 hbool_t dirty         = ((((unsigned)i) & 0x04) == 0);
 
-                HDassert(data[i].global_pinned);
-                HDassert(!data[i].local_pinned);
+                assert(data[i].global_pinned);
+                assert(!data[i].local_pinned);
 
                 unpin_entry(file_ptr, i, TRUE, dirty, via_unprotect);
             }
@@ -5896,8 +5896,8 @@ smoke_check_4(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -6088,8 +6088,8 @@ smoke_check_5(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -6392,8 +6392,8 @@ trace_file_check(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */
@@ -6636,7 +6636,7 @@ smoke_check_6(int metadata_write_strategy)
 
             /* Make sure coll entries do not cross the 80% threshold */
             H5_CHECK_OVERFLOW(cache_ptr->max_cache_size, size_t, double);
-            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            assert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
@@ -6660,7 +6660,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            assert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
@@ -6692,7 +6692,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            assert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
@@ -6716,7 +6716,7 @@ smoke_check_6(int metadata_write_strategy)
             }
 
             /* Make sure coll entries do not cross the 80% threshold */
-            HDassert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
+            assert((double)cache_ptr->max_cache_size * 0.8 > cache_ptr->coll_list_size);
         }
         /* Restore collective metadata reads state */
         H5F_set_coll_metadata_reads(file_ptr, &md_reads_file_flag, &md_reads_context_flag);
@@ -6741,8 +6741,8 @@ smoke_check_6(int metadata_write_strategy)
          */
 
         for (i = 0; i < NUM_DATA_ENTRIES; i++) {
-            HDassert(data_index[i] == i);
-            HDassert(!(data[i].dirty));
+            assert(data_index[i] == i);
+            assert(!(data[i].dirty));
         }
 
         /* compose the done message */

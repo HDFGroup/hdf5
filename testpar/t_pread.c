@@ -111,7 +111,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     pass = TRUE;
 
-    HDassert(comm != MPI_COMM_NULL);
+    assert(comm != MPI_COMM_NULL);
 
     if ((MPI_Comm_rank(comm, &group_rank)) != MPI_SUCCESS) {
         pass         = FALSE;
@@ -151,7 +151,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
          * need to worry that we reassign it for each file!
          */
         group_filename = FILENAMES[file_index];
-        HDassert(group_filename);
+        assert(group_filename);
 
         /* Assign the 'data_filename' */
         if (h5_fixname(group_filename, H5P_DEFAULT, data_filename, sizeof(data_filename)) == NULL) {
@@ -513,7 +513,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     pass = TRUE;
 
-    HDassert(comm != MPI_COMM_NULL);
+    assert(comm != MPI_COMM_NULL);
 
     if ((MPI_Comm_rank(comm, &group_rank)) != MPI_SUCCESS) {
         pass         = FALSE;
@@ -555,7 +555,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         else /* test 2 group 1 */
             group_filename = FILENAMES[2];
 
-        HDassert(group_filename);
+        assert(group_filename);
         if (h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename, sizeof(reloc_data_filename)) ==
             NULL) {
 
