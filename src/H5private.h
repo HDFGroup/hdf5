@@ -1158,9 +1158,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
 #endif
-#ifndef HDsystem
-#define HDsystem(S) system(S)
-#endif
 #ifndef HDtime
 #define HDtime(T) time(T)
 #endif
