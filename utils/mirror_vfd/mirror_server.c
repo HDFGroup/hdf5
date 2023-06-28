@@ -432,7 +432,7 @@ error:
 static void
 wait_for_child(int H5_ATTR_UNUSED sig)
 {
-    while (HDwaitpid(-1, NULL, WNOHANG) > 0)
+    while (waitpid(-1, NULL, WNOHANG) > 0)
         ;
 } /* end wait_for_child() */
 
@@ -554,7 +554,7 @@ handle_requests(struct server_run *run)
 
             mirror_log(run->loginfo, V_INFO, "probable OPEN xmit confirmed");
 
-            pid = HDfork();
+            pid = fork();
             if (pid < 0) { /* fork error */
                 mirror_log(run->loginfo, V_ERR, "cannot fork");
                 goto error;
