@@ -1349,7 +1349,7 @@ main(void)
 
     h5_reset();
 
-    HDprintf("Testing File Image Functionality.\n");
+    printf("Testing File Image Functionality.\n");
 
     errors += test_properties();
     errors += test_callbacks();
@@ -1412,10 +1412,10 @@ main(void)
     h5_restore_err();
 
     if (errors) {
-        HDprintf("***** %d File Image TEST%s FAILED! *****\n", errors, errors > 1 ? "S" : "");
+        printf("***** %d File Image TEST%s FAILED! *****\n", errors, errors > 1 ? "S" : "");
         return 1;
     }
 
-    HDprintf("All File Image tests passed.\n");
+    printf("All File Image tests passed.\n");
     return 0;
 }

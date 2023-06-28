@@ -80,10 +80,9 @@ pause_proc(void)
     if (MAINPROCESS)
         while ((HDstat(greenlight, &statbuf) == -1) && loops < maxloop) {
             if (!loops++) {
-                HDprintf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid,
-                         pid);
+                printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid, pid);
             }
-            HDprintf("waiting(%ds) for file %s ...\n", time_int, greenlight);
+            printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
             HDfflush(stdout);
             HDsleep(time_int);
         }
@@ -107,20 +106,20 @@ MPI_Init(int *argc, char ***argv)
 static void
 usage(void)
 {
-    HDprintf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
-             "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
-    HDprintf("\t-m<n_datasets>"
-             "\tset number of datasets for the multiple dataset test\n");
-    HDprintf("\t-n<n_groups>"
-             "\tset number of groups for the multiple group test\n");
+    printf("    [-r] [-w] [-m<n_datasets>] [-n<n_groups>] "
+           "[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
+    printf("\t-m<n_datasets>"
+           "\tset number of datasets for the multiple dataset test\n");
+    printf("\t-n<n_groups>"
+           "\tset number of groups for the multiple group test\n");
 #if 0
-    HDprintf("\t-f <prefix>\tfilename prefix\n");
+    printf("\t-f <prefix>\tfilename prefix\n");
 #endif
-    HDprintf("\t-2\t\tuse Split-file together with MPIO\n");
-    HDprintf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", ROW_FACTOR,
-             COL_FACTOR);
-    HDprintf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
-    HDprintf("\n");
+    printf("\t-2\t\tuse Split-file together with MPIO\n");
+    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n", ROW_FACTOR,
+           COL_FACTOR);
+    printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
+    printf("\n");
 }
 
 /*
@@ -203,7 +202,7 @@ parse_options(int argc, char **argv)
                 case 'h': /* print help message--return with nerrors set */
                     return (1);
                 default:
-                    HDprintf("Illegal option(%s)\n", *argv);
+                    printf("Illegal option(%s)\n", *argv);
                     nerrors++;
                     return (1);
             }
@@ -212,12 +211,12 @@ parse_options(int argc, char **argv)
 
     /* check validity of dimension and chunk sizes */
     if (dim0 <= 0 || dim1 <= 0) {
-        HDprintf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
+        printf("Illegal dim sizes (%d, %d)\n", dim0, dim1);
         nerrors++;
         return (1);
     }
     if (chunkdim0 <= 0 || chunkdim1 <= 0) {
-        HDprintf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
+        printf("Illegal chunkdim sizes (%d, %d)\n", chunkdim0, chunkdim1);
         nerrors++;
         return (1);
     }
@@ -225,7 +224,7 @@ parse_options(int argc, char **argv)
     /* Make sure datasets can be divided into equal portions by the processes */
     if ((dim0 % mpi_size) || (dim1 % mpi_size)) {
         if (MAINPROCESS)
-            HDprintf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n", dim0, dim1, mpi_size);
+            printf("dim0(%d) and dim1(%d) must be multiples of processes(%d)\n", dim0, dim1, mpi_size);
         nerrors++;
         return (1);
     }
@@ -240,15 +239,15 @@ parse_options(int argc, char **argv)
             strncpy(filenames[i], FILENAME[i], PATH_MAX);
 #if 0 /* no support for VFDs right now */
             if (h5_fixname(FILENAME[i], fapl, filenames[i], PATH_MAX) == NULL) {
-                HDprintf("h5_fixname failed\n");
+                printf("h5_fixname failed\n");
                 nerrors++;
                 return (1);
             }
 #endif
         if (MAINPROCESS) {
-            HDprintf("Test filenames are:\n");
+            printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
-                HDprintf("    %s\n", filenames[i]);
+                printf("    %s\n", filenames[i]);
         }
     }
 
@@ -335,9 +334,9 @@ main(int argc, char **argv)
     dim1 = COL_FACTOR * mpi_size;
 
     if (MAINPROCESS) {
-        HDprintf("===================================\n");
-        HDprintf("PHDF5 TESTS START\n");
-        HDprintf("===================================\n");
+        printf("===================================\n");
+        printf("PHDF5 TESTS START\n");
+        printf("===================================\n");
     }
 
     /* Attempt to turn off atexit post processing so that in case errors
@@ -346,7 +345,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0) {
-        HDprintf("Failed to turn off atexit processing. Continue.\n");
+        printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
     /* h5_show_hostname(); */
@@ -355,7 +354,7 @@ main(int argc, char **argv)
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
-            HDprintf("couldn't allocate filename array\n");
+            printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
     }
@@ -585,7 +584,7 @@ main(int argc, char **argv)
     AddTest("bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
 #else
-    HDprintf("big dataset test will be skipped on Windows (JIRA HDDFV-8064)\n");
+    printf("big dataset test will be skipped on Windows (JIRA HDDFV-8064)\n");
 #endif
 #endif
 
@@ -644,9 +643,9 @@ main(int argc, char **argv)
     coll_chunk4();
 
     if ((mpi_size < 3) && MAINPROCESS) {
-        HDprintf("Collective chunk IO optimization APIs ");
-        HDprintf("needs at least 3 processes to participate\n");
-        HDprintf("Collective chunk IO API tests will be skipped \n");
+        printf("Collective chunk IO optimization APIs ");
+        printf("needs at least 3 processes to participate\n");
+        printf("Collective chunk IO API tests will be skipped \n");
     }
 
 #if 0
@@ -783,8 +782,8 @@ main(int argc, char **argv)
     io_mode_confusion();
 
     if ((mpi_size < 3) && MAINPROCESS) {
-        HDprintf("rr_obj_hdr_flush_confusion test needs at least 3 processes.\n");
-        HDprintf("rr_obj_hdr_flush_confusion test will be skipped \n");
+        printf("rr_obj_hdr_flush_confusion test needs at least 3 processes.\n");
+        printf("rr_obj_hdr_flush_confusion test will be skipped \n");
     }
 
     if (mpi_size > 2) {
@@ -863,8 +862,8 @@ main(int argc, char **argv)
     test_plist_ed();
 
     if ((mpi_size < 2) && MAINPROCESS) {
-        HDprintf("File Image Ops daisy chain test needs at least 2 processes.\n");
-        HDprintf("File Image Ops daisy chain test will be skipped \n");
+        printf("File Image Ops daisy chain test needs at least 2 processes.\n");
+        printf("File Image Ops daisy chain test will be skipped \n");
     }
 
 #if 0
@@ -881,11 +880,11 @@ main(int argc, char **argv)
     }
 
     if ((mpi_size < 2) && MAINPROCESS) {
-        HDprintf("Atomicity tests need at least 2 processes to participate\n");
-        HDprintf("8 is more recommended.. Atomicity tests will be skipped \n");
+        printf("Atomicity tests need at least 2 processes to participate\n");
+        printf("8 is more recommended.. Atomicity tests will be skipped \n");
     }
     else if (facc_type != FACC_MPIO && MAINPROCESS) {
-        HDprintf("Atomicity tests will not work with a non MPIO VFD\n");
+        printf("Atomicity tests will not work with a non MPIO VFD\n");
     }
     else if (mpi_size >= 2 && facc_type == FACC_MPIO) {
 #if 0
@@ -946,9 +945,9 @@ main(int argc, char **argv)
     /* TestParseCmdLine(argc, argv); */
 
     if (dxfer_coll_type == DXFER_INDEPENDENT_IO && MAINPROCESS) {
-        HDprintf("===================================\n"
-                 "   Using Independent I/O with file set view to replace collective I/O \n"
-                 "===================================\n");
+        printf("===================================\n"
+               "   Using Independent I/O with file set view to replace collective I/O \n"
+               "===================================\n");
     }
 
     /* Perform requested testing */
@@ -978,12 +977,12 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS) { /* only process 0 reports */
-        HDprintf("===================================\n");
+        printf("===================================\n");
         if (nerrors)
-            HDprintf("***PHDF5 tests detected %d errors***\n", nerrors);
+            printf("***PHDF5 tests detected %d errors***\n", nerrors);
         else
-            HDprintf("PHDF5 tests finished successfully\n");
-        HDprintf("===================================\n");
+            printf("PHDF5 tests finished successfully\n");
+        printf("===================================\n");
     }
 
 #if 0

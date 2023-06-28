@@ -675,8 +675,8 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
             if (last_fl->size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
                 if (H5DEBUG(HL) && last_fl->size) {
-                    HDfprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n",
-                              (unsigned long)(last_fl->size), __LINE__);
+                    fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes at line %d\n", (unsigned long)(last_fl->size),
+                            __LINE__);
                 }
 #endif
                 last_fl = H5HL__remove_free(heap, last_fl);
@@ -702,16 +702,16 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
 #ifdef H5HL_DEBUG
             }
             else if (H5DEBUG(HL) && need_more > need_size) {
-                HDfprintf(H5DEBUG(HL), "H5HL_insert: lost %lu bytes at line %d\n",
-                          (unsigned long)(need_more - need_size), __LINE__);
+                fprintf(H5DEBUG(HL), "H5HL_insert: lost %lu bytes at line %d\n",
+                        (unsigned long)(need_more - need_size), __LINE__);
 #endif
             }
         }
 
 #ifdef H5HL_DEBUG
         if (H5DEBUG(HL)) {
-            HDfprintf(H5DEBUG(HL), "H5HL: resize mem buf from %lu to %lu bytes\n",
-                      (unsigned long)(old_dblk_size), (unsigned long)(old_dblk_size + need_more));
+            fprintf(H5DEBUG(HL), "H5HL: resize mem buf from %lu to %lu bytes\n",
+                    (unsigned long)(old_dblk_size), (unsigned long)(old_dblk_size + need_more));
         }
 #endif
         if (NULL == (heap->dblk_image = H5FL_BLK_REALLOC(lheap_chunk, heap->dblk_image, heap->dblk_size)))
@@ -852,7 +852,7 @@ H5HL_remove(H5F_t *f, H5HL_t *heap, size_t offset, size_t size)
     if (size < H5HL_SIZEOF_FREE(f)) {
 #ifdef H5HL_DEBUG
         if (H5DEBUG(HL)) {
-            HDfprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n", (unsigned long)size);
+            fprintf(H5DEBUG(HL), "H5HL: lost %lu bytes\n", (unsigned long)size);
         }
 #endif
         HGOTO_DONE(SUCCEED)

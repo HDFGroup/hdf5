@@ -43,15 +43,15 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
     }
     else if (level <= verbosity) {
         if (custom == true && info->prefix[0] != '\0') {
-            HDfprintf(stream, "%s", info->prefix);
+            fprintf(stream, "%s", info->prefix);
         }
 
         switch (level) {
             case (V_ERR):
-                HDfprintf(stream, "ERROR ");
+                fprintf(stream, "ERROR ");
                 break;
             case (V_WARN):
-                HDfprintf(stream, "WARNING ");
+                fprintf(stream, "WARNING ");
                 break;
             default:
                 break;
@@ -64,7 +64,7 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
             va_end(args);
         }
 
-        HDfprintf(stream, "\n");
+        fprintf(stream, "\n");
         HDfflush(stream);
     } /* end if sufficiently verbose to print */
 } /* end mirror_log() */
@@ -98,41 +98,41 @@ mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_byte
         /* print whole lines */
         while ((n_bytes - bytes_written) >= 32) {
             b = buf + bytes_written; /* point to region in buffer */
-            HDfprintf(stream,
-                      "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"
-                      " %02X%02X%02X%02X %02X%02X%02X%02X"
-                      " %02X%02X%02X%02X %02X%02X%02X%02X"
-                      " %02X%02X%02X%02X %02X%02X%02X%02X\n",
-                      bytes_written, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
-                      b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23],
-                      b[24], b[25], b[26], b[27], b[28], b[29], b[30], b[31]);
+            fprintf(stream,
+                    "%04zX  %02X%02X%02X%02X %02X%02X%02X%02X"
+                    " %02X%02X%02X%02X %02X%02X%02X%02X"
+                    " %02X%02X%02X%02X %02X%02X%02X%02X"
+                    " %02X%02X%02X%02X %02X%02X%02X%02X\n",
+                    bytes_written, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
+                    b[12], b[13], b[14], b[15], b[16], b[17], b[18], b[19], b[20], b[21], b[22], b[23], b[24],
+                    b[25], b[26], b[27], b[28], b[29], b[30], b[31]);
             bytes_written += 32;
         }
 
         /* start partial line */
         if (n_bytes > bytes_written) {
-            HDfprintf(stream, "%04zX ", bytes_written);
+            fprintf(stream, "%04zX ", bytes_written);
         }
 
         /* partial line blocks */
         while ((n_bytes - bytes_written) >= 4) {
-            HDfprintf(stream, " %02X%02X%02X%02X", buf[bytes_written], buf[bytes_written + 1],
-                      buf[bytes_written + 2], buf[bytes_written + 3]);
+            fprintf(stream, " %02X%02X%02X%02X", buf[bytes_written], buf[bytes_written + 1],
+                    buf[bytes_written + 2], buf[bytes_written + 3]);
             bytes_written += 4;
         }
 
         /* block separator before partial block */
         if (n_bytes > bytes_written) {
-            HDfprintf(stream, " ");
+            fprintf(stream, " ");
         }
 
         /* partial block individual bytes */
         while (n_bytes > bytes_written) {
-            HDfprintf(stream, "%02X", buf[bytes_written++]);
+            fprintf(stream, "%02X", buf[bytes_written++]);
         }
 
         /* end partial line */
-        HDfprintf(stream, "\n");
+        fprintf(stream, "\n");
     } /* end if suitably verbose to log */
 } /* end mirror_log_bytes() */
 
@@ -165,8 +165,8 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
             FILE *f = NULL;
             f       = HDfopen(path, "w");
             if (NULL == f) {
-                HDfprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
-                          path);
+                fprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
+                        path);
                 info->magic += 1;
                 HDfree(info);
             }

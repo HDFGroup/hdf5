@@ -124,7 +124,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Creating file\n");
+        fprintf(stderr, "Creating file\n");
 
     /* Create the file */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr_write ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl)) < 0)
@@ -177,7 +177,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Creating datasets\n");
+        fprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -218,7 +218,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Closing objects\n");
+        fprintf(stderr, "Closing objects\n");
 
     /* Close everything */
     if (H5Pclose(dcpl) < 0)
@@ -236,23 +236,23 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
 static void
 usage(void)
 {
-    HDprintf("\n");
-    HDprintf("Usage error!\n");
-    HDprintf("\n");
-    HDprintf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
-    HDprintf("    [-i <index type>] [-r <random seed>]\n");
-    HDprintf("\n");
-    HDprintf("NOTE: The random seed option is only used by the sparse test.  Other\n");
-    HDprintf("      tests specify the random seed as a reader/writer option.\n");
-    HDprintf("\n");
-    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    HDprintf("\n");
-    HDprintf("<index type> should be b2 or ea\n");
-    HDprintf("\n");
-    HDprintf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
-    HDprintf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
-    HDprintf("seed (no -r given).\n");
-    HDprintf("\n");
+    printf("\n");
+    printf("Usage error!\n");
+    printf("\n");
+    printf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
+    printf("    [-i <index type>] [-r <random seed>]\n");
+    printf("\n");
+    printf("NOTE: The random seed option is only used by the sparse test.  Other\n");
+    printf("      tests specify the random seed as a reader/writer option.\n");
+    printf("\n");
+    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    printf("\n");
+    printf("<index type> should be b2 or ea\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
+    printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
+    printf("seed (no -r given).\n");
+    printf("\n");
     HDexit(EXIT_FAILURE);
 } /* end usage() */
 
@@ -323,10 +323,10 @@ main(int argc, char *argv[])
 
     /* Emit informational message */
     if (verbose) {
-        HDfprintf(stderr, "Parameters:\n");
-        HDfprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
-        HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
-        HDfprintf(stderr, "\tindex type = %s\n", index_type);
+        fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
+        fprintf(stderr, "\tcompression level = %d\n", comp_level);
+        fprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
 
     /* Set the random seed */
@@ -338,15 +338,15 @@ main(int argc, char *argv[])
     } /* end if */
     HDsrandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
-    HDfprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
+    fprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
+        fprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
     if (gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
-        HDfprintf(stderr, "Error generating skeleton file!\n");
+        fprintf(stderr, "Error generating skeleton file!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 

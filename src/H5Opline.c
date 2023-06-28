@@ -662,8 +662,8 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
-              pline->nalloc);
+    fprintf(stream, "%*s%-*s %zu/%zu\n", indent, "", fwidth, "Number of filters:", pline->nused,
+            pline->nalloc);
 
     /* Loop over all the filters */
     for (size_t i = 0; i < pline->nused; i++) {
@@ -675,26 +675,26 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
         HDmemset(name, 0, 64);
         HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
 
-        HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
-        HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Filter identification:", (unsigned)(pline->filter[i].id));
+        fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);
+        fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Filter identification:", (unsigned)(pline->filter[i].id));
         if (pline->filter[i].name)
-            HDfprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "Filter name:", pline->filter[i].name);
+            fprintf(stream, "%*s%-*s \"%s\"\n", indent + 3, "", MAX(0, fwidth - 3),
+                    "Filter name:", pline->filter[i].name);
         else
-            HDfprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
-        HDfprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Flags:", pline->filter[i].flags);
-        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
-                  "Num CD values:", pline->filter[i].cd_nelmts);
+            fprintf(stream, "%*s%-*s NONE\n", indent + 3, "", MAX(0, fwidth - 3), "Filter name:");
+        fprintf(stream, "%*s%-*s 0x%04x\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Flags:", pline->filter[i].flags);
+        fprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3),
+                "Num CD values:", pline->filter[i].cd_nelmts);
 
         /* Filter parameters */
         for (size_t j = 0; j < pline->filter[i].cd_nelmts; j++) {
             char field_name[32];
 
             HDsnprintf(field_name, sizeof(field_name), "CD value %lu", (unsigned long)j);
-            HDfprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
-                      pline->filter[i].cd_values[j]);
+            fprintf(stream, "%*s%-*s %u\n", indent + 6, "", MAX(0, fwidth - 6), field_name,
+                    pline->filter[i].cd_values[j]);
         }
     }
 

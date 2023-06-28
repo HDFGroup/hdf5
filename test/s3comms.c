@@ -96,7 +96,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
+        printf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -185,10 +185,10 @@ static inline void
 jserr_long(long expected, long actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+        printf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
     }
 }
 
@@ -230,10 +230,10 @@ static inline void
 jserr_str(const char *expected, const char *actual, const char *reason)
 {
     if (reason != NULL) {
-        HDprintf("%s\n", reason);
+        printf("%s\n", reason);
     }
     else {
-        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+        printf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
     }
 }
 
@@ -1287,7 +1287,7 @@ test_HMAC_SHA256(void)
                 dest = (char *)HDrealloc(dest, cases[i].dest_size + 1);
                 assert(dest != NULL);
                 dest[cases[i].dest_size] = 0;
-                HDfprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
+                fprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
                 TEST_ERROR;
             }
 #else  /* VERBOSE not defined */
@@ -1910,7 +1910,7 @@ test_s3r_open(void)
      *************************/
 
 #if S3_TEST_RUN_TIMEOUT
-    HDprintf("Opening on inactive port may hang for a minute; waiting for timeout\n");
+    printf("Opening on inactive port may hang for a minute; waiting for timeout\n");
     handle = H5FD_s3comms_s3r_open(url_raven_badport, NULL, NULL, NULL);
     FAIL_IF(handle != NULL);
 #endif
@@ -2580,7 +2580,7 @@ main(void)
 
 #endif /* H5_HAVE_ROS3_VFD */
 
-    HDprintf("Testing S3Communications functionality.\n");
+    printf("Testing S3Communications functionality.\n");
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -2603,8 +2603,8 @@ main(void)
 
     bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
-        HDprintf("WARNING: S3 bucket url is not defined in environment "
-                 "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
+        printf("WARNING: S3 bucket url is not defined in environment "
+               "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
         HDstrncpy(s3_test_bucket_url, bucket_url_env, S3_TEST_MAX_URL_SIZE);
@@ -2630,17 +2630,17 @@ main(void)
     nerrors += test_s3r_read() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d S3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d S3comms TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return 1;
     }
 
-    HDprintf("All S3comms tests passed.\n");
+    printf("All S3comms tests passed.\n");
 
     return 0;
 
 #else
 
-    HDprintf("SKIPPED - read-only S3 VFD not built\n");
+    printf("SKIPPED - read-only S3 VFD not built\n");
     return EXIT_SUCCESS;
 
 #endif /* H5_HAVE_ROS3_VFD */

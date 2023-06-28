@@ -24,11 +24,11 @@ H5_api_group_test_parallel(void)
     int    nerrors;
 
     if (MAINPROCESS) {
-        HDprintf("**********************************************\n");
-        HDprintf("*                                            *\n");
-        HDprintf("*          API Parallel Group Tests          *\n");
-        HDprintf("*                                            *\n");
-        HDprintf("**********************************************\n\n");
+        printf("**********************************************\n");
+        printf("*                                            *\n");
+        printf("*          API Parallel Group Tests          *\n");
+        printf("*                                            *\n");
+        printf("**********************************************\n\n");
     }
 
     for (i = 0, nerrors = 0; i < ARRAY_LENGTH(par_group_tests); i++) {
@@ -36,12 +36,12 @@ H5_api_group_test_parallel(void)
 
         if (MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD)) {
             if (MAINPROCESS)
-                HDprintf("    MPI_Barrier() failed!\n");
+                printf("    MPI_Barrier() failed!\n");
         }
     }
 
     if (MAINPROCESS)
-        HDprintf("\n");
+        printf("\n");
 
     return nerrors;
 }

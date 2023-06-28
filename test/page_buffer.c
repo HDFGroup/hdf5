@@ -160,7 +160,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
 
         for (j = 0; j < num_elements; j++) {
             if (data[j] != j) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 FAIL_STACK_ERROR;
             }
         }
@@ -270,7 +270,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
 
         for (j = 0; j < num_elements; j++) {
             if (data[j] != j) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 FAIL_STACK_ERROR;
             }
         }
@@ -673,7 +673,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     for (i = 0; i < 400; i++) {
         if (data[i] != -1) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             FAIL_STACK_ERROR;
         }
     }
@@ -687,7 +687,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     for (i = 0; i < 1; i++) {
         if (data[i] != -1) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             TEST_ERROR;
         }
     }
@@ -702,7 +702,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     for (i = 0; i < 100; i++) {
         if (data[i] != i + 350) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             TEST_ERROR;
         }
     }
@@ -717,13 +717,13 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     while (i < 800) {
         if ((i >= 100 && i < 300) || (i >= 600)) {
             if (data[i] != i) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 TEST_ERROR;
             }
         }
         else {
             if (data[i] != -1) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 TEST_ERROR;
             }
         }
@@ -739,7 +739,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
     for (i = 0; i < 800; i++) {
         if (data[i] != i) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             TEST_ERROR;
         }
     }
@@ -765,13 +765,13 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     while (i < 1000) {
         if (i < 400) {
             if (data[i] != i) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 TEST_ERROR;
             }
         }
         else {
             if (data[i] != 0) {
-                HDfprintf(stderr, "Read different values than written\n");
+                fprintf(stderr, "Read different values than written\n");
                 TEST_ERROR;
             }
         }
@@ -952,7 +952,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     for (i = 0; i < 1; i++) {
         if (data[i] != -1) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             TEST_ERROR;
         } /* end if */
     }     /* end for */
@@ -979,7 +979,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     for (i = 0; i < 100; i++) {
         if (data[i] != i + 350) {
-            HDfprintf(stderr, "Read different values than written\n");
+            fprintf(stderr, "Read different values than written\n");
             TEST_ERROR;
         } /* end if */
     }     /* end for */
@@ -1083,7 +1083,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     H5F_t  *f         = NULL;
 
     TESTING("Minimum Metadata threshold Processing");
-    HDprintf("\n");
+    printf("\n");
     h5_fixname(FILENAME[0], orig_fapl, filename, sizeof(filename));
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
@@ -1104,7 +1104,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
         FAIL_STACK_ERROR;
 
-    HDprintf("\tMinimum metadata threshold = 100%%\n");
+    printf("\tMinimum metadata threshold = 100%%\n");
 
     /* keep 5 pages at max in the page buffer and 5 meta page minimum */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 100, 0) < 0)
@@ -1235,7 +1235,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
 
-    HDprintf("\tMinimum raw data threshold = 100%%\n");
+    printf("\tMinimum raw data threshold = 100%%\n");
 
     page_count = 0;
 
@@ -1365,7 +1365,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
 
-    HDprintf("\tMinimum metadata threshold = 40%%, Minimum rawdata threshold = 40%%\n");
+    printf("\tMinimum metadata threshold = 40%%, Minimum rawdata threshold = 40%%\n");
     page_count = 0;
     /* keep 5 pages at max in the page buffer 2 meta pages, 2 raw pages
      * minimum
@@ -1510,7 +1510,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
 
-    HDprintf("\tMinimum metadata threshold = 20%%\n");
+    printf("\tMinimum metadata threshold = 20%%\n");
     page_count = 0;
     /* keep 5 pages at max in the page buffer and 1 meta page minimum */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 39, 0) < 0)
@@ -2154,7 +2154,7 @@ main(void)
     HDexit(EXIT_SUCCESS);
 
 error:
-    HDprintf("***** %d Page Buffering TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+    printf("***** %d Page Buffering TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
     H5E_BEGIN_TRY
     {

@@ -122,7 +122,7 @@ main(void)
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
+        printf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();
@@ -152,7 +152,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }
@@ -182,7 +182,7 @@ main(void)
             }
             else {
                 H5_FAILED();
-                HDprintf("***cannot open the pre-created old modification test file (%s)\n", testfile);
+                printf("***cannot open the pre-created old modification test file (%s)\n", testfile);
                 goto error;
             } /* end else */
         }

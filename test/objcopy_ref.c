@@ -1867,7 +1867,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -1971,7 +1971,7 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
+        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
         HDexit(EXIT_FAILURE);
     } /* end if */
 

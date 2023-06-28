@@ -212,15 +212,15 @@ test_direct_chunk_write(hid_t file)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         goto error;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         goto error;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -269,9 +269,9 @@ test_direct_chunk_write(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -291,15 +291,15 @@ test_direct_chunk_write(hid_t file)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         goto error;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         goto error;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         goto error;
     }
 
@@ -335,9 +335,9 @@ test_direct_chunk_write(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    2. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    2. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -605,9 +605,9 @@ test_skip_compress_write1(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]);
                 goto error;
             }
         }
@@ -630,9 +630,9 @@ test_skip_compress_write1(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != read_direct_buf[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -880,10 +880,10 @@ test_skip_compress_write2(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (origin_direct_buf[i][j] != check_chunk[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j],
-                         check_chunk[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    origin_direct_buf=%d, check_chunk=%d\n", origin_direct_buf[i][j],
+                       check_chunk[i][j]);
                 goto error;
             }
         }
@@ -906,9 +906,9 @@ test_skip_compress_write2(hid_t file)
     for (i = 0; i < CHUNK_NX; i++) {
         for (j = 0; j < CHUNK_NY; j++) {
             if (direct_buf[i][j] != read_direct_buf[i][j]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[i][j], read_direct_buf[i][j]);
                 goto error;
             }
         }
@@ -1088,16 +1088,16 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[3] != (read_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).d != (read_chunk[i][j]).d ||
                 (direct_buf[i][j]).e != (read_chunk[i][j]).e) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
-                HDprintf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (read_chunk[i][j]).a,
-                         (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
-                         (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
-                         (read_chunk[i][j]).e);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
+                printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (read_chunk[i][j]).a,
+                       (read_chunk[i][j]).b, (read_chunk[i][j]).c[0], (read_chunk[i][j]).c[1],
+                       (read_chunk[i][j]).c[2], (read_chunk[i][j]).c[3], (read_chunk[i][j]).d,
+                       (read_chunk[i][j]).e);
 
                 goto error;
             }
@@ -1131,15 +1131,15 @@ test_data_conv(hid_t file)
                 (direct_buf[i][j]).c[2] != (check_chunk[i][j]).c[2] ||
                 (direct_buf[i][j]).c[3] != (check_chunk[i][j]).c[3] ||
                 (direct_buf[i][j]).e != (check_chunk[i][j]).e) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", i, j);
-                HDprintf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
-                         (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
-                         (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
-                         (direct_buf[i][j]).e);
-                HDprintf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", (check_chunk[i][j]).a,
-                         (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
-                         (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d], d=%d, e=%d\n", (direct_buf[i][j]).a,
+                       (direct_buf[i][j]).b, (direct_buf[i][j]).c[0], (direct_buf[i][j]).c[1],
+                       (direct_buf[i][j]).c[2], (direct_buf[i][j]).c[3], (direct_buf[i][j]).d,
+                       (direct_buf[i][j]).e);
+                printf("    dst={a=%d, c=[%d,%d,%d,%d], e=%d\n", (check_chunk[i][j]).a,
+                       (check_chunk[i][j]).c[0], (check_chunk[i][j]).c[1], (check_chunk[i][j]).c[2],
+                       (check_chunk[i][j]).c[3], (check_chunk[i][j]).e);
 
                 goto error;
             }
@@ -1550,19 +1550,19 @@ test_direct_chunk_read_no_cache(hid_t file)
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {
-                HDfprintf(stderr, "overflow\n");
+                fprintf(stderr, "overflow\n");
                 goto error;
             }
             else if (Z_MEM_ERROR == ret) {
-                HDfprintf(stderr, "deflate memory error\n");
+                fprintf(stderr, "deflate memory error\n");
                 goto error;
             }
             else if (Z_DATA_ERROR == ret) {
-                HDfprintf(stderr, "corrupted data\n");
+                fprintf(stderr, "corrupted data\n");
                 goto error;
             }
             else if (Z_OK != ret) {
-                HDfprintf(stderr, "other deflate error\n");
+                fprintf(stderr, "other deflate error\n");
                 goto error;
             }
 
@@ -1570,9 +1570,9 @@ test_direct_chunk_read_no_cache(hid_t file)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1741,19 +1741,19 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
 
             /* Check for various zlib errors */
             if (Z_BUF_ERROR == ret) {
-                HDfprintf(stderr, "overflow\n");
+                fprintf(stderr, "overflow\n");
                 goto error;
             }
             else if (Z_MEM_ERROR == ret) {
-                HDfprintf(stderr, "deflate memory error\n");
+                fprintf(stderr, "deflate memory error\n");
                 goto error;
             }
             else if (Z_DATA_ERROR == ret) {
-                HDfprintf(stderr, "corrupted data\n");
+                fprintf(stderr, "corrupted data\n");
                 goto error;
             }
             else if (Z_OK != ret) {
-                HDfprintf(stderr, "other deflate error\n");
+                fprintf(stderr, "other deflate error\n");
                 goto error;
             }
 
@@ -1761,9 +1761,9 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -1923,9 +1923,9 @@ test_read_unfiltered_dset(hid_t file)
             for (k = 0; k < CHUNK_NX; k++) {
                 for (l = 0; l < CHUNK_NY; l++) {
                     if (direct_buf[k][l] != check_chunk[k][l]) {
-                        HDprintf("\n    1. Read different values than written.");
-                        HDprintf("    At index %d,%d\n", k, l);
-                        HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
+                        printf("\n    1. Read different values than written.");
+                        printf("    At index %d,%d\n", k, l);
+                        printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[k][l], check_chunk[k][l]);
                         goto error;
                     }
                 }
@@ -2299,40 +2299,40 @@ main(void)
             continue;
 
         /* Print configuration */
-        HDprintf("Configuration: ");
+        printf("Configuration: ");
         if (config == 0)
-            HDprintf("<empty>");
+            printf("<empty>");
         if (config & CONFIG_LATEST) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("latest format");
+                printf(", ");
+            printf("latest format");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_REOPEN_FILE) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("reopen file");
+                printf(", ");
+            printf("reopen file");
             need_comma = TRUE;
         } /* end if */
         else if (config & CONFIG_REOPEN_DSET) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("reopen dataset");
+                printf(", ");
+            printf("reopen dataset");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_DIRECT_WRITE) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("direct write");
+                printf(", ");
+            printf("direct write");
             need_comma = TRUE;
         } /* end if */
         if (config & CONFIG_DIRECT_READ) {
             if (need_comma)
-                HDprintf(", ");
-            HDprintf("direct read");
+                printf(", ");
+            printf("direct read");
             need_comma = TRUE;
         } /* end if */
-        HDprintf(":\n");
+        printf(":\n");
         HDfflush(stdout);
 
         nerrors += test_single_chunk(config);

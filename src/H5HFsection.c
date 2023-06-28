@@ -2034,14 +2034,14 @@ H5HF__sect_row_debug(const H5FS_section_info_t *_sect, FILE *stream, int indent,
     assert(sect);
 
     /* Print indirect section information */
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Row:", sect->u.row.row);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Column:", sect->u.row.col);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of entries:", sect->u.row.num_entries);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Row:", sect->u.row.row);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Column:", sect->u.row.col);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of entries:", sect->u.row.num_entries);
 
     /* If this is a first row section display information about underlying indirect section */
     if (sect->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW) {
         /* Print indirect section header */
-        HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Underlying indirect section:");
+        fprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Underlying indirect section:");
 
         H5HF__sect_indirect_debug(sect->u.row.under, stream, indent + 3, MAX(0, fwidth - 3));
     } /* end if */
@@ -4094,9 +4094,9 @@ H5HF__sect_indirect_debug(const H5HF_free_section_t *sect, FILE *stream, int ind
     assert(sect);
 
     /* Print indirect section information */
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Row:", sect->u.indirect.row);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Column:", sect->u.indirect.col);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of entries:", sect->u.indirect.num_entries);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Row:", sect->u.indirect.row);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Column:", sect->u.indirect.col);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of entries:", sect->u.indirect.num_entries);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__sect_indirect_debug() */

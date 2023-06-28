@@ -707,7 +707,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         rank = sel_iter->u.hyp.iter_rank;
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S), "%s: Flattened selection\n", __func__);
+            fprintf(H5DEBUG(S), "%s: Flattened selection\n", __func__);
 #endif
         for (u = 0; u < rank; ++u) {
             H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
@@ -719,14 +719,14 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
-                HDfprintf(H5DEBUG(S),
-                          "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
-                          "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
-                          __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
+                fprintf(H5DEBUG(S),
+                        "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
+                        "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
+                        __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
                 if (u == 0)
-                    HDfprintf(H5DEBUG(S), "  rank=%u\n", rank);
+                    fprintf(H5DEBUG(S), "  rank=%u\n", rank);
                 else
-                    HDfprintf(H5DEBUG(S), "\n");
+                    fprintf(H5DEBUG(S), "\n");
             }
 #endif
 
@@ -741,7 +741,7 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         rank = space->extent.rank;
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S), "%s: Non-flattened selection\n", __func__);
+            fprintf(H5DEBUG(S), "%s: Non-flattened selection\n", __func__);
 #endif
         for (u = 0; u < rank; ++u) {
             H5_CHECK_OVERFLOW(diminfo[u].start, hsize_t, hssize_t)
@@ -753,14 +753,14 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
-                HDfprintf(H5DEBUG(S),
-                          "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
-                          "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
-                          __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
+                fprintf(H5DEBUG(S),
+                        "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
+                        "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
+                        __func__, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
                 if (u == 0)
-                    HDfprintf(H5DEBUG(S), "  rank=%u\n", rank);
+                    fprintf(H5DEBUG(S), "  rank=%u\n", rank);
                 else
-                    HDfprintf(H5DEBUG(S), "\n");
+                    fprintf(H5DEBUG(S), "\n");
             }
 #endif
 
@@ -780,8 +780,8 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
 #ifdef H5S_DEBUG
     if (H5DEBUG(S)) {
         i = ((int)rank) - 1;
-        HDfprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i], i,
-                  max_xtent[i]);
+        fprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i], i,
+                max_xtent[i]);
     }
 #endif
     for (i = ((int)rank) - 2; i >= 0; --i) {
@@ -789,8 +789,8 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
         max_xtent[i] = max_xtent[i + 1] * d[i].xtent;
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i,
-                      offset[i], i, max_xtent[i]);
+            fprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i],
+                    i, max_xtent[i]);
 #endif
     } /* end for */
 
@@ -805,9 +805,9 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
  *******************************************************/
 #ifdef H5S_DEBUG
     if (H5DEBUG(S)) {
-        HDfprintf(H5DEBUG(S), "%s: Making contig type %zu MPI_BYTEs\n", __func__, elmt_size);
+        fprintf(H5DEBUG(S), "%s: Making contig type %zu MPI_BYTEs\n", __func__, elmt_size);
         for (i = ((int)rank) - 1; i >= 0; --i)
-            HDfprintf(H5DEBUG(S), "d[%d].xtent=%" PRIuHSIZE "\n", i, d[i].xtent);
+            fprintf(H5DEBUG(S), "d[%d].xtent=%" PRIuHSIZE "\n", i, d[i].xtent);
     }
 #endif
 
@@ -835,16 +835,16 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     for (i = ((int)rank) - 1; i >= 0; --i) {
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S),
-                      "%s: Dimension i=%d \n"
-                      "start=%" PRIdHSIZE " count=%" PRIuHSIZE " block=%" PRIuHSIZE " stride=%" PRIuHSIZE
-                      ", xtent=%" PRIuHSIZE " max_xtent=%" PRIuHSIZE "\n",
-                      __func__, i, d[i].start, d[i].count, d[i].block, d[i].strid, d[i].xtent, max_xtent[i]);
+            fprintf(H5DEBUG(S),
+                    "%s: Dimension i=%d \n"
+                    "start=%" PRIdHSIZE " count=%" PRIuHSIZE " block=%" PRIuHSIZE " stride=%" PRIuHSIZE
+                    ", xtent=%" PRIuHSIZE " max_xtent=%" PRIuHSIZE "\n",
+                    __func__, i, d[i].start, d[i].count, d[i].block, d[i].strid, d[i].xtent, max_xtent[i]);
 #endif
 
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S), "%s: i=%d  Making vector-type \n", __func__, i);
+            fprintf(H5DEBUG(S), "%s: i=%d  Making vector-type \n", __func__, i);
 #endif
         /****************************************
          * Build vector type of the selection.
@@ -981,8 +981,8 @@ done:
 
 #ifdef H5S_DEBUG
     if (H5DEBUG(S))
-        HDfprintf(H5DEBUG(S), "Leave %s, count=%d  is_derived_type=%s\n", __func__, *count,
-                  (*is_derived_type) ? "TRUE" : "FALSE");
+        fprintf(H5DEBUG(S), "Leave %s, count=%d  is_derived_type=%s\n", __func__, *count,
+                (*is_derived_type) ? "TRUE" : "FALSE");
 #endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__mpio_reg_hyper_type() */

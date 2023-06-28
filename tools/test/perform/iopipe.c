@@ -73,9 +73,9 @@ print_stats(const char *prefix,
     H5_bandwidth(bw, sizeof(bw), (double)nbytes, e_time);
 
 #ifdef H5_HAVE_GETRUSAGE
-    HDprintf(HEADING "%1.2fuser %1.2fsystem %1.2felapsed %s\n", prefix, u_time, s_time, e_time, bw);
+    printf(HEADING "%1.2fuser %1.2fsystem %1.2felapsed %s\n", prefix, u_time, s_time, e_time, bw);
 #else
-    HDprintf(HEADING "%1.2felapsed %s\n", prefix, e_time, bw);
+    printf(HEADING "%1.2felapsed %s\n", prefix, e_time, bw);
 #endif
 }
 
@@ -146,7 +146,7 @@ main(void)
      * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
-    HDprintf("I/O request size is %1.1fMB\n", (double)(hssize_t)(size[0] * size[1]) / 1024.0 * 1024.0);
+    printf("I/O request size is %1.1fMB\n", (double)(hssize_t)(size[0] * size[1]) / 1024.0 * 1024.0);
 
     /* Open the files */
     file = H5Fcreate(HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -170,7 +170,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "fill raw");
+    fprintf(stderr, HEADING, "fill raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -193,7 +193,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "fill hdf5");
+    fprintf(stderr, HEADING, "fill hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -217,7 +217,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "out raw");
+    fprintf(stderr, HEADING, "out raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -243,7 +243,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "out hdf5");
+    fprintf(stderr, HEADING, "out hdf5");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -267,7 +267,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "in raw");
+    fprintf(stderr, HEADING, "in raw");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -293,7 +293,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "in hdf5");
+    fprintf(stderr, HEADING, "in hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);
@@ -322,7 +322,7 @@ main(void)
     HDgetrusage(RUSAGE_SELF, &r_start);
 #endif
     t_start = H5_get_time();
-    HDfprintf(stderr, HEADING, "in hdf5 partial");
+    fprintf(stderr, HEADING, "in hdf5 partial");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
         HDfflush(stderr);

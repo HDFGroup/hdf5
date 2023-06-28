@@ -898,75 +898,75 @@ H5O__fill_debug(H5F_t H5_ATTR_UNUSED *f, const void *_fill, FILE *stream, int in
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
     switch (fill->alloc_time) {
         case H5D_ALLOC_TIME_EARLY:
-            HDfprintf(stream, "Early\n");
+            fprintf(stream, "Early\n");
             break;
 
         case H5D_ALLOC_TIME_LATE:
-            HDfprintf(stream, "Late\n");
+            fprintf(stream, "Late\n");
             break;
 
         case H5D_ALLOC_TIME_INCR:
-            HDfprintf(stream, "Incremental\n");
+            fprintf(stream, "Incremental\n");
             break;
 
         case H5D_ALLOC_TIME_DEFAULT:
         case H5D_ALLOC_TIME_ERROR:
         default:
-            HDfprintf(stream, "Unknown!\n");
+            fprintf(stream, "Unknown!\n");
             break;
     } /* end switch */
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
     switch (fill->fill_time) {
         case H5D_FILL_TIME_ALLOC:
-            HDfprintf(stream, "On Allocation\n");
+            fprintf(stream, "On Allocation\n");
             break;
 
         case H5D_FILL_TIME_NEVER:
-            HDfprintf(stream, "Never\n");
+            fprintf(stream, "Never\n");
             break;
 
         case H5D_FILL_TIME_IFSET:
-            HDfprintf(stream, "If Set\n");
+            fprintf(stream, "If Set\n");
             break;
 
         case H5D_FILL_TIME_ERROR:
         default:
-            HDfprintf(stream, "Unknown!\n");
+            fprintf(stream, "Unknown!\n");
             break;
 
     } /* end switch */
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Value Defined:");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Value Defined:");
     H5P_is_fill_value_defined((const H5O_fill_t *)fill, &fill_status);
     switch (fill_status) {
         case H5D_FILL_VALUE_UNDEFINED:
-            HDfprintf(stream, "Undefined\n");
+            fprintf(stream, "Undefined\n");
             break;
 
         case H5D_FILL_VALUE_DEFAULT:
-            HDfprintf(stream, "Default\n");
+            fprintf(stream, "Default\n");
             break;
 
         case H5D_FILL_VALUE_USER_DEFINED:
-            HDfprintf(stream, "User Defined\n");
+            fprintf(stream, "User Defined\n");
             break;
 
         case H5D_FILL_VALUE_ERROR:
         default:
-            HDfprintf(stream, "Unknown!\n");
+            fprintf(stream, "Unknown!\n");
             break;
 
     } /* end switch */
-    HDfprintf(stream, "%*s%-*s %zd\n", indent, "", fwidth, "Size:", fill->size);
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
+    fprintf(stream, "%*s%-*s %zd\n", indent, "", fwidth, "Size:", fill->size);
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if (fill->type) {
         H5T_debug(fill->type, stream);
-        HDfprintf(stream, "\n");
+        fprintf(stream, "\n");
     } /* end if */
     else
-        HDfprintf(stream, "<dataset type>\n");
+        fprintf(stream, "<dataset type>\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__fill_debug() */

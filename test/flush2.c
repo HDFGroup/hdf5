@@ -255,12 +255,12 @@ main(void)
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
-        HDprintf("Can't check if VFD is compatible with default VFD\n");
+        printf("Can't check if VFD is compatible with default VFD\n");
         HDexit(EXIT_FAILURE);
     }
 
     if (!driver_is_default_vfd_compatible) {
-        HDprintf("Skipping SWMR tests for VFD incompatible with default VFD\n");
+        printf("Skipping SWMR tests for VFD incompatible with default VFD\n");
         HDexit(EXIT_SUCCESS);
     }
 
@@ -433,7 +433,7 @@ main(void)
         SKIPPED();
 
     if (!vfd_supports_swmr)
-        HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
+        printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     h5_cleanup(FILENAME, fapl_id);
 

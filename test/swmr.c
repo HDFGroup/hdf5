@@ -7743,7 +7743,7 @@ main(void)
      */
     driver = HDgetenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
-        HDprintf("This VFD does not support SWMR I/O\n");
+        printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     }
 
@@ -7760,7 +7760,7 @@ main(void)
     /* Check if file locking is enabled on this file system */
     if (use_file_locking)
         if (h5_check_if_file_locking_enabled(&file_locking_enabled) < 0) {
-            HDprintf("Error when determining if file locks are enabled\n");
+            printf("Error when determining if file locks are enabled\n");
             return EXIT_FAILURE;
         }
 
@@ -7847,7 +7847,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All tests passed.\n");
+    printf("All tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -7855,7 +7855,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 
 } /* end main() */

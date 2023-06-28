@@ -46,9 +46,9 @@
 #ifdef H5T_REF_DEBUG
 #define H5T_REF_LOG_DEBUG(...)                                                                               \
     do {                                                                                                     \
-        HDfprintf(stdout, " # %s(): ", __func__);                                                            \
-        HDfprintf(stdout, __VA_ARGS__);                                                                      \
-        HDfprintf(stdout, "\n");                                                                             \
+        fprintf(stdout, " # %s(): ", __func__);                                                              \
+        fprintf(stdout, __VA_ARGS__);                                                                        \
+        fprintf(stdout, "\n");                                                                               \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else

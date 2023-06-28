@@ -92,8 +92,8 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE)) {
         SKIPPED();
-        HDprintf("    API functions for iterate aren't "
-                 "supported with this connector\n");
+        printf("    API functions for iterate aren't "
+               "supported with this connector\n");
         return 1;
     }
 
@@ -115,7 +115,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end liter_cb() */
@@ -415,7 +415,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end aiter_cb() */
@@ -619,8 +619,8 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
 
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_LINK_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for iterate and basic links aren't "
-                 "supported with this connector\n");
+        printf("    API functions for iterate and basic links aren't "
+               "supported with this connector\n");
         return 1;
     }
 
@@ -1068,7 +1068,7 @@ test_corrupted_attnamelen(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 

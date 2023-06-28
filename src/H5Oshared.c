@@ -701,28 +701,28 @@ H5O__shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth
 
     switch (mesg->type) {
         case H5O_SHARE_TYPE_UNSHARED:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Unshared");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Unshared");
             break;
 
         case H5O_SHARE_TYPE_COMMITTED:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
-            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-                      "Object address:", mesg->u.loc.oh_addr);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Obj Hdr");
+            fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+                    "Object address:", mesg->u.loc.oh_addr);
             break;
 
         case H5O_SHARE_TYPE_SOHM:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "SOHM");
-            HDfprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
-                      "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "SOHM");
+            fprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
+                    "Heap ID:", (unsigned long long)mesg->u.heap_id.val);
             break;
 
         case H5O_SHARE_TYPE_HERE:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Here");
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Shared Message type:", "Here");
             break;
 
         default:
-            HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Shared Message type:", "Unknown",
-                      (unsigned)mesg->type);
+            fprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth, "Shared Message type:", "Unknown",
+                    (unsigned)mesg->type);
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

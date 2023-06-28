@@ -1937,7 +1937,7 @@ test_compat(void)
     if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
         TestErrPrintf("can't check if VFD is default VFD compatible\n");
     if (!driver_is_default_compatible) {
-        HDprintf(" -- SKIPPED --\n");
+        printf(" -- SKIPPED --\n");
         return;
     }
 
@@ -2193,7 +2193,7 @@ test_compat(void)
         CHECK_I(ret, "H5Fclose");
     } /* end if */
     else
-        HDprintf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
+        printf("***cannot open the pre-created compound datatype test file (%s)\n", testfile);
 
 } /* end test_compat() */
 

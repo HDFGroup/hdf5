@@ -429,7 +429,7 @@ main(void)
     nerrors += (test_env_var() < 0) ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         HDexit(EXIT_FAILURE);
     }
 

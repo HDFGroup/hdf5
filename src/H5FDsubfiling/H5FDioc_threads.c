@@ -195,7 +195,7 @@ initialize_ioc_threads(void *_sf_context)
 
 #ifdef H5FD_IOC_DEBUG
     if (sf_context->topology->ioc_idx == 0) {
-        HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
+        printf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
         HDfflush(stdout);
     }
 #endif
@@ -1047,8 +1047,8 @@ ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data
             bytes_remaining -= bytes_written;
 
 #ifdef H5FD_IOC_DEBUG
-            HDprintf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
-                     __func__, bytes_written, bytes_remaining, file_offset);
+            printf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
+                   __func__, bytes_written, bytes_remaining, file_offset);
 #endif
 
             this_data += bytes_written;
@@ -1099,8 +1099,8 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
             bytes_remaining -= bytes_read;
 
 #ifdef H5FD_IOC_DEBUG
-            HDprintf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
-                     __func__, bytes_read, bytes_remaining, file_offset);
+            printf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
+                   __func__, bytes_read, bytes_remaining, file_offset);
 #endif
 
             this_buffer += bytes_read;
@@ -1116,8 +1116,8 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
         else {
             if (retries == 0) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", ioc_idx, __func__,
-                         file_offset, data_size);
+                printf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", ioc_idx, __func__,
+                       file_offset, data_size);
 #endif
 
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "HDpread failed");
@@ -1176,8 +1176,8 @@ ioc_file_truncate(sf_work_request_t *msg)
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
 #ifdef H5FD_IOC_DEBUG
-    HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__,
-             (long long)length, errno);
+    printf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__, (long long)length,
+           errno);
     HDfflush(stdout);
 #endif
 

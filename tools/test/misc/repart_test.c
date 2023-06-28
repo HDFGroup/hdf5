@@ -146,6 +146,6 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d FAMILY FILE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     HDexit(EXIT_FAILURE);
 } /* end main() */

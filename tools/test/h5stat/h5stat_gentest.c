@@ -626,6 +626,6 @@ main(void)
     return EXIT_SUCCESS;
 
 error:
-    HDfprintf(stderr, "h5stat test generator FAILED\n");
+    fprintf(stderr, "h5stat test generator FAILED\n");
     return EXIT_FAILURE;
 }

@@ -154,12 +154,12 @@ H5Z_term_package(void)
 
                 if (0 == nprint++) {
                     /* Print column headers */
-                    HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
-                                          "accumulated over life of library:\n");
-                    HDfprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total",
-                              "Errors", "User", "System", "Elapsed", "Bandwidth");
-                    HDfprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----",
-                              "------", "----", "------", "-------", "---------");
+                    fprintf(H5DEBUG(Z), "H5Z: filter statistics "
+                                        "accumulated over life of library:\n");
+                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Filter", "Total", "Errors",
+                            "User", "System", "Elapsed", "Bandwidth");
+                    fprintf(H5DEBUG(Z), "   %-16s %10s %10s %8s %8s %8s %10s\n", "------", "-----", "------",
+                            "----", "------", "-------", "---------");
                 } /* end if */
 
                 /* Truncate the comment to fit in the field */
@@ -175,10 +175,10 @@ H5Z_term_package(void)
                              H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
                 /* Print the statistics */
-                HDfprintf(H5DEBUG(Z), "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
-                          (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
-                          H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
-                          timestrs.elapsed, bandwidth);
+                fprintf(H5DEBUG(Z), "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
+                        (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
+                        H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
+                        timestrs.elapsed, bandwidth);
 next:
                 HDfree(timestrs.user);
                 HDfree(timestrs.system);

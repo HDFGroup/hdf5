@@ -320,7 +320,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: Creating groups with latest version of the format\n", h5tools_getprogname());
+            printf("%s: Creating groups with latest version of the format\n", h5tools_getprogname());
     }
 
     /* Attempt to open an existing HDF5 file first */
@@ -354,7 +354,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: Creating parent groups\n", h5tools_getprogname());
+            printf("%s: Creating parent groups\n", h5tools_getprogname());
     }
 
     /* Loop over creating requested groups */
@@ -375,7 +375,7 @@ main(int argc, char *argv[])
 
         /* Display some output if requested */
         if (params_g.verbose)
-            HDprintf("%s: created group '%s'\n", h5tools_getprogname(), params_g.groups[curr_group]);
+            printf("%s: created group '%s'\n", h5tools_getprogname(), params_g.groups[curr_group]);
     } /* end for */
 
     /* Close link creation property list */

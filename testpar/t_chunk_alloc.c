@@ -455,7 +455,7 @@ test_chunk_alloc(void)
 
     filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend Chunked allocation test on file %s\n", filename);
+        printf("Extend Chunked allocation test on file %s\n", filename);
 
     /* Case 1 */
     /* Create chunked dataset without writing anything.*/

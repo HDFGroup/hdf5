@@ -108,7 +108,7 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end liter_cb() */
@@ -397,7 +397,7 @@ aiter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5A_info_t H5_ATTR_
             return (count2 > 10 ? 1 : 0);
 
         default:
-            HDprintf("invalid iteration command");
+            printf("invalid iteration command");
             return (-1);
     } /* end switch */
 } /* end aiter_cb() */
@@ -1024,7 +1024,7 @@ test_corrupted_attnamelen(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 

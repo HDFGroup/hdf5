@@ -892,7 +892,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             errno                      = 0;
             onion_fa_in_g.revision_num = HDstrtoull(in_vfd_info.info, NULL, 10);
             if (errno == ERANGE) {
-                HDprintf("Invalid onion revision specified for the input file\n");
+                printf("Invalid onion revision specified for the input file\n");
                 usage(h5tools_getprogname());
                 exit(EXIT_FAILURE);
             }
@@ -976,14 +976,14 @@ main(int argc, char **argv)
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
-        HDprintf("Error occurred while retrieving H5TOOLS_BUFSIZE value\n");
+        printf("Error occurred while retrieving H5TOOLS_BUFSIZE value\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* initialize options  */
     if (h5repack_init(&options, 0, FALSE) < 0) {
-        HDprintf("Error occurred while initializing repack options\n");
+        printf("Error occurred while initializing repack options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -993,7 +993,7 @@ main(int argc, char **argv)
 
     parse_ret = parse_command_line(argc, (const char *const *)argv, &options);
     if (parse_ret < 0) {
-        HDprintf("Error occurred while parsing command-line options\n");
+        printf("Error occurred while parsing command-line options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
@@ -1008,7 +1008,7 @@ main(int argc, char **argv)
 
     /* pack it */
     if (h5repack(infile, outfile, &options) < 0) {
-        HDprintf("Error occurred while repacking\n");
+        printf("Error occurred while repacking\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }

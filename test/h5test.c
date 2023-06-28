@@ -596,13 +596,13 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
             if (mpi_rank == 0)
-                HDprintf("*** Hint ***\n"
-                         "You can use environment variable HDF5_PARAPREFIX to "
-                         "run parallel test files in a\n"
-                         "different directory or to add file type prefix. e.g.,\n"
-                         "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                         "   export HDF5_PARAPREFIX\n"
-                         "*** End of Hint ***\n");
+                printf("*** Hint ***\n"
+                       "You can use environment variable HDF5_PARAPREFIX to "
+                       "run parallel test files in a\n"
+                       "different directory or to add file type prefix. e.g.,\n"
+                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                       "   export HDF5_PARAPREFIX\n"
+                       "*** End of Hint ***\n");
 
             explained = TRUE;
 #ifdef HDF5_PARAPREFIX
@@ -928,13 +928,13 @@ h5_show_hostname(void)
 
         if (mpi_initialized && !mpi_finalized) {
             MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-            HDprintf("MPI-process %d.", mpi_rank);
+            printf("MPI-process %d.", mpi_rank);
         }
         else
-            HDprintf("thread 0.");
+            printf("thread 0.");
     }
 #else
-    HDprintf("thread %" PRIu64 ".", H5TS_thread_id());
+    printf("thread %" PRIu64 ".", H5TS_thread_id());
 #endif
 #ifdef H5_HAVE_WIN32_API
 
@@ -959,11 +959,11 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
     if (HDgethostname(hostname, (size_t)80) < 0)
-        HDprintf(" gethostname failed\n");
+        printf(" gethostname failed\n");
     else
-        HDprintf(" hostname=%s\n", hostname);
+        printf(" hostname=%s\n", hostname);
 #else
-    HDprintf(" gethostname not supported\n");
+    printf(" gethostname not supported\n");
 #endif
 #ifdef H5_HAVE_WIN32_API
     WSACleanup();
@@ -1050,7 +1050,7 @@ h5_set_info_object(void)
 
                 /* actually set the darned thing */
                 if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
-                    HDprintf("MPI_Info_set failed\n");
+                    printf("MPI_Info_set failed\n");
                     ret_value = -1;
                 }
             }
@@ -1079,17 +1079,17 @@ h5_dump_info_object(MPI_Info info)
     int  flag;
     int  i, nkeys;
 
-    HDprintf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
+    printf("Dumping MPI Info Object (up to %d bytes per item):\n", MPI_MAX_INFO_VAL);
     if (info == MPI_INFO_NULL) {
-        HDprintf("object is MPI_INFO_NULL\n");
+        printf("object is MPI_INFO_NULL\n");
     }
     else {
         MPI_Info_get_nkeys(info, &nkeys);
-        HDprintf("object has %d items\n", nkeys);
+        printf("object has %d items\n", nkeys);
         for (i = 0; i < nkeys; i++) {
             MPI_Info_get_nthkey(info, i, key);
             MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
-            HDprintf("%s=%s\n", key, value);
+            printf("%s=%s\n", key, value);
         }
     }
 }
@@ -1600,11 +1600,11 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
     /* Write messages to signal file, if provided */
     if (arg2 != NULL) {
         assert(arg1);
-        HDfprintf(signalfile, "%s\n%s\n", arg1, arg2);
+        fprintf(signalfile, "%s\n%s\n", arg1, arg2);
     } /* end if */
     else if (arg1 != NULL) {
         assert(arg2 == NULL);
-        HDfprintf(signalfile, "%s\n", arg1);
+        fprintf(signalfile, "%s\n", arg1);
     } /* end if */
     else {
         assert(arg1 == NULL);
@@ -1664,7 +1664,7 @@ h5_wait_message(const char *waitfor)
             it was likely never sent and we should fail rather
             than loop infinitely */
         if (HDdifftime(t1, t0) > MESSAGE_TIMEOUT) {
-            HDfprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
+            fprintf(stdout, "Error communicating between processes. Make sure test script is running.\n");
             TEST_ERROR;
         } /* end if */
     }     /* end while */
@@ -1907,13 +1907,13 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     /* Open files for reading */
     f1ptr = HDfopen(f1name, "rb");
     if (f1ptr == NULL) {
-        HDfprintf(stderr, "Unable to fopen() %s\n", f1name);
+        fprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
     f2ptr = HDfopen(f2name, "rb");
     if (f2ptr == NULL) {
-        HDfprintf(stderr, "Unable to fopen() %s\n", f2name);
+        fprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
         goto done;
     }
@@ -1926,8 +1926,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
-                  (hsize_t)f2size);
+        fprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
+                (hsize_t)f2size);
         ret_value = -1;
         goto done;
     }
@@ -1945,7 +1945,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
             goto done;
         }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
+            fprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }
