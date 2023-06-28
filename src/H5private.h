@@ -943,9 +943,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDperror
 #define HDperror(S) perror(S)
 #endif
-#ifndef HDpipe
-#define HDpipe(F) pipe(F)
-#endif
 #ifndef HDpow
 #define HDpow(X, Y) pow(X, Y)
 #endif
