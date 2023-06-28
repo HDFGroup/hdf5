@@ -92,13 +92,18 @@ jobs:
              sudo apt update
              sudo apt install automake autoconf libtool libtool-bin gzip dos2unix
 
+      - name: Retrieve version
+        id: version
+        run: |
+          echo "TAG_VERSION=$(bin/h5vers)" >> $GITHUB_OUTPUT
+
       - name: Set file base name
         id: set-file-base
         run: |
           if [ '${{ inputs.use_environ }}' == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true' ]; then
             FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
-            FILE_NAME_BASE=$(echo "hdf5-")$(echo bin/h5vers)
+            FILE_NAME_BASE=$(echo "hdf5-")$(echo "${{ steps.version.outputs.TAG_VERSION }}")
           fi
           echo "FILE_BASE=$FILE_NAME_BASE" >> $GITHUB_OUTPUT
         shell: bash
