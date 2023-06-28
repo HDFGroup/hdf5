@@ -104,7 +104,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
         FAIL_STACK_ERROR;
 
     num_elements = NX * NY;
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
     for (i = 0; i < (int)num_elements; i++)
         data[i] = i;
@@ -185,7 +185,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
     if (H5Sclose(filespace) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(data);
+    free(data);
     return 0;
 
 error:
@@ -196,7 +196,7 @@ error:
         H5Gclose(grp_id);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
     return (1);
@@ -253,7 +253,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
         FAIL_STACK_ERROR;
 
     num_elements = NX * NY;
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     for (i = 0; i < NUM_DSETS; i++) {
@@ -280,7 +280,7 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
         FAIL_STACK_ERROR;
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
-    HDfree(data);
+    free(data);
 
     return 0;
 
@@ -290,7 +290,7 @@ error:
         H5Gclose(grp_id);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
     return 1;
@@ -348,7 +348,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 
         /* Free memb_name */
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-            HDfree(memb_name[mt]);
+            free(memb_name[mt]);
 
     } /* end if */
 
@@ -580,7 +580,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -786,7 +786,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
@@ -798,7 +798,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
     return 1;
@@ -848,7 +848,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -1028,7 +1028,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
@@ -1040,7 +1040,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
     return 1;
@@ -1092,7 +1092,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -1646,7 +1646,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
 
@@ -1660,7 +1660,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
 
@@ -1711,7 +1711,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if (set_multi_split(env_h5_drvr, fapl, sizeof(int) * 200) != 0)
         TEST_ERROR;
 
-    if ((data = (int *)HDcalloc((size_t)num_elements, sizeof(int))) == NULL)
+    if ((data = (int *)calloc((size_t)num_elements, sizeof(int))) == NULL)
         TEST_ERROR;
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -1938,7 +1938,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
-    HDfree(data);
+    free(data);
 
     PASSED();
     return 0;
@@ -1950,7 +1950,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(file_id);
         if (data)
-            HDfree(data);
+            free(data);
     }
     H5E_END_TRY
 

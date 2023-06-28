@@ -638,9 +638,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDatoll
 #define HDatoll(S) atoll(S)
 #endif
-#ifndef HDcalloc
-#define HDcalloc(N, Z) calloc(N, Z)
-#endif
 #ifndef HDceil
 #define HDceil(X) ceil(X)
 #endif
@@ -750,9 +747,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfread
 #define HDfread(M, Z, N, F) fread(M, Z, N, F)
-#endif
-#ifndef HDfree
-#define HDfree(M) free(M)
 #endif
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
@@ -901,9 +895,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
 #endif
-#ifndef HDmalloc
-#define HDmalloc(Z) malloc(Z)
-#endif
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
 #endif
@@ -1000,9 +991,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDreaddir
 #define HDreaddir(D) readdir(D)
-#endif
-#ifndef HDrealloc
-#define HDrealloc(M, Z) realloc(M, Z)
 #endif
 #ifndef HDrealpath
 #define HDrealpath(F1, F2) realpath(F1, F2)

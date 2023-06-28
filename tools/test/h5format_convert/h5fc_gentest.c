@@ -423,7 +423,7 @@ gen_err_level(const char *fname)
         goto error;
 
     /* Initialize data buffer */
-    buf = (unsigned char *)HDmalloc(NUM * sizeof(unsigned char *));
+    buf = (unsigned char *)malloc(NUM * sizeof(unsigned char *));
     HDmemset(buf, 42, NUM * sizeof(unsigned char));
 
     /* Create the test file */

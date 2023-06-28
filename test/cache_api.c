@@ -1455,8 +1455,7 @@ init_invalid_configs(void)
     H5AC_cache_config_t *configs = NULL;
 
     /* Allocate memory */
-    if (NULL ==
-        (configs = (H5AC_cache_config_t *)HDcalloc(NUM_INVALID_CONFIGS, sizeof(H5AC_cache_config_t)))) {
+    if (NULL == (configs = (H5AC_cache_config_t *)calloc(NUM_INVALID_CONFIGS, sizeof(H5AC_cache_config_t)))) {
 
         return NULL;
     }
@@ -2238,7 +2237,7 @@ main(void)
         nerrs += 1;
 
     if (invalid_configs)
-        HDfree(invalid_configs);
+        free(invalid_configs);
 
     if (H5Pclose(fcpl_id) < 0) {
         failure_mssg = "H5Pclose() failed.\n";

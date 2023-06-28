@@ -159,7 +159,7 @@ main(void)
     assert(file_space >= 0);
     dset = H5Dcreate2(file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(dset >= 0);
-    the_data = (unsigned char *)HDmalloc((size_t)(size[0] * size[1]));
+    the_data = (unsigned char *)malloc((size_t)(size[0] * size[1]));
 
     /* initial fill for lazy malloc */
     HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
@@ -347,7 +347,7 @@ main(void)
     H5Sclose(file_space);
     H5Fclose(file);
 
-    HDfree(the_data);
+    free(the_data);
 
     return 0;
 }

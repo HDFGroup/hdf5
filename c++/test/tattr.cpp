@@ -1663,7 +1663,7 @@ test_string_attr(FileAccPropList &fapl)
         if (HDstrcmp(string_att_check, ATTRSTR_DATA.c_str()) != 0)
             TestErrPrintf("Line %d: Attribute data different: ATTRSTR_DATA=%s,string_att_check=%s\n",
                           __LINE__, ATTRSTR_DATA.c_str(), string_att_check);
-        HDfree(string_att_check);
+        free(string_att_check);
 
         /* Test Attribute::read(...,H5std_string& strg) with VL string */
         // Read and verify the attribute string as an std::string.

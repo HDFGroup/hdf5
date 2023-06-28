@@ -141,11 +141,11 @@ alloc_and_init_file_images(int mpi_size)
         buf_len  = INTS_PER_RANK * mpi_size;
         buf_size = sizeof(int32_t) * (size_t)INTS_PER_RANK * (size_t)mpi_size;
 
-        increasing_fi_buf = (int32_t *)HDmalloc(buf_size);
-        decreasing_fi_buf = (int32_t *)HDmalloc(buf_size);
-        negative_fi_buf   = (int32_t *)HDmalloc(buf_size);
-        zero_fi_buf       = (int32_t *)HDmalloc(buf_size);
-        read_fi_buf       = (int32_t *)HDmalloc(buf_size);
+        increasing_fi_buf = (int32_t *)malloc(buf_size);
+        decreasing_fi_buf = (int32_t *)malloc(buf_size);
+        negative_fi_buf   = (int32_t *)malloc(buf_size);
+        zero_fi_buf       = (int32_t *)malloc(buf_size);
+        read_fi_buf       = (int32_t *)malloc(buf_size);
 
         if ((!increasing_fi_buf) || (!decreasing_fi_buf) || (!negative_fi_buf) || (!zero_fi_buf) ||
             (!read_fi_buf)) {
@@ -203,31 +203,31 @@ free_file_images(void)
 {
     if (increasing_fi_buf) {
 
-        HDfree(increasing_fi_buf);
+        free(increasing_fi_buf);
         increasing_fi_buf = NULL;
     }
 
     if (decreasing_fi_buf) {
 
-        HDfree(decreasing_fi_buf);
+        free(decreasing_fi_buf);
         decreasing_fi_buf = NULL;
     }
 
     if (negative_fi_buf) {
 
-        HDfree(negative_fi_buf);
+        free(negative_fi_buf);
         negative_fi_buf = NULL;
     }
 
     if (zero_fi_buf) {
 
-        HDfree(zero_fi_buf);
+        free(zero_fi_buf);
         zero_fi_buf = NULL;
     }
 
     if (read_fi_buf) {
 
-        HDfree(read_fi_buf);
+        free(read_fi_buf);
         read_fi_buf = NULL;
     }
 

@@ -3018,7 +3018,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     TESTING("B-tree insert: create random level 4 B-tree");
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -3198,7 +3198,7 @@ fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
@@ -3210,7 +3210,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY
-    HDfree(records);
+    free(records);
     return 1;
 } /* test_insert_lots() */
 
@@ -5112,7 +5112,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     TESTING("B-tree update: create random level 4 B-tree");
 
     /* Allocate space for the records */
-    if (NULL == (records = (H5B2_test_rec_t *)HDmalloc(sizeof(H5B2_test_rec_t) * INSERT_MANY_REC)))
+    if (NULL == (records = (H5B2_test_rec_t *)malloc(sizeof(H5B2_test_rec_t) * INSERT_MANY_REC)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -5300,7 +5300,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
@@ -5313,7 +5313,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY
-    HDfree(records);
+    free(records);
 
     return 1;
 } /* test_update_lots() */
@@ -8823,7 +8823,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
      */
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -8861,7 +8861,7 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
             TEST_ERROR;
 
         /* Allocate space for the file data */
-        if (NULL == (file_data = HDmalloc((size_t)sb.st_size)))
+        if (NULL == (file_data = malloc((size_t)sb.st_size)))
             TEST_ERROR;
 
         /* Read file's data into memory */
@@ -9192,9 +9192,9 @@ fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     PASSED();
 
     if (records)
-        HDfree(records);
+        free(records);
     if (file_data)
-        HDfree(file_data);
+        free(file_data);
 
     return 0;
 
@@ -9210,9 +9210,9 @@ error:
     if (fd > 0)
         HDclose(fd);
     if (records)
-        HDfree(records);
+        free(records);
     if (file_data)
-        HDfree(file_data);
+        free(file_data);
 
     return 1;
 } /* test_remove_lots() */
@@ -9246,7 +9246,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
     herr_t                ret;         /* Generic error return value */
 
     /* Allocate space for the records */
-    if (NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * FIND_NEIGHBOR)))
+    if (NULL == (records = (hsize_t *)malloc(sizeof(hsize_t) * FIND_NEIGHBOR)))
         TEST_ERROR;
 
     /* Initialize record #'s */
@@ -9426,7 +9426,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
 
     PASSED();
 
-    HDfree(records);
+    free(records);
 
     return 0;
 
@@ -9438,7 +9438,7 @@ error:
         H5Fclose(file);
     }
     H5E_END_TRY
-    HDfree(records);
+    free(records);
     return 1;
 } /* test_find_neighbor() */
 

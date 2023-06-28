@@ -178,7 +178,7 @@ session_init(struct mirror_writer_opts *opts)
         goto error;
     }
 
-    session = (struct mirror_session *)HDmalloc(sizeof(struct mirror_session));
+    session = (struct mirror_session *)malloc(sizeof(struct mirror_session));
     if (session == NULL) {
         mirror_log(NULL, V_ERR, "can't allocate session structure");
         goto error;
@@ -204,7 +204,7 @@ session_init(struct mirror_writer_opts *opts)
 
 error:
     if (session) {
-        HDfree(session);
+        free(session);
     }
     return NULL;
 } /* end session_init() */
@@ -247,7 +247,7 @@ session_stop(struct mirror_session *session)
 
     /* Invalidate and release structure */
     session->magic++;
-    HDfree(session);
+    free(session);
 
     return ret_value;
 } /* end session_stop() */
@@ -730,7 +730,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 
     /* Allocate the buffer once -- re-use between loops.
      */
-    buf = (char *)HDmalloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
+    buf = (char *)malloc(sizeof(char) * H5FD_MIRROR_DATA_BUFFER_MAX);
     if (NULL == buf) {
         mirror_log(session->loginfo, V_ERR, "can't allocate databuffer");
         reply_error(session, "can't allocate buffer for receiving data");
@@ -782,7 +782,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
 
     } while (sum_bytes_written < xmit_write.size); /* end while ingesting */
 
-    HDfree(buf);
+    free(buf);
 
     /* signal that we're done here and a-ok */
     if (reply_ok(session) < 0) {
@@ -906,7 +906,7 @@ process_instructions(struct mirror_session *session)
 
     buf_size = H5FD_MIRROR_XMIT_BUFFER_MAX * sizeof(char);
 
-    if (NULL == (xmit_buf = HDmalloc(buf_size))) {
+    if (NULL == (xmit_buf = malloc(buf_size))) {
         mirror_log(session->loginfo, V_ERR, "out of memory");
         goto error;
     }
@@ -975,11 +975,11 @@ process_instructions(struct mirror_session *session)
 done:
     comm.magic      = 0; /* invalidate structure, on principle */
     xmit_recd.magic = 0; /* invalidate structure, on principle */
-    HDfree(xmit_buf);
+    free(xmit_buf);
     return 0;
 
 error:
-    HDfree(xmit_buf);
+    free(xmit_buf);
     return -1;
 } /* end process_instructions() */
 

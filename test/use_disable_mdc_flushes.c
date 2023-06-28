@@ -149,7 +149,7 @@ parse_option(int argc, char *const argv[])
     /* set test file name if not given */
     if (!filename_g) {
         /* default data file name is <progname>.h5 */
-        if ((filename_g = (char *)HDmalloc(HDstrlen(progname_g) + 4)) == NULL) {
+        if ((filename_g = (char *)malloc(HDstrlen(progname_g) + 4)) == NULL) {
             fprintf(stderr, "malloc: failed\n");
             Hgoto_error(-1);
         };
@@ -372,7 +372,7 @@ write_file(void)
     memdims[0] = 1;
     memdims[1] = dims_g[1];
     memdims[2] = dims_g[2];
-    if ((buffer = (UC_CTYPE *)HDmalloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
+    if ((buffer = (UC_CTYPE *)malloc((size_t)memdims[1] * (size_t)memdims[2] * sizeof(UC_CTYPE))) == NULL) {
         fprintf(stderr, "malloc: failed\n");
         return -1;
     };
@@ -470,7 +470,7 @@ write_file(void)
         }
 
     /* Done writing. Free/Close all resources including data file */
-    HDfree(buffer);
+    free(buffer);
 
     if (H5Dclose(dsid) < 0) {
         fprintf(stderr, "Failed to close datasete\n");

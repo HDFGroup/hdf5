@@ -2369,7 +2369,7 @@ test_write_attribute(void)
         data_size *= dims[i];
     data_size *= ATTRIBUTE_WRITE_TEST_ATTR_DTYPE_SIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / ATTRIBUTE_WRITE_TEST_ATTR_DTYPE_SIZE; i++)
@@ -2389,7 +2389,7 @@ test_write_attribute(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -2412,7 +2412,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Gclose(group_id);
@@ -2503,7 +2503,7 @@ test_write_attribute_invalid_params(void)
         data_size *= dims[i];
     data_size *= ATTRIBUTE_WRITE_INVALID_PARAMS_TEST_ATTR_DTYPE_SIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / ATTRIBUTE_WRITE_INVALID_PARAMS_TEST_ATTR_DTYPE_SIZE; i++)
@@ -2578,7 +2578,7 @@ test_write_attribute_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -2601,7 +2601,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Gclose(group_id);
@@ -2689,9 +2689,9 @@ test_read_attribute(void)
         data_size *= dims[i];
     data_size *= ATTRIBUTE_READ_TEST_ATTR_DTYPE_SIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
-    if (NULL == (read_buf = HDcalloc(1, data_size)))
+    if (NULL == (read_buf = calloc(1, data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / ATTRIBUTE_READ_TEST_ATTR_DTYPE_SIZE; i++)
@@ -2704,7 +2704,7 @@ test_read_attribute(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -2732,7 +2732,7 @@ test_read_attribute(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -2755,9 +2755,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Gclose(group_id);
@@ -2849,9 +2849,9 @@ test_read_attribute_invalid_params(void)
         data_size *= dims[i];
     data_size *= ATTRIBUTE_READ_INVALID_PARAMS_TEST_ATTR_DTYPE_SIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
-    if (NULL == (read_buf = HDcalloc(1, data_size)))
+    if (NULL == (read_buf = calloc(1, data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / ATTRIBUTE_READ_INVALID_PARAMS_TEST_ATTR_DTYPE_SIZE; i++)
@@ -2864,7 +2864,7 @@ test_read_attribute_invalid_params(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -2946,7 +2946,7 @@ test_read_attribute_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -2969,9 +2969,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Gclose(group_id);
@@ -3065,7 +3065,7 @@ test_read_empty_attribute(void)
         data_size *= dims[i];
     data_size *= ATTRIBUTE_READ_EMPTY_DTYPE_SIZE;
 
-    if (NULL == (read_buf = HDcalloc(1, data_size)))
+    if (NULL == (read_buf = calloc(1, data_size)))
         TEST_ERROR;
 
     if (H5Aread(attr_id, ATTRIBUTE_READ_EMPTY_DTYPE, read_buf) < 0) {
@@ -3075,7 +3075,7 @@ test_read_empty_attribute(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -3098,7 +3098,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(space_id);
         H5Aclose(attr_id);
         H5Gclose(group_id);
@@ -4055,7 +4055,7 @@ test_get_attribute_name(void)
 
     /* Allocate the name buffer */
     name_buf_size = strlen(ATTRIBUTE_GET_NAME_TEST_ATTRIBUTE_NAME) + 2;
-    if (NULL == (name_buf = (char *)HDmalloc((size_t)name_buf_size))) {
+    if (NULL == (name_buf = (char *)malloc((size_t)name_buf_size))) {
         H5_FAILED();
         printf("    couldn't allocate buffer for storing attribute's name\n");
         goto error;
@@ -4372,7 +4372,7 @@ test_get_attribute_name(void)
     TESTING_2("test cleanup");
 
     if (name_buf) {
-        HDfree(name_buf);
+        free(name_buf);
         name_buf = NULL;
     }
 
@@ -4397,7 +4397,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (name_buf)
-            HDfree(name_buf);
+            free(name_buf);
         H5Sclose(space_id);
         H5Tclose(attr_dtype);
         H5Aclose(attr_id);
@@ -4499,7 +4499,7 @@ test_get_attribute_name_invalid_params(void)
         goto error;
     }
 
-    if (NULL == (name_buf = (char *)HDmalloc((size_t)name_buf_size + 1)))
+    if (NULL == (name_buf = (char *)malloc((size_t)name_buf_size + 1)))
         TEST_ERROR;
 
     PASSED();
@@ -4731,7 +4731,7 @@ test_get_attribute_name_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (name_buf) {
-        HDfree(name_buf);
+        free(name_buf);
         name_buf = NULL;
     }
 
@@ -4756,7 +4756,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (name_buf)
-            HDfree(name_buf);
+            free(name_buf);
         H5Sclose(space_id);
         H5Tclose(attr_dtype);
         H5Aclose(attr_id);

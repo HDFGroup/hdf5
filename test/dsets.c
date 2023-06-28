@@ -552,9 +552,9 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
         /* Set up data array */
-        if (NULL == (rdata_bytes = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        if (NULL == (rdata_bytes = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
             TEST_ERROR;
-        if (NULL == (rdata = (int **)HDcalloc(DSET_DIM1, sizeof(rdata_bytes))))
+        if (NULL == (rdata = (int **)calloc(DSET_DIM1, sizeof(rdata_bytes))))
             TEST_ERROR;
         for (i = 0; i < DSET_DIM1; i++)
             rdata[i] = rdata_bytes + (i * DSET_DIM2);
@@ -574,7 +574,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
             goto error;
 
         /* Create a small conversion buffer to test strip mining */
-        tconv_buf = HDmalloc((size_t)1000);
+        tconv_buf = malloc((size_t)1000);
         xfer      = H5Pcreate(H5P_DATASET_XFER);
         assert(xfer >= 0);
         if (H5Pset_buffer(xfer, (size_t)1000, tconv_buf, NULL) < 0)
@@ -648,9 +648,9 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         HDclose(f);
         f = -1;
 
-        HDfree(tconv_buf);
-        HDfree(rdata_bytes);
-        HDfree(rdata);
+        free(tconv_buf);
+        free(rdata_bytes);
+        free(rdata);
 
         PASSED();
     } /* end if */
@@ -677,9 +677,9 @@ error:
     if (f > 0)
         HDclose(f);
 
-    HDfree(tconv_buf);
-    HDfree(rdata_bytes);
-    HDfree(rdata);
+    free(tconv_buf);
+    free(rdata_bytes);
+    free(rdata);
 
     return FAIL;
 } /* end test_simple_io() */
@@ -713,9 +713,9 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
         /* Set up data array */
-        if (NULL == (rdata_bytes = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+        if (NULL == (rdata_bytes = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
             TEST_ERROR;
-        if (NULL == (rdata = (int **)HDcalloc(DSET_DIM1, sizeof(rdata_bytes))))
+        if (NULL == (rdata = (int **)calloc(DSET_DIM1, sizeof(rdata_bytes))))
             TEST_ERROR;
         for (i = 0; i < DSET_DIM1; i++)
             rdata[i] = rdata_bytes + (i * DSET_DIM2);
@@ -785,8 +785,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         HDclose(f);
         f = -1;
 
-        HDfree(rdata_bytes);
-        HDfree(rdata);
+        free(rdata_bytes);
+        free(rdata);
 
         PASSED();
     } /* end if */
@@ -813,8 +813,8 @@ error:
     if (f > 0)
         HDclose(f);
 
-    HDfree(rdata_bytes);
-    HDfree(rdata);
+    free(rdata_bytes);
+    free(rdata);
 
     return FAIL;
 } /* end test_userblock_offset() */
@@ -1075,9 +1075,9 @@ test_max_compact(hid_t fapl)
     /* Initialize data */
     compact_size = (SIXTY_FOUR_KB - 64) / sizeof(int);
 
-    if (NULL == (wbuf = (int *)HDmalloc(sizeof(int) * compact_size)))
+    if (NULL == (wbuf = (int *)malloc(sizeof(int) * compact_size)))
         TEST_ERROR;
-    if (NULL == (rbuf = (int *)HDmalloc(sizeof(int) * compact_size)))
+    if (NULL == (rbuf = (int *)malloc(sizeof(int) * compact_size)))
         TEST_ERROR;
 
     n = 0;
@@ -1141,9 +1141,9 @@ test_max_compact(hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
-    HDfree(wbuf);
+    free(wbuf);
     wbuf = NULL;
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
 
     /* Test compact dataset of size 64KB */
@@ -1184,9 +1184,9 @@ test_max_compact(hid_t fapl)
 
 error:
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     H5E_BEGIN_TRY
     {
@@ -1389,7 +1389,7 @@ test_conv_buffer(hid_t fid)
 
     TESTING("data type conversion buffer size");
 
-    if ((cf = (CmpField *)HDcalloc((size_t)1, sizeof(CmpField))) == 0)
+    if ((cf = (CmpField *)calloc((size_t)1, sizeof(CmpField))) == 0)
         goto error;
 
     /* Populate the data members */
@@ -1454,7 +1454,7 @@ test_conv_buffer(hid_t fid)
         goto error;
 
     /* Read should succeed since library will set conversion buffer big enough */
-    if ((cfrR = (CmpFieldR *)HDcalloc((size_t)1, sizeof(CmpFieldR))) == 0)
+    if ((cfrR = (CmpFieldR *)calloc((size_t)1, sizeof(CmpFieldR))) == 0)
         goto error;
     if (H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfrR) < 0)
         goto error;
@@ -1505,14 +1505,14 @@ test_conv_buffer(hid_t fid)
     if (H5Dclose(dataset) < 0)
         goto error;
 
-    HDfree(cf);
-    HDfree(cfrR);
+    free(cf);
+    free(cfrR);
     HDputs(" PASSED");
     return SUCCEED;
 
 error:
-    HDfree(cfrR);
-    HDfree(cf);
+    free(cfrR);
+    free(cf);
 
     H5E_BEGIN_TRY
     {
@@ -1549,9 +1549,9 @@ test_tconv(hid_t file)
     hid_t   space = -1, dataset = -1;
     int     i;
 
-    if ((out = (char *)HDmalloc((size_t)(4 * 1000 * 1000))) == NULL)
+    if ((out = (char *)malloc((size_t)(4 * 1000 * 1000))) == NULL)
         goto error;
-    if ((in = (char *)HDmalloc((size_t)(4 * 1000 * 1000))) == NULL)
+    if ((in = (char *)malloc((size_t)(4 * 1000 * 1000))) == NULL)
         goto error;
 
     TESTING("data type conversion");
@@ -1596,17 +1596,17 @@ test_tconv(hid_t file)
         goto error;
     if (H5Sclose(space) < 0)
         goto error;
-    HDfree(out);
-    HDfree(in);
+    free(out);
+    free(in);
 
     HDputs(" PASSED");
     return SUCCEED;
 
 error:
     if (out)
-        HDfree(out);
+        free(out);
     if (in)
-        HDfree(in);
+        free(in);
 
     H5E_BEGIN_TRY
     {
@@ -1822,7 +1822,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
     if (offset > nbytes || (offset + length) > nbytes || length < sizeof(unsigned int))
         TEST_ERROR;
 
-    if (NULL == (data = HDmalloc((size_t)length)))
+    if (NULL == (data = malloc((size_t)length)))
         TEST_ERROR;
     HDmemset(data, (int)value, (size_t)length);
 
@@ -1844,7 +1844,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
 
     return ret_value;
 } /* end filter_corrupt() */
@@ -1922,7 +1922,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
-    tconv_buf = HDmalloc((size_t)1000);
+    tconv_buf = malloc((size_t)1000);
     if (H5Pset_buffer(dxpl, (size_t)1000, tconv_buf, NULL) < 0)
         goto error;
     if ((write_dxpl = H5Pcopy(dxpl)) < 0)
@@ -2264,13 +2264,13 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         goto error;
     if (H5Pclose(write_dxpl) < 0)
         goto error;
-    HDfree(tconv_buf);
+    free(tconv_buf);
 
     return SUCCEED;
 
 error:
     if (tconv_buf)
-        HDfree(tconv_buf);
+        free(tconv_buf);
     return FAIL;
 } /* end test_filter_internal() */
 
@@ -4353,7 +4353,7 @@ test_nbit_compound_3(hid_t file)
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
 
-        orig_data[i].v.p   = HDmalloc((size_t)(i + 1) * sizeof(unsigned int));
+        orig_data[i].v.p   = malloc((size_t)(i + 1) * sizeof(unsigned int));
         orig_data[i].v.len = (size_t)i + 1;
         for (k = 0; k < (i + 1); k++)
             ((unsigned int *)orig_data[i].v.p)[k] = (unsigned int)(i * 100 + k);
@@ -4483,9 +4483,9 @@ test_nbit_int_size(hid_t file)
     TESTING("    nbit integer dataset size");
 
     /* Set up data array */
-    if (NULL == (orig_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (orig_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (orig = (int **)HDcalloc(DSET_DIM1, sizeof(orig_data))))
+    if (NULL == (orig = (int **)calloc(DSET_DIM1, sizeof(orig_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         orig[i] = orig_data + (i * DSET_DIM2);
@@ -4619,16 +4619,16 @@ test_nbit_int_size(hid_t file)
     H5Sclose(dataspace);
     H5Pclose(dset_create_props);
 
-    HDfree(orig);
-    HDfree(orig_data);
+    free(orig);
+    free(orig_data);
 
     PASSED();
 
     return SUCCEED;
 
 error:
-    HDfree(orig);
-    HDfree(orig_data);
+    free(orig);
+    free(orig_data);
 
     return FAIL;
 } /* end test_nbit_int_size() */
@@ -4663,9 +4663,9 @@ test_nbit_flt_size(hid_t file)
     TESTING("    nbit floating-number dataset size");
 
     /* Set up data array */
-    if (NULL == (orig_data = (float *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(float))))
+    if (NULL == (orig_data = (float *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(float))))
         TEST_ERROR;
-    if (NULL == (orig = (float **)HDcalloc(DSET_DIM1, sizeof(orig_data))))
+    if (NULL == (orig = (float **)calloc(DSET_DIM1, sizeof(orig_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         orig[i] = orig_data + (i * DSET_DIM2);
@@ -4830,13 +4830,13 @@ test_nbit_flt_size(hid_t file)
 
     PASSED();
 
-    HDfree(orig);
-    HDfree(orig_data);
+    free(orig);
+    free(orig_data);
 
     return SUCCEED;
 error:
-    HDfree(orig);
-    HDfree(orig_data);
+    free(orig);
+    free(orig_data);
 
     return FAIL;
 } /* end test_nbit_flt_size() */
@@ -7224,7 +7224,7 @@ auxread_fdata(hid_t fid, const char *name)
         goto error;
 
     if (nelmts) {
-        buf = (void *)HDmalloc((size_t)(nelmts * msize));
+        buf = (void *)malloc((size_t)(nelmts * msize));
         if (buf == NULL) {
             printf("cannot read into memory\n");
             goto error;
@@ -7240,7 +7240,7 @@ auxread_fdata(hid_t fid, const char *name)
     if (H5Dclose(dset_id) < 0)
         goto error;
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     return SUCCEED;
 
@@ -7253,7 +7253,7 @@ error:
         H5Tclose(ftype_id);
         H5Tclose(mtype_id);
         if (buf)
-            HDfree(buf);
+            free(buf);
     }
     H5E_END_TRY
     return FAIL;
@@ -7593,21 +7593,21 @@ test_missing_chunk(hid_t file)
     TESTING("Read dataset with unwritten chunk & undefined fill value");
 
     /* Set up data arrays */
-    if (NULL == (wdata = (int *)HDcalloc(MISSING_CHUNK_DIM, sizeof(int))))
+    if (NULL == (wdata = (int *)calloc(MISSING_CHUNK_DIM, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (rdata = (int *)HDcalloc(MISSING_CHUNK_DIM, sizeof(int))))
+    if (NULL == (rdata = (int *)calloc(MISSING_CHUNK_DIM, sizeof(int))))
         TEST_ERROR;
 
-    if (NULL == (wdata2_bytes = (int *)HDcalloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
+    if (NULL == (wdata2_bytes = (int *)calloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (wdata2 = (int **)HDcalloc(MISSING_CHUNK_DIM, sizeof(wdata2_bytes))))
+    if (NULL == (wdata2 = (int **)calloc(MISSING_CHUNK_DIM, sizeof(wdata2_bytes))))
         TEST_ERROR;
     for (i = 0; i < MISSING_CHUNK_DIM; i++)
         wdata2[i] = wdata2_bytes + (i * MISSING_CHUNK_DIM);
 
-    if (NULL == (rdata2_bytes = (int *)HDcalloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
+    if (NULL == (rdata2_bytes = (int *)calloc(MISSING_CHUNK_DIM * MISSING_CHUNK_DIM, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (rdata2 = (int **)HDcalloc(MISSING_CHUNK_DIM, sizeof(rdata2_bytes))))
+    if (NULL == (rdata2 = (int **)calloc(MISSING_CHUNK_DIM, sizeof(rdata2_bytes))))
         TEST_ERROR;
     for (i = 0; i < MISSING_CHUNK_DIM; i++)
         rdata2[i] = rdata2_bytes + (i * MISSING_CHUNK_DIM);
@@ -7770,12 +7770,12 @@ test_missing_chunk(hid_t file)
     if (H5Dclose(did2) < 0)
         TEST_ERROR;
 
-    HDfree(rdata);
-    HDfree(wdata);
-    HDfree(rdata2);
-    HDfree(wdata2);
-    HDfree(rdata2_bytes);
-    HDfree(wdata2_bytes);
+    free(rdata);
+    free(wdata);
+    free(rdata2);
+    free(wdata2);
+    free(rdata2_bytes);
+    free(wdata2_bytes);
 
     PASSED();
     return SUCCEED;
@@ -7794,12 +7794,12 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(rdata);
-    HDfree(wdata);
-    HDfree(rdata2);
-    HDfree(wdata2);
-    HDfree(rdata2_bytes);
-    HDfree(wdata2_bytes);
+    free(rdata);
+    free(wdata);
+    free(rdata2);
+    free(wdata2);
+    free(rdata2_bytes);
+    free(wdata2_bytes);
 
     return FAIL;
 } /* end test_missing_chunk() */
@@ -9066,25 +9066,24 @@ test_big_chunks_bypass_cache(hid_t fapl)
     h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
 
     /* Set up data arrays */
-    if (NULL ==
-        (t_wdata_bytes = (int *)HDcalloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
+    if (NULL == (t_wdata_bytes = (int *)calloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
         TEST_ERROR;
-    if (NULL == (t_wdata = (int **)HDcalloc((BYPASS_CHUNK_DIM / 2), sizeof(t_wdata_bytes))))
+    if (NULL == (t_wdata = (int **)calloc((BYPASS_CHUNK_DIM / 2), sizeof(t_wdata_bytes))))
         TEST_ERROR;
     for (i = 0; i < (BYPASS_CHUNK_DIM / 2); i++)
         t_wdata[i] = t_wdata_bytes + (i * (BYPASS_CHUNK_DIM / 2));
 
-    if (NULL == (t_rdata1_bytes = (int *)HDcalloc(BYPASS_DIM * BYPASS_DIM, sizeof(int))))
+    if (NULL == (t_rdata1_bytes = (int *)calloc(BYPASS_DIM * BYPASS_DIM, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (t_rdata1 = (int **)HDcalloc(BYPASS_DIM, sizeof(t_rdata1_bytes))))
+    if (NULL == (t_rdata1 = (int **)calloc(BYPASS_DIM, sizeof(t_rdata1_bytes))))
         TEST_ERROR;
     for (i = 0; i < BYPASS_DIM; i++)
         t_rdata1[i] = t_rdata1_bytes + (i * BYPASS_DIM);
 
     if (NULL ==
-        (t_rdata2_bytes = (int *)HDcalloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
+        (t_rdata2_bytes = (int *)calloc((BYPASS_CHUNK_DIM / 2) * (BYPASS_CHUNK_DIM / 2), sizeof(int))))
         TEST_ERROR;
-    if (NULL == (t_rdata2 = (int **)HDcalloc((BYPASS_CHUNK_DIM / 2), sizeof(t_rdata2_bytes))))
+    if (NULL == (t_rdata2 = (int **)calloc((BYPASS_CHUNK_DIM / 2), sizeof(t_rdata2_bytes))))
         TEST_ERROR;
     for (i = 0; i < (BYPASS_CHUNK_DIM / 2); i++)
         t_rdata2[i] = t_rdata2_bytes + (i * (BYPASS_CHUNK_DIM / 2));
@@ -9188,11 +9187,11 @@ test_big_chunks_bypass_cache(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Allocate buffers */
-    if (NULL == (wdata = (int *)HDmalloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
+    if (NULL == (wdata = (int *)malloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
         TEST_ERROR;
-    if (NULL == (rdata1 = (int *)HDmalloc(sizeof(int) * BYPASS_DIM)))
+    if (NULL == (rdata1 = (int *)malloc(sizeof(int) * BYPASS_DIM)))
         TEST_ERROR;
-    if (NULL == (rdata2 = (int *)HDmalloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
+    if (NULL == (rdata2 = (int *)malloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
         TEST_ERROR;
 
     /* Initialize data to write for 1-D dataset */
@@ -9352,15 +9351,15 @@ test_big_chunks_bypass_cache(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Release buffers */
-    HDfree(wdata);
-    HDfree(rdata1);
-    HDfree(rdata2);
-    HDfree(t_wdata);
-    HDfree(t_rdata1);
-    HDfree(t_rdata2);
-    HDfree(t_wdata_bytes);
-    HDfree(t_rdata1_bytes);
-    HDfree(t_rdata2_bytes);
+    free(wdata);
+    free(rdata1);
+    free(rdata2);
+    free(t_wdata);
+    free(t_rdata1);
+    free(t_rdata2);
+    free(t_wdata_bytes);
+    free(t_rdata1_bytes);
+    free(t_rdata2_bytes);
 
     PASSED();
     return SUCCEED;
@@ -9379,15 +9378,15 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(wdata);
-    HDfree(rdata1);
-    HDfree(rdata2);
-    HDfree(t_wdata);
-    HDfree(t_rdata1);
-    HDfree(t_rdata2);
-    HDfree(t_wdata_bytes);
-    HDfree(t_rdata1_bytes);
-    HDfree(t_rdata2_bytes);
+    free(wdata);
+    free(rdata1);
+    free(rdata2);
+    free(t_wdata);
+    free(t_rdata1);
+    free(t_rdata2);
+    free(t_wdata_bytes);
+    free(t_rdata1_bytes);
+    free(t_rdata2_bytes);
 
     return FAIL;
 } /* end test_big_chunks_bypass_cache() */
@@ -9985,16 +9984,16 @@ test_chunk_fast_bug1(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Set up data array */
-    if (NULL == (wbuf_bytes = (unsigned *)HDcalloc(40 * 20, sizeof(unsigned))))
+    if (NULL == (wbuf_bytes = (unsigned *)calloc(40 * 20, sizeof(unsigned))))
         TEST_ERROR;
-    if (NULL == (wbuf = (unsigned **)HDcalloc(40, sizeof(wbuf_bytes))))
+    if (NULL == (wbuf = (unsigned **)calloc(40, sizeof(wbuf_bytes))))
         TEST_ERROR;
     for (i = 0; i < 40; i++)
         wbuf[i] = wbuf_bytes + (i * 20);
 
-    if (NULL == (rbuf_bytes = (unsigned *)HDcalloc(40 * 20, sizeof(unsigned))))
+    if (NULL == (rbuf_bytes = (unsigned *)calloc(40 * 20, sizeof(unsigned))))
         TEST_ERROR;
-    if (NULL == (rbuf = (unsigned **)HDcalloc(40, sizeof(rbuf_bytes))))
+    if (NULL == (rbuf = (unsigned **)calloc(40, sizeof(rbuf_bytes))))
         TEST_ERROR;
     for (i = 0; i < 40; i++)
         rbuf[i] = rbuf_bytes + (i * 20);
@@ -10070,10 +10069,10 @@ test_chunk_fast_bug1(hid_t fapl)
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(wbuf_bytes);
-    HDfree(rbuf_bytes);
+    free(wbuf);
+    free(rbuf);
+    free(wbuf_bytes);
+    free(rbuf_bytes);
 
     PASSED();
     return SUCCEED;
@@ -10088,10 +10087,10 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(wbuf_bytes);
-    HDfree(rbuf_bytes);
+    free(wbuf);
+    free(rbuf);
+    free(wbuf_bytes);
+    free(rbuf_bytes);
 
     return FAIL;
 } /* end test_chunk_fast_bug1() */
@@ -10783,30 +10782,30 @@ test_fixed_array(hid_t fapl)
     h5_fixname(FILENAME[12], fapl, filename, sizeof filename);
 
     /* Set up 2D data arrays */
-    if (NULL == (chunks_bytes = (int *)HDcalloc(12 * 6, sizeof(int))))
+    if (NULL == (chunks_bytes = (int *)calloc(12 * 6, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (chunks = (int **)HDcalloc(12, sizeof(chunks_bytes))))
+    if (NULL == (chunks = (int **)calloc(12, sizeof(chunks_bytes))))
         TEST_ERROR;
     for (i = 0; i < 12; i++)
         chunks[i] = chunks_bytes + (i * 6);
 
-    if (NULL == (chunks_big_bytes = (int *)HDcalloc(125 * 20, sizeof(int))))
+    if (NULL == (chunks_big_bytes = (int *)calloc(125 * 20, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (chunks_big = (int **)HDcalloc(125, sizeof(chunks_big_bytes))))
+    if (NULL == (chunks_big = (int **)calloc(125, sizeof(chunks_big_bytes))))
         TEST_ERROR;
     for (i = 0; i < 125; i++)
         chunks_big[i] = chunks_big_bytes + (i * 20);
 
-    if (NULL == (coord_bytes = (hsize_t *)HDcalloc(POINTS * 2, sizeof(hsize_t))))
+    if (NULL == (coord_bytes = (hsize_t *)calloc(POINTS * 2, sizeof(hsize_t))))
         TEST_ERROR;
-    if (NULL == (coord = (hsize_t **)HDcalloc(POINTS, sizeof(coord_bytes))))
+    if (NULL == (coord = (hsize_t **)calloc(POINTS, sizeof(coord_bytes))))
         TEST_ERROR;
     for (i = 0; i < POINTS; i++)
         coord[i] = coord_bytes + (i * 2);
 
-    if (NULL == (coord_big_bytes = (hsize_t *)HDcalloc(POINTS_BIG * 2, sizeof(hsize_t))))
+    if (NULL == (coord_big_bytes = (hsize_t *)calloc(POINTS_BIG * 2, sizeof(hsize_t))))
         TEST_ERROR;
-    if (NULL == (coord_big = (hsize_t **)HDcalloc(POINTS_BIG, sizeof(coord_big_bytes))))
+    if (NULL == (coord_big = (hsize_t **)calloc(POINTS_BIG, sizeof(coord_big_bytes))))
         TEST_ERROR;
     for (i = 0; i < POINTS_BIG; i++)
         coord_big[i] = coord_big_bytes + (i * 2);
@@ -10826,9 +10825,9 @@ test_fixed_array(hid_t fapl)
         TEST_ERROR;
 
     /* Allocate the "big" buffers */
-    if (NULL == (wbuf_big = (int *)HDmalloc(sizeof(int) * POINTS_BIG)))
+    if (NULL == (wbuf_big = (int *)malloc(sizeof(int) * POINTS_BIG)))
         TEST_ERROR;
-    if (NULL == (rbuf_big = (int *)HDmalloc(sizeof(int) * POINTS_BIG)))
+    if (NULL == (rbuf_big = (int *)malloc(sizeof(int) * POINTS_BIG)))
         TEST_ERROR;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -11190,17 +11189,17 @@ test_fixed_array(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Release buffers */
-    HDfree(wbuf_big);
-    HDfree(rbuf_big);
+    free(wbuf_big);
+    free(rbuf_big);
 
-    HDfree(chunks);
-    HDfree(chunks_big);
-    HDfree(coord);
-    HDfree(coord_big);
-    HDfree(chunks_bytes);
-    HDfree(chunks_big_bytes);
-    HDfree(coord_bytes);
-    HDfree(coord_big_bytes);
+    free(chunks);
+    free(chunks_big);
+    free(coord);
+    free(coord_big);
+    free(chunks_bytes);
+    free(chunks_big_bytes);
+    free(coord_bytes);
+    free(coord_big_bytes);
 
     PASSED();
     return SUCCEED;
@@ -11216,16 +11215,16 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(wbuf_big);
-    HDfree(rbuf_big);
-    HDfree(chunks);
-    HDfree(chunks_big);
-    HDfree(coord);
-    HDfree(coord_big);
-    HDfree(chunks_bytes);
-    HDfree(chunks_big_bytes);
-    HDfree(coord_bytes);
-    HDfree(coord_big_bytes);
+    free(wbuf_big);
+    free(rbuf_big);
+    free(chunks);
+    free(chunks_big);
+    free(coord);
+    free(coord_big);
+    free(chunks_bytes);
+    free(chunks_big_bytes);
+    free(coord_bytes);
+    free(coord_big_bytes);
 
     return FAIL;
 } /* end test_fixed_array() */
@@ -11304,13 +11303,13 @@ test_single_chunk(hid_t fapl)
         TEST_ERROR;
 
     /* Allocate the buffers */
-    if (NULL == (wbuf = (int *)HDmalloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
+    if (NULL == (wbuf = (int *)malloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
         TEST_ERROR;
-    if (NULL == (rbuf = (int *)HDmalloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
+    if (NULL == (rbuf = (int *)malloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
         TEST_ERROR;
-    if (NULL == (t_wbuf = (int *)HDmalloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
+    if (NULL == (t_wbuf = (int *)malloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
         TEST_ERROR;
-    if (NULL == (t_rbuf = (int *)HDmalloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
+    if (NULL == (t_rbuf = (int *)malloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
         TEST_ERROR;
 
     for (i = n = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
@@ -11494,10 +11493,10 @@ test_single_chunk(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Release buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(t_wbuf);
-    HDfree(t_rbuf);
+    free(wbuf);
+    free(rbuf);
+    free(t_wbuf);
+    free(t_rbuf);
 
     PASSED();
     return SUCCEED;
@@ -11515,13 +11514,13 @@ error:
     }
     H5E_END_TRY
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (t_wbuf)
-        HDfree(t_wbuf);
+        free(t_wbuf);
     if (t_rbuf)
-        HDfree(t_rbuf);
+        free(t_rbuf);
     return FAIL;
 } /* end test_single_chunk() */
 
@@ -14519,7 +14518,7 @@ dls_01_main(void)
     if (NULL == h5_fixname(FILENAME[23], H5P_DEFAULT, filename, sizeof(filename)))
         TEST_ERROR;
 
-    buffer = (char *)HDcalloc(DLS_01_DIMS, DLS_01_STR_SIZE);
+    buffer = (char *)calloc(DLS_01_DIMS, DLS_01_STR_SIZE);
     if (NULL == buffer)
         TEST_ERROR;
 
@@ -14565,7 +14564,7 @@ dls_01_main(void)
     if (status != 0)
         TEST_ERROR;
 
-    HDfree(buffer);
+    free(buffer);
 
     PASSED();
 
@@ -14573,7 +14572,7 @@ dls_01_main(void)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     return FAIL;
 } /* end dls_01_main() */
 
@@ -15593,33 +15592,33 @@ main(void)
 
     /* Initialize global arrays */
     /* points */
-    if (NULL == (points_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (points_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (points = (int **)HDcalloc(DSET_DIM1, sizeof(points_data))))
+    if (NULL == (points = (int **)calloc(DSET_DIM1, sizeof(points_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         points[i] = points_data + (i * DSET_DIM2);
 
     /* check */
-    if (NULL == (check_data = (int *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
+    if (NULL == (check_data = (int *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (check = (int **)HDcalloc(DSET_DIM1, sizeof(check_data))))
+    if (NULL == (check = (int **)calloc(DSET_DIM1, sizeof(check_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         check[i] = check_data + (i * DSET_DIM2);
 
     /* points_dbl */
-    if (NULL == (points_dbl_data = (double *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
+    if (NULL == (points_dbl_data = (double *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
         TEST_ERROR;
-    if (NULL == (points_dbl = (double **)HDcalloc(DSET_DIM1, sizeof(points_dbl_data))))
+    if (NULL == (points_dbl = (double **)calloc(DSET_DIM1, sizeof(points_dbl_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         points_dbl[i] = points_dbl_data + (i * DSET_DIM2);
 
     /* check_dbl */
-    if (NULL == (check_dbl_data = (double *)HDcalloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
+    if (NULL == (check_dbl_data = (double *)calloc(DSET_DIM1 * DSET_DIM2, sizeof(double))))
         TEST_ERROR;
-    if (NULL == (check_dbl = (double **)HDcalloc(DSET_DIM1, sizeof(check_dbl_data))))
+    if (NULL == (check_dbl = (double **)calloc(DSET_DIM1, sizeof(check_dbl_data))))
         TEST_ERROR;
     for (i = 0; i < DSET_DIM1; i++)
         check_dbl[i] = check_dbl_data + (i * DSET_DIM2);
@@ -15839,28 +15838,28 @@ main(void)
 #endif /* H5_HAVE_FILTER_SZIP */
     h5_cleanup(FILENAME, fapl);
 
-    HDfree(points);
-    HDfree(check);
-    HDfree(points_dbl);
-    HDfree(check_dbl);
+    free(points);
+    free(check);
+    free(points_dbl);
+    free(check_dbl);
 
-    HDfree(points_data);
-    HDfree(check_data);
-    HDfree(points_dbl_data);
-    HDfree(check_dbl_data);
+    free(points_data);
+    free(check_data);
+    free(points_dbl_data);
+    free(check_dbl_data);
 
     HDexit(EXIT_SUCCESS);
 
 error:
-    HDfree(points);
-    HDfree(check);
-    HDfree(points_dbl);
-    HDfree(check_dbl);
+    free(points);
+    free(check);
+    free(points_dbl);
+    free(check_dbl);
 
-    HDfree(points_data);
-    HDfree(check_data);
-    HDfree(points_dbl_data);
-    HDfree(check_dbl_data);
+    free(points_data);
+    free(check_data);
+    free(points_dbl_data);
+    free(check_dbl_data);
 
     nerrors = MAX(1, nerrors);
     printf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");

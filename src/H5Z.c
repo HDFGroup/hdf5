@@ -180,9 +180,9 @@ H5Z_term_package(void)
                         H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
                         timestrs.elapsed, bandwidth);
 next:
-                HDfree(timestrs.user);
-                HDfree(timestrs.system);
-                HDfree(timestrs.elapsed);
+                free(timestrs.user);
+                free(timestrs.system);
+                free(timestrs.elapsed);
             } /* end for */
         }     /* end for */
     }         /* end if */

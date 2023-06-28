@@ -4737,14 +4737,14 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         failure_mssg = "cache not empty at beginning of flush ops test.";
     }
 
-    spec = HDmalloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
+    spec = malloc((size_t)max_num_spec * sizeof(struct fo_flush_cache_test_spec));
     if (spec == NULL) {
 
         pass         = FALSE;
         failure_mssg = "couldn't allocate flush ops test spec array";
     }
 
-    checks = HDmalloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
+    checks = malloc((size_t)max_num_check * sizeof(struct fo_flush_entry_check));
     if (checks == NULL) {
 
         pass         = FALSE;
@@ -8060,8 +8060,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(checks);
-    HDfree(spec);
+    free(checks);
+    free(spec);
 
     /* finally finish up with the flush ops eviction test */
     check_flush_cache__flush_op_eviction_test(file_ptr);
@@ -8356,7 +8356,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
     test_entry_t *entry_ptr;
     test_entry_t *base_addr;
 
-    expected = HDmalloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
+    expected = malloc((size_t)num_total_entries * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -9574,7 +9574,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
         reset_entries();
     }
 
-    HDfree(expected);
+    free(expected);
 
 } /* check_flush_cache__flush_op_eviction_test() */
 
@@ -10640,7 +10640,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         struct pinned_single_entry_test_spec *spec = NULL;
         size_t                                i;
 
-        spec = HDmalloc(256 * sizeof(struct pinned_single_entry_test_spec));
+        spec = malloc(256 * sizeof(struct pinned_single_entry_test_spec));
         if (spec == NULL) {
 
             pass         = FALSE;
@@ -10758,7 +10758,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
             i++;
         }
 
-        HDfree(spec);
+        free(spec);
     }
 
 } /* check_flush_cache__single_entry() */
@@ -25343,7 +25343,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -26019,7 +26019,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     if (show_progress) /* 12 */
         fprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -31200,7 +31200,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
      */
     hbool_t deserialized = (hbool_t) !(fill_via_insertion);
 
-    expected = HDmalloc(150 * sizeof(struct expected_entry_status));
+    expected = malloc(150 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -31744,7 +31744,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     if (show_progress) /* 13 */
         fprintf(stdout, "%s: check point %d -- pass %d\n", fcn_name, checkpoint++, pass);
 
-    HDfree(expected);
+    free(expected);
 
     if (pass) {
         PASSED();
@@ -31884,7 +31884,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
     H5C_t                        *cache_ptr = file_ptr->shared->cache;
     int                           i;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32078,7 +32078,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__expunge_dirty_entry_in_flush_test() */
 
@@ -32118,7 +32118,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
     const int                     num_huge_entries    = 4;
     const int                     num_monster_entries = 32;
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32432,7 +32432,7 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C_make_space_in_cache() */
 
@@ -32513,7 +32513,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* hbool_t     apply_empty_reserve    = */ TRUE,
         /* double      empty_reserve          = */ 0.05};
 
-    expected = HDmalloc(36 * sizeof(struct expected_entry_status));
+    expected = malloc(36 * sizeof(struct expected_entry_status));
     if (expected == NULL) {
 
         pass         = FALSE;
@@ -32823,7 +32823,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    HDfree(expected);
+    free(expected);
 
 } /* cedds__H5C__autoadjust__ageout__evict_aged_out_entries() */
 

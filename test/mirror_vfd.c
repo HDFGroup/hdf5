@@ -140,7 +140,7 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
     if ((basename == NULL) || (*basename == 0) || (dirname == NULL) || (*dirname == 0) || (path_out == NULL))
         TEST_ERROR;
 
-    if (NULL == (path = HDcalloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
+    if (NULL == (path = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
     if (HDsnprintf(path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
@@ -157,12 +157,12 @@ populate_filepath(const char *dirname, const char *basename, hid_t fapl_id, char
             TEST_ERROR;
     }
 
-    HDfree(path);
+    free(path);
 
     return SUCCEED;
 
 error:
-    HDfree(path);
+    free(path);
     return FAIL;
 } /* end populate_filepath() */
 
@@ -181,7 +181,7 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
 {
     char *baselogname = NULL;
 
-    if (NULL == (baselogname = HDcalloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
+    if (NULL == (baselogname = calloc(H5FD_SPLITTER_PATH_MAX, sizeof(char))))
         TEST_ERROR;
 
     if (populate_filepath(MIRROR_RW_DIR, basename, splitter_config->rw_fapl_id, names->rw, TRUE) < 0)
@@ -198,12 +198,12 @@ build_paths(const char *basename, H5FD_splitter_vfd_config_t *splitter_config,
     if (populate_filepath(MIRROR_WO_DIR, baselogname, splitter_config->wo_fapl_id, names->log, FALSE) < 0)
         TEST_ERROR;
 
-    HDfree(baselogname);
+    free(baselogname);
 
     return SUCCEED;
 
 error:
-    HDfree(baselogname);
+    free(baselogname);
     return FAIL;
 } /* end build_paths() */
 
@@ -877,13 +877,13 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
         FAIL_PUTS_ERROR("shared header structure is not in expected state");
 
     /* Allocate memory */
-    if (NULL == (buf = HDmalloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
+    if (NULL == (buf = malloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
         FAIL_PUTS_ERROR("Unable to allocate memory for buf");
-    if (NULL == (expected = HDmalloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
+    if (NULL == (expected = malloc((H5FD_MIRROR_XMIT_OPEN_SIZE + 8) * sizeof(unsigned char))))
         FAIL_PUTS_ERROR("Unable to allocate memory for expected");
-    if (NULL == (xmit_in = HDmalloc(sizeof(H5FD_mirror_xmit_open_t))))
+    if (NULL == (xmit_in = malloc(sizeof(H5FD_mirror_xmit_open_t))))
         FAIL_PUTS_ERROR("Unable to allocate memory for xmit_in");
-    if (NULL == (xmit_out = HDmalloc(sizeof(H5FD_mirror_xmit_open_t))))
+    if (NULL == (xmit_out = malloc(sizeof(H5FD_mirror_xmit_open_t))))
         FAIL_PUTS_ERROR("Unable to allocate memory for xmit_out");
 
     /* Populate the expected buffer; expect end padding of 0xFF */
@@ -970,19 +970,19 @@ test_encdec_open(H5FD_mirror_xmit_t xmit_mock)
         TEST_ERROR;
     }
 
-    HDfree(buf);
-    HDfree(expected);
-    HDfree(xmit_in);
-    HDfree(xmit_out);
+    free(buf);
+    free(expected);
+    free(xmit_in);
+    free(xmit_out);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(expected);
-    HDfree(xmit_in);
-    HDfree(xmit_out);
+    free(buf);
+    free(expected);
+    free(xmit_in);
+    free(xmit_out);
 
     return -1;
 }
@@ -1209,7 +1209,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     H5FD_mirror_fapl_t          mirror_conf;
     hid_t                       ret_value = H5I_INVALID_HID;
 
-    if (NULL == (splitter_config = HDmalloc(sizeof(H5FD_splitter_vfd_config_t))))
+    if (NULL == (splitter_config = malloc(sizeof(H5FD_splitter_vfd_config_t))))
         TEST_ERROR;
 
     /* Initialize the fapls, too, so the library doesn't try to
@@ -1263,7 +1263,7 @@ create_mirroring_split_fapl(const char *basename, struct mirrortest_filenames *n
     if (H5Pclose(splitter_config->wo_fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(splitter_config);
+    free(splitter_config);
 
     return ret_value;
 
@@ -1275,7 +1275,7 @@ error:
         H5Pclose(ret_value);
     }
     H5E_END_TRY
-    HDfree(splitter_config);
+    free(splitter_config);
 
     return H5I_INVALID_HID;
 } /* end create_mirroring_split_fapl() */
@@ -1302,7 +1302,7 @@ test_create_and_close(const struct mt_opts *opts)
 
     TESTING("File creation and immediate close");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for splitter[sec2|mirror] */
@@ -1317,13 +1317,13 @@ test_create_and_close(const struct mt_opts *opts)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -1741,7 +1741,7 @@ test_basic_dataset_write(const struct mt_opts *opts)
 
     TESTING("Mirror open and dataset writing");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1749,7 +1749,7 @@ test_basic_dataset_write(const struct mt_opts *opts)
         TEST_ERROR;
 
     /* Prepare data to be written */
-    if (NULL == (buf = HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
+    if (NULL == (buf = malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < DATABUFFER_SIZE; i++) {
         for (j = 0; j < DATABUFFER_SIZE; j++) {
@@ -1798,15 +1798,15 @@ test_basic_dataset_write(const struct mt_opts *opts)
     if (h5_compare_file_bytes(names->rw, names->wo) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
-    HDfree(names);
+    free(buf);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(names);
+    free(buf);
+    free(names);
 
     H5E_BEGIN_TRY
     {
@@ -1841,7 +1841,7 @@ test_chunked_dataset_write(const struct mt_opts *opts)
 
     TESTING("Mirror open and dataset writing (chunked)");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1891,13 +1891,13 @@ test_chunked_dataset_write(const struct mt_opts *opts)
         TEST_ERROR;
     }
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -1931,7 +1931,7 @@ test_on_disk_zoo(const struct mt_opts *opts)
 
     TESTING("'Zoo' of on-disk structures");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
 
     /* Create FAPL for Splitter[sec2|mirror] */
@@ -1982,13 +1982,13 @@ test_on_disk_zoo(const struct mt_opts *opts)
     if (h5_compare_file_bytes(names->rw, names->wo) < 0)
         TEST_ERROR;
 
-    HDfree(names);
+    free(names);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
+    free(names);
     H5E_BEGIN_TRY
     {
         H5Fclose(file_id);
@@ -2035,9 +2035,9 @@ test_vanishing_datasets(const struct mt_opts *opts)
 
     TESTING("Vanishing Datasets");
 
-    if (NULL == (names = HDmalloc(sizeof(struct mirrortest_filenames))))
+    if (NULL == (names = malloc(sizeof(struct mirrortest_filenames))))
         TEST_ERROR;
-    if (NULL == (buf = HDcalloc(1, sizeof(*buf))))
+    if (NULL == (buf = calloc(1, sizeof(*buf))))
         TEST_ERROR;
 
     /* -------------------- */
@@ -2121,15 +2121,15 @@ test_vanishing_datasets(const struct mt_opts *opts)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
-    HDfree(names);
-    HDfree(buf);
+    free(names);
+    free(buf);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(names);
-    HDfree(buf);
+    free(names);
+    free(buf);
     H5E_BEGIN_TRY
     {
         H5Pclose(fapl_id);
@@ -2173,7 +2173,7 @@ test_concurrent_access(const struct mt_opts *opts)
 
     TESTING("Concurrent opened mirrored files");
 
-    if (NULL == (bundle = HDmalloc(sizeof(struct file_bundle) * CONCURRENT_COUNT)))
+    if (NULL == (bundle = malloc(sizeof(struct file_bundle) * CONCURRENT_COUNT)))
         TEST_ERROR;
 
     /* Initialize bundle */
@@ -2198,7 +2198,7 @@ test_concurrent_access(const struct mt_opts *opts)
     }
 
     /* Prepare data to be written */
-    if (NULL == (buf = HDmalloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
+    if (NULL == (buf = malloc(DATABUFFER_SIZE * DATABUFFER_SIZE * sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < DATABUFFER_SIZE; i++) {
         for (j = 0; j < DATABUFFER_SIZE; j++) {
@@ -2258,8 +2258,8 @@ test_concurrent_access(const struct mt_opts *opts)
         if (h5_compare_file_bytes(bundle[i].names.rw, bundle[i].names.wo) < 0)
             TEST_ERROR;
 
-    HDfree(bundle);
-    HDfree(buf);
+    free(bundle);
+    free(buf);
 
     PASSED();
     return 0;
@@ -2275,8 +2275,8 @@ error:
         }
     }
     H5E_END_TRY
-    HDfree(bundle);
-    HDfree(buf);
+    free(bundle);
+    free(buf);
     return -1;
 } /* end test_concurrent_access() */
 

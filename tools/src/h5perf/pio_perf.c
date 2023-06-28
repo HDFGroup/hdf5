@@ -763,7 +763,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len     = strcspn(valp, ";");
             next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            key_val = (char *)calloc(1, len + 1);
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -811,10 +811,10 @@ h5_set_info_object(void)
             }
 
             valp = next;
-            HDfree(key_val);
+            free(key_val);
         } while (next && *next);
 
-        HDfree(envp);
+        free(envp);
     }
 
     return ret_value;
@@ -1432,7 +1432,7 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(progname);
-                HDfree(cl_opts);
+                free(cl_opts);
                 return NULL;
         }
     }

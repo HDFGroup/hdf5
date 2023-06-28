@@ -219,7 +219,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     /* Allocate space for 'common' datasets, if any */
     if (ncommon > 0) {
         /* Allocate array to hold pointers to symbols for common datasets */
-        if (NULL == (sym_com = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * ncommon)))
+        if (NULL == (sym_com = (symbol_info_t **)malloc(sizeof(symbol_info_t *) * ncommon)))
             return -1;
 
         /* Open the common datasets */
@@ -240,7 +240,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     /* Allocate space for 'random' datasets, if any */
     if (nrandom > 0) {
         /* Allocate array to hold pointers to symbols for random datasets */
-        if (NULL == (sym_rand = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * nrandom)))
+        if (NULL == (sym_rand = (symbol_info_t **)malloc(sizeof(symbol_info_t *) * nrandom)))
             return -1;
 
         /* Determine the random datasets */
@@ -354,13 +354,13 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     /* Close 'random' datasets, if any */
     if (nrandom > 0) {
         /* Release array holding dataset ID's for random datasets */
-        HDfree(sym_rand);
+        free(sym_rand);
     } /* end if */
 
     /* Close 'common' datasets, if any */
     if (ncommon > 0) {
         /* Release array holding dataset ID's for common datasets */
-        HDfree(sym_com);
+        free(sym_com);
     } /* end if */
 
     return 0;

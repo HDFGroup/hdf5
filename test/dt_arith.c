@@ -99,8 +99,8 @@ typedef enum dtype_t {
 static int without_hardware_g = 0;
 
 /* Allocates memory aligned on a certain boundary. */
-#define aligned_malloc(Z) ((void *)((char *)HDmalloc(ALIGNMENT + Z) + ALIGNMENT))
-#define aligned_free(M)   HDfree((char *)(M)-ALIGNMENT)
+#define aligned_malloc(Z) ((void *)((char *)malloc(ALIGNMENT + Z) + ALIGNMENT))
+#define aligned_free(M)   free((char *)(M)-ALIGNMENT)
 
 /* Initialize source buffer of integer for integer->integer and integer->floating-point conversion test.
  * This algorithm is mainly to avoid any casting and comparison between source and destination types
@@ -291,8 +291,8 @@ static int without_hardware_g = 0;
         HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
         HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
                                                                                                              \
-        tmp1 = (unsigned char *)HDcalloc((size_t)1, (size_t)SRC_SIZE);                                       \
-        tmp2 = (unsigned char *)HDcalloc((size_t)1, (size_t)SRC_SIZE);                                       \
+        tmp1 = (unsigned char *)calloc((size_t)1, (size_t)SRC_SIZE);                                         \
+        tmp2 = (unsigned char *)calloc((size_t)1, (size_t)SRC_SIZE);                                         \
                                                                                                              \
         buf_p   = BUF;                                                                                       \
         saved_p = SAVED;                                                                                     \
@@ -320,8 +320,8 @@ static int without_hardware_g = 0;
             buf_p += SRC_SIZE;                                                                               \
             saved_p += SRC_SIZE;                                                                             \
         }                                                                                                    \
-        HDfree(tmp1);                                                                                        \
-        HDfree(tmp2);                                                                                        \
+        free(tmp1);                                                                                          \
+        free(tmp2);                                                                                          \
     } while (0)
 
 /* Allocate buffer and initialize it with floating-point special values, +/-0, +/-infinity,
@@ -342,7 +342,7 @@ static int without_hardware_g = 0;
         SAVED = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
         HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
         HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
-        value = (unsigned char *)HDcalloc(SRC_SIZE, sizeof(unsigned char));                                  \
+        value = (unsigned char *)calloc(SRC_SIZE, sizeof(unsigned char));                                    \
                                                                                                              \
         buf_p = BUF;                                                                                         \
                                                                                                              \
@@ -385,7 +385,7 @@ static int without_hardware_g = 0;
         }                                                                                                    \
                                                                                                              \
         HDmemcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
-        HDfree(value);                                                                                       \
+        free(value);                                                                                         \
     } while (0)
 
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
@@ -645,8 +645,8 @@ test_particular_fp_integer(void)
     endian     = H5Tget_order(H5T_NATIVE_DOUBLE);
     src_size1  = H5Tget_size(H5T_NATIVE_DOUBLE);
     dst_size1  = H5Tget_size(H5T_NATIVE_SCHAR);
-    buf1       = (unsigned char *)HDcalloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
-    saved_buf1 = (unsigned char *)HDcalloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
+    buf1       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
+    saved_buf1 = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
 
     HDmemcpy(buf1, &src_d, src_size1);
     HDmemcpy(saved_buf1, &src_d, src_size1);
@@ -695,8 +695,8 @@ test_particular_fp_integer(void)
     /* Test conversion from float (the value is INT_MAX) to int. */
     src_size2  = H5Tget_size(H5T_NATIVE_FLOAT);
     dst_size2  = H5Tget_size(H5T_NATIVE_INT);
-    buf2       = (unsigned char *)HDcalloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
-    saved_buf2 = (unsigned char *)HDcalloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
+    buf2       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
+    saved_buf2 = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
     HDmemcpy(buf2, &src_f, src_size2);
     HDmemcpy(saved_buf2, &src_f, src_size2);
 
@@ -746,13 +746,13 @@ test_particular_fp_integer(void)
     }
 
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (saved_buf1)
-        HDfree(saved_buf1);
+        free(saved_buf1);
     if (saved_buf2)
-        HDfree(saved_buf2);
+        free(saved_buf2);
 
     PASSED();
     return 0;
@@ -765,13 +765,13 @@ error:
     }
     H5E_END_TRY
     if (buf1)
-        HDfree(buf1);
+        free(buf1);
     if (buf2)
-        HDfree(buf2);
+        free(buf2);
     if (saved_buf1)
-        HDfree(saved_buf1);
+        free(saved_buf1);
     if (saved_buf2)
-        HDfree(saved_buf2);
+        free(saved_buf2);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -941,11 +941,11 @@ test_derived_flt(void)
      */
     src_size  = H5Tget_size(H5T_NATIVE_INT);
     endian    = H5Tget_order(H5T_NATIVE_INT);
-    buf       = (unsigned char *)HDmalloc(nelmts * (MAX(src_size, size)));
-    saved_buf = (unsigned char *)HDmalloc(nelmts * src_size);
+    buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, size)));
+    saved_buf = (unsigned char *)malloc(nelmts * src_size);
     HDmemset(buf, 0, nelmts * MAX(src_size, size));
     HDmemset(saved_buf, 0, nelmts * src_size);
-    aligned = (int *)HDcalloc((size_t)1, src_size);
+    aligned = (int *)calloc((size_t)1, src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
         buf[i] = saved_buf[i] = (unsigned char)HDrand();
@@ -1003,9 +1003,9 @@ test_derived_flt(void)
     }
 
     fails_this_test = 0;
-    HDfree(buf);
-    HDfree(saved_buf);
-    HDfree(aligned);
+    free(buf);
+    free(saved_buf);
+    free(aligned);
     buf       = NULL;
     saved_buf = NULL;
     aligned   = NULL;
@@ -1102,8 +1102,8 @@ test_derived_flt(void)
     src_size  = H5Tget_size(tid2);
     dst_size  = H5Tget_size(tid1);
     endian    = H5Tget_order(tid2);
-    buf       = (unsigned char *)HDmalloc(nelmts * (MAX(src_size, dst_size)));
-    saved_buf = (unsigned char *)HDmalloc(nelmts * src_size);
+    buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, dst_size)));
+    saved_buf = (unsigned char *)malloc(nelmts * src_size);
     HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
     HDmemset(saved_buf, 0, nelmts * src_size);
 
@@ -1168,9 +1168,9 @@ test_derived_flt(void)
     }
 
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (saved_buf)
-        HDfree(saved_buf);
+        free(saved_buf);
 
     if (H5Tclose(tid1) < 0) {
         H5_FAILED();
@@ -1207,11 +1207,11 @@ test_derived_flt(void)
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (saved_buf)
-        HDfree(saved_buf);
+        free(saved_buf);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
     H5E_BEGIN_TRY
     {
@@ -1426,8 +1426,8 @@ test_derived_integer(void)
     src_size  = H5Tget_size(tid1);
     dst_size  = H5Tget_size(tid2);
     endian    = H5Tget_order(tid1);
-    buf       = (unsigned char *)HDmalloc(nelmts * (MAX(src_size, dst_size)));
-    saved_buf = (unsigned char *)HDmalloc(nelmts * src_size);
+    buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, dst_size)));
+    saved_buf = (unsigned char *)malloc(nelmts * src_size);
     HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
     HDmemset(saved_buf, 0, nelmts * src_size);
 
@@ -1507,8 +1507,8 @@ test_derived_integer(void)
         goto error;
     } /* end if */
 
-    HDfree(buf);
-    HDfree(saved_buf);
+    free(buf);
+    free(saved_buf);
 
     PASSED();
 
@@ -1521,9 +1521,9 @@ test_derived_integer(void)
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (saved_buf)
-        HDfree(saved_buf);
+        free(saved_buf);
     HDfflush(stdout);
     H5E_BEGIN_TRY
     {
@@ -1712,7 +1712,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     src_sign  = H5Tget_sign(src);
     dst_sign  = H5Tget_sign(dst);
-    aligned   = HDcalloc((size_t)1, sizeof(long long));
+    aligned   = calloc((size_t)1, sizeof(long long));
 
     /* Allocate and initialize the source buffer through macro INIT_INTEGER.  The BUF
      * will be used for the conversion while the SAVED buffer will be
@@ -2572,7 +2572,7 @@ done:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */
@@ -2588,7 +2588,7 @@ error:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */
@@ -2624,7 +2624,7 @@ test_conv_int_2(void)
     printf("%-70s", "Testing overlap calculations");
     HDfflush(stdout);
 
-    buf = (char *)HDcalloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
+    buf = (char *)calloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
     assert(buf);
 
     for (i = 1; i <= TMP_BUF_DIM1; i++) {
@@ -2648,7 +2648,7 @@ test_conv_int_2(void)
         }
     }
     PASSED();
-    HDfree(buf);
+    free(buf);
     return 0;
 }
 
@@ -2746,7 +2746,7 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
     int            retval = 0;
     size_t         i;
 
-    bits = (unsigned char *)HDcalloc((size_t)1, size);
+    bits = (unsigned char *)calloc((size_t)1, size);
 
     for (i = 0; i < size; i++)
         bits[size - (i + 1)] = *(val + ENDIAN(size, i, endian));
@@ -2755,7 +2755,7 @@ my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t 
         H5T__bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
         retval = 1;
 
-    HDfree(bits);
+    free(bits);
 
     return retval;
 }
@@ -2947,7 +2947,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     dendian = H5Tget_order(dst);
 
     /* Allocate buffers */
-    aligned = HDcalloc((size_t)1, MAX(sizeof(long double), sizeof(double)));
+    aligned = calloc((size_t)1, MAX(sizeof(long double), sizeof(double)));
 
     /* Allocate and initialize the source buffer through macro INIT_FP_NORM or INIT_FP_SPECIAL.
      * The BUF will be used for the conversion while the SAVED buffer will be used for
@@ -3301,7 +3301,7 @@ done:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
@@ -3330,7 +3330,7 @@ error:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
@@ -3597,7 +3597,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     dst_size  = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
-    aligned   = HDcalloc((size_t)1, MAX(sizeof(long double), sizeof(long long)));
+    aligned   = calloc((size_t)1, MAX(sizeof(long double), sizeof(long long)));
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
@@ -4521,7 +4521,7 @@ done:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -4541,7 +4541,7 @@ error:
     if (saved)
         aligned_free(saved);
     if (aligned)
-        HDfree(aligned);
+        free(aligned);
     HDfflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */

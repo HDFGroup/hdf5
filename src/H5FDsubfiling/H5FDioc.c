@@ -936,7 +936,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     }
 
 done:
-    HDfree(file_ptr->file_path);
+    free(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
     H5MM_free(file_ptr->file_dir);
@@ -1486,7 +1486,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
-        if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
+        if (NULL == (tmp_filename = malloc(PATH_MAX)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate config file name buffer");
 
@@ -1576,7 +1576,7 @@ done:
     if (H5_mpi_info_free(&info) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
     H5MM_free(file_dirname);
     H5MM_free(base_filename);
 
@@ -1633,9 +1633,9 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
      * that blocking write calls do not return early before the data is
      * actually written.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc(2 * (size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc(2 * (size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     /* Each pass thru the following should queue an MPI write
@@ -1669,12 +1669,12 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1712,9 +1712,9 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
      * that the actual I/O call (currently, HDpread) has completed and
      * the data read from the file has been transferred to the caller.
      */
-    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+    if (NULL == (sf_io_reqs = calloc((size_t)count, sizeof(*sf_io_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-    if (NULL == (mpi_reqs = HDmalloc((size_t)count * sizeof(*mpi_reqs))))
+    if (NULL == (mpi_reqs = malloc((size_t)count * sizeof(*mpi_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     for (size_t i = 0; i < (size_t)count; i++) {
@@ -1741,12 +1741,12 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't complete I/O requests");
 
 done:
-    HDfree(mpi_reqs);
+    free(mpi_reqs);
 
     if (sf_io_reqs) {
         for (size_t i = 0; i < count; i++)
-            HDfree(sf_io_reqs[i]);
-        HDfree(sf_io_reqs);
+            free(sf_io_reqs[i]);
+        free(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;

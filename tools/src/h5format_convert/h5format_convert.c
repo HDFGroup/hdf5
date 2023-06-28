@@ -453,9 +453,9 @@ done:
     } /* end if */
 
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
     if (dname_g)
-        HDfree(dname_g);
+        free(dname_g);
 
     leave(h5tools_getstatus());
 

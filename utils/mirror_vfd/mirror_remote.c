@@ -150,7 +150,7 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
 {
     loginfo_t *info = NULL;
 
-    info = (loginfo_t *)HDmalloc(sizeof(loginfo_t));
+    info = (loginfo_t *)malloc(sizeof(loginfo_t));
     if (info != NULL) {
         info->magic     = MIRROR_LOG_INFO_MAGIC;
         info->verbosity = verbosity;
@@ -168,7 +168,7 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
                 fprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
                         path);
                 info->magic += 1;
-                HDfree(info);
+                free(info);
             }
             else {
                 info->stream = f;
@@ -201,7 +201,7 @@ mirror_log_term(loginfo_t *info)
         }
     }
     info->magic += 1;
-    HDfree(info);
+    free(info);
     return SUCCEED;
 } /* end mirror_log_term() */
 

@@ -2505,7 +2505,7 @@ make_szip(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2517,7 +2517,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2590,7 +2590,7 @@ make_deflate(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2602,7 +2602,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2660,7 +2660,7 @@ make_shuffle(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2672,7 +2672,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2733,7 +2733,7 @@ make_fletcher32(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2745,7 +2745,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2838,7 +2838,7 @@ make_nbit(hid_t loc_id)
     if (H5Tclose(dtid) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2853,7 +2853,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -2940,7 +2940,7 @@ make_scaleoffset(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -2955,7 +2955,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3124,7 +3124,7 @@ make_all_filters(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -3139,7 +3139,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3321,7 +3321,7 @@ make_layout(hid_t loc_id)
     if (H5Pclose(dcpl) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -3333,7 +3333,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return -1;
 }
@@ -3406,7 +3406,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(s_buf);
+    free(s_buf);
 
     return (ret_value);
 
@@ -3533,8 +3533,8 @@ make_layout3(hid_t loc_id)
     if (H5Pclose(dcpl3) < 0)
         goto error;
 
-    HDfree(buf1);
-    HDfree(buf2);
+    free(buf1);
+    free(buf2);
 
     return 0;
 
@@ -3549,8 +3549,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf1);
-    HDfree(buf2);
+    free(buf1);
+    free(buf2);
 
     return -1;
 }
@@ -3656,14 +3656,14 @@ make_big(hid_t loc_id)
         goto out;
 
     /* initialize buffer to 0  */
-    buf = (signed char *)HDcalloc(nelmts, size);
+    buf = (signed char *)calloc(nelmts, size);
 
     if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
         goto out;
     if (H5Dwrite(did, H5T_NATIVE_SCHAR, m_sid, f_sid, H5P_DEFAULT, buf) < 0)
         goto out;
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     /* close */
@@ -4118,10 +4118,10 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -4177,7 +4177,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
         /* allocate and initialize array data to write */
         size = (TEST_BUFSIZE / sizeof(double) + 1) * sizeof(double);
-        dbuf = (double *)HDmalloc(size);
+        dbuf = (double *)malloc(size);
         if (NULL == dbuf) {
             printf("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n",
                    (int)size / 1000000);
@@ -4194,16 +4194,16 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
 
         /* create a type larger than TEST_BUFSIZE */
         if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
         size = H5Tget_size(tid);
         if ((sid = H5Screate_simple(1, sdims, NULL)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
         if ((did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-            HDfree(dbuf);
+            free(dbuf);
             goto out;
         }
 #if defined(WRITE_ARRAY)
@@ -4214,7 +4214,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
-        HDfree(dbuf);
+        free(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -4347,7 +4347,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             unsigned l;
 
-            buf52[i][j].p   = HDmalloc((i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++) {
                 if (make_diffs)
@@ -4558,7 +4558,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 unsigned l;
 
-                buf53[i][j][k].p   = HDmalloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++) {
                     if (make_diffs)
@@ -4682,8 +4682,8 @@ make_dset_reg_ref(hid_t loc_id)
     int              retval = -1;         /* return value */
 
     /* Allocate write & read buffers */
-    wbuf  = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
-    dwbuf = (int *)HDmalloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
+    wbuf  = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    dwbuf = (int *)malloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create dataspace for datasets */
     if ((sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL)) < 0)
@@ -4744,9 +4744,9 @@ make_dset_reg_ref(hid_t loc_id)
 
 out:
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (dwbuf)
-        HDfree(dwbuf);
+        free(dwbuf);
 
     H5E_BEGIN_TRY
     {
@@ -5016,10 +5016,10 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     /* Allocate and initialize VL dataset to write */
 
     buf5[0].len           = 1;
-    buf5[0].p             = HDmalloc(1 * sizeof(int));
+    buf5[0].p             = malloc(1 * sizeof(int));
     ((int *)buf5[0].p)[0] = 1;
     buf5[1].len           = 2;
-    buf5[1].p             = HDmalloc(2 * sizeof(int));
+    buf5[1].p             = malloc(2 * sizeof(int));
     ((int *)buf5[1].p)[0] = 2;
     ((int *)buf5[1].p)[1] = 3;
 
@@ -5324,7 +5324,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
         for (j = 0; j < 2; j++) {
             unsigned l;
 
-            buf52[i][j].p   = HDmalloc((i + 1) * sizeof(int));
+            buf52[i][j].p   = malloc((i + 1) * sizeof(int));
             buf52[i][j].len = (size_t)(i + 1);
             for (l = 0; l < i + 1; l++)
                 if (make_diffs)
@@ -5771,7 +5771,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
             for (k = 0; k < 2; k++) {
                 unsigned l;
 
-                buf53[i][j][k].p   = HDmalloc((i + 1) * sizeof(int));
+                buf53[i][j][k].p   = malloc((i + 1) * sizeof(int));
                 buf53[i][j][k].len = (size_t)i + 1;
                 for (l = 0; l < i + 1; l++)
                     if (make_diffs)
@@ -6966,11 +6966,11 @@ make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
     vlen_objref_data[0].len = LEN0_VLEN_OBJREF;
-    vlen_objref_data[0].p   = HDmalloc(vlen_objref_data[0].len * sizeof(hobj_ref_t));
+    vlen_objref_data[0].p   = malloc(vlen_objref_data[0].len * sizeof(hobj_ref_t));
     vlen_objref_data[1].len = LEN1_VLEN_OBJREF;
-    vlen_objref_data[1].p   = HDmalloc(vlen_objref_data[1].len * sizeof(hobj_ref_t));
+    vlen_objref_data[1].p   = malloc(vlen_objref_data[1].len * sizeof(hobj_ref_t));
     vlen_objref_data[2].len = LEN2_VLEN_OBJREF;
-    vlen_objref_data[2].p   = HDmalloc(vlen_objref_data[2].len * sizeof(hobj_ref_t));
+    vlen_objref_data[2].p   = malloc(vlen_objref_data[2].len * sizeof(hobj_ref_t));
 
     /*
      * create obj references
@@ -7034,7 +7034,7 @@ make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
     vlen_regref_data[0].len = LEN0_VLEN_REGREF;
-    vlen_regref_data[0].p   = HDmalloc(vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
+    vlen_regref_data[0].p   = malloc(vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
 
     /*
      * create region reference

@@ -266,7 +266,7 @@ extern "C" {
  * an equivalent non-const pointer around) is far messier.
  */
 #ifndef h5_free_const
-#define h5_free_const(mem) HDfree((void *)(uintptr_t)mem)
+#define h5_free_const(mem) free((void *)(uintptr_t)mem)
 #endif
 
 /* Generally useful testing routines */

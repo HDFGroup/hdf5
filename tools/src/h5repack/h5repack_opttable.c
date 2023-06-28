@@ -104,7 +104,7 @@ aux_inctable(pack_opttbl_t *table, unsigned n_objs)
     int      ret_value = 0;
 
     table->size += n_objs;
-    table->objs = (pack_info_t *)HDrealloc(table->objs, table->size * sizeof(pack_info_t));
+    table->objs = (pack_info_t *)realloc(table->objs, table->size * sizeof(pack_info_t));
     if (table->objs == NULL) {
         H5TOOLS_INFO("not enough memory for options table");
         ret_value = -1;
@@ -132,14 +132,14 @@ options_table_init(pack_opttbl_t **tbl)
     pack_opttbl_t *table;
     int            ret_value = 0;
 
-    if (NULL == (table = (pack_opttbl_t *)HDmalloc(sizeof(pack_opttbl_t)))) {
+    if (NULL == (table = (pack_opttbl_t *)malloc(sizeof(pack_opttbl_t)))) {
         H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
     table->size   = 30;
     table->nelems = 0;
-    if (NULL == (table->objs = (pack_info_t *)HDmalloc(table->size * sizeof(pack_info_t)))) {
-        HDfree(table);
+    if (NULL == (table->objs = (pack_info_t *)malloc(table->size * sizeof(pack_info_t)))) {
+        free(table);
         H5TOOLS_GOTO_ERROR((-1), "not enough memory for options table");
     }
 
@@ -163,8 +163,8 @@ done:
 int
 options_table_free(pack_opttbl_t *table)
 {
-    HDfree(table->objs);
-    HDfree(table);
+    free(table->objs);
+    free(table);
     return 0;
 }
 

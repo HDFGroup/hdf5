@@ -125,7 +125,7 @@ initialize_ioc_threads(void *_sf_context)
      * Allocate and initialize IOC data that will be passed
      * to the IOC main thread
      */
-    if (NULL == (ioc_data = HDmalloc(sizeof(*ioc_data))))
+    if (NULL == (ioc_data = malloc(sizeof(*ioc_data))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, (-1),
                                 "can't allocate IOC data for IOC main thread");
     ioc_data->sf_context_id  = sf_context->sf_context_id;
@@ -242,7 +242,7 @@ finalize_ioc_threads(void *_sf_context)
         H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_CLOSEERROR, -1, "%" PRId32 " I/O requests failed",
                                 ioc_data->io_queue.num_failed);
 
-    HDfree(ioc_data);
+    free(ioc_data);
     sf_context->ioc_data = NULL;
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -739,7 +739,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 #endif
 
     /* Allocate space to receive data sent from the client */
-    if (NULL == (recv_buf = HDmalloc((size_t)data_size))) {
+    if (NULL == (recv_buf = malloc((size_t)data_size))) {
         send_nack = TRUE;
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate receive buffer for data");
     }
@@ -836,7 +836,7 @@ done:
             H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send NACK to client");
     }
 
-    HDfree(recv_buf);
+    free(recv_buf);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* ioc_file_queue_write_indep() */
@@ -935,7 +935,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
 #endif
 
     /* Allocate space to send data read from file to client */
-    if (NULL == (send_buf = HDmalloc((size_t)data_size))) {
+    if (NULL == (send_buf = malloc((size_t)data_size))) {
         if (need_data_tag) {
             send_nack      = TRUE;
             send_empty_buf = FALSE;
@@ -1010,7 +1010,7 @@ done:
             H5_SUBFILING_MPI_DONE_ERROR(-1, "MPI_Send failed", mpi_code);
     }
 
-    HDfree(send_buf);
+    free(send_buf);
 
     return ret_value;
 } /* end ioc_file_queue_read_indep() */
@@ -1273,7 +1273,7 @@ ioc_io_queue_alloc_entry(void)
 {
     ioc_io_queue_entry_t *q_entry_ptr = NULL;
 
-    q_entry_ptr = (ioc_io_queue_entry_t *)HDmalloc(sizeof(ioc_io_queue_entry_t));
+    q_entry_ptr = (ioc_io_queue_entry_t *)malloc(sizeof(ioc_io_queue_entry_t));
 
     if (q_entry_ptr) {
 
@@ -1703,7 +1703,7 @@ ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr)
 
     q_entry_ptr->magic = 0;
 
-    HDfree(q_entry_ptr);
+    free(q_entry_ptr);
 
     q_entry_ptr = NULL;
 

@@ -45,7 +45,7 @@ main(void)
     int    *data = NULL; /* Dataset data */
 
     /* Initialize the data */
-    if (NULL == (data = (int *)HDmalloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
+    if (NULL == (data = (int *)malloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
         TEST_ERROR;
 
     for (i = 0; i < SPACE_DIM1; i++)
@@ -80,7 +80,7 @@ main(void)
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);

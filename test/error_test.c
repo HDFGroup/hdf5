@@ -184,9 +184,9 @@ init_error(void)
     char      *msg      = NULL;
     H5E_type_t msg_type;
 
-    if (NULL == (cls_name = (char *)HDmalloc(HDstrlen(ERR_CLS_NAME) + 1)))
+    if (NULL == (cls_name = (char *)malloc(HDstrlen(ERR_CLS_NAME) + 1)))
         TEST_ERROR;
-    if (NULL == (msg = (char *)HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
+    if (NULL == (msg = (char *)malloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1)))
         TEST_ERROR;
 
     if ((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
@@ -226,16 +226,16 @@ init_error(void)
     if ((ERR_CLS2 = H5Eregister_class(ERR_CLS2_NAME, PROG2_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
 
-    HDfree(cls_name);
-    HDfree(msg);
+    free(cls_name);
+    free(msg);
 
     return 0;
 
 error:
     if (cls_name)
-        HDfree(cls_name);
+        free(cls_name);
     if (msg)
-        HDfree(msg);
+        free(msg);
 
     return -1;
 } /* end init_error() */
@@ -329,9 +329,9 @@ test_long_desc(void)
     const char *test_FUNC = "test_long_desc";
 
     /* Allocate space for the error description info */
-    if (NULL == (long_desc = (char *)HDmalloc(LONG_DESC_SIZE)))
+    if (NULL == (long_desc = (char *)malloc(LONG_DESC_SIZE)))
         TEST_ERROR;
-    if (NULL == (full_desc = (char *)HDmalloc(LONG_DESC_SIZE + 128)))
+    if (NULL == (full_desc = (char *)malloc(LONG_DESC_SIZE + 128)))
         TEST_ERROR;
 
     /* Create the long part of the error description */
@@ -361,16 +361,16 @@ test_long_desc(void)
     if (H5Eclear2(H5E_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(long_desc);
-    HDfree(full_desc);
+    free(long_desc);
+    free(full_desc);
 
     return 0;
 
 error:
     if (long_desc)
-        HDfree(long_desc);
+        free(long_desc);
     if (full_desc)
-        HDfree(full_desc);
+        free(full_desc);
 
     return -1;
 } /* end test_long_desc() */
@@ -803,16 +803,16 @@ main(void)
         TEST_ERROR;
 
     /* Set up data arrays */
-    if (NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (ipoints2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+    if (NULL == (ipoints2 = (int **)calloc(DIM0, sizeof(ipoints2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         ipoints2[i] = ipoints2_data + (i * DIM1);
 
-    if (NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (icheck2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+    if (NULL == (icheck2 = (int **)calloc(DIM0, sizeof(icheck2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         icheck2[i] = icheck2_data + (i * DIM1);
@@ -895,19 +895,19 @@ main(void)
 
     h5_clean_files(FILENAME, fapl);
 
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
     fprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
     fprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;

@@ -77,7 +77,7 @@ H5MM_malloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = HDmalloc(size);
+    ret_value = malloc(size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_malloc() */
@@ -106,7 +106,7 @@ H5MM_calloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = HDcalloc(1, size);
+    ret_value = calloc(1, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_calloc() */
@@ -141,7 +141,7 @@ H5MM_realloc(void *mem, size_t size)
         /* Not defined in the standard, return NULL */
         ret_value = NULL;
     else {
-        ret_value = HDrealloc(mem, size);
+        ret_value = realloc(mem, size);
 
         /* Some platforms do not return NULL if size is zero. */
         if (0 == size)
@@ -255,7 +255,7 @@ H5MM_xfree(void *mem)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfree(mem);
+    free(mem);
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree() */

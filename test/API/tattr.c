@@ -308,8 +308,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(attr_name_size, FAIL, "H5Aget_name");
 
     if (attr_name_size > 0) {
-        attr_name = (char *)HDcalloc((size_t)(attr_name_size + 1), sizeof(char));
-        CHECK_PTR(attr_name, "HDcalloc");
+        attr_name = (char *)calloc((size_t)(attr_name_size + 1), sizeof(char));
+        CHECK_PTR(attr_name, "calloc");
 
         if (attr_name) {
             ret = (herr_t)H5Aget_name(attr, (size_t)(attr_name_size + 1), attr_name);
@@ -317,7 +317,7 @@ test_attr_basic_write(hid_t fapl)
             ret = HDstrcmp(attr_name, ATTR_TMP_NAME);
             VERIFY(ret, 0, "HDstrcmp");
 
-            HDfree(attr_name);
+            free(attr_name);
             attr_name = NULL;
         } /* end if */
     }     /* end if */
@@ -345,8 +345,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(attr_name_size, FAIL, "H5Aget_name");
 
     if (attr_name_size > 0) {
-        attr_name = (char *)HDcalloc((size_t)(attr_name_size + 1), sizeof(char));
-        CHECK_PTR(attr_name, "HDcalloc");
+        attr_name = (char *)calloc((size_t)(attr_name_size + 1), sizeof(char));
+        CHECK_PTR(attr_name, "calloc");
 
         if (attr_name) {
             ret = (herr_t)H5Aget_name(attr2, (size_t)(attr_name_size + 1), attr_name);
@@ -354,7 +354,7 @@ test_attr_basic_write(hid_t fapl)
             ret = HDstrcmp(attr_name, ATTR1A_NAME);
             VERIFY(ret, 0, "HDstrcmp");
 
-            HDfree(attr_name);
+            free(attr_name);
             attr_name = NULL;
         } /* end if */
     }     /* end if */
@@ -7503,8 +7503,8 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = max_compact * 2;
-    visited             = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit);
-    CHECK_PTR(visited, "HDmalloc");
+    visited             = (hbool_t *)malloc(sizeof(hbool_t) * iter_info.max_visit);
+    CHECK_PTR(visited, "malloc");
     iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
@@ -7801,7 +7801,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Free the "visited link" array */
-    HDfree(visited);
+    free(visited);
 } /* test_attr_iterate2() */
 
 /*-------------------------------------------------------------------------
@@ -8815,8 +8815,8 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Writing Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
     /* Allocate & initialize "big" attribute data */
-    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
-    CHECK_PTR(big_value, "HDmalloc");
+    big_value = (unsigned *)malloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK_PTR(big_value, "malloc");
     HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
@@ -9120,7 +9120,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Release memory */
-    HDfree(big_value);
+    free(big_value);
 } /* test_attr_shared_write() */
 
 /****************************************************************
@@ -9166,8 +9166,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Renaming Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
     /* Allocate & initialize "big" attribute data */
-    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
-    CHECK_PTR(big_value, "HDmalloc");
+    big_value = (unsigned *)malloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK_PTR(big_value, "malloc");
     HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
@@ -9580,7 +9580,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Release memory */
-    HDfree(big_value);
+    free(big_value);
 } /* test_attr_shared_rename() */
 
 /****************************************************************
@@ -9625,8 +9625,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Deleting Shared & Unshared Attributes in Compact & Dense Storage\n"));
 
     /* Allocate & initialize "big" attribute data */
-    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
-    CHECK_PTR(big_value, "HDmalloc");
+    big_value = (unsigned *)malloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK_PTR(big_value, "malloc");
     HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
@@ -9964,7 +9964,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Release memory */
-    HDfree(big_value);
+    free(big_value);
 } /* test_attr_shared_delete() */
 
 /****************************************************************
@@ -10009,8 +10009,8 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     MESSAGE(5, ("Testing Unlinking Object with Shared Attributes in Compact & Dense Storage\n"));
 
     /* Allocate & initialize "big" attribute data */
-    big_value = (unsigned *)HDmalloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
-    CHECK_PTR(big_value, "HDmalloc");
+    big_value = (unsigned *)malloc((size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3) * sizeof(unsigned));
+    CHECK_PTR(big_value, "malloc");
     HDmemset(big_value, 1, sizeof(unsigned) * (size_t)(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3));
 
     /* Create dataspace for dataset */
@@ -10336,7 +10336,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Release memory */
-    HDfree(big_value);
+    free(big_value);
 } /* test_attr_shared_unlink() */
 
 /****************************************************************
@@ -11629,8 +11629,8 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
     CHECK(aid, FAIL, "H5Acreate2");
 
     /* Allocate the data buffer */
-    data = (double *)HDmalloc((size_t)(DIM0 * DIM1) * sizeof(double));
-    CHECK_PTR(data, "HDmalloc");
+    data = (double *)malloc((size_t)(DIM0 * DIM1) * sizeof(double));
+    CHECK_PTR(data, "malloc");
 
     /* Initialize the data */
     for (i = 0; i < DIM0; i++)
@@ -11671,7 +11671,7 @@ test_attr_delete_last_dense(hid_t fcpl, hid_t fapl)
 
     /* Free the data buffer */
     if (data)
-        HDfree(data);
+        free(data);
 
 } /* test_attr_delete_last_dense() */
 #endif

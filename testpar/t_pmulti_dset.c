@@ -160,15 +160,15 @@ test_pmdset(size_t niter, unsigned flags)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         T_PMD_ERROR;
-    if (NULL == (dset_usage = (unsigned char *)HDmalloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
+    if (NULL == (dset_usage = (unsigned char *)malloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
         T_PMD_ERROR;
 
     /* Initialize buffer indices */

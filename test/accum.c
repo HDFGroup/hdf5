@@ -192,9 +192,9 @@ test_write_read(H5F_t *f)
     TESTING("simple write/read to/from metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int *)HDmalloc(1024 * sizeof(int));
+    write_buf = (int *)malloc(1024 * sizeof(int));
     assert(write_buf);
-    read_buf = (int *)HDcalloc((size_t)1024, sizeof(int));
+    read_buf = (int *)calloc((size_t)1024, sizeof(int));
     assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -216,15 +216,15 @@ test_write_read(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 1;
 } /* test_write_read */
@@ -251,9 +251,9 @@ test_write_read_nonacc_front(H5F_t *f)
     TESTING("simple write/read to/from before metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int *)HDmalloc(2048 * sizeof(int));
+    write_buf = (int *)malloc(2048 * sizeof(int));
     assert(write_buf);
-    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
+    read_buf = (int *)calloc((size_t)2048, sizeof(int));
     assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -281,15 +281,15 @@ test_write_read_nonacc_front(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 1;
 } /* test_write_read */
@@ -316,9 +316,9 @@ test_write_read_nonacc_end(H5F_t *f)
     TESTING("simple write/read to/from after metadata accumulator");
 
     /* Allocate buffers */
-    write_buf = (int *)HDmalloc(2048 * sizeof(int));
+    write_buf = (int *)malloc(2048 * sizeof(int));
     assert(write_buf);
-    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
+    read_buf = (int *)calloc((size_t)2048, sizeof(int));
     assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -346,15 +346,15 @@ test_write_read_nonacc_end(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(write_buf);
-    HDfree(read_buf);
+    free(write_buf);
+    free(read_buf);
 
     return 1;
 } /* test_write_read */
@@ -383,11 +383,11 @@ test_free(H5F_t *f)
     TESTING("simple freeing metadata accumulator");
 
     /* Write and free the whole accumulator. */
-    wbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
+    wbuf = (int32_t *)malloc(256 * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
+    rbuf = (int32_t *)malloc(256 * sizeof(int32_t));
     assert(rbuf);
-    expect = (int32_t *)HDmalloc(256 * sizeof(int32_t));
+    expect = (int32_t *)malloc(256 * sizeof(int32_t));
     assert(expect);
 
     /* Fill buffer with data */
@@ -565,11 +565,11 @@ test_free(H5F_t *f)
     if (HDmemcmp(expect + 76, rbuf, 116 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
-    HDfree(wbuf);
+    free(wbuf);
     wbuf = NULL;
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(expect);
+    free(expect);
     expect = NULL;
 
     if (accum_reset(f) < 0)
@@ -581,11 +581,11 @@ test_free(H5F_t *f)
 
 error:
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (expect)
-        HDfree(expect);
+        free(expect);
 
     return 1;
 } /* test_free */
@@ -614,9 +614,9 @@ test_accum_overlap(H5F_t *f)
     TESTING("overlapping write to metadata accumulator");
 
     /* Allocate buffers */
-    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)malloc(4096 * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)calloc((size_t)4096, sizeof(int32_t));
     assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -783,15 +783,15 @@ test_accum_overlap(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* test_accum_overlap */
@@ -821,9 +821,9 @@ test_accum_overlap_clean(H5F_t *f)
     TESTING("overlapping write to partially clean metadata accumulator");
 
     /* Allocate buffers */
-    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)malloc(4096 * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)calloc((size_t)4096, sizeof(int32_t));
     assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1003,15 +1003,15 @@ test_accum_overlap_clean(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* test_accum_overlap_clean */
@@ -1040,9 +1040,9 @@ test_accum_non_overlap_size(H5F_t *f)
     TESTING("non-overlapping write to accumulator larger then accum_size");
 
     /* Allocate buffers */
-    wbuf = (int *)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int *)malloc(4096 * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int *)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int *)calloc((size_t)4096, sizeof(int32_t));
     assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1076,15 +1076,15 @@ test_accum_non_overlap_size(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* test_accum_non_overlap_size */
@@ -1114,9 +1114,9 @@ test_accum_overlap_size(H5F_t *f)
     TESTING("overlapping write to accumulator larger then accum_size");
 
     /* Allocate buffers */
-    wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
+    wbuf = (int32_t *)malloc(4096 * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
+    rbuf = (int32_t *)calloc((size_t)4096, sizeof(int32_t));
     assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1150,15 +1150,15 @@ test_accum_overlap_size(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* test_accum_overlap_size */
@@ -1199,9 +1199,9 @@ test_accum_adjust(H5F_t *f)
     TESTING("accumulator adjustments after append/prepend of data");
 
     /* Allocate buffers */
-    wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
+    wbuf = (int32_t *)malloc((size_t)s * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
+    rbuf = (int32_t *)calloc((size_t)s, sizeof(int32_t));
     assert(rbuf);
 
     /* Fill up write buffer */
@@ -1456,15 +1456,15 @@ test_accum_adjust(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* test_accum_adjust */
@@ -1497,9 +1497,9 @@ test_read_after(H5F_t *f)
     TESTING("reading data from both accumulator and disk");
 
     /* Allocate buffers */
-    wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
+    wbuf = (int32_t *)malloc((size_t)s * sizeof(int32_t));
     assert(wbuf);
-    rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
+    rbuf = (int32_t *)calloc((size_t)s, sizeof(int32_t));
     assert(rbuf);
 
     /* Fill up write buffer with 1s */
@@ -1545,15 +1545,15 @@ test_read_after(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     return 1;
 } /* end test_read_after */
@@ -1579,13 +1579,13 @@ test_big(H5F_t *f)
     unsigned u;                          /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
+    wbuf = (uint8_t *)malloc((size_t)BIG_BUF_SIZE);
     assert(wbuf);
-    wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
+    wbuf2 = (uint8_t *)malloc((size_t)BIG_BUF_SIZE);
     assert(wbuf2);
-    rbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
+    rbuf = (uint8_t *)calloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     assert(rbuf);
-    zbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
+    zbuf = (uint8_t *)calloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     assert(zbuf);
 
     /* Initialize write buffers */
@@ -1907,18 +1907,18 @@ test_big(H5F_t *f)
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(wbuf2);
-    HDfree(rbuf);
-    HDfree(zbuf);
+    free(wbuf);
+    free(wbuf2);
+    free(rbuf);
+    free(zbuf);
 
     return 0;
 
 error:
-    HDfree(wbuf);
-    HDfree(wbuf2);
-    HDfree(rbuf);
-    HDfree(zbuf);
+    free(wbuf);
+    free(wbuf2);
+    free(rbuf);
+    free(zbuf);
 
     return 1;
 } /* end test_big() */
@@ -1950,9 +1950,9 @@ test_random_write(H5F_t *f)
     unsigned u;           /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
+    wbuf = (uint8_t *)malloc((size_t)RANDOM_BUF_SIZE);
     assert(wbuf);
-    rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
+    rbuf = (uint8_t *)calloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
     assert(rbuf);
 
     /* Initialize write buffer */
@@ -1970,9 +1970,9 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */
-    off = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    off = (size_t *)malloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     assert(off);
-    len = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
+    len = (size_t *)malloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
     assert(len);
 
     /* Randomly choose lengths of segments */
@@ -2053,19 +2053,19 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
     PASSED();
 
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(off);
-    HDfree(len);
+    free(wbuf);
+    free(rbuf);
+    free(off);
+    free(len);
 
     return 0;
 
 error:
     /* Release memory */
-    HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(off);
-    HDfree(len);
+    free(wbuf);
+    free(rbuf);
+    free(off);
+    free(len);
 
     fprintf(stderr, "Random # seed was: %u\n", seed);
     return 1;
@@ -2176,9 +2176,9 @@ test_swmr_write_big(hbool_t newest_format)
         FAIL_STACK_ERROR;
 
     /* Allocate space for the write & read buffers */
-    if ((wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
+    if ((wbuf2 = (uint8_t *)malloc((size_t)BIG_BUF_SIZE)) == NULL)
         FAIL_STACK_ERROR;
-    if ((rbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
+    if ((rbuf = (uint8_t *)malloc((size_t)BIG_BUF_SIZE)) == NULL)
         FAIL_STACK_ERROR;
 
     /* Initialize wbuf with "0, 1, 2...1024"*/
@@ -2309,9 +2309,9 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* Release memory */
     if (wbuf2)
-        HDfree(wbuf2);
+        free(wbuf2);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     PASSED();
     return 0;
@@ -2327,9 +2327,9 @@ error:
 
     /* Release memory */
     if (wbuf2)
-        HDfree(wbuf2);
+        free(wbuf2);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     return 1;
 

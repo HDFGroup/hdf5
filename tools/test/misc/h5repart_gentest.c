@@ -36,12 +36,12 @@ main(void)
     hsize_t dims[2] = {FAMILY_NUMBER, FAMILY_SIZE};
 
     /* Set up data array */
-    if (NULL == (buf_data = (int *)HDcalloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
-        HDperror("HDcalloc");
+    if (NULL == (buf_data = (int *)calloc(FAMILY_NUMBER * FAMILY_SIZE, sizeof(int)))) {
+        HDperror("calloc");
         HDexit(EXIT_FAILURE);
     }
-    if (NULL == (buf = (int **)HDcalloc(FAMILY_NUMBER, sizeof(buf_data)))) {
-        HDperror("HDcalloc");
+    if (NULL == (buf = (int **)calloc(FAMILY_NUMBER, sizeof(buf_data)))) {
+        HDperror("calloc");
         HDexit(EXIT_FAILURE);
     }
     for (i = 0; i < FAMILY_NUMBER; i++)
@@ -103,8 +103,8 @@ main(void)
         HDexit(EXIT_FAILURE);
     }
 
-    HDfree(buf);
-    HDfree(buf_data);
+    free(buf);
+    free(buf_data);
 
     HDputs(" PASSED");
     HDfflush(stdout);

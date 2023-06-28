@@ -6203,7 +6203,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                HDfree(memb_name[mt]);
+                free(memb_name[mt]);
         } /* end else */
     }     /* end if */
 
@@ -7414,7 +7414,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
 
                     if (nsects) {
                         /* Allocate storage for the free space section information */
-                        sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t));
+                        sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t));
 
                         H5Fget_free_sections(file, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
 
@@ -7423,7 +7423,7 @@ test_mf_strat_thres_persist(const char *env_h5_drvr, hid_t fapl, hbool_t new_for
                             if (sect_info[i].size < fs_threshold)
                                 TEST_ERROR;
                         if (sect_info)
-                            HDfree(sect_info);
+                            free(sect_info);
                     }
                 }
                 else {
@@ -7781,7 +7781,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        HDfree(memb_name[mt]);
+        free(memb_name[mt]);
 
     return 0;
 
@@ -8940,7 +8940,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
 
             /* Free memb_name */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-                HDfree(memb_name[mt]);
+                free(memb_name[mt]);
 
             /* Close memb_fapl */
             if (H5Pclose(memb_fapl) < 0)

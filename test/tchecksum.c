@@ -180,8 +180,8 @@ test_chksum_large(void)
     size_t   u;         /* Local index variable */
 
     /* Allocate the buffer */
-    large_buf = (uint8_t *)HDmalloc((size_t)BUF_LEN);
-    CHECK_PTR(large_buf, "HDmalloc");
+    large_buf = (uint8_t *)malloc((size_t)BUF_LEN);
+    CHECK_PTR(large_buf, "malloc");
 
     /* Initialize buffer w/known data */
     for (u = 0; u < BUF_LEN; u++)
@@ -209,7 +209,7 @@ test_chksum_large(void)
     VERIFY(chksum, 0x930c7afc, "H5_checksum_lookup3");
 
     /* Release memory for buffer */
-    HDfree(large_buf);
+    free(large_buf);
 } /* test_chksum_large() */
 
 /****************************************************************

@@ -1362,7 +1362,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_STACK_ERROR;
 
     /* Check the value for the external prefix */
-    if ((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+    if ((buffer = (char *)calloc((size_t)64, sizeof(char))) == NULL)
         TEST_ERROR;
     if (H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
         FAIL_STACK_ERROR;
@@ -1370,7 +1370,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
         FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
 
     /* Close everything */
-    HDfree(buffer);
+    free(buffer);
     if (H5Sclose(sid) < 0)
         FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
@@ -1387,7 +1387,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
 
 error:
     if (buffer)
-        HDfree(buffer);
+        free(buffer);
     H5E_BEGIN_TRY
     {
         H5Dclose(did);

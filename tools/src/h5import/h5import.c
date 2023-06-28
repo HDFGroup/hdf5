@@ -101,7 +101,7 @@ main(int argc, char *argv[])
     (void)HDsetvbuf(stderr, (char *)NULL, _IOLBF, 0);
     (void)HDsetvbuf(stdout, (char *)NULL, _IOLBF, 0);
 
-    if ((opt = (struct Options *)HDcalloc(1, sizeof(struct Options))) == NULL)
+    if ((opt = (struct Options *)calloc(1, sizeof(struct Options))) == NULL)
         goto err;
 
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
@@ -242,17 +242,17 @@ main(int argc, char *argv[])
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
-            HDfree(in->sizeOfDimension);
+            free(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            HDfree(in->sizeOfChunk);
+            free(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            HDfree(in->maxsizeOfDimension);
+            free(in->maxsizeOfDimension);
         if (in->externFilename)
-            HDfree(in->externFilename);
+            free(in->externFilename);
         if (in->data)
-            HDfree(in->data);
+            free(in->data);
     }
-    HDfree(opt);
+    free(opt);
 
     return EXIT_SUCCESS;
 err:
@@ -260,17 +260,17 @@ err:
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
-            HDfree(in->sizeOfDimension);
+            free(in->sizeOfDimension);
         if (in->sizeOfChunk)
-            HDfree(in->sizeOfChunk);
+            free(in->sizeOfChunk);
         if (in->maxsizeOfDimension)
-            HDfree(in->maxsizeOfDimension);
+            free(in->maxsizeOfDimension);
         if (in->externFilename)
-            HDfree(in->externFilename);
+            free(in->externFilename);
         if (in->data)
-            HDfree(in->data);
+            free(in->data);
     }
-    HDfree(opt);
+    free(opt);
 
     return EXIT_FAILURE;
 }
@@ -1267,28 +1267,28 @@ allocateIntegerStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 8:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT8))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT8))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT16))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT16))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT32))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT32))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_INT64))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_INT64))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
@@ -1314,28 +1314,28 @@ allocateUIntegerStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 8:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT8))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT8))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 16:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT16))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT16))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT32))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT32))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_UINT64))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_UINT64))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
@@ -1361,14 +1361,14 @@ allocateFloatStorage(struct Input *in)
 
     switch (in->inputSize) {
         case 32:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_FLOAT32))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT32))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
             break;
 
         case 64:
-            if ((in->data = (VOIDP)HDmalloc((size_t)len * sizeof(H5DT_FLOAT64))) == NULL) {
+            if ((in->data = (VOIDP)malloc((size_t)len * sizeof(H5DT_FLOAT64))) == NULL) {
                 (void)fprintf(stderr, "%s", err1);
                 return (-1);
             }
@@ -1691,7 +1691,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             }
                         } /* while (get_next_dim) */
 
-                        if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) ==
+                        if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) ==
                             NULL) {
                             goto error;
                         }
@@ -1723,7 +1723,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                     if (!HDstrcmp("/", temp)) { /* / max dims */
                         if ((in->maxsizeOfDimension =
-                                 (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+                                 (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
                             goto error;
                         }
                         if (HDfscanf(strm, "%254s", temp) != 1) { /* start paren */
@@ -1821,7 +1821,7 @@ processConfigurationFile(char *infile, struct Input *in)
                 printf("h5dump STORAGE_LAYOUT %s found\n", temp);
 #endif
                 if (!HDstrcmp("CHUNKED", temp)) { /* CHUNKED */
-                    if ((in->sizeOfChunk = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+                    if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
                         (void)fprintf(stderr, "Unable to allocate dynamic memory.\n");
                         goto error;
                     }
@@ -2565,7 +2565,7 @@ parseDimensions(struct Input *in, char *strm)
         i++;
     }
     in->rank = i + 1;
-    if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+    if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3536,7 +3536,7 @@ getDimensionSizes(struct Input *in, FILE *strm)
     const char *err2 =
         "No. of dimensions for which dimension sizes provided is not equal to provided rank.\n";
 
-    if ((in->sizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+    if ((in->sizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3562,7 +3562,7 @@ getChunkedDimensionSizes(struct Input *in, FILE *strm)
         "No. of dimensions for which chunked dimension sizes provided is not equal to provided rank.\n";
     const char *err3 = "The CHUNKED-DIMENSION-SIZES cannot exceed the sizes of DIMENSION-SIZES\n";
 
-    if ((in->sizeOfChunk = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+    if ((in->sizeOfChunk = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3595,7 +3595,7 @@ getMaximumDimensionSizes(struct Input *in, FILE *strm)
     const char *err3 = "The MAXIMUM-DIMENSIONS cannot be less than the sizes of DIMENSION-SIZES. Exception: "
                        "can be -1 to indicate unlimited size\n";
 
-    if ((in->maxsizeOfDimension = (hsize_t *)HDmalloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
+    if ((in->maxsizeOfDimension = (hsize_t *)malloc((size_t)in->rank * sizeof(hsize_t))) == NULL) {
         (void)fprintf(stderr, "%s", err1);
         return (-1);
     }
@@ -3769,7 +3769,7 @@ getExternalFilename(struct Input *in, FILE *strm)
     }
 
     temp_len           = HDstrlen(temp);
-    in->externFilename = (char *)HDmalloc((temp_len + 1) * sizeof(char));
+    in->externFilename = (char *)malloc((temp_len + 1) * sizeof(char));
     (void)HDstrcpy(in->externFilename, temp);
     in->externFilename[temp_len] = '\0';
     return (0);

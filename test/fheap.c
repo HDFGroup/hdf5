@@ -7622,9 +7622,9 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Set up data array */
-    if (NULL == (heap_id_data = (unsigned char *)HDcalloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
+    if (NULL == (heap_id_data = (unsigned char *)calloc(100 * MAX_HEAP_ID_LEN, sizeof(unsigned char))))
         TEST_ERROR;
-    if (NULL == (heap_id = (unsigned char **)HDcalloc(100, sizeof(heap_id_data))))
+    if (NULL == (heap_id = (unsigned char **)calloc(100, sizeof(heap_id_data))))
         TEST_ERROR;
     for (i = 0; i < 100; i++)
         heap_id[i] = heap_id_data + (i * MAX_HEAP_ID_LEN);
@@ -7695,8 +7695,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     /* All tests passed */
     PASSED();
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 0;
 
@@ -7709,8 +7709,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(heap_id);
-    HDfree(heap_id_data);
+    free(heap_id);
+    free(heap_id_data);
 
     return 1;
 } /* test_man_incr_insert_remove() */

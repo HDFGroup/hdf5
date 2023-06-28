@@ -957,10 +957,10 @@ test_h5o_link(void)
 
     /* Allocate memory buffers */
     /* (These are treated as 2-D buffers) */
-    wdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK_PTR(wdata, "HDmalloc");
-    rdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
-    CHECK_PTR(rdata, "HDmalloc");
+    wdata = (int *)malloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK_PTR(wdata, "malloc");
+    rdata = (int *)malloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK_PTR(rdata, "malloc");
 
     /* Initialize the raw data */
     for (i = n = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
@@ -1083,8 +1083,8 @@ test_h5o_link(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Release buffers */
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 } /* end test_h5o_link() */
 
 /****************************************************************

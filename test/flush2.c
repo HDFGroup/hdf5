@@ -77,7 +77,7 @@ dset_ok(hid_t fid, const char *dset_name)
         goto error;
 
     /* Read the data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         goto error;
     if (H5Dread(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0)
         goto error;
@@ -90,7 +90,7 @@ dset_ok(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         goto error;
 
-    HDfree(data);
+    free(data);
 
     return TRUE;
 
@@ -102,7 +102,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FALSE;
 } /* end dset_ok() */

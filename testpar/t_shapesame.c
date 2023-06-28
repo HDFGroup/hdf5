@@ -191,28 +191,28 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     tv_ptr->block_ptr  = &(tv_ptr->block[PAR_SS_DR_MAX_RANK - tv_ptr->large_rank]);
 
     /* Allocate buffers */
-    tv_ptr->small_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_0 != NULL), "malloc of small_ds_buf_0 succeeded");
 
-    tv_ptr->small_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_1 != NULL), "malloc of small_ds_buf_1 succeeded");
 
-    tv_ptr->small_ds_buf_2 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
+    tv_ptr->small_ds_buf_2 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_size);
     VRFY((tv_ptr->small_ds_buf_2 != NULL), "malloc of small_ds_buf_2 succeeded");
 
-    tv_ptr->small_ds_slice_buf = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
+    tv_ptr->small_ds_slice_buf = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->small_ds_slice_size);
     VRFY((tv_ptr->small_ds_slice_buf != NULL), "malloc of small_ds_slice_buf succeeded");
 
-    tv_ptr->large_ds_buf_0 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_0 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_0 != NULL), "malloc of large_ds_buf_0 succeeded");
 
-    tv_ptr->large_ds_buf_1 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_1 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_1 != NULL), "malloc of large_ds_buf_1 succeeded");
 
-    tv_ptr->large_ds_buf_2 = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
+    tv_ptr->large_ds_buf_2 = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_size);
     VRFY((tv_ptr->large_ds_buf_2 != NULL), "malloc of large_ds_buf_2 succeeded");
 
-    tv_ptr->large_ds_slice_buf = (uint32_t *)HDmalloc(sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
+    tv_ptr->large_ds_slice_buf = (uint32_t *)malloc(sizeof(uint32_t) * tv_ptr->large_ds_slice_size);
     VRFY((tv_ptr->large_ds_slice_buf != NULL), "malloc of large_ds_slice_buf succeeded");
 
     /* initialize the buffers */
@@ -639,22 +639,22 @@ hs_dr_pio_test__takedown(struct hs_dr_pio_test_vars_t *tv_ptr)
     /* Free memory buffers */
 
     if (tv_ptr->small_ds_buf_0 != NULL)
-        HDfree(tv_ptr->small_ds_buf_0);
+        free(tv_ptr->small_ds_buf_0);
     if (tv_ptr->small_ds_buf_1 != NULL)
-        HDfree(tv_ptr->small_ds_buf_1);
+        free(tv_ptr->small_ds_buf_1);
     if (tv_ptr->small_ds_buf_2 != NULL)
-        HDfree(tv_ptr->small_ds_buf_2);
+        free(tv_ptr->small_ds_buf_2);
     if (tv_ptr->small_ds_slice_buf != NULL)
-        HDfree(tv_ptr->small_ds_slice_buf);
+        free(tv_ptr->small_ds_slice_buf);
 
     if (tv_ptr->large_ds_buf_0 != NULL)
-        HDfree(tv_ptr->large_ds_buf_0);
+        free(tv_ptr->large_ds_buf_0);
     if (tv_ptr->large_ds_buf_1 != NULL)
-        HDfree(tv_ptr->large_ds_buf_1);
+        free(tv_ptr->large_ds_buf_1);
     if (tv_ptr->large_ds_buf_2 != NULL)
-        HDfree(tv_ptr->large_ds_buf_2);
+        free(tv_ptr->large_ds_buf_2);
     if (tv_ptr->large_ds_slice_buf != NULL)
-        HDfree(tv_ptr->large_ds_slice_buf);
+        free(tv_ptr->large_ds_slice_buf);
 
     return;
 
@@ -4312,7 +4312,7 @@ main(int argc, char **argv)
 
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
-        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+        if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -4383,7 +4383,7 @@ main(int argc, char **argv)
     }
 
     for (int i = 0; i < NFILENAME; i++) {
-        HDfree(filenames[i]);
+        free(filenames[i]);
         filenames[i] = NULL;
     }
 

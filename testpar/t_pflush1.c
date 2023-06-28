@@ -145,7 +145,7 @@ main(int argc, char *argv[])
         HDexit(EXIT_FAILURE);
     }
 
-    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+    if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
         goto error;
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -195,7 +195,7 @@ main(int argc, char *argv[])
     HDfflush(stderr);
 
     if (data_g) {
-        HDfree(data_g);
+        free(data_g);
         data_g = NULL;
     }
 
@@ -217,7 +217,7 @@ error:
     HDfflush(stdout);
 
     if (data_g)
-        HDfree(data_g);
+        free(data_g);
 
     HD_exit(EXIT_FAILURE);
 } /* end main() */

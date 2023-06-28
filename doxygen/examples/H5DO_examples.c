@@ -190,7 +190,7 @@ size_t       buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
             /* Get the size of the compressed chunk */
             ret = H5Dget_chunk_storage_size(dataset, offset, &read_chunk_nbytes);
 
-            readbuf    = HDmalloc(read_chunk_nbytes);
+            readbuf    = malloc(read_chunk_nbytes);
             pt_readbuf = (const Bytef *)readbuf;
 
             /* Use H5DOread_chunk() to read the chunk back */

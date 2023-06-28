@@ -187,7 +187,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
     outputformat                = &string_dataformat;
 
     /* Build the object's path name */
-    obj_path = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    obj_path = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     if (!obj_path) {
         ret = FAIL;
         goto done;
@@ -229,7 +229,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
 
                         /* Restore old prefix name */
                         HDstrcpy(prefix, old_prefix);
-                        HDfree(old_prefix);
+                        free(old_prefix);
                     }
                     else
                         error_msg("warning: null prefix\n");
@@ -386,7 +386,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
 
         switch (linfo->type) {
             case H5L_TYPE_SOFT:
-                if ((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                if ((targbuf = (char *)malloc(linfo->u.val_size)) == NULL) {
                     error_msg("unable to allocate buffer\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
@@ -436,12 +436,12 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                    HDfree(targbuf);
+                    free(targbuf);
                 }
                 break;
 
             case H5L_TYPE_EXTERNAL:
-                if ((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                if ((targbuf = (char *)malloc(linfo->u.val_size)) == NULL) {
                     error_msg("unable to allocate buffer\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
@@ -510,7 +510,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                    HDfree(targbuf);
+                    free(targbuf);
                 }
                 break;
 
@@ -560,7 +560,7 @@ done:
     h5tools_str_close(&buffer);
 
     if (obj_path)
-        HDfree(obj_path);
+        free(obj_path);
     return ret;
 }
 
@@ -1336,7 +1336,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
             u        = HDstrlen(buf);
             v        = HDstrlen(op_name);
             w        = u + 1 + v + 1 + 2;
-            obj_name = (char *)HDmalloc(w);
+            obj_name = (char *)malloc(w);
             if (obj_name == NULL) {
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
@@ -1359,10 +1359,10 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
                 buffer_space -= MIN(buffer_space, v);
 
                 handle_attributes(oid, obj_name, NULL, 0, NULL);
-                HDfree(obj_name);
+                free(obj_name);
             }
         }
-        HDfree(obj_op_name);
+        free(obj_op_name);
     }
     return ret;
 } /* end attr_search() */
@@ -1420,7 +1420,7 @@ lnk_search(const char *path, const H5L_info2_t *li, void *_op_data)
         k = 2;
     else
         k = 1;
-    search_name = (char *)HDmalloc(search_len + k);
+    search_name = (char *)malloc(search_len + k);
     if (search_name == NULL) {
         error_msg("creating temporary link\n");
         h5tools_setstatus(EXIT_FAILURE);
@@ -1450,7 +1450,7 @@ lnk_search(const char *path, const H5L_info2_t *li, void *_op_data)
                     break;
             } /* end switch() */
         }
-        HDfree(search_name);
+        free(search_name);
     }
     return 0;
 } /* end lnk_search() */
@@ -1534,7 +1534,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     hsize_t           curr_pos = 0; /* total data element position   */
 
     j        = (int)HDstrlen(attr) - 1;
-    obj_name = (char *)HDmalloc((size_t)j + 2);
+    obj_name = (char *)malloc((size_t)j + 2);
     if (obj_name == NULL)
         goto error;
 
@@ -1631,18 +1631,18 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
         goto error;
     } /* end if */
 
-    HDfree(obj_name);
-    HDfree(attr_name);
+    free(obj_name);
+    free(attr_name);
     dump_indent -= COL;
     return;
 
 error:
     h5tools_setstatus(EXIT_FAILURE);
     if (obj_name)
-        HDfree(obj_name);
+        free(obj_name);
 
     if (attr_name)
-        HDfree(attr_name);
+        free(attr_name);
 
     H5E_BEGIN_TRY
     {
@@ -1709,7 +1709,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             if (!sset->start.data) {
                 /* default to (0, 0, ...) for the start coord */
                 if (ndims > 0)
-                    sset->start.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                    sset->start.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->start.data = NULL;
                 sset->start.len = ndims;
@@ -1717,7 +1717,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
             if (!sset->stride.data) {
                 if (ndims > 0)
-                    sset->stride.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                    sset->stride.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->stride.data = NULL;
                 sset->stride.len = ndims;
@@ -1727,7 +1727,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
             if (!sset->count.data) {
                 if (ndims > 0)
-                    sset->count.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                    sset->count.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->count.data = NULL;
                 sset->count.len = ndims;
@@ -1737,7 +1737,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
             if (!sset->block.data) {
                 if (ndims > 0)
-                    sset->block.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                    sset->block.data = (hsize_t *)calloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->block.data = NULL;
                 sset->block.len = ndims;
@@ -1856,7 +1856,7 @@ handle_groups(hid_t fid, const char *group, void H5_ATTR_UNUSED *data, int pe, c
 
         if (prefix_len <= new_len) {
             prefix_len = new_len;
-            prefix     = (char *)HDrealloc(prefix, prefix_len);
+            prefix     = (char *)realloc(prefix, prefix_len);
         } /* end if */
 
         HDstrcpy(prefix, group);
@@ -1893,7 +1893,7 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED *data, int H5_ATT
         h5tools_setstatus(EXIT_FAILURE);
     }
     else {
-        char *buf = (char *)HDmalloc(linfo.u.val_size);
+        char *buf = (char *)malloc(linfo.u.val_size);
         PRINTVALSTREAM(rawoutstream, "\n");
 
         switch (linfo.type) {
@@ -1951,7 +1951,7 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED *data, int H5_ATT
                 end_obj(h5tools_dump_header_format->udlinkend, h5tools_dump_header_format->udlinkblockend);
                 break;
         } /* end switch */
-        HDfree(buf);
+        free(buf);
     } /* end else */
 }
 

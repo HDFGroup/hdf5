@@ -369,7 +369,7 @@ create_textfile(const char *name, size_t size)
 
     if ((fd = HDcreat(name, 0777)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc(size, 1)))
+    if (NULL == (buf = (char *)calloc(size, 1)))
         goto error;
 
     /* Fill buf with pattern */
@@ -380,13 +380,13 @@ create_textfile(const char *name, size_t size)
     if (HDwrite(fd, buf, size) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
     HDclose(fd);
 
     return SUCCEED;
 
 error:
-    HDfree(buf);
+    free(buf);
     if (fd >= 0)
         HDclose(fd);
 

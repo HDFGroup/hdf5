@@ -1271,7 +1271,7 @@ test_HMAC_SHA256(void)
             dest = NULL;
         }
         else {
-            dest = (char *)HDmalloc(sizeof(char) * cases[i].dest_size);
+            dest = (char *)malloc(sizeof(char) * cases[i].dest_size);
             assert(dest != NULL);
         }
 
@@ -1284,7 +1284,7 @@ test_HMAC_SHA256(void)
             if (0 != HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp))) {
                 /* print out how wrong things are, and then fail
                  */
-                dest = (char *)HDrealloc(dest, cases[i].dest_size + 1);
+                dest = (char *)realloc(dest, cases[i].dest_size + 1);
                 assert(dest != NULL);
                 dest[cases[i].dest_size] = 0;
                 fprintf(stdout, "ERROR:\n!!! \"%s\"\n != \"%s\"\n", cases[i].exp, dest);
@@ -1296,14 +1296,14 @@ test_HMAC_SHA256(void)
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, HDstrlen(cases[i].exp)), NULL);
 #endif /* VERBOSE */
         }
-        HDfree(dest);
+        free(dest);
     }
 
     PASSED();
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_HMAC_SHA256() */
@@ -1365,13 +1365,13 @@ test_nlowercase(void)
     TESTING("nlowercase");
 
     for (i = 0; i < n_cases; i++) {
-        dest = (char *)HDmalloc(sizeof(char) * 16);
+        dest = (char *)malloc(sizeof(char) * 16);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_nlowercase(dest, cases[i].in, cases[i].len), cases[i].in)
         if (cases[i].len > 0) {
             JSVERIFY(0, HDstrncmp(dest, cases[i].exp, cases[i].len), NULL)
         }
-        HDfree(dest);
+        free(dest);
     } /* end for each testcase */
 
     JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null destination should fail")
@@ -1380,7 +1380,7 @@ test_nlowercase(void)
     return 0;
 
 error:
-    HDfree(dest);
+    free(dest);
     return -1;
 
 } /* end test_nlowercase() */
@@ -2216,7 +2216,7 @@ test_signing_key(void)
     TESTING("signing_key");
 
     for (i = 0; i < ncases; i++) {
-        key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+        key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
         assert(key != NULL);
 
         JSVERIFY(SUCCEED, H5FD_s3comms_signing_key(key, cases[i].secret_key, cases[i].region, cases[i].when),
@@ -2225,7 +2225,7 @@ test_signing_key(void)
         JSVERIFY(0, HDstrncmp((const char *)cases[i].exp, (const char *)key, SHA256_DIGEST_LENGTH),
                  (const char *)cases[i].exp)
 
-        HDfree(key);
+        free(key);
         key = NULL;
     }
 
@@ -2233,7 +2233,7 @@ test_signing_key(void)
      * ERROR CASES *
      ***************/
 
-    key = (unsigned char *)HDmalloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
+    key = (unsigned char *)malloc(sizeof(unsigned char) * SHA256_DIGEST_LENGTH);
     assert(key != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(NULL, cases[0].secret_key, cases[0].region, cases[0].when),
@@ -2248,7 +2248,7 @@ test_signing_key(void)
     JSVERIFY(FAIL, H5FD_s3comms_signing_key(key, cases[0].secret_key, cases[0].region, NULL),
              "time string cannot be NULL")
 
-    HDfree(key);
+    free(key);
     key = NULL;
 
     PASSED();
@@ -2256,7 +2256,7 @@ test_signing_key(void)
 
 error:
     if (key != NULL) {
-        HDfree(key);
+        free(key);
     }
 
     return -1;
@@ -2397,7 +2397,7 @@ test_trim(void)
 
     for (i = 0; i < n_cases; i++) {
         assert(str == NULL);
-        str = (char *)HDmalloc(sizeof(char) * cases[i].in_len);
+        str = (char *)malloc(sizeof(char) * cases[i].in_len);
         assert(str != NULL);
         HDstrncpy(str, cases[i].in, cases[i].in_len);
 
@@ -2406,7 +2406,7 @@ test_trim(void)
         if (dest_len > 0) {
             JSVERIFY(0, HDstrncmp(cases[i].exp, dest, dest_len), cases[i].exp)
         }
-        HDfree(str);
+        free(str);
         str = NULL;
     } /* end for each testcase */
 
@@ -2415,11 +2415,11 @@ test_trim(void)
     JSVERIFY(0, dest_len, "trimming NULL string writes 0 characters")
 
     assert(str == NULL);
-    str = (char *)HDmalloc(sizeof(char *) * 11);
+    str = (char *)malloc(sizeof(char *) * 11);
     assert(str != NULL);
     HDmemcpy(str, "some text ", 11); /* string with null terminator */
     JSVERIFY(FAIL, H5FD_s3comms_trim(NULL, str, 10, &dest_len), "destination for trim cannot be NULL");
-    HDfree(str);
+    free(str);
     str = NULL;
 
     PASSED();
@@ -2427,7 +2427,7 @@ test_trim(void)
 
 error:
     if (str != NULL) {
-        HDfree(str);
+        free(str);
     }
     return -1;
 
@@ -2511,7 +2511,7 @@ test_uriencode(void)
 
     for (i = 0; i < ncases; i++) {
         str_len = cases[i].s_len;
-        dest    = (char *)HDmalloc(sizeof(char) * str_len * 3 + 1);
+        dest    = (char *)malloc(sizeof(char) * str_len * 3 + 1);
         FAIL_IF(dest == NULL)
 
         JSVERIFY(SUCCEED,
@@ -2520,7 +2520,7 @@ test_uriencode(void)
         JSVERIFY(HDstrlen(cases[i].expected), dest_written, NULL)
         JSVERIFY(0, HDstrncmp(dest, cases[i].expected, dest_written), cases[i].expected);
 
-        HDfree(dest);
+        free(dest);
         dest = NULL;
     } /* end for each testcase */
 
@@ -2528,7 +2528,7 @@ test_uriencode(void)
      * ERROR CASES *
      ***************/
 
-    dest = (char *)HDmalloc(sizeof(char) * 15);
+    dest = (char *)malloc(sizeof(char) * 15);
     assert(dest != NULL);
 
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(NULL, "word$", 5, FALSE, &dest_written),
@@ -2536,7 +2536,7 @@ test_uriencode(void)
     JSVERIFY(FAIL, H5FD_s3comms_uriencode(dest, NULL, 5, FALSE, &dest_written),
              "source string cannot be NULL");
 
-    HDfree(dest);
+    free(dest);
     dest = NULL;
 
     PASSED();
@@ -2544,7 +2544,7 @@ test_uriencode(void)
 
 error:
     if (dest != NULL) {
-        HDfree(dest);
+        free(dest);
     }
     return -1;
 

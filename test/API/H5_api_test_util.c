@@ -504,7 +504,7 @@ generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H
 
     num_members = (size_t)(rand() % ENUM_TYPE_MAX_MEMBERS + 1);
 
-    if (NULL == (enum_member_vals = HDmalloc(num_members * sizeof(int)))) {
+    if (NULL == (enum_member_vals = malloc(num_members * sizeof(int)))) {
         printf("    couldn't allocate space for enum members\n");
         goto done;
     }
@@ -537,7 +537,7 @@ generate_random_datatype_enum(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t H
     ret_value = datatype;
 
 done:
-    HDfree(enum_member_vals);
+    free(enum_member_vals);
 
     if ((ret_value == H5I_INVALID_HID) && (datatype >= 0)) {
         if (H5Tclose(datatype) < 0)
@@ -558,7 +558,7 @@ generate_random_datatype_array(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t 
 
     ndims = (unsigned)(rand() % ARRAY_TYPE_MAX_DIMS + 1);
 
-    if (NULL == (array_dims = HDmalloc(ndims * sizeof(*array_dims)))) {
+    if (NULL == (array_dims = malloc(ndims * sizeof(*array_dims)))) {
         printf("    couldn't allocate space for array datatype dims\n");
         goto done;
     }
@@ -579,7 +579,7 @@ generate_random_datatype_array(H5T_class_t H5_ATTR_UNUSED parent_class, hbool_t 
     ret_value = datatype;
 
 done:
-    HDfree(array_dims);
+    free(array_dims);
 
     if (base_datatype >= 0) {
         if (H5Tclose(base_datatype) < 0)
@@ -720,7 +720,7 @@ error:
 /*
  * Add a prefix to the given filename. The caller
  * is responsible for freeing the returned filename
- * pointer with HDfree().
+ * pointer with free().
  */
 herr_t
 prefix_filename(const char *prefix, const char *filename, char **filename_out)
@@ -744,7 +744,7 @@ prefix_filename(const char *prefix, const char *filename, char **filename_out)
         goto done;
     }
 
-    if (NULL == (out_buf = HDmalloc(H5_API_TEST_FILENAME_MAX_LENGTH))) {
+    if (NULL == (out_buf = malloc(H5_API_TEST_FILENAME_MAX_LENGTH))) {
         printf("    couldn't allocated filename buffer\n");
         ret_value = FAIL;
         goto done;
@@ -789,7 +789,7 @@ remove_test_file(const char *prefix, const char *filename)
     }
 
 done:
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return ret_value;
 }

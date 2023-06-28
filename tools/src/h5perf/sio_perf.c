@@ -214,7 +214,7 @@ main(int argc, char *argv[])
     run_test_loop(opts);
 
 finish:
-    HDfree(opts);
+    free(opts);
     return exit_value;
 }
 
@@ -500,16 +500,16 @@ run_test(iotype iot, parameters parms, struct options *opts)
     }
 
     /* clean up our mess */
-    HDfree(write_sys_mm_table);
-    HDfree(write_mm_table);
-    HDfree(write_gross_mm_table);
-    HDfree(write_raw_mm_table);
+    free(write_sys_mm_table);
+    free(write_mm_table);
+    free(write_gross_mm_table);
+    free(write_raw_mm_table);
 
     if (!parms.h5_write_only) {
-        HDfree(read_sys_mm_table);
-        HDfree(read_mm_table);
-        HDfree(read_gross_mm_table);
-        HDfree(read_raw_mm_table);
+        free(read_sys_mm_table);
+        free(read_mm_table);
+        free(read_gross_mm_table);
+        free(read_raw_mm_table);
     }
 
     return ret_value;
@@ -809,7 +809,7 @@ parse_command_line(int argc, const char *const *argv)
     struct options *cl_opts;
     int             i, default_rank, actual_rank, ranks[4];
 
-    cl_opts = (struct options *)HDmalloc(sizeof(struct options));
+    cl_opts = (struct options *)malloc(sizeof(struct options));
 
     cl_opts->page_buffer_size = 0;
     cl_opts->page_size        = 0;
@@ -1103,7 +1103,7 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(progname);
-                HDfree(cl_opts);
+                free(cl_opts);
                 return NULL;
         }
     }

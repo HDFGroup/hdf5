@@ -617,7 +617,7 @@ H5_timer_get_time_string(double seconds)
     } /* end if */
 
     /* Allocate */
-    if (NULL == (s = (char *)HDcalloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
+    if (NULL == (s = (char *)calloc(H5TIMER_TIME_STRING_LEN, sizeof(char))))
         return NULL;
 
     /* Do we need a format string? Some people might like a certain

@@ -64,7 +64,7 @@ test_vlstr_alloc_custom(size_t size, void *info)
      */
     extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
@@ -96,7 +96,7 @@ test_vlstr_free_custom(void *_mem, void *info)
     if (_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
         *mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 }
 
@@ -162,7 +162,7 @@ test_vlstrings_basic(void)
     dataset2 = H5Dcreate2(fid1, "Dataset2", tid1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate2");
 
-    wdata2 = (char *)HDcalloc((size_t)65534, sizeof(char));
+    wdata2 = (char *)calloc((size_t)65534, sizeof(char));
     HDmemset(wdata2, 'A', (size_t)65533);
 
     ret = H5Dwrite(dataset2, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata2);
@@ -170,7 +170,7 @@ test_vlstrings_basic(void)
 
     H5Sclose(dataspace);
     H5Dclose(dataset2);
-    HDfree(wdata2);
+    free(wdata2);
 
     /* Change to the custom memory allocation routines for reading VL string */
     xfer_pid = H5Pcreate(H5P_DATASET_XFER);
@@ -625,7 +625,7 @@ test_write_vl_string_attribute(void)
     att = H5Acreate2(root, "test_scalar_large", type, dataspace, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
 
-    string_att_write = (char *)HDcalloc((size_t)8192, sizeof(char));
+    string_att_write = (char *)calloc((size_t)8192, sizeof(char));
     HDmemset(string_att_write, 'A', (size_t)8191);
 
     ret = H5Awrite(att, type, &string_att_write);
@@ -642,7 +642,7 @@ test_write_vl_string_attribute(void)
     string_att_check = NULL;
 
     /* The attribute string written is freed below, in the test_read_vl_string_attribute() test */
-    /* HDfree(string_att_write); */
+    /* free(string_att_write); */
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");
@@ -723,7 +723,7 @@ test_read_vl_string_attribute(void)
 
     /* Free string allocated in test_write_vl_string_attribute */
     if (string_att_write)
-        HDfree(string_att_write);
+        free(string_att_write);
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "HAclose");

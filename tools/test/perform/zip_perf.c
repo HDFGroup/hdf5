@@ -104,7 +104,7 @@ cleanup(void)
 {
     if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
-    HDfree(filename);
+    free(filename);
 }
 
 static void
@@ -117,7 +117,7 @@ write_file(Bytef *source, uLongf sourceLen)
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
     destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
-    dest    = (Bytef *)HDmalloc(destLen);
+    dest    = (Bytef *)malloc(destLen);
 
     if (!dest)
         error("out of memory");
@@ -151,7 +151,7 @@ write_file(Bytef *source, uLongf sourceLen)
         d_ptr += rc;
     }
 
-    HDfree(dest);
+    free(dest);
 }
 
 /*
@@ -211,9 +211,9 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
+        filename = (char *)malloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *)HDmalloc(HDstrlen(ZIP_PERF_FILE) + 1);
+        filename = (char *)malloc(HDstrlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
@@ -364,7 +364,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         unsigned long i, iters;
 
         iters = file_size / src_len;
-        src   = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
+        src   = (Bytef *)calloc(1, sizeof(Bytef) * src_len);
 
         if (!src) {
             cleanup();
@@ -452,7 +452,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
         fprintf(stdout, "\tCompression Time: %gs\n", compression_time);
 
         HDunlink(filename);
-        HDfree(src);
+        free(src);
     }
 }
 

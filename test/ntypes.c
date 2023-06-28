@@ -82,9 +82,9 @@ test_atomic_dtype(hid_t file)
 
     TESTING("atomic datatype");
 
-    if (NULL == (ipoints2 = HDcalloc(1, sizeof(*ipoints2))))
+    if (NULL == (ipoints2 = calloc(1, sizeof(*ipoints2))))
         TEST_ERROR;
-    if (NULL == (icheck2 = HDcalloc(1, sizeof(*icheck2))))
+    if (NULL == (icheck2 = calloc(1, sizeof(*icheck2))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -132,7 +132,7 @@ test_atomic_dtype(hid_t file)
 
     /* Read the dataset back.  The temporary buffer is for special platforms
      * like Cray. */
-    if (NULL == (tmp = HDmalloc((size_t)(DIM0 * DIM1 * H5Tget_size(native_type)))))
+    if (NULL == (tmp = malloc((size_t)(DIM0 * DIM1 * H5Tget_size(native_type)))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -140,7 +140,7 @@ test_atomic_dtype(hid_t file)
 
     /* Copy data from temporary buffer to destination buffer */
     HDmemcpy(icheck2, tmp, (size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     /* Convert to the integer type */
@@ -274,8 +274,8 @@ test_atomic_dtype(hid_t file)
     if (H5Sclose(space) < 0)
         TEST_ERROR;
 
-    HDfree(ipoints2);
-    HDfree(icheck2);
+    free(ipoints2);
+    free(icheck2);
 
     PASSED();
 
@@ -283,7 +283,7 @@ test_atomic_dtype(hid_t file)
 
 error:
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     H5E_BEGIN_TRY
     {
@@ -294,8 +294,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(ipoints2);
-    HDfree(icheck2);
+    free(ipoints2);
+    free(icheck2);
 
     return -1;
 }
@@ -340,9 +340,9 @@ test_compound_dtype2(hid_t file)
     TESTING("nested compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if (NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (check = (s1 *)calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -538,22 +538,22 @@ test_compound_dtype2(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (bkg = calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), check, bkg, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(bkg);
+    free(bkg);
     bkg = NULL;
 
     /* Check that the values read are the same as the values written */
@@ -585,21 +585,21 @@ test_compound_dtype2(hid_t file)
     H5Tclose(tid_m);
 
     /* Free memory for test data */
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     PASSED();
     return 0;
 
 error:
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     if (points)
-        HDfree(points);
+        free(points);
     if (check)
-        HDfree(check);
+        free(check);
 
     H5E_BEGIN_TRY
     {
@@ -655,9 +655,9 @@ test_compound_dtype(hid_t file)
     TESTING("compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if (NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (check = (s1 *)calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -759,22 +759,22 @@ test_compound_dtype(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (bkg = calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid2, (DIM0 * DIM1), check, bkg, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(bkg);
+    free(bkg);
     bkg = NULL;
 
     /* Check that the values read are the same as the values written */
@@ -798,8 +798,8 @@ test_compound_dtype(hid_t file)
     H5Tclose(tid2);
 
     /* Free memory for test data */
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     PASSED();
     return 0;
@@ -807,13 +807,13 @@ test_compound_dtype(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     if (points)
-        HDfree(points);
+        free(points);
     if (check)
-        HDfree(check);
+        free(check);
 
     H5E_BEGIN_TRY
     {
@@ -865,9 +865,9 @@ test_compound_dtype3(hid_t file)
     TESTING("compound datatype with array as field");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if (NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (check = (s1 *)calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -989,22 +989,22 @@ test_compound_dtype3(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (bkg = calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), check, bkg, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(bkg);
+    free(bkg);
     bkg = NULL;
 
     /* Check that the values read are the same as the values written */
@@ -1034,8 +1034,8 @@ test_compound_dtype3(hid_t file)
     H5Tclose(tid_m2);
 
     /* Free memory for test data */
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     PASSED();
     return 0;
@@ -1043,13 +1043,13 @@ test_compound_dtype3(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     if (points)
-        HDfree(points);
+        free(points);
     if (check)
-        HDfree(check);
+        free(check);
 
     H5E_BEGIN_TRY
     {
@@ -1102,9 +1102,9 @@ test_compound_opaque(hid_t file)
     TESTING("compound datatype with opaque field");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
+    if (NULL == (points = (s1 *)malloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if (NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (check = (s1 *)calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -1217,22 +1217,22 @@ test_compound_opaque(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
-    if (NULL == (bkg = HDcalloc(sizeof(s1), DIM0 * DIM1)))
+    if (NULL == (bkg = calloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), check, bkg, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    HDfree(bkg);
+    free(bkg);
     bkg = NULL;
 
     /* Check that the values read are the same as the values written */
@@ -1261,8 +1261,8 @@ test_compound_opaque(hid_t file)
     H5Tclose(tid_m);
 
     /* Free memory for test data */
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     PASSED();
     return 0;
@@ -1270,13 +1270,13 @@ test_compound_opaque(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     if (points)
-        HDfree(points);
+        free(points);
     if (check)
-        HDfree(check);
+        free(check);
 
     H5E_BEGIN_TRY
     {
@@ -1328,9 +1328,9 @@ test_enum_dtype(hid_t file)
 
     TESTING("enum datatype");
 
-    if (NULL == (spoints2 = HDcalloc(1, sizeof(*spoints2))))
+    if (NULL == (spoints2 = calloc(1, sizeof(*spoints2))))
         TEST_ERROR;
-    if (NULL == (scheck2 = HDcalloc(1, sizeof(*scheck2))))
+    if (NULL == (scheck2 = calloc(1, sizeof(*scheck2))))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -1397,7 +1397,7 @@ test_enum_dtype(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
@@ -1424,18 +1424,18 @@ test_enum_dtype(hid_t file)
     H5Tclose(native_type);
     H5Tclose(tid_m);
 
-    HDfree(tmp);
-    HDfree(spoints2);
-    HDfree(scheck2);
+    free(tmp);
+    free(spoints2);
+    free(scheck2);
 
     PASSED();
     return 0;
 
 error:
     /* Free memory for test data */
-    HDfree(tmp);
-    HDfree(spoints2);
-    HDfree(scheck2);
+    free(tmp);
+    free(spoints2);
+    free(scheck2);
 
     H5E_BEGIN_TRY
     {
@@ -1484,9 +1484,9 @@ test_array_dtype(hid_t file)
     TESTING("array of compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if (NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1 * 5)))
+    if (NULL == (points = (s1 *)malloc(sizeof(s1) * DIM0 * DIM1 * 5)))
         TEST_ERROR;
-    if (NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1 * 5)))
+    if (NULL == (check = (s1 *)calloc(sizeof(s1), DIM0 * DIM1 * 5)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -1568,14 +1568,14 @@ test_array_dtype(hid_t file)
 
     /* Read the dataset back. Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), check, NULL, H5P_DEFAULT) < 0)
@@ -1606,8 +1606,8 @@ test_array_dtype(hid_t file)
         TEST_ERROR;
 
     /* Free memory for test data */
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     PASSED();
     return 0;
@@ -1615,11 +1615,11 @@ test_array_dtype(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
     if (points)
-        HDfree(points);
+        free(points);
     if (check)
-        HDfree(check);
+        free(check);
 
     H5E_BEGIN_TRY
     {
@@ -1668,9 +1668,9 @@ test_array_dtype2(hid_t file)
 
     TESTING("array of atomic datatype");
 
-    if (NULL == (ipoints3 = HDcalloc(1, sizeof(*ipoints3))))
+    if (NULL == (ipoints3 = calloc(1, sizeof(*ipoints3))))
         goto error;
-    if (NULL == (icheck3 = HDcalloc(1, sizeof(*icheck3))))
+    if (NULL == (icheck3 = calloc(1, sizeof(*icheck3))))
         goto error;
 
     /* Initialize the dataset */
@@ -1725,14 +1725,14 @@ test_array_dtype2(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    if (NULL == (tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type))))
+    if (NULL == (tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type))))
         TEST_ERROR;
 
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
     HDmemcpy(icheck3, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
-    HDfree(tmp);
+    free(tmp);
     tmp = NULL;
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), icheck3, NULL, H5P_DEFAULT) < 0)
@@ -1759,8 +1759,8 @@ test_array_dtype2(hid_t file)
     if (H5Tclose(tid_m) < 0)
         TEST_ERROR;
 
-    HDfree(ipoints3);
-    HDfree(icheck3);
+    free(ipoints3);
+    free(icheck3);
 
     PASSED();
     return 0;
@@ -1768,7 +1768,7 @@ test_array_dtype2(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     H5E_BEGIN_TRY
     {
@@ -1781,8 +1781,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(ipoints3);
-    HDfree(icheck3);
+    free(ipoints3);
+    free(icheck3);
 
     return -1;
 }
@@ -1817,7 +1817,7 @@ test_vl_dtype(hid_t file)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (NULL == wdata[i].p) {
             H5_FAILED();
             printf("    Cannot allocate memory for VL data! i=%u\n", (unsigned)i);
@@ -1825,7 +1825,7 @@ test_vl_dtype(hid_t file)
         } /* end if */
         wdata[i].len = i + 1;
         for (t1 = (hvl_t *)wdata[i].p, j = 0; j < (i + 1); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (NULL == t1->p) {
                 H5_FAILED();
                 printf("    Cannot allocate memory for VL data! i=%u, j=%u\n", (unsigned)i, (unsigned)j);
@@ -1914,7 +1914,7 @@ test_vl_dtype(hid_t file)
 
             /* use temporary buffer to convert datatype.  This is for special
              * platforms like Cray */
-            if (NULL == (tmp = (void **)HDmalloc(t2->len * sizeof(unsigned int))))
+            if (NULL == (tmp = (void **)malloc(t2->len * sizeof(unsigned int))))
                 TEST_ERROR;
             HDmemcpy(tmp, t2->p, t2->len * H5Tget_size(nat_super_type));
 
@@ -1930,7 +1930,7 @@ test_vl_dtype(hid_t file)
                 } /* end if */
             }     /* end for */
 
-            HDfree(tmp);
+            free(tmp);
             tmp = NULL;
         } /* end for */
     }     /* end for */
@@ -1968,7 +1968,7 @@ test_vl_dtype(hid_t file)
 error:
     /* Free memory for test data */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     H5E_BEGIN_TRY
     {
@@ -2103,7 +2103,7 @@ test_vlstr_dtype(hid_t file)
 
     /* Free memory for rdata */
     for (i = 0; i < SPACE1_DIM1; i++)
-        HDfree(rdata[i]);
+        free(rdata[i]);
     rdata_alloc = FALSE;
 
     PASSED();
@@ -2113,7 +2113,7 @@ error:
     if (rdata_alloc) {
         /* Free memory for rdata */
         for (i = 0; i < SPACE1_DIM1; i++)
-            HDfree(rdata[i]);
+            free(rdata[i]);
     } /* end if */
 
     H5E_BEGIN_TRY
@@ -2286,9 +2286,9 @@ test_refer_dtype(hid_t file)
     TESTING("reference datatype");
 
     /* Allocate write & read buffers */
-    if (NULL == (wbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
+    if (NULL == (wbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
         TEST_ERROR;
-    if (NULL == (rbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
+    if (NULL == (rbuf = (hobj_ref_t *)malloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
         TEST_ERROR;
 
     /* Create dataspace for datasets */
@@ -2393,8 +2393,8 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    free(wbuf);
+    free(rbuf);
 
     PASSED();
 
@@ -2402,9 +2402,9 @@ test_refer_dtype(hid_t file)
 
 error:
     if (wbuf)
-        HDfree(wbuf);
+        free(wbuf);
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     H5E_BEGIN_TRY
     {
@@ -2459,9 +2459,9 @@ test_refer_dtype2(hid_t file)
     TESTING("dataset region reference");
 
     /* Allocate write & read buffers */
-    if (NULL == (dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2)))
+    if (NULL == (dwbuf = (uint8_t *)malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2)))
         TEST_ERROR;
-    if (NULL == (drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2)))
+    if (NULL == (drbuf = (uint8_t *)calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2)))
         TEST_ERROR;
 
     /* Create dataspace for datasets */
@@ -2605,8 +2605,8 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Free memory buffers */
-    HDfree(dwbuf);
-    HDfree(drbuf);
+    free(dwbuf);
+    free(drbuf);
 
     PASSED();
     return 0;
@@ -2614,9 +2614,9 @@ test_refer_dtype2(hid_t file)
 error:
     /* Free memory buffers */
     if (dwbuf)
-        HDfree(dwbuf);
+        free(dwbuf);
     if (drbuf)
-        HDfree(drbuf);
+        free(drbuf);
 
     H5E_BEGIN_TRY
     {
@@ -2807,7 +2807,7 @@ test_bitfield_dtype(hid_t file)
     if ((ntype_size = H5Tget_size(native_type)) == 0)
         TEST_ERROR;
 
-    rbuf = HDmalloc((size_t)nelmts * ntype_size);
+    rbuf = malloc((size_t)nelmts * ntype_size);
 
     /* Read the data and compare them */
     if (H5Dread(dataset1, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
@@ -2831,7 +2831,7 @@ test_bitfield_dtype(hid_t file)
     if (H5Dclose(dataset1) < 0)
         TEST_ERROR;
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
 
     /* Open dataset2 again to check H5Tget_native_type */
     if ((dataset2 = H5Dopen2(file, DSET2_BITFIELD_NAME, H5P_DEFAULT)) < 0)

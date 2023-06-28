@@ -541,7 +541,7 @@ H5T__vlen_mem_seq_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
                             "application memory allocation routine failed for VL data")
         }    /* end if */
         else /* Default to system malloc */
-            if (NULL == (vl.p = HDmalloc(len)))
+            if (NULL == (vl.p = malloc(len)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
         /* Copy the data into the newly allocated buffer */
@@ -734,7 +734,7 @@ H5T__vlen_mem_str_write(H5VL_object_t H5_ATTR_UNUSED *file, const H5T_vlen_alloc
                         "application memory allocation routine failed for VL data")
     }    /* end if */
     else /* Default to system malloc */
-        if (NULL == (t = (char *)HDmalloc((seq_len + 1) * base_size)))
+        if (NULL == (t = (char *)malloc((seq_len + 1) * base_size)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
     /* 'write' the string into the buffer, with memcpy() */
@@ -1074,7 +1074,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                     if (free_func != NULL)
                         (*free_func)(vl->p, free_info);
                     else
-                        HDfree(vl->p);
+                        free(vl->p);
                 } /* end if */
             }
             else if (dt->shared->u.vlen.type == H5T_VLEN_STRING) {
@@ -1082,7 +1082,7 @@ H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info
                 if (free_func != NULL)
                     (*free_func)(*(char **)elem, free_info);
                 else
-                    HDfree(*(char **)elem);
+                    free(*(char **)elem);
             }
             else {
                 assert(0 && "Invalid VL type");

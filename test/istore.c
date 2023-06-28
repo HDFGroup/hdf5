@@ -273,9 +273,9 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
 
     HDsnprintf(s, sizeof(s), "istore extend: %s", dims);
     TESTING(s);
-    buf   = (uint8_t *)HDmalloc(nx * ny * nz);
-    check = (uint8_t *)HDmalloc(nx * ny * nz);
-    whole = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz);
+    buf   = (uint8_t *)malloc(nx * ny * nz);
+    check = (uint8_t *)malloc(nx * ny * nz);
+    whole = (uint8_t *)calloc((size_t)1, nx * ny * nz);
 
     whole_size[0] = nx;
     whole_size[1] = ny;
@@ -405,17 +405,17 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         TEST_ERROR;
 
     /* Free memory used */
-    HDfree(buf);
-    HDfree(check);
-    HDfree(whole);
+    free(buf);
+    free(check);
+    free(whole);
 
     PASSED();
     return SUCCEED;
 
 error:
-    HDfree(buf);
-    HDfree(check);
-    HDfree(whole);
+    free(buf);
+    free(check);
+    free(whole);
     return FAIL;
 }
 
@@ -473,7 +473,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         SKIPPED();
         return SUCCEED;
     }
-    buf = (uint8_t *)HDmalloc(nx * ny * nz);
+    buf = (uint8_t *)malloc(nx * ny * nz);
     HDmemset(buf, 128, nx * ny * nz);
 
     /* Set dimensions of dataset */
@@ -542,12 +542,12 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    HDfree(buf);
+    free(buf);
     PASSED();
     return SUCCEED;
 
 error:
-    HDfree(buf);
+    free(buf);
     return FAIL;
 }
 

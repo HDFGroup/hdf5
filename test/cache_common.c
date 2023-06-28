@@ -1848,70 +1848,69 @@ create_entry_arrays(void)
 
 {
     /* pico entries */
-    if (NULL == (pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (pico_entries = (test_entry_t *)calloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_pico_entries = (test_entry_t *)calloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* nano entries */
-    if (NULL == (nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (nano_entries = (test_entry_t *)calloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_nano_entries = (test_entry_t *)calloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* micro entries */
-    if (NULL == (micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (micro_entries = (test_entry_t *)calloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_micro_entries = (test_entry_t *)calloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* tiny entries */
-    if (NULL == (tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (tiny_entries = (test_entry_t *)calloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_tiny_entries = (test_entry_t *)calloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* small entries */
-    if (NULL == (small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (small_entries = (test_entry_t *)calloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_small_entries = (test_entry_t *)calloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* medium entries */
-    if (NULL == (medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (medium_entries = (test_entry_t *)calloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_medium_entries = (test_entry_t *)calloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* large entries */
-    if (NULL == (large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (large_entries = (test_entry_t *)calloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_large_entries = (test_entry_t *)calloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* huge entries */
-    if (NULL == (huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (huge_entries = (test_entry_t *)calloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_huge_entries = (test_entry_t *)calloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* monster entries */
-    if (NULL == (monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (monster_entries = (test_entry_t *)calloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_monster_entries = (test_entry_t *)calloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* variable entries */
-    if (NULL == (variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL ==
-        (orig_variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_variable_entries = (test_entry_t *)calloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     /* notify entries */
-    if (NULL == (notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (notify_entries = (test_entry_t *)calloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
         goto error;
-    if (NULL == (orig_notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+    if (NULL == (orig_notify_entries = (test_entry_t *)calloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
         goto error;
 
     entries[0]  = pico_entries;
@@ -1964,48 +1963,48 @@ free_entry_arrays(void)
 
 {
     /* pico entries */
-    HDfree(pico_entries);
-    HDfree(orig_pico_entries);
+    free(pico_entries);
+    free(orig_pico_entries);
 
     /* nano entries */
-    HDfree(nano_entries);
-    HDfree(orig_nano_entries);
+    free(nano_entries);
+    free(orig_nano_entries);
 
     /* micro entries */
-    HDfree(micro_entries);
-    HDfree(orig_micro_entries);
+    free(micro_entries);
+    free(orig_micro_entries);
 
     /* tiny entries */
-    HDfree(tiny_entries);
-    HDfree(orig_tiny_entries);
+    free(tiny_entries);
+    free(orig_tiny_entries);
 
     /* small entries */
-    HDfree(small_entries);
-    HDfree(orig_small_entries);
+    free(small_entries);
+    free(orig_small_entries);
 
     /* medium entries */
-    HDfree(medium_entries);
-    HDfree(orig_medium_entries);
+    free(medium_entries);
+    free(orig_medium_entries);
 
     /* large entries */
-    HDfree(large_entries);
-    HDfree(orig_large_entries);
+    free(large_entries);
+    free(orig_large_entries);
 
     /* huge entries */
-    HDfree(huge_entries);
-    HDfree(orig_huge_entries);
+    free(huge_entries);
+    free(orig_huge_entries);
 
     /* monster entries */
-    HDfree(monster_entries);
-    HDfree(orig_monster_entries);
+    free(monster_entries);
+    free(orig_monster_entries);
 
     /* variable entries */
-    HDfree(variable_entries);
-    HDfree(orig_variable_entries);
+    free(variable_entries);
+    free(orig_variable_entries);
 
     /* notify entries */
-    HDfree(notify_entries);
-    HDfree(orig_notify_entries);
+    free(notify_entries);
+    free(orig_notify_entries);
 
 } /* free_entry_arrays() */
 

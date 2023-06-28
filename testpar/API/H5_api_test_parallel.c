@@ -141,7 +141,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
     if (space_rank <= 0)
         goto error;
 
-    if (NULL == (dims = HDmalloc((size_t)space_rank * sizeof(hsize_t))))
+    if (NULL == (dims = malloc((size_t)space_rank * sizeof(hsize_t))))
         goto error;
     if (MAINPROCESS) {
         for (i = 0; i < (size_t)space_rank; i++) {
@@ -164,7 +164,7 @@ generate_random_parallel_dimensions(int space_rank, hsize_t **dims_out)
 
 error:
     if (dims)
-        HDfree(dims);
+        free(dims);
 
     return -1;
 }
@@ -445,7 +445,7 @@ main(int argc, char **argv)
     HDexit(EXIT_SUCCESS);
 
 error:
-    HDfree(vol_connector_string_copy);
+    free(vol_connector_string_copy);
 
     H5E_BEGIN_TRY
     {

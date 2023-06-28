@@ -1311,7 +1311,7 @@ process_input_file(char *inputname, int myrank, int size)
             index++;
         }
         linebuf[0] = 0;
-        HDfree(cmdline);
+        free(cmdline);
     }
 
     if (output_log_file) {
@@ -1568,7 +1568,7 @@ main(int argc, char *argv[])
 
     if (tool_selected && (args_byte_length > 0)) {
         pred_head = mfu_pred_new();
-        args_buf  = (char *)HDmalloc((size_t)(args_byte_length + pathlen_total));
+        args_buf  = (char *)malloc((size_t)(args_byte_length + pathlen_total));
     }
 
     /* filter files to only include hdf5 files */

@@ -271,16 +271,16 @@ main(void)
     fapl = h5_fileaccess();
 
     /* Initialize buffer and space */
-    if (NULL == (buf1_data = (int *)HDcalloc(N1X * N1Y, sizeof(int))))
+    if (NULL == (buf1_data = (int *)calloc(N1X * N1Y, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf1 = (int **)HDcalloc(N1X, sizeof(buf1_data))))
+    if (NULL == (buf1 = (int **)calloc(N1X, sizeof(buf1_data))))
         TEST_ERROR;
     for (i = 0; i < N1X; i++)
         buf1[i] = buf1_data + (i * N1Y);
 
-    if (NULL == (buf2_data = (int *)HDcalloc(N2X * N2Y, sizeof(int))))
+    if (NULL == (buf2_data = (int *)calloc(N2X * N2Y, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (buf2 = (int **)HDcalloc(N2X, sizeof(buf2_data))))
+    if (NULL == (buf2 = (int **)calloc(N2X, sizeof(buf2_data))))
         TEST_ERROR;
     for (i = 0; i < N2X; i++)
         buf2[i] = buf2_data + (i * N2Y);
@@ -345,19 +345,19 @@ main(void)
     printf("All extend tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    HDfree(buf1);
-    HDfree(buf1_data);
-    HDfree(buf2);
-    HDfree(buf2_data);
+    free(buf1);
+    free(buf1_data);
+    free(buf2);
+    free(buf2_data);
 
     HDexit(EXIT_SUCCESS);
 
 error:
 
-    HDfree(buf1);
-    HDfree(buf1_data);
-    HDfree(buf2);
-    HDfree(buf2_data);
+    free(buf1);
+    free(buf1_data);
+    free(buf2);
+    free(buf2_data);
 
     printf("*** One or more extend tests failed ***\n");
     HDexit(EXIT_FAILURE);

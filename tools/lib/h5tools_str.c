@@ -64,7 +64,7 @@ void
 h5tools_str_close(h5tools_str_t *str)
 {
     if (str && str->nalloc) {
-        HDfree(str->s);
+        free(str->s);
         HDmemset(str, 0, sizeof(h5tools_str_t));
     }
 }
@@ -150,7 +150,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
              */
             size_t newsize = MAX(str->len + (size_t)nchars + 1, 2 * str->nalloc);
             assert(newsize > str->nalloc); /*overflow*/
-            str->s = (char *)HDrealloc(str->s, newsize);
+            str->s = (char *)realloc(str->s, newsize);
             assert(str->s);
             str->nalloc = newsize;
         }
@@ -183,7 +183,7 @@ h5tools_str_reset(h5tools_str_t *str /*in,out*/)
 {
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
-        str->s      = (char *)HDmalloc(str->nalloc);
+        str->s      = (char *)malloc(str->nalloc);
         assert(str->s);
     }
 
@@ -253,7 +253,7 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
         size_t n = sizeof(_temp);
         if (str->len - start + 1 > n) {
             n    = str->len - start + 1;
-            temp = (char *)HDmalloc(n);
+            temp = (char *)malloc(n);
             assert(temp);
         }
 
@@ -269,7 +269,7 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
 
     /* Free the temp buffer if we allocated one */
     if (temp != _temp)
-        HDfree(temp);
+        free(temp);
 
     return str->s;
 }
@@ -472,7 +472,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
         nblocks    = (hsize_t)snblocks;
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)HDmalloc((size_t)alloc_size);
+        ptdata = (hsize_t *)malloc((size_t)alloc_size);
         H5Sget_select_hyper_blocklist(rspace, (hsize_t)0, nblocks, ptdata);
 
         for (u = 0; u < nblocks; u++) {
@@ -493,7 +493,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
             H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
 
-        HDfree(ptdata);
+        free(ptdata);
     } /* end if (nblocks > 0) */
 }
 
@@ -533,7 +533,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
         npoints    = (hsize_t)snpoints;
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        ptdata = (hsize_t *)HDmalloc((size_t)alloc_size);
+        ptdata = (hsize_t *)malloc((size_t)alloc_size);
         H5Sget_select_elem_pointlist(rspace, (hsize_t)0, npoints, ptdata);
 
         for (u = 0; u < npoints; u++) {
@@ -550,7 +550,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
             H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
 
-        HDfree(ptdata);
+        free(ptdata);
     } /* end if (npoints > 0) */
 }
 
@@ -1442,38 +1442,38 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     H5TOOLS_DEBUG("buf_size=%ld", buf_size);
     if (buf_size) {
-        char *file_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+        char *file_name = (char *)malloc(sizeof(char) * (size_t)buf_size + 1);
         if (H5Rget_file_name(ref_vp, file_name, (size_t)buf_size + 1) >= 0) {
             file_name[buf_size] = '\0';
             H5TOOLS_DEBUG("name=%s", file_name);
             h5tools_str_append(str, "%s", file_name);
         }
-        HDfree(file_name);
+        free(file_name);
     }
 
     buf_size = H5Rget_obj_name(ref_vp, H5P_DEFAULT, NULL, 0);
     H5TOOLS_DEBUG("buf_size=%ld", buf_size);
     if (buf_size) {
-        char *obj_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+        char *obj_name = (char *)malloc(sizeof(char) * (size_t)buf_size + 1);
         if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, obj_name, (size_t)buf_size + 1) >= 0) {
             obj_name[buf_size] = '\0';
             H5TOOLS_DEBUG("name=%s", obj_name);
             h5tools_str_append(str, "%s", obj_name);
         }
-        HDfree(obj_name);
+        free(obj_name);
     }
 
     if (H5Rget_type(ref_vp) == H5R_ATTR) {
         buf_size = H5Rget_attr_name(ref_vp, NULL, 0);
         H5TOOLS_DEBUG("buf_size=%ld", buf_size);
         if (buf_size) {
-            char *attr_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
+            char *attr_name = (char *)malloc(sizeof(char) * (size_t)buf_size + 1);
             if (H5Rget_attr_name(ref_vp, attr_name, (size_t)buf_size + 1) >= 0) {
                 attr_name[buf_size] = '\0';
                 H5TOOLS_DEBUG("name=%s", attr_name);
                 h5tools_str_append(str, "/%s", attr_name);
             }
-            HDfree(attr_name);
+            free(attr_name);
         }
     }
     h5tools_str_append(str, "\"");
@@ -1622,10 +1622,10 @@ h5tools_str_replace(const char *string, const char *substr, const char *replacem
         char *oldstr;
 
         oldstr = newstr;
-        newstr = (char *)HDmalloc(HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement) + 1);
+        newstr = (char *)malloc(HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement) + 1);
 
         if (newstr == NULL) {
-            HDfree(oldstr);
+            free(oldstr);
             return NULL;
         }
         HDmemcpy(newstr, oldstr, (size_t)(tok - oldstr));
@@ -1635,7 +1635,7 @@ h5tools_str_replace(const char *string, const char *substr, const char *replacem
         HDmemset(newstr + HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement), 0, 1);
         /* move back head right after the last replacement */
         head = newstr + (tok - oldstr) + HDstrlen(replacement);
-        HDfree(oldstr);
+        free(oldstr);
     }
 
     return newstr;

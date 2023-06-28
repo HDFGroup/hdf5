@@ -143,11 +143,11 @@ parse_command_line(int argc, const char *const *argv)
 
 done:
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
     if (ub_file)
-        HDfree(ub_file);
+        free(ub_file);
 
     return EXIT_FAILURE;
 }
@@ -281,13 +281,13 @@ main(int argc, char *argv[])
 
 done:
     if (input_file)
-        HDfree(input_file);
+        free(input_file);
 
     if (output_file)
-        HDfree(output_file);
+        free(output_file);
 
     if (ub_file) {
-        HDfree(ub_file);
+        free(ub_file);
     }
 
     leave(h5tools_getstatus());

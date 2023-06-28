@@ -6853,18 +6853,18 @@ main(int argc, char **argv)
         goto finish;
     }
 
-    if (NULL == (data = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
+    if (NULL == (data = malloc(NUM_DATA_ENTRIES * sizeof(*data)))) {
         printf("    Couldn't allocate data array.  Exiting.\n");
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
-    if (NULL == (data_index = HDmalloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
+    if (NULL == (data_index = malloc(NUM_DATA_ENTRIES * sizeof(*data_index)))) {
         printf("    Couldn't allocate data index array.  Exiting.\n");
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
-        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+        if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -6986,9 +6986,9 @@ main(int argc, char **argv)
 
 finish:
     if (data_index)
-        HDfree(data_index);
+        free(data_index);
     if (data)
-        HDfree(data);
+        free(data);
 
     /* make sure all processes are finished before final report, cleanup
      * and exit.

@@ -151,7 +151,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create a data buffer for dataset writes */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Create file */
@@ -546,7 +546,7 @@ generate_eoc_test_file(hid_t fapl_id)
     if (H5Pclose(fapl_copy_id) < 0)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return fid;
@@ -564,7 +564,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     H5_FAILED();
     return -1;
@@ -712,7 +712,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
         TEST_ERROR;
 
     /* Create the data buffer */
-    if (NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Record the number of cache entries */
@@ -771,7 +771,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     if (before != after || before == during)
         TEST_ERROR;
 
-    HDfree(data);
+    free(data);
 
     PASSED();
     return SUCCEED;

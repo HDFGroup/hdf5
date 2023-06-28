@@ -884,7 +884,7 @@ long_links(hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Construct very long file name */
-    if ((objname = (char *)HDmalloc((size_t)(MAX_NAME_LEN + 1))) == NULL)
+    if ((objname = (char *)malloc((size_t)(MAX_NAME_LEN + 1))) == NULL)
         TEST_ERROR;
     for (u = 0; u < MAX_NAME_LEN; u++)
         objname[u] = 'a';
@@ -912,7 +912,7 @@ long_links(hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Release memory */
-    HDfree(objname);
+    free(objname);
 
     PASSED();
     return SUCCEED;
@@ -925,7 +925,7 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY
-    HDfree(objname);
+    free(objname);
     return FAIL;
 }
 
@@ -6481,7 +6481,7 @@ link_iterate_deprec(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = max_compact * 2;
-    if (NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit)))
+    if (NULL == (visited = (hbool_t *)malloc(sizeof(hbool_t) * iter_info.max_visit)))
         TEST_ERROR;
     iter_info.visited = visited;
 
@@ -6653,7 +6653,7 @@ link_iterate_deprec(hid_t fapl)
 
     /* Free resources */
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return SUCCEED;
 
@@ -6668,7 +6668,7 @@ error:
     H5E_END_TRY
 
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return FAIL;
 } /* end link_iterate_deprec() */
@@ -6964,7 +6964,7 @@ link_iterate_old_deprec(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = CORDER_NLINKS;
-    if (NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit)))
+    if (NULL == (visited = (hbool_t *)malloc(sizeof(hbool_t) * iter_info.max_visit)))
         TEST_ERROR;
     iter_info.visited = visited;
 
@@ -7055,7 +7055,7 @@ link_iterate_old_deprec(hid_t fapl)
 
     /* Free resources */
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return SUCCEED;
 
@@ -7069,7 +7069,7 @@ error:
     H5E_END_TRY
 
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return FAIL;
 } /* end link_iterate_old_deprec() */
@@ -9242,13 +9242,13 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout");
 
     /* Set up file names and paths */
-    if (NULL == (filename1 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename1 = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename2 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename2 = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (tmpname = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (tmpname = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (cwdpath = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (cwdpath = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
 
     if ((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) ||
@@ -9256,9 +9256,9 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
         TEST_ERROR;
 
     /* Set up data array */
-    if (NULL == (points_data = (int *)HDcalloc(NUM40 * NUM40, sizeof(int))))
+    if (NULL == (points_data = (int *)calloc(NUM40 * NUM40, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (points = (int **)HDcalloc(NUM40, sizeof(points_data))))
+    if (NULL == (points = (int **)calloc(NUM40, sizeof(points_data))))
         TEST_ERROR;
     for (i = 0; i < NUM40; i++)
         points[i] = points_data + (i * NUM40);
@@ -9371,13 +9371,13 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if (H5Pclose(core_fapl) < 0)
         TEST_ERROR;
 
-    HDfree(points);
-    HDfree(points_data);
+    free(points);
+    free(points_data);
 
-    HDfree(filename1);
-    HDfree(filename2);
-    HDfree(tmpname);
-    HDfree(cwdpath);
+    free(filename1);
+    free(filename2);
+    free(tmpname);
+    free(cwdpath);
 
     PASSED();
     return SUCCEED;
@@ -9396,13 +9396,13 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(points);
-    HDfree(points_data);
+    free(points);
+    free(points_data);
 
-    HDfree(filename1);
-    HDfree(filename2);
-    HDfree(tmpname);
-    HDfree(cwdpath);
+    free(filename1);
+    free(filename2);
+    free(tmpname);
+    free(cwdpath);
 
     return FAIL;
 } /* end external_set_elink_fapl2() */
@@ -12476,27 +12476,27 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         return SUCCEED;
     }
 
-    if (NULL == (filename1 = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename1 = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename2a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename2a = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename2b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename2b = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename3a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename3a = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename3b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename3b = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename4a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename4a = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename4b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename4b = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename5a = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename5a = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (filename5b = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (filename5b = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (tmpname = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (tmpname = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (cwdpath = (char *)HDcalloc(NAME_BUF_SIZE, sizeof(char))))
+    if (NULL == (cwdpath = (char *)calloc(NAME_BUF_SIZE, sizeof(char))))
         TEST_ERROR;
 
     /* set up name for main file: "extlinks21A" */
@@ -12666,17 +12666,17 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     if (H5Fclose(file1) < 0)
         TEST_ERROR;
 
-    HDfree(filename1);
-    HDfree(filename2a);
-    HDfree(filename2b);
-    HDfree(filename3a);
-    HDfree(filename3b);
-    HDfree(filename4a);
-    HDfree(filename4b);
-    HDfree(filename5a);
-    HDfree(filename5b);
-    HDfree(tmpname);
-    HDfree(cwdpath);
+    free(filename1);
+    free(filename2a);
+    free(filename2b);
+    free(filename3a);
+    free(filename3b);
+    free(filename4a);
+    free(filename4b);
+    free(filename5a);
+    free(filename5b);
+    free(tmpname);
+    free(cwdpath);
 
     PASSED();
 
@@ -12697,17 +12697,17 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(filename1);
-    HDfree(filename2a);
-    HDfree(filename2b);
-    HDfree(filename3a);
-    HDfree(filename3b);
-    HDfree(filename4a);
-    HDfree(filename4b);
-    HDfree(filename5a);
-    HDfree(filename5b);
-    HDfree(tmpname);
-    HDfree(cwdpath);
+    free(filename1);
+    free(filename2a);
+    free(filename2b);
+    free(filename3a);
+    free(filename3b);
+    free(filename4a);
+    free(filename4b);
+    free(filename5a);
+    free(filename5b);
+    free(tmpname);
+    free(cwdpath);
 
     return FAIL;
 
@@ -19670,7 +19670,7 @@ link_iterate(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = max_compact * 2;
-    if (NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit)))
+    if (NULL == (visited = (hbool_t *)malloc(sizeof(hbool_t) * iter_info.max_visit)))
         TEST_ERROR;
     iter_info.visited = visited;
 
@@ -19842,7 +19842,7 @@ link_iterate(hid_t fapl)
 
     /* Free resources */
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return SUCCEED;
 
@@ -19857,7 +19857,7 @@ error:
     H5E_END_TRY
 
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return FAIL;
 } /* end link_iterate() */
@@ -20169,7 +20169,7 @@ link_iterate_old(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = CORDER_NLINKS;
-    if (NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit)))
+    if (NULL == (visited = (hbool_t *)malloc(sizeof(hbool_t) * iter_info.max_visit)))
         TEST_ERROR;
     iter_info.visited = visited;
 
@@ -20257,7 +20257,7 @@ link_iterate_old(hid_t fapl)
 
     /* Free resources */
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return SUCCEED;
 
@@ -20271,7 +20271,7 @@ error:
     H5E_END_TRY
 
     if (visited)
-        HDfree(visited);
+        free(visited);
 
     return FAIL;
 } /* end link_iterate_old() */
@@ -20428,7 +20428,7 @@ open_by_idx(hid_t fapl)
         TEST_ERROR;
 
     /* Allocate object token array */
-    if (NULL == (objno = (H5O_token_t *)HDmalloc(sizeof(H5O_token_t) * (max_compact * 2))))
+    if (NULL == (objno = (H5O_token_t *)malloc(sizeof(H5O_token_t) * (max_compact * 2))))
         TEST_ERROR;
 
     /* Create file to mount */
@@ -20635,7 +20635,7 @@ open_by_idx(hid_t fapl)
 
     /* Free resources */
     if (objno)
-        HDfree(objno);
+        free(objno);
 
     return SUCCEED;
 
@@ -20652,7 +20652,7 @@ error:
     H5E_END_TRY
 
     if (objno)
-        HDfree(objno);
+        free(objno);
 
     return FAIL;
 } /* end open_by_idx() */
@@ -21046,7 +21046,7 @@ object_info(hid_t fapl)
         TEST_ERROR;
 
     /* Allocate object token array */
-    if (NULL == (objno = (H5O_token_t *)HDmalloc(sizeof(H5O_token_t) * (max_compact * 2))))
+    if (NULL == (objno = (H5O_token_t *)malloc(sizeof(H5O_token_t) * (max_compact * 2))))
         TEST_ERROR;
 
     /* Create dataspace for attributes */
@@ -21288,7 +21288,7 @@ object_info(hid_t fapl)
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
     if (objno)
-        HDfree(objno);
+        free(objno);
 
     return SUCCEED;
 
@@ -21305,7 +21305,7 @@ error:
     H5E_END_TRY
 
     if (objno)
-        HDfree(objno);
+        free(objno);
 
     return FAIL;
 } /* end object_info() */

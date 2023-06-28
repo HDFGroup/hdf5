@@ -463,7 +463,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
     if ((ret = H5Pencode2(plist_id, NULL, &temp_size, H5P_DEFAULT)) < 0)
         assert(ret > 0);
 
-    temp_buf = (void *)HDmalloc(temp_size);
+    temp_buf = (void *)malloc(temp_size);
     assert(temp_buf);
 
     if ((ret = H5Pencode2(plist_id, temp_buf, &temp_size, H5P_DEFAULT)) < 0)
@@ -477,7 +477,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
 
     HDclose(fd);
 
-    HDfree(temp_buf);
+    free(temp_buf);
 
     return 1;
 }

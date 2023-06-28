@@ -688,10 +688,10 @@ done:
     if (va_started)
         va_end(ap);
     /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with HDfree
+     * with free
      */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_printf_stack() */

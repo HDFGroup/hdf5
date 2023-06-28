@@ -69,17 +69,17 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
 
     TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix");
 
-    if (NULL == (srcfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilename_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilename_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (vfilename2 = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (vfilename2 = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
-    if (NULL == (srcfilenamepct_map = HDmalloc(FILENAME_BUF_SIZE)))
+    if (NULL == (srcfilenamepct_map = malloc(FILENAME_BUF_SIZE)))
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, vfilename, FILENAME_BUF_SIZE);
@@ -273,23 +273,23 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
         TEST_ERROR;
     dcpl = -1;
 
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     PASSED();
     return 0;
 
 error:
-    HDfree(srcfilenamepct_map);
-    HDfree(srcfilenamepct);
-    HDfree(vfilename2);
-    HDfree(vfilename);
-    HDfree(srcfilename_map);
-    HDfree(srcfilename);
+    free(srcfilenamepct_map);
+    free(srcfilenamepct);
+    free(vfilename2);
+    free(vfilename);
+    free(srcfilename_map);
+    free(srcfilename);
 
     H5E_BEGIN_TRY
     {

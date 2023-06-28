@@ -322,7 +322,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hsize_t hs_start[1];
     hsize_t hs_size[1];
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
-    int    *buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     i, j;
     FILE   *out = HDfopen(DNAME, "w");
     hid_t   dcpl;
@@ -426,7 +426,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         goto error;
     if (H5Fclose(file) < 0)
         goto error;
-    HDfree(buf);
+    free(buf);
     HDfclose(out);
     PASSED();
     return 0;
@@ -443,7 +443,7 @@ error:
     }
     H5E_END_TRY
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (out)
         HDfclose(out);
     return 1;
@@ -471,7 +471,7 @@ reader(char *filename, hid_t fapl)
     char    ln[128], *s;
     hsize_t hs_offset[1];
     hsize_t hs_size[1] = {WRT_SIZE};
-    int    *buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf        = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
@@ -534,7 +534,7 @@ reader(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
-    HDfree(buf);
+    free(buf);
     HDfclose(script);
 
     return nerrors;
@@ -549,7 +549,7 @@ error:
     }
     H5E_END_TRY
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (script)
         HDfclose(script);
     return 1;

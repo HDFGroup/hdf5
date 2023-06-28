@@ -931,7 +931,7 @@ H5G__loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
     } /* end if */
 
 done:
-    HDfree(comment.s);
+    free(comment.s);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */

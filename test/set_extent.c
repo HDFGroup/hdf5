@@ -2270,11 +2270,11 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disable_
     char     filename[NAME_BUF_SIZE];
 
     /* Initialize large arrays */
-    if (NULL == (rbuf = HDcalloc(1, sizeof(*rbuf))))
+    if (NULL == (rbuf = calloc(1, sizeof(*rbuf))))
         TEST_ERROR;
-    if (NULL == (wbuf = HDcalloc(1, sizeof(*wbuf))))
+    if (NULL == (wbuf = calloc(1, sizeof(*wbuf))))
         TEST_ERROR;
-    if (NULL == (dim_log = HDcalloc(1, sizeof(*dim_log))))
+    if (NULL == (dim_log = calloc(1, sizeof(*dim_log))))
         TEST_ERROR;
 
     /* Create a new file */
@@ -2417,9 +2417,9 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disable_
     if (H5Fclose(file) < 0)
         TEST_ERROR;
 
-    HDfree(rbuf);
-    HDfree(wbuf);
-    HDfree(dim_log);
+    free(rbuf);
+    free(wbuf);
+    free(dim_log);
 
     return 0;
 
@@ -2434,9 +2434,9 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(rbuf);
-    HDfree(wbuf);
-    HDfree(dim_log);
+    free(rbuf);
+    free(wbuf);
+    free(dim_log);
 
     return -1;
 } /* end test_random_rank4 */
@@ -2492,11 +2492,11 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     char     filename[NAME_BUF_SIZE];
 
     /* Initialize large arrays */
-    if (NULL == (rbuf = HDcalloc(1, sizeof(*rbuf))))
+    if (NULL == (rbuf = calloc(1, sizeof(*rbuf))))
         TEST_ERROR;
-    if (NULL == (wbuf = HDcalloc(1, sizeof(*wbuf))))
+    if (NULL == (wbuf = calloc(1, sizeof(*wbuf))))
         TEST_ERROR;
-    if (NULL == (dim_log = HDcalloc(1, sizeof(*dim_log))))
+    if (NULL == (dim_log = calloc(1, sizeof(*dim_log))))
         TEST_ERROR;
 
     /* Initialize fill value buffers so they aren't freed in case of an error */
@@ -2519,7 +2519,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
             for (k = 0; k < dims[2]; k++)
                 for (l = 0; l < dims[3]; l++) {
                     wbuf->arr[i][j][k][l].len = 2;
-                    if (NULL == (wbuf->arr[i][j][k][l].p = HDmalloc(2 * sizeof(int))))
+                    if (NULL == (wbuf->arr[i][j][k][l].p = malloc(2 * sizeof(int))))
                         TEST_ERROR;
                 } /* end for */
 
@@ -2562,7 +2562,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     /* Create VL fill value, if requested */
     if (do_fillvalue) {
         fill_value.len = 2;
-        if (NULL == (fill_value.p = HDmalloc(2 * sizeof(int))))
+        if (NULL == (fill_value.p = malloc(2 * sizeof(int))))
             TEST_ERROR;
         ((int *)fill_value.p)[0] = 1;
         ((int *)fill_value.p)[1] = 2;
@@ -2688,7 +2688,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
         TEST_ERROR;
     if (H5Treclaim(type, mspace, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR;
-    HDfree(fill_value.p);
+    free(fill_value.p);
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
     if (H5Pclose(my_dcpl) < 0)
@@ -2700,9 +2700,9 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     if (H5Fclose(file) < 0)
         TEST_ERROR;
 
-    HDfree(rbuf);
-    HDfree(wbuf);
-    HDfree(dim_log);
+    free(rbuf);
+    free(wbuf);
+    free(dim_log);
 
     return 0;
 
@@ -2714,12 +2714,12 @@ error:
                 for (k = 0; k < dims[2]; k++)
                     for (l = 0; l < dims[3]; l++) {
                         if (rbuf->arr[i][j][k][l].p)
-                            HDfree(rbuf->arr[i][j][k][l].p);
+                            free(rbuf->arr[i][j][k][l].p);
                         if (wbuf->arr[i][j][k][l].p)
-                            HDfree(wbuf->arr[i][j][k][l].p);
+                            free(wbuf->arr[i][j][k][l].p);
                     } /* end for */
         if (fill_value.p)
-            HDfree(fill_value.p);
+            free(fill_value.p);
         H5Sclose(fspace);
         H5Sclose(mspace);
         H5Pclose(dcpl);
@@ -2729,9 +2729,9 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(rbuf);
-    HDfree(wbuf);
-    HDfree(dim_log);
+    free(rbuf);
+    free(wbuf);
+    free(dim_log);
 
     return -1;
 } /* end test_random_rank4_vl */

@@ -520,11 +520,11 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             assert(H5L_TYPE_SOFT == lnk_info.type);
             assert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = (char *)malloc(lnk_info.u.val_size);
 
             if (!slinkval) {
                 pass         = FALSE;
-                failure_mssg = "vrfy_ns_grp_c: HDmalloc of slinkval failed";
+                failure_mssg = "vrfy_ns_grp_c: malloc of slinkval failed";
             }
             assert(slinkval);
 
@@ -540,7 +540,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             assert(ret >= 0);
             assert(0 == HDstrcmp(slinkval, group_name));
 
-            HDfree(slinkval);
+            free(slinkval);
         } /* end if */
         else if (1 == (u % 3)) {
             H5O_info2_t root_oinfo;
@@ -586,11 +586,11 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             }
             assert(H5L_TYPE_EXTERNAL == lnk_info.type);
 
-            elinkval = HDmalloc(lnk_info.u.val_size);
+            elinkval = malloc(lnk_info.u.val_size);
 
             if (!elinkval) {
                 pass         = FALSE;
-                failure_mssg = "vrfy_ns_grp_c: HDmalloc of elinkval failed.";
+                failure_mssg = "vrfy_ns_grp_c: malloc of elinkval failed.";
             }
             assert(elinkval);
 
@@ -618,7 +618,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             assert(0 == HDstrcmp(file, "external.h5"));
             assert(0 == HDstrcmp(path, "/ext"));
 
-            HDfree(elinkval);
+            free(elinkval);
         } /* end else */
 
         u++;
@@ -929,11 +929,11 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             assert(H5L_TYPE_SOFT == lnk_info.type);
             assert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = (char *)malloc(lnk_info.u.val_size);
 
             if (!slinkval) {
                 pass         = FALSE;
-                failure_mssg = "vrfy_ns_grp_d: HDmalloc of slinkval failed";
+                failure_mssg = "vrfy_ns_grp_d: malloc of slinkval failed";
             }
             assert(slinkval);
 
@@ -949,7 +949,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             assert(ret >= 0);
             assert(0 == HDstrcmp(slinkval, group_name));
 
-            HDfree(slinkval);
+            free(slinkval);
         } /* end if */
         else if (1 == (u % 3)) {
             H5O_info2_t root_oinfo;
@@ -994,11 +994,11 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             }
             assert(H5L_TYPE_EXTERNAL == lnk_info.type);
 
-            elinkval = HDmalloc(lnk_info.u.val_size);
+            elinkval = malloc(lnk_info.u.val_size);
 
             if (!elinkval) {
                 pass         = FALSE;
-                failure_mssg = "vrfy_ns_grp_d: HDmalloc of elinkval failed.";
+                failure_mssg = "vrfy_ns_grp_d: malloc of elinkval failed.";
             }
             assert(elinkval);
 
@@ -1026,7 +1026,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             assert(0 == HDstrcmp(file, "external.h5"));
             assert(0 == HDstrcmp(path, "/ext"));
 
-            HDfree(elinkval);
+            free(elinkval);
         } /* end else */
 
         u++;
@@ -1520,11 +1520,11 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             assert(H5L_TYPE_SOFT == lnk_info.type);
             assert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = (char *)malloc(lnk_info.u.val_size);
 
             if (!slinkval) {
                 pass         = FALSE;
-                failure_mssg = "vrfy_os_grp_n: HDmalloc of slinkval failed";
+                failure_mssg = "vrfy_os_grp_n: malloc of slinkval failed";
             }
             assert(slinkval);
 
@@ -1541,7 +1541,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             assert(ret >= 0);
             assert(0 == HDstrcmp(slinkval, group_name));
 
-            HDfree(slinkval);
+            free(slinkval);
         } /* end if */
         else {
             H5O_info2_t root_oinfo;
@@ -1652,11 +1652,11 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+        wdata = (int *)malloc(sizeof(int) * DSET_DIMS);
 
         if (!wdata) {
             pass         = FALSE;
-            failure_mssg = "ds_ctg_i: HDmalloc of wdata failed.";
+            failure_mssg = "ds_ctg_i: malloc of wdata failed.";
         }
         assert(wdata);
     }
@@ -1674,7 +1674,7 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
         assert(ret >= 0);
     }
 
-    HDfree(wdata);
+    free(wdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -1863,11 +1863,11 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+        rdata = (int *)malloc(sizeof(int) * DSET_DIMS);
 
         if (!rdata) {
             pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: HDmalloc of rdata failed.";
+            failure_mssg = "vrfy_ds_ctg_i: malloc of rdata failed.";
         }
         assert(rdata);
     }
@@ -1892,7 +1892,7 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
     } /* end if */
 
-    HDfree(rdata);
+    free(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -1998,11 +1998,11 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+        wdata = (int *)malloc(sizeof(int) * DSET_DIMS);
 
         if (!wdata) {
             pass         = FALSE;
-            failure_mssg = "ds_chk_i: HDmalloc of wdata failed.";
+            failure_mssg = "ds_chk_i: malloc of wdata failed.";
         }
         assert(wdata);
     }
@@ -2017,7 +2017,7 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
             failure_mssg = "ds_chk_i: H5Dwrite() failed.";
         }
         assert(ret >= 0);
-        HDfree(wdata);
+        free(wdata);
     } /* end if */
 
     if (pass) {
@@ -2222,11 +2222,11 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+        rdata = (int *)malloc(sizeof(int) * DSET_DIMS);
 
         if (!rdata) {
             pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: HDmalloc of rdata failed.";
+            failure_mssg = "vrfy_ds_chk_i: malloc of rdata failed.";
         }
         assert(rdata);
     }
@@ -2251,7 +2251,7 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
     } /* end if */
 
-    HDfree(rdata);
+    free(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -2356,11 +2356,11 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
+        wdata = (int *)malloc(sizeof(int) * DSET_COMPACT_DIMS);
 
         if (!wdata) {
             pass         = FALSE;
-            failure_mssg = "ds_cpt_i: HDmalloc of wdata failed.";
+            failure_mssg = "ds_cpt_i: malloc of wdata failed.";
         }
         assert(wdata);
     }
@@ -2377,7 +2377,7 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         assert(ret >= 0);
 
-        HDfree(wdata);
+        free(wdata);
     } /* end if */
 
     if (pass) {
@@ -2562,11 +2562,11 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
+        rdata = (int *)malloc(sizeof(int) * DSET_COMPACT_DIMS);
 
         if (!rdata) {
             pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: HDmalloc of rdata failed.";
+            failure_mssg = "vrfy_ds_cpt_i: malloc of rdata failed.";
         }
         assert(rdata);
     }
@@ -2591,7 +2591,7 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
         }
     } /* end if */
 
-    HDfree(rdata);
+    free(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -2666,11 +2666,11 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        wdata = (hvl_t *)HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
+        wdata = (hvl_t *)malloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
 
         if (!wdata) {
             pass         = FALSE;
-            failure_mssg = "ds_ctg_v: HDmalloc of wdata failed.";
+            failure_mssg = "ds_ctg_v: malloc of wdata failed.";
         }
         assert(wdata);
     }
@@ -2682,11 +2682,11 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
             unsigned v;
 
             len   = (u % 10) + 1;
-            tdata = (int *)HDmalloc(sizeof(int) * len);
+            tdata = (int *)malloc(sizeof(int) * len);
 
             if (!tdata) {
                 pass         = FALSE;
-                failure_mssg = "ds_ctg_v: HDmalloc of tdata failed.";
+                failure_mssg = "ds_ctg_v: malloc of tdata failed.";
                 break;
             }
             assert(tdata);
@@ -2718,7 +2718,7 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
         }
         assert(ret >= 0);
 
-        HDfree(wdata);
+        free(wdata);
     } /* end if */
 
     if (pass) {
@@ -2929,11 +2929,11 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     }
 
     if ((pass) && (write_data)) {
-        rdata = (hvl_t *)HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
+        rdata = (hvl_t *)malloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
 
         if (!rdata) {
             pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: HDmalloc of rdata failed.";
+            failure_mssg = "vrfy_ds_ctg_v: malloc of rdata failed.";
         }
         assert(rdata);
     }
@@ -2983,7 +2983,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
         assert(ret >= 0);
     } /* end if */
 
-    HDfree(rdata);
+    free(rdata);
 
     if (pass) {
         ret = H5Sclose(sid);

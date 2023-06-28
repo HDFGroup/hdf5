@@ -83,7 +83,7 @@ test_mdset_location(hid_t fapl_id)
     if ((file_id2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    if (NULL == (buf = (int *)HDcalloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
+    if (NULL == (buf = (int *)calloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
         TEST_ERROR;
 
     /* Generate memory dataspace */
@@ -224,13 +224,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         dcpl_id[i] = -1;
 
     /* Allocate buffers */
-    if (NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (rbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (erbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (wbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
-    if (NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
+    if (NULL == (efbuf = (unsigned *)malloc(buf_size)))
         TEST_ERROR;
 
     /* Initialize buffer indices */

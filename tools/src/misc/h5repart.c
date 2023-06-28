@@ -226,9 +226,9 @@ main(int argc, char *argv[])
     }     /* end while */
 
     /* allocate names */
-    if (NULL == (src_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
+    if (NULL == (src_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
         HDexit(EXIT_FAILURE);
-    if (NULL == (dst_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
+    if (NULL == (dst_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
         HDexit(EXIT_FAILURE);
 
     /*
@@ -275,7 +275,7 @@ main(int argc, char *argv[])
         usage(prog_name);
 
     /* Now the real work, split the file */
-    buf = (char *)HDmalloc(blk_size);
+    buf = (char *)malloc(blk_size);
     while (src_offset < src_size) {
 
         /* Read a block.  The amount to read is the minimum of:
@@ -498,9 +498,9 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* Free resources and return */
-    HDfree(src_name);
-    HDfree(dst_name);
-    HDfree(buf);
+    free(src_name);
+    free(dst_name);
+    free(buf);
     return EXIT_SUCCESS;
 } /* end main */
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")

@@ -1007,7 +1007,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len  = HDstrcspn(valp, ";");
             next = &valp[len];
-            if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
+            if (NULL == (key_val = (char *)calloc(1, len + 1)))
                 return -1;
 
             /* increment the next pointer past the terminating semicolon */
@@ -1056,10 +1056,10 @@ h5_set_info_object(void)
             }
 
             valp = next;
-            HDfree(key_val);
+            free(key_val);
         } while (next && *next);
 
-        HDfree(envp);
+        free(envp);
     }
 
     return ret_value;
@@ -1387,16 +1387,16 @@ getenv_all(MPI_Comm comm, int root, const char *name)
             MPI_Bcast(&len, 1, MPI_INT, root, comm);
             if (len >= 0) {
                 if (env == NULL)
-                    env = (char *)HDmalloc((size_t)len + 1);
+                    env = (char *)malloc((size_t)len + 1);
                 else if (HDstrlen(env) < (size_t)len)
-                    env = (char *)HDrealloc(env, (size_t)len + 1);
+                    env = (char *)realloc(env, (size_t)len + 1);
 
                 MPI_Bcast(env, len, MPI_CHAR, root, comm);
                 env[len] = '\0';
             }
             else {
                 if (env)
-                    HDfree(env);
+                    free(env);
                 env = NULL;
             }
         }
@@ -1407,7 +1407,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     else {
         /* use original getenv */
         if (env)
-            HDfree(env);
+            free(env);
         env = HDgetenv(name);
     } /* end if */
 
@@ -1446,7 +1446,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Allocate copy buffer */
-    if (NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
+    if (NULL == (buf = calloc((size_t)1, (size_t)READ_BUF_SIZE)))
         goto error;
 
     /* Copy old file into temporary file */
@@ -1467,7 +1467,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
         goto error;
 
     /* Release memory */
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -1477,7 +1477,7 @@ error:
         HDclose(fd_old);
     if (fd_new > 0)
         HDclose(fd_new);
-    HDfree(buf);
+    free(buf);
     return -1;
 } /* end h5_make_local_copy() */
 
@@ -1808,7 +1808,7 @@ h5_get_dummy_vfd_class(void)
     H5FD_class_t *vfd_class = NULL; /* Dummy VFD that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vfd_class = (H5FD_class_t *)HDmalloc(sizeof(H5FD_class_t))))
+    if (NULL == (vfd_class = (H5FD_class_t *)malloc(sizeof(H5FD_class_t))))
         TEST_ERROR;
 
     /* Copy the dummy VFD */
@@ -1818,7 +1818,7 @@ h5_get_dummy_vfd_class(void)
 
 error:
     if (vfd_class)
-        HDfree(vfd_class);
+        free(vfd_class);
     return NULL;
 } /* h5_get_dummy_vfd_class */
 
@@ -1848,7 +1848,7 @@ h5_get_dummy_vol_class(void)
     H5VL_class_t *vol_class = NULL; /* Dummy VOL class that will be returned */
 
     /* Create the class and initialize everything to zero/NULL */
-    if (NULL == (vol_class = (H5VL_class_t *)HDcalloc((size_t)1, sizeof(H5VL_class_t))))
+    if (NULL == (vol_class = (H5VL_class_t *)calloc((size_t)1, sizeof(H5VL_class_t))))
         TEST_ERROR;
 
     /* Fill in the minimum parameters to make a VOL connector class that
@@ -1861,7 +1861,7 @@ h5_get_dummy_vol_class(void)
 
 error:
     if (vol_class)
-        HDfree(vol_class);
+        free(vol_class);
     return NULL;
 } /* h5_get_dummy_vol_class */
 
@@ -2062,7 +2062,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     read_size = MIN(fsize, max_buf);
-    dup_buf   = HDmalloc(read_size);
+    dup_buf   = malloc(read_size);
     if (NULL == dup_buf) {
         ret_value = -1;
         goto done;
@@ -2084,7 +2084,7 @@ done:
     if (dest_ptr != NULL)
         HDfclose(dest_ptr);
     if (dup_buf != NULL)
-        HDfree(dup_buf);
+        free(dup_buf);
     return ret_value;
 } /* end h5_duplicate_file_by_bytes() */
 

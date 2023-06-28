@@ -216,7 +216,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->exclude_path = 1;
 
                 /* create linked list of excluding objects */
-                if ((exclude_node = (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) ==
+                if ((exclude_node = (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) ==
                     NULL) {
                     printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
@@ -249,7 +249,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
                 /* create linked list of excluding objects */
                 if ((exclude_attr_node =
-                         (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
+                         (struct exclude_path_list *)malloc(sizeof(struct exclude_path_list))) == NULL) {
                     printf("Error: lack of memory!\n");
                     h5diff_exit(EXIT_FAILURE);
                 }

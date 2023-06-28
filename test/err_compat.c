@@ -469,16 +469,16 @@ main(void)
     fapl_id = h5_fileaccess();
 
     /* Set up data arrays */
-    if (NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (ipoints2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+    if (NULL == (ipoints2 = (int **)calloc(DIM0, sizeof(ipoints2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         ipoints2[i] = ipoints2_data + (i * DIM1);
 
-    if (NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+    if (NULL == (icheck2_data = (int *)calloc(DIM0 * DIM1, sizeof(int))))
         TEST_ERROR;
-    if (NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+    if (NULL == (icheck2 = (int **)calloc(DIM0, sizeof(icheck2_data))))
         TEST_ERROR;
     for (i = 0; i < DIM0; i++)
         icheck2[i] = icheck2_data + (i * DIM1);
@@ -518,19 +518,19 @@ main(void)
         TEST_ERROR;
     h5_clean_files(FILENAME, fapl_id);
 
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
     printf("All error API tests passed.\n");
     return EXIT_SUCCESS;
 
 error:
-    HDfree(ipoints2);
-    HDfree(ipoints2_data);
-    HDfree(icheck2);
-    HDfree(icheck2_data);
+    free(ipoints2);
+    free(ipoints2_data);
+    free(icheck2);
+    free(icheck2_data);
 
     H5E_BEGIN_TRY
     {
