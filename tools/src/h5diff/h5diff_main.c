@@ -124,5 +124,5 @@ h5diff_exit(int status)
 {
     h5tools_close();
 
-    HDexit(status);
+    exit(status);
 }

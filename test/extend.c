@@ -339,7 +339,7 @@ main(void)
 
     if (nerrors) {
         printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     printf("All extend tests passed.\n");
@@ -350,7 +350,7 @@ main(void)
     free(buf2);
     free(buf2_data);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
@@ -360,5 +360,5 @@ error:
     free(buf2_data);
 
     printf("*** One or more extend tests failed ***\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

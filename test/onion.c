@@ -4925,7 +4925,7 @@ main(void)
     if ((0 != HDstrcmp(env_h5_drvr, "nomatch")) && (0 != HDstrcmp(env_h5_drvr, "sec2"))) {
         SKIPPED();
         HDputs("Onion VFD test skipped due to non-sec2 default VFD");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* Initialize */

@@ -2509,12 +2509,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail */
@@ -2525,13 +2525,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -2591,84 +2591,84 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         /* close unused read end for in_pdf */
         if (HDclose(in_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should succeed in opening the test file 2 times */
         if ((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* open "dataset" 2 times */
         if ((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" via child_did1 */
         rdata = 0;
         if (H5Dread(child_did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 88)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Notify parent process */
         child_notify = 2;
         if (HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 3) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Refresh "dataset" via child_did2 */
         if (H5Drefresh(child_did2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" child_did2 */
         rdata = 0;
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from "dataset" child_did1 */
         rdata = 0;
         if (H5Dread(child_did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (rdata != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the dataset */
         if (H5Dclose(child_did1))
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Dclose(child_did2))
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the file */
         if (H5Fclose(child_fid1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Fclose(child_fid2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (HDclose(in_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -2780,12 +2780,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2795,9 +2795,9 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -2856,12 +2856,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2871,13 +2871,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -2936,12 +2936,12 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Should fail in opening the test file */
@@ -2951,13 +2951,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
         H5E_END_TRY
         if (fid >= 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* close unused read end for out_pdf */
@@ -5245,12 +5245,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5262,13 +5262,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5322,12 +5322,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -5339,13 +5339,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5400,12 +5400,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -5417,13 +5417,13 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -5478,12 +5478,12 @@ test_file_lock_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Opens the test file */
@@ -5497,16 +5497,16 @@ test_file_lock_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             /* Close the file */
             if (H5Fclose(child_fid) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
             /* Close the pipe */
             if (HDclose(out_pdf[0]) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         } /* end if */
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* close unused read end for out_pdf */
@@ -5642,12 +5642,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5659,13 +5659,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5720,12 +5720,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5737,13 +5737,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5798,12 +5798,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5815,13 +5815,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5875,12 +5875,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5892,13 +5892,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -5952,12 +5952,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -5971,14 +5971,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR;
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6032,12 +6032,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6049,13 +6049,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6110,12 +6110,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6127,13 +6127,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6188,12 +6188,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6205,13 +6205,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6266,12 +6266,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6285,14 +6285,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR;
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6347,12 +6347,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6363,14 +6363,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR;
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6425,12 +6425,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6442,13 +6442,13 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Should fail */
         if (child_fid == FAIL)
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Close unused read end for out_pdf */
@@ -6503,12 +6503,12 @@ test_file_lock_swmr_concur(hid_t in_fapl)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open the test file */
@@ -6522,14 +6522,14 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         if (child_fid >= 0) {
             if (H5Fclose(child_fid) < 0)
                 FAIL_STACK_ERROR;
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* close unused read end for out_pdf */
@@ -6685,12 +6685,12 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1) {
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
         /* Open and close the test file */
@@ -6703,12 +6703,12 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
         /* Close the pipe */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if (H5I_INVALID_HID == child_fid || FAIL == ret)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         else
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
     } /* end child process work */
 
     /* close unused read end for out_pdf */
@@ -7186,96 +7186,96 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
 
         /* Close unused write end for out_pdf */
         if (HDclose(out_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* close unused read end for in_pdf */
         if (HDclose(in_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 1)
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
         /* Open the file 2 times */
         if ((child_fid1 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if ((child_fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Open the dataset 2 times */
         if ((child_did1 = H5Dopen2(child_fid1, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if ((child_did2 = H5Dopen2(child_fid2, "dataset", H5P_DEFAULT)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Get the dataset's dataspace via did1 */
         if ((child_sid = H5Dget_space(child_did1)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (tdims[0] != 1)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from the dataset via did2 */
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Verify the data is correct */
         if (rbuf[0] != 99)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Notify parent process */
         child_notify = 2;
         if (HDwrite(in_pdf[1], &child_notify, sizeof(int)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Wait for notification from parent process */
         while (child_notify != 3)
             if (HDread(out_pdf[0], &child_notify, sizeof(int)) < 0)
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
 
         /* Refresh dataset via did1 */
         if (H5Drefresh(child_did1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Get the dataset's dataspace and verify */
         if ((child_sid = H5Dget_space(child_did1)) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Sget_simple_extent_dims(child_sid, tdims, NULL) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         if (tdims[0] != 2)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Read from the dataset */
         if (H5Dread(child_did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Verify the data is correct */
         if (rbuf[0] != 100 || rbuf[1] != 100)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the 2 datasets */
         if (H5Dclose(child_did1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Dclose(child_did2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the 2 files */
         if (H5Fclose(child_fid1) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (H5Fclose(child_fid2) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
         /* Close the pipes */
         if (HDclose(out_pdf[0]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         if (HDclose(in_pdf[1]) < 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
 
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* Close unused read end for out_pdf */

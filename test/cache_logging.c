@@ -171,10 +171,10 @@ main(void)
 
     if (nerrors) {
         printf("***** %d Metadata cache logging TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All Metadata Cache Logging tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

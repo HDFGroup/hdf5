@@ -1078,17 +1078,17 @@ main(int argc, char **argv)
 
     if ((MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: Unable to initialize MPI\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_size(MPI_COMM_WORLD, &mpi_size)) != MPI_SUCCESS) {
         fprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     H5open();
@@ -1122,7 +1122,7 @@ main(int argc, char **argv)
     if ((MPI_Comm_split(MPI_COMM_WORLD, which_group, 0, &group_comm)) != MPI_SUCCESS) {
 
         fprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* ------  Generate all files ------ */

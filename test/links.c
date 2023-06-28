@@ -22942,7 +22942,7 @@ main(void)
     /* Results */
     if (nerrors) {
         printf("***** %d LINK TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     printf("All link tests passed.\n");
 
@@ -22954,9 +22954,9 @@ main(void)
     HDrmdir(TMPDIR);
     HDrmdir(TMPDIR2);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

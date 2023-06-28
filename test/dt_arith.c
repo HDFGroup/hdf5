@@ -414,7 +414,7 @@ fpe_handler(int H5_ATTR_UNUSED signo)
     HDputs("    Remaining tests could not be run.");
     HDputs("    Please turn off SIGFPE on overflows and try again.");
 #endif
-    HDexit(255);
+    exit(255);
 }
 
 /*-------------------------------------------------------------------------
@@ -3305,9 +3305,9 @@ done:
     HDfflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
-        HDexit(MIN((int)fails_all_tests, 254));
+        exit(MIN((int)fails_all_tests, 254));
     else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     assert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -3334,9 +3334,9 @@ error:
     HDfflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
-        HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
+        exit(MIN(MAX((int)fails_all_tests, 1), 254));
     else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     assert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -5230,7 +5230,7 @@ main(void)
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     printf("All data type tests passed.\n");
     return 0;

@@ -73,11 +73,11 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
     /* Sanity checking */
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
         printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n", TheDescr, MAXTESTDESC);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     if (HDstrlen(TheName) >= MAXTESTNAME) {
         printf("Test name too long, increase MAXTESTNAME(%d).\n", MAXTESTNAME);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Check for increasing the Test array size */
@@ -89,7 +89,7 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
             printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
                    newAlloc);
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         /* Update info */
@@ -230,7 +230,7 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
         else if (((HDstrcmp(*argv, "-exclude") == 0) || (HDstrcmp(*argv, "-x") == 0))) {
@@ -241,7 +241,7 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
         else if (((HDstrcmp(*argv, "-begin") == 0) || (HDstrcmp(*argv, "-b") == 0))) {
@@ -252,7 +252,7 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
         else if (((HDstrcmp(*argv, "-only") == 0) || (HDstrcmp(*argv, "-o") == 0))) {
@@ -272,7 +272,7 @@ TestParseCmdLine(int argc, char *argv[])
             }
             else {
                 TestUsage();
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
         else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
@@ -281,7 +281,7 @@ TestParseCmdLine(int argc, char *argv[])
             enable_error_stack = 1;
         else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
             TestUsage();
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
         else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
             SetTestNoCleanup();
@@ -295,7 +295,7 @@ TestParseCmdLine(int argc, char *argv[])
     if (NULL != TestPrivateParser) {
         ret_code = TestPrivateParser(argc + 1, argv - 1);
         if (ret_code != 0)
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
     }
 }
 

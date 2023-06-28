@@ -416,11 +416,11 @@ main(void)
     if (nerrors)
         TEST_ERROR;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 } /* end main() */

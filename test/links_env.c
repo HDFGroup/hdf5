@@ -161,7 +161,7 @@ main(void)
     /* Splitter VFD has issues with external links */
     if (!HDstrcmp(env_h5_drvr, "splitter")) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     h5_reset();
@@ -184,16 +184,16 @@ main(void)
     if (nerrors) {
         printf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n", nerrors,
                1 == nerrors ? "" : "s");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     printf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
 
     /* clean up tmp_links_env directory created by external link tests */
     HDrmdir(TMPDIR);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("*** TESTS FAILED ***");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

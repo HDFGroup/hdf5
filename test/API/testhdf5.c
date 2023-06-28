@@ -722,10 +722,10 @@ main(int argc, char *argv[])
     /* No need to print anything since PerformTests() already does. */
     if (nerrors /* GetTestNumErrs() */ > 0) {
         printf("** HDF5 tests failed with %d errors **\n", nerrors);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     else {
         printf("** HDF5 tests ran successfully **\n");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 } /* end main() */

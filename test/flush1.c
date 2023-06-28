@@ -323,7 +323,7 @@ main(void)
         STACK_ERROR;
 
     /* _exit() is necessary since we want a hard close of the library */
-    HD_exit(EXIT_SUCCESS);
+    _exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -332,5 +332,5 @@ error:
     }
     H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

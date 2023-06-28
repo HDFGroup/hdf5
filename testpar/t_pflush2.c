@@ -167,7 +167,7 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
@@ -223,11 +223,11 @@ main(int argc, char *argv[])
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     if (data_g)
         free(data_g);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

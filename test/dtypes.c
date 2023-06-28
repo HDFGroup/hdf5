@@ -8890,7 +8890,7 @@ main(void)
 
     if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0) {
         printf("Can't check if driver is parallel-enabled\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (ALIGNMENT)
@@ -8963,7 +8963,7 @@ main(void)
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All datatype tests passed.\n");

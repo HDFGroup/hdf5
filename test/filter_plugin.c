@@ -1619,7 +1619,7 @@ main(void)
 
     printf("All plugin tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -1638,5 +1638,5 @@ error:
 
     nerrors = MAX(1, nerrors);
     printf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

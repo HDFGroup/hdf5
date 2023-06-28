@@ -600,10 +600,10 @@ main(void)
     fflush(stderr);
 
     /* Not going through library closing by calling _exit(0) with success */
-    HD_exit(0);
+    _exit(0);
 
 error:
 
     /* Exit with failure */
-    HD_exit(1);
+    _exit(1);
 }

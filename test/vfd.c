@@ -5954,7 +5954,7 @@ main(void)
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr) {
         printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     h5_reset();

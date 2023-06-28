@@ -69,7 +69,7 @@ leave(int ret)
             error_msg("Could not close file access property list\n");
 
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 } /* end leave() */
 
 /*-------------------------------------------------------------------------

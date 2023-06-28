@@ -256,12 +256,12 @@ main(void)
 
     if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
         printf("Can't check if VFD is compatible with default VFD\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (!driver_is_default_vfd_compatible) {
         printf("Skipping SWMR tests for VFD incompatible with default VFD\n");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* TEST 1 */
@@ -437,8 +437,8 @@ main(void)
 
     h5_cleanup(FILENAME, fapl_id);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

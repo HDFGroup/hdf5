@@ -348,7 +348,7 @@ main(void)
      */
     if (driver_is_parallel || !HDstrcmp(env_h5_drvr, "splitter")) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* Set to use the latest file format */

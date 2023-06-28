@@ -279,10 +279,10 @@ main(int argc, char *argv[])
             UC_opts.fapl_id = H5P_DEFAULT;
             if (read_uc_file(send_wait, &UC_opts) < 0) {
                 fprintf(stderr, "read_uc_file encountered error (%d)\n", mypid);
-                HDexit(1);
+                exit(1);
             }
 
-            HDexit(0);
+            exit(0);
         }
     }
 

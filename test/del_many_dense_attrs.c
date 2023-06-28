@@ -37,7 +37,7 @@ static const char *FILENAME[] = {"del_many_dense_attrs", NULL};
 static void
 catch_signal(int H5_ATTR_UNUSED signo)
 {
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* catch_signal() */
 
 /*-------------------------------------------------------------------------

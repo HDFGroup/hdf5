@@ -102,7 +102,7 @@ parse_option(int argc, char *const argv[])
         switch (c) {
             case 'h':
                 usage(progname_g);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
                 filename_g = optarg;
@@ -543,7 +543,7 @@ int
 main(void)
 {
     fprintf(stderr, "Non-POSIX platform. Skipping.\n");
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */
 
 #endif /* H5_HAVE_UNISTD_H */
