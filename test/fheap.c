@@ -376,7 +376,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
     size_t         robj_size;                /* Object size read in */
 
     /* Sanity check */
-    HDassert(fh);
+    assert(fh);
 
     /* Initialize object buffer */
     obj = &shared_wobj_g[obj_off];
@@ -510,7 +510,7 @@ get_fill_size(const fheap_test_param_t *tparam)
 
         case FHEAP_TEST_FILL_N:
         default:
-            HDassert(0 && "Unknown bulk fill type?!?");
+            assert(0 && "Unknown bulk fill type?!?");
     } /* end switch */
 
     return (0);
@@ -849,9 +849,9 @@ del_objs_half_refill(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_he
     size_t         u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(keep_ids);
 
     /* Check for closing & re-opening the heap */
     if (tparam->reopen_heap) {
@@ -940,10 +940,10 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     size_t  u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(state);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(state);
+    assert(keep_ids);
 
     /* Check for first deleting half of objects & then re-inserting them */
     if (tparam->drain_half == FHEAP_DEL_DRAIN_HALF)
@@ -1037,9 +1037,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
     unsigned       u;            /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
-    HDassert(obj_size + 256 < shared_obj_size_g);
+    assert(fh);
+    assert(state);
+    assert(obj_size + 256 < shared_obj_size_g);
 
     /* Initialize starting information */
     data_size    = (size_t)DBLOCK_FREE(fh, block_row);
@@ -1236,8 +1236,8 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
     unsigned u;                /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1325,8 +1325,8 @@ fill_partial_row(H5HF_t *fh, unsigned row, unsigned width, size_t obj_size, fhea
     unsigned u;          /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1366,8 +1366,8 @@ static int
 fill_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Fill the entire row (with the partial row fill routine) */
     if (fill_partial_row(fh, row, DTABLE_WIDTH(fh), obj_size, state, keep_ids))
@@ -1405,7 +1405,7 @@ fill_root_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_h
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1444,7 +1444,7 @@ fill_2nd_indirect(H5HF_t *fh, unsigned pos, size_t obj_size, fheap_heap_state_t 
 
     /* Get some information for the heap */
     max_dblock_rows = IBLOCK_MAX_DROWS(fh, pos);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1481,7 +1481,7 @@ fill_all_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_he
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -15956,7 +15956,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, huge_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (ret >= 0)
             TEST_ERROR;
@@ -15972,7 +15972,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, tiny_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (ret >= 0)
         TEST_ERROR;
 
@@ -16028,7 +16028,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Overwrite data just written */
         if (H5HF_write(fh, &keep_ids.ids[id_len * u], &id_changed, rewrite_obj) < 0)
             FAIL_STACK_ERROR;
-        HDassert(!id_changed);
+        assert(!id_changed);
 
         /* Read data back in */
         if (H5HF_read(fh, &keep_ids.ids[id_len * u], shared_robj_g) < 0)

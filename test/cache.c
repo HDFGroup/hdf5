@@ -4780,8 +4780,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 2;
         size_t       expected_index_size      = 2 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -4874,8 +4874,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -4965,8 +4965,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5031,8 +5031,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5104,8 +5104,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5201,8 +5201,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 2;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5294,8 +5294,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5385,8 +5385,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 1;
         size_t       expected_index_size      = VARIABLE_ENTRY_SIZE / 4;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5478,8 +5478,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 3;
         size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5560,8 +5560,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5640,8 +5640,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5721,8 +5721,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5801,8 +5801,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -5905,8 +5905,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size =
             VARIABLE_ENTRY_SIZE + (VARIABLE_ENTRY_SIZE / 4) + (VARIABLE_ENTRY_SIZE / 2);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6020,8 +6020,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (VARIABLE_ENTRY_SIZE / 4) +
                                      (VARIABLE_ENTRY_SIZE / 2) + (2 * PICO_ENTRY_SIZE);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6208,8 +6208,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         size_t       expected_index_size      = (2 * VARIABLE_ENTRY_SIZE) + (2 * (VARIABLE_ENTRY_SIZE / 4)) +
                                      (2 * (VARIABLE_ENTRY_SIZE / 2)) + (4 * PICO_ENTRY_SIZE);
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6451,8 +6451,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6690,8 +6690,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 3;
         size_t       expected_index_size      = 3 * PICO_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6809,8 +6809,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -6998,8 +6998,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 13;
         size_t       expected_index_size      = 9 * VARIABLE_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7406,8 +7406,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = (size_t)0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7739,8 +7739,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 5;
         size_t       expected_index_size      = 4 * VARIABLE_ENTRY_SIZE;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -7915,8 +7915,8 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
         unsigned     expected_index_len       = 0;
         size_t       expected_index_size      = 0;
 
-        HDassert(spec_size <= max_num_spec);
-        HDassert(check_size <= max_num_check);
+        assert(spec_size <= max_num_spec);
+        assert(check_size <= max_num_check);
 
         spec[0] = (struct fo_flush_cache_test_spec){
             /* entry_num          = */ 0,
@@ -8475,7 +8475,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].is_corked            = FALSE;
         }
 
-        HDassert(i == num_total_entries);
+        assert(i == num_total_entries);
 
         pass = TRUE;
     }
@@ -15276,7 +15276,7 @@ check_protect_retries(unsigned paged)
         }
         else {
 
-            HDassert((entry_ptr->cache_ptr == NULL) || (entry_ptr->cache_ptr == cache_ptr));
+            assert((entry_ptr->cache_ptr == NULL) || (entry_ptr->cache_ptr == cache_ptr));
 
             entry_ptr->cache_ptr    = cache_ptr;
             entry_ptr->file_ptr     = file_ptr;
@@ -15285,7 +15285,7 @@ check_protect_retries(unsigned paged)
             entry_ptr->ro_ref_count++;
         }
 
-        HDassert(((entry_ptr->header).type)->id == type);
+        assert(((entry_ptr->header).type)->id == type);
     }
 
     if (pass)
@@ -33016,7 +33016,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
         entry_ptr  = &(base_addr[0]);
         entry_addr = entry_ptr->header.addr;
 
-        HDassert(entry_addr == entry_ptr->addr);
+        assert(entry_addr == entry_ptr->addr);
 
         expected_hash_bucket = H5C__HASH_FCN(entry_addr);
 
@@ -33683,7 +33683,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
 static herr_t
 check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_ptr)
 {
-    HDassert(write_permitted_ptr);
+    assert(write_permitted_ptr);
 
     *write_permitted_ptr = write_permitted;
 
@@ -33832,7 +33832,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
-        HDassert(fid >= 0);
+        assert(fid >= 0);
         saved_fid = fid;
         if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
             pass         = FALSE;
@@ -33886,7 +33886,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
          * instance, and then close the file normally.
          */
 
-        HDassert(saved_cache == NULL);
+        assert(saved_cache == NULL);
         saved_cache             = file_ptr->shared->cache;
         file_ptr->shared->cache = NULL;
 
@@ -34018,7 +34018,7 @@ takedown_cache(H5F_t *file_ptr, hbool_t dump_stats, hbool_t dump_detailed_stats)
 
             if (NULL == file_ptr) {
                 file_ptr = (H5F_t *)H5VL_object_verify(saved_fid, H5I_FILE);
-                HDassert(file_ptr);
+                assert(file_ptr);
             }
 
             H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, saved_actual_base_addr,

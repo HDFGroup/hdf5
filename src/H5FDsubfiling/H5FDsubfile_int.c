@@ -175,7 +175,7 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
                 }
             }
 
-            HDassert(test_file_eof == logical_file_eof);
+            assert(test_file_eof == logical_file_eof);
         }
 #endif /* NDEBUG */
     }
@@ -295,18 +295,18 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     int                  mpi_code;            /* MPI return code */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    HDassert(logical_eof_ptr);
+    assert(logical_eof_ptr);
 
     if (NULL == (sf_context = (subfiling_context_t *)H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context");
 
-    HDassert(sf_context->topology);
+    assert(sf_context->topology);
 
     n_io_concentrators = sf_context->topology->n_io_concentrators;
     num_subfiles       = sf_context->sf_num_subfiles;
 
-    HDassert(n_io_concentrators > 0);
-    HDassert(num_subfiles >= n_io_concentrators);
+    assert(n_io_concentrators > 0);
+    assert(num_subfiles >= n_io_concentrators);
 
     if (NULL == (sf_eofs = malloc((size_t)num_subfiles * sizeof(int64_t))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile EOFs array");
@@ -352,9 +352,9 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     for (int i = 0; i < num_subfiles; i++) {
         int ioc_rank = (int)recv_msg[3 * i];
 
-        HDassert(ioc_rank >= 0);
-        HDassert(ioc_rank < n_io_concentrators);
-        HDassert(sf_eofs[i] == -1);
+        assert(ioc_rank >= 0);
+        assert(ioc_rank < n_io_concentrators);
+        assert(sf_eofs[i] == -1);
 
         sf_eofs[i] = recv_msg[(3 * i) + 1];
     }

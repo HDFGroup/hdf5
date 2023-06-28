@@ -192,7 +192,7 @@ H5FD__mpio_parse_debug_str(const char *s)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(s);
+    assert(s);
 
     /* Set debug mask */
     while (*s) {
@@ -1054,8 +1054,8 @@ H5FD__mpio_close(H5FD_t *_file)
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != (mpi_code = MPI_File_close(&(file->f))))
@@ -1129,8 +1129,8 @@ H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD__mpio_get_eoa() */
@@ -1157,8 +1157,8 @@ H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     file->eoa = addr;
 
@@ -1199,8 +1199,8 @@ H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eof)
 } /* end H5FD__mpio_get_eof() */
@@ -1293,9 +1293,9 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert(buf);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert(buf);
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
@@ -1563,12 +1563,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert(buf);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert(buf);
 
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
-    HDassert(!H5CX_get_mpi_file_flushing());
+    assert(!H5CX_get_mpi_file_flushing());
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
@@ -1779,20 +1779,20 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(s_sizes);
-    HDassert(s_bufs);
-    HDassert(vector_was_sorted);
-    HDassert(*vector_was_sorted);
-    HDassert(mpi_off);
-    HDassert(mpi_bufs_base);
-    HDassert(size_i);
-    HDassert(buf_type);
-    HDassert(buf_type_created);
-    HDassert(!*buf_type_created);
-    HDassert(file_type);
-    HDassert(file_type_created);
-    HDassert(!*file_type_created);
-    HDassert(unused);
+    assert(s_sizes);
+    assert(s_bufs);
+    assert(vector_was_sorted);
+    assert(*vector_was_sorted);
+    assert(mpi_off);
+    assert(mpi_bufs_base);
+    assert(size_i);
+    assert(buf_type);
+    assert(buf_type_created);
+    assert(!*buf_type_created);
+    assert(file_type);
+    assert(file_type_created);
+    assert(!*file_type_created);
+    assert(unused);
 
     /* Get bio I/O transition point (may be lower than 2G for testing) */
     bigio_count = H5_mpi_get_bigio_count();
@@ -1888,7 +1888,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             /* Determine size of this vector element */
             if (!fixed_size) {
                 if ((*s_sizes)[i] == 0) {
-                    HDassert(vector_was_sorted);
+                    assert(vector_was_sorted);
                     fixed_size = TRUE;
                     size       = sizes[i - 1];
                 }
@@ -1922,7 +1922,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 /* Allocate arrays to keep track of types and whether they were created, if
                  * necessary */
                 if (!sub_types) {
-                    HDassert(!sub_types_created);
+                    assert(!sub_types_created);
 
                     if (NULL == (sub_types = malloc((size_t)count * sizeof(MPI_Datatype))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
@@ -1936,7 +1936,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                     for (j = 0; j < (int)count; j++)
                         sub_types[j] = MPI_BYTE;
                 }
-                HDassert(sub_types_created);
+                assert(sub_types_created);
 
                 /* Create type for large block */
                 if (H5_mpio_create_large_type(size, 0, MPI_BYTE, &sub_types[i]) < 0)
@@ -1947,7 +1947,7 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 mpi_block_lengths[i] = 1;
             }
             else
-                HDassert(size == (size_t)mpi_block_lengths[i]);
+                assert(size == (size_t)mpi_block_lengths[i]);
         }
 
         /* create the memory MPI derived types */
@@ -1983,20 +1983,20 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
 
         /* Free up memory used to build types */
-        HDassert(mpi_block_lengths);
+        assert(mpi_block_lengths);
         free(mpi_block_lengths);
         mpi_block_lengths = NULL;
 
-        HDassert(mpi_displacements);
+        assert(mpi_displacements);
         free(mpi_displacements);
         mpi_displacements = NULL;
 
-        HDassert(mpi_bufs);
+        assert(mpi_bufs);
         free(mpi_bufs);
         mpi_bufs = NULL;
 
         if (sub_types) {
-            HDassert(sub_types);
+            assert(sub_types);
 
             for (i = 0; i < (int)count; i++)
                 if (sub_types_created[i])
@@ -2054,7 +2054,7 @@ done:
         }
 
         if (sub_types) {
-            HDassert(sub_types_created);
+            assert(sub_types_created);
 
             for (i = 0; i < (int)count; i++)
                 if (sub_types_created[i])
@@ -2068,11 +2068,11 @@ done:
     }
 
     /* Make sure we cleaned up */
-    HDassert(!mpi_block_lengths);
-    HDassert(!mpi_displacements);
-    HDassert(!mpi_bufs);
-    HDassert(!sub_types);
-    HDassert(!sub_types_created);
+    assert(!mpi_block_lengths);
+    assert(!mpi_displacements);
+    assert(!mpi_bufs);
+    assert(!sub_types);
+    assert(!sub_types_created);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_vector_build_types() */
@@ -2162,18 +2162,18 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the sizes and types arrays are
      * valid.
      */
-    HDassert((count == 0) || (sizes[0] != 0));
-    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+    assert((count == 0) || (sizes[0] != 0));
+    assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
     /* Get the transfer mode from the API context
      *
@@ -2324,7 +2324,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* Iterate over sorted array in reverse, filling in zeroes to
              * sections of the buffers that were not read to */
             do {
-                HDassert(i >= 0);
+                assert(i >= 0);
 
 #if MPI_VERSION >= 3
                 io_size    = MIN(n, (MPI_Count)s_sizes[i]);
@@ -2333,7 +2333,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 io_size    = MIN(n, (int)s_sizes[i]);
                 bytes_read = (int)s_sizes[i] - io_size;
 #endif
-                HDassert(bytes_read >= 0);
+                assert(bytes_read >= 0);
 
                 HDmemset((char *)s_bufs[i] + bytes_read, 0, (size_t)io_size);
 
@@ -2554,22 +2554,22 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
-    HDassert((types) || (count == 0));
-    HDassert((addrs) || (count == 0));
-    HDassert((sizes) || (count == 0));
-    HDassert((bufs) || (count == 0));
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
+    assert((types) || (count == 0));
+    assert((addrs) || (count == 0));
+    assert((sizes) || (count == 0));
+    assert((bufs) || (count == 0));
 
     /* verify that the first elements of the sizes and types arrays are
      * valid.
      */
-    HDassert((count == 0) || (sizes[0] != 0));
-    HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+    assert((count == 0) || (sizes[0] != 0));
+    assert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
     /* Verify that no data is written when between MPI_Barrier()s during file flush */
 
-    HDassert(!H5CX_get_mpi_file_flushing());
+    assert(!H5CX_get_mpi_file_flushing());
 
     /* Get the transfer mode from the API context
      *
@@ -2776,9 +2776,9 @@ done:
     }
 
     /* Make sure we cleaned up */
-    HDassert(vector_was_sorted || !s_addrs);
-    HDassert(vector_was_sorted || !s_sizes);
-    HDassert(vector_was_sorted || !s_bufs);
+    assert(vector_was_sorted || !s_addrs);
+    assert(vector_was_sorted || !s_sizes);
+    assert(vector_was_sorted || !s_bufs);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
@@ -2818,8 +2818,8 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     /* Only sync the file if we are not going to immediately close it */
     if (!closing)
@@ -2875,8 +2875,8 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 #endif
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     if (!H5_addr_eq(file->eoa, file->last_eoa)) {
         int        mpi_code; /* mpi return code */
@@ -2969,11 +2969,11 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    HDassert(H5FD_MPIO == H5P_peek_driver(plist));
+    assert(H5FD_MPIO == H5P_peek_driver(plist));
 
     if (H5FD_mpi_self_initialized) {
         comm = MPI_COMM_WORLD;
@@ -3057,32 +3057,32 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    assert(file);
+    assert(H5FD_MPIO == file->pub.driver_id);
 
     switch (op_code) {
 
         case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((MPI_Comm **)output) = file->comm;
             break;
 
         case H5FD_CTL_GET_MPI_RANK_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
         case H5FD_CTL_GET_MPI_SIZE_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
         case H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE:
-            HDassert(output);
-            HDassert(*output);
+            assert(output);
+            assert(*output);
             **((hbool_t **)output) = file->mpi_file_sync_required;
             break;
 

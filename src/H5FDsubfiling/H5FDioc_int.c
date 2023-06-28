@@ -32,12 +32,12 @@ calculate_target_ioc(int64_t file_offset, int64_t stripe_size, int num_io_concen
     int64_t subfile_row;
     int64_t subfile_idx;
 
-    HDassert(stripe_size > 0);
-    HDassert(num_io_concentrators > 0);
-    HDassert(num_subfiles > 0);
-    HDassert(target_ioc);
-    HDassert(ioc_file_offset);
-    HDassert(ioc_subfile_idx);
+    assert(stripe_size > 0);
+    assert(num_io_concentrators > 0);
+    assert(num_subfiles > 0);
+    assert(target_ioc);
+    assert(ioc_file_offset);
+    assert(ioc_subfile_idx);
 
     stripe_idx  = file_offset / stripe_size;
     subfile_row = stripe_idx / num_subfiles;
@@ -111,12 +111,12 @@ ioc__write_independent_async(int64_t context_id, int64_t offset, int64_t element
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(io_req);
+    assert(io_req);
 
     if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
-    HDassert(sf_context->topology->io_concentrators);
+    assert(sf_context->topology);
+    assert(sf_context->topology->io_concentrators);
 
     io_concentrators     = sf_context->topology->io_concentrators;
     num_io_concentrators = sf_context->topology->n_io_concentrators;
@@ -283,14 +283,14 @@ ioc__read_independent_async(int64_t context_id, int64_t offset, int64_t elements
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(io_req);
+    assert(io_req);
 
     H5_CHECK_OVERFLOW(elements, int64_t, int);
 
     if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
-    HDassert(sf_context->topology->io_concentrators);
+    assert(sf_context->topology);
+    assert(sf_context->topology->io_concentrators);
 
     io_concentrators     = sf_context->topology->io_concentrators;
     num_io_concentrators = sf_context->topology->n_io_concentrators;
@@ -426,7 +426,7 @@ ioc__async_completion(MPI_Request *mpi_reqs, size_t num_reqs)
     herr_t ret_value = SUCCEED;
     int    mpi_code;
 
-    HDassert(mpi_reqs);
+    assert(mpi_reqs);
 
     H5_CHECK_OVERFLOW(num_reqs, size_t, int);
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall((int)num_reqs, mpi_reqs, MPI_STATUSES_IGNORE)))

@@ -3766,7 +3766,7 @@ test_compound_18(void)
 
     /* Create compound datatype, but don't insert fields */
     tid = H5Tcreate(H5T_COMPOUND, (size_t)8);
-    HDassert(tid > 0);
+    assert(tid > 0);
 
     /* Attempt to create file with compound datatype that has no fields */
     /* Create File */
@@ -3776,7 +3776,7 @@ test_compound_18(void)
 
     /* Create a dataspace to use */
     sid = H5Screate_simple(1, &dim, NULL);
-    HDassert(sid > 0);
+    assert(sid > 0);
 
     /* Create a dataset with the bad compound datatype */
     H5E_BEGIN_TRY
@@ -3791,7 +3791,7 @@ test_compound_18(void)
 
     /* Create a group */
     gid = H5Gcreate2(file, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(gid > 0);
+    assert(gid > 0);
 
     /* Create an attribute with the bad compound datatype */
     H5E_BEGIN_TRY
@@ -5352,7 +5352,7 @@ test_conv_enum_2(void)
 
     /* Destination enum type */
     dsttype = H5Tenum_create(H5T_NATIVE_INT);
-    HDassert(H5Tget_size(dsttype) > H5Tget_size(srctype));
+    assert(H5Tget_size(dsttype) > H5Tget_size(srctype));
     for (i = 0; i < 8; i++)
         H5Tenum_insert(dsttype, mname[i], &i);
 
@@ -7608,11 +7608,11 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
 
     /* Make copy of FAPL */
     my_fapl = H5Pcopy(fapl);
-    HDassert(my_fapl > 0);
+    assert(my_fapl > 0);
 
     /* Use low/high version of file format */
     status = H5Pset_libver_bounds(my_fapl, low, high);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Set new format flag.  Note: the case high < low should be caught in the caller */
     use_at_least_v18 = 0;
@@ -7621,80 +7621,80 @@ create_del_obj_named_test_file(const char *filename, hid_t fapl, H5F_libver_t lo
 
     /* Create a file creation property list (used for the root group's creation property list) */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    HDassert(fcpl > 0);
+    assert(fcpl > 0);
 
     if (use_at_least_v18) {
         /* Use dense link storage for all links in root group */
         status = H5Pset_link_phase_change(fcpl, 0, 0);
-        HDassert(status >= 0);
+        assert(status >= 0);
     } /* end if */
 
     /* Create file with attribute that uses committed datatype */
     file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, my_fapl);
-    HDassert(file > 0);
+    assert(file > 0);
 
     /* Close FCPL */
     status = H5Pclose(fcpl);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Close FAPL */
     status = H5Pclose(my_fapl);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Create datatype to commit */
     type = H5Tvlen_create(H5T_NATIVE_INT);
-    HDassert(type > 0);
+    assert(type > 0);
 
     /* Commit datatype */
     status = H5Tcommit2(file, DEL_OBJ_NAMED_NAMED_DTYPE, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Create scalar dataspace */
     space = H5Screate(H5S_SCALAR);
-    HDassert(space > 0);
+    assert(space > 0);
 
     /* Create a dataset creation property list */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
-    HDassert(dcpl > 0);
+    assert(dcpl > 0);
 
     if (use_at_least_v18) {
         /* Use dense attribute storage for all attributes on dataset */
         status = H5Pset_attr_phase_change(dcpl, 0, 0);
-        HDassert(status >= 0);
+        assert(status >= 0);
     } /* end if */
 
     /* Create dataset */
     dset = H5Dcreate2(file, DEL_OBJ_NAMED_DATASET, type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    HDassert(dset > 0);
+    assert(dset > 0);
 
     /* Close DCPL */
     status = H5Pclose(dcpl);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Close dataset */
     status = H5Dclose(dset);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Create attribute */
     attr = H5Acreate_by_name(file, DEL_OBJ_NAMED_DATASET, DEL_OBJ_NAMED_ATTRIBUTE, type, space, H5P_DEFAULT,
                              H5P_DEFAULT, H5P_DEFAULT);
-    HDassert(attr > 0);
+    assert(attr > 0);
 
     /* Close dataspace */
     status = H5Sclose(space);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Close datatype */
     status = H5Tclose(type);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Close attribute */
     status = H5Aclose(attr);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* Close file */
     status = H5Fclose(file);
-    HDassert(status >= 0);
+    assert(status >= 0);
 } /* end create_del_obj_named_test_file() */
 
 /*-------------------------------------------------------------------------

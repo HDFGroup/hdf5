@@ -115,11 +115,11 @@ H5HF_id_print(H5HF_t *fh, const void *_id, FILE *stream, int indent, int fwidth)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(fh);
+    assert(id);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -179,10 +179,10 @@ H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fw
     /*
      * Check arguments.
      */
-    HDassert(dtable);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(dtable);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /*
      * Print the values.
@@ -237,10 +237,10 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
     /*
      * Check arguments.
      */
-    HDassert(hdr);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(hdr);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Print opening message */
     HDfprintf(stream, "%*sFractal Heap Header...\n", indent, "");
@@ -337,11 +337,11 @@ H5HF_hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Load the fractal heap header */
     if (NULL == (hdr = H5HF__hdr_protect(f, addr, H5AC__READ_ONLY_FLAG)))
@@ -382,16 +382,16 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(sect);
-    HDassert(udata);
+    assert(sect);
+    assert(udata);
 
     /* Set up some local variables, for convenience */
     sect_start = sect->sect_info.addr;
     sect_end   = (sect->sect_info.addr + sect->sect_info.size) - 1;
-    HDassert(sect_end >= sect_start);
+    assert(sect_end >= sect_start);
     dblock_start = udata->dblock_addr;
     dblock_end   = (udata->dblock_addr + udata->dblock_size) - 1;
-    HDassert(dblock_end >= dblock_start);
+    assert(dblock_end >= dblock_start);
 
     /* Check for overlap between free space section & direct block */
     if ((sect_start <= dblock_end &&
@@ -467,13 +467,13 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(H5_addr_defined(hdr_addr));
-    HDassert(block_size > 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(H5_addr_defined(hdr_addr));
+    assert(block_size > 0);
 
     /* Load the fractal heap header */
     if (NULL == (hdr = H5HF__hdr_protect(f, hdr_addr, H5AC__READ_ONLY_FLAG)))
@@ -584,11 +584,11 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
     /*
      * Check arguments.
      */
-    HDassert(iblock);
-    HDassert(iblock->hdr);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(iblock);
+    assert(iblock->hdr);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Set up convenience variables */
     hdr = iblock->hdr;
@@ -699,13 +699,13 @@ H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(H5_addr_defined(hdr_addr));
-    HDassert(nrows > 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(H5_addr_defined(hdr_addr));
+    assert(nrows > 0);
 
     /* Load the fractal heap header */
     if (NULL == (hdr = H5HF__hdr_protect(f, hdr_addr, H5AC__READ_ONLY_FLAG)))
@@ -754,8 +754,8 @@ H5HF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(sect);
-    HDassert(udata);
+    assert(sect);
+    assert(udata);
 
     /* Print generic section information */
     HDfprintf(
@@ -802,11 +802,11 @@ H5HF_sects_debug(H5F_t *f, haddr_t fh_addr, FILE *stream, int indent, int fwidth
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(fh_addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(H5_addr_defined(fh_addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Load the fractal heap header */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))

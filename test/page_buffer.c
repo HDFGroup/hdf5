@@ -1121,9 +1121,9 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     /* opening the file inserts one or more pages into the page buffer.
      * Get the raw and meta counts now, so we can adjust tests accordingly.
      */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->page_buf);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->page_buf);
 
     base_raw_cnt  = f->shared->page_buf->raw_count;
     base_meta_cnt = f->shared->page_buf->meta_count;
@@ -1255,9 +1255,9 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     /* opening the file inserts one or more pages into the page buffer.
      * Get the raw and meta counts now, so we can adjust tests accordingly.
      */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->page_buf);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->page_buf);
 
     base_raw_cnt  = f->shared->page_buf->raw_count;
     base_meta_cnt = f->shared->page_buf->meta_count;
@@ -1738,9 +1738,9 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
      * Get the raw and meta counts now, so we can adjust the expected
      * statistics accordingly.
      */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->page_buf);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->page_buf);
 
     base_raw_cnt  = f->shared->page_buf->raw_count;
     base_meta_cnt = f->shared->page_buf->meta_count;

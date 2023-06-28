@@ -73,7 +73,7 @@ open_skeleton(const char *filename, unsigned verbose)
     unsigned seed; /* Seed for random number generator */
     unsigned u, v; /* Local index variable */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -153,7 +153,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     hsize_t       dim[2] = {1, 0}; /* Dataspace dimensions */
     unsigned long u, v;            /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */

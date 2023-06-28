@@ -90,11 +90,11 @@ H5FS_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Initialize user data for protecting the free space manager */
     cache_udata.f              = f;
@@ -172,11 +172,11 @@ H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect, FILE *str
     /*
      * Check arguments.
      */
-    HDassert(fspace);
-    HDassert(sect);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(fspace);
+    assert(sect);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     /* Call the section's debugging routine */
     if (fspace->sect_cls[sect->type].debug)
@@ -213,13 +213,13 @@ H5FS_sects_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-    HDassert(H5_addr_defined(fs_addr));
-    HDassert(H5_addr_defined(client_addr));
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
+    assert(H5_addr_defined(fs_addr));
+    assert(H5_addr_defined(client_addr));
 
     /* Initialize user data for protecting the free space manager */
     cache_udata.f              = f;

@@ -8058,9 +8058,9 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     tid    = H5Tvlen_create(H5T_NATIVE_INT);
     did    = H5Dcreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Treclaim(tid, sid, H5P_DEFAULT, buf5);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Dclose(did);
     status = H5Tclose(tid);
     status = H5Sclose(sid);
@@ -8512,7 +8512,7 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     sid1   = H5Screate_simple(2, dims1, NULL);
     did1   = H5Dcreate2(fid, "dsetref", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* create the reference dataset */
     sid2 = H5Screate_simple(1, dims2, NULL);
@@ -8533,12 +8533,12 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
     }
 
     status = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
-    HDassert(status >= 0);
+    assert(status >= 0);
     H5Sget_select_npoints(sid1);
 
     /* store first dataset region */
     status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* select sequence of five points for second reference */
     coord[0][0] = 6;
@@ -8567,17 +8567,17 @@ gen_datareg(hid_t fid, int make_diffs /* flag to modify data buffers */)
 
     /* write */
     status = H5Dwrite(did2, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     /* close, free memory buffers */
     status = H5Dclose(did1);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Sclose(sid1);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Dclose(did2);
-    HDassert(status >= 0);
+    assert(status >= 0);
     status = H5Sclose(sid2);
-    HDassert(status >= 0);
+    assert(status >= 0);
 
     free(rbuf);
     free(buf);

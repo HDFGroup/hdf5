@@ -275,7 +275,7 @@ static herr_t
 H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     /* Windows call handles both system/user and elapsed times */
 #ifdef H5_HAVE_WIN32_API
@@ -375,7 +375,7 @@ herr_t
 H5_timer_init(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Initialize everything */
     HDmemset(timer, 0, sizeof(H5_timer_t));
@@ -400,7 +400,7 @@ herr_t
 H5_timer_start(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Start the timer
      * This sets the "initial" times to the system-defined start times.
@@ -430,7 +430,7 @@ herr_t
 H5_timer_stop(H5_timer_t *timer /*in,out*/)
 {
     /* Sanity check */
-    HDassert(timer);
+    assert(timer);
 
     /* Stop the timer */
     if (H5__timer_get_timevals(&(timer->final_interval)) < 0)
@@ -481,7 +481,7 @@ herr_t
 H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;
@@ -536,7 +536,7 @@ herr_t
 H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
 {
     /* Sanity check */
-    HDassert(times);
+    assert(times);
 
     if (timer.is_running) {
         H5_timevals_t now;

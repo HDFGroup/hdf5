@@ -223,7 +223,7 @@ session_stop(struct mirror_session *session)
 {
     int ret_value = 0;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "session_stop()");
 
@@ -317,7 +317,7 @@ _xmit_reply(struct mirror_session *session)
     unsigned char             xmit_buf[H5FD_MIRROR_XMIT_REPLY_SIZE];
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "_xmit_reply()");
 
@@ -353,7 +353,7 @@ reply_ok(struct mirror_session *session)
 {
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "reply_ok()");
 
@@ -377,7 +377,7 @@ reply_error(struct mirror_session *session, const char *msg)
 {
     H5FD_mirror_xmit_reply_t *reply = &(session->reply);
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_ALL, "reply_error(%s)", msg);
 
@@ -398,7 +398,7 @@ static int
 do_close(struct mirror_session *session)
 {
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_close()");
 
@@ -438,7 +438,7 @@ do_lock(struct mirror_session *session, const unsigned char *xmit_buf)
     size_t                  decode_ret = 0;
     H5FD_mirror_xmit_lock_t xmit_lock;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_lock()");
 
@@ -486,8 +486,8 @@ do_open(struct mirror_session *session, const H5FD_mirror_xmit_open_t *xmit_open
     unsigned _flags   = 0;
     haddr_t  _maxaddr = HADDR_UNDEF;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
-             true == H5FD_mirror_xmit_is_open(xmit_open));
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_open &&
+           true == H5FD_mirror_xmit_is_open(xmit_open));
 
     mirror_log(session->loginfo, V_INFO, "do_open()");
 
@@ -581,7 +581,7 @@ do_set_eoa(struct mirror_session *session, const unsigned char *xmit_buf)
     size_t                 decode_ret = 0;
     H5FD_mirror_xmit_eoa_t xmit_seoa;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_set_eoa()");
 
@@ -627,7 +627,7 @@ static int
 do_truncate(struct mirror_session *session)
 {
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_truncate()");
 
@@ -658,7 +658,7 @@ do_truncate(struct mirror_session *session)
 static int
 do_unlock(struct mirror_session *session)
 {
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "do_unlock()");
 
@@ -702,7 +702,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     ssize_t                  nbytes_in_packet  = 0;
     H5FD_mirror_xmit_write_t xmit_write;
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
+    assert(session && (session->magic == MW_SESSION_MAGIC) && xmit_buf);
 
     mirror_log(session->loginfo, V_INFO, "do_write()");
 
@@ -814,9 +814,9 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
     size_t              decode_ret;
     H5FD_mirror_xmit_t *X = comm->xmit_recd;
 
-    HDassert((session != NULL) && (session->magic == MW_SESSION_MAGIC) && (comm != NULL) &&
-             (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
-             (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
+    assert((session != NULL) && (session->magic == MW_SESSION_MAGIC) && (comm != NULL) &&
+           (comm->magic == MW_SOCK_COMM_MAGIC) && (comm->xmit_recd != NULL) && (comm->raw != NULL) &&
+           (comm->raw_size >= H5FD_MIRROR_XMIT_BUFFER_MAX));
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 
@@ -900,7 +900,7 @@ process_instructions(struct mirror_session *session)
     size_t             buf_size;
     H5FD_mirror_xmit_t xmit_recd; /* for decoded xmit header */
 
-    HDassert(session && (session->magic == MW_SESSION_MAGIC));
+    assert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "process_instructions()");
 

@@ -429,7 +429,7 @@ typedef struct test_entry_t {
                 if ((entry_ptr) != (cache_ptr)->index[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \
                         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;                                \
-                    HDassert((entry_ptr)->ht_prev != NULL);                                                  \
+                    assert((entry_ptr)->ht_prev != NULL);                                                    \
                     (entry_ptr)->ht_prev->ht_next  = (entry_ptr)->ht_next;                                   \
                     (cache_ptr)->index[k]->ht_prev = (entry_ptr);                                            \
                     (entry_ptr)->ht_next           = (cache_ptr)->index[k];                                  \

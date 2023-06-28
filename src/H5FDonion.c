@@ -377,8 +377,8 @@ H5FD__onion_sb_size(H5FD_t *_file)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (file->original_file)
         ret_value = H5FD_sb_size(file->original_file);
@@ -403,8 +403,8 @@ H5FD__onion_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*ou
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (file->original_file && H5FD_sb_encode(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file")
@@ -430,8 +430,8 @@ H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
-    HDassert(file->original_file);
+    assert(file);
+    assert(file->original_file);
 
     if (H5FD_sb_load(file->original_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file")
@@ -494,7 +494,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     if (history->n_revisions == 0) {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_locs == NULL);
+        assert(history->record_locs == NULL);
         history->n_revisions = 1;
         if (NULL == (history->record_locs = H5MM_calloc(sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
@@ -510,7 +510,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     else {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
-        HDassert(history->record_locs != NULL);
+        assert(history->record_locs != NULL);
 
         if (NULL == (new_list = H5MM_calloc((history->n_revisions + 1) * sizeof(H5FD_onion_record_loc_t))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
@@ -554,15 +554,15 @@ H5FD__onion_close(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (H5FD_ONION_STORE_TARGET_ONION == file->fa.store_target) {
 
-        HDassert(file->onion_file);
+        assert(file->onion_file);
 
         if (file->is_open_rw) {
 
-            HDassert(file->recovery_file);
+            assert(file->recovery_file);
 
             if (H5FD__onion_commit_new_revision_record(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write revision record to backing store")
@@ -695,7 +695,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
+    assert(file != NULL);
 
     hdr     = &file->header;
     history = &file->history;
@@ -925,7 +925,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
     if (0 == maxaddr || HADDR_UNDEF == maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
-    HDassert(H5P_DEFAULT != fapl_id);
+    assert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
@@ -1042,7 +1042,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 size_t                        size       = 0;
                 size_t                        saved_size = 0;
 
-                HDassert(file != NULL);
+                assert(file != NULL);
 
                 hdr     = &file->header;
                 history = &file->history;
@@ -1347,8 +1347,8 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
-    HDassert(buf_out != NULL);
+    assert(file != NULL);
+    assert(buf_out != NULL);
 
     if ((uint64_t)(offset + len) > file->logical_eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Read extends beyond addressed space")
@@ -1421,7 +1421,7 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         bytes_to_read -= page_readsize;
     } /* end for each page in range */
 
-    HDassert(0 == bytes_to_read);
+    assert(0 == bytes_to_read);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1471,10 +1471,10 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file != NULL);
-    HDassert(buf != NULL);
-    HDassert(file->rev_index != NULL);
-    HDassert((uint64_t)(offset + len) <= file->logical_eoa);
+    assert(file != NULL);
+    assert(buf != NULL);
+    assert(file->rev_index != NULL);
+    assert((uint64_t)(offset + len) <= file->logical_eoa);
 
     if (FALSE == file->is_open_rw)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Write not allowed if file not opened in write mode")
@@ -1569,7 +1569,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             } /* end if page exists in neither index */
 
             /* Copy input buffer to temporary page buffer */
-            HDassert((page_size - page_gap_head) >= page_n_used);
+            assert((page_size - page_gap_head) >= page_n_used);
             HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
             write_buf = page_buf;
 
@@ -1593,7 +1593,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     } /* end for each page to write */
 
-    HDassert(0 == bytes_to_write);
+    assert(0 == bytes_to_write);
 
     file->logical_eof = MAX(file->logical_eof, (offset + len));
 
@@ -1630,7 +1630,7 @@ H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_A
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(file);
+    assert(file);
 
     switch (op_code) {
         case H5FD_CTL_GET_NUM_REVISIONS:
@@ -1713,8 +1713,8 @@ H5FD__get_onion_revision_count(H5FD_t *file, uint64_t *revision_count)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
-    HDassert(revision_count);
+    assert(file);
+    assert(revision_count);
 
     op_code = H5FD_CTL_GET_NUM_REVISIONS;
     flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;

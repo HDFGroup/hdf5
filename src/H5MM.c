@@ -301,11 +301,11 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(dest);
-    HDassert(src);
+    assert(dest);
+    assert(src);
 
     /* Check for buffer overlap */
-    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
+    assert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
 
     /* Copy */
     ret = HDmemcpy(dest, src, n);

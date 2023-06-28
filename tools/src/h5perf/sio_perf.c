@@ -328,7 +328,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
         default:
             /* unknown request */
             HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-            HDassert(0 && "Unknown IO tpe");
+            assert(0 && "Unknown IO tpe");
             break;
     }
 

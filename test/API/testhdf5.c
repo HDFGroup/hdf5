@@ -117,7 +117,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     int          len;
     static char *env = NULL;
 
-    HDassert(name);
+    assert(name);
 
     MPI_Initialized(&mpi_initialized);
     MPI_Finalized(&mpi_finalized);
@@ -125,7 +125,7 @@ getenv_all(MPI_Comm comm, int root, const char *name)
     if (mpi_initialized && !mpi_finalized) {
         MPI_Comm_rank(comm, &mpi_rank);
         MPI_Comm_size(comm, &mpi_size);
-        HDassert(root < mpi_size);
+        assert(root < mpi_size);
 
         /* The root task does the getenv call
          * and sends the result to the other tasks */
@@ -515,7 +515,7 @@ h5_using_default_driver(const char *drv_name)
 {
     hbool_t ret_val = TRUE;
 
-    HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
+    assert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
@@ -533,8 +533,8 @@ h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatib
     hid_t         driver_id  = H5I_INVALID_HID;
     herr_t        ret_value  = SUCCEED;
 
-    HDassert(fapl_id >= 0);
-    HDassert(default_vfd_compatible);
+    assert(fapl_id >= 0);
+    assert(default_vfd_compatible);
 
     if (fapl_id == H5P_DEFAULT)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;

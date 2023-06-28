@@ -2690,13 +2690,13 @@ test_vltypes_fill_value(void)
                 } break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2798,13 +2798,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2985,13 +2985,13 @@ test_vltypes_fill_value(void)
                     break;
 
                 case H5D_VIRTUAL:
-                    HDassert(0 && "Invalid layout type!");
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
-                    HDassert(0 && "Unknown layout type!");
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 

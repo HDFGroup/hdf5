@@ -82,7 +82,7 @@ H5PL__get_plugin_control_mask(unsigned int *mask /*out*/)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args - Just assert on package functions */
-    HDassert(mask);
+    assert(mask);
 
     /* Return the mask */
     *mask = H5PL_plugin_control_mask_g;
@@ -329,11 +329,11 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(path);
+    assert(path);
     if (type == H5PL_TYPE_NONE)
-        HDassert(!key);
-    HDassert(success);
-    HDassert(plugin_info);
+        assert(!key);
+    assert(success);
+    assert(plugin_info);
 
     /* Initialize out parameters */
     *success     = FALSE;

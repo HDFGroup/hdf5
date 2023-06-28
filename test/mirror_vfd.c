@@ -1359,9 +1359,9 @@ create_datasets(hid_t file_id, unsigned min_dset, unsigned max_dset)
     hsize_t      chunk_dims[2] = {CHUNK_DIM, CHUNK_DIM};
     hsize_t      dset_dims[2]  = {DSET_DIM, DSET_DIM};
 
-    HDassert(file_id >= 0);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset <= MAX_DSET_COUNT);
+    assert(file_id >= 0);
+    assert(min_dset <= max_dset);
+    assert(max_dset <= MAX_DSET_COUNT);
 
     LOGPRINT(2, "create_dataset()\n");
 
@@ -1678,9 +1678,9 @@ verify_datasets(hid_t file_id, unsigned min_dset, unsigned max_dset)
     hid_t   memspace_id   = H5I_INVALID_HID;
     hsize_t chunk_dims[2] = {CHUNK_DIM, CHUNK_DIM};
 
-    HDassert(file_id >= 0);
-    HDassert(min_dset <= max_dset);
-    HDassert(max_dset <= MAX_DSET_COUNT);
+    assert(file_id >= 0);
+    assert(min_dset <= max_dset);
+    assert(max_dset <= MAX_DSET_COUNT);
 
     LOGPRINT(2, "verify_datasets()\n");
 

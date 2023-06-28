@@ -125,7 +125,7 @@ io_time_t *
 io_time_set(io_time_t *pt, timer_type t, int start_stop)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     switch (pt->type) {
 #ifdef H5_HAVE_PARALLEL
@@ -214,7 +214,7 @@ H5_ATTR_PURE double
 io_time_get(io_time_t *pt, timer_type t)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     return pt->total_time[t];
 }

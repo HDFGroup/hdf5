@@ -582,7 +582,7 @@ test_compound(char *filename, hid_t fapl)
 
     /* Read the dataset */
     s8 = (s1_t *)calloc((size_t)(h_size[0] * h_size[1]), sizeof(s1_t));
-    HDassert(s8);
+    assert(s8);
     if (H5Dread(dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
         goto error;
     }
@@ -715,7 +715,7 @@ test_compound(char *filename, hid_t fapl)
     h_size[0]   = 2 * NX / 3 - f_offset[0];
     h_size[1]   = 2 * NY / 3 - f_offset[1];
     s11         = (s4_t *)malloc((size_t)h_size[0] * (size_t)h_size[1] * sizeof(s4_t));
-    HDassert(s11);
+    assert(s11);
 
     /* Initialize */
     for (i = 0; i < h_size[0] * h_size[1]; i++) {

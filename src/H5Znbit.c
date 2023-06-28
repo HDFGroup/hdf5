@@ -866,7 +866,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Get total number of elements in the chunk */
     if ((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
-    HDassert(npoints);
+    assert(npoints);
 
     /* Initialize index for cd_values array starting from the third entry */
     cd_values_index = 2;
@@ -915,7 +915,7 @@ H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end switch */
 
     /* Check if calculation of parameters matches with setting of parameters */
-    HDassert(cd_values_actual_nparms == cd_values_index);
+    assert(cd_values_actual_nparms == cd_values_index);
 
     /* Finally set the first two entries of cd_values[] */
     H5_CHECK_OVERFLOW(cd_values_actual_nparms, size_t, unsigned);
@@ -986,7 +986,7 @@ H5Z__filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], s
     } /* end if */
     /* output; compress */
     else {
-        HDassert(nbytes == d_nelmts * cd_values[4]);
+        assert(nbytes == d_nelmts * cd_values[4]);
 
         size_out = nbytes;
 
@@ -1128,7 +1128,7 @@ H5Z__nbit_decompress_one_atomic(unsigned char *data, size_t data_offset, unsigne
     }
     else { /* big endian */
         /* Sanity check */
-        HDassert(p->order == H5Z_NBIT_ORDER_BE);
+        assert(p->order == H5Z_NBIT_ORDER_BE);
 
         /* calculate begin_i and end_i */
         begin_i = ((unsigned)datatype_len - p->precision - p->offset) / 8;
@@ -1203,7 +1203,7 @@ H5Z__nbit_decompress_one_array(unsigned char *data, size_t data_offset, unsigned
             break;
 
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     } /* end switch */
 
 done:
@@ -1268,7 +1268,7 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset, unsig
                 break;
 
             default:
-                HDassert(0 && "This Should never be executed!");
+                assert(0 && "This Should never be executed!");
         } /* end switch */
     }
 
@@ -1335,7 +1335,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
             break;
 
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     } /* end switch */
 
 done:
@@ -1435,7 +1435,7 @@ H5Z__nbit_compress_one_atomic(unsigned char *data, size_t data_offset, unsigned 
     }
     else { /* big endian */
         /* Sanity check */
-        HDassert(p->order == H5Z_NBIT_ORDER_BE);
+        assert(p->order == H5Z_NBIT_ORDER_BE);
 
         /* calculate begin_i and end_i */
         begin_i = ((unsigned)datatype_len - p->precision - p->offset) / 8;
@@ -1499,7 +1499,7 @@ H5Z__nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned c
             break;
 
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     } /* end switch */
 }
 
@@ -1542,7 +1542,7 @@ H5Z__nbit_compress_one_compound(unsigned char *data, size_t data_offset, unsigne
                 break;
 
             default:
-                HDassert(0 && "This Should never be executed!");
+                assert(0 && "This Should never be executed!");
         } /* end switch */
     }
 }
@@ -1598,7 +1598,7 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
             break;
 
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     } /* end switch */
 
     /* Update the size to the new value after compression.  If there are any bits hanging over in

@@ -1383,8 +1383,8 @@ test_select_hyper_stride(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Sort the locations into the proper order */
-    HDqsort(loc1, (size_t)72, sizeof(size_t), compare_size_t);
-    HDqsort(loc2, (size_t)72, sizeof(size_t), compare_size_t);
+    qsort(loc1, (size_t)72, sizeof(size_t), compare_size_t);
+    qsort(loc2, (size_t)72, sizeof(size_t), compare_size_t);
     /* Compare data read with data written out */
     for (i = 0; i < 72; i++) {
         tbuf  = wbuf + loc1[i];
@@ -1886,8 +1886,8 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t cube_si
     size_t          s;              /* Local index variable */
     hbool_t         mis_match;      /* Flag to indicate mismatch in expected value */
 
-    HDassert(cube_buf);
-    HDassert(cube_size > 0);
+    assert(cube_buf);
+    assert(cube_size > 0);
 
     expected_value = 0;
     mis_match      = FALSE;
@@ -1904,7 +1904,7 @@ verify_select_hyper_contig_dr__run_test(const uint16_t *cube_buf, size_t cube_si
                     m = 0;
                     do {
                         /* Sanity check */
-                        HDassert(s < cube_size);
+                        assert(s < cube_size);
 
                         /* Check for correct value */
                         if (*cube_ptr != expected_value)
@@ -1980,12 +1980,12 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
     MESSAGE(7, ("\tranks = %u/%u, edge_size = %u, chunk_edge_size = %u.\n", small_rank, large_rank, edge_size,
                 chunk_edge_size));
 
-    HDassert(edge_size >= 6);
-    HDassert(edge_size >= chunk_edge_size);
-    HDassert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
-    HDassert(small_rank > 0);
-    HDassert(small_rank < large_rank);
-    HDassert(large_rank <= SS_DR_MAX_RANK);
+    assert(edge_size >= 6);
+    assert(edge_size >= chunk_edge_size);
+    assert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
+    assert(small_rank > 0);
+    assert(small_rank < large_rank);
+    assert(large_rank <= SS_DR_MAX_RANK);
 
     /* Compute cube sizes */
     small_cube_size = large_cube_size = (size_t)1;
@@ -1996,7 +1996,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
         large_cube_size *= (size_t)edge_size;
     } /* end for */
 
-    HDassert(large_cube_size < (size_t)UINT_MAX);
+    assert(large_cube_size < (size_t)UINT_MAX);
 
     /* set up the start, stride, count, and block pointers */
     start_ptr  = &(start[SS_DR_MAX_RANK - large_rank]);
@@ -2242,8 +2242,8 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
                                   (x * edge_size);
                     stop_index = start_index + small_cube_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= large_cube_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= large_cube_size);
 
                     mis_match      = FALSE;
                     ptr_1          = large_cube_buf_1;
@@ -2436,8 +2436,8 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
                                   (x * edge_size);
                     stop_index = start_index + small_cube_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= large_cube_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= large_cube_size);
 
                     mis_match      = FALSE;
                     ptr_1          = large_cube_buf_1;
@@ -2603,16 +2603,16 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid, u
     unsigned u;                      /* Local index variables */
     herr_t   ret;                    /* Generic return value */
 
-    HDassert(edge_size >= 6);
-    HDassert(0 < checker_edge_size);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(0 < sel_rank);
-    HDassert(sel_rank <= tgt_n_cube_rank);
-    HDassert(tgt_n_cube_rank <= SS_DR_MAX_RANK);
+    assert(edge_size >= 6);
+    assert(0 < checker_edge_size);
+    assert(checker_edge_size <= edge_size);
+    assert(0 < sel_rank);
+    assert(sel_rank <= tgt_n_cube_rank);
+    assert(tgt_n_cube_rank <= SS_DR_MAX_RANK);
 
     sel_offset    = SS_DR_MAX_RANK - sel_rank;
     n_cube_offset = SS_DR_MAX_RANK - tgt_n_cube_rank;
-    HDassert(n_cube_offset <= sel_offset);
+    assert(n_cube_offset <= sel_offset);
 
     /* First, compute the base count (which assumes start == 0
      * for the associated offset) and offset_count (which
@@ -2827,13 +2827,13 @@ test_select_hyper_checker_board_dr__verify_data(uint16_t *buf_ptr, unsigned rank
     unsigned       v, w, x, y, z;     /* to track position in checker */
     const unsigned test_max_rank = 5; /* code changes needed if this is increased */
 
-    HDassert(buf_ptr != NULL);
-    HDassert(0 < rank);
-    HDassert(rank <= test_max_rank);
-    HDassert(edge_size >= 6);
-    HDassert(0 < checker_edge_size);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(test_max_rank <= SS_DR_MAX_RANK);
+    assert(buf_ptr != NULL);
+    assert(0 < rank);
+    assert(rank <= test_max_rank);
+    assert(edge_size >= 6);
+    assert(0 < checker_edge_size);
+    assert(checker_edge_size <= edge_size);
+    assert(test_max_rank <= SS_DR_MAX_RANK);
 
     val_ptr        = buf_ptr;
     expected_value = first_expected_val;
@@ -2966,15 +2966,15 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     MESSAGE(7, ("\tranks = %d/%d, edge_size = %d, checker_edge_size = %d, chunk_edge_size = %d.\n",
                 small_rank, large_rank, edge_size, checker_edge_size, chunk_edge_size));
 
-    HDassert(edge_size >= 6);
-    HDassert(checker_edge_size > 0);
-    HDassert(checker_edge_size <= edge_size);
-    HDassert(edge_size >= chunk_edge_size);
-    HDassert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
-    HDassert(small_rank > 0);
-    HDassert(small_rank < large_rank);
-    HDassert(large_rank <= test_max_rank);
-    HDassert(test_max_rank <= SS_DR_MAX_RANK);
+    assert(edge_size >= 6);
+    assert(checker_edge_size > 0);
+    assert(checker_edge_size <= edge_size);
+    assert(edge_size >= chunk_edge_size);
+    assert((chunk_edge_size == 0) || (chunk_edge_size >= 3));
+    assert(small_rank > 0);
+    assert(small_rank < large_rank);
+    assert(large_rank <= test_max_rank);
+    assert(test_max_rank <= SS_DR_MAX_RANK);
 
     /* Compute cube sizes */
     small_cube_size = large_cube_size = (size_t)1;
@@ -2984,16 +2984,16 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
 
         large_cube_size *= (size_t)edge_size;
     } /* end for */
-    HDassert(large_cube_size < (size_t)(UINT_MAX));
+    assert(large_cube_size < (size_t)(UINT_MAX));
 
     small_rank_offset = test_max_rank - small_rank;
-    HDassert(small_rank_offset >= 1);
+    assert(small_rank_offset >= 1);
 
     /* also, at present, we use 16 bit values in this test --
      * hence the following assertion.  Delete it if we convert
      * to 32 bit values.
      */
-    HDassert(large_cube_size < (size_t)(64 * 1024));
+    assert(large_cube_size < (size_t)(64 * 1024));
 
     /* Allocate & initialize buffers */
     small_cube_buf_1 = (uint16_t *)calloc(sizeof(uint16_t), small_cube_size);
@@ -3160,11 +3160,11 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                      * need for another inner loop.
                      */
 
-                    HDassert((sel_start[0] == 0) || (0 < small_rank_offset));
-                    HDassert((sel_start[1] == 0) || (1 < small_rank_offset));
-                    HDassert((sel_start[2] == 0) || (2 < small_rank_offset));
-                    HDassert((sel_start[3] == 0) || (3 < small_rank_offset));
-                    HDassert((sel_start[4] == 0) || (4 < small_rank_offset));
+                    assert((sel_start[0] == 0) || (0 < small_rank_offset));
+                    assert((sel_start[1] == 0) || (1 < small_rank_offset));
+                    assert((sel_start[2] == 0) || (2 < small_rank_offset));
+                    assert((sel_start[3] == 0) || (3 < small_rank_offset));
+                    assert((sel_start[4] == 0) || (4 < small_rank_offset));
 
                     test_select_hyper_checker_board_dr__select_checker_board(
                         file_large_cube_sid, large_rank, edge_size, checker_edge_size, small_rank, sel_start);
@@ -3240,11 +3240,11 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                      * need for another inner loop.
                      */
 
-                    HDassert((sel_start[0] == 0) || (0 < small_rank_offset));
-                    HDassert((sel_start[1] == 0) || (1 < small_rank_offset));
-                    HDassert((sel_start[2] == 0) || (2 < small_rank_offset));
-                    HDassert((sel_start[3] == 0) || (3 < small_rank_offset));
-                    HDassert((sel_start[4] == 0) || (4 < small_rank_offset));
+                    assert((sel_start[0] == 0) || (0 < small_rank_offset));
+                    assert((sel_start[1] == 0) || (1 < small_rank_offset));
+                    assert((sel_start[2] == 0) || (2 < small_rank_offset));
+                    assert((sel_start[3] == 0) || (3 < small_rank_offset));
+                    assert((sel_start[4] == 0) || (4 < small_rank_offset));
 
                     test_select_hyper_checker_board_dr__select_checker_board(
                         mem_large_cube_sid, large_rank, edge_size, checker_edge_size, small_rank, sel_start);
@@ -3274,8 +3274,8 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                   (x * edge_size);
                     stop_index = start_index + small_cube_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= large_cube_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= large_cube_size);
 
                     /* verify that the large cube contains only zeros before the slice */
                     for (s = 0; s < start_index; s++) {
@@ -3283,7 +3283,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                             data_ok = FALSE;
                         ptr_1++;
                     } /* end for */
-                    HDassert(s == start_index);
+                    assert(s == start_index);
 
                     data_ok &= test_select_hyper_checker_board_dr__verify_data(
                         ptr_1, small_rank, edge_size, checker_edge_size, (uint16_t)0, (hbool_t)TRUE);
@@ -3291,7 +3291,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     ptr_1 += small_cube_size;
                     s += small_cube_size;
 
-                    HDassert(s == stop_index + 1);
+                    assert(s == stop_index + 1);
 
                     /* verify that the large cube contains only zeros after the slice */
                     for (s = stop_index + 1; s < large_cube_size; s++) {
@@ -3360,11 +3360,11 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                      * need for another inner loop.
                      */
 
-                    HDassert((sel_start[0] == 0) || (0 < small_rank_offset));
-                    HDassert((sel_start[1] == 0) || (1 < small_rank_offset));
-                    HDassert((sel_start[2] == 0) || (2 < small_rank_offset));
-                    HDassert((sel_start[3] == 0) || (3 < small_rank_offset));
-                    HDassert((sel_start[4] == 0) || (4 < small_rank_offset));
+                    assert((sel_start[0] == 0) || (0 < small_rank_offset));
+                    assert((sel_start[1] == 0) || (1 < small_rank_offset));
+                    assert((sel_start[2] == 0) || (2 < small_rank_offset));
+                    assert((sel_start[3] == 0) || (3 < small_rank_offset));
+                    assert((sel_start[4] == 0) || (4 < small_rank_offset));
 
                     test_select_hyper_checker_board_dr__select_checker_board(
                         mem_large_cube_sid, large_rank, edge_size, checker_edge_size, small_rank, sel_start);
@@ -3455,11 +3455,11 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                      * need for another inner loop.
                      */
 
-                    HDassert((sel_start[0] == 0) || (0 < small_rank_offset));
-                    HDassert((sel_start[1] == 0) || (1 < small_rank_offset));
-                    HDassert((sel_start[2] == 0) || (2 < small_rank_offset));
-                    HDassert((sel_start[3] == 0) || (3 < small_rank_offset));
-                    HDassert((sel_start[4] == 0) || (4 < small_rank_offset));
+                    assert((sel_start[0] == 0) || (0 < small_rank_offset));
+                    assert((sel_start[1] == 0) || (1 < small_rank_offset));
+                    assert((sel_start[2] == 0) || (2 < small_rank_offset));
+                    assert((sel_start[3] == 0) || (3 < small_rank_offset));
+                    assert((sel_start[4] == 0) || (4 < small_rank_offset));
 
                     test_select_hyper_checker_board_dr__select_checker_board(
                         file_large_cube_sid, large_rank, edge_size, checker_edge_size, small_rank, sel_start);
@@ -3498,8 +3498,8 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                                   (x * edge_size);
                     stop_index = start_index + small_cube_size - 1;
 
-                    HDassert(start_index < stop_index);
-                    HDassert(stop_index <= large_cube_size);
+                    assert(start_index < stop_index);
+                    assert(stop_index <= large_cube_size);
 
                     /* verify that the large cube contains only zeros before the slice */
                     for (s = 0; s < start_index; s++) {
@@ -3507,7 +3507,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                             data_ok = FALSE;
                         ptr_1++;
                     } /* end for */
-                    HDassert(s == start_index);
+                    assert(s == start_index);
 
                     /* verify that the slice contains the expected data */
                     data_ok &= test_select_hyper_checker_board_dr__verify_data(
@@ -3516,7 +3516,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     ptr_1 += small_cube_size;
                     s += small_cube_size;
 
-                    HDassert(s == stop_index + 1);
+                    assert(s == stop_index + 1);
 
                     /* verify that the large cube contains only zeros after the slice */
                     for (s = stop_index + 1; s < large_cube_size; s++) {
@@ -5569,7 +5569,7 @@ test_select_hyper_valid_combination(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Selection Combination Validity\n"));
-    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for single point selection */
     single_pt_sid = H5Screate_simple(SPACE9_RANK, dims2D, NULL);
@@ -8459,7 +8459,7 @@ test_shape_same(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Same Shape Comparisons\n"));
-    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for "all" selection */
     all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
@@ -10912,13 +10912,13 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
     htri_t   check; /* Shape comparison return value */
     herr_t   ret;   /* Generic return value    */
 
-    HDassert(0 < small_rank);
-    HDassert(small_rank <= large_rank);
-    HDassert(large_rank <= SS_DR_MAX_RANK);
-    HDassert(0 <= offset);
-    HDassert(offset < large_rank);
-    HDassert(edge_size > 0);
-    HDassert(edge_size <= 1000);
+    assert(0 < small_rank);
+    assert(small_rank <= large_rank);
+    assert(large_rank <= SS_DR_MAX_RANK);
+    assert(0 <= offset);
+    assert(offset < large_rank);
+    assert(edge_size > 0);
+    assert(edge_size <= 1000);
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n",
                test_num);
@@ -10970,7 +10970,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
      */
 
     i = SS_DR_MAX_RANK - large_rank;
-    HDassert(i >= 0);
+    assert(i >= 0);
 
     start_ptr  = &(start[i]);
     stride_ptr = &(stride[i]);
@@ -11164,21 +11164,21 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
     htri_t   check; /* Shape comparison return value */
     herr_t   ret;   /* Generic return value    */
 
-    HDassert(0 < small_rank);
-    HDassert(small_rank <= large_rank);
-    HDassert(large_rank <= SS_DR_MAX_RANK);
-    HDassert(0 < checker_size);
-    HDassert(checker_size <= edge_size);
-    HDassert(edge_size <= 1000);
-    HDassert(0 <= offset);
-    HDassert(offset < (int)edge_size);
+    assert(0 < small_rank);
+    assert(small_rank <= large_rank);
+    assert(large_rank <= SS_DR_MAX_RANK);
+    assert(0 < checker_size);
+    assert(checker_size <= edge_size);
+    assert(edge_size <= 1000);
+    assert(0 <= offset);
+    assert(offset < (int)edge_size);
 
     for (i = SS_DR_MAX_RANK - large_rank; i < SS_DR_MAX_RANK; i++)
         if (dim_selected[i] == TRUE)
             dims_selected++;
 
-    HDassert(dims_selected >= 0);
-    HDassert(dims_selected <= large_rank);
+    assert(dims_selected >= 0);
+    assert(dims_selected <= large_rank);
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0),
                "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
@@ -11367,7 +11367,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
      */
 
     i = SS_DR_MAX_RANK - large_rank;
-    HDassert(i >= 0);
+    assert(i >= 0);
 
     start_ptr  = &(start[i]);
     stride_ptr = &(stride[i]);
@@ -11708,22 +11708,22 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
     htri_t   check; /* Shape comparison return value */
     herr_t   ret;   /* Generic return value    */
 
-    HDassert(0 < small_rank);
-    HDassert(small_rank <= large_rank);
-    HDassert(large_rank <= SS_DR_MAX_RANK);
-    HDassert(9 <= edge_size);
-    HDassert(edge_size <= 1000);
-    HDassert(0 <= slice_offset);
-    HDassert(slice_offset < edge_size);
-    HDassert(-2 <= pattern_offset);
-    HDassert(pattern_offset <= 2);
+    assert(0 < small_rank);
+    assert(small_rank <= large_rank);
+    assert(large_rank <= SS_DR_MAX_RANK);
+    assert(9 <= edge_size);
+    assert(edge_size <= 1000);
+    assert(0 <= slice_offset);
+    assert(slice_offset < edge_size);
+    assert(-2 <= pattern_offset);
+    assert(pattern_offset <= 2);
 
     for (i = SS_DR_MAX_RANK - large_rank; i < SS_DR_MAX_RANK; i++)
         if (dim_selected[i] == TRUE)
             dims_selected++;
 
-    HDassert(dims_selected >= 0);
-    HDassert(dims_selected <= large_rank);
+    assert(dims_selected >= 0);
+    assert(dims_selected <= large_rank);
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0),
                "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
@@ -11821,7 +11821,7 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
      */
 
     i = SS_DR_MAX_RANK - large_rank;
-    HDassert(i >= 0);
+    assert(i >= 0);
 
     start_ptr  = &(start[i]);
     stride_ptr = &(stride[i]);
@@ -14327,7 +14327,7 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t en
     hsize_t      blocklist[12];
     herr_t       ret;
 
-    HDassert(enblocks <= 2);
+    assert(enblocks <= 2);
 
     /* Copy sid to lim_sid */
     lim_sid = H5Scopy(sid);
@@ -14365,7 +14365,7 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t en
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end if */
             else {
-                HDassert(nblocks == (hssize_t)2);
+                assert(nblocks == (hssize_t)2);
                 if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0) {
                     if (HDmemcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])) != 0)
                         ERROR("H5Sget_select_hyper_blocklist");
@@ -14795,7 +14795,7 @@ test_internal_consistency(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Consistency of Internal States\n"));
-    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for "all" selection */
     all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);
@@ -15362,7 +15362,7 @@ test_sel_iter(void)
                 case H5S_SEL_ERROR:
                 case H5S_SEL_N:
                 default:
-                    HDassert(0 && "Can't occur");
+                    assert(0 && "Can't occur");
                     break;
             } /* end switch */
 
@@ -15410,7 +15410,7 @@ test_sel_iter(void)
                 case H5S_SEL_ERROR:
                 case H5S_SEL_N:
                 default:
-                    HDassert(0 && "Can't occur");
+                    assert(0 && "Can't occur");
                     break;
             } /* end switch */
 
@@ -15481,7 +15481,7 @@ test_sel_iter(void)
                 case H5S_SEL_ERROR:
                 case H5S_SEL_N:
                 default:
-                    HDassert(0 && "Can't occur");
+                    assert(0 && "Can't occur");
                     break;
             } /* end switch */
 
@@ -15529,7 +15529,7 @@ test_sel_iter(void)
                 case H5S_SEL_ERROR:
                 case H5S_SEL_N:
                 default:
-                    HDassert(0 && "Can't occur");
+                    assert(0 && "Can't occur");
                     break;
             } /* end switch */
 
@@ -15567,7 +15567,7 @@ test_sel_iter(void)
                 case H5S_SEL_ERROR:
                 case H5S_SEL_N:
                 default:
-                    HDassert(0 && "Can't occur");
+                    assert(0 && "Can't occur");
                     break;
             } /* end switch */
 

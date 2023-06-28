@@ -291,8 +291,8 @@ H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(dst);
-    HDassert(src);
+    assert(dst);
+    assert(src);
 
     /* Copy components of the location */
     if (H5O_loc_copy(dst->oloc, src->oloc, depth) < 0)
@@ -324,7 +324,7 @@ H5G_loc_reset(H5G_loc_t *loc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
+    assert(loc);
 
     /* Reset components of the location */
     if (H5O_loc_reset(loc->oloc) < 0)
@@ -356,7 +356,7 @@ H5G_loc_free(H5G_loc_t *loc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
+    assert(loc);
 
     /* Reset components of the location */
     if (H5G_name_free(loc->path) < 0)
@@ -426,9 +426,9 @@ H5G_loc_find(const H5G_loc_t *loc, const char *name, H5G_loc_t *obj_loc /*out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(obj_loc);
+    assert(loc);
+    assert(name && *name);
+    assert(obj_loc);
 
     /* Set up user data for locating object */
     udata.loc = obj_loc;
@@ -527,9 +527,9 @@ H5G_loc_find_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(group_name && *group_name);
-    HDassert(obj_loc);
+    assert(loc);
+    assert(group_name && *group_name);
+    assert(obj_loc);
 
     /* Set up user data for locating object */
     udata.idx_type = idx_type;
@@ -566,9 +566,9 @@ H5G__loc_insert(H5G_loc_t *grp_loc, char *name, H5G_loc_t *obj_loc, H5O_type_t o
     FUNC_ENTER_PACKAGE
 
     /* Check args. */
-    HDassert(grp_loc);
-    HDassert(name && *name);
-    HDassert(obj_loc);
+    assert(grp_loc);
+    assert(name && *name);
+    assert(obj_loc);
 
     /* Create link object for the object location */
     lnk.type         = H5L_TYPE_HARD;
@@ -650,9 +650,9 @@ H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(exists);
+    assert(loc);
+    assert(name && *name);
+    assert(exists);
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G__loc_exists_cb, exists) < 0)
@@ -720,9 +720,9 @@ H5G__loc_addr(const H5G_loc_t *loc, const char *name, haddr_t *addr /*out*/)
     FUNC_ENTER_PACKAGE
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(addr);
+    assert(loc);
+    assert(name && *name);
+    assert(addr);
 
     /* Traverse group hierarchy to locate object */
     if (H5G_traverse(loc, name, H5G_TARGET_NORMAL, H5G__loc_addr_cb, addr) < 0)
@@ -792,9 +792,9 @@ H5G_loc_info(const H5G_loc_t *loc, const char *name, H5O_info2_t *oinfo /*out*/,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(oinfo);
+    assert(loc);
+    assert(name && *name);
+    assert(oinfo);
 
     /* Set up user data for locating object */
     udata.fields = fields;
@@ -868,9 +868,9 @@ H5G_loc_native_info(const H5G_loc_t *loc, const char *name, H5O_native_info_t *o
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
-    HDassert(oinfo);
+    assert(loc);
+    assert(name && *name);
+    assert(oinfo);
 
     /* Set up user data for locating object */
     udata.fields = fields;
@@ -962,8 +962,8 @@ H5G_loc_set_comment(const H5G_loc_t *loc, const char *name, const char *comment)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for locating object */
     udata.comment = comment;
@@ -1049,8 +1049,8 @@ H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Set up user data for locating object */
     udata.comment      = comment;

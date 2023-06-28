@@ -435,7 +435,7 @@ H5FD__sec2_close(H5FD_t *_file)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     /* Close the underlying file */
     if (HDclose(file->fd) < 0)
@@ -691,8 +691,8 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5_addr_defined(addr))
@@ -753,8 +753,8 @@ H5FD__sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             break;
         } /* end if */
 
-        HDassert(bytes_read >= 0);
-        HDassert((size_t)bytes_read <= size);
+        assert(bytes_read >= 0);
+        assert((size_t)bytes_read <= size);
 
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
@@ -799,8 +799,8 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5_addr_defined(addr))
@@ -856,8 +856,8 @@ H5FD__sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
 
-        HDassert(bytes_wrote > 0);
-        HDassert((size_t)bytes_wrote <= size);
+        assert(bytes_wrote > 0);
+        assert((size_t)bytes_wrote <= size);
 
         size -= (size_t)bytes_wrote;
         addr += (haddr_t)bytes_wrote;
@@ -901,7 +901,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Extend the file to make sure it's large enough */
     if (!H5_addr_eq(file->eoa, file->eof)) {
@@ -971,7 +971,7 @@ H5FD__sec2_lock(H5FD_t *_file, hbool_t rw)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     /* Set exclusive or shared lock based on rw status */
     lock_flags = rw ? LOCK_EX : LOCK_SH;
@@ -1011,7 +1011,7 @@ H5FD__sec2_unlock(H5FD_t *_file)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(file);
+    assert(file);
 
     if (HDflock(file->fd, LOCK_UN) < 0) {
         if (file->ignore_disabled_file_locks && ENOSYS == errno) {
@@ -1044,7 +1044,7 @@ H5FD__sec2_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(filename);
+    assert(filename);
 
     if (HDremove(filename) < 0)
         HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")

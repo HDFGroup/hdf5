@@ -727,8 +727,8 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
         entry_ptr = cache_ptr->index[i];
 
         while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-            HDassert(entry_ptr->is_dirty == FALSE);
+            assert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+            assert(entry_ptr->is_dirty == FALSE);
 
             if (!entry_ptr->is_pinned && !entry_ptr->is_protected) {
                 ret = H5AC_expunge_entry(f, entry_ptr->type, entry_ptr->addr, 0);

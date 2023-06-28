@@ -93,7 +93,7 @@ H5CS__get_stack(void)
         fstack =
             (H5CS_t *)malloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
 #endif /* H5_HAVE_WIN_THREADS */
-        HDassert(fstack);
+        assert(fstack);
 
         /* Set the thread-specific info */
         fstack->nused  = 0;
@@ -133,7 +133,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
+    assert(fstack);
 
     /* Default to outputting information to stderr */
     if (!stream)
@@ -174,9 +174,9 @@ H5CS_push(const char *func_name)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
-    HDassert(fstack->nused <= fstack->nalloc);
-    HDassert(func_name);
+    assert(fstack);
+    assert(fstack->nused <= fstack->nalloc);
+    assert(func_name);
 
     /* Check if we need to expand the stack of records */
     if (fstack->nused == fstack->nalloc) {
@@ -186,7 +186,7 @@ H5CS_push(const char *func_name)
         const char **x = (const char **)realloc(fstack->rec, na * sizeof(const char *));
 
         /* (Avoid returning an error from this routine, currently -QAK) */
-        HDassert(x);
+        assert(x);
         fstack->rec    = x;
         fstack->nalloc = na;
     } /* end if */
@@ -219,8 +219,8 @@ H5CS_pop(void)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(fstack);
-    HDassert(fstack->nused > 0);
+    assert(fstack);
+    assert(fstack->nused > 0);
 
     /* Pop the function. */
     fstack->nused--;
@@ -252,7 +252,7 @@ H5CS_copy_stack(void)
     FUNC_ENTER_NOAPI_NOFS
 
     /* Sanity check */
-    HDassert(old_stack);
+    assert(old_stack);
 
     /* Allocate a new stack */
     /* (Don't use library allocate code, since this code stack supports it) */
@@ -294,7 +294,7 @@ H5CS_close_stack(H5CS_t *stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert(stack);
+    assert(stack);
 
     /* Free stack */
     /* The function name string are statically allocated (by the compiler)
