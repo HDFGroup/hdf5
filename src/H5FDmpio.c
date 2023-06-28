@@ -2888,7 +2888,7 @@ H5FD__selection_build_types(hbool_t io_op_write, uint32_t num_pieces, H5S_t **fi
          */
         j = 0; /* guess at the index of the smallest value of s_bufs[] */
 
-        if (bufs[j+1].cvp != NULL) {
+        if (bufs[j + 1].cvp != NULL) {
             for (i = 1; i < num_pieces; i++) {
                 if (io_op_write) {
                     if (bufs[i].cvp < bufs[j].cvp)
