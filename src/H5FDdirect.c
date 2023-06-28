@@ -550,11 +550,11 @@ H5FD__direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
      * than the one where the program is running.
      */
     /* NOTE: Use malloc and free here to ensure compatibility with
-     *       HDposix_memalign.
+     *       posix_memalign().
      */
     buf1 = malloc(sizeof(int));
-    if (HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
+    if (posix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "posix_memalign failed")
 
     if (o_flags & O_CREAT) {
         if (HDwrite(file->fd, buf1, sizeof(int)) < 0) {
@@ -944,8 +944,8 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
         if (alloc_size > _cbsize)
             alloc_size = _cbsize;
         assert(!(alloc_size % _fbsize));
-        if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+        if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
 
         /* look for the aligned position for reading the data */
         assert(!(((addr / _fbsize) * _fbsize) % _fbsize));
@@ -1125,8 +1125,8 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
             alloc_size = _cbsize;
         assert(!(alloc_size % _fbsize));
 
-        if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "HDposix_memalign failed")
+        if (posix_memalign(&copy_buf, _boundary, alloc_size) != 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "posix_memalign failed")
 
         /* look for the right position for reading or writing the data */
         if (HDlseek(file->fd, (HDoff_t)write_addr, SEEK_SET) < 0)

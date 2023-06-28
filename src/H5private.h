@@ -895,8 +895,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
 #endif
-#ifndef HDposix_memalign
-#define HDposix_memalign(P, A, Z) posix_memalign(P, A, Z)
 #endif
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
@@ -1145,9 +1143,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
-#endif
-#ifndef HDsystem
-#define HDsystem(S) system(S)
 #endif
 #ifndef HDtime
 #define HDtime(T) time(T)
