@@ -263,7 +263,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
         case open_only:
             break;
         default:
-            HDassert(0);
+            assert(0);
     }
 
     /* Close up */
@@ -387,7 +387,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
                     value = 0;
                 break;
             default:
-                HDassert(0);
+                assert(0);
         }
 
         /* verify content of the chunk */
@@ -455,7 +455,7 @@ test_chunk_alloc(void)
 
     filename = (const char *)GetTestParameters();
     if (VERBOSE_MED)
-        HDprintf("Extend Chunked allocation test on file %s\n", filename);
+        printf("Extend Chunked allocation test on file %s\n", filename);
 
     /* Case 1 */
     /* Create chunked dataset without writing anything.*/

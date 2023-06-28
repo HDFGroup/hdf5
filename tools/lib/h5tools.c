@@ -175,7 +175,7 @@ h5tools_close(void)
     if (h5tools_init_g) {
         /* special case where only data is output to stdout */
         if ((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
-            HDfprintf(rawdatastream, "\n");
+            fprintf(rawdatastream, "\n");
 
         if (tools_func)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);

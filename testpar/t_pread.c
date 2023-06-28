@@ -111,7 +111,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     pass = TRUE;
 
-    HDassert(comm != MPI_COMM_NULL);
+    assert(comm != MPI_COMM_NULL);
 
     if ((MPI_Comm_rank(comm, &group_rank)) != MPI_SUCCESS) {
         pass         = FALSE;
@@ -125,7 +125,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     if (mpi_rank == 0) {
 
-        HDfprintf(stdout, "Constructing test files...");
+        fprintf(stdout, "Constructing test files...");
     }
 
     /* Setup the file names
@@ -151,7 +151,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
          * need to worry that we reassign it for each file!
          */
         group_filename = FILENAMES[file_index];
-        HDassert(group_filename);
+        assert(group_filename);
 
         /* Assign the 'data_filename' */
         if (h5_fixname(group_filename, H5P_DEFAULT, data_filename, sizeof(data_filename)) == NULL) {
@@ -429,11 +429,11 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
     /* report results */
     if (mpi_rank == 0) {
         if (pass) {
-            HDfprintf(stdout, "Done.\n");
+            fprintf(stdout, "Done.\n");
         }
         else {
-            HDfprintf(stdout, "FAILED.\n");
-            HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            fprintf(stdout, "FAILED.\n");
+            fprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
         }
     }
 
@@ -513,7 +513,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     pass = TRUE;
 
-    HDassert(comm != MPI_COMM_NULL);
+    assert(comm != MPI_COMM_NULL);
 
     if ((MPI_Comm_rank(comm, &group_rank)) != MPI_SUCCESS) {
         pass         = FALSE;
@@ -555,7 +555,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         else /* test 2 group 1 */
             group_filename = FILENAMES[2];
 
-        HDassert(group_filename);
+        assert(group_filename);
         if (h5_fixname(group_filename, H5P_DEFAULT, reloc_data_filename, sizeof(reloc_data_filename)) ==
             NULL) {
 
@@ -1023,7 +1023,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
         }
         else {
             H5_FAILED();
-            HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            fprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
         }
         HDremove(reloc_data_filename);
     }
@@ -1077,34 +1077,34 @@ main(int argc, char **argv)
     test_argv0 = HDstrdup(argv[0]);
 
     if ((MPI_Init(&argc, &argv)) != MPI_SUCCESS) {
-        HDfprintf(stderr, "FATAL: Unable to initialize MPI\n");
+        fprintf(stderr, "FATAL: Unable to initialize MPI\n");
         HDexit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank)) != MPI_SUCCESS) {
-        HDfprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
+        fprintf(stderr, "FATAL: MPI_Comm_rank returned an error\n");
         HDexit(EXIT_FAILURE);
     }
 
     if ((MPI_Comm_size(MPI_COMM_WORLD, &mpi_size)) != MPI_SUCCESS) {
-        HDfprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
+        fprintf(stderr, "FATAL: MPI_Comm_size returned an error\n");
         HDexit(EXIT_FAILURE);
     }
 
     H5open();
 
     if (mpi_rank == 0) {
-        HDfprintf(stdout, "========================================\n");
-        HDfprintf(stdout, "Collective file open optimization tests\n");
-        HDfprintf(stdout, "        mpi_size     = %d\n", mpi_size);
-        HDfprintf(stdout, "========================================\n");
+        fprintf(stdout, "========================================\n");
+        fprintf(stdout, "Collective file open optimization tests\n");
+        fprintf(stdout, "        mpi_size     = %d\n", mpi_size);
+        fprintf(stdout, "========================================\n");
     }
 
     if (mpi_size < 3) {
 
         if (mpi_rank == 0) {
 
-            HDprintf("    Need at least 3 processes.  Exiting.\n");
+            printf("    Need at least 3 processes.  Exiting.\n");
         }
         goto finish;
     }
@@ -1121,7 +1121,7 @@ main(int argc, char **argv)
 
     if ((MPI_Comm_split(MPI_COMM_WORLD, which_group, 0, &group_comm)) != MPI_SUCCESS) {
 
-        HDfprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
+        fprintf(stderr, "FATAL: MPI_Comm_split returned an error\n");
         HDexit(EXIT_FAILURE);
     }
 
@@ -1132,7 +1132,7 @@ main(int argc, char **argv)
 
     if (nerrs > 0) {
         if (mpi_rank == 0) {
-            HDprintf("    Test(1) file construction failed -- skipping tests.\n");
+            printf("    Test(1) file construction failed -- skipping tests.\n");
         }
         goto finish;
     }
@@ -1142,7 +1142,7 @@ main(int argc, char **argv)
 
     if (nerrs > 0) {
         if (mpi_rank == 0) {
-            HDprintf("    Test(2) file construction failed -- skipping tests.\n");
+            printf("    Test(2) file construction failed -- skipping tests.\n");
         }
         goto finish;
     }
@@ -1152,15 +1152,15 @@ main(int argc, char **argv)
 
     if (nerrs > 0) {
         if (mpi_rank == 0) {
-            HDprintf("    Parallel read test(1) failed -- skipping tests.\n");
+            printf("    Parallel read test(1) failed -- skipping tests.\n");
         }
         goto finish;
     }
 
     /* Update the user on our progress so far. */
     if (mpi_rank == 0) {
-        HDprintf("    Test 1 of 2 succeeded\n");
-        HDprintf("    -- Starting multi-group parallel read test.\n");
+        printf("    Test 1 of 2 succeeded\n");
+        printf("    -- Starting multi-group parallel read test.\n");
     }
 
     /* run the 2nd set of tests */
@@ -1168,19 +1168,19 @@ main(int argc, char **argv)
 
     if (nerrs > 0) {
         if (mpi_rank == 0) {
-            HDprintf("    Multi-group read test(2) failed\n");
+            printf("    Multi-group read test(2) failed\n");
         }
         goto finish;
     }
 
     if (mpi_rank == 0) {
-        HDprintf("    Test 2 of 2 succeeded\n");
+        printf("    Test 2 of 2 succeeded\n");
     }
 
 finish:
 
     if ((group_comm != MPI_COMM_NULL) && (MPI_Comm_free(&group_comm)) != MPI_SUCCESS) {
-        HDfprintf(stderr, "MPI_Comm_free failed!\n");
+        fprintf(stderr, "MPI_Comm_free failed!\n");
     }
 
     /* make sure all processes are finished before final report, cleanup
@@ -1191,19 +1191,19 @@ finish:
     if (mpi_rank == 0) { /* only process 0 reports */
         const char *header = "Collective file open optimization tests";
 
-        HDfprintf(stdout, "===================================\n");
+        fprintf(stdout, "===================================\n");
         if (nerrs > 0) {
-            HDfprintf(stdout, "***%s detected %d failures***\n", header, nerrs);
+            fprintf(stdout, "***%s detected %d failures***\n", header, nerrs);
         }
         else {
-            HDfprintf(stdout, "%s finished with no failures\n", header);
+            fprintf(stdout, "%s finished with no failures\n", header);
         }
-        HDfprintf(stdout, "===================================\n");
+        fprintf(stdout, "===================================\n");
     }
 
     /* close HDF5 library */
     if (H5close() != SUCCEED) {
-        HDfprintf(stdout, "H5close() failed. (Ignoring)\n");
+        fprintf(stdout, "H5close() failed. (Ignoring)\n");
     }
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */

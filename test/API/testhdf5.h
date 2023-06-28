@@ -207,15 +207,15 @@
 #define TEST_STR      "Test"
 #define CLEAN_STR     "Cleanup"
 
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define TESTING(WHAT)                                                                                        \
     {                                                                                                        \
-        HDprintf("Testing %-62s", WHAT);                                                                     \
+        printf("Testing %-62s", WHAT);                                                                       \
         HDfflush(stdout);                                                                                    \
     }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
-        HDprintf("  Testing %-60s", WHAT);                                                                   \
+        printf("  Testing %-60s", WHAT);                                                                     \
         HDfflush(stdout);                                                                                    \
     }
 #define PASSED()                                                                                             \

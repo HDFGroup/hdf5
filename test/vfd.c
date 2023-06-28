@@ -81,9 +81,9 @@ static int __k;
     do {                                                                                                     \
         for (__k = 0; __k < (size); __k++) {                                                                 \
             if (__k % 16 == 0) {                                                                             \
-                HDprintf("\n%04x", __k);                                                                     \
+                printf("\n%04x", __k);                                                                       \
             }                                                                                                \
-            HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                        \
+            printf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                          \
         }                                                                                                    \
     } while (0) /* end #define HEXPRINT() */
 
@@ -104,7 +104,7 @@ static int __k;
                                                                                                              \
             if ((sizes_array)[idx] == 0) {                                                                   \
                                                                                                              \
-                HDassert((idx) > 0);                                                                         \
+                assert((idx) > 0);                                                                           \
                 (bool_size_fixed) = TRUE;                                                                    \
             }                                                                                                \
             else {                                                                                           \
@@ -131,7 +131,7 @@ static int __k;
                                                                                                              \
             if ((types_array)[idx] == H5FD_MEM_NOLIST) {                                                     \
                                                                                                              \
-                HDassert((idx) > 0);                                                                         \
+                assert((idx) > 0);                                                                           \
                 (bool_type_fixed) = TRUE;                                                                    \
             }                                                                                                \
             else {                                                                                           \
@@ -532,8 +532,8 @@ test_core(void)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             if (*pr++ != *pw++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -600,8 +600,8 @@ test_core(void)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             if (*pw++ != *pr++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -753,7 +753,7 @@ test_direct(void)
     if (file < 0) {
         H5Pclose(fapl);
         SKIPPED();
-        HDprintf("  Probably the file system doesn't support Direct I/O\n");
+        printf("  Probably the file system doesn't support Direct I/O\n");
         return 0;
     }
 
@@ -833,8 +833,8 @@ test_direct(void)
         for (j = 0; j < DSET1_DIM2; j++)
             if (*p1++ != *p2++) {
                 H5_FAILED();
-                HDprintf("    Read different values than written in data set 1.\n");
-                HDprintf("    At index %d,%d\n", i, j);
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
                 TEST_ERROR;
             } /* end if */
 
@@ -866,8 +866,8 @@ test_direct(void)
     for (i = 0; i < DSET2_DIM; i++)
         if (wdata2[i] != rdata2[i]) {
             H5_FAILED();
-            HDprintf("    Read different values than written in data set 2.\n");
-            HDprintf("    At index %d\n", i);
+            printf("    Read different values than written in data set 2.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
         } /* end if */
 
@@ -2386,7 +2386,7 @@ error:
     do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDfprintf(stderr, mesg);                                                                             \
+        fprintf(stderr, mesg);                                                                               \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
         HDfflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
@@ -2443,7 +2443,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
     }
     if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
         HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
-        HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
+        fprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
         SPLITTER_TEST_FAULT("Write-Only file path mismatch\n");
@@ -3417,7 +3417,7 @@ test_splitter(void)
 
     if (!driver_is_splitter_compatible(child_fapl_id)) {
         SKIPPED();
-        HDprintf("  given driver is not Splitter W/O compatible.\n");
+        printf("  given driver is not Splitter W/O compatible.\n");
         return 0;
     }
 
@@ -3502,7 +3502,7 @@ setup_rand(void)
 
         seed = predefined_seed;
 
-        HDfprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
+        fprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
         HDfflush(stdout);
 
         HDsrand(seed);
@@ -3511,14 +3511,14 @@ setup_rand(void)
 
         if (HDgettimeofday(&tv, NULL) != 0) {
 
-            HDfprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", __func__);
+            fprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", __func__);
             HDfflush(stdout);
         }
         else {
 
             seed = (unsigned)tv.tv_usec;
 
-            HDfprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
+            fprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
             HDfflush(stdout);
 
             HDsrand(seed);
@@ -4081,7 +4081,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
         if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
-            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
+            fprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
             break;
         }
@@ -4184,7 +4184,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
      */
     fix_point = ((uint32_t)rand() & (count - 1)) / 2;
 
-    HDassert(fix_point < count / 2);
+    assert(fix_point < count / 2);
 
     for (i = 0; i < count; i++) {
 
@@ -4218,7 +4218,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
         if ((NULL == temp_buf) || (NULL == read_bufs[i])) {
 
-            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
+            fprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
             break;
         }
@@ -4305,7 +4305,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: H5FDread() failed on entry %d.\n", __func__, i);
+                fprintf(stdout, "%s: H5FDread() failed on entry %d.\n", __func__, i);
             }
             result = FALSE;
             break;
@@ -4356,7 +4356,7 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: HDwrite() failed on entry %d.\n", __func__, i);
+                fprintf(stdout, "%s: HDwrite() failed on entry %d.\n", __func__, i);
             }
             result = FALSE;
             break;
@@ -4420,10 +4420,10 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
 
                 if (verbose) {
 
-                    HDfprintf(stdout, "\n\nread/write buf mismatch in vector/entry");
-                    HDfprintf(stdout, "\"%s\"/%u at offset %llu/%llu w/r = %c/%c type = %s\n\n", name,
-                              (unsigned)i, (long long unsigned)j, (long long unsigned)size, w_buf[j],
-                              r_buf[j], mem_type_names[type]);
+                    fprintf(stdout, "\n\nread/write buf mismatch in vector/entry");
+                    fprintf(stdout, "\"%s\"/%u at offset %llu/%llu w/r = %c/%c type = %s\n\n", name,
+                            (unsigned)i, (long long unsigned)j, (long long unsigned)size, w_buf[j], r_buf[j],
+                            mem_type_names[type]);
                 }
             }
             j++;
@@ -4467,7 +4467,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
     const char *w_buf;
     char       *r_buf;
 
-    HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
+    fprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
 
     for (i = 0; i < count; i++) {
 
@@ -4475,7 +4475,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
 
         SET_TYPE(type_fixed, types, type, i);
 
-        HDassert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
+        assert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
 
         w_buf = (const char *)(write_bufs[i]);
 
@@ -4488,12 +4488,12 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
             r_buf = NULL;
         }
 
-        HDfprintf(stdout, "%u: addr/len = %llu/%llu, type = %s, w_buf = \"%s\"\n", (unsigned)i,
-                  (long long unsigned)(addrs[i]), (long long unsigned)(size), mem_type_names[type], w_buf);
+        fprintf(stdout, "%u: addr/len = %llu/%llu, type = %s, w_buf = \"%s\"\n", (unsigned)i,
+                (long long unsigned)(addrs[i]), (long long unsigned)(size), mem_type_names[type], w_buf);
 
         if (r_buf) {
 
-            HDfprintf(stdout, " r_buf = \"%s\"\n", r_buf);
+            fprintf(stdout, " r_buf = \"%s\"\n", r_buf);
         }
     }
 
@@ -4609,7 +4609,7 @@ test_vector_io(const char *vfd_name)
     }
     else {
 
-        HDfprintf(stdout, "un-supported VFD\n");
+        fprintf(stdout, "un-supported VFD\n");
         TEST_ERROR;
     }
 
@@ -5049,15 +5049,15 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
             if (rbufs[i][j] != erbufs[i][j]) {
                 H5_FAILED();
                 AT();
-                HDprintf("data read from file does not match expected values at mapping array location %d\n",
-                         i);
-                HDprintf("expected data: \n");
+                printf("data read from file does not match expected values at mapping array location %d\n",
+                       i);
+                printf("expected data: \n");
                 for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++) {
                     printf("%6d", erbufs[i][j]);
                     if (!((j + 1) % SEL_IO_DIM1))
                         printf("\n");
                 }
-                HDprintf("read data: \n");
+                printf("read data: \n");
                 for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++) {
                     printf("%6d", rbufs[i][j]);
                     if (!((j + 1) % SEL_IO_DIM1))
@@ -5148,7 +5148,7 @@ test_selection_io(const char *vfd_name)
     }
     else {
 
-        HDfprintf(stdout, "un-supported VFD\n");
+        fprintf(stdout, "un-supported VFD\n");
         TEST_ERROR;
     }
 
@@ -5220,7 +5220,7 @@ test_selection_io(const char *vfd_name)
          * Test 3: Strided <> Contiguous 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection in memory */
         start[0]  = 1;
@@ -5269,7 +5269,7 @@ test_selection_io(const char *vfd_name)
          * Test 4: Contiguous <> Strided 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Contiguous selection in memory */
         start[0]  = 1;
@@ -5318,7 +5318,7 @@ test_selection_io(const char *vfd_name)
          * Test 5: Strided <> Strided 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection in memory */
         start[0]  = 1;
@@ -5474,8 +5474,8 @@ test_selection_io(const char *vfd_name)
          * Test 8: Strided <> Strided 2D I/O
          */
         /* SEL_IO_DIM0 and SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM0 / 2 == (SEL_IO_DIM0 + 1) / 2);
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM0 / 2 == (SEL_IO_DIM0 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection (across dim 1) in memory */
         start[0]  = 0;
@@ -5509,7 +5509,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 1, j2 = 0; i < SEL_IO_DIM0; i++)
             for (j = 1; j < SEL_IO_DIM1; j += 2) {
-                HDassert(i2 < SEL_IO_DIM0);
+                assert(i2 < SEL_IO_DIM0);
                 fbuf2[i2][j2] = wbuf2[i][j];
                 if (++j2 == SEL_IO_DIM1) {
                     i2 += 2;
@@ -5571,7 +5571,7 @@ test_selection_io(const char *vfd_name)
 
         /* Update file buf */
         for (i = 1, i2 = 0, j2 = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2) {
-            HDassert(i2 < SEL_IO_DIM0);
+            assert(i2 < SEL_IO_DIM0);
             fbuf2[i2][j2] = wbuf1[i];
             j2 += 2;
             if (j2 >= SEL_IO_DIM1) {
@@ -5633,7 +5633,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 0; i < SEL_IO_DIM0; i += 2)
             for (j = 0; j < SEL_IO_DIM1; j++) {
-                HDassert(i2 < (SEL_IO_DIM0 * SEL_IO_DIM1));
+                assert(i2 < (SEL_IO_DIM0 * SEL_IO_DIM1));
                 fbuf1[i2] = wbuf2[i][j];
                 i2 += 2;
             }
@@ -5668,7 +5668,7 @@ test_selection_io(const char *vfd_name)
              * Test 11: Strided <> Strided 1D and 2D I/O
              */
             /* SEL_IO_DIM1 must be even */
-            HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+            assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
             /* Strided selection in memory (1D) */
             start[0]  = 0;
@@ -5717,7 +5717,7 @@ test_selection_io(const char *vfd_name)
                 fbuf1[(2 * i) + 1] = wbuf1[2 * i];
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5826,7 +5826,7 @@ test_selection_io(const char *vfd_name)
              * find 1D index into 2D array */
             for (i = 0, i2 = 0, j2 = 0; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf1[(i2 * SEL_IO_DIM1) + j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5836,7 +5836,7 @@ test_selection_io(const char *vfd_name)
                 }
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5953,13 +5953,13 @@ main(void)
      */
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr) {
-        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
+        printf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
         HDexit(EXIT_SUCCESS);
     }
 
     h5_reset();
 
-    HDprintf("Testing basic Virtual File Driver functionality.\n");
+    printf("Testing basic Virtual File Driver functionality.\n");
 
     setup_rand();
 
@@ -5983,11 +5983,11 @@ main(void)
     nerrors += test_ctl() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
     }
 
-    HDprintf("All Virtual File Driver tests passed.\n");
+    printf("All Virtual File Driver tests passed.\n");
 
     return EXIT_SUCCESS;
 } /* end main() */

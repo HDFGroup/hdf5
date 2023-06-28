@@ -34,10 +34,10 @@ my_errx(int code, const char *fmt, ...)
 {
     va_list ap;
 
-    (void)HDfprintf(stderr, "thread_id: ");
-    HDva_start(ap, fmt);
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
     (void)HDvfprintf(stderr, fmt, ap);
-    HDva_end(ap);
+    va_end(ap);
     (void)HDfputc('\n', stderr);
     HDexit(code);
 }
@@ -176,11 +176,11 @@ my_err(int code, const char *fmt, ...)
     va_list ap;
     int     errno_copy = errno;
 
-    (void)HDfprintf(stderr, "thread_id: ");
-    HDva_start(ap, fmt);
+    (void)fprintf(stderr, "thread_id: ");
+    va_start(ap, fmt);
     (void)HDvfprintf(stderr, fmt, ap);
-    HDva_end(ap);
-    (void)HDfprintf(stderr, ": %s\n", HDstrerror(errno_copy));
+    va_end(ap);
+    (void)fprintf(stderr, ": %s\n", HDstrerror(errno_copy));
     HDexit(code);
 }
 
@@ -203,9 +203,9 @@ atomic_printf(const char *fmt, ...)
     va_list ap;
     ssize_t nprinted, nwritten;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     nprinted = HDvsnprintf(buf, sizeof(buf), fmt, ap);
-    HDva_end(ap);
+    va_end(ap);
 
     if (nprinted == -1)
         my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
@@ -318,7 +318,7 @@ main(void)
 int
 main(void)
 {
-    HDfprintf(stderr, "not implemented in this configuration.\n");
+    fprintf(stderr, "not implemented in this configuration.\n");
     return EXIT_SUCCESS;
 }
 #endif /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/

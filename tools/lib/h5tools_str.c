@@ -122,9 +122,9 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
         int    nchars = -1;
         size_t avail  = str->nalloc - str->len;
 
-        HDva_start(ap, fmt);
+        va_start(ap, fmt);
         nchars = HDvsnprintf(str->s + str->len, avail, fmt, ap);
-        HDva_end(ap);
+        va_end(ap);
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when
          * buffer is smaller than source string. On Unix, this function
@@ -149,9 +149,9 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
              * Allocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + (size_t)nchars + 1, 2 * str->nalloc);
-            HDassert(newsize > str->nalloc); /*overflow*/
+            assert(newsize > str->nalloc); /*overflow*/
             str->s = (char *)HDrealloc(str->s, newsize);
-            HDassert(str->s);
+            assert(str->s);
             str->nalloc = newsize;
         }
         else {
@@ -184,7 +184,7 @@ h5tools_str_reset(h5tools_str_t *str /*in,out*/)
     if (!str->s || str->nalloc <= 0) {
         str->nalloc = STR_INIT_LEN;
         str->s      = (char *)HDmalloc(str->nalloc);
-        HDassert(str->s);
+        assert(str->s);
     }
 
     str->s[0] = '\0';
@@ -238,8 +238,8 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
 {
     char _temp[1024], *temp = _temp;
 
-    HDassert(str);
-    HDassert(fmt);
+    assert(str);
+    assert(fmt);
 
     /* If the format string is simply "%s" then don't bother doing anything */
     if (!HDstrcmp(fmt, "%s"))
@@ -254,7 +254,7 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
         if (str->len - start + 1 > n) {
             n    = str->len - start + 1;
             temp = (char *)HDmalloc(n);
-            HDassert(temp);
+            assert(temp);
         }
 
         HDstrncpy(temp, str->s + start, n - 1);
@@ -471,7 +471,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
 
         nblocks    = (hsize_t)snblocks;
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t)alloc_size);
         H5Sget_select_hyper_blocklist(rspace, (hsize_t)0, nblocks, ptdata);
 
@@ -532,7 +532,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
 
         npoints    = (hsize_t)snpoints;
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
-        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t)alloc_size);
         H5Sget_select_elem_pointlist(rspace, (hsize_t)0, npoints, ptdata);
 
@@ -1267,13 +1267,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 size  = H5Tget_size(memb);
                 ndims = H5Tget_array_ndims(type);
                 H5Tget_array_dims2(type, dims);
-                HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+                assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
                 /* Calculate the number of array elements */
                 for (k = 0, nelmts = 1; k < ndims; k++) {
                     temp_nelmts = nelmts;
                     temp_nelmts *= dims[k];
-                    HDassert(temp_nelmts == (hsize_t)((size_t)temp_nelmts));
+                    assert(temp_nelmts == (hsize_t)((size_t)temp_nelmts));
                     nelmts = (size_t)temp_nelmts;
                 }
                 /* Print the opening bracket */

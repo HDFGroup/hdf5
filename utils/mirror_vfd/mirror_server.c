@@ -139,22 +139,22 @@ struct server_run {
 static void
 usage(void)
 {
-    HDfprintf(stdout,
-              "mirror_server [options]\n"
-              "\n"
-              "Application for providing Mirror Writer process to "
-              " Mirror VFD on file-open.\n"
-              "Listens on a dedicated socket; forks as a Writer upon receipt"
-              " of a valid OPEN xmit.\n"
-              "\n"
-              "Options:\n"
-              "--help [-h]         : Print this help message and quit.\n"
-              "--logpath=PATH      : File path for logging output "
-              "(default none, to stdout).\n"
-              "--port=PORT         : Primary port (default %d).\n"
-              "--verbosity=NUM     : Debug printing level "
-              "0..4, (default %d).\n",
-              DEFAULT_PORT, MIRROR_LOG_DEFAULT_VERBOSITY);
+    fprintf(stdout,
+            "mirror_server [options]\n"
+            "\n"
+            "Application for providing Mirror Writer process to "
+            " Mirror VFD on file-open.\n"
+            "Listens on a dedicated socket; forks as a Writer upon receipt"
+            " of a valid OPEN xmit.\n"
+            "\n"
+            "Options:\n"
+            "--help [-h]         : Print this help message and quit.\n"
+            "--logpath=PATH      : File path for logging output "
+            "(default none, to stdout).\n"
+            "--port=PORT         : Primary port (default %d).\n"
+            "--verbosity=NUM     : Debug printing level "
+            "0..4, (default %d).\n",
+            DEFAULT_PORT, MIRROR_LOG_DEFAULT_VERBOSITY);
 } /* end usage() */
 
 /* ---------------------------------------------------------------------------
@@ -432,7 +432,7 @@ error:
 static void
 wait_for_child(int H5_ATTR_UNUSED sig)
 {
-    while (HDwaitpid(-1, NULL, WNOHANG) > 0)
+    while (waitpid(-1, NULL, WNOHANG) > 0)
         ;
 } /* end wait_for_child() */
 
@@ -554,7 +554,7 @@ handle_requests(struct server_run *run)
 
             mirror_log(run->loginfo, V_INFO, "probable OPEN xmit confirmed");
 
-            pid = HDfork();
+            pid = fork();
             if (pid < 0) { /* fork error */
                 mirror_log(run->loginfo, V_ERR, "cannot fork");
                 goto error;
@@ -562,10 +562,10 @@ handle_requests(struct server_run *run)
             else if (pid == 0) { /* child process (writer side of fork) */
                 mirror_log(run->loginfo, V_INFO, "executing writer");
                 if (run_writer(connfd, xopen) < 0) {
-                    HDprintf("can't run writer\n");
+                    printf("can't run writer\n");
                 }
                 else {
-                    HDprintf("writer OK\n");
+                    printf("writer OK\n");
                 }
                 HDclose(connfd);
 
@@ -634,7 +634,7 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    HDprintf("Mirror VFD was not built -- cannot launch server.\n");
+    printf("Mirror VFD was not built -- cannot launch server.\n");
     HDexit(EXIT_FAILURE);
 }
 

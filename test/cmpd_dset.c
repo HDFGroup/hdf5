@@ -209,17 +209,17 @@ test_compound(char *filename, hid_t fapl)
     if ((PRESERVE = H5Pcreate(H5P_DATASET_XFER)) < 0)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 0) {
-        HDprintf("Preserve status of dataset transfer property list should be"
-                 " 0 (FALSE), got %d\n",
-                 ret_code);
+        printf("Preserve status of dataset transfer property list should be"
+               " 0 (FALSE), got %d\n",
+               ret_code);
         goto error;
     }
     if (H5Pset_preserve(PRESERVE, 1) < 0)
         goto error;
     if ((ret_code = H5Pget_preserve(PRESERVE)) != 1) {
-        HDprintf("Preserve status of dataset transfer property list should be"
-                 " 1 (TRUE), got %d\n",
-                 ret_code);
+        printf("Preserve status of dataset transfer property list should be"
+               " 1 (TRUE), got %d\n",
+               ret_code);
         goto error;
     }
 
@@ -520,11 +520,11 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != 8 * i + 3 || s1[i].c[2] != 8 * i + 4 || s1[i].c[3] != 8 * i + 5 ||
             s1[i].d != 8 * i + 6 || s1[i].e != 8 * i + 7) {
             H5_FAILED();
-            HDprintf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
-            HDprintf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0],
-                     s1[i].c[1], s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
-            HDprintf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
-                     8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
+            printf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
+            printf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0], s1[i].c[1],
+                   s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
+            printf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
+                   8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
             goto error;
         }
     }
@@ -582,7 +582,7 @@ test_compound(char *filename, hid_t fapl)
 
     /* Read the dataset */
     s8 = (s1_t *)HDcalloc((size_t)(h_size[0] * h_size[1]), sizeof(s1_t));
-    HDassert(s8);
+    assert(s8);
     if (H5Dread(dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
         goto error;
     }
@@ -715,7 +715,7 @@ test_compound(char *filename, hid_t fapl)
     h_size[0]   = 2 * NX / 3 - f_offset[0];
     h_size[1]   = 2 * NY / 3 - f_offset[1];
     s11         = (s4_t *)HDmalloc((size_t)h_size[0] * (size_t)h_size[1] * sizeof(s4_t));
-    HDassert(s11);
+    assert(s11);
 
     /* Initialize */
     for (i = 0; i < h_size[0] * h_size[1]; i++) {
@@ -1220,8 +1220,8 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
             !H5_DBL_ABS_EQUAL(s_ptr->n, d_ptr->n)) {
 
             H5_FAILED();
-            HDprintf("    i=%d\n", i);
-            HDprintf(
+            printf("    i=%d\n", i);
+            printf(
                 "    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                 "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
                 s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2], s_ptr->c[3], s_ptr->c[4],
@@ -1231,7 +1231,7 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
                 (double)s_ptr->h[8], (double)s_ptr->h[9], (double)s_ptr->h[10], (double)s_ptr->h[11],
                 (double)s_ptr->h[12], (double)s_ptr->h[13], (double)s_ptr->h[14], (double)s_ptr->h[15],
                 (double)s_ptr->i, (double)s_ptr->j, s_ptr->k, s_ptr->l, s_ptr->m, s_ptr->n);
-            HDprintf(
+            printf(
                 "    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, "
                 "h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
                 d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2], d_ptr->c[3], d_ptr->c[4],
@@ -1665,10 +1665,10 @@ error:
         int _i;                                                                                              \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
-        HDprintf("    Insertion order =");                                                                   \
+        printf("    Insertion order =");                                                                     \
         for (_i = 0; _i < PACK_NMEMBS; _i++)                                                                 \
-            HDprintf(" %d", order[_i]);                                                                      \
-        HDprintf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
+            printf(" %d", order[_i]);                                                                        \
+        printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]);   \
         HDfflush(stdout);                                                                                    \
         goto error;                                                                                          \
     }
@@ -2216,7 +2216,7 @@ main(int argc, char *argv[])
     /* Turn off optimized compound converter? */
     if (argc > 1) {
         if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
-            HDfprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
+            fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
             HDexit(EXIT_FAILURE);
         }
         H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1,
@@ -2249,7 +2249,7 @@ main(int argc, char *argv[])
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
 
     if (nerrors) {
-        HDprintf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        printf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
         HDexit(EXIT_FAILURE);
     }
 

@@ -253,9 +253,9 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
     FUNC_ENTER_PACKAGE
 
     /* Check args - Just assert on package functions */
-    HDassert(search_params);
-    HDassert(found);
-    HDassert(plugin_info);
+    assert(search_params);
+    assert(found);
+    assert(plugin_info);
 
     /* Initialize output parameters */
     *found       = FALSE;
@@ -289,7 +289,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         matched = TRUE;
                 }
                 else {
-                    HDassert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+                    assert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
 
                     /* Make sure the plugin cache entry key type matches our search key type */
                     if (H5PL_cache_g[u].key.vol.kind != H5VL_GET_CONNECTOR_BY_VALUE)
@@ -313,7 +313,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
                         matched = TRUE;
                 }
                 else {
-                    HDassert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
+                    assert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
 
                     /* Make sure the plugin cache entry key type matches our search key type */
                     if (H5PL_cache_g[u].key.vfd.kind != H5FD_GET_DRIVER_BY_VALUE)

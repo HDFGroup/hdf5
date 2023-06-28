@@ -79,7 +79,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
         int     ret;
         va_list ap;
 
-        HDva_copy(ap, _ap);
+        va_copy(ap, _ap);
         ret = HDvsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
@@ -227,7 +227,7 @@ H5_make_time(struct tm *tm)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(tm);
+    assert(tm);
 
     /* Initialize timezone information */
     if (!H5_ntzset) {
@@ -398,7 +398,7 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
     static hbool_t       is_initialized = FALSE;
     BOOL                 err;
 
-    HDassert(tvs);
+    assert(tvs);
 
     if (!is_initialized) {
         /* NOTE: This is just a pseudo handle and does not need to be closed. */
@@ -569,9 +569,9 @@ Wopen_utf8(const char *path, int oflag, ...)
     if (oflag & O_CREAT) {
         va_list vl;
 
-        HDva_start(vl, oflag);
-        pmode = HDva_arg(vl, int);
-        HDva_end(vl);
+        va_start(vl, oflag);
+        pmode = va_arg(vl, int);
+        va_end(vl);
     }
 
     /* Open the file */
@@ -650,8 +650,8 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
-    HDassert(name);
-    HDassert(extpath);
+    assert(name);
+    assert(extpath);
 
     /* Clear external path pointer to begin with */
     *extpath = NULL;
@@ -705,10 +705,10 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             size_t cwdlen;
             size_t path_len;
 
-            HDassert(cwdpath);
+            assert(cwdpath);
             cwdlen = HDstrlen(cwdpath);
-            HDassert(cwdlen);
-            HDassert(new_name);
+            assert(cwdlen);
+            assert(new_name);
             path_len = cwdlen + HDstrlen(new_name) + 2;
             if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -725,7 +725,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
         char *ptr = NULL;
 
         H5_GET_LAST_DELIMITER(full_path, ptr)
-        HDassert(ptr);
+        assert(ptr);
         *++ptr   = '\0';
         *extpath = full_path;
     } /* end if */
@@ -762,7 +762,7 @@ H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(path2);
+    assert(path2);
 
     if (path1)
         path1_len = HDstrlen(path1);
@@ -1084,7 +1084,7 @@ H5_dirname(const char *path, char **dirname)
             else {
                 /* Pathname of form "dir/filename" */
                 len = sep - path;
-                HDassert(len >= 0);
+                assert(len >= 0);
 
                 out = H5MM_strndup(path, (size_t)len);
             }
@@ -1186,7 +1186,7 @@ H5_basename(const char *path, char **basename)
                     c_ptr--;
 
                 len = sep - c_ptr;
-                HDassert(len >= 0);
+                assert(len >= 0);
 
                 out = H5MM_strndup(c_ptr, (size_t)len);
             }
@@ -1272,7 +1272,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
                         }
                         else if (l_opts[i].has_arg == require_arg) {
                             if (H5_opterr)
-                                HDfprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
+                                fprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
 
                             optchar = '?';
                         }
@@ -1281,7 +1281,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
                 else {
                     if (H5_optarg) {
                         if (H5_opterr)
-                            HDfprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
+                            fprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
 
                         optchar = '?';
                     }
@@ -1293,7 +1293,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         if (l_opts && l_opts[i].name == NULL) {
             /* exhausted all of the l_opts we have and still didn't match */
             if (H5_opterr)
-                HDfprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
+                fprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
 
             optchar = '?';
         }
@@ -1311,7 +1311,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
 
         if (optchar == ':' || (cp = HDstrchr(opts, optchar)) == 0) {
             if (H5_opterr)
-                HDfprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
+                fprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optchar);
 
             /* if no chars left in this token, move to next token */
             if (argv[H5_optind][++sp] == '\0') {
@@ -1329,7 +1329,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
             }
             else if (++H5_optind >= argc) {
                 if (H5_opterr)
-                    HDfprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], optchar);
+                    fprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], optchar);
 
                 optchar = '?';
             }
@@ -1388,8 +1388,8 @@ char *
 H5_strcasestr(const char *haystack, const char *needle)
 {
     /* Check arguments. */
-    HDassert(haystack);
-    HDassert(needle);
+    assert(haystack);
+    assert(needle);
 
     /* begin once from each character of haystack, until needle is found */
     do {

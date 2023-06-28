@@ -404,17 +404,17 @@ typedef struct test_entry_t {
 
 #define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                                                          \
     if (H5C__PRE_HT_SEARCH_SC_CMP(cache_ptr, Addr)) {                                                        \
-        HDfprintf(stdout, "Pre HT search SC failed.\n");                                                     \
+        fprintf(stdout, "Pre HT search SC failed.\n");                                                       \
     }
 
 #define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)                                             \
     if (H5C__POST_SUC_HT_SEARCH_SC_CMP(cache_ptr, entry_ptr, k)) {                                           \
-        HDfprintf(stdout, "Post successful HT search SC failed.\n");                                         \
+        fprintf(stdout, "Post successful HT search SC failed.\n");                                           \
     }
 
 #define H5C_TEST__POST_HT_SHIFT_TO_FRONT_SC(cache_ptr, entry_ptr, k)                                         \
     if (H5C__POST_HT_SHIFT_TO_FRONT_SC_CMP(cache_ptr, entry_ptr, k)) {                                       \
-        HDfprintf(stdout, "Post HT shift to front failed.\n");                                               \
+        fprintf(stdout, "Post HT shift to front failed.\n");                                                 \
     }
 
 #define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                                                   \
@@ -429,7 +429,7 @@ typedef struct test_entry_t {
                 if ((entry_ptr) != (cache_ptr)->index[k]) {                                                  \
                     if ((entry_ptr)->ht_next)                                                                \
                         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;                                \
-                    HDassert((entry_ptr)->ht_prev != NULL);                                                  \
+                    assert((entry_ptr)->ht_prev != NULL);                                                    \
                     (entry_ptr)->ht_prev->ht_next  = (entry_ptr)->ht_next;                                   \
                     (cache_ptr)->index[k]->ht_prev = (entry_ptr);                                            \
                     (entry_ptr)->ht_next           = (cache_ptr)->index[k];                                  \

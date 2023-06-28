@@ -104,8 +104,8 @@ check_data_i(const char *dsetname, hid_t fid)
             if (data_out[i][j] != data_in[i][j])
                 if (!nerrors++) {
                     H5_FAILED();
-                    HDprintf("element [%d][%d] is %lld but should have been %lld\n", (int)i, (int)j,
-                             data_out[i][j], data_in[i][j]);
+                    printf("element [%d][%d] is %lld but should have been %lld\n", (int)i, (int)j,
+                           data_out[i][j], data_in[i][j]);
                 } /* end if */
 
     /* Close/release resources. */
@@ -114,7 +114,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Failure */
     if (nerrors) {
-        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX * NY));
+        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX * NY));
         return 1;
     } /* end if */
 
@@ -178,8 +178,8 @@ check_data_f(const char *dsetname, hid_t fid)
             if (!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], 0.001))
                 if (!nerrors++) {
                     H5_FAILED();
-                    HDprintf("element [%d][%d] is %g but should have been %g\n", (int)i, (int)j,
-                             data_out[i][j], data_in[i][j]);
+                    printf("element [%d][%d] is %g but should have been %g\n", (int)i, (int)j, data_out[i][j],
+                           data_in[i][j]);
                 } /* end if */
 
     /* Close/release resources. */
@@ -188,7 +188,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Failure */
     if (nerrors) {
-        HDprintf("total of %d errors out of %d elements\n", nerrors, (int)(NX * NY));
+        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX * NY));
         return 1;
     } /* end if */
 
@@ -382,10 +382,10 @@ main(void)
     nerrors += check_file(filename);
 
     if (nerrors) {
-        HDprintf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
         return EXIT_FAILURE;
     } /* end if */
 
-    HDprintf("All data type tests passed.\n");
+    printf("All data type tests passed.\n");
     return EXIT_SUCCESS;
 } /* end main() */

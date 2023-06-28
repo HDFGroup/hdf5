@@ -1089,7 +1089,7 @@ typedef int H5C_ring_t;
  *        Note: At this time, the flush_me_last flag will only be applied to
  *              two types of entries: the superblock and the file driver info
  *              message.  The code utilizing these flags is protected with
- *              HDasserts to enforce this.
+ *              asserts to enforce this.
  *
  * clear_on_unprotect:  Boolean flag used only in PHDF5.  When H5C is used
  *        to implement the metadata cache In the parallel case, only

@@ -125,7 +125,7 @@ H5C_ignore_tags(H5C_t *cache)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Assertions */
-    HDassert(cache != NULL);
+    assert(cache != NULL);
 
     /* Set variable to ignore tag values upon assignment */
     cache->ignore_tags = TRUE;
@@ -151,7 +151,7 @@ H5C_get_ignore_tags(const H5C_t *cache)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(cache);
+    assert(cache);
 
     /* Return ignore tag value */
     FUNC_LEAVE_NOAPI(cache->ignore_tags)
@@ -174,7 +174,7 @@ H5C_get_num_objs_corked(const H5C_t *cache)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
-    HDassert(cache);
+    assert(cache);
 
     /* Return value for num_objs_corked */
     FUNC_LEAVE_NOAPI(cache->num_objs_corked)
@@ -205,8 +205,8 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     FUNC_ENTER_PACKAGE
 
     /* Assertions */
-    HDassert(cache != NULL);
-    HDassert(entry != NULL);
+    assert(cache != NULL);
+    assert(entry != NULL);
 
     /* Get the tag */
     tag = H5CX_get_tag();
@@ -246,12 +246,12 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
         HASH_ADD(hh, cache->tag_list, tag, sizeof(haddr_t), tag_info);
     }
     else
-        HDassert(tag_info->corked || (tag_info->entry_cnt > 0 && tag_info->head));
+        assert(tag_info->corked || (tag_info->entry_cnt > 0 && tag_info->head));
 
     /* Sanity check entry, to avoid double insertions, etc */
-    HDassert(entry->tl_next == NULL);
-    HDassert(entry->tl_prev == NULL);
-    HDassert(entry->tag_info == NULL);
+    assert(entry->tl_next == NULL);
+    assert(entry->tl_prev == NULL);
+    assert(entry->tag_info == NULL);
 
     /* Add the entry to the list for the tagged object */
     entry->tl_next  = tag_info->head;
@@ -287,8 +287,8 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Assertions */
-    HDassert(cache != NULL);
-    HDassert(entry != NULL);
+    assert(cache != NULL);
+    assert(entry != NULL);
 
     /* Get the entry's tag info struct */
     if (NULL != (tag_info = entry->tag_info)) {
@@ -309,14 +309,14 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
         /* Remove the tag info from the tag list, if there's no more entries with this tag */
         if (!tag_info->corked && 0 == tag_info->entry_cnt) {
             /* Sanity check */
-            HDassert(NULL == tag_info->head);
+            assert(NULL == tag_info->head);
 
             /* Release the tag info */
             HASH_DELETE(hh, cache->tag_list, tag_info);
             tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
         }
         else
-            HDassert(tag_info->corked || NULL != tag_info->head);
+            assert(tag_info->corked || NULL != tag_info->head);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -344,7 +344,7 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(cache != NULL);
+    assert(cache != NULL);
 
     /* Search the list of tagged object addresses in the cache */
     HASH_FIND(hh, cache->tag_list, &tag, sizeof(haddr_t), tag_info);
@@ -355,8 +355,8 @@ H5C__iter_tagged_entries_real(H5C_t *cache, haddr_t tag, H5C_tag_iter_cb_t cb, v
         H5C_cache_entry_t *next_entry; /* Pointer to next entry in hash bucket chain */
 
         /* Sanity check */
-        HDassert(tag_info->head);
-        HDassert(tag_info->entry_cnt > 0);
+        assert(tag_info->head);
+        assert(tag_info->entry_cnt > 0);
 
         /* Iterate over the entries for this tag */
         entry = tag_info->head;
@@ -398,7 +398,7 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global, H5C_ta
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(cache != NULL);
+    assert(cache != NULL);
 
     /* Iterate over the entries for this tag */
     if (H5C__iter_tagged_entries_real(cache, tag, cb, cb_ctx) < 0)
@@ -441,8 +441,8 @@ H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Santify checks */
-    HDassert(entry);
-    HDassert(ctx);
+    assert(entry);
+    assert(ctx);
 
     /* Attempt to evict entry */
     if (entry->is_protected)
@@ -492,10 +492,10 @@ H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
-    HDassert(cache != NULL);
+    assert(cache != NULL);
 
     /* Construct context for iterator callbacks */
     ctx.f = f;
@@ -565,7 +565,7 @@ H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(entry);
+    assert(entry);
 
     /* We only want to set the flush marker on entries that
      * actually need flushed (i.e., dirty ones) */
@@ -597,7 +597,7 @@ H5C__mark_tagged_entries(H5C_t *cache, haddr_t tag)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(cache);
+    assert(cache);
 
     /* Iterate through hash table entries, marking those with specified tag, as
      * well as any major global entries which should always be flushed
@@ -629,7 +629,7 @@ H5C__flush_marked_entries(H5F_t *f)
     FUNC_ENTER_PACKAGE
 
     /* Assertions */
-    HDassert(f != NULL);
+    assert(f != NULL);
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
@@ -744,8 +744,8 @@ H5C_flush_tagged_entries(H5F_t *f, haddr_t tag)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Get cache pointer */
     cache = f->shared->cache;
@@ -785,7 +785,7 @@ H5C_retag_entries(H5C_t *cache, haddr_t src_tag, haddr_t dest_tag)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
-    HDassert(cache);
+    assert(cache);
 
     /* Remove tag info from tag list */
     HASH_FIND(hh, cache->tag_list, &src_tag, sizeof(haddr_t), tag_info);
@@ -826,8 +826,8 @@ H5C__expunge_tag_type_metadata_cb(H5C_cache_entry_t *entry, void *_ctx)
     FUNC_ENTER_PACKAGE
 
     /* Santify checks */
-    HDassert(entry);
-    HDassert(ctx);
+    assert(entry);
+    assert(ctx);
 
     /* Found one with the same tag and type id */
     if (entry->type->id == ctx->type_id)
@@ -862,10 +862,10 @@ H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache = f->shared->cache; /* Get cache pointer */
-    HDassert(cache != NULL);
+    assert(cache != NULL);
 
     /* Construct context for iterator callbacks */
     ctx.f       = f;
@@ -899,9 +899,9 @@ H5C_get_tag(const void *thing, haddr_t *tag)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(entry);
-    HDassert(entry->tag_info);
-    HDassert(tag);
+    assert(entry);
+    assert(entry->tag_info);
+    assert(tag);
 
     /* Return the tag */
     *tag = entry->tag_info->tag;

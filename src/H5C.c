@@ -133,17 +133,17 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
     FUNC_ENTER_NOAPI(NULL)
 
-    HDassert(max_cache_size >= H5C__MIN_MAX_CACHE_SIZE);
-    HDassert(max_cache_size <= H5C__MAX_MAX_CACHE_SIZE);
-    HDassert(min_clean_size <= max_cache_size);
+    assert(max_cache_size >= H5C__MIN_MAX_CACHE_SIZE);
+    assert(max_cache_size <= H5C__MAX_MAX_CACHE_SIZE);
+    assert(min_clean_size <= max_cache_size);
 
-    HDassert(max_type_id >= 0);
-    HDassert(max_type_id < H5C__MAX_NUM_TYPE_IDS);
-    HDassert(class_table_ptr);
+    assert(max_type_id >= 0);
+    assert(max_type_id < H5C__MAX_NUM_TYPE_IDS);
+    assert(class_table_ptr);
 
     for (i = 0; i <= max_type_id; i++) {
-        HDassert((class_table_ptr)[i]);
-        HDassert(HDstrlen((class_table_ptr)[i]->name) > 0);
+        assert((class_table_ptr)[i]);
+        assert(HDstrlen((class_table_ptr)[i]->name) > 0);
     } /* end for */
 
     if (NULL == (cache_ptr = H5FL_CALLOC(H5C_t)))
@@ -404,11 +404,11 @@ H5C_prep_for_file_close(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
     cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     /* It is possible to receive the close warning more than once */
     if (cache_ptr->close_warning_received)
@@ -416,7 +416,7 @@ H5C_prep_for_file_close(H5F_t *f)
     cache_ptr->close_warning_received = TRUE;
 
     /* Make certain there aren't any protected entries */
-    HDassert(cache_ptr->pl_len == 0);
+    assert(cache_ptr->pl_len == 0);
 
     /* Prepare cache image */
     if (H5C__prep_image_for_file_close(f, &image_generated) < 0)
@@ -495,8 +495,8 @@ H5C_dest(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->close_warning_received);
+    assert(cache_ptr);
+    assert(cache_ptr->close_warning_received);
 
 #if H5AC_DUMP_IMAGE_STATS_ON_CLOSE
     if (H5C__image_stats(cache_ptr, TRUE) < 0)
@@ -520,8 +520,8 @@ H5C_dest(H5F_t *f)
      *           point?  If no, shouldn't this if statement be an assert?
      */
     if (cache_ptr->slist_ptr != NULL) {
-        HDassert(cache_ptr->slist_len == 0);
-        HDassert(cache_ptr->slist_size == 0);
+        assert(cache_ptr->slist_len == 0);
+        assert(cache_ptr->slist_size == 0);
 
         H5SL_close(cache_ptr->slist_ptr);
         cache_ptr->slist_ptr = NULL;
@@ -538,8 +538,8 @@ H5C_dest(H5F_t *f)
 
 #ifdef H5C_DO_SANITY_CHECKS
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0)
-        HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
-                  cache_ptr->get_entry_ptr_from_addr_counter);
+        fprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
+                cache_ptr->get_entry_ptr_from_addr_counter);
 #endif /* H5C_DO_SANITY_CHECKS */
 
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
@@ -578,7 +578,7 @@ H5C_evict(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
+    assert(f);
 
     /* Enable the slist, as it is needed in the flush */
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
@@ -634,19 +634,19 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->slist_ptr);
+    assert(cache_ptr);
+    assert(cache_ptr->slist_ptr);
 
 #ifdef H5C_DO_SANITY_CHECKS
-    HDassert(cache_ptr->index_ring_len[H5C_RING_UNDEFINED] == 0);
-    HDassert(cache_ptr->index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->clean_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->dirty_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->slist_ring_len[H5C_RING_UNDEFINED] == 0);
-    HDassert(cache_ptr->slist_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
+    assert(cache_ptr->index_ring_len[H5C_RING_UNDEFINED] == 0);
+    assert(cache_ptr->index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
+    assert(cache_ptr->clean_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
+    assert(cache_ptr->dirty_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
+    assert(cache_ptr->slist_ring_len[H5C_RING_UNDEFINED] == 0);
+    assert(cache_ptr->slist_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
 
     for (i = H5C_RING_USER; i < H5C_RING_NTYPES; i++) {
         index_len += cache_ptr->index_ring_len[i];
@@ -658,12 +658,12 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
         slist_size += cache_ptr->slist_ring_size[i];
     } /* end for */
 
-    HDassert(cache_ptr->index_len == index_len);
-    HDassert(cache_ptr->index_size == index_size);
-    HDassert(cache_ptr->clean_index_size == clean_index_size);
-    HDassert(cache_ptr->dirty_index_size == dirty_index_size);
-    HDassert(cache_ptr->slist_len == slist_len);
-    HDassert(cache_ptr->slist_size == slist_size);
+    assert(cache_ptr->index_len == index_len);
+    assert(cache_ptr->index_size == index_size);
+    assert(cache_ptr->clean_index_size == clean_index_size);
+    assert(cache_ptr->dirty_index_size == dirty_index_size);
+    assert(cache_ptr->slist_len == slist_len);
+    assert(cache_ptr->slist_size == slist_size);
 #endif /* H5C_DO_SANITY_CHECKS */
 
 #ifdef H5C_DO_EXTREME_SANITY_CHECKS
@@ -673,8 +673,8 @@ H5C_flush_cache(H5F_t *f, unsigned flags)
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     destroy = ((flags & H5C__FLUSH_INVALIDATE_FLAG) != 0);
-    HDassert(!(destroy && ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0)));
-    HDassert(!(cache_ptr->flush_in_progress));
+    assert(!(destroy && ((flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0)));
+    assert(!(cache_ptr->flush_in_progress));
 
     cache_ptr->flush_in_progress = TRUE;
 
@@ -765,10 +765,10 @@ H5C_flush_to_min_clean(H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     if (cache_ptr->check_write_permitted != NULL) {
         if ((cache_ptr->check_write_permitted)(f, &write_permitted) < 0)
@@ -956,9 +956,9 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
      *
      * by definition.
      */
-    HDassert(new_min_clean_size <= new_max_cache_size);
-    HDassert(cache_ptr->resize_ctl.min_size <= new_max_cache_size);
-    HDassert(new_max_cache_size <= cache_ptr->resize_ctl.max_size);
+    assert(new_min_clean_size <= new_max_cache_size);
+    assert(cache_ptr->resize_ctl.min_size <= new_max_cache_size);
+    assert(new_max_cache_size <= cache_ptr->resize_ctl.max_size);
 
     if (new_max_cache_size < cache_ptr->max_cache_size)
         cache_ptr->size_decreased = TRUE;
@@ -1142,7 +1142,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
          * and in any case, there is no requirement that all dirty entries
          * will reside on the dirty LRU.
          */
-        HDassert(cache_ptr->dirty_index_size == cache_ptr->slist_size);
+        assert(cache_ptr->dirty_index_size == cache_ptr->slist_size);
     }
     else { /* take down the skip list */
         if (!cache_ptr->slist_enabled)
@@ -1165,8 +1165,8 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
 
         cache_ptr->slist_enabled = FALSE;
 
-        HDassert(0 == cache_ptr->slist_len);
-        HDassert(0 == cache_ptr->slist_size);
+        assert(0 == cache_ptr->slist_len);
+        assert(0 == cache_ptr->slist_size);
     }
 
 done:
@@ -1206,10 +1206,10 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
     cache_ptr = f->shared->cache;
 
     switch (ring) {
@@ -1230,7 +1230,7 @@ H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring)
             break;
 
         default:
-            HDassert(FALSE); /* this should be un-reachable */
+            assert(FALSE); /* this should be un-reachable */
             break;
     } /* end switch */
 
@@ -1403,15 +1403,15 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Assertions */
-    HDassert(cache_ptr != NULL);
-    HDassert(H5_addr_defined(obj_addr));
-    HDassert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
+    assert(cache_ptr != NULL);
+    assert(H5_addr_defined(obj_addr));
+    assert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */
     HASH_FIND(hh, cache_ptr->tag_list, &obj_addr, sizeof(haddr_t), tag_info);
 
     if (H5C__GET_CORKED == action) {
-        HDassert(corked);
+        assert(corked);
         if (tag_info != NULL && tag_info->corked)
             *corked = TRUE;
         else
@@ -1419,7 +1419,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     }
     else {
         /* Sanity check */
-        HDassert(H5C__SET_CORK == action || H5C__UNCORK == action);
+        assert(H5C__SET_CORK == action || H5C__UNCORK == action);
 
         /* Perform appropriate action */
         if (H5C__SET_CORK == action) {
@@ -1439,7 +1439,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 /* Check for object already corked */
                 if (tag_info->corked)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked")
-                HDassert(tag_info->entry_cnt > 0 && tag_info->head);
+                assert(tag_info->entry_cnt > 0 && tag_info->head);
             }
 
             /* Set the corked status for the entire object */
@@ -1462,7 +1462,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             /* Remove the tag info from the tag list, if there's no more entries with this tag */
             if (0 == tag_info->entry_cnt) {
                 /* Sanity check */
-                HDassert(NULL == tag_info->head);
+                assert(NULL == tag_info->head);
 
                 HASH_DELETE(hh, cache_ptr->tag_list, tag_info);
 
@@ -1470,7 +1470,7 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
                 tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
             }
             else
-                HDassert(NULL != tag_info->head);
+                assert(NULL != tag_info->head);
         }
     }
 

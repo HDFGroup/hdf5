@@ -193,9 +193,9 @@ test_write_read(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(1024 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)1024, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 1024; i++)
@@ -252,9 +252,9 @@ test_write_read_nonacc_front(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 2048; i++)
@@ -317,9 +317,9 @@ test_write_read_nonacc_end(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 2048; i++)
@@ -384,11 +384,11 @@ test_free(H5F_t *f)
 
     /* Write and free the whole accumulator. */
     wbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
     expect = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(expect);
+    assert(expect);
 
     /* Fill buffer with data */
     for (i = 0; i < 256; i++)
@@ -615,9 +615,9 @@ test_accum_overlap(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 40 */
@@ -822,9 +822,9 @@ test_accum_overlap_clean(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 40 */
@@ -1041,9 +1041,9 @@ test_accum_non_overlap_size(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 140 */
@@ -1115,9 +1115,9 @@ test_accum_overlap_size(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 64 */
@@ -1200,9 +1200,9 @@ test_accum_adjust(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Fill up write buffer */
     for (i = 0; i < s; i++)
@@ -1498,9 +1498,9 @@ test_read_after(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Fill up write buffer with 1s */
     for (i = 0; i < s; i++)
@@ -1580,13 +1580,13 @@ test_big(H5F_t *f)
 
     /* Allocate space for the write & read buffers */
     wbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
-    HDassert(wbuf);
+    assert(wbuf);
     wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
-    HDassert(wbuf2);
+    assert(wbuf2);
     rbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
-    HDassert(rbuf);
+    assert(rbuf);
     zbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
-    HDassert(zbuf);
+    assert(zbuf);
 
     /* Initialize write buffers */
     for (u = 0; u < BIG_BUF_SIZE; u++) {
@@ -1951,9 +1951,9 @@ test_random_write(H5F_t *f)
 
     /* Allocate space for the write & read buffers */
     wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Initialize write buffer */
     for (u = 0; u < RANDOM_BUF_SIZE; u++)
@@ -1965,15 +1965,15 @@ test_random_write(H5F_t *f)
     seed = (unsigned)HDtime(NULL);
 #if 0
 /* seed = (unsigned)1155438845; */
-HDfprintf(stderr, "Random # seed was: %u\n", seed);
+fprintf(stderr, "Random # seed was: %u\n", seed);
 #endif
     HDsrandom(seed);
 
     /* Allocate space for the segment length buffer */
     off = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
-    HDassert(off);
+    assert(off);
     len = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
-    HDassert(len);
+    assert(len);
 
     /* Randomly choose lengths of segments */
     cur_off = 0;
@@ -2067,7 +2067,7 @@ error:
     HDfree(off);
     HDfree(len);
 
-    HDfprintf(stderr, "Random # seed was: %u\n", seed);
+    fprintf(stderr, "Random # seed was: %u\n", seed);
     return 1;
 } /* end test_random_write() */
 
@@ -2238,7 +2238,7 @@ test_swmr_write_big(hbool_t newest_format)
         ZeroMemory(&pi, sizeof(pi));
 
         if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-            HDprintf("CreateProcess failed (%d).\n", GetLastError());
+            printf("CreateProcess failed (%d).\n", GetLastError());
             FAIL_STACK_ERROR;
         }
 
@@ -2258,7 +2258,7 @@ test_swmr_write_big(hbool_t newest_format)
         int   status; /* Status returned from child process */
 
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
-        if ((pid = HDfork()) < 0) {
+        if ((pid = fork()) < 0) {
             HDperror("fork");
             FAIL_STACK_ERROR;
         }
@@ -2271,13 +2271,13 @@ test_swmr_write_big(hbool_t newest_format)
             char        swmr_reader[] = SWMR_READER;
             char *const new_argv[]    = {swmr_reader, NULL};
             /* Run the reader */
-            status = HDexecv(SWMR_READER, new_argv);
-            HDprintf("errno from execv = %s\n", HDstrerror(errno));
+            status = execv(SWMR_READER, new_argv);
+            printf("errno from execv = %s\n", HDstrerror(errno));
             FAIL_STACK_ERROR;
         } /* end if */
 
         /* Parent process -- wait for the child process to complete */
-        while (pid != HDwaitpid(pid, &status, 0))
+        while (pid != waitpid(pid, &status, 0))
             /*void*/;
 
         /* Check if child process terminates normally and its return value */
@@ -2355,31 +2355,31 @@ accum_printf(const H5F_t *f)
 {
     H5F_meta_accum_t *accum = &f->shared->accum;
 
-    HDprintf("\n");
-    HDprintf("Current contents of accumulator:\n");
+    printf("\n");
+    printf("Current contents of accumulator:\n");
     if (accum->alloc_size == 0) {
-        HDprintf("=====================================================\n");
-        HDprintf(" No accumulator allocated.\n");
-        HDprintf("=====================================================\n");
+        printf("=====================================================\n");
+        printf(" No accumulator allocated.\n");
+        printf("=====================================================\n");
     }
     else {
-        HDprintf("=====================================================\n");
-        HDprintf(" accumulator allocated size == %zu\n", accum->alloc_size);
-        HDprintf(" accumulated data size      == %zu\n", accum->size);
-        HDfprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "TRUE" : "FALSE");
-        HDprintf("=====================================================\n");
-        HDfprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
+        printf("=====================================================\n");
+        printf(" accumulator allocated size == %zu\n", accum->alloc_size);
+        printf(" accumulated data size      == %zu\n", accum->size);
+        fprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "TRUE" : "FALSE");
+        printf("=====================================================\n");
+        fprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
-            HDfprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
-                      (haddr_t)(accum->loc + accum->dirty_off));
-            HDfprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
-                      (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
+            fprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
+                    (haddr_t)(accum->loc + accum->dirty_off));
+            fprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
+                    (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
-        HDfprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
-                  (haddr_t)(accum->loc + accum->size));
-        HDfprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
-                  (haddr_t)(accum->loc + accum->alloc_size));
-        HDprintf("=====================================================\n");
+        fprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
+                (haddr_t)(accum->loc + accum->size));
+        fprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
+                (haddr_t)(accum->loc + accum->alloc_size));
+        printf("=====================================================\n");
     }
-    HDprintf("\n\n");
+    printf("\n\n");
 } /* accum_printf() */

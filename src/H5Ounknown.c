@@ -75,7 +75,7 @@ H5O__unknown_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_unknown_t, mesg);
 

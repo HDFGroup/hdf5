@@ -1258,8 +1258,8 @@ main(void)
 
     /* Create memory space.  This does not include the extra row for fill
      * values. */
-    HDassert(dimsf[0] == NX);
-    HDassert(dimsf[1] == NY);
+    assert(dimsf[0] == NX);
+    assert(dimsf[1] == NY);
     if ((memspace = H5Screate_simple(RANK, dimsf, NULL)) < 0)
         TEST_ERROR;
 

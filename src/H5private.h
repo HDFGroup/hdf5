@@ -623,9 +623,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
 #endif
-#ifndef HDassert
-#define HDassert(X) assert(X)
-#endif
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
 #endif
@@ -670,15 +667,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
-#endif
-#ifndef HDexecv
-#define HDexecv(S, AV) execv(S, AV)
-#endif
-#ifndef HDexecve
-#define HDexecve(S, AV, E) execve(S, AV, E)
-#endif
-#ifndef HDexecvp
-#define HDexecvp(S, AV) execvp(S, AV)
 #endif
 #ifndef HDexit
 #define HDexit(N) exit(N)
@@ -753,12 +741,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfopen
 #define HDfopen(S, M) fopen(S, M)
-#endif
-#ifndef HDfork
-#define HDfork() fork()
-#endif
-#ifndef HDfprintf
-#define HDfprintf fprintf
 #endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
@@ -955,9 +937,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDperror
 #define HDperror(S) perror(S)
 #endif
-#ifndef HDpipe
-#define HDpipe(F) pipe(F)
-#endif
 #ifndef HDpow
 #define HDpow(X, Y) pow(X, Y)
 #endif
@@ -966,9 +945,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
-#endif
-#ifndef HDprintf
-#define HDprintf printf /*varargs*/
 #endif
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
@@ -981,9 +957,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
-#endif
-#ifndef HDqsort
-#define HDqsort(M, N, Z, F) qsort(M, N, Z, F)
 #endif
 
 /* clang-format off */
@@ -1218,18 +1191,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
-#ifndef HDva_arg
-#define HDva_arg(A, T) va_arg(A, T)
-#endif
-#ifndef HDva_copy
-#define HDva_copy(D, S) va_copy(D, S)
-#endif
-#ifndef HDva_end
-#define HDva_end(A) va_end(A)
-#endif
-#ifndef HDva_start
-#define HDva_start(A, P) va_start(A, P)
-#endif
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
 #endif
@@ -1241,12 +1202,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #ifndef HDvsnprintf
 #define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
-#ifndef HDwait
-#define HDwait(W) wait(W)
-#endif
-#ifndef HDwaitpid
-#define HDwaitpid(P, W, O) waitpid(P, W, O)
 #endif
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
@@ -1269,7 +1224,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)                                                            \
     {                                                                                                        \
         casttype _tmp_overflow = (casttype)(var);                                                            \
-        HDassert((var) == (vartype)_tmp_overflow);                                                           \
+        assert((var) == (vartype)_tmp_overflow);                                                             \
     }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1283,7 +1238,7 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1293,8 +1248,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1304,8 +1259,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_dst >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_dst >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1313,8 +1268,8 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
     {                                                                                                        \
         srctype _tmp_src = (srctype)(src);                                                                   \
         dsttype _tmp_dst = (dsttype)(_tmp_src);                                                              \
-        HDassert(_tmp_src >= 0);                                                                             \
-        HDassert(_tmp_src == (srctype)_tmp_dst);                                                             \
+        assert(_tmp_src >= 0);                                                                               \
+        assert(_tmp_src == (srctype)_tmp_dst);                                                               \
         (dst) = _tmp_dst;                                                                                    \
     }
 
@@ -1706,9 +1661,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         if (!func_check) {                                                                                   \
             /* Check function naming status */                                                               \
-            HDassert(asrt &&                                                                                 \
-                     "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "   \
-                     "H5private.h (this is usually due to an incorrect number of underscores)");             \
+            assert(asrt &&                                                                                   \
+                   "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in "     \
+                   "H5private.h (this is usually due to an incorrect number of underscores)");               \
                                                                                                              \
             /* Don't check again */                                                                          \
             func_check = TRUE;                                                                               \

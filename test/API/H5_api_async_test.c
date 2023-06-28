@@ -73,8 +73,7 @@ test_one_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -135,7 +134,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_eswait);
                     } /* end if */
 
@@ -177,7 +176,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_dclose);
                     } /* end if */
 
@@ -222,7 +221,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_dflush);
                     } /* end if */
 
@@ -276,7 +275,7 @@ test_one_dataset_io(void)
                 for (j = 0; j < 10; j++)
                     if (wbuf[i][j] != rbuf[i][j]) {
                         H5_FAILED();
-                        HDprintf("    data verification failed\n");
+                        printf("    data verification failed\n");
                         PART_ERROR(single_dset_fclose);
                     } /* end if */
 
@@ -341,8 +340,7 @@ test_multi_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -432,7 +430,7 @@ test_multi_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_dset_open);
                         } /* end if */
 
@@ -526,7 +524,7 @@ test_multi_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_dset_close);
                         } /* end if */
 
@@ -596,8 +594,7 @@ test_multi_file_dataset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, dataset, or flush aren't supported with this connector\n");
+        printf("    API functions for basic file, dataset, or flush aren't supported with this connector\n");
         return 0;
     }
 
@@ -673,7 +670,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_open);
                         } /* end if */
 
@@ -744,7 +741,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_dclose);
                         } /* end if */
 
@@ -838,7 +835,7 @@ test_multi_file_dataset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_dset_fclose);
                         } /* end if */
 
@@ -907,8 +904,7 @@ test_multi_file_grp_dset_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC)) {
         SKIPPED();
-        HDprintf(
-            "    API functions for basic file, group, or dataset aren't supported with this connector\n");
+        printf("    API functions for basic file, group, or dataset aren't supported with this connector\n");
         return 0;
     }
 
@@ -1028,7 +1024,7 @@ test_multi_file_grp_dset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_grp_dset_no_kick);
                         } /* end if */
 
@@ -1149,7 +1145,7 @@ test_multi_file_grp_dset_io(void)
                     for (k = 0; k < 10; k++)
                         if (wbuf[i][j][k] != rbuf[i][j][k]) {
                             H5_FAILED();
-                            HDprintf("    data verification failed\n");
+                            printf("    data verification failed\n");
                             PART_ERROR(multi_file_grp_dset_kick);
                         } /* end if */
 
@@ -1224,8 +1220,8 @@ test_set_extent(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, or flush aren't supported with "
-                 "this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, or flush aren't supported with "
+               "this connector\n");
         return 0;
     }
 
@@ -1428,8 +1424,8 @@ test_attribute_exists(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -1549,8 +1545,8 @@ test_attribute_io(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, dataset, dataset more, attribute, or flush aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -1691,7 +1687,7 @@ test_attribute_io_tconv(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf(
+        printf(
             "    API functions for basic file, attribute, or flush aren't supported with this connector\n");
         return 0;
     }
@@ -1837,7 +1833,7 @@ test_attribute_io_compound(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
         SKIPPED();
-        HDprintf(
+        printf(
             "    API functions for basic file, attribute, or flush aren't supported with this connector\n");
         return 0;
     }
@@ -2143,8 +2139,8 @@ test_group(void)
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_BASIC) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_GROUP_MORE) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, or group more aren't supported "
-                 "with this connector\n");
+        printf("    API functions for basic file, group, or group more aren't supported "
+               "with this connector\n");
         return 0;
     }
 
@@ -2314,8 +2310,8 @@ test_link(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_CREATION_ORDER)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
-                 "aren't supported with this connector\n");
+        printf("    API functions for basic file, link, hard link, soft link, flush, or creation order "
+               "aren't supported with this connector\n");
         return 0;
     }
 
@@ -2505,8 +2501,8 @@ test_ocopy_orefresh(void)
         !(vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_OBJECT_MORE) ||
         !(vol_cap_flags_g & H5VL_CAP_FLAG_FLUSH_REFRESH)) {
         SKIPPED();
-        HDprintf("    API functions for basic file, group, dataset, object more, flush, or refresh aren't "
-                 "supported with this connector\n");
+        printf("    API functions for basic file, group, dataset, object more, flush, or refresh aren't "
+               "supported with this connector\n");
         return 0;
     }
 
@@ -2615,7 +2611,7 @@ test_file_reopen(void)
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) || !(vol_cap_flags_g & H5VL_CAP_FLAG_FILE_MORE)) {
         SKIPPED();
-        HDprintf("    API functions for basic file or file more aren't supported with this connector\n");
+        printf("    API functions for basic file or file more aren't supported with this connector\n");
         return 0;
     }
 
@@ -2691,16 +2687,16 @@ H5_api_async_test(void)
     size_t i;
     int    nerrors;
 
-    HDprintf("**********************************************\n");
-    HDprintf("*                                            *\n");
-    HDprintf("*             API Async Tests                *\n");
-    HDprintf("*                                            *\n");
-    HDprintf("**********************************************\n\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*             API Async Tests                *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
 
     /* Make sure the connector supports the API functions being tested */
     if (!(vol_cap_flags_g & H5VL_CAP_FLAG_ASYNC)) {
         SKIPPED();
-        HDprintf("    Async APIs aren't supported with this connector\n");
+        printf("    Async APIs aren't supported with this connector\n");
         return 0;
     }
 
@@ -2708,9 +2704,9 @@ H5_api_async_test(void)
         nerrors += (*async_tests[i])() ? 1 : 0;
     }
 
-    HDprintf("\n");
+    printf("\n");
 
-    HDprintf("Cleaning up testing files\n");
+    printf("Cleaning up testing files\n");
     cleanup_files();
 
     return nerrors;
@@ -2721,13 +2717,13 @@ H5_api_async_test(void)
 int
 H5_api_async_test(void)
 {
-    HDprintf("**********************************************\n");
-    HDprintf("*                                            *\n");
-    HDprintf("*             API Async Tests                *\n");
-    HDprintf("*                                            *\n");
-    HDprintf("**********************************************\n\n");
+    printf("**********************************************\n");
+    printf("*                                            *\n");
+    printf("*             API Async Tests                *\n");
+    printf("*                                            *\n");
+    printf("**********************************************\n\n");
 
-    HDprintf("SKIPPED due to no async support in HDF5 library\n");
+    printf("SKIPPED due to no async support in HDF5 library\n");
 
     return 0;
 }

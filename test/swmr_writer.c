@@ -75,7 +75,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
     unsigned u, v;                /* Local index variable */
     hbool_t  use_log_vfd = FALSE; /* Use the log VFD (set this manually) */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -105,7 +105,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Opening datasets\n");
+        fprintf(verbose_file, "Opening datasets\n");
 
     /* Open the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -155,7 +155,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
     unsigned long rec_to_flush;                         /* # of records left to write before flush */
     unsigned long u, v;                                 /* Local index variables */
 
-    HDassert(fid >= 0);
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -242,7 +242,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Closing datasets\n");
+        fprintf(verbose_file, "Closing datasets\n");
 
     /* Close the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -256,20 +256,20 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 static void
 usage(void)
 {
-    HDprintf("\n");
-    HDprintf("Usage error!\n");
-    HDprintf("\n");
-    HDprintf("Usage: swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
-    HDprintf("    file contents>] [-r <random seed>] <# of records>\n");
-    HDprintf("\n");
-    HDprintf("<# of records to write between flushing file contents> should be 0\n");
-    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    HDprintf("\n");
-    HDprintf("<# of records> must be specified.\n");
-    HDprintf("\n");
-    HDprintf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
-    HDprintf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
-    HDprintf("\n");
+    printf("\n");
+    printf("Usage error!\n");
+    printf("\n");
+    printf("Usage: swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
+    printf("    file contents>] [-r <random seed>] <# of records>\n");
+    printf("\n");
+    printf("<# of records to write between flushing file contents> should be 0\n");
+    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    printf("\n");
+    printf("<# of records> must be specified.\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
+    printf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
+    printf("\n");
     HDexit(EXIT_FAILURE);
 }
 
@@ -358,24 +358,24 @@ main(int argc, char *argv[])
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
         if (NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
-            HDfprintf(stderr, "Can't open verbose output file!\n");
+            fprintf(stderr, "Can't open verbose output file!\n");
             HDexit(EXIT_FAILURE);
         }
     } /* end if */
 
     /* Emit informational message */
     if (verbose) {
-        HDfprintf(verbose_file, "Parameters:\n");
-        HDfprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
-        HDfprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
+        fprintf(verbose_file, "Parameters:\n");
+        fprintf(verbose_file, "\t# of records between flushes = %ld\n", flush_count);
+        fprintf(verbose_file, "\t# of records to write = %ld\n", nrecords);
     } /* end if */
 
     /* ALWAYS emit the random seed for possible debugging */
-    HDfprintf(stdout, "Using writer random seed: %u\n", random_seed);
+    fprintf(stdout, "Using writer random seed: %u\n", random_seed);
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Generating symbol names\n");
+        fprintf(verbose_file, "Generating symbol names\n");
 
     /* Generate dataset names */
     if (generate_symbols() < 0)
@@ -383,11 +383,11 @@ main(int argc, char *argv[])
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Opening skeleton file: %s\n", FILENAME);
+        fprintf(verbose_file, "Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
     if ((fid = open_skeleton(FILENAME, verbose, verbose_file, random_seed, old)) < 0) {
-        HDfprintf(stderr, "Error opening skeleton file!\n");
+        fprintf(stderr, "Error opening skeleton file!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 
@@ -396,31 +396,31 @@ main(int argc, char *argv[])
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Adding records\n");
+        fprintf(verbose_file, "Adding records\n");
 
     /* Append records to datasets */
     if (add_records(fid, verbose, verbose_file, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        HDfprintf(stderr, "Error appending records to datasets!\n");
+        fprintf(stderr, "Error appending records to datasets!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Releasing symbols\n");
+        fprintf(verbose_file, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
-        HDfprintf(stderr, "Error releasing symbols!\n");
+        fprintf(stderr, "Error releasing symbols!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(verbose_file, "Closing objects\n");
+        fprintf(verbose_file, "Closing objects\n");
 
     /* Close objects opened */
     if (H5Fclose(fid) < 0) {
-        HDfprintf(stderr, "Error closing file!\n");
+        fprintf(stderr, "Error closing file!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */
 

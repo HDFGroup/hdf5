@@ -237,8 +237,8 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check hash value */
     if (bt2_udata->name_hash < bt2_rec->hash)
@@ -250,7 +250,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
         H5HF_t         *fheap;    /* Fractal heap handle to use for finding object */
 
         /* Sanity check */
-        HDassert(bt2_udata->name_hash == bt2_rec->hash);
+        assert(bt2_udata->name_hash == bt2_rec->hash);
 
         /* Prepare user data for callback */
         /* down */
@@ -268,7 +268,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int
             fheap = bt2_udata->shared_fheap;
         else
             fheap = bt2_udata->fheap;
-        HDassert(fheap);
+        assert(fheap);
 
         /* Check if the user's attribute and the B-tree's attribute have the same name */
         if (H5HF_op(fheap, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata) < 0)
@@ -363,8 +363,8 @@ H5A__dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u, %08" PRIx32 "}\n", indent, "", fwidth,
-              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder, nrecord->hash);
+    fprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u, %08" PRIx32 "}\n", indent, "", fwidth,
+            "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder, nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_name_debug() */
@@ -421,8 +421,8 @@ H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, i
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(bt2_udata);
-    HDassert(bt2_rec);
+    assert(bt2_udata);
+    assert(bt2_rec);
 
     /* Check creation order value */
     if (bt2_udata->corder < bt2_rec->corder)
@@ -514,8 +514,8 @@ H5A__dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void 
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u}\n", indent, "", fwidth,
-              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder);
+    fprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u}\n", indent, "", fwidth,
+            "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_debug() */

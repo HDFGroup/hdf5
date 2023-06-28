@@ -342,7 +342,7 @@ main(void)
     nerrors += test_getters() < 0 ? 1 : 0;
 
     if (nerrors) {
-        HDprintf("***** %d VOL connector plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d VOL connector plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         HDexit(EXIT_FAILURE);
     }
 

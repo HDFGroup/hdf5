@@ -46,7 +46,7 @@ static void
 leave(int ret)
 {
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 static FILE *fpGif = NULL;

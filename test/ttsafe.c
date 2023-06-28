@@ -113,7 +113,7 @@ main(int argc, char *argv[])
 
 #else /* H5_HAVE_THREADSAFE */
 
-    HDprintf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
+    printf("Most thread-safety tests skipped because THREADSAFE not enabled\n");
 
 #endif /* H5_HAVE_THREADSAFE */
 

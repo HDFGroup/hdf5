@@ -1044,16 +1044,16 @@ test_misc5(void)
 
     /* Verify the correct information was read in */
     for (i = 0; i < (buf.len); i++) {
-        /* HDprintf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
+        /* printf("[%d]=%d\n",i, ((misc5_struct1 *)(buf.p))[i].st1_el1); */
         VERIFY(((misc5_struct1 *)(buf.p))[i].st1_el1, MISC5_DBGELVAL1, "H5Dread");
         for (j = 0; j < (((misc5_struct1 *)(buf.p))[i].st1_el2.len); j++) {
-            /* HDprintf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *)
+            /* printf("   [%d]=%d\n",j, ((misc5_struct2 *)(((misc5_struct1 *)
              * (buf.p))[i].st1_el2.p))[j].st2_el1); */
             VERIFY(((misc5_struct2 *)(((misc5_struct1 *)(buf.p))[i].st1_el2.p))[j].st2_el1, MISC5_DBGELVAL2,
                    "H5Dread");
             for (k = 0; k < (((misc5_struct2 *)(((misc5_struct1 *)(buf.p))[i].st1_el2.p))[j].st2_el2.len);
                  k++) {
-                /* HDprintf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1
+                /* printf("      [%d]=%d\n",k, ((misc5_struct3 *)(((misc5_struct2 *) (((misc5_struct1
                  * *)(buf.p))[i].  st1_el2.p))[j].st2_el2.p))[k].st3_el1); */
                 VERIFY(((misc5_struct3 *)(((misc5_struct2 *)(((misc5_struct1 *)(buf.p))[i].st1_el2.p))[j]
                                               .st2_el2.p))[k]
@@ -1863,7 +1863,7 @@ test_misc10(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -3792,7 +3792,7 @@ test_misc20(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -5099,7 +5099,7 @@ test_misc25b(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -5362,7 +5362,7 @@ test_misc27(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -5590,7 +5590,7 @@ test_misc29(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -5889,7 +5889,7 @@ test_misc33(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 
@@ -6192,7 +6192,7 @@ test_misc37(void)
     CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 

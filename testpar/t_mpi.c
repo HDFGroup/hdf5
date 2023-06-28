@@ -54,7 +54,7 @@ test_mpio_overlap_writes(char *filename)
     MPI_Status     mpi_stat;
 
     if (VERBOSE_MED)
-        HDprintf("MPIO independent overlapping writes test on file %s\n", filename);
+        printf("MPIO independent overlapping writes test on file %s\n", filename);
 
     nerrs = 0;
     /* set up MPI parameters */
@@ -64,15 +64,15 @@ test_mpio_overlap_writes(char *filename)
     /* Need at least 2 processes */
     if (mpi_size < 2) {
         if (MAINPROCESS)
-            HDprintf("Need at least 2 processes to run MPIO test.\n");
-        HDprintf(" -SKIP- \n");
+            printf("Need at least 2 processes to run MPIO test.\n");
+        printf(" -SKIP- \n");
         return 0;
     }
 
     bufsize = 4093; /* use some prime number for size */
     if (NULL == (buf = HDmalloc((size_t)bufsize))) {
         if (MAINPROCESS)
-            HDprintf("couldn't allocate buffer\n");
+            printf("couldn't allocate buffer\n");
         return 1;
     }
 
@@ -142,12 +142,12 @@ test_mpio_overlap_writes(char *filename)
                 unsigned char expected;
                 expected = (unsigned char)(mpi_off + i);
                 if ((expected != buf[i]) && (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)) {
-                    HDprintf("proc %d: found data error at [%ld], expect %u, got %u\n", mpi_rank,
-                             (long)(mpi_off + i), expected, buf[i]);
+                    printf("proc %d: found data error at [%ld], expect %u, got %u\n", mpi_rank,
+                           (long)(mpi_off + i), expected, buf[i]);
                 }
             }
             if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-                HDprintf("proc %d: [more errors ...]\n", mpi_rank);
+                printf("proc %d: [more errors ...]\n", mpi_rank);
 
             nerrs += vrfyerrs;
         }
@@ -212,7 +212,7 @@ test_mpio_gb_file(char *filename)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (VERBOSE_MED)
-        HDprintf("MPI_Offset range test\n");
+        printf("MPI_Offset range test\n");
 
     /* figure out the signness and sizeof MPI_Offset */
     mpi_off           = 0;
@@ -224,11 +224,11 @@ test_mpio_gb_file(char *filename)
      * sizes.
      */
     if (MAINPROCESS) { /* only process 0 needs to check it*/
-        HDprintf("MPI_Offset is %s %d bytes integral type\n", is_signed ? "signed" : "unsigned",
-                 (int)sizeof(MPI_Offset));
+        printf("MPI_Offset is %s %d bytes integral type\n", is_signed ? "signed" : "unsigned",
+               (int)sizeof(MPI_Offset));
         if (sizeof_mpi_offset <= 4 && is_signed) {
-            HDprintf("Skipped 2GB range test "
-                     "because MPI_Offset cannot support it\n");
+            printf("Skipped 2GB range test "
+                   "because MPI_Offset cannot support it\n");
         }
         else {
             /* verify correctness of assigning 2GB sizes */
@@ -249,8 +249,8 @@ test_mpio_gb_file(char *filename)
         }
 
         if (sizeof_mpi_offset <= 4) {
-            HDprintf("Skipped 4GB range test "
-                     "because MPI_Offset cannot support it\n");
+            printf("Skipped 4GB range test "
+                   "because MPI_Offset cannot support it\n");
         }
         else {
             /* verify correctness of assigning 4GB sizes */
@@ -275,11 +275,11 @@ test_mpio_gb_file(char *filename)
      * Verify if we can write to a file of multiple GB sizes.
      */
     if (VERBOSE_MED)
-        HDprintf("MPIO GB file test %s\n", filename);
+        printf("MPIO GB file test %s\n", filename);
 
     if (sizeof_mpi_offset <= 4) {
-        HDprintf("Skipped GB file range test "
-                 "because MPI_Offset cannot support it\n");
+        printf("Skipped GB file range test "
+               "because MPI_Offset cannot support it\n");
     }
     else {
         buf = (char *)HDmalloc(MB);
@@ -294,7 +294,7 @@ test_mpio_gb_file(char *filename)
         mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE | MPI_MODE_RDWR, info, &fh);
         VRFY((mrc == MPI_SUCCESS), "MPI_FILE_OPEN");
 
-        HDprintf("MPIO GB file write test %s\n", filename);
+        printf("MPIO GB file write test %s\n", filename);
 
         /* instead of writing every bytes of the file, we will just write
          * some data around the 2 and 4 GB boundaries.  That should cover
@@ -306,13 +306,12 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + mpi_rank) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    HDfprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, mpi_off,
-                              mpi_off);
+                    fprintf(stdout, "proc %d: write to mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
                 /* set data to some trivial pattern for easy verification */
                 for (j = 0; j < MB; j++)
                     *(buf + j) = (int8_t)(i * mpi_size + mpi_rank);
                 if (VERBOSE_MED)
-                    HDfprintf(stdout, "proc %d: writing %d bytes at offset %lld\n", mpi_rank, MB, mpi_off);
+                    fprintf(stdout, "proc %d: writing %d bytes at offset %lld\n", mpi_rank, MB, mpi_off);
                 mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file write");
                 if (mrc != MPI_SUCCESS)
@@ -332,9 +331,9 @@ test_mpio_gb_file(char *filename)
          */
         /* open it again to verify the data written */
         /* but only if there was no write errors */
-        HDprintf("MPIO GB file read test %s\n", filename);
+        printf("MPIO GB file read test %s\n", filename);
         if (errors_sum(writerrs) > 0) {
-            HDprintf("proc %d: Skip read test due to previous write errors\n", mpi_rank);
+            printf("proc %d: Skip read test due to previous write errors\n", mpi_rank);
             goto finish;
         }
         mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
@@ -346,20 +345,19 @@ test_mpio_gb_file(char *filename)
             for (i = ntimes - 2; i <= ntimes; i++) {
                 mpi_off = (i * mpi_size + (mpi_size - mpi_rank - 1)) * (MPI_Offset)MB;
                 if (VERBOSE_MED)
-                    HDfprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, mpi_off,
-                              mpi_off);
+                    fprintf(stdout, "proc %d: read from mpi_off=%016llx, %lld\n", mpi_rank, mpi_off, mpi_off);
                 mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
                 INFO((mrc == MPI_SUCCESS), "GB size file read");
                 expected = (int8_t)(i * mpi_size + (mpi_size - mpi_rank - 1));
                 vrfyerrs = 0;
                 for (j = 0; j < MB; j++) {
                     if ((*(buf + j) != expected) && (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)) {
-                        HDprintf("proc %d: found data error at [%ld+%d], expect %d, got %d\n", mpi_rank,
-                                 (long)mpi_off, j, expected, *(buf + j));
+                        printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n", mpi_rank,
+                               (long)mpi_off, j, expected, *(buf + j));
                     }
                 }
                 if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
-                    HDprintf("proc %d: [more errors ...]\n", mpi_rank);
+                    printf("proc %d: [more errors ...]\n", mpi_rank);
 
                 nerrs += vrfyerrs;
             }
@@ -376,7 +374,7 @@ test_mpio_gb_file(char *filename)
         mrc = MPI_Barrier(MPI_COMM_WORLD);
         VRFY((mrc == MPI_SUCCESS), "Sync before leaving test");
 
-        HDprintf("Test if MPI_File_get_size works correctly with %s\n", filename);
+        printf("Test if MPI_File_get_size works correctly with %s\n", filename);
 
         mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, info, &fh);
         VRFY((mrc == MPI_SUCCESS), "");
@@ -423,7 +421,7 @@ finish:
  */
 
 #define DIMSIZE  32 /* Dimension size. */
-#define PRINTID  HDprintf("Proc %d: ", mpi_rank)
+#define PRINTID  printf("Proc %d: ", mpi_rank)
 #define USENONE  0
 #define USEATOM  1 /* request atomic I/O */
 #define USEFSYNC 2 /* request file_sync */
@@ -449,24 +447,24 @@ test_mpio_1wMr(char *filename, int special_request)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     if (MAINPROCESS && VERBOSE_MED) {
-        HDprintf("Testing one process writes, all processes read.\n");
-        HDprintf("Using %d processes accessing file %s\n", mpi_size, filename);
-        HDprintf("    (Filename can be specified via program argument)\n");
+        printf("Testing one process writes, all processes read.\n");
+        printf("Using %d processes accessing file %s\n", mpi_size, filename);
+        printf("    (Filename can be specified via program argument)\n");
     }
 
     /* show the hostname so that we can tell where the processes are running */
     if (VERBOSE_DEF) {
 #ifdef H5_HAVE_GETHOSTNAME
         if (HDgethostname(hostname, sizeof(hostname)) < 0) {
-            HDprintf("gethostname failed\n");
+            printf("gethostname failed\n");
             hostname[0] = '\0';
         }
 #else
-        HDprintf("gethostname unavailable\n");
+        printf("gethostname unavailable\n");
         hostname[0] = '\0';
 #endif
         PRINTID;
-        HDprintf("hostname=%s\n", hostname);
+        printf("hostname=%s\n", hostname);
     }
 
     /* Delete any old file in order to start anew. */
@@ -479,7 +477,7 @@ test_mpio_1wMr(char *filename, int special_request)
                                  &fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
         PRINTID;
-        HDprintf("MPI_File_open failed (%s)\n", mpi_err_str);
+        printf("MPI_File_open failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -491,29 +489,29 @@ test_mpio_1wMr(char *filename, int special_request)
         if ((mpi_err = MPI_File_get_atomicity(fh, &atomicity)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
+            printf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
         }
         if (VERBOSE_HI)
-            HDprintf("Initial atomicity = %d\n", atomicity);
+            printf("Initial atomicity = %d\n", atomicity);
         if ((mpi_err = MPI_File_set_atomicity(fh, 1)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_set_atomicity failed (%s)\n", mpi_err_str);
+            printf("MPI_File_set_atomicity failed (%s)\n", mpi_err_str);
         }
         if ((mpi_err = MPI_File_get_atomicity(fh, &atomicity)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
+            printf("MPI_File_get_atomicity failed (%s)\n", mpi_err_str);
         }
         if (VERBOSE_HI)
-            HDprintf("After set_atomicity atomicity = %d\n", atomicity);
+            printf("After set_atomicity atomicity = %d\n", atomicity);
     }
 
     /* This barrier is not necessary but do it anyway. */
     MPI_Barrier(MPI_COMM_WORLD);
     if (VERBOSE_HI) {
         PRINTID;
-        HDprintf("between MPI_Barrier and MPI_File_write_at\n");
+        printf("between MPI_Barrier and MPI_File_write_at\n");
     }
 
     /* ==================================================
@@ -529,14 +527,14 @@ test_mpio_1wMr(char *filename, int special_request)
     if (mpi_rank == irank) {
         if (VERBOSE_HI) {
             PRINTID;
-            HDprintf("wrote %d bytes at %ld\n", DIMSIZE, (long)mpi_off);
+            printf("wrote %d bytes at %ld\n", DIMSIZE, (long)mpi_off);
         }
         if ((mpi_err = MPI_File_write_at(fh, mpi_off, writedata, DIMSIZE, MPI_BYTE, &mpi_stat)) !=
             MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
-                     mpi_err_str);
+            printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
+                   mpi_err_str);
             return 1;
         };
     };
@@ -546,7 +544,7 @@ test_mpio_1wMr(char *filename, int special_request)
     MPI_Bcast(&mpi_err, 1, MPI_INT, irank, MPI_COMM_WORLD);
     if (VERBOSE_HI) {
         PRINTID;
-        HDprintf("MPI_Bcast: mpi_err = %d\n", mpi_err);
+        printf("MPI_Bcast: mpi_err = %d\n", mpi_err);
     }
 
     if (special_request & USEFSYNC) {
@@ -555,19 +553,19 @@ test_mpio_1wMr(char *filename, int special_request)
          * should not need this.
          * ==================================================*/
         if (VERBOSE_HI)
-            HDprintf("Apply MPI_File_sync\n");
+            printf("Apply MPI_File_sync\n");
         /* call file_sync to force the write out */
         if ((mpi_err = MPI_File_sync(fh)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_sync failed (%s)\n", mpi_err_str);
+            printf("MPI_File_sync failed (%s)\n", mpi_err_str);
         }
         MPI_Barrier(MPI_COMM_WORLD);
         /* call file_sync to force the write out */
         if ((mpi_err = MPI_File_sync(fh)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
             PRINTID;
-            HDprintf("MPI_File_sync failed (%s)\n", mpi_err_str);
+            printf("MPI_File_sync failed (%s)\n", mpi_err_str);
         }
     }
 
@@ -576,7 +574,7 @@ test_mpio_1wMr(char *filename, int special_request)
     MPI_Barrier(MPI_COMM_WORLD);
     if (VERBOSE_HI) {
         PRINTID;
-        HDprintf("after MPI_Barrier\n");
+        printf("after MPI_Barrier\n");
     }
 
     /* ==================================================
@@ -587,15 +585,15 @@ test_mpio_1wMr(char *filename, int special_request)
     if ((mpi_err = MPI_File_read_at(fh, mpi_off, readdata, DIMSIZE, MPI_BYTE, &mpi_stat)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
         PRINTID;
-        HDprintf("MPI_File_read_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
-                 mpi_err_str);
+        printf("MPI_File_read_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, DIMSIZE,
+               mpi_err_str);
         return 1;
     };
     for (i = 0; i < DIMSIZE; i++) {
         expect_val = (uint8_t)(irank * DIMSIZE + i);
         if (readdata[i] != expect_val) {
             PRINTID;
-            HDprintf("read data[%d:%d] got %02x, expect %02x\n", irank, i, readdata[i], expect_val);
+            printf("read data[%d:%d] got %02x, expect %02x\n", irank, i, readdata[i], expect_val);
             nerrs++;
         }
     }
@@ -604,7 +602,7 @@ test_mpio_1wMr(char *filename, int special_request)
 
     if (VERBOSE_HI) {
         PRINTID;
-        HDprintf("%d data errors detected\n", nerrs);
+        printf("%d data errors detected\n", nerrs);
     }
 
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
@@ -658,7 +656,7 @@ test_mpio_1wMr(char *filename, int special_request)
  2. This test will verify whether the complicated derived datatype is working on
  the current platform.
 
- If this bug has been fixed in the previous not-working package, this test will issue a HDprintf message to
+ If this bug has been fixed in the previous not-working package, this test will issue a printf message to
  tell the developer to change the configuration specific file of HDF5 so that we can change our
  configurationsetting to support collective IO for irregular selections.
 
@@ -699,7 +697,7 @@ test_mpio_derived_dtype(char *filename)
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL,
                                  &fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_open failed (%s)\n", mpi_err_str);
+        printf("MPI_File_open failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -712,13 +710,13 @@ test_mpio_derived_dtype(char *filename)
 
     if ((mpi_err = MPI_Type_create_hindexed(count, blocklens, offsets, MPI_BYTE, &filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_Type_commit(&filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -728,13 +726,13 @@ test_mpio_derived_dtype(char *filename)
     if ((mpi_err = MPI_Type_create_hindexed(count, blocklens, offsets, MPI_BYTE, &filetypenew)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_Type_commit(&filetypenew)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -749,67 +747,67 @@ test_mpio_derived_dtype(char *filename)
     if ((mpi_err = MPI_Type_create_struct(outcount, adv_blocklens, adv_disp, bas_filetype, &adv_filetype)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_create_struct failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_create_struct failed (%s)\n", mpi_err_str);
         return 1;
     }
     if ((mpi_err = MPI_Type_commit(&adv_filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_File_set_view(fh, disp, etype, adv_filetype, "native", MPI_INFO_NULL)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+        printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_File_write(fh, buf, 3, MPI_BYTE, &Status)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_write failed (%s)\n", mpi_err_str);
+        printf("MPI_File_write failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_close failed (%s)\n", mpi_err_str);
+        printf("MPI_File_close failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_Type_free(&filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_free failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_Type_free(&adv_filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_free failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_Type_free(&filetypenew)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_free failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_open failed (%s)\n", mpi_err_str);
+        printf("MPI_File_open failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     if ((mpi_err = MPI_File_set_view(fh, 0, MPI_BYTE, MPI_BYTE, "native", MPI_INFO_NULL)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+        printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
         return 1;
     }
     if ((mpi_err = MPI_File_read(fh, outbuf, 3, MPI_BYTE, &Status)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_read failed (%s)\n", mpi_err_str);
+        printf("MPI_File_read failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -818,9 +816,9 @@ test_mpio_derived_dtype(char *filename)
     }
     else {
         /*      if(mpi_rank == 0) {
-        HDprintf("complicated derived datatype is NOT working at this platform\n");
-        HDprintf("go back to hdf5/config and find the corresponding\n");
-        HDprintf("configure-specific file and change ?????\n");
+        printf("complicated derived datatype is NOT working at this platform\n");
+        printf("go back to hdf5/config and find the corresponding\n");
+        printf("configure-specific file and change ?????\n");
         }
         */
         retcode = -1;
@@ -828,15 +826,15 @@ test_mpio_derived_dtype(char *filename)
 
     if ((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_close failed (%s)\n", mpi_err_str);
+        printf("MPI_File_close failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
     if (retcode == -1) {
         if (mpi_rank == 0) {
-            HDprintf("Complicated derived datatype is NOT working at this platform\n");
-            HDprintf(" Please report to help@hdfgroup.org about this problem.\n");
+            printf("Complicated derived datatype is NOT working at this platform\n");
+            printf(" Please report to help@hdfgroup.org about this problem.\n");
         }
         retcode = 1;
     }
@@ -861,7 +859,7 @@ test_mpio_derived_dtype(char *filename)
  2. This test will fail with the MPI-IO package that doesn't support this. For example,
  mpich 1.2.6.
 
- If this bug has been fixed in the previous not-working package, this test will issue a HDprintf message to
+ If this bug has been fixed in the previous not-working package, this test will issue a printf message to
  tell the developer to change the configuration specific file of HDF5 so that we can change our
  configurationsetting to support special collective IO; currently only special collective IO.
 
@@ -913,25 +911,25 @@ test_mpio_special_collective(char *filename)
     if (count != 0) {
         if ((mpi_err = MPI_Type_create_hindexed(2, blocklens, offsets, etype, &filetype)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-            HDprintf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+            printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
             return 1;
         } /* end if */
 
         if ((mpi_err = MPI_Type_commit(&filetype)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-            HDprintf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+            printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
             return 1;
         } /* end if */
 
         if ((mpi_err = MPI_Type_create_hindexed(2, blocklens, offsets, etype, &buftype)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-            HDprintf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
+            printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
             return 1;
         } /* end if */
 
         if ((mpi_err = MPI_Type_commit(&buftype)) != MPI_SUCCESS) {
             MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-            HDprintf("MPI_Type_commit failed (%s)\n", mpi_err_str);
+            printf("MPI_Type_commit failed (%s)\n", mpi_err_str);
             return 1;
         } /* end if */
     }     /* end if */
@@ -940,7 +938,7 @@ test_mpio_special_collective(char *filename)
     if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDWR | MPI_MODE_CREATE, MPI_INFO_NULL,
                                  &fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_open failed (%s)\n", mpi_err_str);
+        printf("MPI_File_open failed (%s)\n", mpi_err_str);
         return 1;
     } /* end if */
 
@@ -952,13 +950,13 @@ test_mpio_special_collective(char *filename)
     if ((mpi_err = MPI_File_set_view(fh, mpi_off, MPI_BYTE, filetype, filerep, MPI_INFO_NULL)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_set_view failed (%s)\n", mpi_err_str);
+        printf("MPI_File_set_view failed (%s)\n", mpi_err_str);
         return 1;
     } /* end if */
 
     if (filetype != MPI_BYTE && (mpi_err = MPI_Type_free(&filetype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_free failed (%s)\n", mpi_err_str);
         return 1;
     }
 
@@ -966,21 +964,21 @@ test_mpio_special_collective(char *filename)
     if ((mpi_err = MPI_File_write_at_all(fh, mpi_off, writedata, bufcount, buftype, &mpi_stat)) !=
         MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, bufcount,
-                 mpi_err_str);
+        printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n", (long)mpi_off, bufcount,
+               mpi_err_str);
         return 1;
     } /* end if */
 
     if (buftype != MPI_BYTE && (mpi_err = MPI_Type_free(&buftype)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_Type_free failed (%s)\n", mpi_err_str);
+        printf("MPI_Type_free failed (%s)\n", mpi_err_str);
         return 1;
     }
 
     /* Close the file */
     if ((mpi_err = MPI_File_close(&fh)) != MPI_SUCCESS) {
         MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-        HDprintf("MPI_File_close failed. \n");
+        printf("MPI_File_close failed. \n");
         return 1;
     } /* end if */
 
@@ -988,8 +986,8 @@ test_mpio_special_collective(char *filename)
     mpi_err = MPI_Barrier(MPI_COMM_WORLD);
     if (retcode != 0) {
         if (mpi_rank == 0) {
-            HDprintf("special collective IO is NOT working at this platform\n");
-            HDprintf(" Please report to help@hdfgroup.org about this problem.\n");
+            printf("special collective IO is NOT working at this platform\n");
+            printf(" Please report to help@hdfgroup.org about this problem.\n");
         } /* end if */
         retcode = 1;
     } /* end if */
@@ -1047,15 +1045,15 @@ parse_options(int argc, char **argv)
 
         for (i = 0; i < n; i++)
             if (h5_fixname(FILENAME[i], plist, filenames[i], sizeof(filenames[i])) == NULL) {
-                HDprintf("h5_fixname failed\n");
+                printf("h5_fixname failed\n");
                 nerrors++;
                 return (1);
             }
         H5Pclose(plist);
         if (VERBOSE_MED) {
-            HDprintf("Test filenames are:\n");
+            printf("Test filenames are:\n");
             for (i = 0; i < n; i++)
-                HDprintf("    %s\n", filenames[i]);
+                printf("    %s\n", filenames[i]);
         }
     }
 
@@ -1068,10 +1066,10 @@ parse_options(int argc, char **argv)
 static void
 usage(void)
 {
-    HDprintf("Usage: t_mpi [-v<verbosity>] [-f <prefix>]\n");
-    HDprintf("\t-v<verbosity>\tset verbose level (0-9,l,m,h)\n");
-    HDprintf("\t-f <prefix>\tfilename prefix\n");
-    HDprintf("\n");
+    printf("Usage: t_mpi [-v<verbosity>] [-f <prefix>]\n");
+    printf("\t-v<verbosity>\tset verbose level (0-9,l,m,h)\n");
+    printf("\t-f <prefix>\tfilename prefix\n");
+    printf("\n");
 }
 
 /*
@@ -1101,7 +1099,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0) {
-        HDprintf("Failed to turn off atexit processing. Continue.\n");
+        printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
     if (parse_options(argc, argv) != 0) {
@@ -1111,9 +1109,9 @@ main(int argc, char **argv)
     }
 
     if (MAINPROCESS) {
-        HDprintf("===================================\n");
-        HDprintf("MPI functionality tests\n");
-        HDprintf("===================================\n");
+        printf("===================================\n");
+        printf("MPI functionality tests\n");
+        printf("===================================\n");
     }
 
     if (VERBOSE_MED)
@@ -1132,7 +1130,7 @@ main(int argc, char **argv)
     ret_code = test_mpio_1wMr(filenames[0], USENONE);
     ret_code = errors_sum(ret_code);
     if (mpi_rank == 0 && ret_code > 0) {
-        HDprintf("***FAILED with %d total errors\n", ret_code);
+        printf("***FAILED with %d total errors\n", ret_code);
         nerrors += ret_code;
     }
 
@@ -1143,7 +1141,7 @@ main(int argc, char **argv)
         ret_code = test_mpio_1wMr(filenames[0], USEATOM);
         ret_code = errors_sum(ret_code);
         if (mpi_rank == 0 && ret_code > 0) {
-            HDprintf("***FAILED with %d total errors\n", ret_code);
+            printf("***FAILED with %d total errors\n", ret_code);
             nerrors += ret_code;
         }
 
@@ -1151,7 +1149,7 @@ main(int argc, char **argv)
         ret_code = test_mpio_1wMr(filenames[0], USEFSYNC);
         ret_code = errors_sum(ret_code);
         if (mpi_rank == 0 && ret_code > 0) {
-            HDprintf("***FAILED with %d total errors\n", ret_code);
+            printf("***FAILED with %d total errors\n", ret_code);
             nerrors += ret_code;
         }
     }
@@ -1164,12 +1162,12 @@ main(int argc, char **argv)
     ret_code = test_mpio_gb_file(filenames[0]);
     ret_code = errors_sum(ret_code);
     if (mpi_rank == 0 && ret_code > 0) {
-        HDprintf("***FAILED with %d total errors\n", ret_code);
+        printf("***FAILED with %d total errors\n", ret_code);
         nerrors += ret_code;
     }
 #else
     if (mpi_rank == 0)
-        HDprintf(" will be skipped on Windows (JIRA HDDFV-8064)\n");
+        printf(" will be skipped on Windows (JIRA HDDFV-8064)\n");
 #endif
 
     /*=======================================
@@ -1179,7 +1177,7 @@ main(int argc, char **argv)
     ret_code = test_mpio_overlap_writes(filenames[0]);
     ret_code = errors_sum(ret_code);
     if (mpi_rank == 0 && ret_code > 0) {
-        HDprintf("***FAILED with %d total errors\n", ret_code);
+        printf("***FAILED with %d total errors\n", ret_code);
         nerrors += ret_code;
     }
 
@@ -1190,7 +1188,7 @@ main(int argc, char **argv)
     ret_code = test_mpio_derived_dtype(filenames[0]);
     ret_code = errors_sum(ret_code);
     if (mpi_rank == 0 && ret_code > 0) {
-        HDprintf("***FAILED with %d total errors\n", ret_code);
+        printf("***FAILED with %d total errors\n", ret_code);
         nerrors += ret_code;
     }
 
@@ -1200,7 +1198,7 @@ main(int argc, char **argv)
     if (mpi_size < 4) {
         MPI_BANNER("MPIO special collective io test SKIPPED.");
         if (mpi_rank == 0)
-            HDprintf("This test needs at least four processes to run.\n");
+            printf("This test needs at least four processes to run.\n");
         ret_code = 0;
         goto sc_finish;
     } /* end if */
@@ -1211,7 +1209,7 @@ main(int argc, char **argv)
 sc_finish:
     ret_code = errors_sum(ret_code);
     if (mpi_rank == 0 && ret_code > 0) {
-        HDprintf("***FAILED with %d total errors\n", ret_code);
+        printf("***FAILED with %d total errors\n", ret_code);
         nerrors += ret_code;
     }
 
@@ -1221,14 +1219,14 @@ finish:
      */
     MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS) { /* only process 0 reports */
-        HDprintf("===================================\n");
+        printf("===================================\n");
         if (nerrors) {
-            HDprintf("***MPI tests detected %d errors***\n", nerrors);
+            printf("***MPI tests detected %d errors***\n", nerrors);
         }
         else {
-            HDprintf("MPI tests finished with no errors\n");
+            printf("MPI tests finished with no errors\n");
         }
-        HDprintf("===================================\n");
+        printf("===================================\n");
     }
 
     /* turn off alarm */

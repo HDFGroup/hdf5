@@ -383,9 +383,9 @@ main(void)
             HDputs(msg);
 
             for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-                HDprintf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                         bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                         bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
+                printf("Config: %s%s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                       bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                       bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "");
                 nerrors += test_vds_prefix_second(bit_config, fapl);
             }
 
@@ -400,13 +400,13 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All virtual dataset tests passed.\n");
+    printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

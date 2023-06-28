@@ -93,8 +93,8 @@ H5O__mdci_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -145,9 +145,9 @@ H5O__mdci_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(p);
-    HDassert(mesg);
+    assert(f);
+    assert(p);
+    assert(mesg);
 
     /* encode */
     *p++ = H5O_MDCI_VERSION_0;
@@ -181,7 +181,7 @@ H5O__mdci_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_mdci_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -245,7 +245,7 @@ H5O__mdci_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_mdci_t, mesg);
 
@@ -274,8 +274,8 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(mesg);
+    assert(f);
+    assert(mesg);
 
     /* Free file space for cache image */
     if (H5_addr_defined(mesg->addr)) {
@@ -289,7 +289,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
 
-            HDassert(H5_addr_eq(final_eoa, mesg->addr + mesg->size));
+            assert(H5_addr_eq(final_eoa, mesg->addr + mesg->size));
 
             if (H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
@@ -322,17 +322,17 @@ H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(mdci);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(mdci);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
-              "Metadata Cache Image Block address:", mdci->addr);
+    fprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+            "Metadata Cache Image Block address:", mdci->addr);
 
-    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
-              "Metadata Cache Image Block size in bytes:", mdci->size);
+    fprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+            "Metadata Cache Image Block size in bytes:", mdci->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__mdci_debug() */

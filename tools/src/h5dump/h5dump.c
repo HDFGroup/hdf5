@@ -1232,11 +1232,11 @@ end_collect:
                 errno                   = 0;
                 onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
                 if (errno == ERANGE) {
-                    HDprintf("Invalid onion revision specified\n");
+                    printf("Invalid onion revision specified\n");
                     goto error;
                 }
 
-                HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+                printf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
             }
         }
         else
@@ -1374,7 +1374,7 @@ main(int argc, char *argv[])
                 goto done;
             }
 
-            HDprintf("The number of revisions for the onion file is %" PRIu64 "\n", revision_count);
+            printf("The number of revisions for the onion file is %" PRIu64 "\n", revision_count);
             goto done;
         }
         else

@@ -75,7 +75,7 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(flags);
+    assert(flags);
 
     /* The native VOL connector supports all optional operations */
     *flags = H5VL_OPT_QUERY_SUPPORTED;

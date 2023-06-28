@@ -355,9 +355,9 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
 
             /* Verify that read chunk is the same as the corresponding written one */
             if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
-                HDfprintf(stderr,
-                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
-                          offset[0], offset[1]);
+                fprintf(stderr,
+                        "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                        offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -577,15 +577,15 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        HDfprintf(stderr, "overflow");
+        fprintf(stderr, "overflow");
         TEST_ERROR;
     }
     else if (Z_MEM_ERROR == ret) {
-        HDfprintf(stderr, "deflate memory error");
+        fprintf(stderr, "deflate memory error");
         TEST_ERROR;
     }
     else if (Z_OK != ret) {
-        HDfprintf(stderr, "other deflate error");
+        fprintf(stderr, "other deflate error");
         TEST_ERROR;
     }
 #else
@@ -1932,7 +1932,7 @@ test_get_chunk_info_v110(hid_t fapl)
     H5F_libver_t low, high;                   /* File format bounds */
 
     TESTING("getting chunk information in file with versions 1.10 and later");
-    HDprintf("\n"); /* to list sub-tests */
+    printf("\n"); /* to list sub-tests */
 
     /* Set high bound to the current latest version */
     high = H5F_LIBVER_LATEST;
@@ -2108,9 +2108,9 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     for (ii = 0; ii < CHUNK_NX; ii++)
         for (jj = 0; jj < CHUNK_NY; jj++)
             if (direct_buf[ii][jj] != check_chunk[ii][jj]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", ii, jj);
-                HDprintf("    direct_buf=%d, check_chunk=%d\n", direct_buf[ii][jj], check_chunk[ii][jj]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", ii, jj);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[ii][jj], check_chunk[ii][jj]);
                 TEST_ERROR;
             }
 
@@ -2131,10 +2131,10 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     for (ii = 0; ii < CHUNK_NX; ii++)
         for (jj = 0; jj < CHUNK_NY; jj++)
             if (direct_buf[ii][jj] != read_direct_buf[ii][jj]) {
-                HDprintf("    1. Read different values than written.");
-                HDprintf("    At index %d,%d\n", ii, jj);
-                HDprintf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[ii][jj],
-                         read_direct_buf[ii][jj]);
+                printf("    1. Read different values than written.");
+                printf("    At index %d,%d\n", ii, jj);
+                printf("    direct_buf=%d, read_direct_buf=%d\n", direct_buf[ii][jj],
+                       read_direct_buf[ii][jj]);
                 TEST_ERROR;
             }
 
@@ -2230,7 +2230,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All chunk query tests passed.\n");
+    printf("All chunk query tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -2238,7 +2238,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 }
 

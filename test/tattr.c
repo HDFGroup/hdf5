@@ -919,10 +919,10 @@ test_attr_compound_read(hid_t fapl)
     for (i = 0; i < ATTR4_DIM1; i++)
         for (j = 0; j < ATTR4_DIM2; j++)
             if (HDmemcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct)) != 0) {
-                HDprintf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
-                         __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
-                HDprintf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
-                         __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
+                printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
+                       __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
+                printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
+                       __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
                 TestErrPrintf(
                     "%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",
                     __LINE__, i, j, attr_data4[i][j].c, i, j, read_data4[i][j].c);
@@ -1063,8 +1063,8 @@ test_attr_scalar_read(hid_t fapl)
 
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if (!H5_FLT_ABS_EQUAL(rdata, attr_data5))
-        HDprintf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Aread",
-                 (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
+        printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n", "H5Aread",
+               (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);
@@ -4610,7 +4610,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -4693,7 +4693,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -4814,7 +4814,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -4924,7 +4924,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -5155,7 +5155,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -5209,7 +5209,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Create several attributes, but keep storage in compact form */
@@ -5370,7 +5370,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
                 break;
 
             default:
-                HDassert(0 && "Too many datasets!");
+                assert(0 && "Too many datasets!");
         } /* end switch */
 
         /* Check on dataset's attribute storage status */
@@ -5564,7 +5564,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Check on dataset's attribute storage status */
@@ -5893,7 +5893,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Check on dataset's attribute storage status */
@@ -6415,7 +6415,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Check on dataset's attribute storage status */
@@ -6487,7 +6487,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Delete attributes from compact storage */
@@ -6546,7 +6546,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Create more attributes, to push into dense form */
@@ -6619,7 +6619,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Delete attributes from dense storage */
@@ -6689,7 +6689,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Create attributes, to push into dense form */
@@ -6736,7 +6736,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Delete every other attribute from dense storage, in appropriate order */
@@ -6789,7 +6789,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Delete remaining attributes from dense storage, in appropriate order */
@@ -7078,7 +7078,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_attrs; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -7109,7 +7109,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_attrs; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -7140,7 +7140,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_attrs; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -7172,7 +7172,7 @@ attr_iterate_check(hid_t fid, const char *dsetname, hid_t obj_id, H5_index_t idx
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_attrs; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -7405,7 +7405,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Check on dataset's attribute storage status */
@@ -7507,7 +7507,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Create more attributes, to push into dense form */
@@ -7800,7 +7800,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Check on dataset's attribute storage status */
@@ -7878,7 +7878,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                             break;
 
                         default:
-                            HDassert(0 && "Too many datasets!");
+                            assert(0 && "Too many datasets!");
                     } /* end switch */
 
                     /* Create more attributes, to push into dense form */
@@ -8140,7 +8140,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Check on dataset's attribute storage status */
@@ -8246,7 +8246,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Create more attributes, to push into dense form */
@@ -8435,7 +8435,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Check on dataset's attribute storage status */
@@ -8498,7 +8498,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     break;
 
                 default:
-                    HDassert(0 && "Too many datasets!");
+                    assert(0 && "Too many datasets!");
             } /* end switch */
 
             /* Create more attributes, to push into dense form */

@@ -532,9 +532,9 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
 
         if (options->verbose > 0) {
             if (options->verbose == 2)
-                HDprintf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
+                printf(FORMAT_OBJ_ATTR_TIME, "attr", read_time, write_time, name);
             else
-                HDprintf(FORMAT_OBJ_ATTR, "attr", name);
+                printf(FORMAT_OBJ_ATTR, "attr", name);
         }
 
         /*---------------------------------------------------------------------
@@ -602,7 +602,7 @@ check_options(pack_opt_t *options)
      */
     if (options->verbose > 0 && have_request(options)) {
         if (options->all_layout == 1) {
-            HDprintf("All objects to modify layout are...\n");
+            printf("All objects to modify layout are...\n");
             switch (options->layout_g) {
                 case H5D_COMPACT:
                     strcpy(slayout, "compact");
@@ -624,17 +624,17 @@ check_options(pack_opt_t *options)
                     strcpy(slayout, "invalid layout\n");
                     H5TOOLS_GOTO_DONE((-1));
             }
-            HDprintf(" Apply %s layout to all", slayout);
+            printf(" Apply %s layout to all", slayout);
             if (H5D_CHUNKED == options->layout_g) {
-                HDprintf("with dimension [ ");
+                printf("with dimension [ ");
                 for (j = 0; j < options->chunk_g.rank; j++)
-                    HDprintf("%d ", (int)options->chunk_g.chunk_lengths[j]);
-                HDprintf("]");
+                    printf("%d ", (int)options->chunk_g.chunk_lengths[j]);
+                printf("]");
             }
-            HDprintf("\n");
+            printf("\n");
         }
         else
-            HDprintf("No all objects to modify layout\n");
+            printf("No all objects to modify layout\n");
     } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
@@ -642,16 +642,16 @@ check_options(pack_opt_t *options)
 
         if (options->op_tbl->objs[i].chunk.rank > 0) {
             if (options->verbose > 0) {
-                HDprintf(" <%s> with chunk size ", name);
+                printf(" <%s> with chunk size ", name);
                 for (k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
-                    HDprintf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
-                HDprintf("\n");
+                    printf("%d ", (int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+                printf("\n");
             }
             has_ck = 1;
         }
         else if (options->op_tbl->objs[i].chunk.rank == -2) { /* TODO: replace 'magic number' */
             if (options->verbose > 0)
-                HDprintf(" <%s> %s\n", name, "NONE (contiguous)");
+                printf(" <%s> %s\n", name, "NONE (contiguous)");
             has_ck = 1;
         }
     } /* end for each object in options */
@@ -666,34 +666,34 @@ check_options(pack_opt_t *options)
 
     if (options->verbose > 0 && have_request(options)) {
         if (options->all_filter == 1) {
-            HDprintf("All objects to apply filter are...\n");
+            printf("All objects to apply filter are...\n");
             for (k = 0; k < options->n_filter_g; k++) {
                 H5Z_filter_t filtn = options->filter_g[k].filtn;
                 if (filtn < 0) {
-                    HDprintf(" Unknown\n");
+                    printf(" Unknown\n");
                     continue;
                 }
                 switch (filtn) {
                     case H5Z_FILTER_NONE:
-                        HDprintf(" Uncompress all\n");
+                        printf(" Uncompress all\n");
                         break;
                     case H5Z_FILTER_SHUFFLE:
                     case H5Z_FILTER_FLETCHER32:
-                        HDprintf(" All with %s\n", get_sfilter(filtn));
+                        printf(" All with %s\n", get_sfilter(filtn));
                         break;
                     case H5Z_FILTER_SZIP:
                     case H5Z_FILTER_DEFLATE:
-                        HDprintf(" All with %s, parameter %d\n", get_sfilter(filtn),
-                                 options->filter_g[k].cd_values[0]);
+                        printf(" All with %s, parameter %d\n", get_sfilter(filtn),
+                               options->filter_g[k].cd_values[0]);
                         break;
                     default:
-                        HDprintf(" User Defined %d\n", filtn);
+                        printf(" User Defined %d\n", filtn);
                         break;
                 } /* end switch */
             }     /* end for each filter */
         }         /* end if options->all_filter == 1 (TODO: meaning) */
         else
-            HDprintf("No all objects to apply filter\n");
+            printf("No all objects to apply filter\n");
     } /* end if verbose */
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
@@ -704,11 +704,11 @@ check_options(pack_opt_t *options)
             if (options->verbose > 0) {
                 if (pack.filter[j].filtn >= 0) {
                     if (pack.filter[j].filtn > H5Z_FILTER_SCALEOFFSET) {
-                        HDprintf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
-                                 pack.filter[j].filtn);
+                        printf(" <%s> with %s filter %d\n", name, get_sfilter(pack.filter[j].filtn),
+                               pack.filter[j].filtn);
                     }
                     else {
-                        HDprintf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
+                        printf(" <%s> with %s filter\n", name, get_sfilter(pack.filter[j].filtn));
                     }
                 }
             }
@@ -740,8 +740,8 @@ check_options(pack_opt_t *options)
      */
     if (options->ublock_filename != NULL && options->ublock_size == 0) {
         if (options->verbose > 0) {
-            HDprintf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
-                     options->ublock_filename);
+            printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
+                   options->ublock_filename);
             options->ublock_size = 1024;
         }
     }
@@ -813,21 +813,21 @@ check_objects(const char *fname, pack_opt_t *options)
      */
 
     if (options->verbose > 0)
-        HDprintf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
+        printf("Opening file. Searching %zu objects to modify ...\n", travt->nobjs);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
         pack_info_t obj  = options->op_tbl->objs[i];
         char       *name = obj.path;
 
         if (options->verbose > 0)
-            HDprintf(" <%s>", name);
+            printf(" <%s>", name);
 
         /* the input object names are present in the file and are valid */
         if (h5trav_getindext(name, travt) < 0)
             H5TOOLS_GOTO_ERROR((-1), "%s Could not find <%s> in file <%s>. Exiting...\n",
                                (options->verbose > 0 ? "\n" : ""), name, fname);
         if (options->verbose > 0)
-            HDprintf("...Found\n");
+            printf("...Found\n");
 
         for (ifil = 0; ifil < obj.nfilters; ifil++) {
             if (obj.filter[ifil].filtn < 0)
@@ -866,7 +866,7 @@ check_objects(const char *fname, pack_opt_t *options)
                     }
 
                     if (csize < ppb) {
-                        HDprintf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
+                        printf(" <warning: SZIP settings, chunk size is smaller than pixels per block>\n");
                         H5TOOLS_GOTO_DONE(0);
                     }
                 } /* end case SZIP */

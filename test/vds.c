@@ -55,7 +55,7 @@ static const char *FILENAME[] = {"vds_virt_0", "vds_virt_1", "vds_src_0",  "vds_
 /* Print config directly to output */
 #define PRINT_CONFIG(...)                                                                                    \
     do {                                                                                                     \
-        HDprintf("Config: " __VA_ARGS__);                                                                    \
+        printf("Config: " __VA_ARGS__);                                                                      \
         HDputs("");                                                                                          \
     } while (0)
 
@@ -80,11 +80,11 @@ char vds_test_str_g[128]   = "";
 /* Replacement for TEST_ERROR for non-verbose output */
 #define TEST_ERROR_SUPPRESSED                                                                                \
     do {                                                                                                     \
-        HDprintf("Failed config: %s\nFailed test: %s\n", vds_config_str_g, vds_test_str_g);                  \
+        printf("Failed config: %s\nFailed test: %s\n", vds_config_str_g, vds_test_str_g);                    \
         TEST_ERROR;                                                                                          \
     } while (0)
 
-/* Replacement for HDprintf for printing configuration for non-verbose output */
+/* Replacement for printf for printing configuration for non-verbose output */
 #define PRINT_CONFIG(...)                                                                                    \
     do {                                                                                                     \
         HDsnprintf(vds_config_str_g, sizeof(vds_config_str_g), __VA_ARGS__);                                 \
@@ -277,11 +277,11 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
     htri_t  tri_ret;
     ssize_t str_len;
 
-    HDassert(dcpl >= 0);
-    HDassert(vspace >= 0);
-    HDassert(srcspace >= 0);
-    HDassert(filename);
-    HDassert(dsetname);
+    assert(dcpl >= 0);
+    assert(vspace >= 0);
+    assert(srcspace >= 0);
+    assert(filename);
+    assert(dsetname);
 
     /* Check vspace */
     if ((space_out = H5Pget_virtual_vspace(dcpl, i)) < 0)
@@ -314,7 +314,7 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
         TEST_ERROR;
     if ((size_t)str_len != HDstrlen(filename))
         TEST_ERROR;
-    HDassert((size_t)str_len < sizeof(name_out));
+    assert((size_t)str_len < sizeof(name_out));
     if ((str_len = H5Pget_virtual_filename(dcpl, i, name_out, sizeof(name_out))) < 0)
         TEST_ERROR;
     if ((size_t)str_len != HDstrlen(filename))
@@ -327,7 +327,7 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
         TEST_ERROR;
     if ((size_t)str_len != HDstrlen(dsetname))
         TEST_ERROR;
-    HDassert((size_t)str_len < sizeof(name_out));
+    assert((size_t)str_len < sizeof(name_out));
     if ((str_len = H5Pget_virtual_dsetname(dcpl, i, name_out, sizeof(name_out))) < 0)
         TEST_ERROR;
     if ((size_t)str_len != HDstrlen(dsetname))
@@ -368,13 +368,13 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
     H5O_native_info_t  ninfo;            /* Object info struct */
     htri_t             tri_ret;
 
-    HDassert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
-    HDassert(fapl >= 0);
-    HDassert(dcpl >= 0);
-    HDassert(ex_dcpl);
-    HDassert(*ex_dcpl < 0);
-    HDassert(vspace >= 0);
-    HDassert(filename);
+    assert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
+    assert(fapl >= 0);
+    assert(dcpl >= 0);
+    assert(ex_dcpl);
+    assert(*ex_dcpl < 0);
+    assert(vspace >= 0);
+    assert(filename);
 
     /* Take different action depending on test configuration */
     if (config >= TEST_API_CREATE_DSET) {
@@ -426,9 +426,8 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
             TEST_ERROR;
         if (config == TEST_API_REOPEN_FILE) {
             if (ninfo.meta_size.obj.heap_size != exp_meta_size) {
-                HDprintf("VDS metadata size: %llu Expected: %llu\n",
-                         (long long unsigned)ninfo.meta_size.obj.heap_size,
-                         (long long unsigned)exp_meta_size);
+                printf("VDS metadata size: %llu Expected: %llu\n",
+                       (long long unsigned)ninfo.meta_size.obj.heap_size, (long long unsigned)exp_meta_size);
                 TEST_ERROR;
             }
         }
@@ -12437,13 +12436,13 @@ main(void)
 
     if (nerrors)
         goto error;
-    HDprintf("All virtual dataset tests passed.\n");
+    printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 } /* end main() */

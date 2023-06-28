@@ -119,7 +119,7 @@ main(void)
 
     HDfree(buffer);
 
-    HDfprintf(stderr, "SWMR reader exited successfully\n");
+    fprintf(stderr, "SWMR reader exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -141,7 +141,7 @@ error:
 
     HDfree(buffer);
 
-    HDfprintf(stderr, "ERROR: SWMR reader exited with errors\n");
+    fprintf(stderr, "ERROR: SWMR reader exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

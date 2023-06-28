@@ -271,45 +271,45 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if (H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR;
     if (heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
-                  heap_stats.man_nobjs, state->man_nobjs);
+        fprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
+                heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_size, state->man_size);
+        fprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
+                heap_stats.man_size, state->man_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout,
-                  "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
-                  heap_stats.man_alloc_size, state->man_alloc_size);
+        fprintf(stdout,
+                "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
+                heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout,
-                  "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
-                  heap_stats.man_free_space, state->man_free_space);
+        fprintf(stdout,
+                "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
+                heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
-                  heap_stats.huge_nobjs, state->huge_nobjs);
+        fprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
+                heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
-                  heap_stats.huge_size, state->huge_size);
+        fprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
+                heap_stats.huge_size, state->huge_size);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
-                  heap_stats.tiny_nobjs, state->tiny_nobjs);
+        fprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
+                heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR;
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
-                  heap_stats.tiny_size, state->tiny_size);
+        fprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
+                heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR;
     } /* end if */
 
@@ -376,7 +376,7 @@ add_obj(H5HF_t *fh, size_t obj_off, size_t obj_size, fheap_heap_state_t *state, 
     size_t         robj_size;                /* Object size read in */
 
     /* Sanity check */
-    HDassert(fh);
+    assert(fh);
 
     /* Initialize object buffer */
     obj = &shared_wobj_g[obj_off];
@@ -510,7 +510,7 @@ get_fill_size(const fheap_test_param_t *tparam)
 
         case FHEAP_TEST_FILL_N:
         default:
-            HDassert(0 && "Unknown bulk fill type?!?");
+            assert(0 && "Unknown bulk fill type?!?");
     } /* end switch */
 
     return (0);
@@ -849,9 +849,9 @@ del_objs_half_refill(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_he
     size_t         u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(keep_ids);
 
     /* Check for closing & re-opening the heap */
     if (tparam->reopen_heap) {
@@ -940,10 +940,10 @@ del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_heap_state_t *
     size_t  u;                     /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(*fh);
-    HDassert(state);
-    HDassert(keep_ids);
+    assert(fh);
+    assert(*fh);
+    assert(state);
+    assert(keep_ids);
 
     /* Check for first deleting half of objects & then re-inserting them */
     if (tparam->drain_half == FHEAP_DEL_DRAIN_HALF)
@@ -1037,9 +1037,9 @@ fill_heap(H5HF_t *fh, unsigned block_row, size_t obj_size, fheap_heap_state_t *s
     unsigned       u;            /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
-    HDassert(obj_size + 256 < shared_obj_size_g);
+    assert(fh);
+    assert(state);
+    assert(obj_size + 256 < shared_obj_size_g);
 
     /* Initialize starting information */
     data_size    = (size_t)DBLOCK_FREE(fh, block_row);
@@ -1236,8 +1236,8 @@ fill_root_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *sta
     unsigned u;                /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1325,8 +1325,8 @@ fill_partial_row(H5HF_t *fh, unsigned row, unsigned width, size_t obj_size, fhea
     unsigned u;          /* Local index variable */
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Get some information for the heap */
     block_size = (size_t)DBLOCK_SIZE(fh, row);
@@ -1366,8 +1366,8 @@ static int
 fill_row(H5HF_t *fh, unsigned row, size_t obj_size, fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids)
 {
     /* Sanity check */
-    HDassert(fh);
-    HDassert(state);
+    assert(fh);
+    assert(state);
 
     /* Fill the entire row (with the partial row fill routine) */
     if (fill_partial_row(fh, row, DTABLE_WIDTH(fh), obj_size, state, keep_ids))
@@ -1405,7 +1405,7 @@ fill_root_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_h
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1444,7 +1444,7 @@ fill_2nd_indirect(H5HF_t *fh, unsigned pos, size_t obj_size, fheap_heap_state_t 
 
     /* Get some information for the heap */
     max_dblock_rows = IBLOCK_MAX_DROWS(fh, pos);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -1481,7 +1481,7 @@ fill_all_direct(H5HF_t *fh, size_t obj_size, fheap_heap_state_t *state, fheap_he
 
     /* Get heap info */
     max_dblock_rows = DTABLE_MAX_DROWS(fh);
-    HDassert(max_dblock_rows);
+    assert(max_dblock_rows);
 
     /* Loop over rows */
     for (row = 0; row < max_dblock_rows; row++)
@@ -6438,7 +6438,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155438845; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -6510,7 +6510,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         if (fh)
@@ -15508,7 +15508,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1156158635; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15608,7 +15608,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15714,7 +15714,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     seed = (unsigned long)HDtime(NULL);
 #if 0
 /* seed = (unsigned long)1155181717; */
-HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+fprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif
     HDsrandom((unsigned)seed);
 
@@ -15826,7 +15826,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     return (0);
 
 error:
-    HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+    fprintf(stderr, "Random # seed was: %lu\n", seed);
     H5E_BEGIN_TRY
     {
         H5MM_xfree(keep_ids.ids);
@@ -15956,7 +15956,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, huge_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
         if (ret >= 0)
             TEST_ERROR;
@@ -15972,7 +15972,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         ret = H5HF_write(fh, tiny_heap_id, &id_changed, shared_wobj_g);
     }
     H5E_END_TRY
-    HDassert(!id_changed);
+    assert(!id_changed);
     if (ret >= 0)
         TEST_ERROR;
 
@@ -16028,7 +16028,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         /* Overwrite data just written */
         if (H5HF_write(fh, &keep_ids.ids[id_len * u], &id_changed, rewrite_obj) < 0)
             FAIL_STACK_ERROR;
-        HDassert(!id_changed);
+        assert(!id_changed);
 
         /* Read data back in */
         if (H5HF_read(fh, &keep_ids.ids[id_len * u], shared_robj_g) < 0)
@@ -16362,7 +16362,7 @@ main(void)
      *      in the future for parallel build.
      */
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
     else if (ExpressMode == 0) {
 #ifdef H5_HAVE_PARALLEL
         num_pb_fs = NUM_PB_FS - 2;
@@ -16580,7 +16580,7 @@ main(void)
                      * level of complexity gradually. -QAK
                      */
                     if (ExpressMode > 1)
-                        HDprintf(
+                        printf(
                             "***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
                     else
                         nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
@@ -16628,7 +16628,7 @@ main(void)
                                 nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                                 nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
                                     nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
@@ -16678,7 +16678,7 @@ main(void)
                                     test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(
                                         fapl, &small_cparam, &tparam);
                                 if (ExpressMode > 1)
-                                    HDprintf("***Express test mode on.  Some tests skipped\n");
+                                    printf("***Express test mode on.  Some tests skipped\n");
                                 else {
                                     nerrors +=
                                         test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(
@@ -16808,7 +16808,7 @@ main(void)
 
             /* Random object insertion & deletion */
             if (ExpressMode > 1)
-                HDprintf("***Express test mode on.  Some tests skipped\n");
+                printf("***Express test mode on.  Some tests skipped\n");
             else {
                 /* Random tests using "small" heap creation parameters */
                 HDputs("Using 'small' heap creation parameters");

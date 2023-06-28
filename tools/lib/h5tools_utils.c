@@ -65,15 +65,15 @@ parallel_print(const char *format, ...)
     int     bytes_written;
     va_list ap;
 
-    HDva_start(ap, format);
+    va_start(ap, format);
 
     if (!g_Parallel)
         HDvprintf(format, ap);
     else {
         if (overflow_file == NULL) /*no overflow has occurred yet */ {
             bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
-            HDva_end(ap);
-            HDva_start(ap, format);
+            va_end(ap);
+            va_start(ap, format);
 
             if ((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
@@ -81,8 +81,8 @@ parallel_print(const char *format, ...)
 
                 overflow_file = HDtmpfile();
                 if (overflow_file == NULL)
-                    HDfprintf(rawerrorstream,
-                              "warning: could not create overflow file.  Output may be truncated.\n");
+                    fprintf(rawerrorstream,
+                            "warning: could not create overflow file.  Output may be truncated.\n");
                 else
                     bytes_written = HDvfprintf(overflow_file, format, ap);
             }
@@ -92,7 +92,7 @@ parallel_print(const char *format, ...)
         else
             bytes_written = HDvfprintf(overflow_file, format, ap);
     }
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -109,14 +109,14 @@ error_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     FLUSHSTREAM(rawattrstream);
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
-    HDfprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
+    fprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
 
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -133,13 +133,13 @@ warn_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     FLUSHSTREAM(rawattrstream);
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
-    HDfprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
+    fprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -153,8 +153,8 @@ warn_msg(const char *fmt, ...)
 void
 help_ref_msg(FILE *output)
 {
-    HDfprintf(output, "Try '-h' or '--help' for more information or ");
-    HDfprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n", h5tools_getprogname());
+    fprintf(output, "Try '-h' or '--help' for more information or ");
+    fprintf(output, "see the <%s> entry in the 'HDF5 Reference Manual'.\n", h5tools_getprogname());
 }
 
 /*-------------------------------------------------------------------------
@@ -508,7 +508,7 @@ indentation(unsigned x)
             PRINTVALSTREAM(rawoutstream, " ");
     }
     else {
-        HDfprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
+        fprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
         HDexit(1);
     }
 }
@@ -1130,19 +1130,19 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                            /* e.g.? if (!populate()) { then failed } */
 
     if (show_progress) {
-        HDprintf("called h5tools_populate_ros3_fapl\n");
+        printf("called h5tools_populate_ros3_fapl\n");
     }
 
     if (fa == NULL) {
         if (show_progress) {
-            HDprintf("  ERROR: null pointer to fapl_t\n");
+            printf("  ERROR: null pointer to fapl_t\n");
         }
         ret_value = 0;
         goto done;
     }
 
     if (show_progress) {
-        HDprintf("  preset fapl with default values\n");
+        printf("  preset fapl with default values\n");
     }
     fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->authenticate  = FALSE;
@@ -1155,21 +1155,21 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
     if (values != NULL) {
         if (values[0] == NULL) {
             if (show_progress) {
-                HDprintf("  ERROR: aws_region value cannot be NULL\n");
+                printf("  ERROR: aws_region value cannot be NULL\n");
             }
             ret_value = 0;
             goto done;
         }
         if (values[1] == NULL) {
             if (show_progress) {
-                HDprintf("  ERROR: secret_id value cannot be NULL\n");
+                printf("  ERROR: secret_id value cannot be NULL\n");
             }
             ret_value = 0;
             goto done;
         }
         if (values[2] == NULL) {
             if (show_progress) {
-                HDprintf("  ERROR: secret_key value cannot be NULL\n");
+                printf("  ERROR: secret_key value cannot be NULL\n");
             }
             ret_value = 0;
             goto done;
@@ -1181,48 +1181,48 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
         if (*values[0] != '\0' && *values[1] != '\0') {
             if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
                 if (show_progress) {
-                    HDprintf("  ERROR: aws_region value too long\n");
+                    printf("  ERROR: aws_region value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
             HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
-                HDprintf("  aws_region set\n");
+                printf("  aws_region set\n");
             }
 
             if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
                 if (show_progress) {
-                    HDprintf("  ERROR: secret_id value too long\n");
+                    printf("  ERROR: secret_id value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
             HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
-                HDprintf("  secret_id set\n");
+                printf("  secret_id set\n");
             }
 
             if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
                 if (show_progress) {
-                    HDprintf("  ERROR: secret_key value too long\n");
+                    printf("  ERROR: secret_key value too long\n");
                 }
                 ret_value = 0;
                 goto done;
             }
             HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
-                HDprintf("  secret_key set\n");
+                printf("  secret_key set\n");
             }
 
             fa->authenticate = TRUE;
             if (show_progress) {
-                HDprintf("  set to authenticate\n");
+                printf("  set to authenticate\n");
             }
         }
         else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0') {
             if (show_progress) {
-                HDprintf("  ERROR: invalid assortment of empty/non-empty values\n");
+                printf("  ERROR: invalid assortment of empty/non-empty values\n");
             }
             ret_value = 0;
             goto done;

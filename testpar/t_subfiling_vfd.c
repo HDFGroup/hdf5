@@ -91,6 +91,7 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t cus
 
 /* Test functions */
 static void test_create_and_close(void);
+static void test_ioc_only_fail(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
 static void test_selection_strategies(void);
@@ -102,6 +103,7 @@ static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
     test_create_and_close,
+    test_ioc_only_fail,
     test_config_file,
     test_stripe_sizes,
     test_selection_strategies,
@@ -130,7 +132,7 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
     H5FD_ioc_config_t       ioc_conf;
     hid_t                   ret_value = H5I_INVALID_HID;
 
-    HDassert(!custom_config || custom_cfg);
+    assert(!custom_config || custom_cfg);
 
     if ((ret_value = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
@@ -211,6 +213,45 @@ test_create_and_close(void)
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
     H5E_END_TRY
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+
+/*
+ * A simple test that ensures file creation fails when
+ * attempting to use the IOC VFD by itself, without it
+ * being stacked under the Subfiling VFD. This is
+ * currently unsupported.
+ */
+#define SUBF_FILENAME "test_subfiling_only_ioc_fail.h5"
+static void
+test_ioc_only_fail(void)
+{
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("invalid use of IOC VFD by itself");
+
+    /* Setup a FAPL using only the IOC VFD */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "H5Pcreate succeeded");
+
+    VRFY((H5Pset_mpi_params(fapl_id, comm_g, info_g) >= 0), "H5Pset_mpi_params succeeded");
+
+    VRFY((H5Pset_fapl_ioc(fapl_id, NULL) >= 0), "H5Pset_fapl_ioc succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    }
+    H5E_END_TRY;
+    VRFY((file_id < 0), "H5Fcreate failed successfully");
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -900,7 +941,7 @@ test_selection_strategies(void)
                     case SELECT_IOC_WITH_CONFIG:
                     case ioc_selection_options:
                     default:
-                        HDprintf("invalid IOC selection strategy\n");
+                        printf("invalid IOC selection strategy\n");
                         MPI_Abort(comm_g, -1);
                 }
 
@@ -914,7 +955,7 @@ test_selection_strategies(void)
                 VRFY(HDsetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA, criteria_buf, 1) >= 0,
                      "HDsetenv succeeded");
 
-                HDassert(num_active_ranks == mpi_size || num_active_ranks == 1);
+                assert(num_active_ranks == mpi_size || num_active_ranks == 1);
 
                 if ((num_active_ranks == mpi_size) || (mpi_rank == 0)) {
                     h5_stat_t file_info;
@@ -1883,8 +1924,8 @@ test_subfiling_h5fuse(void)
         pid_t tmppid;
         int   status;
 
-        pid = HDfork();
-        VRFY(pid >= 0, "HDfork succeeded");
+        pid = fork();
+        VRFY(pid >= 0, "fork succeeded");
 
         if (pid == 0) {
             char *tmp_filename;
@@ -1906,23 +1947,23 @@ test_subfiling_h5fuse(void)
             args[6] = NULL;
 
             /* Call h5fuse script from MPI rank 0 */
-            HDexecvp("env", args);
+            execvp("env", args);
         }
         else {
-            tmppid = HDwaitpid(pid, &status, 0);
-            VRFY(tmppid >= 0, "HDwaitpid succeeded");
+            tmppid = waitpid(pid, &status, 0);
+            VRFY(tmppid >= 0, "waitpid succeeded");
 
             if (WIFEXITED(status)) {
                 int ret;
 
                 if ((ret = WEXITSTATUS(status)) != 0) {
-                    HDprintf("h5fuse process exited with error code %d\n", ret);
+                    printf("h5fuse process exited with error code %d\n", ret);
                     HDfflush(stdout);
                     MPI_Abort(comm_g, -1);
                 }
             }
             else {
-                HDprintf("h5fuse process terminated abnormally\n");
+                printf("h5fuse process terminated abnormally\n");
                 HDfflush(stdout);
                 MPI_Abort(comm_g, -1);
             }
@@ -1992,7 +2033,7 @@ test_subfiling_h5fuse(void)
 
         /* Delete the configuration file */
         if (HDremove(filename_buf) < 0) {
-            HDprintf("couldn't remove Subfiling VFD configuration file '%s'\n", filename_buf);
+            printf("couldn't remove Subfiling VFD configuration file '%s'\n", filename_buf);
             nerrors++;
         }
 
@@ -2003,7 +2044,7 @@ test_subfiling_h5fuse(void)
 
             /* Delete the subfile */
             if (HDremove(filename_buf) < 0) {
-                HDprintf("couldn't remove subfile '%s'\n", filename_buf);
+                printf("couldn't remove subfile '%s'\n", filename_buf);
                 nerrors++;
             }
         }
@@ -2058,7 +2099,7 @@ parse_subfiling_env_vars(void)
     }
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX))) {
-        HDassert(config_dir);
+        assert(config_dir);
 
         HDstrncpy(config_dir, env_value, PATH_MAX);
 
@@ -2088,27 +2129,27 @@ main(int argc, char **argv)
 
     /* Initialize MPI */
     if (MPI_SUCCESS != (mpi_code_g = MPI_Init_thread(&argc, &argv, required, &provided))) {
-        HDprintf("MPI_Init_thread failed with error code %d\n", mpi_code_g);
+        printf("MPI_Init_thread failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
 
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(comm_g, &mpi_rank))) {
-        HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+        printf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
 
     if (provided != required) {
         if (MAINPROCESS)
-            HDprintf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
+            printf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
         nerrors++;
         goto exit;
     }
 
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(comm_g, &mpi_size))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -2117,19 +2158,19 @@ main(int argc, char **argv)
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_split_type(comm_g, MPI_COMM_TYPE_SHARED, mpi_rank,
                                                          MPI_INFO_NULL, &node_local_comm))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_split_type failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_split_type failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(node_local_comm, &node_local_size))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(node_local_comm, &node_local_rank))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -2139,7 +2180,7 @@ main(int argc, char **argv)
     if (MPI_SUCCESS !=
         (mpi_code_g = MPI_Allreduce(MPI_IN_PLACE, &num_nodes_g, 1, MPI_INT, MPI_SUM, comm_g))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Allreduce failed with error code %d\n", mpi_code_g);
+            printf("MPI_Allreduce failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -2152,32 +2193,32 @@ main(int argc, char **argv)
      */
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_split(comm_g, node_local_rank, mpi_rank, &ioc_comm))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_split failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_split failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(ioc_comm, &ioc_comm_size))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(ioc_comm, &ioc_comm_rank))) {
         if (MAINPROCESS)
-            HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+            printf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
 
     if (H5dont_atexit() < 0) {
         if (MAINPROCESS)
-            HDprintf("Failed to turn off atexit processing. Continue.\n");
+            printf("Failed to turn off atexit processing. Continue.\n");
     }
 
     H5open();
 
     if (MAINPROCESS) {
-        HDprintf("Testing Subfiling VFD functionality\n");
+        printf("Testing Subfiling VFD functionality\n");
     }
 
     TestAlarmOn();
@@ -2195,7 +2236,7 @@ main(int argc, char **argv)
     if (mpi_size > 1) {
         if (MPI_SUCCESS != (mpi_code_g = MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, comm_g))) {
             if (MAINPROCESS)
-                HDprintf("MPI_Bcast failed with error code %d\n", mpi_code_g);
+                printf("MPI_Bcast failed with error code %d\n", mpi_code_g);
             nerrors++;
             goto exit;
         }
@@ -2204,13 +2245,13 @@ main(int argc, char **argv)
     srand(seed);
 
     if (MAINPROCESS)
-        HDprintf("Using seed: %u\n\n", seed);
+        printf("Using seed: %u\n\n", seed);
 
     /* Allocate buffer for possible config file directory specified */
     config_dir = HDmalloc(PATH_MAX);
     if (!config_dir) {
         if (MAINPROCESS)
-            HDprintf("couldn't allocate space for subfiling config file directory buffer\n");
+            printf("couldn't allocate space for subfiling config file directory buffer\n");
         nerrors++;
         goto exit;
     }
@@ -2271,7 +2312,7 @@ main(int argc, char **argv)
 
         if (HDsetenv(H5FD_SUBFILING_STRIPE_SIZE, tmp, 1) < 0) {
             if (MAINPROCESS)
-                HDprintf("HDsetenv failed\n");
+                printf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
@@ -2288,7 +2329,7 @@ main(int argc, char **argv)
 
         if (HDsetenv(H5FD_SUBFILING_IOC_PER_NODE, ioc_per_node_str, 1) < 0) {
             if (MAINPROCESS)
-                HDprintf("HDsetenv failed\n");
+                printf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
@@ -2298,7 +2339,7 @@ main(int argc, char **argv)
     if (ioc_thread_pool_size_g < 0) {
         if (HDsetenv(H5FD_IOC_THREAD_POOL_SIZE, "2", 1) < 0) {
             if (MAINPROCESS)
-                HDprintf("HDsetenv failed\n");
+                printf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
@@ -2323,7 +2364,7 @@ main(int argc, char **argv)
 
             if (MAINPROCESS) {
                 if ((HDmkdir(SUBFILING_CONFIG_FILE_DIR, (mode_t)0755) < 0) && (errno != EEXIST)) {
-                    HDprintf("couldn't create temporary testing directory\n");
+                    printf("couldn't create temporary testing directory\n");
                     mkdir_success = 0;
                 }
                 else
@@ -2335,14 +2376,14 @@ main(int argc, char **argv)
 
             if (!mkdir_success) {
                 if (MAINPROCESS)
-                    HDprintf("HDmkdir failed\n");
+                    printf("HDmkdir failed\n");
                 nerrors++;
                 goto exit;
             }
 
             if (HDsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX, SUBFILING_CONFIG_FILE_DIR, 1) < 0) {
                 if (MAINPROCESS)
-                    HDprintf("HDsetenv failed\n");
+                    printf("HDsetenv failed\n");
                 nerrors++;
                 goto exit;
             }
@@ -2350,7 +2391,7 @@ main(int argc, char **argv)
         else {
             if (HDsetenv(H5FD_SUBFILING_CONFIG_FILE_PREFIX, ".", 1) < 0) {
                 if (MAINPROCESS)
-                    HDprintf("HDsetenv failed\n");
+                    printf("HDsetenv failed\n");
                 nerrors++;
                 goto exit;
             }
@@ -2372,7 +2413,7 @@ main(int argc, char **argv)
         num_iocs_g = mpi_size;
 
     if (MAINPROCESS) {
-        HDprintf("Re-running tests with environment variables set\n");
+        printf("Re-running tests with environment variables set\n");
     }
 
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
@@ -2407,14 +2448,14 @@ exit:
 
     if (MAINPROCESS) {
         if (HDrmdir(SUBFILING_CONFIG_FILE_DIR) < 0 && (errno != ENOENT)) {
-            HDprintf("couldn't remove temporary testing directory\n");
+            printf("couldn't remove temporary testing directory\n");
             nerrors++;
         }
     }
 
     if (nerrors) {
         if (MAINPROCESS)
-            HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
+            printf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
     }
 
     TestAlarmOff();
@@ -2437,8 +2478,8 @@ int
 main(void)
 {
     h5_reset();
-    HDprintf("Testing Subfiling VFD functionality\n");
-    HDprintf("SKIPPED - Subfiling VFD not built\n");
+    printf("Testing Subfiling VFD functionality\n");
+    printf("SKIPPED - Subfiling VFD not built\n");
     HDexit(EXIT_SUCCESS);
 }
 

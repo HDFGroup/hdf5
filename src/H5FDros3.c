@@ -306,7 +306,7 @@ H5FD_ros3_init(void)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD_ros3_init() called.\n");
+    fprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif
 
     if (H5I_VFL != H5I_get_type(H5FD_ROS3_g)) {
@@ -350,7 +350,7 @@ H5FD__ros3_term(void)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_term() called.\n");
+    fprintf(stdout, "H5FD__ros3_term() called.\n");
 #endif
 
     /* Reset VFL ID */
@@ -383,10 +383,10 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*#", fapl_id, fa);
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pset_fapl_ros3() called.\n");
+    fprintf(stdout, "H5Pset_fapl_ros3() called.\n");
 #endif
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
@@ -429,7 +429,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
@@ -469,7 +469,7 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
     H5TRACE2("e", "ix", fapl_id, fa_dst);
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5Pget_fapl_ros3() called.\n");
+    fprintf(stdout, "H5Pget_fapl_ros3() called.\n");
 #endif
 
     if (fa_dst == NULL)
@@ -592,7 +592,7 @@ H5FD__ros3_fapl_free(void *_fa)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fa != NULL); /* sanity check */
+    assert(fa != NULL); /* sanity check */
 
     H5MM_xfree(fa);
 
@@ -630,7 +630,7 @@ ros3_reset_stats(H5FD_ros3_t *file)
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDprintf("ros3_reset_stats() called\n");
+    printf("ros3_reset_stats() called\n");
 #endif
 
     if (file == NULL)
@@ -698,7 +698,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_open() called.\n");
+    fprintf(stdout, "H5FD__ros3_open() called.\n");
 #endif
 
     /* Sanity check on file offsets */
@@ -729,7 +729,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * find way to re-use/share
          */
         now = gmnow();
-        HDassert(now != NULL);
+        assert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp")
         if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa.secret_key,
@@ -868,20 +868,20 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      * PRINT FILENAME *
      ******************/
 
-    HDfprintf(stream, "stats for %s://%s", purl->scheme, purl->host);
+    fprintf(stream, "stats for %s://%s", purl->scheme, purl->host);
     if (purl->port != NULL && purl->port[0] != '\0')
-        HDfprintf(stream, ":%s", purl->port);
+        fprintf(stream, ":%s", purl->port);
     if (purl->query != NULL && purl->query[0] != '\0') {
         if (purl->path != NULL && purl->path[0] != '\0')
-            HDfprintf(stream, "/%s", purl->path);
+            fprintf(stream, "/%s", purl->path);
         else
-            HDfprintf(stream, "/");
-        HDfprintf(stream, "?%s", purl->query);
+            fprintf(stream, "/");
+        fprintf(stream, "?%s", purl->query);
     }
     else if (purl->path != NULL && purl->path[0] != '\0') {
-        HDfprintf(stream, "/%s", purl->path);
+        fprintf(stream, "/%s", purl->path);
     }
-    HDfprintf(stream, "\n");
+    fprintf(stream, "\n");
 
     /*******************
      * AGGREGATE STATS *
@@ -914,10 +914,10 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      * PRINT OVERVIEW *
      ******************/
 
-    HDfprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
-              count_raw);
-    HDfprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
-              bytes_raw);
+    fprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
+            count_raw);
+    fprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
+            bytes_raw);
 
     if (count_raw + count_meta == 0)
         goto done;
@@ -926,60 +926,60 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
      * PRINT AGGREGATE STATS *
      *************************/
 
-    HDfprintf(stream, "SIZES     meta      raw\n");
-    HDfprintf(stream, "  min ");
+    fprintf(stream, "SIZES     meta      raw\n");
+    fprintf(stream, "  min ");
     if (count_meta == 0)
-        HDfprintf(stream, "   0.000  ");
+        fprintf(stream, "   0.000  ");
     else {
         re_dub = (double)min_meta;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
-        HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+        assert(suffix_i < sizeof(suffixes));
+        fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
     }
 
     if (count_raw == 0)
-        HDfprintf(stream, "   0.000 \n");
+        fprintf(stream, "   0.000 \n");
     else {
         re_dub = (double)min_raw;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
-        HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+        assert(suffix_i < sizeof(suffixes));
+        fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
     }
 
-    HDfprintf(stream, "  avg ");
+    fprintf(stream, "  avg ");
     re_dub = (double)average_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
-    HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)average_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
-    HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
-    HDfprintf(stream, "  max ");
+    fprintf(stream, "  max ");
     re_dub = (double)max_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
-    HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)max_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
-    HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
+    assert(suffix_i < sizeof(suffixes));
+    fprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
     /******************************
      * PRINT INDIVIDUAL BIN STATS *
      ******************************/
 
-    HDfprintf(stream, "BINS             # of reads      total bytes         average size\n");
-    HDfprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
+    fprintf(stream, "BINS             # of reads      total bytes         average size\n");
+    fprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
 
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         const ros3_statsbin *m;
@@ -1003,50 +1003,50 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 
         if (i == ROS3_STATS_BIN_COUNT) {
             range_end = ros3_stats_boundaries[i - 1];
-            HDfprintf(stream, ">");
+            fprintf(stream, ">");
         }
         else
-            HDfprintf(stream, " ");
+            fprintf(stream, " ");
 
         bm_val = (double)m->bytes;
         for (suffix_i = 0; bm_val >= 1024.0; suffix_i++)
             bm_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         bm_suffix = suffixes[suffix_i];
 
         br_val = (double)r->bytes;
         for (suffix_i = 0; br_val >= 1024.0; suffix_i++)
             br_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         br_suffix = suffixes[suffix_i];
 
         if (m->count > 0)
             am_val = (double)(m->bytes) / (double)(m->count);
         for (suffix_i = 0; am_val >= 1024.0; suffix_i++)
             am_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         am_suffix = suffixes[suffix_i];
 
         if (r->count > 0)
             ar_val = (double)(r->bytes) / (double)(r->count);
         for (suffix_i = 0; ar_val >= 1024.0; suffix_i++)
             ar_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         ar_suffix = suffixes[suffix_i];
 
         re_dub = (double)range_end;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
 
-        HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
-                  suffixes[suffix_i], /* bin ceiling      */
-                  m->count,           /* metadata reads   */
-                  r->count,           /* raw data reads    */
-                  bm_val, bm_suffix,  /* metadata bytes   */
-                  br_val, br_suffix,  /* raw data bytes    */
-                  am_val, am_suffix,  /* metadata average */
-                  ar_val, ar_suffix); /* raw data average  */
+        fprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+                suffixes[suffix_i], /* bin ceiling      */
+                m->count,           /* metadata reads   */
+                r->count,           /* raw data reads    */
+                bm_val, bm_suffix,  /* metadata bytes   */
+                br_val, br_suffix,  /* raw data bytes    */
+                am_val, am_suffix,  /* metadata average */
+                ar_val, ar_suffix); /* raw data average  */
 
         HDfflush(stream);
     }
@@ -1083,12 +1083,12 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_close() called.\n");
+    fprintf(stdout, "H5FD__ros3_close() called.\n");
 #endif
 
     /* Sanity checks */
-    HDassert(file != NULL);
-    HDassert(file->s3r_handle != NULL);
+    assert(file != NULL);
+    assert(file->s3r_handle != NULL);
 
     /* Close the underlying request handle
      */
@@ -1152,20 +1152,20 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_cmp() called.\n");
+    fprintf(stdout, "H5FD__ros3_cmp() called.\n");
 #endif
 
-    HDassert(f1->s3r_handle != NULL);
-    HDassert(f2->s3r_handle != NULL);
+    assert(f1->s3r_handle != NULL);
+    assert(f2->s3r_handle != NULL);
 
     purl1 = (const parsed_url_t *)f1->s3r_handle->purl;
     purl2 = (const parsed_url_t *)f2->s3r_handle->purl;
-    HDassert(purl1 != NULL);
-    HDassert(purl2 != NULL);
-    HDassert(purl1->scheme != NULL);
-    HDassert(purl2->scheme != NULL);
-    HDassert(purl1->host != NULL);
-    HDassert(purl2->host != NULL);
+    assert(purl1 != NULL);
+    assert(purl2 != NULL);
+    assert(purl1->scheme != NULL);
+    assert(purl2->scheme != NULL);
+    assert(purl1->host != NULL);
+    assert(purl2->host != NULL);
 
     /* URL: SCHEME */
     if (HDstrcmp(purl1->scheme, purl2->scheme))
@@ -1264,7 +1264,7 @@ H5FD__ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_query() called.\n");
+    fprintf(stdout, "H5FD__ros3_query() called.\n");
 #endif
 
     /* Set the VFL feature flags that this driver supports */
@@ -1304,7 +1304,7 @@ H5FD__ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
+    fprintf(stdout, "H5FD__ros3_get_eoa() called.\n");
 #endif
 
     FUNC_LEAVE_NOAPI(file->eoa)
@@ -1335,7 +1335,7 @@ H5FD__ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
+    fprintf(stdout, "H5FD__ros3_set_eoa() called.\n");
 #endif
 
     file->eoa = addr;
@@ -1369,7 +1369,7 @@ H5FD__ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     FUNC_ENTER_PACKAGE_NOERR
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_get_eof() called.\n");
+    fprintf(stdout, "H5FD__ros3_get_eof() called.\n");
 #endif
 
     FUNC_LEAVE_NOAPI(H5FD_s3comms_s3r_get_filesize(file->s3r_handle))
@@ -1401,7 +1401,7 @@ H5FD__ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_get_handle() called.\n");
+    fprintf(stdout, "H5FD__ros3_get_handle() called.\n");
 #endif
 
     if (!file_handle)
@@ -1451,12 +1451,12 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_read() called.\n");
+    fprintf(stdout, "H5FD__ros3_read() called.\n");
 #endif
 
-    HDassert(file != NULL);
-    HDassert(file->s3r_handle != NULL);
-    HDassert(buf != NULL);
+    assert(file != NULL);
+    assert(file->s3r_handle != NULL);
+    assert(buf != NULL);
 
     filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
 
@@ -1521,7 +1521,7 @@ H5FD__ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_write() called.\n");
+    fprintf(stdout, "H5FD__ros3_write() called.\n");
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.")
@@ -1559,7 +1559,7 @@ H5FD__ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
     FUNC_ENTER_PACKAGE
 
 #if ROS3_DEBUG
-    HDfprintf(stdout, "H5FD__ros3_truncate() called.\n");
+    fprintf(stdout, "H5FD__ros3_truncate() called.\n");
 #endif
 
     HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.")

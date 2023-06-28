@@ -639,7 +639,7 @@ cklinks(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
 
@@ -689,7 +689,7 @@ cklinks(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Otoken_cmp(file, &oinfo1.token, &oinfo2.token, &token_cmp) < 0)
@@ -725,12 +725,12 @@ cklinks(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/dangle", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
         H5_FAILED();
-        HDprintf("    %d: Can't retrieve link value\n", __LINE__);
+        printf("    %d: Can't retrieve link value\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (HDstrcmp(linkval, "foobar") != 0) {
@@ -756,12 +756,12 @@ cklinks(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/recursive", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
         H5_FAILED();
-        HDprintf("    %d: Can't retrieve link value\n", __LINE__);
+        printf("    %d: Can't retrieve link value\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (HDstrcmp(linkval, "/grp1/recursive") != 0) {
@@ -824,7 +824,7 @@ ck_new_links(hid_t fapl, hbool_t new_format)
     /* Check hard links */
     if (H5O_TYPE_DATASET != oi_hard1.type || H5O_TYPE_DATASET != oi_hard2.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     }
 
@@ -955,7 +955,7 @@ toomany(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NUM_LINKS == 16);
+    assert(H5L_NUM_LINKS == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -2162,7 +2162,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
@@ -2207,7 +2207,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5O_TYPE_DATASET != oinfo2.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5_addr_ne(oinfo1.addr, oinfo2.addr)) {
@@ -2241,12 +2241,12 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/dangle", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
         H5_FAILED();
-        HDprintf("    %d: Can't retrieve link value\n", __LINE__);
+        printf("    %d: Can't retrieve link value\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (HDstrcmp(linkval, "foobar") != 0) {
@@ -2272,12 +2272,12 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
     if (H5L_TYPE_SOFT != linfo.type) {
         H5_FAILED();
-        HDprintf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
+        printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (H5Lget_val(file, "grp1/recursive", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
         H5_FAILED();
-        HDprintf("    %d: Can't retrieve link value\n", __LINE__);
+        printf("    %d: Can't retrieve link value\n", __LINE__);
         TEST_ERROR;
     } /* end if */
     if (HDstrcmp(linkval, "/grp1/recursive") != 0) {
@@ -4148,7 +4148,7 @@ lapl_nlinks_deprec(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NUM_LINKS == 16);
+    assert(H5L_NUM_LINKS == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -6349,7 +6349,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -6384,7 +6384,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -6510,7 +6510,7 @@ link_iterate_deprec(hid_t fapl)
                                     "creation order index using deprecated routines");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("iterating over links by creation order index in native order w/creation "
                                     "order index using deprecated routines");
@@ -6537,7 +6537,7 @@ link_iterate_deprec(hid_t fapl)
                                     "order index using deprecated routines");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("iterating over links by name index in native order w/creation order "
                                     "index using deprecated routines");
@@ -6832,7 +6832,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -6867,7 +6867,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -6980,7 +6980,7 @@ link_iterate_old_deprec(hid_t fapl)
                     "deprecated routines");
         } /* end else */
         else {
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
             TESTING("iterating over links by name index in native order in old-style group using deprecated "
                     "routines");
         } /* end else */
@@ -7986,7 +7986,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NUM_LINKS == 16);
+    assert(H5L_NUM_LINKS == 16);
 
     /* Set up filenames */
     h5_fixname(FILENAME[3], fapl, filename1, sizeof filename1);
@@ -8064,7 +8064,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
-        HDprintf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
+        printf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
         goto error;
     }
 
@@ -15244,7 +15244,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     /* XXX: should probably make a "generic" test that creates the proper
      *          # of links based on this value - QAK
      */
-    HDassert(H5L_NUM_LINKS == 16);
+    assert(H5L_NUM_LINKS == 16);
 
     /* Create file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -19534,7 +19534,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -19570,7 +19570,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -19699,7 +19699,7 @@ link_iterate(hid_t fapl)
                                     "creation order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("iterating over links by creation order index in native order w/creation "
                                     "order index");
@@ -19726,7 +19726,7 @@ link_iterate(hid_t fapl)
                                     "order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING(
                                 "iterating over links by name index in native order w/creation order index");
@@ -20031,7 +20031,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -20067,7 +20067,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     else {
         unsigned nvisit = 0; /* # of links visited */
 
-        HDassert(order == H5_ITER_NATIVE);
+        assert(order == H5_ITER_NATIVE);
         for (v = 0; v < max_links; v++)
             if (iter_info->visited[v] == TRUE)
                 nvisit++;
@@ -20183,7 +20183,7 @@ link_iterate_old(hid_t fapl)
             TESTING("iterating over links by name index in decreasing order in old-style group");
         } /* end else */
         else {
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
             TESTING("iterating over links by name index in native order in old-style group");
         } /* end else */
 
@@ -20461,7 +20461,7 @@ open_by_idx(hid_t fapl)
                                     "order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING(
                                 "open object by creation order index in native order w/creation order index");
@@ -20484,7 +20484,7 @@ open_by_idx(hid_t fapl)
                             TESTING("open object by name index in decreasing order w/o creation order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("open object by name index in native order w/creation order index");
                         else
@@ -20810,7 +20810,7 @@ open_by_idx_old(hid_t fapl)
             TESTING("open object by name index in decreasing order in old-style group");
         } /* end else */
         else {
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
             TESTING("open object by name index in native order in old-style group");
         } /* end else */
 
@@ -21078,7 +21078,7 @@ object_info(hid_t fapl)
                                     "creation order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("query object info by creation order index in native order w/creation "
                                     "order index");
@@ -21105,7 +21105,7 @@ object_info(hid_t fapl)
                                     "index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("query object info by name index in native order w/creation order index");
                         else
@@ -21435,7 +21435,7 @@ object_info_old(hid_t fapl)
             TESTING("query object info by name index in decreasing order in old-style group");
         } /* end else */
         else {
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
             TESTING("query object info by name index in native order in old-style group");
         } /* end else */
 
@@ -21629,7 +21629,7 @@ group_info(hid_t fapl)
                                     "creation order index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("query group info by creation order index in native order w/creation "
                                     "order index");
@@ -21656,7 +21656,7 @@ group_info(hid_t fapl)
                                     "index");
                     } /* end else */
                     else {
-                        HDassert(order == H5_ITER_NATIVE);
+                        assert(order == H5_ITER_NATIVE);
                         if (use_index)
                             TESTING("query group info by name index in native order w/creation order index");
                         else
@@ -22149,7 +22149,7 @@ group_info_old(hid_t fapl)
             TESTING("query group info by name index in decreasing order in old-style group");
         } /* end else */
         else {
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
             TESTING("query group info by name index in native order in old-style group");
         } /* end else */
 
@@ -22678,13 +22678,13 @@ main(void)
 
     for (minimize_dset_oh = 0; minimize_dset_oh <= 1; minimize_dset_oh++) {
         if (minimize_dset_oh) {
-            HDprintf("\n-Testing with minimized dataset object headers-\n");
+            printf("\n-Testing with minimized dataset object headers-\n");
             dcpl_g = H5Pcreate(H5P_DATASET_CREATE);
             if (0 > dcpl_g)
                 TEST_ERROR;
         }
         else {
-            HDprintf("\n-Testing with unminimzed dataset object headers-\n");
+            printf("\n-Testing with unminimzed dataset object headers-\n");
             dcpl_g = H5P_DEFAULT;
         }
 
@@ -22694,11 +22694,11 @@ main(void)
             /* Check for FAPL to use */
             if (new_format) {
                 my_fapl = fapl2;
-                HDprintf("\n--Testing with 'new format'--\n");
+                printf("\n--Testing with 'new format'--\n");
             }
             else {
                 my_fapl = fapl;
-                HDprintf("\n--Testing with 'old format'--\n");
+                printf("\n--Testing with 'old format'--\n");
             }
 
             /* always enter tests without external cache */
@@ -22752,12 +22752,12 @@ main(void)
                     if (efc) {
                         if (H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
                             TEST_ERROR;
-                        HDprintf("\n---Testing with external file cache---\n");
+                        printf("\n---Testing with external file cache---\n");
                     } /* end if */
                     else {
                         if (H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
                             TEST_ERROR;
-                        HDprintf("\n---Testing without external file cache---\n");
+                        printf("\n---Testing without external file cache---\n");
                     } /* end else */
 
                     nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
@@ -22941,10 +22941,10 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d LINK TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        printf("***** %d LINK TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
         HDexit(EXIT_FAILURE);
     }
-    HDprintf("All link tests passed.\n");
+    printf("All link tests passed.\n");
 
     /* clean up symlink created by external link tests */
     HDremove(SYMLINK1);

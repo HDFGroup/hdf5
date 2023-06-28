@@ -91,7 +91,7 @@ typedef struct H5FD_ioc_t {
 #ifdef H5FD_IOC_DEBUG
 #define H5FD_IOC_LOG_CALL(name)                                                                              \
     do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
+        printf("called %s()\n", (name));                                                                     \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #else
@@ -422,7 +422,7 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(config_out);
+    assert(config_out);
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
@@ -455,7 +455,7 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_IOC_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ioc_config_t version");
@@ -660,7 +660,7 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(old_fa_ptr);
+    assert(old_fa_ptr);
 
     new_fa_ptr = H5FL_CALLOC(H5FD_ioc_config_t);
     if (NULL == new_fa_ptr)
@@ -695,7 +695,7 @@ H5FD__ioc_fapl_free(void *_fapl)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Check arguments */
-    HDassert(fapl);
+    assert(fapl);
 
     /* Free the property list */
     fapl = H5FL_FREE(H5FD_ioc_config_t, fapl);
@@ -819,6 +819,19 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Retrieve the HDF5 stub file ID for the current file */
     if (H5_subfiling_get_file_id_prop(plist_ptr, &file_ptr->file_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get stub file ID from FAPL");
+    if (file_ptr->file_id == UINT64_MAX) {
+        /* Since this VFD does no displaying of error stacks itself
+         * (it relies on the Subfiling VFD to do this), we must print
+         * the error stack here if we know it wasn't stacked under the
+         * Subfiling VFD.
+         */
+        H5_SUBFILING_DONE_ERROR(
+            H5E_PLIST, H5E_BADVALUE, NULL,
+            "subfiling stub file ID property was missing from FAPL - IOC VFD wasn't correctly stacked under "
+            "the Subfiling VFD and cannot currently be used alone");
+        PRINT_ERROR_STACK;
+        goto done;
+    }
 
     /*
      * Open the subfiles for this HDF5 file. A subfiling
@@ -891,7 +904,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(file_ptr);
+    assert(file_ptr);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
@@ -977,8 +990,8 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(f1);
-    HDassert(f2);
+    assert(f1);
+    assert(f2);
 
     ret_value = (f1->file_id > f2->file_id) - (f1->file_id < f2->file_id);
 
@@ -1095,7 +1108,7 @@ H5FD__ioc_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     ret_value = file->eoa;
 
@@ -1121,7 +1134,7 @@ H5FD__ioc_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     file->eoa = addr;
 
@@ -1150,7 +1163,7 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     H5FD_IOC_LOG_CALL(__func__);
 
     /* Sanity check */
-    HDassert(file);
+    assert(file);
 
     sf_context = H5_get_subfiling_object(file->context_id);
     if (sf_context) {
@@ -1209,8 +1222,8 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(file && file->pub.cls);
-    HDassert(buf);
+    assert(file && file->pub.cls);
+    assert(buf);
 
     /* Check for overflow conditions */
     if (!H5_addr_defined(addr))
@@ -1369,7 +1382,7 @@ H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(file);
+    assert(file);
 
     /* TODO: placeholder for now since Subfiling does the truncation */
     if (!H5_addr_eq(file->eoa, file->last_eoa)) {
@@ -1441,7 +1454,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
     if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    HDassert(H5FD_IOC == H5P_peek_driver(plist));
+    assert(H5FD_IOC == H5P_peek_driver(plist));
 
     if (H5FD_mpi_self_initialized) {
         comm = MPI_COMM_WORLD;
@@ -1488,7 +1501,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
 #endif
 
                 H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1527,7 +1540,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
+                printf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
 #endif
 
                 if (ENOENT != errno)
@@ -1597,10 +1610,10 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
 
-    HDassert(_file);
-    HDassert(addrs);
-    HDassert(sizes);
-    HDassert(bufs);
+    assert(_file);
+    assert(addrs);
+    assert(sizes);
+    assert(bufs);
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1609,7 +1622,7 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
+    assert(sf_context->topology);
 
     /*
      * Allocate an array of I/O requests and an array twice that size for
@@ -1678,10 +1691,10 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
 
-    HDassert(_file);
-    HDassert(addrs);
-    HDassert(sizes);
-    HDassert(bufs);
+    assert(_file);
+    assert(addrs);
+    assert(sizes);
+    assert(bufs);
 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
@@ -1690,7 +1703,7 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
-    HDassert(sf_context->topology);
+    assert(sf_context->topology);
 
     /*
      * Allocate an array of I/O requests and an array for MPI_Request

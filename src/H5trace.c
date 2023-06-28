@@ -259,13 +259,13 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
             if ('a' == type[1]) {
                 asize_idx = (int)HDstrtol(type + 2, &rest, 10);
-                HDassert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
-                HDassert(']' == *rest);
+                assert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
+                assert(']' == *rest);
                 type = rest + 1;
             }
             else {
                 rest = (char *)HDstrchr(type, ']');
-                HDassert(rest);
+                assert(rest);
                 type      = rest + 1;
                 asize_idx = -1;
             }
@@ -278,13 +278,13 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
          * don't print the argument or the following `=' (this is used for
          * return values).
          */
-        argname = HDva_arg(ap, char *);
+        argname = va_arg(ap, char *);
         if (argname)
             H5RS_asprintf_cat(rs, "%s%s=", argno ? ", " : "", argname);
 
         /* A pointer/array */
         if (ptr) {
-            vp = HDva_arg(ap, void *);
+            vp = va_arg(ap, void *);
             if (vp) {
                 switch (type[0]) {
                     case 'h': /* hsize_t */
@@ -439,7 +439,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
             switch (type[0]) {
                 case 'a': /* haddr_t */
                 {
-                    haddr_t addr = HDva_arg(ap, haddr_t);
+                    haddr_t addr = va_arg(ap, haddr_t);
 
                     if (H5_addr_defined(addr))
                         H5RS_asprintf_cat(rs, "%" PRIuHADDR, addr);
@@ -452,7 +452,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'i': /* H5A_info_t */
                         {
-                            H5A_info_t ainfo = HDva_arg(ap, H5A_info_t);
+                            H5A_info_t ainfo = va_arg(ap, H5A_info_t);
 
                             H5RS_acat(rs, "{");
                             H5_trace_args_bool(rs, ainfo.corder_valid);
@@ -465,7 +465,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'o': /* H5A_operator1_t */
                         {
-                            H5A_operator1_t aop1 = (H5A_operator1_t)HDva_arg(ap, H5A_operator1_t);
+                            H5A_operator1_t aop1 = (H5A_operator1_t)va_arg(ap, H5A_operator1_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)aop1);
                         } /* end block */
@@ -474,7 +474,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'O': /* H5A_operator2_t */
                         {
-                            H5A_operator2_t aop2 = (H5A_operator2_t)HDva_arg(ap, H5A_operator2_t);
+                            H5A_operator2_t aop2 = (H5A_operator2_t)va_arg(ap, H5A_operator2_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)aop2);
                         } /* end block */
@@ -488,8 +488,8 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'b': /* hbool_t */
                 {
-                    /* Can't pass hbool_t to HDva_arg() */
-                    hbool_t bool_var = (hbool_t)HDva_arg(ap, int);
+                    /* Can't pass hbool_t to va_arg() */
+                    hbool_t bool_var = (hbool_t)va_arg(ap, int);
 
                     H5_trace_args_bool(rs, bool_var);
                 } /* end block */
@@ -499,7 +499,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'c': /* H5AC_cache_config_t */
                         {
-                            H5AC_cache_config_t cc = HDva_arg(ap, H5AC_cache_config_t);
+                            H5AC_cache_config_t cc = va_arg(ap, H5AC_cache_config_t);
 
                             H5RS_asprintf_cat(rs, "{%d, ", cc.version);
                             H5_trace_args_bool(rs, cc.rpt_fcn_enabled);
@@ -584,7 +584,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'C': /* H5AC_cache_image_config_t */
                         {
-                            H5AC_cache_image_config_t cic = HDva_arg(ap, H5AC_cache_image_config_t);
+                            H5AC_cache_image_config_t cic = va_arg(ap, H5AC_cache_image_config_t);
 
                             H5RS_asprintf_cat(rs, "{%d, ", cic.version);
                             H5_trace_args_bool(rs, cic.generate_image);
@@ -603,7 +603,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'd': /* double */
                 {
-                    double dbl = HDva_arg(ap, double);
+                    double dbl = va_arg(ap, double);
 
                     H5RS_asprintf_cat(rs, "%g", dbl);
                 } /* end block */
@@ -613,7 +613,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'a': /* H5D_alloc_time_t */
                         {
-                            H5D_alloc_time_t alloc_time = (H5D_alloc_time_t)HDva_arg(ap, int);
+                            H5D_alloc_time_t alloc_time = (H5D_alloc_time_t)va_arg(ap, int);
 
                             switch (alloc_time) {
                                 case H5D_ALLOC_TIME_ERROR:
@@ -645,7 +645,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'A': /* H5D_append_cb_t */
                         {
-                            H5D_append_cb_t dapp = (H5D_append_cb_t)HDva_arg(ap, H5D_append_cb_t);
+                            H5D_append_cb_t dapp = (H5D_append_cb_t)va_arg(ap, H5D_append_cb_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)dapp);
                         } /* end block */
@@ -653,7 +653,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'c': /* H5FD_mpio_collective_opt_t */
                         {
-                            H5FD_mpio_collective_opt_t opt = (H5FD_mpio_collective_opt_t)HDva_arg(ap, int);
+                            H5FD_mpio_collective_opt_t opt = (H5FD_mpio_collective_opt_t)va_arg(ap, int);
 
                             switch (opt) {
                                 case H5FD_MPIO_COLLECTIVE_IO:
@@ -674,7 +674,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'C': /* H5D_selection_io_mode_t */
                         {
                             H5D_selection_io_mode_t selection_io_mode =
-                                (H5D_selection_io_mode_t)HDva_arg(ap, int);
+                                (H5D_selection_io_mode_t)va_arg(ap, int);
 
                             switch (selection_io_mode) {
                                 case H5D_SELECTION_IO_MODE_DEFAULT:
@@ -698,7 +698,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5D_fill_time_t */
                         {
-                            H5D_fill_time_t fill_time = (H5D_fill_time_t)HDva_arg(ap, int);
+                            H5D_fill_time_t fill_time = (H5D_fill_time_t)va_arg(ap, int);
 
                             switch (fill_time) {
                                 case H5D_FILL_TIME_ERROR:
@@ -726,7 +726,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'F': /* H5D_fill_value_t */
                         {
-                            H5D_fill_value_t fill_value = (H5D_fill_value_t)HDva_arg(ap, int);
+                            H5D_fill_value_t fill_value = (H5D_fill_value_t)va_arg(ap, int);
 
                             switch (fill_value) {
                                 case H5D_FILL_VALUE_ERROR:
@@ -754,7 +754,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'g': /* H5D_gather_func_t */
                         {
-                            H5D_gather_func_t gop = (H5D_gather_func_t)HDva_arg(ap, H5D_gather_func_t);
+                            H5D_gather_func_t gop = (H5D_gather_func_t)va_arg(ap, H5D_gather_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)gop);
                         } /* end block */
@@ -762,7 +762,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'h': /* H5FD_mpio_chunk_opt_t */
                         {
-                            H5FD_mpio_chunk_opt_t opt = (H5FD_mpio_chunk_opt_t)HDva_arg(ap, int);
+                            H5FD_mpio_chunk_opt_t opt = (H5FD_mpio_chunk_opt_t)va_arg(ap, int);
 
                             switch (opt) {
                                 case H5FD_MPIO_CHUNK_DEFAULT:
@@ -787,7 +787,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'i': /* H5D_mpio_actual_io_mode_t */
                         {
                             H5D_mpio_actual_io_mode_t actual_io_mode =
-                                (H5D_mpio_actual_io_mode_t)HDva_arg(ap, int);
+                                (H5D_mpio_actual_io_mode_t)va_arg(ap, int);
 
                             switch (actual_io_mode) {
                                 case H5D_MPIO_NO_COLLECTIVE:
@@ -819,7 +819,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'I': /* H5FD_file_image_callbacks_t */
                         {
-                            H5FD_file_image_callbacks_t ficb = HDva_arg(ap, H5FD_file_image_callbacks_t);
+                            H5FD_file_image_callbacks_t ficb = va_arg(ap, H5FD_file_image_callbacks_t);
 
                             H5RS_asprintf_cat(rs, "{%p, ", (void *)(uintptr_t)ficb.image_malloc);
                             H5RS_asprintf_cat(rs, "%p, ", (void *)(uintptr_t)ficb.image_memcpy);
@@ -833,7 +833,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'k': /* H5D_chunk_index_t */
                         {
-                            H5D_chunk_index_t idx = (H5D_chunk_index_t)HDva_arg(ap, int);
+                            H5D_chunk_index_t idx = (H5D_chunk_index_t)va_arg(ap, int);
 
                             switch (idx) {
                                 case H5D_CHUNK_IDX_BTREE:
@@ -873,7 +873,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'l': /* H5D_layout_t */
                         {
-                            H5D_layout_t layout = (H5D_layout_t)HDva_arg(ap, int);
+                            H5D_layout_t layout = (H5D_layout_t)va_arg(ap, int);
 
                             switch (layout) {
                                 case H5D_LAYOUT_ERROR:
@@ -910,7 +910,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'n': /* H5D_mpio_no_collective_cause_t */
                         {
                             H5D_mpio_no_collective_cause_t nocol_cause_mode =
-                                (H5D_mpio_no_collective_cause_t)HDva_arg(ap, int);
+                                (H5D_mpio_no_collective_cause_t)va_arg(ap, int);
                             hbool_t flag_already_displayed = FALSE;
 
                             /* Check for all bit-flags which might be set */
@@ -958,7 +958,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'o': /* H5D_mpio_actual_chunk_opt_mode_t */
                         {
                             H5D_mpio_actual_chunk_opt_mode_t chunk_opt_mode =
-                                (H5D_mpio_actual_chunk_opt_mode_t)HDva_arg(ap, int);
+                                (H5D_mpio_actual_chunk_opt_mode_t)va_arg(ap, int);
 
                             switch (chunk_opt_mode) {
                                 case H5D_MPIO_NO_CHUNK_OPTIMIZATION:
@@ -982,7 +982,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'O': /* H5D_operator_t */
                         {
-                            H5D_operator_t dop = (H5D_operator_t)HDva_arg(ap, H5D_operator_t);
+                            H5D_operator_t dop = (H5D_operator_t)va_arg(ap, H5D_operator_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)dop);
                         } /* end block */
@@ -990,7 +990,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5D_space_status_t */
                         {
-                            H5D_space_status_t space_status = (H5D_space_status_t)HDva_arg(ap, int);
+                            H5D_space_status_t space_status = (H5D_space_status_t)va_arg(ap, int);
 
                             switch (space_status) {
                                 case H5D_SPACE_STATUS_NOT_ALLOCATED:
@@ -1018,7 +1018,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'S': /* H5D_scatter_func_t */
                         {
-                            H5D_scatter_func_t sop = (H5D_scatter_func_t)HDva_arg(ap, H5D_scatter_func_t);
+                            H5D_scatter_func_t sop = (H5D_scatter_func_t)va_arg(ap, H5D_scatter_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)sop);
                         } /* end block */
@@ -1026,7 +1026,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5FD_mpio_xfer_t */
                         {
-                            H5FD_mpio_xfer_t transfer = (H5FD_mpio_xfer_t)HDva_arg(ap, int);
+                            H5FD_mpio_xfer_t transfer = (H5FD_mpio_xfer_t)va_arg(ap, int);
 
                             switch (transfer) {
                                 case H5FD_MPIO_INDEPENDENT:
@@ -1046,7 +1046,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'v': /* H5D_vds_view_t */
                         {
-                            H5D_vds_view_t view = (H5D_vds_view_t)HDva_arg(ap, int);
+                            H5D_vds_view_t view = (H5D_vds_view_t)va_arg(ap, int);
 
                             switch (view) {
                                 case H5D_VDS_ERROR:
@@ -1070,8 +1070,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'V': /* H5FD_class_value_t */
                         {
-                            H5FD_class_value_t class_val =
-                                (H5FD_class_value_t)HDva_arg(ap, H5FD_class_value_t);
+                            H5FD_class_value_t class_val = (H5FD_class_value_t)va_arg(ap, H5FD_class_value_t);
 
                             switch (class_val) {
                                 case H5_VFD_INVALID:
@@ -1143,7 +1142,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'e': /* herr_t */
                 {
-                    herr_t status = HDva_arg(ap, herr_t);
+                    herr_t status = va_arg(ap, herr_t);
 
                     if (status >= 0)
                         H5RS_acat(rs, "SUCCEED");
@@ -1157,7 +1156,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'a': /* H5E_auto1_t */
                         {
-                            H5E_auto1_t eauto1 = (H5E_auto1_t)HDva_arg(ap, H5E_auto1_t);
+                            H5E_auto1_t eauto1 = (H5E_auto1_t)va_arg(ap, H5E_auto1_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)eauto1);
                         } /* end block */
@@ -1166,7 +1165,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'A': /* H5E_auto2_t */
                         {
-                            H5E_auto2_t eauto2 = (H5E_auto2_t)HDva_arg(ap, H5E_auto2_t);
+                            H5E_auto2_t eauto2 = (H5E_auto2_t)va_arg(ap, H5E_auto2_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)eauto2);
                         } /* end block */
@@ -1175,7 +1174,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'C': /* H5ES_event_complete_func_t */
                         {
                             H5ES_event_complete_func_t cfunc =
-                                (H5ES_event_complete_func_t)HDva_arg(ap, H5ES_event_complete_func_t);
+                                (H5ES_event_complete_func_t)va_arg(ap, H5ES_event_complete_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
                         } /* end block */
@@ -1183,7 +1182,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'd': /* H5E_direction_t */
                         {
-                            H5E_direction_t direction = (H5E_direction_t)HDva_arg(ap, int);
+                            H5E_direction_t direction = (H5E_direction_t)va_arg(ap, int);
 
                             switch (direction) {
                                 case H5E_WALK_UPWARD:
@@ -1203,7 +1202,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'e': /* H5E_error_t */
                         {
-                            H5E_error2_t *error = HDva_arg(ap, H5E_error2_t *);
+                            H5E_error2_t *error = va_arg(ap, H5E_error2_t *);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)error);
                         } /* end block */
@@ -1212,7 +1211,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'I': /* H5ES_event_insert_func_t */
                         {
                             H5ES_event_insert_func_t ifunc =
-                                (H5ES_event_insert_func_t)HDva_arg(ap, H5ES_event_insert_func_t);
+                                (H5ES_event_insert_func_t)va_arg(ap, H5ES_event_insert_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifunc);
                         } /* end block */
@@ -1220,7 +1219,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5ES_status_t */
                         {
-                            H5ES_status_t status = (H5ES_status_t)HDva_arg(ap, int);
+                            H5ES_status_t status = (H5ES_status_t)va_arg(ap, int);
 
                             switch (status) {
                                 case H5ES_STATUS_IN_PROGRESS:
@@ -1248,7 +1247,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5E_type_t */
                         {
-                            H5E_type_t etype = (H5E_type_t)HDva_arg(ap, int);
+                            H5E_type_t etype = (H5E_type_t)va_arg(ap, int);
 
                             switch (etype) {
                                 case H5E_MAJOR:
@@ -1276,7 +1275,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'C': /* H5FD_class_t */
                         {
-                            H5FD_class_t cls = HDva_arg(ap, H5FD_class_t);
+                            H5FD_class_t cls = va_arg(ap, H5FD_class_t);
 
                             H5RS_asprintf_cat(rs, "{'%s', %" PRIuHADDR ", ", cls.name, cls.maxaddr);
                             H5_trace_args_close_degree(rs, cls.fc_degree);
@@ -1286,7 +1285,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'd': /* H5F_close_degree_t */
                         {
-                            H5F_close_degree_t degree = (H5F_close_degree_t)HDva_arg(ap, int);
+                            H5F_close_degree_t degree = (H5F_close_degree_t)va_arg(ap, int);
 
                             H5_trace_args_close_degree(rs, degree);
                         } /* end block */
@@ -1294,7 +1293,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5F_fspace_strategy_t */
                         {
-                            H5F_fspace_strategy_t fs_strategy = (H5F_fspace_strategy_t)HDva_arg(ap, int);
+                            H5F_fspace_strategy_t fs_strategy = (H5F_fspace_strategy_t)va_arg(ap, int);
 
                             switch (fs_strategy) {
                                 case H5F_FSPACE_STRATEGY_FSM_AGGR:
@@ -1323,7 +1322,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'F': /* H5F_flush_cb_t */
                         {
-                            H5F_flush_cb_t fflsh = (H5F_flush_cb_t)HDva_arg(ap, H5F_flush_cb_t);
+                            H5F_flush_cb_t fflsh = (H5F_flush_cb_t)va_arg(ap, H5F_flush_cb_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)fflsh);
                         } /* end block */
@@ -1331,7 +1330,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'I': /* H5F_info2_t */
                         {
-                            H5F_info2_t fi2 = HDva_arg(ap, H5F_info2_t);
+                            H5F_info2_t fi2 = va_arg(ap, H5F_info2_t);
 
                             H5RS_asprintf_cat(rs, "{{%u, %" PRIuHSIZE ", %" PRIuHSIZE "}, ",
                                               fi2.super.version, fi2.super.super_size,
@@ -1346,7 +1345,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'm': /* H5F_mem_t */
                         {
-                            H5F_mem_t mem_type = (H5F_mem_t)HDva_arg(ap, int);
+                            H5F_mem_t mem_type = (H5F_mem_t)va_arg(ap, int);
 
                             switch (mem_type) {
                                 case H5FD_MEM_NOLIST:
@@ -1391,7 +1390,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5F_scope_t */
                         {
-                            H5F_scope_t scope = (H5F_scope_t)HDva_arg(ap, int);
+                            H5F_scope_t scope = (H5F_scope_t)va_arg(ap, int);
 
                             switch (scope) {
                                 case H5F_SCOPE_LOCAL:
@@ -1411,7 +1410,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5F_file_space_type_t */
                         {
-                            H5F_file_space_type_t fspace_type = (H5F_file_space_type_t)HDva_arg(ap, int);
+                            H5F_file_space_type_t fspace_type = (H5F_file_space_type_t)va_arg(ap, int);
 
                             switch (fspace_type) {
                                 case H5F_FILE_SPACE_DEFAULT:
@@ -1444,7 +1443,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'v': /* H5F_libver_t */
                         {
-                            H5F_libver_t libver_vers = (H5F_libver_t)HDva_arg(ap, int);
+                            H5F_libver_t libver_vers = (H5F_libver_t)va_arg(ap, int);
 
                             switch (libver_vers) {
                                 case H5F_LIBVER_EARLIEST:
@@ -1492,7 +1491,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'i': /* H5G_iterate_t */
                         {
-                            H5G_iterate_t git = (H5G_iterate_t)HDva_arg(ap, H5G_iterate_t);
+                            H5G_iterate_t git = (H5G_iterate_t)va_arg(ap, H5G_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)git);
                         } /* end block */
@@ -1500,7 +1499,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'o': /* H5G_obj_t */
                         {
-                            H5G_obj_t obj_type = (H5G_obj_t)HDva_arg(ap, int);
+                            H5G_obj_t obj_type = (H5G_obj_t)va_arg(ap, int);
 
                             switch (obj_type) {
                                 case H5G_UNKNOWN:
@@ -1542,7 +1541,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5G_stat_t */
                         {
-                            H5G_stat_t *statbuf = HDva_arg(ap, H5G_stat_t *);
+                            H5G_stat_t *statbuf = va_arg(ap, H5G_stat_t *);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)statbuf);
                         } /* end block */
@@ -1557,7 +1556,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'h': /* hsize_t */
                 {
-                    hsize_t hsize = HDva_arg(ap, hsize_t);
+                    hsize_t hsize = va_arg(ap, hsize_t);
 
                     if (H5S_UNLIMITED == hsize)
                         H5RS_acat(rs, "H5S_UNLIMITED");
@@ -1572,7 +1571,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'c': /* H5_atclose_func_t */
                         {
-                            H5_atclose_func_t cfunc = (H5_atclose_func_t)HDva_arg(ap, H5_atclose_func_t);
+                            H5_atclose_func_t cfunc = (H5_atclose_func_t)va_arg(ap, H5_atclose_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
                         } /* end block */
@@ -1580,7 +1579,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* hssize_t */
                         {
-                            hssize_t hssize = HDva_arg(ap, hssize_t);
+                            hssize_t hssize = va_arg(ap, hssize_t);
 
                             H5RS_asprintf_cat(rs, "%" PRIdHSIZE, hssize);
                             asize[argno] = (hssize_t)hssize;
@@ -1595,7 +1594,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'i': /* hid_t (and H5E_major_t / H5E_minor_t) */
                 {
-                    hid_t obj = HDva_arg(ap, hid_t);
+                    hid_t obj = va_arg(ap, hid_t);
 
                     if (H5P_DEFAULT == obj)
                         H5RS_acat(rs, "H5P_DEFAULT");
@@ -1789,7 +1788,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'D': /* H5I_future_discard_func_t */
                         {
                             H5I_future_discard_func_t ifdisc =
-                                (H5I_future_discard_func_t)HDva_arg(ap, H5I_future_discard_func_t);
+                                (H5I_future_discard_func_t)va_arg(ap, H5I_future_discard_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifdisc);
                         } /* end block */
@@ -1797,7 +1796,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5I_free_t */
                         {
-                            H5I_free_t ifree = (H5I_free_t)HDva_arg(ap, H5I_free_t);
+                            H5I_free_t ifree = (H5I_free_t)va_arg(ap, H5I_free_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifree);
                         } /* end block */
@@ -1805,7 +1804,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'i': /* H5_index_t */
                         {
-                            H5_index_t idx_type = (H5_index_t)HDva_arg(ap, int);
+                            H5_index_t idx_type = (H5_index_t)va_arg(ap, int);
 
                             switch (idx_type) {
                                 case H5_INDEX_UNKNOWN:
@@ -1833,7 +1832,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'I': /* H5I_iterate_func_t */
                         {
-                            H5I_iterate_func_t iiter = (H5I_iterate_func_t)HDva_arg(ap, H5I_iterate_func_t);
+                            H5I_iterate_func_t iiter = (H5I_iterate_func_t)va_arg(ap, H5I_iterate_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)iiter);
                         } /* end block */
@@ -1841,7 +1840,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'o': /* H5_iter_order_t */
                         {
-                            H5_iter_order_t order = (H5_iter_order_t)HDva_arg(ap, int);
+                            H5_iter_order_t order = (H5_iter_order_t)va_arg(ap, int);
 
                             switch (order) {
                                 case H5_ITER_UNKNOWN:
@@ -1874,7 +1873,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'R': /* H5I_future_realize_func_t */
                         {
                             H5I_future_realize_func_t ifreal =
-                                (H5I_future_realize_func_t)HDva_arg(ap, H5I_future_realize_func_t);
+                                (H5I_future_realize_func_t)va_arg(ap, H5I_future_realize_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifreal);
                         } /* end block */
@@ -1882,7 +1881,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* int / int32_t */
                         {
-                            int is = HDva_arg(ap, int);
+                            int is = va_arg(ap, int);
 
                             H5RS_asprintf_cat(rs, "%d", is);
                             asize[argno] = is;
@@ -1891,7 +1890,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'S': /* H5I_search_func_t */
                         {
-                            H5I_search_func_t isearch = (H5I_search_func_t)HDva_arg(ap, H5I_search_func_t);
+                            H5I_search_func_t isearch = (H5I_search_func_t)va_arg(ap, H5I_search_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)isearch);
                         } /* end block */
@@ -1899,7 +1898,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5I_type_t */
                         {
-                            H5I_type_t id_type = (H5I_type_t)HDva_arg(ap, int);
+                            H5I_type_t id_type = (H5I_type_t)va_arg(ap, int);
 
                             switch (id_type) {
                                 case H5I_UNINIT:
@@ -1987,7 +1986,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'u': /* unsigned / uint32_t */
                         {
-                            unsigned iu = HDva_arg(ap, unsigned);
+                            unsigned iu = va_arg(ap, unsigned);
 
                             H5RS_asprintf_cat(rs, "%u", iu);
                             asize[argno] = iu;
@@ -2002,7 +2001,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'k': /* H5O_token_t */
                 {
-                    H5O_token_t token = HDva_arg(ap, H5O_token_t);
+                    H5O_token_t token = va_arg(ap, H5O_token_t);
                     int         j;
 
                     for (j = 0; j < H5O_MAX_TOKEN_SIZE; j++)
@@ -2015,7 +2014,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'i': /* H5L_iterate1_t */
                         {
-                            H5L_iterate1_t liter = (H5L_iterate1_t)HDva_arg(ap, H5L_iterate1_t);
+                            H5L_iterate1_t liter = (H5L_iterate1_t)va_arg(ap, H5L_iterate1_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)liter);
                         } /* end block */
@@ -2024,7 +2023,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'I': /* H5L_iterate2_t */
                         {
-                            H5L_iterate2_t liter = (H5L_iterate2_t)HDva_arg(ap, H5L_iterate2_t);
+                            H5L_iterate2_t liter = (H5L_iterate2_t)va_arg(ap, H5L_iterate2_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)liter);
                         } /* end block */
@@ -2032,7 +2031,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'l': /* H5L_type_t (or H5G_link_t) */
                         {
-                            H5L_type_t link_type = (H5L_type_t)HDva_arg(ap, int);
+                            H5L_type_t link_type = (H5L_type_t)va_arg(ap, int);
 
                             switch (link_type) {
                                 case H5L_TYPE_ERROR:
@@ -2064,8 +2063,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5L_elink_traverse_t */
                         {
-                            H5L_elink_traverse_t elt =
-                                (H5L_elink_traverse_t)HDva_arg(ap, H5L_elink_traverse_t);
+                            H5L_elink_traverse_t elt = (H5L_elink_traverse_t)va_arg(ap, H5L_elink_traverse_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)elt);
                         } /* end block */
@@ -2081,7 +2079,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'a': /* H5MM_allocate_t */
                         {
-                            H5MM_allocate_t afunc = (H5MM_allocate_t)HDva_arg(ap, H5MM_allocate_t);
+                            H5MM_allocate_t afunc = (H5MM_allocate_t)va_arg(ap, H5MM_allocate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)afunc);
                         } /* end block */
@@ -2090,7 +2088,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifdef H5_HAVE_PARALLEL
                         case 'c': /* MPI_Comm */
                         {
-                            MPI_Comm comm = HDva_arg(ap, MPI_Comm);
+                            MPI_Comm comm = va_arg(ap, MPI_Comm);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)comm);
                         } /* end block */
@@ -2099,7 +2097,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5MM_free_t */
                         {
-                            H5MM_free_t ffunc = (H5MM_free_t)HDva_arg(ap, H5MM_free_t);
+                            H5MM_free_t ffunc = (H5MM_free_t)va_arg(ap, H5MM_free_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ffunc);
                         } /* end block */
@@ -2108,7 +2106,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifdef H5_HAVE_PARALLEL
                         case 'i': /* MPI_Info */
                         {
-                            MPI_Info info = HDva_arg(ap, MPI_Info);
+                            MPI_Info info = va_arg(ap, MPI_Info);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)info);
                         } /* end block */
@@ -2118,7 +2116,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifdef H5_HAVE_MAP_API
                         case 'I': /* H5M_iterate_t */
                         {
-                            H5M_iterate_t miter = (H5M_iterate_t)HDva_arg(ap, H5M_iterate_t);
+                            H5M_iterate_t miter = (H5M_iterate_t)va_arg(ap, H5M_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)miter);
                         } /* end block */
@@ -2127,7 +2125,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5FD_mem_t */
                         {
-                            H5FD_mem_t mt = (H5FD_mem_t)HDva_arg(ap, int);
+                            H5FD_mem_t mt = (H5FD_mem_t)va_arg(ap, int);
 
                             switch (mt) {
                                 case H5FD_MEM_NOLIST:
@@ -2180,7 +2178,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'o': /* off_t */
                 {
-                    off_t offset = HDva_arg(ap, off_t);
+                    off_t offset = va_arg(ap, off_t);
 
                     H5RS_asprintf_cat(rs, "%ld", (long)offset);
                 } /* end block */
@@ -2191,7 +2189,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                         case 'i': /* H5O_iterate1_t */
                         {
-                            H5O_iterate1_t oiter = (H5O_iterate1_t)HDva_arg(ap, H5O_iterate1_t);
+                            H5O_iterate1_t oiter = (H5O_iterate1_t)va_arg(ap, H5O_iterate1_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)oiter);
                         } /* end block */
@@ -2200,7 +2198,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'I': /* H5O_iterate2_t */
                         {
-                            H5O_iterate2_t oiter2 = (H5O_iterate2_t)HDva_arg(ap, H5O_iterate2_t);
+                            H5O_iterate2_t oiter2 = (H5O_iterate2_t)va_arg(ap, H5O_iterate2_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)oiter2);
                         } /* end block */
@@ -2209,7 +2207,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 's': /* H5O_mcdt_search_cb_t */
                         {
                             H5O_mcdt_search_cb_t osrch =
-                                (H5O_mcdt_search_cb_t)HDva_arg(ap, H5O_mcdt_search_cb_t);
+                                (H5O_mcdt_search_cb_t)va_arg(ap, H5O_mcdt_search_cb_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)osrch);
                         } /* end block */
@@ -2217,7 +2215,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5O_type_t */
                         {
-                            H5O_type_t objtype = (H5O_type_t)HDva_arg(ap, int);
+                            H5O_type_t objtype = (H5O_type_t)va_arg(ap, int);
 
                             switch (objtype) {
                                 case H5O_TYPE_UNKNOWN:
@@ -2259,7 +2257,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'p': /* H5P_class_t */
                 {
-                    hid_t           pclass_id  = HDva_arg(ap, hid_t);
+                    hid_t           pclass_id  = va_arg(ap, hid_t);
                     char           *class_name = NULL;
                     H5P_genclass_t *pclass;
 
@@ -2280,7 +2278,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'c': /* H5P_cls_create_func_t */
                         {
                             H5P_cls_create_func_t pcls_crt =
-                                (H5P_cls_create_func_t)HDva_arg(ap, H5P_cls_create_func_t);
+                                (H5P_cls_create_func_t)va_arg(ap, H5P_cls_create_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)pcls_crt);
                         } /* end block */
@@ -2289,7 +2287,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'C': /* H5P_prp_create_func_t */
                         {
                             H5P_prp_create_func_t prp_crt =
-                                (H5P_prp_create_func_t)HDva_arg(ap, H5P_prp_create_func_t);
+                                (H5P_prp_create_func_t)va_arg(ap, H5P_prp_create_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_crt);
                         } /* end block */
@@ -2298,7 +2296,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'D': /* H5P_prp_delete_func_t */
                         {
                             H5P_prp_delete_func_t prp_del =
-                                (H5P_prp_delete_func_t)HDva_arg(ap, H5P_prp_delete_func_t);
+                                (H5P_prp_delete_func_t)va_arg(ap, H5P_prp_delete_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_del);
                         } /* end block */
@@ -2306,7 +2304,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'G': /* H5P_prp_get_func_t */
                         {
-                            H5P_prp_get_func_t prp_get = (H5P_prp_get_func_t)HDva_arg(ap, H5P_prp_get_func_t);
+                            H5P_prp_get_func_t prp_get = (H5P_prp_get_func_t)va_arg(ap, H5P_prp_get_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_get);
                         } /* end block */
@@ -2314,7 +2312,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'i': /* H5P_iterate_t */
                         {
-                            H5P_iterate_t piter = (H5P_iterate_t)HDva_arg(ap, H5P_iterate_t);
+                            H5P_iterate_t piter = (H5P_iterate_t)va_arg(ap, H5P_iterate_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)piter);
                         } /* end block */
@@ -2323,7 +2321,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'l': /* H5P_cls_close_func_t */
                         {
                             H5P_cls_close_func_t pcls_cls =
-                                (H5P_cls_close_func_t)HDva_arg(ap, H5P_cls_close_func_t);
+                                (H5P_cls_close_func_t)va_arg(ap, H5P_cls_close_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)pcls_cls);
                         } /* end block */
@@ -2332,7 +2330,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'L': /* H5P_prp_close_func_t */
                         {
                             H5P_prp_close_func_t prp_cls =
-                                (H5P_prp_close_func_t)HDva_arg(ap, H5P_prp_close_func_t);
+                                (H5P_prp_close_func_t)va_arg(ap, H5P_prp_close_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_cls);
                         } /* end block */
@@ -2341,7 +2339,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'M': /* H5P_prp_compare_func_t */
                         {
                             H5P_prp_compare_func_t prp_cmp =
-                                (H5P_prp_compare_func_t)HDva_arg(ap, H5P_prp_compare_func_t);
+                                (H5P_prp_compare_func_t)va_arg(ap, H5P_prp_compare_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_cmp);
                         } /* end block */
@@ -2350,7 +2348,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'o': /* H5P_cls_copy_func_t */
                         {
                             H5P_cls_copy_func_t pcls_cpy =
-                                (H5P_cls_copy_func_t)HDva_arg(ap, H5P_cls_copy_func_t);
+                                (H5P_cls_copy_func_t)va_arg(ap, H5P_cls_copy_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)pcls_cpy);
                         } /* end block */
@@ -2359,7 +2357,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'O': /* H5P_prp_copy_func_t */
                         {
                             H5P_prp_copy_func_t prp_cpy =
-                                (H5P_prp_copy_func_t)HDva_arg(ap, H5P_prp_copy_func_t);
+                                (H5P_prp_copy_func_t)va_arg(ap, H5P_prp_copy_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_cpy);
                         } /* end block */
@@ -2367,7 +2365,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'S': /* H5P_prp_set_func_t */
                         {
-                            H5P_prp_set_func_t prp_set = (H5P_prp_set_func_t)HDva_arg(ap, H5P_prp_set_func_t);
+                            H5P_prp_set_func_t prp_set = (H5P_prp_set_func_t)va_arg(ap, H5P_prp_set_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)prp_set);
                         } /* end block */
@@ -2391,7 +2389,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'o': /* hobj_ref_t */
                         {
-                            hobj_ref_t ref = HDva_arg(ap, hobj_ref_t);
+                            hobj_ref_t ref = va_arg(ap, hobj_ref_t);
 
                             H5RS_asprintf_cat(rs, "Reference Object=%" PRIuHADDR, ref);
                         } /* end block */
@@ -2407,7 +2405,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5R_type_t */
                         {
-                            H5R_type_t reftype = (H5R_type_t)HDva_arg(ap, int);
+                            H5R_type_t reftype = (H5R_type_t)va_arg(ap, int);
 
                             switch (reftype) {
                                 case H5R_BADTYPE:
@@ -2455,7 +2453,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'c': /* H5S_class_t */
                         {
-                            H5S_class_t cls = (H5S_class_t)HDva_arg(ap, int);
+                            H5S_class_t cls = (H5S_class_t)va_arg(ap, int);
 
                             switch (cls) {
                                 case H5S_NO_CLASS:
@@ -2483,7 +2481,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5S_seloper_t */
                         {
-                            H5S_seloper_t so = (H5S_seloper_t)HDva_arg(ap, int);
+                            H5S_seloper_t so = (H5S_seloper_t)va_arg(ap, int);
 
                             switch (so) {
                                 case H5S_SELECT_NOOP:
@@ -2535,7 +2533,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5S_sel_type */
                         {
-                            H5S_sel_type st = (H5S_sel_type)HDva_arg(ap, int);
+                            H5S_sel_type st = (H5S_sel_type)va_arg(ap, int);
 
                             switch (st) {
                                 case H5S_SEL_ERROR:
@@ -2577,7 +2575,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 't': /* htri_t */
                 {
-                    htri_t tri_var = HDva_arg(ap, htri_t);
+                    htri_t tri_var = va_arg(ap, htri_t);
 
                     if (tri_var > 0)
                         H5RS_acat(rs, "TRUE");
@@ -2592,7 +2590,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'c': /* H5T_cset_t */
                         {
-                            H5T_cset_t cset = (H5T_cset_t)HDva_arg(ap, int);
+                            H5T_cset_t cset = (H5T_cset_t)va_arg(ap, int);
 
                             H5_trace_args_cset(rs, cset);
                         } /* end block */
@@ -2600,7 +2598,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'C': /* H5T_conv_t */
                         {
-                            H5T_conv_t tconv = (H5T_conv_t)HDva_arg(ap, H5T_conv_t);
+                            H5T_conv_t tconv = (H5T_conv_t)va_arg(ap, H5T_conv_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)tconv);
                         } /* end block */
@@ -2608,7 +2606,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'd': /* H5T_direction_t */
                         {
-                            H5T_direction_t direct = (H5T_direction_t)HDva_arg(ap, int);
+                            H5T_direction_t direct = (H5T_direction_t)va_arg(ap, int);
 
                             switch (direct) {
                                 case H5T_DIR_DEFAULT:
@@ -2632,7 +2630,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'e': /* H5T_pers_t */
                         {
-                            H5T_pers_t pers = (H5T_pers_t)HDva_arg(ap, int);
+                            H5T_pers_t pers = (H5T_pers_t)va_arg(ap, int);
 
                             switch (pers) {
                                 case H5T_PERS_DONTCARE:
@@ -2657,7 +2655,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'E': /* H5T_conv_except_func_t */
                         {
                             H5T_conv_except_func_t conv_ex =
-                                (H5T_conv_except_func_t)HDva_arg(ap, H5T_conv_except_func_t);
+                                (H5T_conv_except_func_t)va_arg(ap, H5T_conv_except_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)conv_ex);
                         } /* end block */
@@ -2665,7 +2663,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'n': /* H5T_norm_t */
                         {
-                            H5T_norm_t norm = (H5T_norm_t)HDva_arg(ap, int);
+                            H5T_norm_t norm = (H5T_norm_t)va_arg(ap, int);
 
                             switch (norm) {
                                 case H5T_NORM_ERROR:
@@ -2693,7 +2691,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'o': /* H5T_order_t */
                         {
-                            H5T_order_t order = (H5T_order_t)HDva_arg(ap, int);
+                            H5T_order_t order = (H5T_order_t)va_arg(ap, int);
 
                             switch (order) {
                                 case H5T_ORDER_ERROR:
@@ -2729,7 +2727,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'p': /* H5T_pad_t */
                         {
-                            H5T_pad_t pad = (H5T_pad_t)HDva_arg(ap, int);
+                            H5T_pad_t pad = (H5T_pad_t)va_arg(ap, int);
 
                             switch (pad) {
                                 case H5T_PAD_ERROR:
@@ -2761,7 +2759,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5T_sign_t */
                         {
-                            H5T_sign_t sign = (H5T_sign_t)HDva_arg(ap, int);
+                            H5T_sign_t sign = (H5T_sign_t)va_arg(ap, int);
 
                             switch (sign) {
                                 case H5T_SGN_ERROR:
@@ -2789,7 +2787,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5T_class_t */
                         {
-                            H5T_class_t type_class = (H5T_class_t)HDva_arg(ap, int);
+                            H5T_class_t type_class = (H5T_class_t)va_arg(ap, int);
 
                             switch (type_class) {
                                 case H5T_NO_CLASS:
@@ -2853,7 +2851,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'z': /* H5T_str_t */
                         {
-                            H5T_str_t str = (H5T_str_t)HDva_arg(ap, int);
+                            H5T_str_t str = (H5T_str_t)va_arg(ap, int);
 
                             switch (str) {
                                 case H5T_STR_ERROR:
@@ -2905,7 +2903,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'l': /* unsigned long */
                         {
-                            unsigned long iul = HDva_arg(ap, unsigned long);
+                            unsigned long iul = va_arg(ap, unsigned long);
 
                             H5RS_asprintf_cat(rs, "%lu", iul);
                             asize[argno] = (hssize_t)iul;
@@ -2914,7 +2912,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'L': /* unsigned long long / uint64_t */
                         {
-                            unsigned long long iull = HDva_arg(ap, unsigned long long);
+                            unsigned long long iull = va_arg(ap, unsigned long long);
 
                             H5RS_asprintf_cat(rs, "%llu", iull);
                             asize[argno] = (hssize_t)iull;
@@ -2931,7 +2929,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'a': /* H5VL_attr_get_t */
                         {
-                            H5VL_attr_get_t get = (H5VL_attr_get_t)HDva_arg(ap, int);
+                            H5VL_attr_get_t get = (H5VL_attr_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_ATTR_GET_SPACE:
@@ -2967,7 +2965,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'A': /* H5VL_blob_optional_t */
                         {
-                            H5VL_blob_optional_t optional = (H5VL_blob_optional_t)HDva_arg(ap, int);
+                            H5VL_blob_optional_t optional = (H5VL_blob_optional_t)va_arg(ap, int);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
@@ -2975,7 +2973,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'b': /* H5VL_attr_specific_t */
                         {
-                            H5VL_attr_specific_t specific = (H5VL_attr_specific_t)HDva_arg(ap, int);
+                            H5VL_attr_specific_t specific = (H5VL_attr_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_ATTR_DELETE:
@@ -3007,7 +3005,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'B': /* H5VL_blob_specific_t */
                         {
-                            H5VL_blob_specific_t specific = (H5VL_blob_specific_t)HDva_arg(ap, int);
+                            H5VL_blob_specific_t specific = (H5VL_blob_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_BLOB_DELETE:
@@ -3031,7 +3029,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'c': /* H5VL_dataset_get_t */
                         {
-                            H5VL_dataset_get_t get = (H5VL_dataset_get_t)HDva_arg(ap, int);
+                            H5VL_dataset_get_t get = (H5VL_dataset_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_DATASET_GET_SPACE:
@@ -3067,8 +3065,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'C': /* H5VL_class_value_t */
                         {
-                            H5VL_class_value_t class_val =
-                                (H5VL_class_value_t)HDva_arg(ap, H5VL_class_value_t);
+                            H5VL_class_value_t class_val = (H5VL_class_value_t)va_arg(ap, H5VL_class_value_t);
 
                             if (H5_VOL_NATIVE == class_val)
                                 H5RS_acat(rs, "H5_VOL_NATIVE");
@@ -3079,7 +3076,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'd': /* H5VL_dataset_specific_t */
                         {
-                            H5VL_dataset_specific_t specific = (H5VL_dataset_specific_t)HDva_arg(ap, int);
+                            H5VL_dataset_specific_t specific = (H5VL_dataset_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_DATASET_SET_EXTENT:
@@ -3103,7 +3100,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'e': /* H5VL_datatype_get_t */
                         {
-                            H5VL_datatype_get_t get = (H5VL_datatype_get_t)HDva_arg(ap, int);
+                            H5VL_datatype_get_t get = (H5VL_datatype_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_DATATYPE_GET_BINARY_SIZE:
@@ -3127,7 +3124,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5VL_datatype_specific_t */
                         {
-                            H5VL_datatype_specific_t specific = (H5VL_datatype_specific_t)HDva_arg(ap, int);
+                            H5VL_datatype_specific_t specific = (H5VL_datatype_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_DATATYPE_FLUSH:
@@ -3147,7 +3144,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'g': /* H5VL_file_get_t */
                         {
-                            H5VL_file_get_t get = (H5VL_file_get_t)HDva_arg(ap, int);
+                            H5VL_file_get_t get = (H5VL_file_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_FILE_GET_CONT_INFO:
@@ -3191,7 +3188,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'h': /* H5VL_file_specific_t */
                         {
-                            H5VL_file_specific_t specific = (H5VL_file_specific_t)HDva_arg(ap, int);
+                            H5VL_file_specific_t specific = (H5VL_file_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_FILE_FLUSH:
@@ -3223,7 +3220,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'i': /* H5VL_group_get_t */
                         {
-                            H5VL_group_get_t get = (H5VL_group_get_t)HDva_arg(ap, int);
+                            H5VL_group_get_t get = (H5VL_group_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_GROUP_GET_GCPL:
@@ -3243,7 +3240,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'j': /* H5VL_group_specific_t */
                         {
-                            H5VL_group_specific_t specific = (H5VL_group_specific_t)HDva_arg(ap, int);
+                            H5VL_group_specific_t specific = (H5VL_group_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_GROUP_MOUNT:
@@ -3271,7 +3268,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'k': /* H5VL_link_create_t */
                         {
-                            H5VL_link_create_t create = (H5VL_link_create_t)HDva_arg(ap, int);
+                            H5VL_link_create_t create = (H5VL_link_create_t)va_arg(ap, int);
 
                             switch (create) {
                                 case H5VL_LINK_CREATE_HARD:
@@ -3295,7 +3292,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'l': /* H5VL_link_get_t */
                         {
-                            H5VL_link_get_t get = (H5VL_link_get_t)HDva_arg(ap, int);
+                            H5VL_link_get_t get = (H5VL_link_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_LINK_GET_INFO:
@@ -3319,7 +3316,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'L': /* H5VL_get_conn_lvl_t */
                         {
-                            H5VL_get_conn_lvl_t get = (H5VL_get_conn_lvl_t)HDva_arg(ap, int);
+                            H5VL_get_conn_lvl_t get = (H5VL_get_conn_lvl_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_GET_CONN_LVL_CURR:
@@ -3339,7 +3336,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'm': /* H5VL_link_specific_t */
                         {
-                            H5VL_link_specific_t specific = (H5VL_link_specific_t)HDva_arg(ap, int);
+                            H5VL_link_specific_t specific = (H5VL_link_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_LINK_DELETE:
@@ -3363,7 +3360,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'n': /* H5VL_object_get_t */
                         {
-                            H5VL_object_get_t get = (H5VL_object_get_t)HDva_arg(ap, int);
+                            H5VL_object_get_t get = (H5VL_object_get_t)va_arg(ap, int);
 
                             switch (get) {
                                 case H5VL_OBJECT_GET_FILE:
@@ -3392,7 +3389,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         case 'N': /* H5VL_request_notify_t */
                         {
                             H5VL_request_notify_t vlrnot =
-                                (H5VL_request_notify_t)HDva_arg(ap, H5VL_request_notify_t);
+                                (H5VL_request_notify_t)va_arg(ap, H5VL_request_notify_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)vlrnot);
                         } /* end block */
@@ -3400,7 +3397,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'o': /* H5VL_object_specific_t */
                         {
-                            H5VL_object_specific_t specific = (H5VL_object_specific_t)HDva_arg(ap, int);
+                            H5VL_object_specific_t specific = (H5VL_object_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_OBJECT_CHANGE_REF_COUNT:
@@ -3436,7 +3433,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'r': /* H5VL_request_specific_t */
                         {
-                            H5VL_request_specific_t specific = (H5VL_request_specific_t)HDva_arg(ap, int);
+                            H5VL_request_specific_t specific = (H5VL_request_specific_t)va_arg(ap, int);
 
                             switch (specific) {
                                 case H5VL_REQUEST_GET_ERR_STACK:
@@ -3456,7 +3453,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 's': /* H5VL_attr_optional_t */
                         {
-                            H5VL_attr_optional_t optional = (H5VL_attr_optional_t)HDva_arg(ap, int);
+                            H5VL_attr_optional_t optional = (H5VL_attr_optional_t)va_arg(ap, int);
 
                             switch (optional) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -3474,7 +3471,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'S': /* H5VL_subclass_t */
                         {
-                            H5VL_subclass_t subclass = (H5VL_subclass_t)HDva_arg(ap, int);
+                            H5VL_subclass_t subclass = (H5VL_subclass_t)va_arg(ap, int);
 
                             switch (subclass) {
                                 case H5VL_SUBCLS_NONE:
@@ -3538,7 +3535,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 't': /* H5VL_dataset_optional_t */
                         {
-                            H5VL_dataset_optional_t optional = (H5VL_dataset_optional_t)HDva_arg(ap, int);
+                            H5VL_dataset_optional_t optional = (H5VL_dataset_optional_t)va_arg(ap, int);
 
                             switch (optional) {
                                 case H5VL_NATIVE_DATASET_FORMAT_CONVERT:
@@ -3590,7 +3587,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'u': /* H5VL_datatype_optional_t */
                         {
-                            H5VL_datatype_optional_t optional = (H5VL_datatype_optional_t)HDva_arg(ap, int);
+                            H5VL_datatype_optional_t optional = (H5VL_datatype_optional_t)va_arg(ap, int);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
@@ -3598,7 +3595,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'v': /* H5VL_file_optional_t */
                         {
-                            H5VL_file_optional_t optional = (H5VL_file_optional_t)HDva_arg(ap, int);
+                            H5VL_file_optional_t optional = (H5VL_file_optional_t)va_arg(ap, int);
 
                             switch (optional) {
                                 case H5VL_NATIVE_FILE_CLEAR_ELINK_CACHE:
@@ -3728,7 +3725,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'w': /* H5VL_group_optional_t */
                         {
-                            H5VL_group_optional_t optional = (H5VL_group_optional_t)HDva_arg(ap, int);
+                            H5VL_group_optional_t optional = (H5VL_group_optional_t)va_arg(ap, int);
 
                             switch (optional) {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -3750,7 +3747,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'x': /* H5VL_link_optional_t */
                         {
-                            H5VL_link_optional_t optional = (H5VL_link_optional_t)HDva_arg(ap, int);
+                            H5VL_link_optional_t optional = (H5VL_link_optional_t)va_arg(ap, int);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
@@ -3758,7 +3755,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'y': /* H5VL_object_optional_t */
                         {
-                            H5VL_object_optional_t optional = (H5VL_object_optional_t)HDva_arg(ap, int);
+                            H5VL_object_optional_t optional = (H5VL_object_optional_t)va_arg(ap, int);
 
                             switch (optional) {
                                 case H5VL_NATIVE_OBJECT_GET_COMMENT:
@@ -3794,7 +3791,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'z': /* H5VL_request_optional_t */
                         {
-                            H5VL_request_optional_t optional = (H5VL_request_optional_t)HDva_arg(ap, int);
+                            H5VL_request_optional_t optional = (H5VL_request_optional_t)va_arg(ap, int);
 
                             H5RS_asprintf_cat(rs, "%ld", (long)optional);
                         } /* end block */
@@ -3807,7 +3804,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     break;
 
                 case 'x': { /* void / va_list */
-                    vp = HDva_arg(ap, void *);
+                    vp = va_arg(ap, void *);
 
                     if (vp)
                         H5RS_asprintf_cat(rs, "%p", vp);
@@ -3817,7 +3814,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 break;
 
                 case 'z': {
-                    size_t size = HDva_arg(ap, size_t);
+                    size_t size = va_arg(ap, size_t);
 
                     H5RS_asprintf_cat(rs, "%zu", size);
                     asize[argno] = (hssize_t)size;
@@ -3828,7 +3825,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     switch (type[1]) {
                         case 'a': /* H5Z_SO_scale_type_t */
                         {
-                            H5Z_SO_scale_type_t scale_type = (H5Z_SO_scale_type_t)HDva_arg(ap, int);
+                            H5Z_SO_scale_type_t scale_type = (H5Z_SO_scale_type_t)va_arg(ap, int);
 
                             switch (scale_type) {
                                 case H5Z_SO_FLOAT_DSCALE:
@@ -3852,7 +3849,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'c': /* H5Z_class2_t */
                         {
-                            H5Z_class2_t *filter = HDva_arg(ap, H5Z_class2_t *);
+                            H5Z_class2_t *filter = va_arg(ap, H5Z_class2_t *);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)filter);
                         } /* end block  */
@@ -3860,7 +3857,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'e': /* H5Z_EDC_t */
                         {
-                            H5Z_EDC_t edc = (H5Z_EDC_t)HDva_arg(ap, int);
+                            H5Z_EDC_t edc = (H5Z_EDC_t)va_arg(ap, int);
 
                             if (H5Z_DISABLE_EDC == edc)
                                 H5RS_acat(rs, "H5Z_DISABLE_EDC");
@@ -3873,7 +3870,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'f': /* H5Z_filter_t */
                         {
-                            H5Z_filter_t id = HDva_arg(ap, H5Z_filter_t);
+                            H5Z_filter_t id = va_arg(ap, H5Z_filter_t);
 
                             if (H5Z_FILTER_NONE == id)
                                 H5RS_acat(rs, "H5Z_FILTER_NONE");
@@ -3896,14 +3893,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                         case 'F': /* H5Z_filter_func_t */
                         {
-                            H5Z_filter_func_t ffunc = (H5Z_filter_func_t)HDva_arg(ap, H5Z_filter_func_t);
+                            H5Z_filter_func_t ffunc = (H5Z_filter_func_t)va_arg(ap, H5Z_filter_func_t);
 
                             H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ffunc);
                         } /* end block */
                         break;
 
                         case 's': {
-                            ssize_t ssize = HDva_arg(ap, ssize_t);
+                            ssize_t ssize = va_arg(ap, ssize_t);
 
                             H5RS_asprintf_cat(rs, "%zd", ssize);
                             asize[argno] = (hssize_t)ssize;
@@ -4036,7 +4033,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
      * since the one for the function call, then we're continuing
      * the same line. */
     if (returning) {
-        HDassert(current_depth > 0);
+        assert(current_depth > 0);
         --current_depth;
         if (current_depth < last_call_depth) {
             /* We are at the beginning of a line */
@@ -4070,9 +4067,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     }
 
     /* Format arguments into the refcounted string */
-    HDva_start(ap, type);
+    va_start(ap, type);
     H5_trace_args(rs, type, ap);
-    HDva_end(ap);
+    va_end(ap);
 
     /* Display event time for return */
     if (returning && H5_debug_g.ttimes) {

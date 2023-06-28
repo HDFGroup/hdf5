@@ -927,7 +927,7 @@ test_header_encode_decode(void)
 
     for (i = 0; i < H5FD_ONION_ENCODED_SIZE_HEADER; i++) {
         if (exp[i] != buf[i]) {
-            HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
+            printf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
             TEST_ERROR;
         }
     }
@@ -1045,7 +1045,7 @@ test_history_encode_decode_empty(void)
         TEST_ERROR;
     for (i = 0; i < 20; i++) {
         if (exp[i] != buf[i]) {
-            HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
+            printf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
             TEST_ERROR;
         }
     }
@@ -1388,26 +1388,26 @@ test_revision_record_encode_decode(void)
     for (i = 0; i < exp_size; i++) {
         if (exp[i] != buf[i]) {
             badness = TRUE;
-            HDprintf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i,
-                     (unsigned int)exp[i], (unsigned int)buf[i]);
+            printf("Bad encoded record - Index %zu: expected 0x%02X but got 0x%02X\n", i,
+                   (unsigned int)exp[i], (unsigned int)buf[i]);
         }
     }
     if (badness) {
         /* If this fragile test breaks, this information is helpful... */
-        HDprintf("INDEX\n");
+        printf("INDEX\n");
         for (i = 0; i < exp_size; i++)
-            HDprintf("%4zu ", i);
-        HDprintf("\n");
+            printf("%4zu ", i);
+        printf("\n");
 
-        HDprintf("EXPECTED\n");
+        printf("EXPECTED\n");
         for (i = 0; i < exp_size; i++)
-            HDprintf("0x%02X ", (unsigned int)exp[i]);
-        HDprintf("\n");
+            printf("0x%02X ", (unsigned int)exp[i]);
+        printf("\n");
 
-        HDprintf("ACTUAL\n");
+        printf("ACTUAL\n");
         for (i = 0; i < exp_size; i++)
-            HDprintf("0x%02X ", (unsigned int)buf[i]);
-        HDprintf("\n");
+            printf("0x%02X ", (unsigned int)buf[i]);
+        printf("\n");
     }
     if (badness)
         TEST_ERROR;
@@ -1545,7 +1545,7 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
     /* filesize is wrong w/ stdio - it's zero instead of 40 or whatnot */
     filesize = (uint64_t)H5FDget_eof(raw_vfile, H5FD_MEM_DRAW);
     if ((uint64_t)nbytes != filesize) {
-        HDfprintf(stderr, "\nSizes not the same - nbytes: %zu, filesize: %" PRIu64 "\n", nbytes, filesize);
+        fprintf(stderr, "\nSizes not the same - nbytes: %zu, filesize: %" PRIu64 "\n", nbytes, filesize);
         TEST_ERROR;
     }
 
@@ -1562,7 +1562,7 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
     /* Compare raw bytes data */
     for (size_t i = 0; i < nbytes; i++) {
         if (exp[i] != act_buf[i]) {
-            HDprintf("first mismatched byte %zu: expected 0x%02X was 0x%02X\n", i, exp[i], act_buf[i]);
+            printf("first mismatched byte %zu: expected 0x%02X was 0x%02X\n", i, exp[i], act_buf[i]);
             TEST_ERROR;
         }
     }
@@ -1680,7 +1680,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         TEST_ERROR;
 
     /* Re-use buffer space to sanity-check checksum for record pointer(s). */
-    HDassert(readsize >= sizeof(H5FD_onion_record_loc_t));
+    assert(readsize >= sizeof(H5FD_onion_record_loc_t));
     for (size_t i = 0; i < history_out.n_revisions; i++) {
 
         uint64_t phys_addr;
@@ -2309,7 +2309,7 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (8 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (H5FDclose(file) < 0)
@@ -2330,7 +2330,7 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        printf("\nEOF is not zero, it is: %" PRIuHADDR "\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (H5FDclose(file) < 0)
@@ -2352,8 +2352,8 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     size = a_off + a_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-        HDprintf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
-                 H5FDget_eof(file, H5FD_MEM_DRAW));
+        printf("\nEOF is not %" PRIuHADDR ", it is: %" PRIuHADDR "\n", size,
+               H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
     }
     if (NULL == (buf = HDmalloc(size * sizeof(unsigned char))))
@@ -2618,7 +2618,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 size_t               z    = 0;
                 HDputs("i  exp  act");
                 for (z = 0; z < wi->size; z++)
-                    HDprintf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
+                    printf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
                 HDfflush(stdout);
                 TEST_ERROR;
             }
@@ -2746,20 +2746,20 @@ test_page_aligned_history_create(void)
         TEST_ERROR;
     if (HDmemcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
-        HDprintf("aoff: %" PRIu64 "\n", a_off);
+        printf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
-            HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
+            printf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
         HDfflush(stdout);
         TEST_ERROR;
     }
     if (HDmemcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
-        HDprintf("aoff: %" PRIu64 "\n", a_off);
+        printf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
-            HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
+            printf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
         HDfflush(stdout);
         TEST_ERROR;
@@ -3066,7 +3066,7 @@ test_integration_create(void)
         for (int j = 0; j < 256; j++) {
             int expected = i * j - j;
             if (rdata->arr[i][j] != expected) {
-                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR;
             }
@@ -3104,7 +3104,7 @@ test_integration_create(void)
         for (int j = 0; j < 256; j++) {
             int expected = i * 6 + j + 1;
             if (rdata->arr[i][j] != expected) {
-                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR;
             }
@@ -3143,7 +3143,7 @@ test_integration_create(void)
         for (int j = 0; j < 256; j++) {
             int expected = i * 3 + j + 5;
             if (rdata->arr[i][j] != expected) {
-                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
                 HDfflush(stdout);
                 TEST_ERROR;
             }
@@ -3407,7 +3407,7 @@ test_integration_create_simple(void)
     for (int i = 0; i < ONE_DIM_SIZE; i += 20) {
         int expected = i + 2048;
         if (rdata->arr[i] != expected) {
-            HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
+            printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
             TEST_ERROR;
         }
     }
@@ -4439,7 +4439,7 @@ test_integration_reference(void)
 
     /* Verify the number of selection */
     if ((nelmts = H5Sget_select_npoints(space)) != 8) {
-        HDprintf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
+        printf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
@@ -4526,7 +4526,7 @@ test_integration_reference(void)
         for (int j = 0; j < 4; j++) {
             int expected = i + j;
             if (rdata[i][j] != expected) {
-                HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 TEST_ERROR;
             }
         }
@@ -4582,7 +4582,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     if ((nelmts = H5Sget_select_npoints(space2)) != 8) {
-        HDprintf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
+        printf("Number of selected elements is supposed to be 8, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
@@ -4595,7 +4595,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     if ((nelmts = H5Sget_select_npoints(space2)) != 4) {
-        HDprintf("Number of selected elements is supposed to be 4, but got %" PRIuHSIZE "\n", nelmts);
+        printf("Number of selected elements is supposed to be 4, but got %" PRIuHSIZE "\n", nelmts);
         TEST_ERROR;
     }
 
@@ -4849,7 +4849,7 @@ test_integration_create_by_name(void)
     for (int i = 0; i < ONE_DIM_SIZE; i += 20) {
         int expected = i + 2048;
         if (rdata->arr[i] != expected) {
-            HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
+            printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
             TEST_ERROR;
         }
     }
@@ -4912,7 +4912,7 @@ main(void)
     const char *env_h5_drvr = NULL; /* VFD value from environment */
     int         nerrors     = 0;
 
-    HDprintf("Testing Onion VFD functionality.\n");
+    printf("Testing Onion VFD functionality.\n");
 
     h5_reset();
 
@@ -4957,11 +4957,11 @@ main(void)
     nerrors -= test_integration_create_by_name();
 
     if (nerrors > 0) {
-        HDprintf("***** %d Onion TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        printf("***** %d Onion TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
         return EXIT_FAILURE;
     }
 
-    HDprintf("All Onion tests passed.\n");
+    printf("All Onion tests passed.\n");
     return EXIT_SUCCESS;
 
 } /* end main() */

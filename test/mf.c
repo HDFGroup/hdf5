@@ -159,36 +159,35 @@ check_stats(const H5F_t *f, const H5FS_t *frsp, H5FS_stat_t *state)
 {
     H5FS_stat_t frspace_stats; /* Statistics about the heap */
 
-    HDassert(f);
-    HDassert(frsp);
+    assert(f);
+    assert(frsp);
 
     /* Get statistics for free-space and verify they are correct */
     if (H5FS_stat_info(f, frsp, &frspace_stats) < 0)
         FAIL_STACK_ERROR;
 
     if (frspace_stats.tot_space != state->tot_space) {
-        HDfprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_space, state->tot_space);
+        fprintf(stdout, "frspace_stats.tot_space = %" PRIuHSIZE ", state->tot_space = %" PRIuHSIZE "\n",
+                frspace_stats.tot_space, state->tot_space);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.tot_sect_count != state->tot_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
-                  frspace_stats.tot_sect_count, state->tot_sect_count);
+        fprintf(stdout,
+                "frspace_stats.tot_sect_count = %" PRIuHSIZE ", state->tot_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.tot_sect_count, state->tot_sect_count);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.serial_sect_count != state->serial_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.serial_sect_count, state->serial_sect_count);
+        fprintf(stdout,
+                "frspace_stats.serial_sect_count = %" PRIuHSIZE ", state->serial_sect_count = %" PRIuHSIZE
+                "\n",
+                frspace_stats.serial_sect_count, state->serial_sect_count);
         TEST_ERROR;
     } /* end if */
     if (frspace_stats.ghost_sect_count != state->ghost_sect_count) {
-        HDfprintf(stdout,
-                  "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE
-                  "\n",
-                  frspace_stats.ghost_sect_count, state->ghost_sect_count);
+        fprintf(stdout,
+                "frspace_stats.ghost_sect_count = %" PRIuHSIZE ", state->ghost_sect_count = %" PRIuHSIZE "\n",
+                frspace_stats.ghost_sect_count, state->ghost_sect_count);
         TEST_ERROR;
     } /* end if */
 
@@ -6315,7 +6314,7 @@ test_mf_fs_persist_split(void)
      * with the split file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
@@ -6325,7 +6324,7 @@ test_mf_fs_persist_split(void)
          * with the split file driver.
          */
         SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
@@ -6638,14 +6637,14 @@ test_mf_fs_persist_multi(void)
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* for now, we don't support persistent free space managers
      * with the multi file driver.
      */
     SKIPPED();
-    HDfprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
+    fprintf(stdout, " Persistent FSMs disabled in multi file driver.\n");
     return 0; /* <========== note return */
 
     /* File creation property list template */
@@ -7756,7 +7755,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
     hbool_t    relax;
     H5FD_mem_t mt;
 
-    HDassert(is_multi_or_split);
+    assert(is_multi_or_split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 

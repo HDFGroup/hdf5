@@ -936,8 +936,8 @@ END SUBROUTINE group_info
 !    old_modification_time = oinfo.mtime;
 
 !     If this test happens too quickly, the times will all be the same.  Make sure the time changes.
-!    curr_time = HDtime(NULL);
-!    while(HDtime(NULL) <= curr_time)
+!    curr_time = time(NULL);
+!    while(time(NULL) <= curr_time)
 !        ;
 
 !     Close the file and reopen it
@@ -1411,7 +1411,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
               CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), error)
               CALL check("H5Ldelete_by_idx_f", error, total_error)
               !  Verify the link information for first link in appropriate order
-              ! HDmemset(&linfo, 0, sizeof(linfo));
+              ! memset(&linfo, 0, sizeof(linfo));
 
               CALL H5Lget_info_by_idx_f(group_id, ".", idx_type, iorder, INT(0,HSIZE_T), &
                    link_type, f_corder_valid, corder, cset, token, val_size, error)
@@ -1441,7 +1441,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
 
               !  Verify the name for first link in appropriate order
-              ! HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+              ! memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 !!$              size_tmp = 20
 !!$              CALL H5Lget_name_by_idx_f(group_id, ".", idx_type, order, INT(0,HSIZE_T), size_tmp, tmpname, error)
 !!$              CALL check("delete_by_idx.H5Lget_name_by_idx_f", error, total_error)
@@ -1530,14 +1530,14 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   valname = 'valn.'//chr2
 
   !  Verify the link information for first link, in increasing creation order
-  !  HDmemset(&linfo, 0, sizeof(linfo));
+  !  memset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), &
        link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
   CALL verify("H5Lget_info_by_idx_f", corder, 0, total_error)
 
   !  Verify the link information for new link, in increasing creation order
-  ! HDmemset(&linfo, 0, sizeof(linfo));
+  ! memset(&linfo, 0, sizeof(linfo));
   CALL H5Lget_info_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), &
        link_type, f_corder_valid, corder, cset, token, val_size, error)
   CALL check("H5Lget_info_by_idx_f", error, total_error)
@@ -1545,16 +1545,16 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   !  Verify value for new soft link, in increasing creation order
 !!$  IF(hard_link)THEN
-!!$     ! HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+!!$     ! memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
 !!$
 !!$     CALL H5Lget_val_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, n, tmpval, INT(7,SIZE_T),error)
 !!$     CALL check("H5Lget_val_by_idx",error,total_error)
 !!$
-!!$!     IF(HDstrcmp(valname, tmpval)) TEST_ERROR
+!!$!     IF(strcmp(valname, tmpval)) TEST_ERROR
 !!$  ENDIF
 
   !  Verify the name for new link, in increasing creation order
-  !  HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+  !  memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
 
   ! The actual size of tmpname should be 7
 

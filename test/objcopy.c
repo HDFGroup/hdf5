@@ -1098,7 +1098,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             else {
                 /* vlens cannot currently be nested below the top layer of a
                  * compound */
-                HDassert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
+                assert(H5Tdetect_class(memb_id, H5T_VLEN) == FALSE);
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
@@ -1675,7 +1675,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         break;
 
                     case H5O_TYPE_MAP:
-                        HDassert(0 && "maps not supported in native VOL connector");
+                        assert(0 && "maps not supported in native VOL connector");
 
                         /* clang complains about implicit fallthrough here and
                          * our usual attributes and fall-through comments don't
@@ -1685,7 +1685,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-                        HDassert(0 && "Unknown type of object");
+                        assert(0 && "Unknown type of object");
                         break;
                         H5_CLANG_DIAG_ON("implicit-fallthrough")
                 } /* end switch */
@@ -1708,7 +1708,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     char linkval2[NAME_BUF_SIZE]; /* Link value */
 
                     /* Get link values */
-                    HDassert(linfo.u.val_size <= NAME_BUF_SIZE);
+                    assert(linfo.u.val_size <= NAME_BUF_SIZE);
                     if (H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
                     if (H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
@@ -1719,7 +1719,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         TEST_ERROR;
                 } /* end else-if */
                 else {
-                    HDassert(0 && "Unknown type of link");
+                    assert(0 && "Unknown type of link");
                 } /* end else */
             }     /* end else */
         }         /* end for */
@@ -17395,7 +17395,7 @@ main(void)
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -17657,7 +17657,7 @@ main(void)
 
     /* Results */
     if (nerrors) {
-        HDprintf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
+        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n", nerrors, (1 == nerrors ? "" : "S"));
         HDexit(EXIT_FAILURE);
     } /* end if */
 

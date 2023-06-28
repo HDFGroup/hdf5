@@ -476,8 +476,8 @@ index_rec_cb(const void *_record, void *_op_data)
     const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
     H5B2_test_rec_t       *search = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record);
-    HDassert(search);
+    assert(record);
+    assert(search);
 
     search->key = record->key;
     search->val = record->val;
@@ -554,7 +554,7 @@ modify_rec_cb(void *_record, void *_op_data, hbool_t *changed)
     H5B2_test_rec_t *record = (H5B2_test_rec_t *)_record;
     H5B2_test_rec_t *modify = (H5B2_test_rec_t *)_op_data;
 
-    HDassert(record->key == modify->key);
+    assert(record->key == modify->key);
     record->val = modify->val;
     *changed    = TRUE;
 
@@ -3008,7 +3008,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     curr_time = HDtime(NULL);
 #if 0
 curr_time=1109170019;
-HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+fprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -5102,7 +5102,7 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
     curr_time = HDtime(NULL);
 #if 0
 curr_time = 1451342093;
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -5305,7 +5305,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     return 0;
 
 error:
-    HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+    fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     H5E_BEGIN_TRY
     {
         if (bt2)
@@ -8814,7 +8814,7 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
     curr_time = HDtime(NULL);
 #if 0
 curr_time = 1163537969;
-HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+fprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 #endif
     HDsrandom((unsigned)curr_time);
 
@@ -10139,7 +10139,7 @@ main(void)
         ExpressMode = 2;
 
     if (ExpressMode > 1)
-        HDprintf("***Express test mode on.  Some tests may be skipped\n");
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize v2 B-tree creation parameters */
     init_cparam(&cparam, &cparam2);
@@ -10152,11 +10152,11 @@ main(void)
     /* Loop over re-opening B-tree during tests */
     for (reopen = FALSE; reopen <= TRUE; reopen++) {
         if (reopen) {
-            HDfprintf(stdout, "Testing with reopening B-tree:\n");
+            fprintf(stdout, "Testing with reopening B-tree:\n");
             tparam.reopen_btree = TRUE;
         } /* end if */
         else {
-            HDfprintf(stdout, "Testing without reopening B-tree:\n");
+            fprintf(stdout, "Testing without reopening B-tree:\n");
             tparam.reopen_btree = FALSE;
         } /* end else */
 
@@ -10176,7 +10176,7 @@ main(void)
         nerrors += test_insert_level2_3internal_redistrib(fapl, &cparam, &tparam);
         nerrors += test_insert_level2_3internal_split(fapl, &cparam, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_insert_lots skipped\n");
+            printf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
 
@@ -10190,7 +10190,7 @@ main(void)
         nerrors += test_update_level1_middle_split(fapl, &cparam2, &tparam);
         nerrors += test_update_make_level2(fapl, &cparam2, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_update_lots skipped\n");
+            printf("***Express test mode on.  test_update_lots skipped\n");
         else
             nerrors += test_update_lots(fapl, &cparam2, &tparam);
 
@@ -10217,7 +10217,7 @@ main(void)
         nerrors += test_remove_level2_3internal_merge(fapl, &cparam, &tparam);
         nerrors += test_remove_level2_collapse_right(fapl, &cparam, &tparam);
         if (ExpressMode > 1)
-            HDprintf("***Express test mode on.  test_remove_lots skipped\n");
+            printf("***Express test mode on.  test_remove_lots skipped\n");
         else
             nerrors += test_remove_lots(envval, fapl, &cparam);
 

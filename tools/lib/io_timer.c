@@ -125,7 +125,7 @@ io_time_t *
 io_time_set(io_time_t *pt, timer_type t, int start_stop)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     switch (pt->type) {
 #ifdef H5_HAVE_PARALLEL
@@ -158,7 +158,7 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
             break;
 #else
         case MPI_CLOCK:
-            HDfprintf(stderr, "MPI clock set in serial library\n");
+            fprintf(stderr, "MPI clock set in serial library\n");
             return NULL;
 #endif /* H5_HAVE_PARALLEL */
         case SYS_CLOCK:
@@ -192,7 +192,7 @@ io_time_set(io_time_t *pt, timer_type t, int start_stop)
             break;
 
         default:
-            HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+            fprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
             return NULL;
     } /* end switch */
 
@@ -214,7 +214,7 @@ H5_ATTR_PURE double
 io_time_get(io_time_t *pt, timer_type t)
 {
     /* sanity check */
-    HDassert(pt);
+    assert(pt);
 
     return pt->total_time[t];
 }

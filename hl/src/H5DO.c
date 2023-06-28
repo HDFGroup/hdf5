@@ -120,7 +120,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
     hsize_t        *boundary = NULL;  /* Boundary set in append flush property */
     H5D_append_cb_t append_cb;        /* Callback function set in append flush property */
     void           *udata;            /* User data set in append flush property */
-    hbool_t         hit = FALSE;      /* Boundary is hit or not */
+    bool            hit = false;      /* Boundary is hit or not */
     hsize_t         k;                /* Local index variable */
     unsigned        u;                /* Local index variable */
     herr_t          ret_value = FAIL; /* Return value */
@@ -131,7 +131,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
 
     /* If the user passed in a default DXPL, sanity check it */
     if (H5P_DEFAULT != dxpl_id)
-        if (TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
+        if (true != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
             goto done;
 
     /* Get the dataspace of the dataset */
@@ -199,7 +199,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
         goto done;
 
     /* Allocate the boundary array */
-    boundary = (hsize_t *)HDmalloc(ndims * sizeof(hsize_t));
+    boundary = (hsize_t *)malloc(ndims * sizeof(hsize_t));
 
     /* Retrieve the append flush property */
     if (H5Pget_append_flush(dapl, ndims, boundary, &append_cb, &udata) < 0)
@@ -211,7 +211,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
         /* Determine whether a boundary is hit or not */
         for (k = start[axis]; k < size[axis]; k++)
             if (!((k + 1) % boundary[axis])) {
-                hit = TRUE;
+                hit = true;
                 break;
             }
 
@@ -247,7 +247,7 @@ done:
         ret_value = FAIL;
 
     if (boundary)
-        HDfree(boundary);
+        free(boundary);
 
     return ret_value;
 } /* H5DOappend() */

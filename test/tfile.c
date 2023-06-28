@@ -4406,7 +4406,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
     hbool_t    relax;
     H5FD_mem_t mt;
 
-    HDassert(split);
+    assert(split);
 
     HDmemset(memb_name, 0, sizeof memb_name);
 
@@ -5631,7 +5631,7 @@ test_libver_bounds_copy(void)
     CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
 
     if (!driver_is_default_compatible) {
-        HDprintf("-- SKIPPED --\n");
+        printf("-- SKIPPED --\n");
         return;
     }
 

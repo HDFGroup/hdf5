@@ -164,7 +164,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             } while (_size_rem);                                                                             \
         } /* end if */                                                                                       \
         else {                                                                                               \
-            HDassert(H5T_native_order_g == H5T_ORDER_BE);                                                    \
+            assert(H5T_native_order_g == H5T_ORDER_BE);                                                      \
                                                                                                              \
             /* Copy 4 bytes at a time to each cd value, but start at the end                                 \
              * (highest address) of fill_val */                                                              \
@@ -183,7 +183,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                     _fv_p -= _size_rem;                                                                      \
             } /* end while */                                                                                \
                                                                                                              \
-            HDassert(_fv_p == (char *)&(fill_val));                                                          \
+            assert(_fv_p == (char *)&(fill_val));                                                            \
             if (_size_rem) {                                                                                 \
                 /* Amount left to copy is smaller than a cd_value, initialize                                \
                  * _cd_value as it will not be fully overwritten and copy to the end                         \
@@ -291,7 +291,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             } while (_size_rem);                                                                             \
         } /* end if */                                                                                       \
         else {                                                                                               \
-            HDassert(H5T_native_order_g == H5T_ORDER_BE);                                                    \
+            assert(H5T_native_order_g == H5T_ORDER_BE);                                                      \
                                                                                                              \
             /* Copy 4 bytes at a time to each cd value, but start at the end                                 \
              * (highest address) of fill_val */                                                              \
@@ -310,7 +310,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                     _fv_p -= _size_rem;                                                                      \
             } /* end while */                                                                                \
                                                                                                              \
-            HDassert(_fv_p == (char *)&(fill_val));                                                          \
+            assert(_fv_p == (char *)&(fill_val));                                                            \
             if (_size_rem) {                                                                                 \
                 /* Amount left to copy is smaller than a cd_value, initialize                                \
                  * _cd_value as it will not be fully overwritten and copy to the end                         \
@@ -586,7 +586,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (H5T_native_order_g == H5T_ORDER_LE)                                                          \
                 H5MM_memcpy(minval, &min, sizeof(type));                                                     \
             else {                                                                                           \
-                HDassert(H5T_native_order_g == H5T_ORDER_BE);                                                \
+                assert(H5T_native_order_g == H5T_ORDER_BE);                                                  \
                 H5MM_memcpy(((char *)minval) + (sizeof(long long) - sizeof(type)), &min, sizeof(type));      \
             } /* end else */                                                                                 \
         else                                                                                                 \
@@ -673,7 +673,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             if (H5T_native_order_g == H5T_ORDER_LE)                                                          \
                 H5MM_memcpy(&min, &minval, sizeof(type));                                                    \
             else {                                                                                           \
-                HDassert(H5T_native_order_g == H5T_ORDER_BE);                                                \
+                assert(H5T_native_order_g == H5T_ORDER_BE);                                                  \
                 H5MM_memcpy(&min, ((char *)&minval) + (sizeof(long long) - sizeof(type)), sizeof(type));     \
             } /* end else */                                                                                 \
         else                                                                                                 \
@@ -1240,7 +1240,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             minval |= minval_mask;
         }
 
-        HDassert(minbits <= p.size * 8);
+        assert(minbits <= p.size * 8);
         p.minbits = minbits;
 
         /* calculate size of output buffer after decompression */
@@ -1298,7 +1298,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     }
     /* output; compress */
     else {
-        HDassert(nbytes == d_nelmts * p.size);
+        assert(nbytes == d_nelmts * p.size);
 
         /* before preprocess, convert to memory endianness order if needed */
         if (need_convert)
@@ -1319,7 +1319,7 @@ H5Z__filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_valu
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "pre-compression failed")
             }
 
-        HDassert(minbits <= p.size * 8);
+        assert(minbits <= p.size * 8);
 
         /* calculate buffer size after compression
          * minbits and minval are stored in the front of the compressed buffer
@@ -1655,7 +1655,7 @@ H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
     unsigned dtype_len;
     int      k;
 
-    HDassert(p.minbits > 0);
+    assert(p.minbits > 0);
 
     dtype_len = p.size * 8;
 
@@ -1667,7 +1667,7 @@ H5Z__scaleoffset_decompress_one_atomic(unsigned char *data, size_t data_offset, 
                                                  p, dtype_len);
     }
     else { /* big endian */
-        HDassert(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE);
+        assert(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE);
 
         begin_i = (dtype_len - p.minbits) / 8;
 
@@ -1739,7 +1739,7 @@ H5Z__scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset, un
     unsigned dtype_len;
     int      k;
 
-    HDassert(p.minbits > 0);
+    assert(p.minbits > 0);
 
     dtype_len = p.size * 8;
 
@@ -1751,7 +1751,7 @@ H5Z__scaleoffset_compress_one_atomic(unsigned char *data, size_t data_offset, un
                                                dtype_len);
     }
     else { /* big endian */
-        HDassert(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE);
+        assert(p.mem_order == H5Z_SCALEOFFSET_ORDER_BE);
         begin_i = (dtype_len - p.minbits) / 8;
 
         for (k = (int)begin_i; k <= (int)(p.size - 1); k++)

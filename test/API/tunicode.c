@@ -152,7 +152,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Create a src_type that holds the UTF-8 string and its final NULL */
     big_len = length + 1; /* +1 byte for final NULL */
-    HDassert((2 * big_len) <= sizeof(cmpbuf));
+    assert((2 * big_len) <= sizeof(cmpbuf));
     src_type = mkstr(big_len, H5T_STR_NULLTERM);
     CHECK(src_type, FAIL, "mkstr");
     /* Create a dst_type that holds half of the UTF-8 string and a final
@@ -215,7 +215,7 @@ test_strpad(hid_t H5_ATTR_UNUSED fid, const char *string)
 
     /* Create a src_type that holds the UTF-8 string */
     big_len = length;
-    HDassert((2 * big_len) <= sizeof(cmpbuf));
+    assert((2 * big_len) <= sizeof(cmpbuf));
     src_type = mkstr(big_len, H5T_STR_NULLPAD);
     CHECK(src_type, FAIL, "mkstr");
     /* Create a dst_type that holds half of the UTF-8 string */
@@ -783,15 +783,15 @@ dump_string(const char *string)
     size_t length;
     size_t x;
 
-    HDprintf("The string was:\n %s", string);
-    HDprintf("Or in hex:\n");
+    printf("The string was:\n %s", string);
+    printf("Or in hex:\n");
 
     length = HDstrlen(string);
 
     for (x = 0; x < length; x++)
-        HDprintf("%x ", string[x] & (0x000000FF));
+        printf("%x ", string[x] & (0x000000FF));
 
-    HDprintf("\n");
+    printf("\n");
 }
 
 /* Main test.

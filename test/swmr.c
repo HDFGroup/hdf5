@@ -2491,7 +2491,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /*
@@ -2501,7 +2501,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2552,7 +2552,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2574,13 +2574,13 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 2 pipes */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
-    if (HDpipe(in_pdf) < 0)
+    if (pipe(in_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) {                        /* Child process */
@@ -2745,7 +2745,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2768,11 +2768,11 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      *  will fail with H5Fstart_swmr_write()
      */
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2822,7 +2822,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2844,11 +2844,11 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2902,7 +2902,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2924,11 +2924,11 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2982,7 +2982,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -5232,11 +5232,11 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5289,7 +5289,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5309,11 +5309,11 @@ test_file_lock_concur(hid_t in_fapl)
      * Case 2: 1) RDWR 2) RDONLY : should fail
      */
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5366,7 +5366,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5387,11 +5387,11 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5444,7 +5444,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5465,11 +5465,11 @@ test_file_lock_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5527,7 +5527,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5629,11 +5629,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5686,7 +5686,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5707,11 +5707,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5764,7 +5764,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5785,11 +5785,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5842,7 +5842,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5862,11 +5862,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 4: 1) RDWR|SWMR_WRITE 2) RDWR|SWMR_WRITE : should fail
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5919,7 +5919,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5939,11 +5939,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 5: 1) RDWR|SWMR_WRITE 2) RDONLY|SWMR_READ : should succeed
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5999,7 +5999,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6019,11 +6019,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      * Case 6: 1) RDWR|SWMR_WRITE 2) RDONLY : should fail
      */
 
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6076,7 +6076,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6097,11 +6097,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6154,7 +6154,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6175,11 +6175,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6232,7 +6232,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6253,11 +6253,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6313,7 +6313,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6334,11 +6334,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6391,7 +6391,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6412,11 +6412,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6469,7 +6469,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6490,11 +6490,11 @@ test_file_lock_swmr_concur(hid_t in_fapl)
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6550,7 +6550,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6669,11 +6669,11 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
      */
 
     /* Create 1 pipe */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         TEST_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         TEST_ERROR;
 
     if (childpid == 0) {
@@ -6729,7 +6729,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         TEST_ERROR;
 
     /* Check exit status of the child */
@@ -7166,13 +7166,13 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Create 2 pipes */
-    if (HDpipe(out_pdf) < 0)
+    if (pipe(out_pdf) < 0)
         FAIL_STACK_ERROR;
-    if (HDpipe(in_pdf) < 0)
+    if (pipe(in_pdf) < 0)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) {         /* Child process */
@@ -7347,7 +7347,7 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -7743,7 +7743,7 @@ main(void)
      */
     driver = HDgetenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
-        HDprintf("This VFD does not support SWMR I/O\n");
+        printf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
     }
 
@@ -7760,7 +7760,7 @@ main(void)
     /* Check if file locking is enabled on this file system */
     if (use_file_locking)
         if (h5_check_if_file_locking_enabled(&file_locking_enabled) < 0) {
-            HDprintf("Error when determining if file locks are enabled\n");
+            printf("Error when determining if file locks are enabled\n");
             return EXIT_FAILURE;
         }
 
@@ -7847,7 +7847,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    HDprintf("All tests passed.\n");
+    printf("All tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -7855,7 +7855,7 @@ main(void)
 
 error:
     nerrors = MAX(1, nerrors);
-    HDprintf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
+    printf("***** %d SWMR TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     return EXIT_FAILURE;
 
 } /* end main() */
