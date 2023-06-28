@@ -2523,7 +2523,6 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
     if (H5FD__sort_io_req_real(count, addrs, vector_was_sorted, &srt_tmp) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sorting error in selection offsets")
 
-
     if (*vector_was_sorted) {
 
         *s_types_ptr = types;
