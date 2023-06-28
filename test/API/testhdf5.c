@@ -55,9 +55,9 @@ print_func(const char *format, ...)
     va_list arglist;
     int     ret_value;
 
-    HDva_start(arglist, format);
+    va_start(arglist, format);
     ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_end(arglist);
     return ret_value;
 }
 
@@ -75,9 +75,9 @@ TestErrPrintf(const char *format, ...)
     nerrors++;
 
     /* Print the requested information */
-    HDva_start(arglist, format);
+    va_start(arglist, format);
     ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_end(arglist);
 
     /* Return the length of the string produced (like printf() does) */
     return ret_value;

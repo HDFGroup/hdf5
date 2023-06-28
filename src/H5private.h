@@ -1218,18 +1218,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
-#ifndef HDva_arg
-#define HDva_arg(A, T) va_arg(A, T)
-#endif
-#ifndef HDva_copy
-#define HDva_copy(D, S) va_copy(D, S)
-#endif
-#ifndef HDva_end
-#define HDva_end(A) va_end(A)
-#endif
-#ifndef HDva_start
-#define HDva_start(A, P) va_start(A, P)
-#endif
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
 #endif

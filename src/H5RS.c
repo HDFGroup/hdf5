@@ -373,16 +373,16 @@ H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
         HGOTO_ERROR(H5E_RS, H5E_CANTINIT, FAIL, "can't initialize ref-counted string")
 
     /* Attempt to write formatted output into the managed string */
-    HDva_start(args1, fmt);
-    HDva_copy(args2, args1);
+    va_start(args1, fmt);
+    va_copy(args2, args1);
     while ((out_len = (size_t)HDvsnprintf(rs->end, (rs->max - rs->len), fmt, args1)) >= (rs->max - rs->len)) {
         /* Allocate a large enough buffer */
         if (H5RS__resize_for_append(rs, out_len) < 0)
             HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer")
 
         /* Restart the va_list */
-        HDva_end(args1);
-        HDva_copy(args1, args2);
+        va_end(args1);
+        va_copy(args1, args2);
     } /* end while */
 
     /* Increment the size & end of the string */
@@ -390,8 +390,8 @@ H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
     rs->end += out_len;
 
     /* Finish access to varargs */
-    HDva_end(args1);
-    HDva_end(args2);
+    va_end(args1);
+    va_end(args2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

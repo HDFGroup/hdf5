@@ -1332,7 +1332,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
      */
 
     /* Format the description */
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     va_started = TRUE;
 
     /* Use the vasprintf() routine, since it does what we're trying to do below */
@@ -1345,7 +1345,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 
 done:
     if (va_started)
-        HDva_end(ap);
+        va_end(ap);
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
      */

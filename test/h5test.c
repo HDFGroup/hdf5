@@ -1279,9 +1279,9 @@ print_func(const char *format, ...)
     va_list arglist;
     int     ret_value;
 
-    HDva_start(arglist, format);
+    va_start(arglist, format);
     ret_value = HDvprintf(format, arglist);
-    HDva_end(arglist);
+    va_end(arglist);
     return ret_value;
 }
 

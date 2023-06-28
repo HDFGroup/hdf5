@@ -359,16 +359,16 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "event set has failed operations")
 
     /* Start working on the API routines arguments */
-    HDva_start(ap, caller_args);
+    va_start(ap, caller_args);
     arg_started = TRUE;
 
     /* Copy the app source information */
-    (void)HDva_arg(ap, char *); /* Toss the 'app_file' parameter name */
-    app_file = HDva_arg(ap, char *);
-    (void)HDva_arg(ap, char *); /* Toss the 'app_func' parameter name */
-    app_func = HDva_arg(ap, char *);
-    (void)HDva_arg(ap, char *); /* Toss the 'app_line' parameter name */
-    app_line = HDva_arg(ap, unsigned);
+    (void)va_arg(ap, char *); /* Toss the 'app_file' parameter name */
+    app_file = va_arg(ap, char *);
+    (void)va_arg(ap, char *); /* Toss the 'app_func' parameter name */
+    app_func = va_arg(ap, char *);
+    (void)va_arg(ap, char *); /* Toss the 'app_line' parameter name */
+    app_line = va_arg(ap, unsigned);
 
     /* Create the string for the API routine's arguments */
     if (NULL == (rs = H5RS_create(NULL)))
@@ -389,7 +389,7 @@ H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, con
 done:
     /* Clean up */
     if (arg_started)
-        HDva_end(ap);
+        va_end(ap);
     if (rs)
         H5RS_decr(rs);
 

@@ -65,15 +65,15 @@ parallel_print(const char *format, ...)
     int     bytes_written;
     va_list ap;
 
-    HDva_start(ap, format);
+    va_start(ap, format);
 
     if (!g_Parallel)
         HDvprintf(format, ap);
     else {
         if (overflow_file == NULL) /*no overflow has occurred yet */ {
             bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
-            HDva_end(ap);
-            HDva_start(ap, format);
+            va_end(ap);
+            va_start(ap, format);
 
             if ((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
@@ -92,7 +92,7 @@ parallel_print(const char *format, ...)
         else
             bytes_written = HDvfprintf(overflow_file, format, ap);
     }
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -109,14 +109,14 @@ error_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     FLUSHSTREAM(rawattrstream);
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     HDfprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
 
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------
@@ -133,13 +133,13 @@ warn_msg(const char *fmt, ...)
 {
     va_list ap;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     FLUSHSTREAM(rawattrstream);
     FLUSHSTREAM(rawdatastream);
     FLUSHSTREAM(rawoutstream);
     HDfprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*-------------------------------------------------------------------------

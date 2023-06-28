@@ -79,7 +79,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
         int     ret;
         va_list ap;
 
-        HDva_copy(ap, _ap);
+        va_copy(ap, _ap);
         ret = HDvsnprintf(buf, bufsz, fmt, ap);
         va_end(ap);
         if (ret >= 0 && (size_t)ret < bufsz) {
@@ -569,9 +569,9 @@ Wopen_utf8(const char *path, int oflag, ...)
     if (oflag & O_CREAT) {
         va_list vl;
 
-        HDva_start(vl, oflag);
-        pmode = HDva_arg(vl, int);
-        HDva_end(vl);
+        va_start(vl, oflag);
+        pmode = va_arg(vl, int);
+        va_end(vl);
     }
 
     /* Open the file */

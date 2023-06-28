@@ -633,11 +633,11 @@ output_report(const char *fmt, ...)
 {
     va_list ap;
 
-    HDva_start(ap, fmt);
+    va_start(ap, fmt);
     H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     HDvfprintf(output, fmt, ap);
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
-    HDva_end(ap);
+    va_end(ap);
 }
 
 /*
