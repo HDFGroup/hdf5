@@ -117,8 +117,8 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
         nbytes *= path->stats.nelmts;
         H5_bandwidth(bandwidth, sizeof(bandwidth), (double)nbytes, path->stats.times.elapsed);
         fprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
-                  path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
-                  bandwidth);
+                path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
+                bandwidth);
         free(timestrs.user);
         free(timestrs.system);
         free(timestrs.elapsed);

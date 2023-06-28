@@ -335,7 +335,7 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]) {
         fprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n", (unsigned long long)dims[0],
-                  (unsigned long long)dims[1], (unsigned long long)dims[2]);
+                (unsigned long long)dims[1], (unsigned long long)dims[2]);
         free(buffer);
         return -1;
     }
@@ -512,9 +512,9 @@ read_uc_file(hbool_t towait, options_t *opts)
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[1] != memdims[1] || dims[2] != memdims[2]) {
         fprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
-                  (unsigned long long)dims[0], (unsigned long long)dims[1], (unsigned long long)dims[2]);
+                (unsigned long long)dims[0], (unsigned long long)dims[1], (unsigned long long)dims[2]);
         fprintf(stderr, "But memdims=(%llu,%llu,%llu)\n", (unsigned long long)memdims[0],
-                  (unsigned long long)memdims[1], (unsigned long long)memdims[2]);
+                (unsigned long long)memdims[1], (unsigned long long)memdims[2]);
         free(buffer);
         return -1;
     }
