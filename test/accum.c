@@ -193,9 +193,9 @@ test_write_read(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(1024 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)1024, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 1024; i++)
@@ -252,9 +252,9 @@ test_write_read_nonacc_front(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 2048; i++)
@@ -317,9 +317,9 @@ test_write_read_nonacc_end(H5F_t *f)
 
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
-    HDassert(write_buf);
+    assert(write_buf);
     read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
-    HDassert(read_buf);
+    assert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
     for (i = 0; i < 2048; i++)
@@ -384,11 +384,11 @@ test_free(H5F_t *f)
 
     /* Write and free the whole accumulator. */
     wbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
     expect = (int32_t *)HDmalloc(256 * sizeof(int32_t));
-    HDassert(expect);
+    assert(expect);
 
     /* Fill buffer with data */
     for (i = 0; i < 256; i++)
@@ -615,9 +615,9 @@ test_accum_overlap(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 40 */
@@ -822,9 +822,9 @@ test_accum_overlap_clean(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 40 */
@@ -1041,9 +1041,9 @@ test_accum_non_overlap_size(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 140 */
@@ -1115,9 +1115,9 @@ test_accum_overlap_size(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Case 1: No metadata in accumulator */
     /* Write 10 1's at address 64 */
@@ -1200,9 +1200,9 @@ test_accum_adjust(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Fill up write buffer */
     for (i = 0; i < s; i++)
@@ -1498,9 +1498,9 @@ test_read_after(H5F_t *f)
 
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc((size_t)s * sizeof(int32_t));
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (int32_t *)HDcalloc((size_t)s, sizeof(int32_t));
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Fill up write buffer with 1s */
     for (i = 0; i < s; i++)
@@ -1580,13 +1580,13 @@ test_big(H5F_t *f)
 
     /* Allocate space for the write & read buffers */
     wbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
-    HDassert(wbuf);
+    assert(wbuf);
     wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
-    HDassert(wbuf2);
+    assert(wbuf2);
     rbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
-    HDassert(rbuf);
+    assert(rbuf);
     zbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
-    HDassert(zbuf);
+    assert(zbuf);
 
     /* Initialize write buffers */
     for (u = 0; u < BIG_BUF_SIZE; u++) {
@@ -1951,9 +1951,9 @@ test_random_write(H5F_t *f)
 
     /* Allocate space for the write & read buffers */
     wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
-    HDassert(wbuf);
+    assert(wbuf);
     rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
-    HDassert(rbuf);
+    assert(rbuf);
 
     /* Initialize write buffer */
     for (u = 0; u < RANDOM_BUF_SIZE; u++)
@@ -1971,9 +1971,9 @@ HDfprintf(stderr, "Random # seed was: %u\n", seed);
 
     /* Allocate space for the segment length buffer */
     off = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
-    HDassert(off);
+    assert(off);
     len = (size_t *)HDmalloc(MAX_RANDOM_SEGMENTS * sizeof(size_t));
-    HDassert(len);
+    assert(len);
 
     /* Randomly choose lengths of segments */
     cur_off = 0;

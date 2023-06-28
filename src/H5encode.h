@@ -263,7 +263,7 @@
                 UINT16ENCODE(p, l);                                                                          \
                 break;                                                                                       \
             default:                                                                                         \
-                HDassert("bad sizeof size" && 0);                                                            \
+                assert("bad sizeof size" && 0);                                                              \
         }                                                                                                    \
     } while (0)
 
@@ -280,7 +280,7 @@
                 UINT16DECODE(p, l);                                                                          \
                 break;                                                                                       \
             default:                                                                                         \
-                HDassert("bad sizeof size" && 0);                                                            \
+                assert("bad sizeof size" && 0);                                                              \
         }                                                                                                    \
     } while (0)
 

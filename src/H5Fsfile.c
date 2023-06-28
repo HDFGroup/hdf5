@@ -56,7 +56,7 @@ H5F_sfile_assert_num(unsigned n)
 
     if (n == 0) {
         /* Sanity checking */
-        HDassert(H5F_sfile_head_s == NULL);
+        assert(H5F_sfile_head_s == NULL);
     } /* end if */
     else {
         unsigned          count; /* Number of open shared files */
@@ -74,7 +74,7 @@ H5F_sfile_assert_num(unsigned n)
         } /* end while */
 
         /* Sanity checking */
-        HDassert(count == n);
+        assert(count == n);
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -101,7 +101,7 @@ H5F__sfile_add(H5F_shared_t *shared)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(shared);
+    assert(shared);
 
     /* Allocate new shared file node */
     if (NULL == (new_shared = H5FL_CALLOC(H5F_sfile_node_t)))
@@ -140,7 +140,7 @@ H5F__sfile_search(H5FD_t *lf)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(lf);
+    assert(lf);
 
     /* Iterate through low-level files for matching low-level file info */
     curr = H5F_sfile_head_s;
@@ -179,7 +179,7 @@ H5F__sfile_remove(H5F_shared_t *shared)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(shared);
+    assert(shared);
 
     /* Locate shared file node with correct shared file */
     last = NULL;

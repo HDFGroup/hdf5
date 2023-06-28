@@ -194,8 +194,8 @@ H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr)
     if (hit_rate_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad hit_rate_ptr on entry.")
 
-    HDassert(cache_ptr->cache_hits >= 0);
-    HDassert(cache_ptr->cache_accesses >= cache_ptr->cache_hits);
+    assert(cache_ptr->cache_hits >= 0);
+    assert(cache_ptr->cache_accesses >= cache_ptr->cache_hits);
 
     if (cache_ptr->cache_accesses > 0)
         *hit_rate_ptr = ((double)(cache_ptr->cache_hits)) / ((double)(cache_ptr->cache_accesses));
@@ -240,12 +240,12 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
-    HDassert(cache_ptr != NULL);
-    HDassert(H5_addr_defined(addr));
-    HDassert(in_cache_ptr != NULL);
+    assert(cache_ptr != NULL);
+    assert(H5_addr_defined(addr));
+    assert(in_cache_ptr != NULL);
 
     if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
@@ -335,7 +335,7 @@ H5C_get_aux_ptr(const H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     FUNC_LEAVE_NOAPI(cache_ptr->aux_ptr)
 } /* H5C_get_aux_ptr() */
@@ -365,11 +365,11 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(H5_addr_defined(addr));
+    assert(cache_ptr);
+    assert(H5_addr_defined(addr));
 
     /* Locate the entry at the address */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);

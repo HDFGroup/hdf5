@@ -517,8 +517,8 @@ test_ooo_indices(hid_t fapl)
     }
 
     /* The indices should have "wrapped around" on the last iteration */
-    HDassert(obj[534].idx == 65535);
-    HDassert(obj[535].idx == 1);
+    assert(obj[534].idx == 65535);
+    assert(obj[535].idx == 1);
 
     /* Reopen the file */
     if (H5Fclose(file) < 0)

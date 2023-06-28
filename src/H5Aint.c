@@ -222,7 +222,7 @@ H5A_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(0 == H5I_nmembers(H5I_ATTR));
+    assert(0 == H5I_nmembers(H5I_ATTR));
 
     /* Destroy the attribute object id group */
     n += (H5I_dec_type_ref(H5I_ATTR) > 0);
@@ -254,10 +254,10 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
     FUNC_ENTER_PACKAGE_TAG(loc->oloc->addr)
 
     /* Check args */
-    HDassert(loc);
-    HDassert(attr_name);
-    HDassert(type);
-    HDassert(space);
+    assert(loc);
+    assert(attr_name);
+    assert(type);
+    assert(space);
 
     /* Check for existing attribute with same name */
     /* (technically, the "attribute create" operation will fail for a duplicated
@@ -286,7 +286,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
         HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "can't allocate shared attr structure")
 
     /* If the creation property list is H5P_ATTRIBUTE_CREATE_DEFAULT, use the default character encoding */
-    HDassert(acpl_id != H5P_DEFAULT);
+    assert(acpl_id != H5P_DEFAULT);
     if (acpl_id == H5P_ATTRIBUTE_CREATE_DEFAULT)
         attr->shared->encoding = H5F_DEFAULT_CSET;
     else {
@@ -364,8 +364,8 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, NULL, "dataspace is invalid")
     H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
-    HDassert(attr->shared->dt_size > 0);
-    HDassert(attr->shared->ds_size > 0);
+    assert(attr->shared->dt_size > 0);
+    assert(attr->shared->ds_size > 0);
     attr->shared->data_size = nelmts * H5T_GET_SIZE(attr->shared->dt);
 
     /* Hold the symbol table entry (and file) open */
@@ -418,9 +418,9 @@ H5A__create_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(loc);
-    HDassert(obj_name);
-    HDassert(attr_name);
+    assert(loc);
+    assert(obj_name);
+    assert(attr_name);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -477,8 +477,8 @@ H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(loc);
-    HDassert(attr);
+    assert(loc);
+    assert(attr);
 
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear object location */
@@ -528,8 +528,8 @@ H5A__open(const H5G_loc_t *loc, const char *attr_name)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(loc);
-    HDassert(attr_name);
+    assert(loc);
+    assert(attr_name);
 
     /* Read in attribute from object header */
     if (NULL == (attr = H5O__attr_open_by_name(loc->oloc, attr_name)))
@@ -578,8 +578,8 @@ H5A__open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(loc);
-    HDassert(obj_name);
+    assert(loc);
+    assert(obj_name);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -640,9 +640,9 @@ H5A__open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_n
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(loc);
-    HDassert(obj_name);
-    HDassert(attr_name);
+    assert(loc);
+    assert(obj_name);
+    assert(attr_name);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -710,9 +710,9 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
 
     FUNC_ENTER_PACKAGE_TAG(attr->oloc.addr)
 
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
+    assert(attr);
+    assert(mem_type);
+    assert(buf);
 
     /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(attr->shared->dt, H5F_VOL_OBJ(attr->oloc.file)) < 0)
@@ -765,7 +765,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
 
                     /* Copy the application buffer into the background buffer if necessary */
                     if (need_bkg == H5T_BKG_YES) {
-                        HDassert(buf_size >= (dst_type_size * nelmts));
+                        assert(buf_size >= (dst_type_size * nelmts));
                         H5MM_memcpy(bkg_buf, buf, dst_type_size * nelmts);
                     }
                 }
@@ -779,7 +779,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
             } /* end if */
             /* No type conversion necessary */
             else {
-                HDassert(dst_type_size == src_type_size);
+                assert(dst_type_size == src_type_size);
 
                 /* Copy the attribute data into the user's buffer */
                 H5MM_memcpy(buf, attr->shared->data, (dst_type_size * nelmts));
@@ -832,9 +832,9 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 
     FUNC_ENTER_PACKAGE_TAG(attr->oloc.addr)
 
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
+    assert(attr);
+    assert(mem_type);
+    assert(buf);
 
     /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
     if (H5T_patch_vlen_file(attr->shared->dt, H5F_VOL_OBJ(attr->oloc.file)) < 0)
@@ -909,7 +909,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
         } /* end if */
         /* No type conversion necessary */
         else {
-            HDassert(dst_type_size == src_type_size);
+            assert(dst_type_size == src_type_size);
 
             /* Allocate the attribute buffer, if there isn't one */
             if (attr->shared->data == NULL)
@@ -963,8 +963,8 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf, size_t *attr_name_len)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(attr);
-    HDassert(attr_name_len);
+    assert(attr);
+    assert(attr_name_len);
 
     /* Get the real attribute length */
     nbytes = HDstrlen(attr->shared->name);
@@ -1005,7 +1005,7 @@ H5A_get_space(H5A_t *attr)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(attr);
+    assert(attr);
 
     /* Copy the attribute's dataspace */
     if (NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
@@ -1040,7 +1040,7 @@ H5A__get_type(H5A_t *attr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(attr);
+    assert(attr);
 
     /* Patch the datatype's "top level" file pointer */
     if (H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
@@ -1146,8 +1146,8 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
-    HDassert(attr);
-    HDassert(ainfo);
+    assert(attr);
+    assert(ainfo);
 
     /* Set info for attribute */
     ainfo->cset      = attr->shared->encoding;
@@ -1187,7 +1187,7 @@ H5A__copy(H5A_t *_new_attr, const H5A_t *old_attr)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(old_attr);
+    assert(old_attr);
 
     /* Allocate attribute structure */
     if (_new_attr == NULL) {
@@ -1247,8 +1247,8 @@ H5A__shared_free(H5A_t *attr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(attr);
-    HDassert(attr->shared);
+    assert(attr);
+    assert(attr->shared);
 
     /* Free dynamically allocated items.
      * When possible, keep trying to shut things down (via HDONE_ERROR).
@@ -1293,7 +1293,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(attr_vol_obj);
+    assert(attr_vol_obj);
 
     /* Close the attribute */
     if (H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
@@ -1326,8 +1326,8 @@ H5A__close(H5A_t *attr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(attr);
-    HDassert(attr->shared);
+    assert(attr);
+    assert(attr->shared);
 
     /* Close the object's symbol-table entry */
     if (attr->obj_opened && (H5O_close(&(attr->oloc), NULL) < 0))
@@ -1379,7 +1379,7 @@ H5A_oloc(H5A_t *attr)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(attr);
+    assert(attr);
 
     /* Set return value */
     ret_value = &(attr->oloc);
@@ -1409,7 +1409,7 @@ H5A_nameof(H5A_t *attr)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(attr);
+    assert(attr);
 
     /* Set return value */
     ret_value = &(attr->path);
@@ -1437,7 +1437,7 @@ H5A_type(const H5A_t *attr)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(attr);
+    assert(attr);
 
     /* Set return value */
     ret_value = attr->shared->dt;
@@ -1469,9 +1469,9 @@ H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(obj_name);
-    HDassert(attr_name);
-    HDassert(attr_exists);
+    assert(obj_name);
+    assert(attr_name);
+    assert(attr_exists);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1522,7 +1522,7 @@ H5A__compact_build_table_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(mesg);
+    assert(mesg);
 
     /* Re-allocate the table if necessary */
     if (udata->curr_attr == udata->atable->nattrs) {
@@ -1581,9 +1581,9 @@ H5A__compact_build_table(H5F_t *f, H5O_t *oh, H5_index_t idx_type, H5_iter_order
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(atable);
+    assert(f);
+    assert(oh);
+    assert(atable);
 
     /* Initialize table */
     atable->attrs  = NULL;
@@ -1639,9 +1639,9 @@ H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(attr);
-    HDassert(udata);
-    HDassert(udata->curr_attr < udata->atable->nattrs);
+    assert(attr);
+    assert(udata);
+    assert(udata->curr_attr < udata->atable->nattrs);
 
     /* Allocate attribute for entry in the table */
     if (NULL == (udata->atable->attrs[udata->curr_attr] = H5FL_CALLOC(H5A_t)))
@@ -1686,11 +1686,11 @@ H5A__dense_build_table(H5F_t *f, const H5O_ainfo_t *ainfo, H5_index_t idx_type, 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(ainfo);
-    HDassert(H5_addr_defined(ainfo->fheap_addr));
-    HDassert(H5_addr_defined(ainfo->name_bt2_addr));
-    HDassert(atable);
+    assert(f);
+    assert(ainfo);
+    assert(H5_addr_defined(ainfo->fheap_addr));
+    assert(H5_addr_defined(ainfo->name_bt2_addr));
+    assert(atable);
 
     /* Open the name index v2 B-tree */
     if (NULL == (bt2_name = H5B2_open(f, ainfo->name_bt2_addr, NULL)))
@@ -1880,25 +1880,25 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(atable);
+    assert(atable);
 
     /* Pick appropriate comparison routine */
     if (idx_type == H5_INDEX_NAME) {
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_name_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
-        HDassert(idx_type == H5_INDEX_CRT_ORDER);
+        assert(idx_type == H5_INDEX_CRT_ORDER);
         if (order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_inc);
         else if (order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
+            qsort(atable->attrs, atable->nattrs, sizeof(H5A_t *), H5A__attr_cmp_corder_dec);
         else
-            HDassert(order == H5_ITER_NATIVE);
+            assert(order == H5_ITER_NATIVE);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1927,8 +1927,8 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(atable);
-    HDassert(attr_op);
+    assert(atable);
+    assert(attr_op);
 
     /* Skip over attributes, if requested */
     if (last_attr)
@@ -1964,7 +1964,7 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
                 break;
 
             default:
-                HDassert("unknown attribute op type" && 0);
+                assert("unknown attribute op type" && 0);
 #ifdef NDEBUG
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type")
 #endif    /* NDEBUG */
@@ -2003,7 +2003,7 @@ H5A__attr_release_table(H5A_attr_table_t *atable)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(atable);
+    assert(atable);
 
     /* Release attribute info, if any. */
     if (atable->nattrs > 0) {
@@ -2015,7 +2015,7 @@ H5A__attr_release_table(H5A_attr_table_t *atable)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute")
     } /* end if */
     else
-        HDassert(atable->attrs == NULL);
+        assert(atable->attrs == NULL);
 
     atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, atable->attrs);
 
@@ -2045,9 +2045,9 @@ H5A__get_ainfo(H5F_t *f, H5O_t *oh, H5O_ainfo_t *ainfo)
     FUNC_ENTER_NOAPI_TAG(oh->cache_info.addr, FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(ainfo);
+    assert(f);
+    assert(oh);
+    assert(ainfo);
 
     /* Check if the "attribute info" message exists */
     if ((ret_value = H5O_msg_exists_oh(oh, H5O_AINFO_ID)) < 0)
@@ -2109,8 +2109,8 @@ H5A__set_version(const H5F_t *f, H5A_t *attr)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f);
-    HDassert(attr);
+    assert(f);
+    assert(attr);
 
     /* Check whether datatype and dataspace are shared */
     if (H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -2186,10 +2186,10 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(attr_src);
-    HDassert(file_dst);
-    HDassert(cpy_info);
-    HDassert(!cpy_info->copy_without_attr);
+    assert(attr_src);
+    assert(file_dst);
+    assert(cpy_info);
+    assert(!cpy_info->copy_without_attr);
 
     /* Allocate space for the destination message */
     if (NULL == (attr_dst = H5FL_CALLOC(H5A_t)))
@@ -2211,7 +2211,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
     /* Copy attribute's name */
     attr_dst->shared->name = H5MM_strdup(attr_src->shared->name);
-    HDassert(attr_dst->shared->name);
+    assert(attr_dst->shared->name);
     attr_dst->shared->encoding = attr_src->shared->encoding;
 
     /* Copy attribute's datatype */
@@ -2236,7 +2236,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
     /* Copy the dataspace for the attribute. Make sure the maximal dimension is also copied.
      * Otherwise the comparison in the test may complain about it. SLU 2011/4/12 */
     attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, TRUE);
-    HDassert(attr_dst->shared->ds);
+    assert(attr_dst->shared->ds);
 
     /* Reset the dataspace's sharing in the source file before trying to share
      * it in the destination.
@@ -2257,9 +2257,9 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
      * size unless they're shared.
      */
     attr_dst->shared->dt_size = H5O_msg_raw_size(file_dst, H5O_DTYPE_ID, FALSE, attr_dst->shared->dt);
-    HDassert(attr_dst->shared->dt_size > 0);
+    assert(attr_dst->shared->dt_size > 0);
     attr_dst->shared->ds_size = H5O_msg_raw_size(file_dst, H5O_SDSPACE_ID, FALSE, attr_dst->shared->ds);
-    HDassert(attr_dst->shared->ds_size > 0);
+    assert(attr_dst->shared->ds_size > 0);
 
     /* Check whether to recompute the size of the attribute */
     /* (happens when the datatype or dataspace changes sharing status) */
@@ -2384,7 +2384,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         } /* end if */
         else {
-            HDassert(attr_dst->shared->data_size == attr_src->shared->data_size);
+            assert(attr_dst->shared->data_size == attr_src->shared->data_size);
             H5MM_memcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
         } /* end else */
     }     /* end if(attr_src->shared->data) */
@@ -2458,16 +2458,16 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src, H5O_l
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(src_oloc);
-    HDassert(dst_oloc);
-    HDassert(attr_dst);
-    HDassert(attr_src);
+    assert(src_oloc);
+    assert(dst_oloc);
+    assert(attr_dst);
+    assert(attr_src);
 
     file_src = src_oloc->file;
     file_dst = dst_oloc->file;
 
-    HDassert(file_src);
-    HDassert(file_dst);
+    assert(file_src);
+    assert(file_dst);
 
     if (H5T_is_named(attr_src->shared->dt)) {
         H5O_loc_t *src_oloc_dt; /* Pointer to source datatype's object location */
@@ -2475,9 +2475,9 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src, H5O_l
 
         /* Get group entries for source & destination */
         src_oloc_dt = H5T_oloc(attr_src->shared->dt);
-        HDassert(src_oloc_dt);
+        assert(src_oloc_dt);
         dst_oloc_dt = H5T_oloc(attr_dst->shared->dt);
-        HDassert(dst_oloc_dt);
+        assert(dst_oloc_dt);
 
         /* Reset object location for new object */
         H5O_loc_reset(dst_oloc_dt);
@@ -2548,11 +2548,11 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(attr_src);
-    HDassert(udata);
-    HDassert(udata->ainfo);
-    HDassert(udata->file);
-    HDassert(udata->cpy_info);
+    assert(attr_src);
+    assert(udata);
+    assert(udata->ainfo);
+    assert(udata->file);
+    assert(udata->cpy_info);
 
     if (NULL ==
         (attr_dst = H5A__attr_copy_file(attr_src, udata->file, udata->recompute_size, udata->cpy_info)))
@@ -2606,8 +2606,8 @@ H5A__dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainf
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(ainfo_src);
-    HDassert(ainfo_dst);
+    assert(ainfo_src);
+    assert(ainfo_dst);
 
     udata.ainfo          = ainfo_dst;       /* Destination dense information    */
     udata.file           = dst_oloc->file;  /* Destination file                 */

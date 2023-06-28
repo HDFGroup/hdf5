@@ -1255,7 +1255,7 @@ H5is_library_terminating(hbool_t *is_terminating /*out*/)
     FUNC_ENTER_API_NOINIT
     H5TRACE1("e", "x", is_terminating);
 
-    HDassert(is_terminating);
+    assert(is_terminating);
 
     if (is_terminating)
         *is_terminating = H5_TERM_GLOBAL;

@@ -79,15 +79,15 @@
 
 #define H5FD_IOC__Q_APPEND(q_ptr, entry_ptr)                                                      \
 do {                                                                                              \
-    HDassert(q_ptr);                                                                              \
-    HDassert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                             \
-    HDassert((((q_ptr)->q_len == 0) && ((q_ptr)->q_head == NULL) && ((q_ptr)->q_tail == NULL)) || \
+    assert(q_ptr);                                                                              \
+    assert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                             \
+    assert((((q_ptr)->q_len == 0) && ((q_ptr)->q_head == NULL) && ((q_ptr)->q_tail == NULL)) || \
              (((q_ptr)->q_len > 0) && ((q_ptr)->q_head != NULL) && ((q_ptr)->q_tail != NULL)));   \
-    HDassert(entry_ptr);                                                                          \
-    HDassert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                   \
-    HDassert((entry_ptr)->next == NULL);                                                          \
-    HDassert((entry_ptr)->prev == NULL);                                                          \
-    HDassert((entry_ptr)->in_progress == FALSE);                                                  \
+    assert(entry_ptr);                                                                          \
+    assert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                   \
+    assert((entry_ptr)->next == NULL);                                                          \
+    assert((entry_ptr)->prev == NULL);                                                          \
+    assert((entry_ptr)->in_progress == FALSE);                                                  \
                                                                                                   \
     if ( ((q_ptr)->q_head) == NULL )                                                              \
     {                                                                                             \
@@ -105,15 +105,15 @@ do {                                                                            
 
 #define H5FD_IOC__Q_REMOVE(q_ptr, entry_ptr)                                                                         \
 do {                                                                                                                 \
-    HDassert(q_ptr);                                                                                                 \
-    HDassert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                                                \
-    HDassert((((q_ptr)->q_len == 1) && ((q_ptr)->q_head ==((q_ptr)->q_tail)) && ((q_ptr)->q_head == (entry_ptr))) || \
+    assert(q_ptr);                                                                                                 \
+    assert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                                                \
+    assert((((q_ptr)->q_len == 1) && ((q_ptr)->q_head ==((q_ptr)->q_tail)) && ((q_ptr)->q_head == (entry_ptr))) || \
              (((q_ptr)->q_len > 0) && ((q_ptr)->q_head != NULL) && ((q_ptr)->q_tail != NULL)));                      \
-    HDassert(entry_ptr);                                                                                             \
-    HDassert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                                      \
-    HDassert((((q_ptr)->q_len == 1) && ((entry_ptr)->next == NULL) && ((entry_ptr)->prev == NULL)) ||                \
+    assert(entry_ptr);                                                                                             \
+    assert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                                      \
+    assert((((q_ptr)->q_len == 1) && ((entry_ptr)->next == NULL) && ((entry_ptr)->prev == NULL)) ||                \
              (((q_ptr)->q_len > 1) && (((entry_ptr)->next != NULL) || ((entry_ptr)->prev != NULL))));                \
-    HDassert((entry_ptr)->in_progress == TRUE);                                                                      \
+    assert((entry_ptr)->in_progress == TRUE);                                                                      \
                                                                                                                      \
     {                                                                                                                \
        if ( (((q_ptr)->q_head)) == (entry_ptr) )                                                                     \

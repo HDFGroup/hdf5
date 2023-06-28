@@ -259,13 +259,13 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
             if ('a' == type[1]) {
                 asize_idx = (int)HDstrtol(type + 2, &rest, 10);
-                HDassert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
-                HDassert(']' == *rest);
+                assert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
+                assert(']' == *rest);
                 type = rest + 1;
             }
             else {
                 rest = (char *)HDstrchr(type, ']');
-                HDassert(rest);
+                assert(rest);
                 type      = rest + 1;
                 asize_idx = -1;
             }
@@ -4033,7 +4033,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
      * since the one for the function call, then we're continuing
      * the same line. */
     if (returning) {
-        HDassert(current_depth > 0);
+        assert(current_depth > 0);
         --current_depth;
         if (current_depth < last_call_depth) {
             /* We are at the beginning of a line */

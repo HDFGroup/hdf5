@@ -151,8 +151,8 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(cparam);
+    assert(f);
+    assert(cparam);
 
     /* Create shared fractal heap header */
     if (HADDR_UNDEF == (fh_addr = H5HF__hdr_create(f, cparam)))
@@ -216,8 +216,8 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(fh_addr));
+    assert(f);
+    assert(H5_addr_defined(fh_addr));
 
     /* Load the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__READ_ONLY_FLAG)))
@@ -276,8 +276,8 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id_len_p);
+    assert(fh);
+    assert(id_len_p);
 
     /* Retrieve the ID length for entries in this heap */
     *id_len_p = fh->hdr->id_len;
@@ -305,8 +305,8 @@ H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(heap_addr_p);
+    assert(fh);
+    assert(heap_addr_p);
 
     /* Retrieve the heap header address for this heap */
     *heap_addr_p = fh->hdr->heap_addr;
@@ -336,9 +336,9 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(fh);
-    HDassert(obj);
-    HDassert(id);
+    assert(fh);
+    assert(obj);
+    assert(id);
 
     /* Check arguments */
     if (size == 0)
@@ -408,9 +408,9 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj_len_p);
+    assert(fh);
+    assert(id);
+    assert(obj_len_p);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -468,9 +468,9 @@ H5HF_get_obj_off(H5HF_t *fh, const void *_id, hsize_t *obj_off_p)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj_off_p);
+    assert(fh);
+    assert(id);
+    assert(obj_off_p);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -528,9 +528,9 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj);
+    assert(fh);
+    assert(id);
+    assert(obj);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -603,9 +603,9 @@ H5HF_write(H5HF_t *fh, void *_id, hbool_t H5_ATTR_UNUSED *id_changed, const void
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(obj);
+    assert(fh);
+    assert(id);
+    assert(obj);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -672,9 +672,9 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(id);
-    HDassert(op);
+    assert(fh);
+    assert(id);
+    assert(op);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -735,9 +735,9 @@ H5HF_remove(H5HF_t *fh, const void *_id)
     /*
      * Check arguments.
      */
-    HDassert(fh);
-    HDassert(fh->hdr);
-    HDassert(id);
+    assert(fh);
+    assert(fh->hdr);
+    assert(id);
 
     /* Get the ID flags */
     id_flags = *id;
@@ -798,7 +798,7 @@ H5HF_close(H5HF_t *fh)
     /*
      * Check arguments.
      */
-    HDassert(fh);
+    assert(fh);
 
     /* Decrement file reference & check if this is the last open fractal heap using the shared heap header */
     if (0 == H5HF__hdr_fuse_decr(fh->hdr)) {
@@ -892,8 +892,8 @@ H5HF_delete(H5F_t *f, haddr_t fh_addr)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5_addr_defined(fh_addr));
+    assert(f);
+    assert(H5_addr_defined(fh_addr));
 
     /* Lock the heap header into memory */
     if (NULL == (hdr = H5HF__hdr_protect(f, fh_addr, H5AC__NO_FLAGS_SET)))

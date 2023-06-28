@@ -100,8 +100,8 @@ H5O__copy_obj_by_ref(H5O_loc_t *src_oloc, H5O_loc_t *dst_oloc, H5G_loc_t *dst_ro
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(src_oloc);
-    HDassert(dst_oloc);
+    assert(src_oloc);
+    assert(dst_oloc);
 
     /* Perform the copy, or look up existing copy */
     if ((ret_value = H5O_copy_header_map(src_oloc, dst_oloc, cpy_info, FALSE, NULL, NULL)) < 0)
@@ -442,12 +442,12 @@ H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, const H5T_t *dt_src, void *b
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(file_src);
-    HDassert(buf_src);
-    HDassert(file_dst);
-    HDassert(buf_dst);
-    HDassert(nbytes_src);
-    HDassert(cpy_info);
+    assert(file_src);
+    assert(buf_src);
+    assert(file_dst);
+    assert(buf_dst);
+    assert(nbytes_src);
+    assert(cpy_info);
 
     /* Initialize object locations */
     H5O_loc_reset(&src_oloc);

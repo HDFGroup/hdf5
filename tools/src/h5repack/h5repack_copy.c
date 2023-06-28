@@ -1654,13 +1654,13 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
             } while (-1 == nwritten && EINTR == errno);
             if (-1 == nwritten) /* error */
                 H5TOOLS_GOTO_ERROR((-1), "HDwrite failed");
-            HDassert(nwritten > 0);
-            HDassert(nwritten <= nbytes);
+            assert(nwritten > 0);
+            assert(nwritten <= nbytes);
 
             /* Update # of bytes left & offset in buffer */
             nbytes -= nwritten;
             wbuf += nwritten;
-            HDassert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
+            assert(nbytes == 0 || wbuf < (rbuf + USERBLOCK_XFER_SIZE));
         } /* end while */
 
         /* Update size of userblock left to transfer */

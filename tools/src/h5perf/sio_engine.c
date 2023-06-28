@@ -263,7 +263,7 @@ done:
             break;
         default:
             /* unknown request */
-            HDassert(0 && "Unknown IO type");
+            assert(0 && "Unknown IO type");
             break;
     }
 
@@ -311,7 +311,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         default:
             /* unknown request */
             HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-            HDassert(0 && "Unknown IO type");
+            assert(0 && "Unknown IO type");
             break;
     }
 
@@ -660,7 +660,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 
                         for (k = 0; k < parms->rank; k++) {
 
-                            HDassert(h5offset[k] >= 0);
+                            assert(h5offset[k] >= 0);
                             if (dims[k] <= (hsize_t)h5offset[k]) {
                                 dims[k] = dims[k] + h5count[k];
                                 hrc     = H5Sset_extent_simple(h5dset_space_id, parms->rank, dims, maxdims);
@@ -684,7 +684,7 @@ dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
                 default:
                     /* unknown request */
                     HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
-                    HDassert(0 && "Unknown IO type");
+                    assert(0 && "Unknown IO type");
                     break;
             } /* switch (parms->io_type) */
         }
@@ -982,7 +982,7 @@ dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer, const 
                 default:
                     /* unknown request */
                     HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
-                    HDassert(0 && "Unknown IO type");
+                    assert(0 && "Unknown IO type");
                     break;
             } /* switch (parms->io_type) */
         }
@@ -1167,7 +1167,7 @@ set_vfd(parameters *param)
         HDmemset(memb_name, 0, sizeof memb_name);
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
-        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+        assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
         if (NULL == (sv = HDcalloc(1, sizeof(*sv))))
             return -1;
@@ -1310,7 +1310,7 @@ do_cleanupfile(iotype iot, char *filename)
                 }
                 else if (driver == H5FD_MULTI) {
                     H5FD_mem_t mt;
-                    HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+                    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
                     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                         HDsnprintf(temp, temp_sz, "%s-%c.h5", filename, multi_letters[mt]);
@@ -1326,7 +1326,7 @@ do_cleanupfile(iotype iot, char *filename)
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
-                HDassert(0 && "Unknown IO type");
+                assert(0 && "Unknown IO type");
                 break;
         }
     }

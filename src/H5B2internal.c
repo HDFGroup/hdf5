@@ -90,9 +90,9 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(node_ptr);
-    HDassert(depth > 0);
+    assert(hdr);
+    assert(node_ptr);
+    assert(depth > 0);
 
     /* Allocate memory for internal node information */
     if (NULL == (internal = H5FL_CALLOC(H5B2_internal_t)))
@@ -190,13 +190,13 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(node_ptr);
-    HDassert(H5_addr_defined(node_ptr->addr));
-    HDassert(depth > 0);
+    assert(hdr);
+    assert(node_ptr);
+    assert(H5_addr_defined(node_ptr->addr));
+    assert(depth > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data for callback */
     udata.f      = hdr->f;
@@ -289,11 +289,11 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
-    HDassert(op);
+    assert(hdr);
+    assert(depth > 0);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
+    assert(op);
 
     /* Lock current B-tree node */
     if (NULL ==
@@ -313,7 +313,7 @@ H5B2__neighbor_internal(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_n
             neighbor_loc = H5B2_INT_NREC(internal, hdr, idx - 1);
     } /* end if */
     else {
-        HDassert(comp == H5B2_COMPARE_GREATER);
+        assert(comp == H5B2_COMPARE_GREATER);
 
         if (idx < internal->nrec)
             neighbor_loc = H5B2_INT_NREC(internal, hdr, idx);
@@ -366,10 +366,10 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
+    assert(hdr);
+    assert(depth > 0);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL ==
@@ -377,7 +377,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
 
     /* Sanity check number of records */
-    HDassert(internal->nrec == curr_node_ptr->node_nrec);
+    assert(internal->nrec == curr_node_ptr->node_nrec);
 
     /* Split or redistribute child node pointers, if necessary */
     {
@@ -537,10 +537,10 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
+    assert(hdr);
+    assert(depth > 0);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL ==
@@ -548,7 +548,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
 
     /* Sanity check number of records */
-    HDassert(internal->nrec == curr_node_ptr->node_nrec);
+    assert(internal->nrec == curr_node_ptr->node_nrec);
 
     /* Locate node pointer for child */
     if (H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx, &cmp) <
@@ -562,7 +562,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
         /* Make callback for current record */
         if ((op)(H5B2_INT_NREC(internal, hdr, idx), op_data, &changed) < 0) {
             /* Make certain that the callback didn't modify the value if it failed */
-            HDassert(changed == FALSE);
+            assert(changed == FALSE);
 
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMODIFY, FAIL,
                         "'modify' callback failed for B-tree update operation")
@@ -691,7 +691,7 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
 
             case H5B2_UPDATE_UNKNOWN:
             default:
-                HDassert(0 && "Invalid update status");
+                assert(0 && "Invalid update status");
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "invalid update status")
         } /* end switch */
     }     /* end else */
@@ -746,12 +746,12 @@ H5B2__shadow_internal(H5B2_internal_t *internal, H5B2_node_ptr_t *curr_node_ptr)
     /*
      * Check arguments.
      */
-    HDassert(internal);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
+    assert(internal);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
     hdr = internal->hdr;
-    HDassert(hdr);
-    HDassert(hdr->swmr_write);
+    assert(hdr);
+    assert(hdr->swmr_write);
 
     /* We only need to shadow the node if it has not been shadowed since the
      * last time the header was flushed, as otherwise it will be unreachable by
@@ -819,11 +819,11 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *swap_loc,
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(parent_cache_info);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
+    assert(hdr);
+    assert(depth > 0);
+    assert(parent_cache_info);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
@@ -1063,19 +1063,19 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
-    HDassert(hdr);
-    HDassert(depth > 0);
-    HDassert(parent_cache_info);
-    HDassert(curr_node_ptr);
-    HDassert(H5_addr_defined(curr_node_ptr->addr));
+    assert(hdr);
+    assert(depth > 0);
+    assert(parent_cache_info);
+    assert(curr_node_ptr);
+    assert(H5_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
     if (NULL == (internal = H5B2__protect_internal(hdr, parent_cache_info, curr_node_ptr, depth, FALSE,
                                                    H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
     internal_addr = curr_node_ptr->addr;
-    HDassert(internal->nrec == curr_node_ptr->node_nrec);
-    HDassert(depth == hdr->depth || internal->nrec > 1);
+    assert(internal->nrec == curr_node_ptr->node_nrec);
+    assert(depth == hdr->depth || internal->nrec > 1);
 
     /* Determine the correct number of records to merge at */
     merge_nrec = hdr->node_info[depth - 1].merge_nrec;
@@ -1084,7 +1084,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hbool_t *depth_decreased, void *sw
     /* (The root node is the only internal node allowed to have 1 record) */
     if (internal->nrec == 1 &&
         ((internal->node_ptrs[0].node_nrec + internal->node_ptrs[1].node_nrec) <= ((merge_nrec * 2) + 1))) {
-        HDassert(depth == hdr->depth);
+        assert(depth == hdr->depth);
 
         /* Merge children of root node */
         if (H5B2__merge2(hdr, depth, curr_node_ptr, parent_cache_info_flags_ptr, internal, &internal_flags,
@@ -1347,7 +1347,7 @@ H5B2__internal_free(H5B2_internal_t *internal)
     /*
      * Check arguments.
      */
-    HDassert(internal);
+    assert(internal);
 
     /* Release internal node's native key buffer */
     if (internal->int_native)
@@ -1364,7 +1364,7 @@ H5B2__internal_free(H5B2_internal_t *internal)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTDEC, FAIL, "can't decrement ref. count on B-tree header")
 
     /* Sanity check */
-    HDassert(NULL == internal->top_proxy);
+    assert(NULL == internal->top_proxy);
 
     /* Free B-tree internal node info */
     internal = H5FL_FREE(H5B2_internal_t, internal);
@@ -1395,22 +1395,22 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_U
     uint16_t u, v;         /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(internal->nrec <= hdr->node_info->split_nrec);
+    assert(internal->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on node pointers */
     tot_all_nrec = internal->nrec;
     for (u = 0; u < internal->nrec + 1; u++) {
         tot_all_nrec += internal->node_ptrs[u].all_nrec;
 
-        HDassert(H5_addr_defined(internal->node_ptrs[u].addr));
-        HDassert(internal->node_ptrs[u].addr > 0);
+        assert(H5_addr_defined(internal->node_ptrs[u].addr));
+        assert(internal->node_ptrs[u].addr > 0);
         for (v = 0; v < u; v++)
-            HDassert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
+            assert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
     } /* end for */
 
     /* Sanity check all_nrec total in parent */
     if (parent_all_nrec > 0)
-        HDassert(tot_all_nrec == parent_all_nrec);
+        assert(tot_all_nrec == parent_all_nrec);
 
     return (0);
 } /* end H5B2__assert_internal() */
@@ -1435,24 +1435,24 @@ H5B2__assert_internal2(hsize_t parent_all_nrec, const H5B2_hdr_t H5_ATTR_NDEBUG_
     uint16_t u, v;         /* Local index variables */
 
     /* General sanity checking on node */
-    HDassert(internal->nrec <= hdr->node_info->split_nrec);
+    assert(internal->nrec <= hdr->node_info->split_nrec);
 
     /* Sanity checking on node pointers */
     tot_all_nrec = internal->nrec;
     for (u = 0; u < internal->nrec + 1; u++) {
         tot_all_nrec += internal->node_ptrs[u].all_nrec;
 
-        HDassert(H5_addr_defined(internal->node_ptrs[u].addr));
-        HDassert(internal->node_ptrs[u].addr > 0);
+        assert(H5_addr_defined(internal->node_ptrs[u].addr));
+        assert(internal->node_ptrs[u].addr > 0);
         for (v = 0; v < u; v++)
-            HDassert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
+            assert(internal->node_ptrs[u].addr != internal->node_ptrs[v].addr);
         for (v = 0; v < internal2->nrec + 1; v++)
-            HDassert(internal->node_ptrs[u].addr != internal2->node_ptrs[v].addr);
+            assert(internal->node_ptrs[u].addr != internal2->node_ptrs[v].addr);
     } /* end for */
 
     /* Sanity check all_nrec total in parent */
     if (parent_all_nrec > 0)
-        HDassert(tot_all_nrec == parent_all_nrec);
+        assert(tot_all_nrec == parent_all_nrec);
 
     return (0);
 } /* end H5B2__assert_internal2() */

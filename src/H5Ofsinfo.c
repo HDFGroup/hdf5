@@ -96,8 +96,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Allocate space for message */
     if (NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
@@ -232,9 +232,9 @@ H5O__fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(p);
-    HDassert(fsinfo);
+    assert(f);
+    assert(p);
+    assert(fsinfo);
 
     *p++ = (uint8_t)fsinfo->version;            /* message version */
     *p++ = (uint8_t)fsinfo->strategy;           /* File space strategy */
@@ -277,7 +277,7 @@ H5O__fsinfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(fsinfo);
+    assert(fsinfo);
     if (!dest && NULL == (dest = H5FL_CALLOC(H5O_fsinfo_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -342,7 +342,7 @@ H5O__fsinfo_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_fsinfo_t, mesg);
 
@@ -369,11 +369,11 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(fsinfo);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(fsinfo);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "File space strategy:");
     switch (fsinfo->strategy) {
@@ -443,7 +443,7 @@ H5O_fsinfo_set_version(H5F_libver_t low, H5F_libver_t high, H5O_fsinfo_t *fsinfo
 
     /* Sanity check */
     HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
-    HDassert(fsinfo);
+    assert(fsinfo);
 
     version = H5O_FSINFO_VERSION_1;
 
@@ -483,7 +483,7 @@ H5O_fsinfo_check_version(H5F_libver_t high, H5O_fsinfo_t *fsinfo)
 
     /* Sanity check */
     HDcompile_assert(N_FSINFO_VERSION_BOUNDS == H5F_LIBVER_NBOUNDS);
-    HDassert(fsinfo);
+    assert(fsinfo);
 
     /* Check the version */
     if (H5O_fsinfo_ver_bounds[high] == H5O_INVALID_VERSION || fsinfo->version > H5O_fsinfo_ver_bounds[high])
