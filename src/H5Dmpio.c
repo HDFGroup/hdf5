@@ -1524,7 +1524,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
 
             /* Sort sel_pieces if necessary */
             if (need_sort)
-                HDqsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
+                qsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
                         H5D__cmp_piece_addr);
 
             /* Allocate chunking information */
@@ -3219,7 +3219,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
 
         /* Ensure the chunk list is sorted in ascending order of offset in the file */
         if (need_sort)
-            HDqsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
+            qsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
                     H5D__cmp_filtered_collective_io_info_entry);
 
 #ifdef H5Dmpio_DEBUG
@@ -3527,7 +3527,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         HDmemset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
 
         /* Sort collective chunk list according to chunk index */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
                 H5D__cmp_chunk_redistribute_info);
 
         /*
@@ -3609,7 +3609,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
          *       algorithm may be devised that doesn't rely on frail sorting,
          *       but the current implementation is a quick and naive approach.
          */
-        HDqsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
+        qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
                 H5D__cmp_chunk_redistribute_info_orig_owner);
     }
 
@@ -4995,7 +4995,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
      * ascending order of offset in the file
      */
     if (need_sort)
-        HDqsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
+        qsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
                 H5D__cmp_filtered_collective_io_info_entry);
 
 done:

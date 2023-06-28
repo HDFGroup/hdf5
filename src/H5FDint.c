@@ -2293,7 +2293,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         }
 
         /* sort the srt_tmp array */
-        HDqsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
+        qsort(srt_tmp, count, sizeof(struct H5FD_vsrt_tmp_t), H5FD__vsrt_tmp_cmp);
 
         /* verify no duplicate entries */
         i = 1;

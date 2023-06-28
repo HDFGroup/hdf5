@@ -1359,7 +1359,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
 
     /* Sort the list according to the node local lead rank values */
-    HDqsort(app_layout->layout, (size_t)app_layout->world_size, sizeof(layout_t), compare_layout_nodelocal);
+    qsort(app_layout->layout, (size_t)app_layout->world_size, sizeof(layout_t), compare_layout_nodelocal);
 
     /*
      * Count the number of nodes by checking how many

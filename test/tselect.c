@@ -1382,8 +1382,8 @@ test_select_hyper_stride(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Sort the locations into the proper order */
-    HDqsort(loc1, (size_t)72, sizeof(size_t), compare_size_t);
-    HDqsort(loc2, (size_t)72, sizeof(size_t), compare_size_t);
+    qsort(loc1, (size_t)72, sizeof(size_t), compare_size_t);
+    qsort(loc2, (size_t)72, sizeof(size_t), compare_size_t);
     /* Compare data read with data written out */
     for (i = 0; i < 72; i++) {
         tbuf  = wbuf + loc1[i];

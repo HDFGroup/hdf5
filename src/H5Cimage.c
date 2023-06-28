@@ -1062,7 +1062,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hbool_t *image_generated)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTINIT, FAIL, "can't setup image entries array.")
 
             /* Sort the entries */
-            HDqsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
+            qsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
                     sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
         }      /* end if */
         else { /* cancel creation of metadata cache image */

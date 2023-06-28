@@ -982,9 +982,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
 #endif
-#ifndef HDqsort
-#define HDqsort(M, N, Z, F) qsort(M, N, Z, F)
-#endif
 
 /* clang-format off */
 #ifdef H5_HAVE_RAND_R
