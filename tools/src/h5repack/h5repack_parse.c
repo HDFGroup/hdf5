@@ -228,15 +228,15 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                                 l           = 0;
                             }
                             else if (f == -1) {
-                                filt->filt_flag = (unsigned)HDstrtoul(stype, NULL, 0);
+                                filt->filt_flag = (unsigned)strtoul(stype, NULL, 0);
                                 f               = 0;
                             }
                             else if (p == -1) {
-                                filt->cd_nelmts = HDstrtoull(stype, NULL, 0);
+                                filt->cd_nelmts = strtoull(stype, NULL, 0);
                                 p               = 0;
                             }
                             else {
-                                filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                             }
                             q = 0;
                             u++; /* skip ',' */
@@ -279,7 +279,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     stype[m] = '\0';
                 } /*if */
 
-                filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
+                filt->cd_values[j++] = (unsigned)strtoul(stype, NULL, 0);
                 if (filt->cd_nelmts == 0)
                     j = 0;
                 i += m; /* jump */
@@ -596,7 +596,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                 if (c == 'x') {
                     sdim[k - 1]                        = '\0';
                     k                                  = 0;
-                    pack->chunk.chunk_lengths[c_index] = HDstrtoull(sdim, NULL, 0);
+                    pack->chunk.chunk_lengths[c_index] = strtoull(sdim, NULL, 0);
                     if (pack->chunk.chunk_lengths[c_index] == 0) {
                         if (obj_list)
                             free(obj_list);
@@ -612,7 +612,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                         pack->chunk.rank = -2;
                     }
                     else {
-                        pack->chunk.chunk_lengths[c_index] = HDstrtoull(sdim, NULL, 0);
+                        pack->chunk.chunk_lengths[c_index] = strtoull(sdim, NULL, 0);
                         if (pack->chunk.chunk_lengths[c_index] == 0) {
                             if (obj_list)
                                 free(obj_list);

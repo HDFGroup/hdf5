@@ -955,11 +955,11 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
      */
     *end = '\0';
 
-    content_length = HDstrtoumax((const char *)start, NULL, 0);
+    content_length = strtoumax((const char *)start, NULL, 0);
     if (UINTMAX_MAX > SIZE_MAX && content_length > SIZE_MAX)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "content_length overflows size_t");
 
-    if (content_length == 0 || errno == ERANGE) /* errno set by HDstrtoumax*/
+    if (content_length == 0 || errno == ERANGE) /* errno set by strtoumax*/
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "could not convert found \"Content-Length\" response (\"%s\")",
                     start); /* range is null-terminated, remember */

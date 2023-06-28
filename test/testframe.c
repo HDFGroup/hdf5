@@ -643,7 +643,7 @@ TestAlarmOn(void)
 
     /* Get the alarm value from the environment variable, if set */
     if (env_val != NULL)
-        alarm_sec = (unsigned)HDstrtoul(env_val, (char **)NULL, 10);
+        alarm_sec = (unsigned)strtoul(env_val, (char **)NULL, 10);
 
     /* Set the number of seconds before alarm goes off */
     HDalarm((unsigned)alarm_sec);

@@ -97,14 +97,14 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
     char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
-        retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
+        retval = strtol(argv[*argno] + 2, &suffix, 10);
         (*argno)++;
     }
     else if (argv[*argno][2] || *argno + 1 >= argc) {
         usage(progname);
     }
     else {
-        retval = HDstrtol(argv[*argno + 1], &suffix, 0);
+        retval = strtol(argv[*argno + 1], &suffix, 0);
         if (suffix == argv[*argno + 1])
             usage(progname);
         *argno += 2;

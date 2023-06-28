@@ -1116,29 +1116,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrstr
 #define HDstrstr(X, Y) strstr(X, Y)
 #endif
-#ifndef HDstrtod
-#define HDstrtod(S, R) strtod(S, R)
-#endif
 #ifndef HDstrtok
 #define HDstrtok(X, Y) strtok(X, Y)
 #endif
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
-#endif
-#ifndef HDstrtol
-#define HDstrtol(S, R, N) strtol(S, R, N)
-#endif
-#ifndef HDstrtoll
-#define HDstrtoll(S, R, N) strtoll(S, R, N)
-#endif
-#ifndef HDstrtoul
-#define HDstrtoul(S, R, N) strtoul(S, R, N)
-#endif
-#ifndef HDstrtoull
-#define HDstrtoull(S, R, N) strtoull(S, R, N)
-#endif
-#ifndef HDstrtoumax
-#define HDstrtoumax(S, R, N) strtoumax(S, R, N)
 #endif
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)

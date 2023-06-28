@@ -258,7 +258,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
             char *rest;
 
             if ('a' == type[1]) {
-                asize_idx = (int)HDstrtol(type + 2, &rest, 10);
+                asize_idx = (int)strtol(type + 2, &rest, 10);
                 assert(0 <= asize_idx && asize_idx < (int)NELMTS(asize));
                 assert(']' == *rest);
                 type = rest + 1;

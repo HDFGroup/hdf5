@@ -305,7 +305,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->count = HDstrtoull(H5_optarg, NULL, 0);
+                opts->count = strtoull(H5_optarg, NULL, 0);
                 break;
 
             case 'N':
@@ -390,7 +390,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
         if (opts->vfd_info[0].info) {
             errno                     = 0;
-            onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
+            onion_fa_g_1.revision_num = strtoull(opts->vfd_info[0].info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for file 1\n");
                 usage();
@@ -407,7 +407,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
     if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
         if (opts->vfd_info[1].info) {
             errno                     = 0;
-            onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
+            onion_fa_g_2.revision_num = strtoull(opts->vfd_info[1].info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for file 2\n");
                 usage();

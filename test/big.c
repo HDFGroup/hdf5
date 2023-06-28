@@ -495,8 +495,8 @@ reader(char *filename, hid_t fapl)
     while (HDfgets(ln, (int)sizeof(ln), script)) {
         if ('#' != ln[0])
             break;
-        i            = (int)HDstrtol(ln + 1, &s, 10);
-        hs_offset[0] = HDstrtoull(s, NULL, 0);
+        i            = (int)strtol(ln + 1, &s, 10);
+        hs_offset[0] = strtoull(s, NULL, 0);
         fprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
@@ -741,7 +741,7 @@ main(int ac, char **av)
             ac--;
             av++;
             if (ac > 0) {
-                family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
+                family_size_def = (hsize_t)strtoull(*av, NULL, 0);
             }
             else {
                 printf("***Missing fsize value***\n");

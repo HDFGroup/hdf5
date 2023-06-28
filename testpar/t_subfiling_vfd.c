@@ -2073,13 +2073,13 @@ parse_subfiling_env_vars(void)
     char *env_value;
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
-        stripe_size_g = HDstrtoll(env_value, NULL, 0);
+        stripe_size_g = strtoll(env_value, NULL, 0);
         if ((ERANGE == errno) || (stripe_size_g <= 0))
             stripe_size_g = -1;
     }
 
     if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
-        ioc_per_node_g = HDstrtol(env_value, NULL, 0);
+        ioc_per_node_g = strtol(env_value, NULL, 0);
         if ((ERANGE == errno) || (ioc_per_node_g <= 0))
             ioc_per_node_g = -1;
         else if (ioc_per_node_g * num_nodes_g > mpi_size)

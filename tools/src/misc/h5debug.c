@@ -321,7 +321,7 @@ main(int argc, char *argv[])
 
     /* Primary data structure to dump */
     if (argc > 2)
-        addr = (haddr_t)HDstrtoll(argv[2], NULL, 0);
+        addr = (haddr_t)strtoll(argv[2], NULL, 0);
 
     /* Extra arguments for primary data structure */
     HDmemset(extra, 0, sizeof(extra));
@@ -337,7 +337,7 @@ main(int argc, char *argv[])
         } /* end if */
 
         for (u = 0; u < (size_t)extra_count; u++)
-            extra[u] = (haddr_t)HDstrtoll(argv[u + 3], NULL, 0);
+            extra[u] = (haddr_t)strtoll(argv[u + 3], NULL, 0);
     } /* end if */
 
     /*

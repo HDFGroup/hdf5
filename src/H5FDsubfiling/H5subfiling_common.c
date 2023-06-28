@@ -860,7 +860,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
 
             errno = 0;
 
-            stripe_size = HDstrtoll(env_value, NULL, 0);
+            stripe_size = strtoll(env_value, NULL, 0);
             if (ERANGE == errno)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
                                             "invalid stripe size setting for " H5FD_SUBFILING_STRIPE_SIZE);
@@ -987,7 +987,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
                 /* Check for an IOC-per-node value set in the environment */
                 if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
                     errno          = 0;
-                    ioc_select_val = HDstrtol(env_value, NULL, 0);
+                    ioc_select_val = strtol(env_value, NULL, 0);
                     if ((ERANGE == errno)) {
                         printf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
                         ioc_select_val = 1;
@@ -1014,7 +1014,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
             ioc_select_val = 1;
             if (ioc_sel_str) {
                 errno          = 0;
-                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
+                ioc_select_val = strtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     printf("invalid IOC selection strategy string '%s' for strategy "
                            "SELECT_IOC_EVERY_NTH_RANK; defaulting to SELECT_IOC_ONE_PER_NODE\n",
@@ -1050,7 +1050,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
             ioc_select_val = 1;
             if (ioc_sel_str) {
                 errno          = 0;
-                ioc_select_val = HDstrtol(ioc_sel_str, NULL, 0);
+                ioc_select_val = strtol(ioc_sel_str, NULL, 0);
                 if ((ERANGE == errno) || (ioc_select_val <= 0)) {
                     printf("invalid IOC selection strategy string '%s' for strategy SELECT_IOC_TOTAL; "
                            "defaulting to SELECT_IOC_ONE_PER_NODE\n",
@@ -1213,7 +1213,7 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
             *opt_value++ = '\0';
 
             errno       = 0;
-            check_value = HDstrtol(env_value, NULL, 0);
+            check_value = strtol(env_value, NULL, 0);
 
             if (errno == ERANGE)
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,

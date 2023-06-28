@@ -1175,7 +1175,7 @@ parse_size_directive(const char *size)
     hsize_t s;
     char   *endptr;
 
-    s = HDstrtoull(size, &endptr, 10);
+    s = strtoull(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))

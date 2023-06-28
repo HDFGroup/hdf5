@@ -1238,7 +1238,7 @@ end_collect:
                 get_onion_revision_count = TRUE;
             else {
                 errno                   = 0;
-                onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
+                onion_fa_g.revision_num = strtoull(vfd_info_g.info, NULL, 10);
                 if (errno == ERANGE) {
                     printf("Invalid onion revision specified\n");
                     goto error;
