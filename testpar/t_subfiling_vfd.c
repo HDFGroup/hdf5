@@ -91,6 +91,7 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t cus
 
 /* Test functions */
 static void test_create_and_close(void);
+static void test_ioc_only_fail(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
 static void test_selection_strategies(void);
@@ -102,6 +103,7 @@ static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
     test_create_and_close,
+    test_ioc_only_fail,
     test_config_file,
     test_stripe_sizes,
     test_selection_strategies,
@@ -211,6 +213,45 @@ test_create_and_close(void)
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
     H5E_END_TRY;
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+
+/*
+ * A simple test that ensures file creation fails when
+ * attempting to use the IOC VFD by itself, without it
+ * being stacked under the Subfiling VFD. This is
+ * currently unsupported.
+ */
+#define SUBF_FILENAME "test_subfiling_only_ioc_fail.h5"
+static void
+test_ioc_only_fail(void)
+{
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("invalid use of IOC VFD by itself");
+
+    /* Setup a FAPL using only the IOC VFD */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "H5Pcreate succeeded");
+
+    VRFY((H5Pset_mpi_params(fapl_id, comm_g, info_g) >= 0), "H5Pset_mpi_params succeeded");
+
+    VRFY((H5Pset_fapl_ioc(fapl_id, NULL) >= 0), "H5Pset_fapl_ioc succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    }
+    H5E_END_TRY;
+    VRFY((file_id < 0), "H5Fcreate failed successfully");
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 

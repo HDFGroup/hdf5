@@ -109,7 +109,16 @@ Bug Fixes since HDF5-1.14.1 release
 ===================================
     Library
     -------
-    -
+    - Fixed an assertion failure when attempting to use the Subfiling IOC
+      VFD directly
+
+      The Subfiling feature makes use of two Virtual File Drivers, the
+      Subfiling VFD and the IOC (I/O Concentrator) VFD. The two VFDs are
+      intended to be stacked together such that the Subfiling VFD sits
+      "on top" of the IOC VFD and routes I/O requests through it; using the
+      IOC VFD alone is currently unsupported. The IOC VFD has been fixed so
+      that an error message is displayed in this situation rather than causing
+      an assertion failure.
 
 
     Java Library
