@@ -95,12 +95,14 @@ jobs:
       - name: Retrieve version
         id: version
         run: |
+          cd "$GITHUB_WORKSPACE/hdfsrc"
           echo "TAG_VERSION=$(bin/h5vers)" >> $GITHUB_OUTPUT
 
       - name: Set file base name
         id: set-file-base
         run: |
-          if [ '${{ inputs.use_environ }}' == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true' ]; then
+          if [[ '${{ inputs.use_environ }}' == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true' ]]
+          then
             FILE_NAME_BASE=$(echo "hdf5-${{ needs.check_commits.outputs.branch_ref }}-${{ needs.check_commits.outputs.branch_sha }}")
           else
             FILE_NAME_BASE=$(echo "hdf5-${{ steps.version.outputs.TAG_VERSION }}")
@@ -110,7 +112,7 @@ jobs:
 
       - name: Create snapshot file base name
         id: create-file-base
-        if: '${{ inputs.use_environ }}' == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true'
+        if: ${{ inputs.use_environ }} == 'snapshots' && ${{ needs.check_commits.outputs.has_changes }} == 'true'
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
           bin/bbrelease -d $GITHUB_WORKSPACE --branch ${{ needs.check_commits.outputs.branch_ref }} --revision gzip zip
@@ -118,7 +120,7 @@ jobs:
 
       - name: Create release file base name
         id: create-rel-base
-        if: '${{ inputs.use_environ }}' == 'release'
+        if: ${{ inputs.use_environ }} == 'release'
         run: |
           cd "$GITHUB_WORKSPACE/hdfsrc"
           bin/release -d $GITHUB_WORKSPACE gzip zip cmake-tgz cmake-zip 
