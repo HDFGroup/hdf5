@@ -91,8 +91,8 @@ H5O__ginfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(p);
+    assert(f);
+    assert(p);
 
     /* Version of message */
     if (H5_IS_BUFFER_OVERFLOW(p, 1, p_end))
@@ -170,8 +170,8 @@ H5O__ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(p);
-    HDassert(ginfo);
+    assert(p);
+    assert(ginfo);
 
     /* Message version */
     *p++ = H5O_GINFO_VERSION;
@@ -221,7 +221,7 @@ H5O__ginfo_copy(const void *_mesg, void *_dest)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(ginfo);
+    assert(ginfo);
     if (!dest && NULL == (dest = H5FL_MALLOC(H5O_ginfo_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -291,7 +291,7 @@ H5O__ginfo_free(void *mesg)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(mesg);
+    assert(mesg);
 
     mesg = H5FL_FREE(H5O_ginfo_t, mesg);
 
@@ -318,11 +318,11 @@ H5O__ginfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(f);
-    HDassert(ginfo);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(ginfo);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Max. compact links:", ginfo->max_compact);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Min. dense links:", ginfo->min_dense);

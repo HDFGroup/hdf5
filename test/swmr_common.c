@@ -179,7 +179,7 @@ create_symbol_datatype(void)
 int
 generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count)
 {
-    HDassert(name_buf);
+    assert(name_buf);
 
     HDsnprintf(name_buf, name_buf_length, "%u-%04u", level, count);
 

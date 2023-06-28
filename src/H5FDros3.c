@@ -383,7 +383,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*#", fapl_id, fa);
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5Pset_fapl_ros3() called.\n");
@@ -429,7 +429,7 @@ H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
@@ -592,7 +592,7 @@ H5FD__ros3_fapl_free(void *_fa)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fa != NULL); /* sanity check */
+    assert(fa != NULL); /* sanity check */
 
     H5MM_xfree(fa);
 
@@ -729,7 +729,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * find way to re-use/share
          */
         now = gmnow();
-        HDassert(now != NULL);
+        assert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp")
         if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa.secret_key,
@@ -934,7 +934,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         re_dub = (double)min_meta;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
     }
 
@@ -944,7 +944,7 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         re_dub = (double)min_raw;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
     }
 
@@ -952,26 +952,26 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
     re_dub = (double)average_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)average_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
     HDfprintf(stream, "  max ");
     re_dub = (double)max_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)max_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
     /******************************
@@ -1011,33 +1011,33 @@ ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
         bm_val = (double)m->bytes;
         for (suffix_i = 0; bm_val >= 1024.0; suffix_i++)
             bm_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         bm_suffix = suffixes[suffix_i];
 
         br_val = (double)r->bytes;
         for (suffix_i = 0; br_val >= 1024.0; suffix_i++)
             br_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         br_suffix = suffixes[suffix_i];
 
         if (m->count > 0)
             am_val = (double)(m->bytes) / (double)(m->count);
         for (suffix_i = 0; am_val >= 1024.0; suffix_i++)
             am_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         am_suffix = suffixes[suffix_i];
 
         if (r->count > 0)
             ar_val = (double)(r->bytes) / (double)(r->count);
         for (suffix_i = 0; ar_val >= 1024.0; suffix_i++)
             ar_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         ar_suffix = suffixes[suffix_i];
 
         re_dub = (double)range_end;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
 
         HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                   suffixes[suffix_i], /* bin ceiling      */
@@ -1087,8 +1087,8 @@ H5FD__ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
 #endif
 
     /* Sanity checks */
-    HDassert(file != NULL);
-    HDassert(file->s3r_handle != NULL);
+    assert(file != NULL);
+    assert(file->s3r_handle != NULL);
 
     /* Close the underlying request handle
      */
@@ -1155,17 +1155,17 @@ H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDfprintf(stdout, "H5FD__ros3_cmp() called.\n");
 #endif
 
-    HDassert(f1->s3r_handle != NULL);
-    HDassert(f2->s3r_handle != NULL);
+    assert(f1->s3r_handle != NULL);
+    assert(f2->s3r_handle != NULL);
 
     purl1 = (const parsed_url_t *)f1->s3r_handle->purl;
     purl2 = (const parsed_url_t *)f2->s3r_handle->purl;
-    HDassert(purl1 != NULL);
-    HDassert(purl2 != NULL);
-    HDassert(purl1->scheme != NULL);
-    HDassert(purl2->scheme != NULL);
-    HDassert(purl1->host != NULL);
-    HDassert(purl2->host != NULL);
+    assert(purl1 != NULL);
+    assert(purl2 != NULL);
+    assert(purl1->scheme != NULL);
+    assert(purl2->scheme != NULL);
+    assert(purl1->host != NULL);
+    assert(purl2->host != NULL);
 
     /* URL: SCHEME */
     if (HDstrcmp(purl1->scheme, purl2->scheme))
@@ -1454,9 +1454,9 @@ H5FD__ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     HDfprintf(stdout, "H5FD__ros3_read() called.\n");
 #endif
 
-    HDassert(file != NULL);
-    HDassert(file->s3r_handle != NULL);
-    HDassert(buf != NULL);
+    assert(file != NULL);
+    assert(file->s3r_handle != NULL);
+    assert(buf != NULL);
 
     filesize = H5FD_s3comms_s3r_get_filesize(file->s3r_handle);
 

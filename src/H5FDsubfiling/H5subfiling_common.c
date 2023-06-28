@@ -186,7 +186,7 @@ H5_get_subfiling_object(int64_t object_id)
              * If we had to make more space, the given object index
              * should always fall within range after a single re-allocation
              */
-            HDassert((size_t)obj_index < sf_context_cache_size);
+            assert((size_t)obj_index < sf_context_cache_size);
         }
 
         /*
@@ -194,11 +194,11 @@ H5_get_subfiling_object(int64_t object_id)
          * application exit, context entry indices should just be
          * consecutive
          */
-        HDassert((size_t)obj_index <= sf_context_cache_num_entries);
+        assert((size_t)obj_index <= sf_context_cache_num_entries);
         if ((size_t)obj_index < sf_context_cache_num_entries)
             ret_value = sf_context_cache[obj_index];
         else {
-            HDassert(!sf_context_cache[sf_context_cache_num_entries]);
+            assert(!sf_context_cache[sf_context_cache_num_entries]);
 
             /* Allocate a new subfiling context object */
             if (NULL == (ret_value = HDcalloc(1, sizeof(subfiling_context_t))))
@@ -244,7 +244,7 @@ H5_get_subfiling_object(int64_t object_id)
              * If we had to make more space, the given object index
              * should always fall within range after a single re-allocation
              */
-            HDassert((size_t)obj_index < sf_topology_cache_size);
+            assert((size_t)obj_index < sf_topology_cache_size);
         }
 
         /*
@@ -252,11 +252,11 @@ H5_get_subfiling_object(int64_t object_id)
          * application exit, topology entry indices should just be
          * consecutive
          */
-        HDassert((size_t)obj_index <= sf_topology_cache_num_entries);
+        assert((size_t)obj_index <= sf_topology_cache_num_entries);
         if ((size_t)obj_index < sf_topology_cache_num_entries)
             ret_value = sf_topology_cache[obj_index];
         else {
-            HDassert(!sf_topology_cache[sf_topology_cache_num_entries]);
+            assert(!sf_topology_cache[sf_topology_cache_num_entries]);
 
             /* Allocate a new subfiling topology object */
             if (NULL == (ret_value = HDmalloc(sizeof(sf_topology_t))))
@@ -308,15 +308,15 @@ H5_free_subfiling_object(int64_t object_id)
         if (H5_free_subfiling_object_int(sf_context) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
 
-        HDassert(sf_context_cache_num_entries > 0);
-        HDassert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
+        assert(sf_context_cache_num_entries > 0);
+        assert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
         sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
         sf_context_cache_num_entries--;
     }
     else {
         sf_topology_t *sf_topology;
 
-        HDassert(obj_type == SF_TOPOLOGY);
+        assert(obj_type == SF_TOPOLOGY);
 
         if (NULL == (sf_topology = H5_get_subfiling_object(object_id)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
@@ -325,8 +325,8 @@ H5_free_subfiling_object(int64_t object_id)
         if (H5_free_subfiling_topology(sf_topology) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
 
-        HDassert(sf_topology_cache_num_entries > 0);
-        HDassert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
+        assert(sf_topology_cache_num_entries > 0);
+        assert(sf_topology == sf_topology_cache[sf_topology_cache_num_entries - 1]);
         sf_topology_cache[sf_topology_cache_num_entries - 1] = NULL;
         sf_topology_cache_num_entries--;
     }
@@ -342,7 +342,7 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
+    assert(sf_context);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
         /* Assume MPI is finalized or worse, and try to clean up what we can */
@@ -432,7 +432,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(topology);
+    assert(topology);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized))) {
         /* Assume MPI is finalized or worse, but clean up what we can */
@@ -448,7 +448,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
         for (size_t i = 0; i < sf_topology_cache_num_entries; i++)
             if (topology == sf_topology_cache[i])
                 topology_cached = TRUE;
-        HDassert(topology_cached);
+        assert(topology_cached);
     }
 #endif
 
@@ -758,7 +758,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_param
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    HDassert(context_id_out);
+    assert(context_id_out);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
@@ -960,11 +960,11 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
     int                         mpi_code;
     herr_t                      ret_value = SUCCEED;
 
-    HDassert(subfiling_config);
-    HDassert(MPI_COMM_NULL != comm);
-    HDassert(MPI_COMM_NULL != node_comm);
-    HDassert(app_topology_out);
-    HDassert(!*app_topology_out);
+    assert(subfiling_config);
+    assert(MPI_COMM_NULL != comm);
+    assert(MPI_COMM_NULL != node_comm);
+    assert(app_topology_out);
+    assert(!*app_topology_out);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
@@ -1098,7 +1098,7 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
     if (find_cached_topology_info(comm, subfiling_config, iocs_per_node, &app_topology) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                 "can't check for cached subfiling topology object");
-    HDassert(!app_topology || (app_topology->selection_type == ioc_selection_type));
+    assert(!app_topology || (app_topology->selection_type == ioc_selection_type));
 
     if (!app_topology) {
         /* Generate an ID for the application topology object */
@@ -1121,10 +1121,10 @@ init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_
 
         if (init_app_layout(app_topology, comm, node_comm) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application layout");
-        HDassert(app_topology->app_layout);
-        HDassert(app_topology->app_layout->layout);
-        HDassert(app_topology->app_layout->node_ranks);
-        HDassert(app_topology->app_layout->node_count > 0);
+        assert(app_topology->app_layout);
+        assert(app_topology->app_layout->layout);
+        assert(app_topology->app_layout->node_ranks);
+        assert(app_topology->app_layout->node_count > 0);
 
         /*
          * Now that the application node count has been determined, adjust the
@@ -1186,8 +1186,8 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
     char  *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
     herr_t ret_value = SUCCEED;
 
-    HDassert(ioc_selection_type);
-    HDassert(ioc_sel_info_str);
+    assert(ioc_selection_type);
+    assert(ioc_sel_info_str);
 
     *ioc_sel_info_str = NULL;
 
@@ -1259,7 +1259,7 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
     int32_t                     stripe_count;
     herr_t                      ret_value = SUCCEED;
 
-    HDassert(subf_config);
+    assert(subf_config);
 
     ioc_selection_type = subf_config->ioc_selection;
     stripe_count       = subf_config->stripe_count;
@@ -1269,7 +1269,7 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
         int            result;
         int            mpi_code;
 
-        HDassert(cached_topology);
+        assert(cached_topology);
 
         /*
          * If the selection types differ, just reject the cached topology
@@ -1289,8 +1289,8 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, l
         }
 
         if (cached_topology->selection_type == SELECT_IOC_ONE_PER_NODE) {
-            HDassert(iocs_per_node >= 1);
-            HDassert(cached_topology->app_layout->node_count > 0);
+            assert(iocs_per_node >= 1);
+            assert(cached_topology->app_layout->node_count > 0);
 
             /*
              * If a IOCs-per-node setting was set in the environment and would
@@ -1332,10 +1332,10 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
     int           mpi_code;
     herr_t        ret_value = SUCCEED;
 
-    HDassert(app_topology);
-    HDassert(!app_topology->app_layout);
-    HDassert(MPI_COMM_NULL != comm);
-    HDassert(MPI_COMM_NULL != node_comm);
+    assert(app_topology);
+    assert(!app_topology->app_layout);
+    assert(MPI_COMM_NULL != comm);
+    assert(MPI_COMM_NULL != node_comm);
 
     if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -1370,7 +1370,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
         if (app_layout->layout[i].node_local_rank == 0)
             app_layout->node_count++;
 
-    HDassert(app_layout->node_count > 0);
+    assert(app_layout->node_count > 0);
 
     if (NULL ==
         (app_layout->node_ranks = HDmalloc((size_t)app_layout->node_count * sizeof(*app_layout->node_ranks))))
@@ -1383,7 +1383,7 @@ init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm)
      */
     for (size_t i = 0, node_rank_index = 0; i < (size_t)app_layout->world_size; i++) {
         if (app_layout->layout[i].node_local_rank == 0) {
-            HDassert(node_rank_index < (size_t)app_layout->node_count);
+            assert(node_rank_index < (size_t)app_layout->node_count);
             app_layout->node_ranks[node_rank_index++] = app_layout->layout[i].rank;
         }
     }
@@ -1428,9 +1428,9 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
     int       mpi_code;
     herr_t    ret_value = SUCCEED;
 
-    HDassert(app_layout);
-    HDassert(app_layout->layout);
-    HDassert(MPI_COMM_NULL != comm);
+    assert(app_layout);
+    assert(app_layout->layout);
+    assert(MPI_COMM_NULL != comm);
 
     sf_world_rank   = app_layout->world_rank;
     sf_world_size   = app_layout->world_size;
@@ -1481,7 +1481,7 @@ gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_com
 #else
         int aggr_comm_size = 0;
 
-        HDassert(MPI_COMM_NULL != intra_comm);
+        assert(MPI_COMM_NULL != intra_comm);
 
         /* Split the file communicator into a sub-group of one rank per node */
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(comm, node_local_rank, sf_world_rank, &aggr_comm)))
@@ -1612,12 +1612,12 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
     int           max_iocs         = 0;
     herr_t        ret_value        = SUCCEED;
 
-    HDassert(app_topology);
-    HDassert(!app_topology->io_concentrators);
-    HDassert(app_topology->n_io_concentrators > 0);
-    HDassert(app_topology->app_layout);
-    HDassert(app_topology->app_layout->layout);
-    HDassert(app_topology->app_layout->node_count > 0);
+    assert(app_topology);
+    assert(!app_topology->io_concentrators);
+    assert(app_topology->n_io_concentrators > 0);
+    assert(app_topology->app_layout);
+    assert(app_topology->app_layout->layout);
+    assert(app_topology->app_layout->node_count > 0);
 
     app_layout = app_topology->app_layout;
 
@@ -1638,13 +1638,13 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
             if (app_topology->n_io_concentrators > app_layout->node_count)
                 iocs_per_node = app_topology->n_io_concentrators / app_layout->node_count;
 
-            HDassert(app_layout->node_ranks);
+            assert(app_layout->node_ranks);
 
             for (size_t i = 0; i < (size_t)app_layout->node_count; i++) {
                 int node_index = app_layout->node_ranks[i];
                 int local_size = app_layout->layout[node_index].node_local_size;
 
-                HDassert(total_ioc_count < app_topology->n_io_concentrators);
+                assert(total_ioc_count < app_topology->n_io_concentrators);
                 io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
 
                 if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
@@ -1660,7 +1660,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
                     if (j >= (size_t)local_size)
                         break;
 
-                    HDassert(total_ioc_count < app_topology->n_io_concentrators);
+                    assert(total_ioc_count < app_topology->n_io_concentrators);
                     io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
 
                     if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
@@ -1686,7 +1686,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
             int num_iocs_assigned = 0;
             int world_size        = app_layout->world_size;
 
-            HDassert(rank_stride > 0);
+            assert(rank_stride > 0);
 
             for (int i = 0; num_iocs_assigned < max_iocs; num_iocs_assigned++) {
                 int ioc_index = rank_stride * i++;
@@ -1749,15 +1749,15 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->topology == NULL);
-    HDassert(sf_context->sf_context_id >= 0);
-    HDassert(base_filename);
-    HDassert(file_id != UINT64_MAX);
-    HDassert(subfiling_config);
-    HDassert(app_topology);
-    HDassert(app_topology->n_io_concentrators > 0);
-    HDassert(MPI_COMM_NULL != file_comm);
+    assert(sf_context);
+    assert(sf_context->topology == NULL);
+    assert(sf_context->sf_context_id >= 0);
+    assert(base_filename);
+    assert(file_id != UINT64_MAX);
+    assert(subfiling_config);
+    assert(app_topology);
+    assert(app_topology->n_io_concentrators > 0);
+    assert(MPI_COMM_NULL != file_comm);
 
     sf_context->h5_file_id      = file_id;
     sf_context->sf_fids         = NULL;
@@ -1888,7 +1888,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe count (%d)",
                                 sf_context->sf_num_subfiles);
 
-    HDassert(sf_context->sf_num_subfiles >= app_topology->n_io_concentrators);
+    assert(sf_context->sf_num_subfiles >= app_topology->n_io_concentrators);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1932,8 +1932,8 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
     herr_t ret_value = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(sf_context->h5_file_id != UINT64_MAX);
+    assert(sf_context);
+    assert(sf_context->h5_file_id != UINT64_MAX);
 
     /*
      * Save the HDF5 file ID (e.g., inode) to subfile context mapping.
@@ -2131,13 +2131,13 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
                                 "couldn't get subfiling object from context ID");
 
-    HDassert(sf_context->h5_file_id != UINT64_MAX);
-    HDassert(sf_context->h5_filename);
-    HDassert(sf_context->sf_fids);
-    HDassert(sf_context->sf_num_subfiles > 0);
-    HDassert(sf_context->sf_num_fids > 0);
-    HDassert(sf_context->topology);
-    HDassert(sf_context->topology->ioc_idx >= 0); /* Only IOC ranks should be here */
+    assert(sf_context->h5_file_id != UINT64_MAX);
+    assert(sf_context->h5_filename);
+    assert(sf_context->sf_fids);
+    assert(sf_context->sf_num_subfiles > 0);
+    assert(sf_context->sf_num_fids > 0);
+    assert(sf_context->topology);
+    assert(sf_context->topology->ioc_idx >= 0); /* Only IOC ranks should be here */
 
     /* Get the basename of the full HDF5 filename */
     if (H5_basename(sf_context->h5_filename, &base) < 0)
@@ -2264,10 +2264,10 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 
-    HDassert(sf_context);
-    HDassert(base_filename);
-    HDassert(config_dir);
-    HDassert(subfile_dir);
+    assert(sf_context);
+    assert(base_filename);
+    assert(config_dir);
+    assert(subfile_dir);
 
     if (sf_context->h5_file_id == UINT64_MAX)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid HDF5 file ID %" PRIu64,
@@ -2394,11 +2394,11 @@ open_config_file(const char *base_filename, const char *config_dir, uint64_t fil
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 
-    HDassert(base_filename);
-    HDassert(config_dir);
-    HDassert(file_id != UINT64_MAX);
-    HDassert(mode);
-    HDassert(config_file_out);
+    assert(base_filename);
+    assert(config_dir);
+    assert(file_id != UINT64_MAX);
+    assert(mode);
+    assert(config_file_out);
 
     *config_file_out = NULL;
 
@@ -2466,7 +2466,7 @@ H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64
     long    config_file_len   = 0;
     herr_t  ret_value         = SUCCEED;
 
-    HDassert(config_file);
+    assert(config_file);
 
     if (HDfseek(config_file, 0, SEEK_END) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
@@ -2561,8 +2561,8 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     int     mpi_code;
     herr_t  ret_value = SUCCEED;
 
-    HDassert(filepath);
-    HDassert(resolved_filepath);
+    assert(filepath);
+    assert(resolved_filepath);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);

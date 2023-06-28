@@ -308,7 +308,7 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if ((bin + 1) > iter->attr_nbins) {
         iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
-        HDassert(iter->attr_bins);
+        assert(iter->attr_bins);
 
         /* Initialize counts for intermediate bins */
         while (iter->attr_nbins < bin)
@@ -742,7 +742,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         if (NULL == (sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t))))
             return (FAIL);
         nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
-        HDassert(nsects);
+        assert(nsects);
     } /* end else-if */
 
     for (u = 0; u < (size_t)nsects; u++) {
@@ -756,7 +756,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         if (bin >= iter->sect_nbins) {
             /* Allocate more storage for section info */
             iter->sect_bins = (unsigned long *)HDrealloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
-            HDassert(iter->sect_bins);
+            assert(iter->sect_bins);
 
             /* Initialize counts for intermediate bins */
             while (iter->sect_nbins < bin)
@@ -1720,7 +1720,7 @@ main(int argc, char *argv[])
 
         if (H5Fget_filesize(fid, &iter.filesize) < 0)
             warn_msg("Unable to retrieve file size\n");
-        HDassert(iter.filesize != 0);
+        assert(iter.filesize != 0);
 
         /* Get storage info for file-level structures */
         if (H5Fget_info2(fid, &finfo) < 0)
@@ -1754,7 +1754,7 @@ main(int argc, char *argv[])
 
         if (H5Pget_file_space_strategy(fcpl, &iter.fs_strategy, &iter.fs_persist, &iter.fs_threshold) < 0)
             warn_msg("Unable to retrieve file space information\n");
-        HDassert(iter.fs_strategy >= 0 && iter.fs_strategy < H5F_FSPACE_STRATEGY_NTYPES);
+        assert(iter.fs_strategy >= 0 && iter.fs_strategy < H5F_FSPACE_STRATEGY_NTYPES);
 
         if (H5Pget_file_space_page_size(fcpl, &iter.fsp_size) < 0)
             warn_msg("Unable to retrieve file space page size\n");

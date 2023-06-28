@@ -88,7 +88,7 @@ H5HL__prfx_new(H5HL_t *heap)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(heap);
+    assert(heap);
 
     /* Allocate new local heap prefix */
     if (NULL == (prfx = H5FL_CALLOC(H5HL_prfx_t)))
@@ -134,7 +134,7 @@ H5HL__prfx_dest(H5HL_prfx_t *prfx)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(prfx);
+    assert(prfx);
 
     /* Check if prefix was initialized */
     if (prfx->heap) {

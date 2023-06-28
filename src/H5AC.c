@@ -207,8 +207,8 @@ H5AC_cache_image_pending(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
     cache_ptr = f->shared->cache;
 
     ret_value = H5C_cache_image_pending(cache_ptr);
@@ -246,11 +246,11 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(NULL == f->shared->cache);
-    HDassert(config_ptr != NULL);
-    HDassert(image_config_ptr != NULL);
-    HDassert(image_config_ptr->version == H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION);
+    assert(f);
+    assert(NULL == f->shared->cache);
+    assert(config_ptr != NULL);
+    assert(image_config_ptr != NULL);
+    assert(image_config_ptr->version == H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION);
     HDcompile_assert(NELMTS(H5AC_class_s) == H5AC_NTYPES);
     HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
@@ -426,9 +426,9 @@ H5AC_dest(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
 #if H5AC_DUMP_STATS_ON_CLOSE
     /* Dump debugging info */
@@ -497,17 +497,17 @@ H5AC_dest(H5F_t *f)
 #ifdef H5_HAVE_PARALLEL
     if (aux_ptr != NULL) {
         if (aux_ptr->d_slist_ptr != NULL) {
-            HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
         } /* end if */
 
         if (aux_ptr->c_slist_ptr != NULL) {
-            HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
         } /* end if */
 
         if (aux_ptr->candidate_slist_ptr != NULL) {
-            HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
+            assert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
         } /* end if */
 
@@ -540,9 +540,9 @@ H5AC_evict(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     /* Evict all entries in the cache except the pinned superblock entry */
     if (H5C_evict(f) < 0)
@@ -579,12 +579,12 @@ H5AC_expunge_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr, unsigned fl
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(type);
-    HDassert(type->serialize);
-    HDassert(H5_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(type);
+    assert(type->serialize);
+    assert(H5_addr_defined(addr));
 
     if (H5C_expunge_entry(f, type, addr, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed")
@@ -625,9 +625,9 @@ H5AC_flush(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
 #ifdef H5_HAVE_PARALLEL
     /* flushing the cache, so clear all collective entries */
@@ -742,13 +742,13 @@ H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(type);
-    HDassert(type->serialize);
-    HDassert(H5_addr_defined(addr));
-    HDassert(thing);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(type);
+    assert(type->serialize);
+    assert(H5_addr_defined(addr));
+    assert(thing);
 
     /* Check for invalid access request */
     if (0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
@@ -812,9 +812,9 @@ H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_load_cache_image_on_next_protect(f, addr, len, rw) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "call to H5C_load_cache_image_on_next_protect failed")
@@ -846,7 +846,7 @@ H5AC_mark_entry_dirty(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     /* Set up entry & cache pointers */
     entry_ptr = (H5AC_info_t *)thing;
@@ -900,7 +900,7 @@ H5AC_mark_entry_clean(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (H5AC_info_t *)thing;
     cache_ptr = entry_ptr->cache_ptr;
@@ -953,7 +953,7 @@ H5AC_mark_entry_unserialized(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     /* Set up entry & cache pointers */
     entry_ptr = (H5AC_info_t *)thing;
@@ -995,7 +995,7 @@ H5AC_mark_entry_serialized(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (H5AC_info_t *)thing;
     cache_ptr = entry_ptr->cache_ptr;
@@ -1037,12 +1037,12 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared->cache);
-    HDassert(type);
-    HDassert(H5_addr_defined(old_addr));
-    HDassert(H5_addr_defined(new_addr));
-    HDassert(H5_addr_ne(old_addr, new_addr));
+    assert(f);
+    assert(f->shared->cache);
+    assert(type);
+    assert(H5_addr_defined(old_addr));
+    assert(H5_addr_defined(new_addr));
+    assert(H5_addr_ne(old_addr, new_addr));
 
 #ifdef H5_HAVE_PARALLEL
     /* Log moving the entry */
@@ -1093,11 +1093,11 @@ H5AC_pin_protected_entry(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (H5AC_info_t *)thing;
     cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     /* Pin entry */
     if (H5C_pin_protected_entry(thing) < 0)
@@ -1139,9 +1139,9 @@ H5AC_prep_for_file_close(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_prep_for_file_close(f) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cache prep for file close failed")
@@ -1181,9 +1181,9 @@ H5AC_prep_for_file_flush(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't enable skip list")
@@ -1225,9 +1225,9 @@ H5AC_secure_from_file_flush(H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't disable skip list")
@@ -1260,12 +1260,12 @@ H5AC_create_flush_dependency(void *parent_thing, void *child_thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(parent_thing);
-    HDassert(child_thing);
+    assert(parent_thing);
+    assert(child_thing);
 
     entry_ptr = (H5AC_info_t *)parent_thing;
     cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     /* Create the flush dependency */
     if (H5C_create_flush_dependency(parent_thing, child_thing) < 0)
@@ -1314,21 +1314,21 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsi
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(type);
-    HDassert(type->serialize);
-    HDassert(H5_addr_defined(addr));
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(type);
+    assert(type->serialize);
+    assert(H5_addr_defined(addr));
 
     /* Check for unexpected flags -- H5C__FLUSH_COLLECTIVELY_FLAG
      * only permitted in the parallel case.
      */
 #ifdef H5_HAVE_PARALLEL
-    HDassert(0 == (flags &
-                   (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG))));
+    assert(0 == (flags &
+                 (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG))));
 #else  /* H5_HAVE_PARALLEL */
-    HDassert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG))));
+    assert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | H5C__FLUSH_LAST_FLAG))));
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check for invalid access request */
@@ -1382,11 +1382,11 @@ H5AC_resize_entry(void *thing, size_t new_size)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (H5AC_info_t *)thing;
     cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
 #ifdef H5_HAVE_PARALLEL
     /* Log the generation of dirty bytes of metadata iff:
@@ -1479,11 +1479,11 @@ H5AC_unpin_entry(void *thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(thing);
+    assert(thing);
 
     entry_ptr = (H5AC_info_t *)thing;
     cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     /* Unpin the entry */
     if (H5C_unpin_entry(thing) < 0)
@@ -1521,12 +1521,12 @@ H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(parent_thing);
-    HDassert(child_thing);
+    assert(parent_thing);
+    assert(child_thing);
 
     entry_ptr = (H5AC_info_t *)parent_thing;
     cache_ptr = entry_ptr->cache_ptr;
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     /* Destroy the flush dependency */
     if (H5C_destroy_flush_dependency(parent_thing, child_thing) < 0)
@@ -1593,16 +1593,16 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing, un
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(type);
-    HDassert(type->deserialize);
-    HDassert(type->image_len);
-    HDassert(H5_addr_defined(addr));
-    HDassert(thing);
-    HDassert(((H5AC_info_t *)thing)->addr == addr);
-    HDassert(((H5AC_info_t *)thing)->type == type);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(type);
+    assert(type->deserialize);
+    assert(type->image_len);
+    assert(H5_addr_defined(addr));
+    assert(thing);
+    assert(((H5AC_info_t *)thing)->addr == addr);
+    assert(((H5AC_info_t *)thing)->type == type);
 
     dirtied =
         (hbool_t)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) || (((H5AC_info_t *)thing)->dirtied));
@@ -1868,7 +1868,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     if (cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry")
@@ -2094,9 +2094,9 @@ H5AC__check_if_write_permitted(const H5F_t
 
 #ifdef H5_HAVE_PARALLEL
     /* Sanity checks */
-    HDassert(f != NULL);
-    HDassert(f->shared != NULL);
-    HDassert(f->shared->cache != NULL);
+    assert(f != NULL);
+    assert(f->shared != NULL);
+    assert(f->shared->cache != NULL);
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if (aux_ptr != NULL) {
         if ((aux_ptr->mpi_rank == 0) ||
@@ -2199,9 +2199,9 @@ H5AC_ignore_tags(const H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
 
     /* Set up a new metadata tag */
     if (H5C_ignore_tags(f->shared->cache) < 0)
@@ -2260,8 +2260,8 @@ H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Call cache-level function to re-tag entries with the COPIED tag */
     if (H5C_retag_entries(f->shared->cache, H5AC__COPIED_TAG, metadata_tag) < 0)
@@ -2294,8 +2294,8 @@ H5AC_flush_tagged_metadata(H5F_t *f, haddr_t metadata_tag)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Call cache level function to flush metadata entries with specified tag */
     if (H5C_flush_tagged_entries(f, metadata_tag) < 0)
@@ -2329,8 +2329,8 @@ H5AC_evict_tagged_metadata(H5F_t *f, haddr_t metadata_tag, hbool_t match_global)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Call cache level function to evict metadata entries with specified tag */
     if (H5C_evict_tagged_entries(f, metadata_tag, match_global) < 0)
@@ -2362,8 +2362,8 @@ H5AC_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flag
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert(f);
-    HDassert(f->shared);
+    assert(f);
+    assert(f->shared);
 
     /* Call cache level function to expunge entries with specified tag and type id */
     if (H5C_expunge_tag_type_metadata(f, tag, type_id, flags) < 0)
@@ -2395,8 +2395,8 @@ H5AC_get_tag(const void *thing, haddr_t *tag)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert(thing);
-    HDassert(tag);
+    assert(thing);
+    assert(tag);
 
     /* Call cache level function to get the tag */
     if (H5C_get_tag(thing, tag) < 0)
@@ -2425,11 +2425,11 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->cache);
-    HDassert(H5_addr_defined(obj_addr));
-    HDassert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->cache);
+    assert(H5_addr_defined(obj_addr));
+    assert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
 
     /*  Skip the search on "tag_list" when there are no "corked" objects.
      *  This is done to mitigate the slow down when closing objects.
@@ -2437,7 +2437,7 @@ H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
      *  in the future.
      */
     if (action == H5AC__GET_CORKED) {
-        HDassert(corked);
+        assert(corked);
         if (H5C_get_num_objs_corked(f->shared->cache) == 0) {
             *corked = FALSE;
             HGOTO_DONE(SUCCEED)
@@ -2510,9 +2510,9 @@ H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(ring);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(ring);
 
     /* Retrieve the ring value for the entry at address */
     if (H5C_get_entry_ring(f, addr, ring) < 0)
@@ -2540,7 +2540,7 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Note: orig_ring can be NULL so don't check it with HDassert() */
+    /* Note: orig_ring can be NULL so don't check it with assert() */
 
     /* Get the current ring value and return that (if orig_ring is NOT null) */
     if (orig_ring)
@@ -2589,7 +2589,7 @@ H5AC_unsettle_entry_ring(void *_entry)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(entry);
+    assert(entry);
 
     /* Unsettle the entry's ring */
     if (H5C_unsettle_entry_ring(entry) < 0)
@@ -2663,9 +2663,9 @@ H5AC_remove_entry(void *_entry)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(entry);
+    assert(entry);
     cache = entry->cache_ptr;
-    HDassert(cache);
+    assert(cache);
 
     /* Remove the entry from the cache*/
     if (H5C_remove_entry(entry) < 0)

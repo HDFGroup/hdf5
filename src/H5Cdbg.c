@@ -85,8 +85,8 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_name != NULL);
+    assert(cache_ptr != NULL);
+    assert(cache_name != NULL);
 
     /* First, create a skip list */
     if (NULL == (slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -153,7 +153,7 @@ H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
     HDfprintf(stdout, "\n\n");
 
     /* Verify that all the entries were removed from the skip list */
-    HDassert(H5SL_count(slist_ptr) == 0);
+    assert(H5SL_count(slist_ptr) == 0);
 
 done:
     /* Discard the skip list */
@@ -188,8 +188,8 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_name != NULL);
+    assert(cache_ptr != NULL);
+    assert(cache_name != NULL);
 
     HDfprintf(stdout, "\n\nDump of metadata cache LRU \"%s\"\n", cache_name);
     HDfprintf(stdout, "LRU len = %d, LRU size = %d\n", cache_ptr->LRU_list_len,
@@ -264,8 +264,8 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
 
     FUNC_ENTER_NOAPI_NOERR
 
-    HDassert(cache_ptr != NULL);
-    HDassert(calling_fcn != NULL);
+    assert(cache_ptr != NULL);
+    assert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
     HDfprintf(stdout, " slist %s.\n", cache_ptr->slist_enabled ? "enabled" : "disabled");
@@ -706,7 +706,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
     int i;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
 #if H5C_COLLECT_CACHE_STATS
     for (i = 0; i <= cache_ptr->max_type_id; i++) {
@@ -829,10 +829,10 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
     FUNC_ENTER_NOAPI(NULL)
 
     /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(H5_addr_defined(parent_addr));
-    HDassert(H5_addr_defined(child_addr));
-    HDassert(fd_exists_ptr);
+    assert(cache_ptr);
+    assert(H5_addr_defined(parent_addr));
+    assert(H5_addr_defined(child_addr));
+    assert(fd_exists_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, parent_addr, parent_ptr, FAIL);
     H5C__SEARCH_INDEX(cache_ptr, child_addr, child_ptr, FAIL);
@@ -841,13 +841,13 @@ H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child
         if (child_ptr->flush_dep_nparents > 0) {
             unsigned u; /* Local index variable */
 
-            HDassert(child_ptr->flush_dep_parent);
-            HDassert(child_ptr->flush_dep_parent_nalloc >= child_ptr->flush_dep_nparents);
+            assert(child_ptr->flush_dep_parent);
+            assert(child_ptr->flush_dep_parent_nalloc >= child_ptr->flush_dep_nparents);
 
             for (u = 0; u < child_ptr->flush_dep_nparents; u++) {
                 if (child_ptr->flush_dep_parent[u] == parent_ptr) {
                     fd_exists = TRUE;
-                    HDassert(parent_ptr->flush_dep_nchildren > 0);
+                    assert(parent_ptr->flush_dep_nchildren > 0);
                     break;
                 } /* end if */
             }     /* end for */
@@ -895,7 +895,7 @@ H5C_validate_index_list(H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity checks */
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     for (i = 0; i < H5C_RING_NTYPES; i++) {
         index_ring_len[i]        = 0;
@@ -928,8 +928,8 @@ H5C_validate_index_list(H5C_t *cache_ptr)
             ((entry_ptr->il_next == NULL) || (entry_ptr->il_next->il_prev != entry_ptr)))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list pointers for entry are invalid")
 
-        HDassert(entry_ptr->ring > 0);
-        HDassert(entry_ptr->ring < H5C_RING_NTYPES);
+        assert(entry_ptr->ring > 0);
+        assert(entry_ptr->ring < H5C_RING_NTYPES);
 
         len++;
         index_ring_len[entry_ptr->ring] += 1;
@@ -969,7 +969,7 @@ H5C_validate_index_list(H5C_t *cache_ptr)
 
 done:
     if (ret_value != SUCCEED)
-        HDassert(0);
+        assert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_validate_index_list() */
@@ -1020,9 +1020,9 @@ H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(H5_addr_defined(addr));
-    HDassert(entry_ptr_ptr);
+    assert(cache_ptr);
+    assert(H5_addr_defined(addr));
+    assert(entry_ptr_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
@@ -1063,7 +1063,7 @@ H5C_get_serialization_in_progress(const H5C_t *cache_ptr)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     FUNC_LEAVE_NOAPI(cache_ptr->serialization_in_progress)
 } /* H5C_get_serialization_in_progress() */
@@ -1095,9 +1095,9 @@ H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(inner_ring >= H5C_RING_USER);
-    HDassert(inner_ring <= H5C_RING_SB);
+    assert(cache_ptr);
+    assert(inner_ring >= H5C_RING_USER);
+    assert(inner_ring <= H5C_RING_SB);
 
     while (ring <= inner_ring) {
         if (cache_ptr->dirty_index_ring_size[ring] > 0)
@@ -1146,11 +1146,11 @@ H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expecte
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(cache_ptr);
-    HDassert(H5_addr_defined(addr));
-    HDassert(expected_type);
-    HDassert(in_cache_ptr);
-    HDassert(type_ok_ptr);
+    assert(cache_ptr);
+    assert(H5_addr_defined(addr));
+    assert(expected_type);
+    assert(in_cache_ptr);
+    assert(type_ok_ptr);
 
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL);
 
@@ -1198,8 +1198,8 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                             double hit_rate, enum H5C_resize_status status, size_t old_max_cache_size,
                             size_t new_max_cache_size, size_t old_min_clean_size, size_t new_min_clean_size)
 {
-    HDassert(cache_ptr != NULL);
-    HDassert(version == H5C__CURR_AUTO_RESIZE_RPT_FCN_VER);
+    assert(cache_ptr != NULL);
+    assert(version == H5C__CURR_AUTO_RESIZE_RPT_FCN_VER);
 
     switch (status) {
         case in_spec:
@@ -1208,8 +1208,8 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             break;
 
         case increase:
-            HDassert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
-            HDassert(old_max_cache_size < new_max_cache_size);
+            assert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
+            assert(old_max_cache_size < new_max_cache_size);
 
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.lower_hr_threshold);
@@ -1218,7 +1218,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             break;
 
         case flash_increase:
-            HDassert(old_max_cache_size < new_max_cache_size);
+            assert(old_max_cache_size < new_max_cache_size);
 
             HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
                       (int)(cache_ptr->resize_ctl.flash_incr_mode), cache_ptr->flash_size_increase_threshold);
@@ -1227,7 +1227,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             break;
 
         case decrease:
-            HDassert(old_max_cache_size > new_max_cache_size);
+            assert(old_max_cache_size > new_max_cache_size);
 
             switch (cache_ptr->resize_ctl.decr_mode) {
                 case H5C_decr__off:
@@ -1236,7 +1236,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                     break;
 
                 case H5C_decr__threshold:
-                    HDassert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
+                    assert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
 
                     HDfprintf(stdout, "%sAuto cache resize -- decrease by threshold.  HR = %lf > %6.5lf\n",
                               cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.upper_hr_threshold);
@@ -1250,7 +1250,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                     break;
 
                 case H5C_decr__age_out_with_threshold:
-                    HDassert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
+                    assert(hit_rate > cache_ptr->resize_ctl.upper_hr_threshold);
 
                     HDfprintf(stdout,
                               "%sAuto cache resize -- decrease by ageout with threshold. HR = %lf > %6.5lf\n",
@@ -1289,7 +1289,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             break;
 
         case not_full:
-            HDassert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
+            assert(hit_rate < cache_ptr->resize_ctl.lower_hr_threshold);
 
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, cache_ptr->resize_ctl.lower_hr_threshold);
@@ -1328,7 +1328,7 @@ H5C__validate_lru_list(H5C_t *cache_ptr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     if (((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_tail_ptr == NULL)) &&
         (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
@@ -1367,7 +1367,7 @@ H5C__validate_lru_list(H5C_t *cache_ptr)
 
 done:
     if (ret_value != SUCCEED)
-        HDassert(0);
+        assert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__validate_lru_list() */
@@ -1400,7 +1400,7 @@ H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     if (((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_tail_ptr == NULL)) &&
         (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
@@ -1442,7 +1442,7 @@ H5C__validate_pinned_entry_list(H5C_t *cache_ptr)
 
 done:
     if (ret_value != SUCCEED)
-        HDassert(0);
+        assert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__validate_pinned_entry_list() */
@@ -1475,7 +1475,7 @@ H5C__validate_protected_entry_list(H5C_t *cache_ptr)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(cache_ptr);
+    assert(cache_ptr);
 
     if (((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_tail_ptr == NULL)) &&
         (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
@@ -1517,7 +1517,7 @@ H5C__validate_protected_entry_list(H5C_t *cache_ptr)
 
 done:
     if (ret_value != SUCCEED)
-        HDassert(0);
+        assert(0);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__validate_protected_entry_list() */
@@ -1548,8 +1548,8 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
     FUNC_ENTER_PACKAGE
 
     /* Assertions */
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->slist_ptr);
+    assert(cache_ptr);
+    assert(cache_ptr->slist_ptr);
 
     node_ptr = H5SL_first(cache_ptr->slist_ptr);
     in_slist = FALSE;
@@ -1558,9 +1558,9 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 
         entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
-        HDassert(entry_ptr);
-        HDassert(entry_ptr->is_dirty);
-        HDassert(entry_ptr->in_slist);
+        assert(entry_ptr);
+        assert(entry_ptr->is_dirty);
+        assert(entry_ptr->in_slist);
 
         if (entry_ptr == target_ptr)
             in_slist = TRUE;

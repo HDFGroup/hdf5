@@ -468,7 +468,7 @@ main(int argc, char *argv[])
          * Debug a v2 B-tree header.
          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         if ((cls == H5D_BT2 || cls == H5D_BT2_FILT) && (extra_count == 0 || extra[0] == 0)) {
             HDfprintf(stderr, "ERROR: Need v2 B-tree header address and object header address containing the "
@@ -486,7 +486,7 @@ main(int argc, char *argv[])
          * Debug a v2 B-tree internal node.
          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if ((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
@@ -522,7 +522,7 @@ main(int argc, char *argv[])
          * Debug a v2 B-tree leaf node.
          */
         const H5B2_class_t *cls = get_H5B2_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if ((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
@@ -649,7 +649,7 @@ main(int argc, char *argv[])
          * Debug an extensible array header.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0) {
@@ -670,7 +670,7 @@ main(int argc, char *argv[])
          * Debug an extensible array index block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {
@@ -691,7 +691,7 @@ main(int argc, char *argv[])
          * Debug an extensible array super block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0) {
@@ -711,7 +711,7 @@ main(int argc, char *argv[])
          * Debug an extensible array data block.
          */
         const H5EA_class_t *cls = get_H5EA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0 || extra[2] == 0) {
@@ -732,7 +732,7 @@ main(int argc, char *argv[])
          * Debug a fixed array header.
          */
         const H5FA_class_t *cls = get_H5FA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0) {
@@ -752,7 +752,7 @@ main(int argc, char *argv[])
          * Debug a fixed array data block.
          */
         const H5FA_class_t *cls = get_H5FA_class(sig);
-        HDassert(cls);
+        assert(cls);
 
         /* Check for enough valid parameters */
         if (extra_count == 0 || extra[0] == 0 || extra[1] == 0) {

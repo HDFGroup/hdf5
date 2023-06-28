@@ -119,9 +119,9 @@ H5A__create_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(loc_params);
-    HDassert(attr_name);
+    assert(vol_obj);
+    assert(loc_params);
+    assert(attr_name);
 
     /* Create the attribute */
     if (NULL == (attr = H5VL_attr_create(vol_obj, loc_params, attr_name, type_id, space_id, acpl_id, aapl_id,
@@ -455,8 +455,8 @@ H5A__open_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const ch
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Open the attribute */
     if (NULL ==
@@ -1205,7 +1205,7 @@ H5Aget_create_plist(hid_t attr_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", attr_id);
 
-    HDassert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
+    assert(H5P_LST_ATTRIBUTE_CREATE_ID_g != -1);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
@@ -1589,10 +1589,10 @@ H5A__rename_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(loc_params);
-    HDassert(old_name);
-    HDassert(new_name);
+    assert(vol_obj);
+    assert(loc_params);
+    assert(old_name);
+    assert(new_name);
 
     /* Avoid thrashing things if the names are the same */
     if (HDstrcmp(old_name, new_name) != 0) {
@@ -2332,8 +2332,8 @@ H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(vol_obj);
-    HDassert(loc_params);
+    assert(vol_obj);
+    assert(loc_params);
 
     /* Check arguments */
     if (!attr_name || !*attr_name)

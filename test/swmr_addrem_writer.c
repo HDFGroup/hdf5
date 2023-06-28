@@ -75,7 +75,7 @@ open_skeleton(const char *filename, unsigned verbose)
     hsize_t  dim[2]; /* Dataspace dimension */
     unsigned u, v;   /* Local index variable */
 
-    HDassert(filename);
+    assert(filename);
 
     /* Create file access property list */
     if ((fapl = h5_fileaccess()) < 0)
@@ -148,7 +148,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     unsigned long op_to_flush;                          /* # of operations before flush */
     unsigned long u, v;                                 /* Local index variables */
 
-    HDassert(fid > 0);
+    assert(fid > 0);
 
     /* Reset the buffer */
     HDmemset(&buf, 0, sizeof(buf));

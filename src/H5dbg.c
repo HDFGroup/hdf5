@@ -78,11 +78,11 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
     /*
      * Check arguments.
      */
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(buf);
-    HDassert(marker);
-    HDassert(buf_size > 0);
+    assert(stream);
+    assert(indent >= 0);
+    assert(buf);
+    assert(marker);
+    assert(buf_size > 0);
 
     /*
      * Print the buffer in a VMS-style octal dump.
