@@ -606,7 +606,7 @@ parse_mask_list(const char *h_list)
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
-            soffset_value = HDatoi(ptr);
+            soffset_value = atoi(ptr);
             offset_value  = (unsigned)soffset_value;
             if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
                 error_msg("Packed Bit offset value(%d) must be between 0 and %u\n", soffset_value,
@@ -628,7 +628,7 @@ parse_mask_list(const char *h_list)
                 error_msg("Bad mask list(%s)\n", h_list);
                 return FAIL;
             }
-            slength_value = HDatoi(ptr);
+            slength_value = atoi(ptr);
             if (slength_value <= 0) {
                 error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
                 return FAIL;
@@ -778,7 +778,7 @@ parse_start:
                 dump_opts.display_fi = TRUE;
                 last_was_dset        = FALSE;
                 if (H5_optarg != NULL)
-                    h5trav_set_verbose(HDatoi(H5_optarg));
+                    h5trav_set_verbose(atoi(H5_optarg));
                 break;
             case 'p':
                 dump_opts.display_dcpl = TRUE;
@@ -796,7 +796,7 @@ parse_start:
                 break;
             case 'A':
                 if (H5_optarg != NULL) {
-                    if (0 == HDatoi(H5_optarg))
+                    if (0 == atoi(H5_optarg))
                         dump_opts.include_attrs = FALSE;
                 }
                 else {
@@ -820,7 +820,7 @@ parse_start:
                 goto done;
                 break;
             case 'w': {
-                int sh5tools_nCols = HDatoi(H5_optarg);
+                int sh5tools_nCols = atoi(H5_optarg);
 
                 if (sh5tools_nCols <= 0)
                     h5tools_nCols = 65535;
@@ -1006,7 +1006,7 @@ parse_start:
                 dump_opts.display_vds_first = TRUE;
                 break;
             case 'G':
-                dump_opts.vds_gap_size = HDatoi(H5_optarg);
+                dump_opts.vds_gap_size = atoi(H5_optarg);
                 if (dump_opts.vds_gap_size < 0) {
                     usage(h5tools_getprogname());
                     goto error;
@@ -1139,7 +1139,7 @@ end_collect:
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -1193,7 +1193,7 @@ end_collect:
 
             case '1':
                 vol_info_g.type    = VOL_BY_VALUE;
-                vol_info_g.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                vol_info_g.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 use_custom_vol_g   = TRUE;
                 break;
 
@@ -1209,7 +1209,7 @@ end_collect:
 
             case '4':
                 vfd_info_g.type    = VFD_BY_VALUE;
-                vfd_info_g.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                vfd_info_g.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 use_custom_vfd_g   = TRUE;
                 break;
 

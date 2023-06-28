@@ -626,18 +626,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
 #endif
-#ifndef HDatof
-#define HDatof(S) atof(S)
-#endif
-#ifndef HDatoi
-#define HDatoi(S) atoi(S)
-#endif
-#ifndef HDatol
-#define HDatol(S) atol(S)
-#endif
-#ifndef HDatoll
-#define HDatoll(S) atoll(S)
-#endif
 #ifndef HDceil
 #define HDceil(X) ceil(X)
 #endif

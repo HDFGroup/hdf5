@@ -47,7 +47,7 @@ main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    file_number = HDatoi(argv[1]);
+    file_number = atoi(argv[1]);
     if (file_number < 0 || file_number >= N_SOURCES)
         TEST_ERROR;
 

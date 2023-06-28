@@ -2754,7 +2754,7 @@ main(int argc, char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
             vol_info.type    = VOL_BY_VALUE;
-            vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno] + 12);
+            vol_info.u.value = (H5VL_class_value_t)atoi(argv[argno] + 12);
             custom_vol_fapl  = TRUE;
         }
         else if (!HDstrncmp(argv[argno], "--vol-name=", (size_t)11)) {
@@ -2772,7 +2772,7 @@ main(int argc, char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
             vfd_info.type    = VFD_BY_VALUE;
-            vfd_info.u.value = (H5FD_class_value_t)HDatoi(argv[argno] + 12);
+            vfd_info.u.value = (H5FD_class_value_t)atoi(argv[argno] + 12);
             custom_vfd_fapl  = TRUE;
         }
         else if (!HDstrncmp(argv[argno], "--vfd-name=", (size_t)11)) {

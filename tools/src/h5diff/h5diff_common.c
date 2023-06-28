@@ -181,7 +181,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     }
                     else {
                         if (H5_optarg != NULL)
-                            opts->mode_verbose_level = HDatoi(H5_optarg);
+                            opts->mode_verbose_level = atoi(H5_optarg);
                         else
                             opts->mode_verbose_level = 0;
                     }
@@ -207,7 +207,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case 'S':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -280,7 +280,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = HDatof(H5_optarg);
+                opts->delta = atof(H5_optarg);
                 /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
@@ -291,7 +291,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = HDatof(H5_optarg);
+                opts->percent = atof(H5_optarg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
@@ -322,7 +322,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '1':
                 opts->vol_info[0].type    = VOL_BY_VALUE;
-                opts->vol_info[0].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                opts->vol_info[0].u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 opts->custom_vol[0]       = TRUE;
                 break;
 
@@ -338,7 +338,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '4':
                 opts->vol_info[1].type    = VOL_BY_VALUE;
-                opts->vol_info[1].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                opts->vol_info[1].u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 opts->custom_vol[1]       = TRUE;
                 break;
 
@@ -354,7 +354,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '7':
                 opts->vfd_info[0].type    = VFD_BY_VALUE;
-                opts->vfd_info[0].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->vfd_info[0].u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 opts->custom_vfd[0]       = TRUE;
                 break;
 
@@ -370,7 +370,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
             case '0':
                 opts->vfd_info[1].type    = VFD_BY_VALUE;
-                opts->vfd_info[1].u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                opts->vfd_info[1].u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 opts->custom_vfd[1]       = TRUE;
                 break;
 
@@ -544,7 +544,7 @@ check_p_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
@@ -571,7 +571,7 @@ check_d_input(const char *str)
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = HDatof(str);
+    x = atof(str);
     if (x < 0)
         return -1;
 
