@@ -105,7 +105,7 @@ token_insert(H5O_info2_t *oinfo)
     /* Extend the table */
     if (idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2 * idtab_g.nalloc);
-        idtab_g.obj    = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj    = (H5O_token_t *)realloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     }
 
     /* Insert the entry */
@@ -161,7 +161,7 @@ static void
 token_reset(void)
 {
     if (idtab_g.obj)
-        HDfree(idtab_g.obj);
+        free(idtab_g.obj);
     idtab_g.obj    = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
 } /* end token_reset() */
@@ -635,9 +635,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from the source attribute */
@@ -668,9 +668,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -693,9 +693,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
 error:
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (rbuf2)
-        HDfree(rbuf2);
+        free(rbuf2);
     H5E_BEGIN_TRY
     {
         H5Sclose(sid2);
@@ -1172,9 +1172,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from datasets */
@@ -1203,9 +1203,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -1235,9 +1235,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (rbuf)
-            HDfree(rbuf);
+            free(rbuf);
         if (rbuf2)
-            HDfree(rbuf2);
+            free(rbuf2);
         H5Pclose(dcpl2);
         H5Pclose(dcpl);
         H5Sclose(sid2);

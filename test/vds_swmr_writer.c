@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 
     /* Create a data buffer that represents a plane */
     n_elements = PLANES[file_number][1] * PLANES[file_number][2];
-    if (NULL == (buffer = (int *)HDmalloc(n_elements * sizeof(int))))
+    if (NULL == (buffer = (int *)malloc(n_elements * sizeof(int))))
         TEST_ERROR;
 
     /* Create the memory dataspace */
@@ -132,7 +132,7 @@ main(int argc, char *argv[])
         TEST_ERROR;
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
-    HDfree(buffer);
+    free(buffer);
 
     HDfprintf(stderr, "SWMR writer exited successfully\n");
     return EXIT_SUCCESS;
@@ -152,7 +152,7 @@ error:
         if (fsid >= 0)
             (void)H5Sclose(fsid);
         if (buffer != NULL)
-            HDfree(buffer);
+            free(buffer);
     }
     H5E_END_TRY
 

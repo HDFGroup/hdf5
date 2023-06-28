@@ -61,7 +61,7 @@ sub_time(struct timeval *a, struct timeval *b)
 io_time_t *
 io_time_new(clock_type type)
 {
-    io_time_t *pt = (io_time_t *)HDcalloc(1, sizeof(struct io_time_t));
+    io_time_t *pt = (io_time_t *)calloc(1, sizeof(struct io_time_t));
 
     /* set global timer variable */
     timer_g = pt;
@@ -81,7 +81,7 @@ io_time_new(clock_type type)
 void
 io_time_destroy(io_time_t *pt)
 {
-    HDfree(pt);
+    free(pt);
     /* reset the global timer pointer too. */
     timer_g = NULL;
 }

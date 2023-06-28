@@ -307,7 +307,7 @@ attribute_stats(iter_t *iter, const H5O_info2_t *oi, const H5O_native_info_t *na
     /* Add attribute count to proper bin */
     bin = ceil_log10((unsigned long)oi->num_attrs);
     if ((bin + 1) > iter->attr_nbins) {
-        iter->attr_bins = (unsigned long *)HDrealloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
+        iter->attr_bins = (unsigned long *)realloc(iter->attr_bins, (bin + 1) * sizeof(unsigned long));
         HDassert(iter->attr_bins);
 
         /* Initialize counts for intermediate bins */
@@ -368,7 +368,7 @@ group_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_nat
     if ((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         if ((iter->group_bins =
-                 (unsigned long *)HDrealloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
+                 (unsigned long *)realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long))) == NULL)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
         /* Initialize counts for intermediate bins */
@@ -503,8 +503,8 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         bin = ceil_log10((unsigned long)dims[0]);
         if ((bin + 1) > iter->dset_dim_nbins) {
             /* Allocate more storage for info about dataset's datatype */
-            if ((iter->dset_dim_bins = (unsigned long *)HDrealloc(iter->dset_dim_bins,
-                                                                  (bin + 1) * sizeof(unsigned long))) == NULL)
+            if ((iter->dset_dim_bins = (unsigned long *)realloc(iter->dset_dim_bins,
+                                                                (bin + 1) * sizeof(unsigned long))) == NULL)
                 H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
             /* Initialize counts for intermediate bins */
@@ -542,7 +542,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info2_t *oi, const H5O_n
         iter->dset_ntypes++;
 
         /* Allocate more storage for info about dataset's datatype */
-        if ((iter->dset_type_info = (dtype_info_t *)HDrealloc(
+        if ((iter->dset_type_info = (dtype_info_t *)realloc(
                  iter->dset_type_info, iter->dset_ntypes * sizeof(dtype_info_t))) == NULL)
             H5TOOLS_GOTO_ERROR(FAIL, "H5Drealloc() failed");
 
@@ -739,7 +739,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     if ((nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, 0, NULL)) < 0)
         return (FAIL);
     else if (nsects) {
-        if (NULL == (sect_info = (H5F_sect_info_t *)HDcalloc((size_t)nsects, sizeof(H5F_sect_info_t))))
+        if (NULL == (sect_info = (H5F_sect_info_t *)calloc((size_t)nsects, sizeof(H5F_sect_info_t))))
             return (FAIL);
         nsects = H5Fget_free_sections(fid, H5FD_MEM_DEFAULT, (size_t)nsects, sect_info);
         HDassert(nsects);
@@ -755,7 +755,7 @@ freespace_stats(hid_t fid, iter_t *iter)
         bin = ceil_log10((unsigned long)sect_info[u].size);
         if (bin >= iter->sect_nbins) {
             /* Allocate more storage for section info */
-            iter->sect_bins = (unsigned long *)HDrealloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
+            iter->sect_bins = (unsigned long *)realloc(iter->sect_bins, (bin + 1) * sizeof(unsigned long));
             HDassert(iter->sect_bins);
 
             /* Initialize counts for intermediate bins */
@@ -771,7 +771,7 @@ freespace_stats(hid_t fid, iter_t *iter)
     } /* end for */
 
     if (sect_info)
-        HDfree(sect_info);
+        free(sect_info);
 
     return 0;
 } /* end freespace_stats() */
@@ -795,12 +795,12 @@ hand_free(struct handler_t *hand)
 
         for (u = 0; u < hand->obj_count; u++)
             if (hand->obj[u]) {
-                HDfree(hand->obj[u]);
+                free(hand->obj[u]);
                 hand->obj[u] = NULL;
             } /* end if */
         hand->obj_count = 0;
-        HDfree(hand->obj);
-        HDfree(hand);
+        free(hand->obj);
+        free(hand);
     } /* end if */
 } /* end hand_free() */
 
@@ -941,14 +941,14 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
                 display_object = TRUE;
 
                 /* Allocate space to hold the command line info */
-                if (NULL == (hand = (struct handler_t *)HDcalloc((size_t)1, sizeof(struct handler_t)))) {
+                if (NULL == (hand = (struct handler_t *)calloc((size_t)1, sizeof(struct handler_t)))) {
                     error_msg("unable to allocate memory for object struct\n");
                     goto error;
                 } /* end if */
 
                 /* Allocate space to hold the object strings */
                 hand->obj_count = (size_t)argc;
-                if (NULL == (hand->obj = (char **)HDcalloc((size_t)argc, sizeof(char *)))) {
+                if (NULL == (hand->obj = (char **)calloc((size_t)argc, sizeof(char *)))) {
                     error_msg("unable to allocate memory for object array\n");
                     goto error;
                 } /* end if */
@@ -1032,49 +1032,49 @@ iter_free(iter_t *iter)
 
     /* Clear array of bins for group counts */
     if (iter->group_bins) {
-        HDfree(iter->group_bins);
+        free(iter->group_bins);
         iter->group_bins = NULL;
     } /* end if */
 
     /* Clear array for tracking small groups */
     if (iter->num_small_groups) {
-        HDfree(iter->num_small_groups);
+        free(iter->num_small_groups);
         iter->num_small_groups = NULL;
     } /* end if */
 
     /* Clear array of bins for attribute counts */
     if (iter->attr_bins) {
-        HDfree(iter->attr_bins);
+        free(iter->attr_bins);
         iter->attr_bins = NULL;
     } /* end if */
 
     /* Clear array for tracking small attributes */
     if (iter->num_small_attrs) {
-        HDfree(iter->num_small_attrs);
+        free(iter->num_small_attrs);
         iter->num_small_attrs = NULL;
     } /* end if */
 
     /* Clear dataset datatype information found */
     if (iter->dset_type_info) {
-        HDfree(iter->dset_type_info);
+        free(iter->dset_type_info);
         iter->dset_type_info = NULL;
     } /* end if */
 
     /* Clear array of bins for dataset dimensions */
     if (iter->dset_dim_bins) {
-        HDfree(iter->dset_dim_bins);
+        free(iter->dset_dim_bins);
         iter->dset_dim_bins = NULL;
     } /* end if */
 
     /* Clear array of tracking 1-D small datasets */
     if (iter->small_dset_dims) {
-        HDfree(iter->small_dset_dims);
+        free(iter->small_dset_dims);
         iter->small_dset_dims = NULL;
     } /* end if */
 
     /* Clear array of bins for free-space section sizes */
     if (iter->sect_bins) {
-        HDfree(iter->sect_bins);
+        free(iter->sect_bins);
         iter->sect_bins = NULL;
     } /* end if */
 } /* end iter_free() */
@@ -1735,10 +1735,9 @@ main(int argc, char *argv[])
             iter.free_hdr              = finfo.free.meta_size;
         } /* end else */
 
-        iter.num_small_groups = (unsigned long *)HDcalloc((size_t)sgroups_threshold, sizeof(unsigned long));
-        iter.num_small_attrs =
-            (unsigned long *)HDcalloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
-        iter.small_dset_dims = (unsigned long *)HDcalloc((size_t)sdsets_threshold, sizeof(unsigned long));
+        iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
+        iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold + 1), sizeof(unsigned long));
+        iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
 
         if (iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
             error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");

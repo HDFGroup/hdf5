@@ -1390,7 +1390,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
         alloc_size = (hsize_t)nblocks1 * (unsigned)ndims1 * 2 * sizeof(ptdata1[0]);
         HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        if ((ptdata1 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
+        if ((ptdata1 = (hsize_t *)malloc((size_t)alloc_size)) == NULL) {
             opts->err_stat = H5DIFF_ERR;
             H5TOOLS_INFO("Buffer allocation failed");
         }
@@ -1398,7 +1398,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
             H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
             H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
 
-            if ((ptdata2 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
+            if ((ptdata2 = (hsize_t *)malloc((size_t)alloc_size)) == NULL) {
                 opts->err_stat = H5DIFF_ERR;
                 H5TOOLS_INFO("Buffer allocation failed");
             }
@@ -1446,10 +1446,10 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
                         parallel_print("\n");
                     }
                 }
-                HDfree(ptdata2);
+                free(ptdata2);
             } /* else ptdata2 */
 
-            HDfree(ptdata1);
+            free(ptdata1);
         } /* else ptdata1 */
     }
 
@@ -1462,7 +1462,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
         alloc_size = (hsize_t)npoints1 * (unsigned)ndims1 * sizeof(ptdata1[0]);
         HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
-        if ((ptdata1 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
+        if ((ptdata1 = (hsize_t *)malloc((size_t)alloc_size)) == NULL) {
             opts->err_stat = H5DIFF_ERR;
             H5TOOLS_INFO("Buffer allocation failed");
         }
@@ -1470,7 +1470,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
             H5_CHECK_OVERFLOW(npoints1, hssize_t, hsize_t);
             H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
 
-            if ((ptdata2 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
+            if ((ptdata2 = (hsize_t *)malloc((size_t)alloc_size)) == NULL) {
                 opts->err_stat = H5DIFF_ERR;
                 H5TOOLS_INFO("Buffer allocation failed");
             }
@@ -1511,7 +1511,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
                         }
                     }
                 }
-                HDfree(ptdata2);
+                free(ptdata2);
             } /* else ptdata2 */
 
 #if defined(H5DIFF_DEBUG)
@@ -1526,7 +1526,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
             parallel_print("\n");
 #endif
 
-            HDfree(ptdata1);
+            free(ptdata1);
         } /* else ptdata1 */
     }
 
@@ -3101,7 +3101,7 @@ ull2float(unsigned long long ull_value, float *f_value)
 
     src_size = H5Tget_size(H5T_NATIVE_ULLONG);
     dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
-    if ((buf = (unsigned char *)HDcalloc((size_t)1, MAX(src_size, dst_size))) == NULL)
+    if ((buf = (unsigned char *)calloc((size_t)1, MAX(src_size, dst_size))) == NULL)
         H5TOOLS_GOTO_ERROR(FAIL, "Could not allocate buffer for dims");
 
     HDmemcpy(buf, &ull_value, src_size);
@@ -3120,7 +3120,7 @@ done:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     H5TOOLS_ENDDEBUG(" ");
     return ret_value;
@@ -3493,14 +3493,14 @@ get_member_types(hid_t tid, mcomp_t *members)
             return;
         members->n = (unsigned)nmembs;
 
-        members->ids     = (hid_t *)HDcalloc((size_t)members->n, sizeof(hid_t));
-        members->offsets = (size_t *)HDcalloc((size_t)members->n, sizeof(size_t));
-        members->m       = (mcomp_t **)HDcalloc((size_t)members->n, sizeof(mcomp_t *));
+        members->ids     = (hid_t *)calloc((size_t)members->n, sizeof(hid_t));
+        members->offsets = (size_t *)calloc((size_t)members->n, sizeof(size_t));
+        members->m       = (mcomp_t **)calloc((size_t)members->n, sizeof(mcomp_t *));
 
         for (u = 0; u < members->n; u++) {
             members->ids[u]     = H5Tget_member_type(tid, u);
             members->offsets[u] = H5Tget_member_offset(tid, u);
-            members->m[u]       = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
+            members->m[u]       = (mcomp_t *)malloc(sizeof(mcomp_t));
             HDmemset(members->m[u], 0, sizeof(mcomp_t));
             get_member_types(members->ids[u], members->m[u]);
         }
@@ -3523,12 +3523,12 @@ close_member_types(mcomp_t *members)
     for (u = 0; u < members->n; u++) {
         if (members->m[u]) {
             close_member_types(members->m[u]);
-            HDfree(members->m[u]);
+            free(members->m[u]);
         }
         H5Tclose(members->ids[u]);
     }
 
-    HDfree(members->m);
-    HDfree(members->ids);
-    HDfree(members->offsets);
+    free(members->m);
+    free(members->ids);
+    free(members->offsets);
 }

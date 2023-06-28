@@ -84,9 +84,9 @@ free_2D_array(int ***arr)
 {
 
     if (arr && *arr && (*arr)[0])
-        HDfree((*arr)[0]);
+        free((*arr)[0]);
     if (arr && *arr)
-        HDfree(*arr);
+        free(*arr);
     *arr = NULL;
 
     return SUCCEED;
@@ -114,9 +114,9 @@ allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_value
     c = (size_t)sizes[1];
 
     /* Allocate and set up pseudo-2D array */
-    if (NULL == (*arr = (int **)HDcalloc(r, sizeof(int *))))
+    if (NULL == (*arr = (int **)calloc(r, sizeof(int *))))
         TEST_ERROR;
-    if (NULL == ((*arr)[0] = (int *)HDcalloc(r * c, sizeof(int))))
+    if (NULL == ((*arr)[0] = (int *)calloc(r * c, sizeof(int))))
         TEST_ERROR;
     for (i = 0; i < r; i++)
         (*arr)[i] = (**arr + c * i);
@@ -212,7 +212,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
      */
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
-    if (NULL == (tconv_buf = HDcalloc((size_t)1000, sizeof(char))))
+    if (NULL == (tconv_buf = calloc((size_t)1000, sizeof(char))))
         TEST_ERROR;
     if (H5Pset_buffer(dxpl_id, (size_t)1000, tconv_buf, NULL) < 0)
         TEST_ERROR;
@@ -400,7 +400,7 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     free_2D_array(&orig);
     free_2D_array(&read);
 
-    HDfree(tconv_buf);
+    free(tconv_buf);
 
     return SUCCEED;
 
@@ -420,7 +420,7 @@ error:
     free_2D_array(&read);
 
     if (tconv_buf)
-        HDfree(tconv_buf);
+        free(tconv_buf);
 
     return FAIL;
 } /* end ensure_filter_works() */

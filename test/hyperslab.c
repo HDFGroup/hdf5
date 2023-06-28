@@ -117,11 +117,11 @@ print_ref(size_t nx, size_t ny, size_t nz)
 {
     uint8_t *array;
 
-    if (NULL != (array = (uint8_t *)HDmalloc(nx * ny * nz))) {
+    if (NULL != (array = (uint8_t *)malloc(nx * ny * nz))) {
         HDprintf("Reference array:\n");
         init_full(array, nx, ny, nz);
         print_array(array, nx, ny, nz);
-        HDfree(array);
+        free(array);
     } /* end if */
 } /* end print_ref() */
 
@@ -179,7 +179,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
     HDfflush(stdout);
 
     /* Allocate array */
-    if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (dst = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
 
     init_full(dst, nx, ny, nz);
@@ -258,13 +258,13 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
 
     PASSED();
 
-    HDfree(dst);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (dst)
-        HDfree(dst);
+        free(dst);
     return FAIL;
 } /* end test_fill() */
 
@@ -370,9 +370,9 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
     /*
      * Allocate arrays
      */
-    if (NULL == (src = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (src = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
-    if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
+    if (NULL == (dst = (uint8_t *)calloc((size_t)1, nx * ny * nz)))
         TEST_ERROR;
 
     init_full(src, nx, ny, nz);
@@ -527,16 +527,16 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_copy() */
@@ -577,9 +577,9 @@ test_multifill(size_t nx)
     HDfflush(stdout);
 
     /* Initialize the source and destination */
-    if (NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
+    if (NULL == (src = (struct a_struct *)malloc(nx * sizeof(*src))))
         TEST_ERROR;
-    if (NULL == (dst = (struct a_struct *)HDmalloc(nx * sizeof(*dst))))
+    if (NULL == (dst = (struct a_struct *)malloc(nx * sizeof(*dst))))
         TEST_ERROR;
 
     for (i = 0; i < nx; i++) {
@@ -645,16 +645,16 @@ test_multifill(size_t nx)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_multifill() */
@@ -689,9 +689,9 @@ test_endian(size_t nx)
     HDfflush(stdout);
 
     /* Initialize arrays */
-    if (NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
+    if (NULL == (src = (uint8_t *)malloc(nx * 4)))
         TEST_ERROR;
-    if (NULL == (dst = (uint8_t *)HDcalloc(nx, (size_t)4)))
+    if (NULL == (dst = (uint8_t *)calloc(nx, (size_t)4)))
         TEST_ERROR;
 
     init_full(src, nx, (size_t)4, (size_t)1);
@@ -731,16 +731,16 @@ test_endian(size_t nx)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_endian() */
@@ -776,9 +776,9 @@ test_transpose(size_t nx, size_t ny)
     HDfflush(stdout);
 
     /* Initialize */
-    if (NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
+    if (NULL == (src = (int *)malloc(nx * ny * sizeof(*src))))
         TEST_ERROR;
-    if (NULL == (dst = (int *)HDcalloc(nx * ny, sizeof(*dst))))
+    if (NULL == (dst = (int *)calloc(nx * ny, sizeof(*dst))))
         TEST_ERROR;
 
     for (i = 0; i < nx; i++)
@@ -826,16 +826,16 @@ test_transpose(size_t nx, size_t ny)
 
     PASSED();
 
-    HDfree(src);
-    HDfree(dst);
+    free(src);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (src)
-        HDfree(src);
+        free(src);
     if (dst)
-        HDfree(dst);
+        free(dst);
 
     return FAIL;
 } /* end test_transpose() */
@@ -875,11 +875,11 @@ test_sub_super(size_t nx, size_t ny)
     HDfflush(stdout);
 
     /* Initialize */
-    if (NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
+    if (NULL == (full = (uint8_t *)malloc(4 * nx * ny)))
         TEST_ERROR;
-    if (NULL == (half = (uint8_t *)HDcalloc((size_t)1, nx * ny)))
+    if (NULL == (half = (uint8_t *)calloc((size_t)1, nx * ny)))
         TEST_ERROR;
-    if (NULL == (twice = (uint8_t *)HDcalloc((size_t)4, nx * ny)))
+    if (NULL == (twice = (uint8_t *)calloc((size_t)4, nx * ny)))
         TEST_ERROR;
 
     init_full(full, 2 * nx, 2 * ny, (size_t)1);
@@ -973,19 +973,19 @@ test_sub_super(size_t nx, size_t ny)
 
     PASSED();
 
-    HDfree(full);
-    HDfree(half);
-    HDfree(twice);
+    free(full);
+    free(half);
+    free(twice);
 
     return SUCCEED;
 
 error:
     if (full)
-        HDfree(full);
+        free(full);
     if (half)
-        HDfree(half);
+        free(half);
     if (twice)
-        HDfree(twice);
+        free(twice);
 
     return FAIL;
 } /* test_sub_super() */
@@ -1018,7 +1018,7 @@ test_array_fill(size_t lo, size_t hi)
     TESTING(s);
 
     /* Initialize */
-    if (NULL == (dst = (int *)HDcalloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
+    if (NULL == (dst = (int *)calloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
         TEST_ERROR;
 
     /* Setup */
@@ -1040,13 +1040,13 @@ test_array_fill(size_t lo, size_t hi)
 
     PASSED();
 
-    HDfree(dst);
+    free(dst);
 
     return SUCCEED;
 
 error:
     if (dst)
-        HDfree(dst);
+        free(dst);
     return FAIL;
 } /* end test_array_fill() */
 
@@ -1083,7 +1083,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     TESTING(s);
 
     /* Initialize */
-    if (NULL == (a = (hsize_t *)HDmalloc(sizeof(hsize_t) * x * y * z)))
+    if (NULL == (a = (hsize_t *)malloc(sizeof(hsize_t) * x * y * z)))
         TEST_ERROR;
 
     dims[0] = z;
@@ -1125,13 +1125,13 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
 
     PASSED();
 
-    HDfree(a);
+    free(a);
 
     return SUCCEED;
 
 error:
     if (a)
-        HDfree(a);
+        free(a);
 
     return FAIL;
 } /* end test_array_offset_n_calc() */

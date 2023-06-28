@@ -122,7 +122,7 @@ main(void)
     H5Dclose(set);
 
     /* Now open the set, and read it back in */
-    data = (char *)HDmalloc(H5Tget_size(fix));
+    data = (char *)malloc(H5Tget_size(fix));
 
     if (!data) {
         HDperror("malloc() failed");
@@ -186,7 +186,7 @@ out:
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     H5Sclose(spc);
     H5Tclose(cs6);
     H5Tclose(cmp);

@@ -649,7 +649,7 @@ test_filespace(hid_t fapl)
         TEST_ERROR;
 
     /* Create buffer for writing dataset */
-    if (NULL == (data = (int *)HDmalloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
+    if (NULL == (data = (int *)malloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2)))
         TEST_ERROR;
 
     /* Create single dataset (with contiguous storage & late allocation), remove it & verify file size */
@@ -1425,7 +1425,7 @@ test_filespace(hid_t fapl)
     /* Cleanup common objects */
 
     /* Release dataset buffer */
-    HDfree(data);
+    free(data);
 
     /* Close property lists */
     if (H5Pclose(fapl_nocache) < 0)
@@ -1452,7 +1452,7 @@ test_filespace(hid_t fapl)
 error:
     /* Release dataset buffer */
     if (data)
-        HDfree(data);
+        free(data);
 
     return 1;
 } /* end test_filespace() */
@@ -1736,7 +1736,7 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1770,7 +1770,7 @@ test_unlink_rightleaf(hid_t fid)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1786,7 +1786,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1823,7 +1823,7 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -1860,7 +1860,7 @@ test_unlink_rightnode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -1876,7 +1876,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {
@@ -1913,7 +1913,7 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if (NULL == (gids = (hid_t *)HDcalloc((size_t)ngroups, sizeof(hid_t))))
+    if (NULL == (gids = (hid_t *)calloc((size_t)ngroups, sizeof(hid_t))))
         TEST_ERROR;
 
     if ((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
@@ -2236,7 +2236,7 @@ test_unlink_middlenode(hid_t fid)
         FAIL_STACK_ERROR;
 
     /* Free memory */
-    HDfree(gids);
+    free(gids);
 
     PASSED();
     return 0;
@@ -2252,7 +2252,7 @@ error:
                 }
                 H5E_END_TRY
             } /* end if */
-        HDfree(gids);
+        free(gids);
     } /* end if */
     H5E_BEGIN_TRY
     {

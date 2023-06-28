@@ -170,7 +170,7 @@ main(int argc, char *argv[])
         HDexit(EXIT_SUCCESS);
     }
 
-    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+    if (NULL == (data_g = malloc(100 * 100 * sizeof(*data_g))))
         goto error;
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -217,7 +217,7 @@ main(int argc, char *argv[])
     h5_clean_files(&FILENAME[1], fapl_id2);
 
     if (data_g) {
-        HDfree(data_g);
+        free(data_g);
         data_g = NULL;
     }
 
@@ -227,7 +227,7 @@ main(int argc, char *argv[])
 
 error:
     if (data_g)
-        HDfree(data_g);
+        free(data_g);
 
     HDexit(EXIT_FAILURE);
 } /* end main() */

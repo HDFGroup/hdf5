@@ -124,7 +124,7 @@ gen_cache_image_file(const char *fname)
     if (H5Fclose(fid) < 0)
         goto error;
 
-    HDfree(buf);
+    free(buf);
 
     return 0;
 
@@ -140,7 +140,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(buf);
+    free(buf);
 
     return 1;
 } /* gen_cache_image_file() */

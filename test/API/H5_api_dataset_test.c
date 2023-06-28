@@ -3771,7 +3771,7 @@ test_dataset_property_lists(void)
                     PART_ERROR(H5Dget_access_plist);
                 }
 
-                if (NULL == (tmp_prefix = (char *)HDcalloc(1, (size_t)buf_size + 1))) {
+                if (NULL == (tmp_prefix = (char *)calloc(1, (size_t)buf_size + 1))) {
                     H5_FAILED();
                     HDprintf("    couldn't allocate buffer for property value\n");
                     PART_ERROR(H5Dget_access_plist);
@@ -3915,7 +3915,7 @@ test_dataset_property_lists(void)
     TESTING_2("test cleanup");
 
     if (tmp_prefix) {
-        HDfree(tmp_prefix);
+        free(tmp_prefix);
         tmp_prefix = NULL;
     }
 
@@ -3960,7 +3960,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (tmp_prefix)
-            HDfree(tmp_prefix);
+            free(tmp_prefix);
         H5Pclose(dcpl_id1);
         H5Pclose(dcpl_id2);
         H5Pclose(dapl_id1);
@@ -4127,7 +4127,7 @@ test_read_dataset_small_all(void)
         data_size *= dims[i];
     data_size *= DATASET_SMALL_READ_TEST_ALL_DSET_DTYPESIZE;
 
-    if (NULL == (read_buf = HDmalloc(data_size)))
+    if (NULL == (read_buf = malloc(data_size)))
         TEST_ERROR;
 
     if (H5Dread(dset_id, DATASET_SMALL_READ_TEST_ALL_DSET_DTYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) <
@@ -4138,7 +4138,7 @@ test_read_dataset_small_all(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -4161,7 +4161,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
         H5Gclose(group_id);
@@ -4252,7 +4252,7 @@ test_read_dataset_small_hyperslab(void)
         data_size *= dims[i];
     data_size *= DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_DTYPESIZE;
 
-    if (NULL == (read_buf = HDmalloc(data_size)))
+    if (NULL == (read_buf = malloc(data_size)))
         TEST_ERROR;
 
     if (H5Dread(dset_id, DATASET_SMALL_READ_TEST_HYPERSLAB_DSET_DTYPE, mspace_id, fspace_id, H5P_DEFAULT,
@@ -4263,7 +4263,7 @@ test_read_dataset_small_hyperslab(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -4288,7 +4288,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -4368,7 +4368,7 @@ test_read_dataset_small_point_selection(void)
     data_size = DATASET_SMALL_READ_TEST_POINT_SELECTION_NUM_POINTS *
                 DATASET_SMALL_READ_TEST_POINT_SELECTION_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < DATASET_SMALL_READ_TEST_POINT_SELECTION_NUM_POINTS; i++) {
@@ -4393,7 +4393,7 @@ test_read_dataset_small_point_selection(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -4418,7 +4418,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -4993,7 +4993,7 @@ test_read_dataset_invalid_params(void)
         data_size *= dims[i];
     data_size *= DATASET_READ_INVALID_PARAMS_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (read_buf = HDmalloc(data_size)))
+    if (NULL == (read_buf = malloc(data_size)))
         TEST_ERROR;
 
     PASSED();
@@ -5130,7 +5130,7 @@ test_read_dataset_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -5153,7 +5153,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
         H5Gclose(group_id);
@@ -5246,7 +5246,7 @@ test_write_dataset_small_all(void)
         goto error;
     }
 
-    if (NULL == (data = HDmalloc((hsize_t)space_npoints * DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPESIZE)))
+    if (NULL == (data = malloc((hsize_t)space_npoints * DATASET_SMALL_WRITE_TEST_ALL_DSET_DTYPESIZE)))
         TEST_ERROR;
 
     for (i = 0; i < (hsize_t)space_npoints; i++)
@@ -5259,7 +5259,7 @@ test_write_dataset_small_all(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -5282,7 +5282,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
         H5Gclose(group_id);
@@ -5362,7 +5362,7 @@ test_write_dataset_small_hyperslab(void)
         data_size *= dims[i];
     data_size *= DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / DATASET_SMALL_WRITE_TEST_HYPERSLAB_DSET_DTYPESIZE; i++)
@@ -5388,7 +5388,7 @@ test_write_dataset_small_hyperslab(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -5413,7 +5413,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -5493,7 +5493,7 @@ test_write_dataset_small_point_selection(void)
     data_size = DATASET_SMALL_WRITE_TEST_POINT_SELECTION_NUM_POINTS *
                 DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / DATASET_SMALL_WRITE_TEST_POINT_SELECTION_DSET_DTYPESIZE; i++)
@@ -5521,7 +5521,7 @@ test_write_dataset_small_point_selection(void)
     }
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -5546,7 +5546,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -5631,7 +5631,7 @@ test_write_dataset_data_verification(void)
         data_size *= dims[i];
     data_size *= DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE; i++)
@@ -5653,7 +5653,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
@@ -5693,7 +5693,7 @@ test_write_dataset_data_verification(void)
             }
 
             if (NULL ==
-                (data = HDmalloc((hsize_t)space_npoints * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
+                (data = malloc((hsize_t)space_npoints * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_all_read);
@@ -5714,7 +5714,7 @@ test_write_dataset_data_verification(void)
                 }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
@@ -5728,7 +5728,7 @@ test_write_dataset_data_verification(void)
 
             data_size = dims[1] * 2 * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -5741,7 +5741,7 @@ test_write_dataset_data_verification(void)
                 data_size *= dims[i];
             data_size *= DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-            if (NULL == (data = HDmalloc(data_size))) {
+            if (NULL == (data = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset data verification\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -5835,8 +5835,8 @@ test_write_dataset_data_verification(void)
                 PART_ERROR(H5Dwrite_hyperslab_read);
             }
 
-            if (NULL == (read_buf = HDmalloc((hsize_t)space_npoints *
-                                             DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
+            if (NULL ==
+                (read_buf = malloc((hsize_t)space_npoints * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -5856,17 +5856,17 @@ test_write_dataset_data_verification(void)
             }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
 
             if (read_buf) {
-                HDfree(read_buf);
+                free(read_buf);
                 read_buf = NULL;
             }
 
@@ -5881,7 +5881,7 @@ test_write_dataset_data_verification(void)
             data_size =
                 DATASET_DATA_VERIFY_WRITE_TEST_NUM_POINTS * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -5894,7 +5894,7 @@ test_write_dataset_data_verification(void)
                 data_size *= dims[i];
             data_size *= DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE;
 
-            if (NULL == (data = HDmalloc(data_size))) {
+            if (NULL == (data = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset data verification\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -5995,8 +5995,8 @@ test_write_dataset_data_verification(void)
                 PART_ERROR(H5Dwrite_point_sel_read);
             }
 
-            if (NULL == (read_buf = HDmalloc((hsize_t)space_npoints *
-                                             DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
+            if (NULL ==
+                (read_buf = malloc((hsize_t)space_npoints * DATASET_DATA_VERIFY_WRITE_TEST_DSET_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -6024,17 +6024,17 @@ test_write_dataset_data_verification(void)
     TESTING_2("test cleanup");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -6057,11 +6057,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -6141,7 +6141,7 @@ test_write_dataset_invalid_params(void)
         goto error;
     }
 
-    if (NULL == (data = HDmalloc((hsize_t)space_npoints * DATASET_WRITE_INVALID_PARAMS_TEST_DSET_DTYPESIZE)))
+    if (NULL == (data = malloc((hsize_t)space_npoints * DATASET_WRITE_INVALID_PARAMS_TEST_DSET_DTYPESIZE)))
         TEST_ERROR;
 
     for (i = 0; i < (hsize_t)space_npoints; i++)
@@ -6281,7 +6281,7 @@ test_write_dataset_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
@@ -6304,7 +6304,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
         H5Gclose(group_id);
@@ -6400,7 +6400,7 @@ test_dataset_builtin_type_conversion(void)
         data_size *= dims[i];
     data_size *= DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
-    if (NULL == (data = HDmalloc(data_size)))
+    if (NULL == (data = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE; i++)
@@ -6423,7 +6423,7 @@ test_dataset_builtin_type_conversion(void)
             }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
@@ -6463,8 +6463,8 @@ test_dataset_builtin_type_conversion(void)
                 PART_ERROR(H5Dwrite_all_read);
             }
 
-            if (NULL == (data = HDmalloc((hsize_t)space_npoints *
-                                         DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
+            if (NULL == (data = malloc((hsize_t)space_npoints *
+                                       DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_all_read);
@@ -6486,7 +6486,7 @@ test_dataset_builtin_type_conversion(void)
                 }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
@@ -6500,7 +6500,7 @@ test_dataset_builtin_type_conversion(void)
 
             data_size = dims[1] * 2 * DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -6513,7 +6513,7 @@ test_dataset_builtin_type_conversion(void)
                 data_size *= dims[i];
             data_size *= DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
-            if (NULL == (data = HDmalloc(data_size))) {
+            if (NULL == (data = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset data verification\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -6610,8 +6610,8 @@ test_dataset_builtin_type_conversion(void)
                 PART_ERROR(H5Dwrite_hyperslab_read);
             }
 
-            if (NULL == (read_buf = HDmalloc((hsize_t)space_npoints *
-                                             DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
+            if (NULL == (read_buf = malloc((hsize_t)space_npoints *
+                                           DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_hyperslab_read);
@@ -6632,17 +6632,17 @@ test_dataset_builtin_type_conversion(void)
             }
 
             if (data) {
-                HDfree(data);
+                free(data);
                 data = NULL;
             }
 
             if (write_buf) {
-                HDfree(write_buf);
+                free(write_buf);
                 write_buf = NULL;
             }
 
             if (read_buf) {
-                HDfree(read_buf);
+                free(read_buf);
                 read_buf = NULL;
             }
 
@@ -6657,7 +6657,7 @@ test_dataset_builtin_type_conversion(void)
             data_size = DATASET_DATA_BUILTIN_CONVERSION_TEST_NUM_POINTS *
                         DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
-            if (NULL == (write_buf = HDmalloc(data_size))) {
+            if (NULL == (write_buf = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset write\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -6670,7 +6670,7 @@ test_dataset_builtin_type_conversion(void)
                 data_size *= dims[i];
             data_size *= DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE;
 
-            if (NULL == (data = HDmalloc(data_size))) {
+            if (NULL == (data = malloc(data_size))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset data verification\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -6774,8 +6774,8 @@ test_dataset_builtin_type_conversion(void)
                 PART_ERROR(H5Dwrite_point_sel_read);
             }
 
-            if (NULL == (read_buf = HDmalloc((hsize_t)space_npoints *
-                                             DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
+            if (NULL == (read_buf = malloc((hsize_t)space_npoints *
+                                           DATASET_DATA_BUILTIN_CONVERSION_TEST_MEM_DTYPESIZE))) {
                 H5_FAILED();
                 HDprintf("    couldn't allocate buffer for dataset read\n");
                 PART_ERROR(H5Dwrite_point_sel_read);
@@ -6804,17 +6804,17 @@ test_dataset_builtin_type_conversion(void)
     TESTING_2("test cleanup");
 
     if (data) {
-        HDfree(data);
+        free(data);
         data = NULL;
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -6837,11 +6837,11 @@ error:
     H5E_BEGIN_TRY
     {
         if (data)
-            HDfree(data);
+            free(data);
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -8727,7 +8727,7 @@ test_write_single_chunk_dataset(void)
         data_size *= dims[i];
     data_size *= DATASET_SINGLE_CHUNK_WRITE_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size)))
+    if (NULL == (write_buf = malloc(data_size)))
         TEST_ERROR;
 
     for (i = 0; i < data_size / DATASET_SINGLE_CHUNK_WRITE_TEST_DSET_DTYPESIZE; i++)
@@ -8741,7 +8741,7 @@ test_write_single_chunk_dataset(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -8781,7 +8781,7 @@ test_write_single_chunk_dataset(void)
     }
 
     if (NULL ==
-        (read_buf = HDmalloc((hsize_t)space_npoints * DATASET_SINGLE_CHUNK_WRITE_TEST_DSET_DTYPESIZE))) {
+        (read_buf = malloc((hsize_t)space_npoints * DATASET_SINGLE_CHUNK_WRITE_TEST_DSET_DTYPESIZE))) {
         H5_FAILED();
         HDprintf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -8802,7 +8802,7 @@ test_write_single_chunk_dataset(void)
         }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -8827,9 +8827,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Pclose(dcpl_id);
         H5Sclose(fspace_id);
         H5Dclose(dset_id);
@@ -9139,7 +9139,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
         data_size *= dims[i];
     data_size *= DATASET_MULTI_CHUNK_WRITE_SAME_SPACE_READ_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size)))
+    if (NULL == (write_buf = malloc(data_size)))
         TEST_ERROR;
 
     /*
@@ -9208,7 +9208,7 @@ test_write_multi_chunk_dataset_same_shape_read(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -9334,7 +9334,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -9466,7 +9466,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
         data_size *= dims[i];
     data_size *= DATASET_MULTI_CHUNK_WRITE_DIFF_SPACE_READ_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size)))
+    if (NULL == (write_buf = malloc(data_size)))
         TEST_ERROR;
 
     /*
@@ -9535,7 +9535,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -9573,7 +9573,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     /*
      * Allocate single chunk-sized read buffer.
      */
-    if (NULL == (read_buf = HDmalloc(chunk_size))) {
+    if (NULL == (read_buf = malloc(chunk_size))) {
         H5_FAILED();
         HDprintf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -9643,7 +9643,7 @@ test_write_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -9670,9 +9670,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -9805,7 +9805,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
         data_size *= dims[i];
     data_size *= DATASET_MULTI_CHUNK_OVERWRITE_SAME_SPACE_READ_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size)))
+    if (NULL == (write_buf = malloc(data_size)))
         TEST_ERROR;
 
     /*
@@ -9980,7 +9980,7 @@ test_overwrite_multi_chunk_dataset_same_shape_read(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
@@ -10007,7 +10007,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -10140,13 +10140,13 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
         data_size *= dims[i];
     data_size *= DATASET_MULTI_CHUNK_OVERWRITE_DIFF_SPACE_READ_TEST_DSET_DTYPESIZE;
 
-    if (NULL == (write_buf = HDmalloc(data_size)))
+    if (NULL == (write_buf = malloc(data_size)))
         TEST_ERROR;
 
     /*
      * Allocate single chunk-sized read buffer.
      */
-    if (NULL == (read_buf = HDmalloc(chunk_size))) {
+    if (NULL == (read_buf = malloc(chunk_size))) {
         H5_FAILED();
         HDprintf("    couldn't allocate buffer for dataset read\n");
         goto error;
@@ -10320,12 +10320,12 @@ test_overwrite_multi_chunk_dataset_diff_shape_read(void)
     }
 
     if (write_buf) {
-        HDfree(write_buf);
+        free(write_buf);
         write_buf = NULL;
     }
 
     if (read_buf) {
-        HDfree(read_buf);
+        free(read_buf);
         read_buf = NULL;
     }
 
@@ -10352,9 +10352,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (write_buf)
-            HDfree(write_buf);
+            free(write_buf);
         if (read_buf)
-            HDfree(read_buf);
+            free(read_buf);
         H5Pclose(dcpl_id);
         H5Sclose(mspace_id);
         H5Sclose(fspace_id);
@@ -10896,7 +10896,7 @@ test_get_vlen_buf_size(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < DATASET_GET_VLEN_BUF_SIZE_DSET_SPACE_DIM; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(unsigned int));
+        wdata[i].p   = malloc((i + 1) * sizeof(unsigned int));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].p)[j] = i * 10 + j;

@@ -90,8 +90,8 @@ H5CS__get_stack(void)
         fstack = (H5CS_t *)LocalAlloc(
             LPTR, sizeof(H5CS_t)); /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
 #else
-        fstack = (H5CS_t *)HDmalloc(
-            sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
+        fstack =
+            (H5CS_t *)malloc(sizeof(H5CS_t)); /* Don't use H5MM_malloc() here, it causes infinite recursion */
 #endif /* H5_HAVE_WIN_THREADS */
         HDassert(fstack);
 
@@ -183,7 +183,7 @@ H5CS_push(const char *func_name)
         size_t na = MAX((fstack->nalloc * 2), H5CS_MIN_NSLOTS);
 
         /* Don't use H5MM_realloc here */
-        const char **x = (const char **)HDrealloc(fstack->rec, na * sizeof(const char *));
+        const char **x = (const char **)realloc(fstack->rec, na * sizeof(const char *));
 
         /* (Avoid returning an error from this routine, currently -QAK) */
         HDassert(x);
@@ -256,9 +256,9 @@ H5CS_copy_stack(void)
 
     /* Allocate a new stack */
     /* (Don't use library allocate code, since this code stack supports it) */
-    if (NULL == (new_stack = HDcalloc(1, sizeof(H5CS_t))))
+    if (NULL == (new_stack = calloc(1, sizeof(H5CS_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack")
-    if (NULL == (new_stack->rec = HDcalloc(old_stack->nused, sizeof(const char *))))
+    if (NULL == (new_stack->rec = calloc(old_stack->nused, sizeof(const char *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate function stack records")
 
     /* Copy pointers on old stack to new one */
@@ -301,11 +301,11 @@ H5CS_close_stack(H5CS_t *stack)
      * and are not allocated, so there's no need to free them.
      */
     if (stack->rec) {
-        HDfree(stack->rec);
+        free(stack->rec);
         stack->rec = NULL;
     } /* end if */
     if (stack)
-        HDfree(stack);
+        free(stack);
 
     FUNC_LEAVE_NOAPI_NOFS(SUCCEED)
 } /* end H5CS_close_stack() */

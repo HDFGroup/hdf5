@@ -333,10 +333,10 @@ H5E__get_stack(void)
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
         estack = (H5E_t *)LocalAlloc(LPTR, sizeof(H5E_t));
 #else
-        /* Use HDmalloc here since this has to match the HDfree in the
+        /* Use malloc here since this has to match the free in the
          * destructor and we want to avoid the codestack there.
          */
-        estack = (H5E_t *)HDmalloc(sizeof(H5E_t));
+        estack = (H5E_t *)malloc(sizeof(H5E_t));
 #endif /* H5_HAVE_WIN_THREADS */
         HDassert(estack);
 
@@ -1347,10 +1347,10 @@ done:
     if (va_started)
         va_end(ap);
     /* Memory was allocated with HDvasprintf so it needs to be freed
-     * with HDfree
+     * with free
      */
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */

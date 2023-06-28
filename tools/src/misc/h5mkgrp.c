@@ -58,11 +58,11 @@ leave(int ret)
     size_t curr_group;
 
     if (params_g.fname)
-        HDfree(params_g.fname);
+        free(params_g.fname);
     if (params_g.ngroups) {
         for (curr_group = 0; curr_group < params_g.ngroups; curr_group++)
-            HDfree(params_g.groups[curr_group]);
-        HDfree(params_g.groups);
+            free(params_g.groups[curr_group]);
+        free(params_g.groups);
     }
     if (H5I_INVALID_HID != params_g.fapl_id && H5P_DEFAULT != params_g.fapl_id)
         if (H5Pclose(params_g.fapl_id) < 0)
@@ -239,7 +239,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
     /* Allocate space for the group name pointers */
     options->ngroups = (size_t)(argc - H5_optind);
-    options->groups  = (char **)HDmalloc(options->ngroups * sizeof(char *));
+    options->groups  = (char **)malloc(options->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;

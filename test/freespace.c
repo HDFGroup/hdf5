@@ -269,7 +269,7 @@ static herr_t
 TEST_sect_free(H5FS_section_info_t *sect)
 {
     /* Release the section */
-    HDfree(sect);
+    free(sect);
 
     return 0;
 } /* TEST_sect_free() */
@@ -633,7 +633,7 @@ test_fs_sect_add(hid_t fapl)
     if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
-    if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE,
@@ -699,7 +699,7 @@ test_fs_sect_add(hid_t fapl)
         TEST_ERROR;
 
     /* Create free list section node */
-    if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE,
@@ -773,7 +773,7 @@ test_fs_sect_add(hid_t fapl)
     if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
-    if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     /*
@@ -843,7 +843,7 @@ test_fs_sect_add(hid_t fapl)
     if (!H5_addr_defined(fs_addr))
         TEST_ERROR;
 
-    if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     /*
@@ -1002,7 +1002,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -1022,7 +1022,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section C
      */
-    if (NULL == (sect_node3 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node3 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node3, (haddr_t)(TEST_SECT_ADDR200), (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -1041,7 +1041,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -1060,7 +1060,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section D
      */
-    if (NULL == (sect_node4 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node4 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR300, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE,
@@ -1129,7 +1129,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -1149,7 +1149,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR200, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE,
@@ -1208,7 +1208,7 @@ test_fs_sect_find(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -1356,7 +1356,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section C
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -1376,7 +1376,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -1394,7 +1394,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node3 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node3 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE10, TEST_FSPACE_SECT_TYPE,
@@ -1412,7 +1412,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section D
      */
-    if (NULL == (sect_node4 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node4 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR150, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE,
@@ -1485,7 +1485,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -1505,7 +1505,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -1588,7 +1588,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE10, TEST_FSPACE_SECT_TYPE,
@@ -1608,7 +1608,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30,
@@ -1628,7 +1628,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section C
      */
-    if (NULL == (sect_node3 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node3 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50,
@@ -1646,7 +1646,7 @@ test_fs_sect_merge(hid_t fapl)
     /*
      * Add section D
      */
-    if (NULL == (sect_node4 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node4 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node4, (haddr_t)TEST_SECT_ADDR150, (hsize_t)TEST_SECT_SIZE80, TEST_FSPACE_SECT_TYPE,
@@ -1834,7 +1834,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Add section A that allow shrinking but its section class type does not define "can_shrink"
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50,
@@ -1869,7 +1869,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Re-add section A that allow shrinking and its section class type defines "can_shrink"
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -1936,7 +1936,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR80, (hsize_t)TEST_SECT_SIZE20, TEST_FSPACE_SECT_TYPE,
@@ -1956,7 +1956,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -2036,7 +2036,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -2056,7 +2056,7 @@ test_fs_sect_shrink(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50, TEST_FSPACE_SECT_TYPE,
@@ -2178,7 +2178,7 @@ test_fs_sect_change_class(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR60, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -2198,7 +2198,7 @@ test_fs_sect_change_class(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50,
@@ -2282,7 +2282,7 @@ test_fs_sect_change_class(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE30, TEST_FSPACE_SECT_TYPE,
@@ -2294,7 +2294,7 @@ test_fs_sect_change_class(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE50,
@@ -2306,7 +2306,7 @@ test_fs_sect_change_class(hid_t fapl)
     /*
      * Add section C
      */
-    if (NULL == (sect_node3 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node3 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node3, (haddr_t)TEST_SECT_ADDR200, (hsize_t)TEST_SECT_SIZE80,
@@ -2466,7 +2466,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE,
@@ -2486,7 +2486,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE,
@@ -2543,7 +2543,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE,
@@ -2563,7 +2563,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE,
@@ -2617,7 +2617,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE,
@@ -2637,7 +2637,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE,
@@ -2692,7 +2692,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section A
      */
-    if (NULL == (sect_node1 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node1 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node1, (haddr_t)TEST_SECT_ADDR70, (hsize_t)TEST_SECT_SIZE5, TEST_FSPACE_SECT_TYPE,
@@ -2712,7 +2712,7 @@ test_fs_sect_extend(hid_t fapl)
     /*
      * Add section B
      */
-    if (NULL == (sect_node2 = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+    if (NULL == (sect_node2 = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
         FAIL_STACK_ERROR;
 
     init_sect_node(sect_node2, (haddr_t)TEST_SECT_ADDR100, (hsize_t)TEST_SECT_SIZE40, TEST_FSPACE_SECT_TYPE,
@@ -2823,7 +2823,7 @@ test_fs_sect_iterate(hid_t fapl)
         TEST_ERROR;
 
     for (i = 1; i <= NUM_SECTIONS; i++) {
-        if (NULL == (sect_node = (TEST_free_section_t *)HDmalloc(sizeof(TEST_free_section_t))))
+        if (NULL == (sect_node = (TEST_free_section_t *)malloc(sizeof(TEST_free_section_t))))
             FAIL_STACK_ERROR;
 
         sect_size = (unsigned)((i - 1) % 9) + 1;

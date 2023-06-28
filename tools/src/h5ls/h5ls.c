@@ -916,8 +916,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             dst_size = H5Tget_size(type);
 
         /* Get the names and raw values of all members */
-        name  = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
-        value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+        name  = (char **)calloc((size_t)nmembs, sizeof(char *));
+        value = (unsigned char *)calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
         for (i = 0; i < (unsigned)nmembs; i++) {
             name[i] = H5Tget_member_name(type, i);
             H5Tget_member_value(type, i, value + i * H5Tget_size(type));
@@ -929,8 +929,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 /* Release resources */
                 for (i = 0; i < (unsigned)nmembs; i++)
                     H5free_memory(name[i]);
-                HDfree(name);
-                HDfree(value);
+                free(name);
+                free(value);
                 H5Tclose(super);
 
                 return FALSE;
@@ -971,8 +971,8 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
         /* Release resources */
         for (i = 0; i < (unsigned)nmembs; i++)
             H5free_memory(name[i]);
-        HDfree(name);
-        HDfree(value);
+        free(name);
+        free(value);
     }
     else
         h5tools_str_append(buffer, "\n%*s <empty>", ind + 4, "");
@@ -1178,7 +1178,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
         return FALSE;
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
-        dims = (hsize_t *)HDmalloc((unsigned)ndims * sizeof(dims[0]));
+        dims = (hsize_t *)malloc((unsigned)ndims * sizeof(dims[0]));
         H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
@@ -1186,7 +1186,7 @@ print_array_type(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "%s%" PRIuHSIZE, i ? "," : "[", dims[i]);
         h5tools_str_append(buffer, "]");
 
-        HDfree(dims);
+        free(dims);
     }
     else
         h5tools_str_append(buffer, " [SCALAR]\n");
@@ -1431,17 +1431,17 @@ dump_dataset_values(hid_t dset)
         ctx.need_prefix = TRUE;
 
         if (NULL !=
-            (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            (ref_buf = (H5R_ref_t *)calloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Dread reference read");
             if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf) < 0) {
-                HDfree(ref_buf);
+                free(ref_buf);
                 H5TOOLS_INFO("H5Dread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
             h5tools_dump_reference(rawoutstream, info, &ctx, dset, ref_buf, ndims);
 
             PRINTVALSTREAM(rawoutstream, "\n");
-            HDfree(ref_buf);
+            free(ref_buf);
         }
     }
     else {
@@ -1601,10 +1601,10 @@ dump_attribute_values(hid_t attr)
         ctx.need_prefix = TRUE;
 
         if (NULL !=
-            (ref_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
+            (ref_buf = (H5R_ref_t *)calloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)ndims))) {
             H5TOOLS_DEBUG("H5Aread reference read");
             if (H5Aread(attr, H5T_STD_REF, ref_buf) < 0) {
-                HDfree(ref_buf);
+                free(ref_buf);
                 H5TOOLS_INFO("H5Aread reference failed");
                 H5TOOLS_GOTO_DONE_NO_RET();
             }
@@ -1613,7 +1613,7 @@ dump_attribute_values(hid_t attr)
 
             PRINTVALSTREAM(rawoutstream, "\n");
             ctx.indent_level--;
-            HDfree(ref_buf);
+            free(ref_buf);
         }
     }
     else {
@@ -2203,7 +2203,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                  */
                 if (cmt_bufsize > 0) {
                     comment =
-                        (char *)HDmalloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
+                        (char *)malloc((size_t)cmt_bufsize + 1); /* new_size including null terminator */
                     if (comment) {
                         cmt_bufsize = H5Oget_comment(obj_id, comment, (size_t)cmt_bufsize);
                         if (cmt_bufsize > 0) {
@@ -2215,7 +2215,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
                             h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos,
                                                    (size_t)info->line_ncols, (hsize_t)0, (hsize_t)0);
                         } /* end if */
-                        HDfree(comment);
+                        free(comment);
                     }
                 }
             }
@@ -2429,7 +2429,7 @@ done:
     h5tools_str_close(&buffer);
 
     if (buf)
-        HDfree(buf);
+        free(buf);
     return 0;
 } /* end list_lnk() */
 
@@ -3044,7 +3044,7 @@ main(int argc, char *argv[])
 
         if (file_id < 0) {
             HDfprintf(rawerrorstream, "%s: unable to open file\n", argv[argno - 1]);
-            HDfree(fname);
+            free(fname);
             err_exit = 1;
             continue;
         } /* end if */
@@ -3121,17 +3121,17 @@ main(int argc, char *argv[])
             list_lnk(oname, &li, &iter);
         }
         H5Fclose(file_id);
-        HDfree(fname);
+        free(fname);
         if (x)
-            HDfree(oname);
+            free(oname);
 
         for (u = 0; u < symlink_list.nused; u++) {
             if (symlink_list.objs[u].type == H5L_TYPE_EXTERNAL)
-                HDfree(symlink_list.objs[u].file);
+                free(symlink_list.objs[u].file);
 
-            HDfree(symlink_list.objs[u].path);
+            free(symlink_list.objs[u].path);
         }
-        HDfree(symlink_list.objs);
+        free(symlink_list.objs);
 
         /* if no-dangling-links option specified and dangling link found */
         if (no_dangling_link_g && iter.symlink_list->dangle_link)

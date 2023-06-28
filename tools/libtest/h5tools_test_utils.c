@@ -553,9 +553,9 @@ test_parse_tuple(void)
             /* TEARDOWN */
             HDassert(parsed != NULL);
             HDassert(cpy != NULL);
-            HDfree(parsed);
+            free(parsed);
             parsed = NULL;
-            HDfree(cpy);
+            free(cpy);
             cpy = NULL;
         }
         else {
@@ -573,9 +573,9 @@ error:
      ***********/
 
     if (parsed != NULL)
-        HDfree(parsed);
+        free(parsed);
     if (cpy != NULL)
-        HDfree(cpy);
+        free(cpy);
 
     return 1;
 

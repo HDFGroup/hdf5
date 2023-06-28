@@ -129,11 +129,11 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     VRFY(sid >= 0, "H5Screate_simple");
 
     /* Create buffers */
-    points = (int *)HDmalloc(size[0] * size[1] * sizeof(int));
-    VRFY(points != NULL, "HDmalloc");
+    points = (int *)malloc(size[0] * size[1] * sizeof(int));
+    VRFY(points != NULL, "malloc");
 
-    check = (int *)HDmalloc(hs_size[0] * hs_size[1] * sizeof(int));
-    VRFY(check != NULL, "HDmalloc");
+    check = (int *)malloc(hs_size[0] * hs_size[1] * sizeof(int));
+    VRFY(check != NULL, "malloc");
 
     /* Initialize writing buffer with random data */
     for (i = 0; i < size[0]; i++)
@@ -228,8 +228,8 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
     hrc = H5Fclose(file);
     VRFY(hrc >= 0, "H5Fclose");
 
-    HDfree(points);
-    HDfree(check);
+    free(points);
+    free(check);
 
     MPI_Barrier(MPI_COMM_WORLD);
 }

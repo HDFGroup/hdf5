@@ -468,7 +468,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     if (vfd_config == NULL) {
-        if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
+        if (NULL == (subfiling_conf = calloc(1, sizeof(*subfiling_conf))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfiling VFD configuration");
         subfiling_conf->ioc_fapl_id = H5I_INVALID_HID;
@@ -516,7 +516,7 @@ done:
     if (subfiling_conf) {
         if (subfiling_conf->ioc_fapl_id >= 0 && H5I_dec_ref(subfiling_conf->ioc_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
-        HDfree(subfiling_conf);
+        free(subfiling_conf);
     }
 
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -902,7 +902,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     /* Decode config file prefix string */
     if (tmpu64 > 0) {
         if (!sf_context->config_file_prefix) {
-            if (NULL == (sf_context->config_file_prefix = HDmalloc(tmpu64)))
+            if (NULL == (sf_context->config_file_prefix = malloc(tmpu64)))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate space for config file prefix string");
 
@@ -1346,7 +1346,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
     file_ptr->fail_to_encode = FALSE;
 
 done:
-    HDfree(file_ptr->file_path);
+    free(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
     H5MM_free(file_ptr->file_dir);
@@ -1675,14 +1675,14 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
          * to contain the translation of the I/O request into a collection of
          * I/O requests.
          */
-        if (NULL == (source_data_offset =
-                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1713,16 +1713,16 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
             H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
-            if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
+            if (NULL == (io_types = malloc(vector_len * sizeof(*io_types))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O types vector");
-            if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
+            if (NULL == (io_addrs = malloc(vector_len * sizeof(*io_addrs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O addresses vector");
-            if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
+            if (NULL == (io_sizes = malloc(vector_len * sizeof(*io_sizes))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O sizes vector");
-            if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
+            if (NULL == (io_bufs = malloc(vector_len * sizeof(*io_bufs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
@@ -1774,13 +1774,13 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     file_ptr->op  = OP_READ;
 
 done:
-    HDfree(io_bufs);
-    HDfree(io_sizes);
-    HDfree(io_addrs);
-    HDfree(io_types);
-    HDfree(sf_offset);
-    HDfree(sf_data_size);
-    HDfree(source_data_offset);
+    free(io_bufs);
+    free(io_sizes);
+    free(io_addrs);
+    free(io_types);
+    free(sf_offset);
+    free(sf_data_size);
+    free(source_data_offset);
 
     if (ret_value < 0) {
         /* Reset last file I/O information */
@@ -1918,14 +1918,14 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
          * to contain the translation of the I/O request into a collection of
          * I/O requests.
          */
-        if (NULL == (source_data_offset =
-                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
+        if (NULL ==
+            (source_data_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = calloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1956,16 +1956,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
             H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
-            if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
+            if (NULL == (io_types = malloc(vector_len * sizeof(*io_types))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O types vector");
-            if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
+            if (NULL == (io_addrs = malloc(vector_len * sizeof(*io_addrs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O addresses vector");
-            if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
+            if (NULL == (io_sizes = malloc(vector_len * sizeof(*io_sizes))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O sizes vector");
-            if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
+            if (NULL == (io_bufs = malloc(vector_len * sizeof(*io_bufs))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
@@ -2031,13 +2031,13 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         file_ptr->local_eof = file_ptr->pos;
 
 done:
-    HDfree(io_bufs);
-    HDfree(io_sizes);
-    HDfree(io_addrs);
-    HDfree(io_types);
-    HDfree(sf_offset);
-    HDfree(sf_data_size);
-    HDfree(source_data_offset);
+    free(io_bufs);
+    free(io_sizes);
+    free(io_addrs);
+    free(io_types);
+    free(sf_offset);
+    free(sf_data_size);
+    free(source_data_offset);
 
     if (ret_value < 0) {
         /* Reset last file I/O information */

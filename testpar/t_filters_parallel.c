@@ -490,11 +490,11 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
                 (hsize_t)WRITE_ONE_CHUNK_FILTERED_DATASET_NCOLS * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -512,13 +512,13 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_ONE_CHUNK_FILTERED_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -529,9 +529,9 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -645,11 +645,11 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -665,13 +665,13 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -682,9 +682,9 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -792,11 +792,11 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -821,13 +821,13 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_PARTIAL_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -838,9 +838,9 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -953,11 +953,11 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -975,13 +975,13 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -992,9 +992,9 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1077,11 +1077,11 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -1148,9 +1148,9 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1231,11 +1231,11 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -1301,9 +1301,9 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1394,12 +1394,12 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
         /* Fill data buffer */
         data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-        tmp_realloc = (C_DATATYPE *)HDrealloc(data, data_size);
-        VRFY((NULL != tmp_realloc), "HDrealloc succeeded");
+        tmp_realloc = (C_DATATYPE *)realloc(data, data_size);
+        VRFY((NULL != tmp_realloc), "realloc succeeded");
         data = tmp_realloc;
 
-        tmp_realloc = (C_DATATYPE *)HDrealloc(read_buf, data_size);
-        VRFY((NULL != tmp_realloc), "HDrealloc succeeded");
+        tmp_realloc = (C_DATATYPE *)realloc(read_buf, data_size);
+        VRFY((NULL != tmp_realloc), "realloc succeeded");
         read_buf = tmp_realloc;
 
         for (j = 0; j < data_size / sizeof(*data); j++)
@@ -1470,9 +1470,9 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1561,12 +1561,12 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
         /* Fill data buffer */
         data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-        tmp_realloc = (C_DATATYPE *)HDrealloc(data, data_size);
-        VRFY((NULL != tmp_realloc), "HDrealloc succeeded");
+        tmp_realloc = (C_DATATYPE *)realloc(data, data_size);
+        VRFY((NULL != tmp_realloc), "realloc succeeded");
         data = tmp_realloc;
 
-        tmp_realloc = (C_DATATYPE *)HDrealloc(read_buf, data_size);
-        VRFY((NULL != tmp_realloc), "HDrealloc succeeded");
+        tmp_realloc = (C_DATATYPE *)realloc(read_buf, data_size);
+        VRFY((NULL != tmp_realloc), "realloc succeeded");
         read_buf = tmp_realloc;
 
         for (j = 0; j < data_size / sizeof(*data); j++)
@@ -1633,9 +1633,9 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
     }
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1758,15 +1758,15 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
     if (mpi_rank != WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
-        data = (C_DATATYPE *)HDcalloc(1, data_size);
-        VRFY((NULL != data), "HDcalloc succeeded");
+        data = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != data), "calloc succeeded");
 
         for (i = 0; i < data_size / sizeof(*data); i++)
             data[i] = (C_DATATYPE)GEN_DATA(i);
     }
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
@@ -1785,13 +1785,13 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     verify_space_alloc_status(dset_id, plist_id, (mpi_size > 1 ? SOME_CHUNKS_WRITTEN : NO_CHUNKS_WRITTEN));
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -1802,9 +1802,9 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1894,11 +1894,11 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -1910,13 +1910,13 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_ALL_NO_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -1927,9 +1927,9 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2013,8 +2013,8 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
 
     num_points = (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NROWS *
                  (hsize_t)WRITE_POINT_SELECTION_FILTERED_CHUNKS_NCOLS / (hsize_t)mpi_size;
-    coords = (hsize_t *)HDcalloc(1, 2 * num_points * sizeof(*coords));
-    VRFY((NULL != coords), "Coords HDcalloc succeeded");
+    coords = (hsize_t *)calloc(1, 2 * num_points * sizeof(*coords));
+    VRFY((NULL != coords), "Coords calloc succeeded");
 
     for (i = 0; i < num_points; i++)
         for (j = 0; j < WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
@@ -2030,11 +2030,11 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2052,13 +2052,13 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2069,11 +2069,11 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (coords)
-        HDfree(coords);
+        free(coords);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2190,11 +2190,11 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2220,13 +2220,13 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, INTERLEAVED_WRITE_FILTERED_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2237,9 +2237,9 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2361,11 +2361,11 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2385,13 +2385,13 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
          "Dataset write succeeded");
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2409,9 +2409,9 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -2534,11 +2534,11 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2553,13 +2553,13 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2570,9 +2570,9 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2696,11 +2696,11 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2716,13 +2716,13 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_CHUNKS_3D_SAME_PAGE_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2733,9 +2733,9 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2857,11 +2857,11 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     data_size        = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -2891,13 +2891,13 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_CHUNKS_3D_DATASET_NAME, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
@@ -2908,9 +2908,9 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -3041,14 +3041,14 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    data = (COMPOUND_C_DATATYPE *)HDcalloc(
+    data = (COMPOUND_C_DATATYPE *)calloc(
         1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "HDcalloc succeeded");
+    VRFY((NULL != data), "calloc succeeded");
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     /* Fill data buffer */
     for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_ENTRIES_PER_PROC; i++) {
@@ -3071,13 +3071,13 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id =
         H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
@@ -3088,9 +3088,9 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -3222,14 +3222,14 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    data = (COMPOUND_C_DATATYPE *)HDcalloc(
+    data = (COMPOUND_C_DATATYPE *)calloc(
         1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "HDcalloc succeeded");
+    VRFY((NULL != data), "calloc succeeded");
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     /* Fill data buffer */
     for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_ENTRIES_PER_PROC; i++) {
@@ -3258,13 +3258,13 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
     /* Verify the correct data was written */
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id =
         H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_NO_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
@@ -3275,9 +3275,9 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -3429,14 +3429,14 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    data = (COMPOUND_C_DATATYPE *)HDcalloc(
+    data = (COMPOUND_C_DATATYPE *)calloc(
         1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "HDcalloc succeeded");
+    VRFY((NULL != data), "calloc succeeded");
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     /* Fill data buffer */
     for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_ENTRIES_PER_PROC; i++) {
@@ -3456,13 +3456,13 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     /* Verify that no data was written */
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id =
         H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_UNSHARED_DATASET_NAME, H5P_DEFAULT);
@@ -3473,9 +3473,9 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -3628,14 +3628,14 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
 
-    data = (COMPOUND_C_DATATYPE *)HDcalloc(
+    data = (COMPOUND_C_DATATYPE *)calloc(
         1, (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC * sizeof(*data));
-    VRFY((NULL != data), "HDcalloc succeeded");
+    VRFY((NULL != data), "calloc succeeded");
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(COMPOUND_C_DATATYPE);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     /* Fill data buffer */
     for (i = 0; i < (hsize_t)WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_ENTRIES_PER_PROC; i++) {
@@ -3655,13 +3655,13 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     verify_space_alloc_status(dset_id, plist_id, NO_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     /* Verify that no data was written */
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     dset_id =
         H5Dopen2(group_id, WRITE_COMPOUND_FILTERED_CHUNKS_TYPE_CONVERSION_SHARED_DATASET_NAME, H5P_DEFAULT);
@@ -3672,9 +3672,9 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -3732,8 +3732,8 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = ((C_DATATYPE)i % (READ_ONE_CHUNK_FILTERED_DATASET_CH_NROWS / mpi_size *
@@ -3842,24 +3842,24 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)flat_dims[0];
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0]);
@@ -3871,15 +3871,15 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -3934,8 +3934,8 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     correct_buf_size = (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NROWS *
                        (hsize_t)READ_UNSHARED_FILTERED_CHUNKS_NCOLS * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
@@ -4042,24 +4042,24 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)flat_dims[0];
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0]);
@@ -4071,15 +4071,15 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -4134,8 +4134,8 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] =
@@ -4244,14 +4244,14 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
@@ -4263,11 +4263,11 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
         size_t loop_count       = count[0];
         size_t total_recvcounts = 0;
 
-        recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "HDcalloc succeeded");
+        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+        VRFY((NULL != recvcounts), "calloc succeeded");
 
-        displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "HDcalloc succeeded");
+        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+        VRFY((NULL != displs), "calloc succeeded");
 
         for (i = 0; i < (size_t)mpi_size; i++) {
             recvcounts[i] = (int)dataset_dims[1];
@@ -4289,15 +4289,15 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -4353,8 +4353,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
@@ -4474,8 +4474,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, NULL) >= 0),
@@ -4486,20 +4486,20 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
              "Dataset read succeeded");
     }
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
                               READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NCOLS);
     recvcounts[READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC] = 0;
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * (size_t)(READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_CH_NROWS *
@@ -4517,15 +4517,15 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -4573,8 +4573,8 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4651,8 +4651,8 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
 
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
@@ -4660,9 +4660,9 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -4715,8 +4715,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] =
@@ -4801,8 +4801,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
 
     num_points = (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NROWS *
                  (hsize_t)READ_POINT_SELECTION_FILTERED_CHUNKS_NCOLS / (hsize_t)mpi_size;
-    coords = (hsize_t *)HDcalloc(1, 2 * num_points * sizeof(*coords));
-    VRFY((NULL != coords), "Coords HDcalloc succeeded");
+    coords = (hsize_t *)calloc(1, 2 * num_points * sizeof(*coords));
+    VRFY((NULL != coords), "Coords calloc succeeded");
 
     for (i = 0; i < num_points; i++)
         for (j = 0; j < READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS; j++)
@@ -4816,14 +4816,14 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
@@ -4836,11 +4836,11 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
         size_t cur_loop_count      = original_loop_count;
         size_t total_recvcounts    = 0;
 
-        recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "HDcalloc succeeded");
+        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+        VRFY((NULL != recvcounts), "calloc succeeded");
 
-        displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "HDcalloc succeeded");
+        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+        VRFY((NULL != displs), "calloc succeeded");
 
         for (i = 0; i < (size_t)mpi_size; i++) {
             recvcounts[i] = (int)dataset_dims[1];
@@ -4863,17 +4863,17 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
-    HDfree(coords);
+    free(coords);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -4931,8 +4931,8 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add Column Index */
@@ -5051,14 +5051,14 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /*
      * Since these chunks are shared, run multiple rounds of MPI_Allgatherv
@@ -5070,11 +5070,11 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
         size_t loop_count       = count[0];
         size_t total_recvcounts = 0;
 
-        recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-        VRFY((NULL != recvcounts), "HDcalloc succeeded");
+        recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+        VRFY((NULL != recvcounts), "calloc succeeded");
 
-        displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-        VRFY((NULL != displs), "HDcalloc succeeded");
+        displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+        VRFY((NULL != displs), "calloc succeeded");
 
         for (i = 0; i < (size_t)mpi_size; i++) {
             recvcounts[i] = (int)dataset_dims[1];
@@ -5096,15 +5096,15 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -5160,8 +5160,8 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (hsize_t)mpi_size) + (i / (hsize_t)mpi_size));
@@ -5277,14 +5277,14 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /*
      * Due to the nature of 3-dimensional reading, create an MPI vector type that allows each
@@ -5312,11 +5312,11 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
     VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
 
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -5379,8 +5379,8 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     correct_buf_size = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS *
                        (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
@@ -5509,24 +5509,24 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)flat_dims[0];
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0]);
@@ -5538,15 +5538,15 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -5604,8 +5604,8 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] * dataset_dims[1])) +
@@ -5721,24 +5721,24 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)flat_dims[0];
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0]);
@@ -5750,15 +5750,15 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -5815,8 +5815,8 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add the Column Index */
@@ -5943,14 +5943,14 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     {
         size_t run_length =
@@ -5987,11 +5987,11 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
     VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
 
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -6055,8 +6055,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
         correct_buf[i].field1 = (short)((i % dataset_dims[1]) + (i / dataset_dims[1]));
@@ -6181,23 +6181,23 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    global_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
@@ -6209,15 +6209,15 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -6282,8 +6282,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
         correct_buf[i].field1 =
@@ -6414,23 +6414,23 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    global_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
@@ -6442,15 +6442,15 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -6515,8 +6515,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
         correct_buf[i].field1 = (short)((i % dataset_dims[1]) + (i / dataset_dims[1]));
@@ -6649,23 +6649,23 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    global_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
@@ -6677,15 +6677,15 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -6751,8 +6751,8 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     /* Setup the buffer for writing and for comparison */
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    correct_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++) {
         correct_buf[i].field1 =
@@ -6891,23 +6891,23 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
 
     read_buf_size = flat_dims[0] * sizeof(*read_buf);
 
-    read_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (COMPOUND_C_DATATYPE *)calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     VRFY((H5Dread(dset_id, memtype, memspace, filespace, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    global_buf = (COMPOUND_C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != global_buf), "HDcalloc succeeded");
+    global_buf = (COMPOUND_C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "calloc succeeded");
 
     /* Collect each piece of data from all ranks into a global buffer on all ranks */
-    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = (int *)calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         recvcounts[i] = (int)(flat_dims[0] * sizeof(*read_buf));
 
-    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = (int *)calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++)
         displs[i] = (int)(i * flat_dims[0] * sizeof(*read_buf));
@@ -6919,15 +6919,15 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (global_buf)
-        HDfree(global_buf);
+        free(global_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -7016,8 +7016,8 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
 
         data_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*data);
 
-        data = (C_DATATYPE *)HDcalloc(1, data_size);
-        VRFY((NULL != data), "HDcalloc succeeded");
+        data = (C_DATATYPE *)calloc(1, data_size);
+        VRFY((NULL != data), "calloc succeeded");
 
         for (i = 0; i < data_size / sizeof(*data); i++)
             data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -7029,7 +7029,7 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
         verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
         if (data)
-            HDfree(data);
+            free(data);
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -7039,11 +7039,11 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
 
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (long)i;
@@ -7064,9 +7064,9 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -7186,8 +7186,8 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sel_dims[2] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -7199,7 +7199,7 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
     verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -7228,11 +7228,11 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
 
         correct_buf_size = dataset_dims[0] * dataset_dims[1] * dataset_dims[2] * sizeof(*correct_buf);
 
-        correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-        VRFY((NULL != correct_buf), "HDcalloc succeeded");
+        correct_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != correct_buf), "calloc succeeded");
 
-        read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
-        VRFY((NULL != read_buf), "HDcalloc succeeded");
+        read_buf = (C_DATATYPE *)calloc(1, correct_buf_size);
+        VRFY((NULL != read_buf), "calloc succeeded");
 
         for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
             correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] * dataset_dims[1])) +
@@ -7247,8 +7247,8 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
         VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-        HDfree(correct_buf);
-        HDfree(read_buf);
+        free(correct_buf);
+        free(read_buf);
     }
 
     return;
@@ -7352,11 +7352,11 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
 
     data_size = sel_dims[0] * sel_dims[1] * sizeof(double);
 
-    data = (double *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (double *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    read_buf = (double *)HDcalloc(1, data_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (double *)calloc(1, data_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
         /* Continually write random float data, followed by zeroed-out data */
@@ -7389,9 +7389,9 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     }
 
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (data)
-        HDfree(data);
+        free(data);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -7501,11 +7501,11 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -7592,9 +7592,9 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -7704,11 +7704,11 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
-    read_buf = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -7796,9 +7796,9 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
@@ -7900,11 +7900,11 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Allocate buffer for reading entire dataset */
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
 
-    read_buf = HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
-    correct_buf = HDcalloc(1, read_buf_size);
-    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+    correct_buf = calloc(1, read_buf_size);
+    VRFY((NULL != correct_buf), "calloc succeeded");
 
     /* Read entire dataset and verify that the fill value is returned */
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
@@ -7949,8 +7949,8 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -7974,11 +7974,11 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
      * Each MPI rank communicates their written piece of data
      * into each other rank's correctness-checking buffer
      */
-    recvcounts = HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
-    displs = HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++) {
         recvcounts[i] = (int)(count[1] * block[1]);
@@ -8174,15 +8174,15 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
         VRFY((read_buf[i] != FILL_VALUES_TEST_FILL_VAL), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (correct_buf)
-        HDfree(correct_buf);
+        free(correct_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -8263,8 +8263,8 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     /* Allocate buffer for reading entire dataset */
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
 
-    read_buf = HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
     /*
      * Read entire dataset - nothing to verify since there's no fill value.
@@ -8316,8 +8316,8 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -8380,9 +8380,9 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
          "Dataset read succeeded");
 
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -8486,11 +8486,11 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     /* Allocate buffer for reading entire dataset */
     read_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*read_buf);
 
-    read_buf = HDcalloc(1, read_buf_size);
-    VRFY((NULL != read_buf), "HDcalloc succeeded");
+    read_buf = calloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "calloc succeeded");
 
-    fill_buf = HDcalloc(1, read_buf_size);
-    VRFY((NULL != fill_buf), "HDcalloc succeeded");
+    fill_buf = calloc(1, read_buf_size);
+    VRFY((NULL != fill_buf), "calloc succeeded");
 
     /* Read entire dataset and verify that the fill value isn't returned */
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
@@ -8540,8 +8540,8 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     /* Fill data buffer */
     data_size = sel_dims[0] * sel_dims[1] * sizeof(*data);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    data = (C_DATATYPE *)calloc(1, data_size);
+    VRFY((NULL != data), "calloc succeeded");
 
     for (i = 0; i < data_size / sizeof(*data); i++)
         data[i] = (C_DATATYPE)GEN_DATA(i);
@@ -8565,11 +8565,11 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * Each MPI rank communicates their written piece of data
      * into each other rank's correctness-checking buffer
      */
-    recvcounts = HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
-    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+    recvcounts = calloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "calloc succeeded");
 
-    displs = HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
-    VRFY((NULL != displs), "HDcalloc succeeded");
+    displs = calloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "calloc succeeded");
 
     for (i = 0; i < (size_t)mpi_size; i++) {
         recvcounts[i] = (int)(count[1] * block[1]);
@@ -8634,15 +8634,15 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
         VRFY((read_buf[i] != FILL_TIME_NEVER_TEST_FILL_VAL), "Data verification succeeded");
 
     if (displs)
-        HDfree(displs);
+        free(displs);
     if (recvcounts)
-        HDfree(recvcounts);
+        free(recvcounts);
     if (data)
-        HDfree(data);
+        free(data);
     if (read_buf)
-        HDfree(read_buf);
+        free(read_buf);
     if (fill_buf)
-        HDfree(fill_buf);
+        free(fill_buf);
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");

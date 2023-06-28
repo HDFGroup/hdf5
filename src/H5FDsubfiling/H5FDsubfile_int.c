@@ -101,10 +101,10 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
 
         num_subfiles_owned = sf_context->sf_num_fids;
 
-        if (NULL == (recv_reqs = HDmalloc((size_t)num_subfiles_owned * sizeof(*recv_reqs))))
+        if (NULL == (recv_reqs = malloc((size_t)num_subfiles_owned * sizeof(*recv_reqs))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate receive requests array");
-        if (NULL == (recv_msgs = HDmalloc((size_t)num_subfiles_owned * 3 * sizeof(*recv_msgs))))
+        if (NULL == (recv_msgs = malloc((size_t)num_subfiles_owned * 3 * sizeof(*recv_msgs))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
 
         /*
@@ -186,8 +186,8 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
 done:
-    HDfree(recv_msgs);
-    HDfree(recv_reqs);
+    free(recv_msgs);
+    free(recv_reqs);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* H5FD__subfiling__truncate_sub_files() */
@@ -308,11 +308,11 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     HDassert(n_io_concentrators > 0);
     HDassert(num_subfiles >= n_io_concentrators);
 
-    if (NULL == (sf_eofs = HDmalloc((size_t)num_subfiles * sizeof(int64_t))))
+    if (NULL == (sf_eofs = malloc((size_t)num_subfiles * sizeof(int64_t))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile EOFs array");
-    if (NULL == (recv_reqs = HDmalloc((size_t)num_subfiles * sizeof(*recv_reqs))))
+    if (NULL == (recv_reqs = malloc((size_t)num_subfiles * sizeof(*recv_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate receive requests array");
-    if (NULL == (recv_msg = HDmalloc((size_t)num_subfiles * sizeof(msg))))
+    if (NULL == (recv_msg = malloc((size_t)num_subfiles * sizeof(msg))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
 
     for (int i = 0; i < num_subfiles; i++) {
@@ -405,9 +405,9 @@ done:
         }
     }
 
-    HDfree(recv_msg);
-    HDfree(recv_reqs);
-    HDfree(sf_eofs);
+    free(recv_msg);
+    free(recv_reqs);
+    free(sf_eofs);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* H5FD__subfiling__get_real_eof() */

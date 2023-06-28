@@ -166,7 +166,7 @@ do_pio(parameters param)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
         GOTOERROR(FAIL);
 
     switch (iot) {
@@ -366,8 +366,8 @@ done:
     }
 
     /* release generic resources */
-    HDfree(buffer);
-    HDfree(fname);
+    free(buffer);
+    free(fname);
     res.ret_code = ret_code;
     return res;
 }

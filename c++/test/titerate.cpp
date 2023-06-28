@@ -267,7 +267,7 @@ test_iter_group(FileAccPropList &fapl)
 
         /* Free the dataset names */
         for (int i = 0; i < NDATASETS + 2; i++)
-            HDfree(lnames[i]);
+            free(lnames[i]);
 
         // Everything will be closed as they go out of scope
 

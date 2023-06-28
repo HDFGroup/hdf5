@@ -165,7 +165,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
     outputformat                = &string_dataformat;
 
     /* Build the object's path name */
-    obj_path = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    obj_path = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     if (!obj_path) {
         ret = FAIL;
         goto done;
@@ -211,7 +211,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
 
                         /* Restore old prefix name */
                         HDstrcpy(prefix, old_prefix);
-                        HDfree(old_prefix);
+                        free(old_prefix);
                     }
 
                     /* Close group */
@@ -316,10 +316,10 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                            HDfree(t_name);
-                            HDfree(t_obj_path);
-                            HDfree(t_prefix);
-                            HDfree(t_objname);
+                            free(t_name);
+                            free(t_obj_path);
+                            free(t_prefix);
+                            free(t_objname);
 
                             H5Dclose(obj);
                             goto done;
@@ -364,7 +364,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
 
         switch (linfo->type) {
             case H5L_TYPE_SOFT:
-                if ((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                if ((targbuf = (char *)malloc(linfo->u.val_size)) == NULL) {
                     error_msg("unable to allocate buffer\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
@@ -388,7 +388,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                         char *t_link_path;
                         int   res;
 
-                        t_link_path = (char *)HDmalloc(HDstrlen(prefix) + linfo->u.val_size + 1);
+                        t_link_path = (char *)malloc(HDstrlen(prefix) + linfo->u.val_size + 1);
                         if (targbuf[0] == '/')
                             HDstrcpy(t_link_path, targbuf);
                         else {
@@ -446,19 +446,19 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
                         }
 
-                        HDfree(t_prefix);
-                        HDfree(t_name);
-                        HDfree(t_targbuf);
-                        HDfree(t_obj_path);
-                        HDfree(t_link_path);
+                        free(t_prefix);
+                        free(t_name);
+                        free(t_targbuf);
+                        free(t_obj_path);
+                        free(t_link_path);
                     }
 
-                    HDfree(targbuf);
+                    free(targbuf);
                 }
                 break;
 
             case H5L_TYPE_EXTERNAL:
-                if ((targbuf = (char *)HDmalloc(linfo->u.val_size)) == NULL) {
+                if ((targbuf = (char *)malloc(linfo->u.val_size)) == NULL) {
                     error_msg("unable to allocate buffer\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret = FAIL;
@@ -512,14 +512,14 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                            HDfree(t_prefix);
-                            HDfree(t_name);
-                            HDfree(t_filename);
-                            HDfree(t_targname);
-                            HDfree(t_obj_path);
+                            free(t_prefix);
+                            free(t_name);
+                            free(t_filename);
+                            free(t_targname);
+                            free(t_obj_path);
                         } /* end else */
                     }     /* end else */
-                    HDfree(targbuf);
+                    free(targbuf);
                 }
                 break;
 
@@ -556,9 +556,9 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                HDfree(t_prefix);
-                HDfree(t_name);
-                HDfree(t_obj_path);
+                free(t_prefix);
+                free(t_name);
+                free(t_obj_path);
             } break;
 
         } /* end switch */
@@ -569,7 +569,7 @@ done:
     h5tools_str_close(&buffer);
 
     if (obj_path)
-        HDfree(obj_path);
+        free(obj_path);
     return ret;
 }
 
@@ -689,7 +689,7 @@ xml_escape_the_name(const char *str)
 
     cp      = str;
     ncp_len = len + extra + 1;
-    rcp = ncp = (char *)HDmalloc(ncp_len);
+    rcp = ncp = (char *)malloc(ncp_len);
 
     if (!ncp)
         return NULL; /* ?? */
@@ -782,7 +782,7 @@ xml_escape_the_string(const char *str, int slen)
 
     cp      = str;
     ncp_len = len + extra + 1;
-    rcp = ncp = (char *)HDcalloc(ncp_len, sizeof(char));
+    rcp = ncp = (char *)calloc(ncp_len, sizeof(char));
 
     if (ncp == NULL)
         return NULL; /* ?? */
@@ -912,7 +912,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             /* This should be defined somewhere else */
             /* These 2 cases are handled the same right now, but
                probably will have something different eventually */
-            char *dtxid = (char *)HDmalloc((size_t)100);
+            char *dtxid = (char *)malloc((size_t)100);
 
             xml_name_to_XID(type, found_obj->objname, dtxid, 100, 1);
             if (!found_obj->recorded) {
@@ -939,9 +939,9 @@ xml_print_datatype(hid_t type, unsigned in_group)
                                    dtxid, t_objname);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                HDfree(t_objname);
+                free(t_objname);
             }
-            HDfree(dtxid);
+            free(dtxid);
         }
         else {
             ctx.need_prefix = TRUE;
@@ -1286,7 +1286,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
                     H5free_memory(mname);
-                    HDfree(t_fname);
+                    free(t_fname);
                     dump_indent += COL;
                     ctx.indent_level++;
 
@@ -1612,7 +1612,7 @@ xml_dump_datatype(hid_t type)
         if (found_obj) {
             /* Shared datatype, must be entered as an object  */
             /* These 2 cases are the same now, but may change */
-            char *dtxid = (char *)HDmalloc((size_t)100);
+            char *dtxid = (char *)malloc((size_t)100);
 
             xml_name_to_XID(type, found_obj->objname, dtxid, 100, 1);
             if (!found_obj->recorded) {
@@ -1642,9 +1642,9 @@ xml_dump_datatype(hid_t type)
                                    xmlnsprefix, dtxid, t_objname);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                HDfree(t_objname);
+                free(t_objname);
             }
-            HDfree(dtxid);
+            free(dtxid);
         }
         else {
             ctx.need_prefix = TRUE;
@@ -2081,7 +2081,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     h5tools_str_append(&buffer, "<%sAttribute Name=\"%s\">", xmlnsprefix, t_aname);
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-    HDfree(t_aname);
+    free(t_aname);
 
     if ((attr_id = H5Aopen(attr, attr_name, H5P_DEFAULT)) >= 0) {
         type       = H5Aget_type(attr_id);
@@ -2370,7 +2370,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     char             *t_prefix  = NULL;
     char             *t_name    = NULL;
 
-    tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     if (tmp == NULL) {
         indentation(dump_indent);
         error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -2406,8 +2406,8 @@ xml_dump_named_datatype(hid_t type, const char *name)
     string_dataformat.do_escape = dump_opts.display_escape;
     outputformat                = &string_dataformat;
 
-    dtxid     = (char *)HDmalloc((size_t)100);
-    parentxid = (char *)HDmalloc((size_t)100);
+    dtxid     = (char *)malloc((size_t)100);
+    parentxid = (char *)malloc((size_t)100);
     t_tmp     = xml_escape_the_name(tmp);
     t_prefix  = xml_escape_the_name(prefix);
     t_name    = xml_escape_the_name(name);
@@ -2493,7 +2493,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
                 h5tools_str_append(&buffer, "</%sNamedDataType>", xmlnsprefix);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                HDfree(t_objname);
+                free(t_objname);
                 goto done;
             }
             else
@@ -2541,12 +2541,12 @@ done:
 
     h5tools_str_close(&buffer);
 
-    HDfree(dtxid);
-    HDfree(parentxid);
-    HDfree(t_tmp);
-    HDfree(t_prefix);
-    HDfree(t_name);
-    HDfree(tmp);
+    free(dtxid);
+    free(parentxid);
+    free(t_tmp);
+    free(t_prefix);
+    free(t_name);
+    free(tmp);
 }
 
 /*-------------------------------------------------------------------------
@@ -2631,7 +2631,7 @@ xml_dump_group(hid_t gid, const char *name)
         tmp    = HDstrdup("/");
     }
     else {
-        tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+        tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
         if (tmp == NULL) {
             indentation(dump_indent);
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -2665,11 +2665,11 @@ xml_dump_group(hid_t gid, const char *name)
         }
         else {
             char *t_name    = xml_escape_the_name(name);
-            char *grpxid    = (char *)HDmalloc((size_t)100);
-            char *parentxid = (char *)HDmalloc((size_t)100);
+            char *grpxid    = (char *)malloc((size_t)100);
+            char *parentxid = (char *)malloc((size_t)100);
 
             if (found_obj->displayed) {
-                char *ptrstr = (char *)HDmalloc((size_t)100);
+                char *ptrstr = (char *)malloc((size_t)100);
 
                 /* already seen: enter a groupptr */
                 if (isRoot) {
@@ -2702,8 +2702,8 @@ xml_dump_group(hid_t gid, const char *name)
                                        par_name);
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                    HDfree(t_objname);
-                    HDfree(par_name);
+                    free(t_objname);
+                    free(par_name);
 
                     ctx.indent_level++;
 
@@ -2725,10 +2725,10 @@ xml_dump_group(hid_t gid, const char *name)
 
                     ctx.indent_level--;
 
-                    HDfree(t_objname);
-                    HDfree(par_name);
+                    free(t_objname);
+                    free(par_name);
                 }
-                HDfree(ptrstr);
+                free(ptrstr);
             }
             else {
 
@@ -2763,8 +2763,8 @@ xml_dump_group(hid_t gid, const char *name)
                     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-                    HDfree(t_tmp);
-                    HDfree(par_name);
+                    free(t_tmp);
+                    free(par_name);
                 }
                 found_obj->displayed = TRUE;
 
@@ -2820,16 +2820,16 @@ xml_dump_group(hid_t gid, const char *name)
                 dump_indent -= COL;
                 ctx.indent_level--;
             }
-            HDfree(t_name);
-            HDfree(grpxid);
-            HDfree(parentxid);
+            free(t_name);
+            free(grpxid);
+            free(parentxid);
         }
     }
     else {
         /* only link -- must be first time! */
         char *t_name    = xml_escape_the_name(name);
-        char *grpxid    = (char *)HDmalloc((size_t)100);
-        char *parentxid = (char *)HDmalloc((size_t)100);
+        char *grpxid    = (char *)malloc((size_t)100);
+        char *parentxid = (char *)malloc((size_t)100);
 
         ctx.need_prefix = TRUE;
 
@@ -2851,15 +2851,15 @@ xml_dump_group(hid_t gid, const char *name)
                                "<%sGroup Name=\"%s\" OBJ-XID=\"%s\" H5Path=\"%s\" "
                                "Parents=\"%s\" H5ParentPaths=\"%s\" >",
                                xmlnsprefix, t_name, grpxid, t_tmp, parentxid, par_name);
-            HDfree(t_tmp);
-            HDfree(par_name);
+            free(t_tmp);
+            free(par_name);
         }
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-        HDfree(t_name);
-        HDfree(grpxid);
-        HDfree(parentxid);
+        free(t_name);
+        free(grpxid);
+        free(parentxid);
 
         /* 1.  do all the attributes of the group */
 
@@ -2928,9 +2928,9 @@ xml_dump_group(hid_t gid, const char *name)
     h5tools_str_close(&buffer);
 
     if (par)
-        HDfree(par);
+        free(par);
     if (tmp)
-        HDfree(tmp);
+        free(tmp);
 }
 
 /*-------------------------------------------------------------------------
@@ -2983,7 +2983,7 @@ xml_print_refs(hid_t did, int source)
         if ((ssiz = H5Sget_simple_extent_npoints(space)) < 0)
             goto error;
 
-        buf = (char *)HDcalloc((size_t)ssiz, sizeof(H5R_ref_t));
+        buf = (char *)calloc((size_t)ssiz, sizeof(H5R_ref_t));
         if (buf == NULL)
             goto error;
         e = H5Dread(did, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -2996,7 +2996,7 @@ xml_print_refs(hid_t did, int source)
         if ((ssiz = H5Sget_simple_extent_npoints(space)) < 0)
             goto error;
 
-        buf = (char *)HDcalloc((size_t)ssiz, sizeof(H5R_ref_t));
+        buf = (char *)calloc((size_t)ssiz, sizeof(H5R_ref_t));
         if (buf == NULL)
             goto error;
         e = H5Aread(did, H5T_STD_REF, buf);
@@ -3054,7 +3054,7 @@ xml_print_refs(hid_t did, int source)
             h5tools_str_append(&buffer, "\"%s\"", t_path);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            HDfree(t_path);
+            free(t_path);
         }
         ctx.indent_level--;
 
@@ -3065,14 +3065,14 @@ xml_print_refs(hid_t did, int source)
 
     h5tools_str_close(&buffer);
 
-    HDfree(buf);
+    free(buf);
     H5Tclose(type);
     H5Sclose(space);
     return SUCCEED;
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     H5E_BEGIN_TRY
     {
@@ -3133,7 +3133,7 @@ xml_print_strs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = HDmalloc((size_t)ssiz * tsiz);
+        buf = malloc((size_t)ssiz * tsiz);
         if (buf == NULL)
             goto error;
 
@@ -3148,7 +3148,7 @@ xml_print_strs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = HDmalloc((size_t)ssiz * tsiz);
+        buf = malloc((size_t)ssiz * tsiz);
         if (buf == NULL)
             goto error;
 
@@ -3159,7 +3159,7 @@ xml_print_strs(hid_t did, int source)
 
     bp = (char *)buf;
     if (!is_vlstr) {
-        onestring = (char *)HDcalloc(tsiz, sizeof(char));
+        onestring = (char *)calloc(tsiz, sizeof(char));
         if (onestring == NULL)
             goto error;
     }
@@ -3219,7 +3219,7 @@ xml_print_strs(hid_t did, int source)
                 h5tools_str_append(&buffer, "\"%s\"", t_onestring);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                        (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                HDfree(t_onestring);
+                free(t_onestring);
             }
         }
         bp += tsiz;
@@ -3230,11 +3230,11 @@ xml_print_strs(hid_t did, int source)
     /* Reclaim any VL memory, if necessary */
     if (!is_vlstr)
         if (onestring)
-            HDfree(onestring);
+            free(onestring);
     if (buf) {
         if (is_vlstr)
             H5Treclaim(type, space, H5P_DEFAULT, buf);
-        HDfree(buf);
+        free(buf);
     }
     H5Tclose(type);
     H5Sclose(space);
@@ -3242,7 +3242,7 @@ xml_print_strs(hid_t did, int source)
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     H5E_BEGIN_TRY
     {
@@ -3459,7 +3459,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     dump_indent += COL;
 
     space = H5Tget_size(type);
-    buf   = HDmalloc((size_t)space);
+    buf   = malloc((size_t)space);
 
     H5Pget_fill_value(dcpl, type, buf);
 
@@ -3492,7 +3492,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
             h5tools_str_append(&buffer, "\"%s\"", t_path);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            HDfree(t_path);
+            free(t_path);
         }
 
         ctx.need_prefix = TRUE;
@@ -3732,7 +3732,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
                 break;
         }
     }
-    HDfree(buf);
+    free(buf);
     ctx.indent_level--;
     dump_indent -= COL;
 
@@ -3782,15 +3782,15 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
-    char *rstr = (char *)HDmalloc((size_t)100);
-    char *pstr = (char *)HDmalloc((size_t)100);
+    char *rstr = (char *)malloc((size_t)100);
+    char *pstr = (char *)malloc((size_t)100);
 
-    tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    tmp = (char *)malloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     if (tmp == NULL) {
         error_msg("buffer allocation failed\n");
         h5tools_setstatus(EXIT_FAILURE);
-        HDfree(rstr);
-        HDfree(pstr);
+        free(rstr);
+        free(pstr);
         return;
     }
 
@@ -3839,12 +3839,12 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                            (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
-    HDfree(t_name);
-    HDfree(t_tmp);
-    HDfree(t_prefix);
-    HDfree(rstr);
-    HDfree(pstr);
-    HDfree(tmp);
+    free(t_name);
+    free(t_tmp);
+    free(t_prefix);
+    free(rstr);
+    free(pstr);
+    free(tmp);
 
     dcpl  = H5Dget_create_plist(did);
     type  = H5Dget_type(did);
@@ -3860,7 +3860,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
             h5tools_setstatus(EXIT_FAILURE);
         }
         else {
-            chsize = (hsize_t *)HDmalloc((size_t)maxdims * sizeof(hsize_t));
+            chsize = (hsize_t *)malloc((size_t)maxdims * sizeof(hsize_t));
             ctx.indent_level++;
             dump_indent += COL;
 
@@ -3943,7 +3943,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
                                    (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
             ctx.indent_level--;
             dump_indent -= COL;
-            HDfree(chsize);
+            free(chsize);
         }
     }
     else if (H5D_CONTIGUOUS == H5Pget_layout(dcpl)) {
@@ -4457,8 +4457,8 @@ xml_print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    name  = (char **)HDcalloc((size_t)nmembs, sizeof(char *));
-    value = (unsigned char *)HDcalloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+    name  = (char **)calloc((size_t)nmembs, sizeof(char *));
+    value = (unsigned char *)calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);
@@ -4494,7 +4494,7 @@ xml_print_enum(hid_t type)
         h5tools_str_append(&buffer, "%s", t_name);
         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos,
                                (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-        HDfree(t_name);
+        free(t_name);
         ctx.indent_level--;
 
         ctx.need_prefix = TRUE;
@@ -4557,7 +4557,7 @@ xml_print_enum(hid_t type)
     for (i = 0; i < nmembs; i++)
         H5free_memory(name[i]);
 
-    HDfree(name);
-    HDfree(value);
+    free(name);
+    free(value);
     H5Tclose(super);
 }

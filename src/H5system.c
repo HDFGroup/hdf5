@@ -75,7 +75,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
     char  *buf;   /* buffer to receive formatted string */
     size_t bufsz; /* size of buffer to allocate */
 
-    for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL;) {
+    for (bufsz = 32; (buf = malloc(bufsz)) != NULL;) {
         int     ret;
         va_list ap;
 
@@ -86,7 +86,7 @@ HDvasprintf(char **bufp, const char *fmt, va_list _ap)
             *bufp = buf;
             return ret;
         }
-        HDfree(buf);
+        free(buf);
         if (ret < 0)
             return ret;
         bufsz = (size_t)ret + 1;
@@ -1301,7 +1301,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         H5_optind++;
         sp = 1;
 
-        HDfree(arg);
+        free(arg);
     }
     else {
         char *cp; /* pointer into current token */

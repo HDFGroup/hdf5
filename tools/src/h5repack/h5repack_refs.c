@@ -152,18 +152,18 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                          *-------------------------------------------------------------------------
                          */
                         if (nelmts) {
-                            buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
+                            buf = (hobj_ref_t *)malloc((unsigned)(nelmts * msize));
                             if (buf == NULL) {
                                 HDprintf("cannot read into memory\n");
-                                H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                                H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                             } /* end if */
                             if (H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
 
-                            refbuf = (hobj_ref_t *)HDcalloc((unsigned)nelmts, msize);
+                            refbuf = (hobj_ref_t *)calloc((unsigned)nelmts, msize);
                             if (refbuf == NULL) {
                                 HDprintf("cannot allocate memory\n");
-                                H5TOOLS_GOTO_ERROR((-1), "HDcalloc failed");
+                                H5TOOLS_GOTO_ERROR((-1), "calloc failed");
                             } /* end if */
                             for (u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY
@@ -207,9 +207,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                         if (buf)
-                            HDfree(buf);
+                            free(buf);
                         if (refbuf)
-                            HDfree(refbuf);
+                            free(refbuf);
 
                         /*------------------------------------------------------
                          * copy attrs
@@ -234,10 +234,10 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                          *-------------------------------------------------------------------------
                          */
                         if (nelmts) {
-                            buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
+                            buf = (hdset_reg_ref_t *)malloc((unsigned)(nelmts * msize));
                             if (buf == NULL) {
                                 HDprintf("cannot read into memory\n");
-                                H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                                H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                             } /* end if */
                             if (H5Dread(dset_in, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
@@ -246,11 +246,11 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                              * create output
                              *-------------------------------------------------------------------------
                              */
-                            refbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t),
-                                                                 (size_t)nelmts); /*init to zero */
+                            refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t),
+                                                               (size_t)nelmts); /*init to zero */
                             if (refbuf == NULL) {
                                 HDprintf("cannot allocate memory\n");
-                                H5TOOLS_GOTO_ERROR((-1), "HDcalloc failed");
+                                H5TOOLS_GOTO_ERROR((-1), "calloc failed");
                             } /* end if */
 
                             for (u = 0; u < nelmts; u++) {
@@ -301,9 +301,9 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                         if (buf)
-                            HDfree(buf);
+                            free(buf);
                         if (refbuf)
-                            HDfree(refbuf);
+                            free(refbuf);
 
                         /*-----------------------------------------------------
                          * copy attrs
@@ -506,8 +506,8 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             if (nmembers < 1)
                 H5TOOLS_GOTO_ERROR((-1), "H5Tget_nmembers failed");
 
-            ref_comp_index   = (unsigned *)HDmalloc((size_t)nmembers * sizeof(unsigned));
-            ref_comp_size    = (size_t *)HDmalloc((size_t)nmembers * sizeof(ref_comp_size));
+            ref_comp_index   = (unsigned *)malloc((size_t)nmembers * sizeof(unsigned));
+            ref_comp_size    = (size_t *)malloc((size_t)nmembers * sizeof(ref_comp_size));
             ref_comp_field_n = 0;
 
             for (i = 0; i < (unsigned)nmembers; i++) {
@@ -527,12 +527,12 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
              * statement below. */
             if (!ref_comp_field_n) {
                 if (ref_comp_index) {
-                    HDfree(ref_comp_index);
+                    free(ref_comp_index);
                     ref_comp_index = NULL;
                 }
 
                 if (ref_comp_size) {
-                    HDfree(ref_comp_size);
+                    free(ref_comp_size);
                     ref_comp_size = NULL;
                 }
             }
@@ -598,18 +598,18 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
         if (nelmts > 0) {
             /* handle object references */
             if ((is_ref || is_ref_array) && (H5R_OBJ_REF_BUF_SIZE == msize)) {
-                buf = (hobj_ref_t *)HDmalloc((unsigned)(nelmts * msize));
+                buf = (hobj_ref_t *)malloc((unsigned)(nelmts * msize));
                 if (buf == NULL) {
                     HDprintf("cannot read into memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                 } /* end if */
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
 
-                refbuf = (hobj_ref_t *)HDcalloc((unsigned)nelmts, msize);
+                refbuf = (hobj_ref_t *)calloc((unsigned)nelmts, msize);
                 if (refbuf == NULL) {
                     HDprintf("cannot allocate memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDcalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "calloc failed");
                 } /* end if */
 
                 for (i = 0; i < (unsigned)nelmts; i++)
@@ -619,11 +619,11 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             } /* H5T_STD_REF_OBJ */
             /* handle region references */
             else if ((is_ref || is_ref_array) && (H5R_DSET_REG_REF_BUF_SIZE == msize)) {
-                buf = (hdset_reg_ref_t *)HDmalloc((unsigned)(nelmts * msize));
+                buf = (hdset_reg_ref_t *)malloc((unsigned)(nelmts * msize));
 
                 if (buf == NULL) {
                     HDprintf("cannot read into memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                 } /* end if */
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
                     H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
@@ -632,11 +632,10 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                  * create output
                  *-------------------------------------------------------------------------
                  */
-                refbuf =
-                    (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
+                refbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)nelmts); /*init to zero */
                 if (refbuf == NULL) {
                     HDprintf("cannot allocate memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDcalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "calloc failed");
                 } /* end if */
 
                 for (i = 0; i < (unsigned)nelmts; i++)
@@ -647,12 +646,12 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             else if (is_ref_vlen) {
                 /* handle VLEN of references */
 
-                buf    = (hvl_t *)HDmalloc((unsigned)(nelmts * sizeof(hvl_t)));
+                buf    = (hvl_t *)malloc((unsigned)(nelmts * sizeof(hvl_t)));
                 refbuf = buf; /* reuse the read buffer for write */
 
                 if (buf == NULL) {
                     HDprintf("cannot read into memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                 } /* end if */
 
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
@@ -689,12 +688,12 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             else if (is_ref_comp) {
                 /* handle ref fields in a compound */
 
-                buf    = HDmalloc((unsigned)(nelmts * msize));
+                buf    = malloc((unsigned)(nelmts * msize));
                 refbuf = buf; /* reuse the read buffer for write */
 
                 if (buf == NULL) {
                     HDprintf("cannot read into memory\n");
-                    H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
+                    H5TOOLS_GOTO_ERROR((-1), "malloc failed");
                 } /* end if */
 
                 if (H5Aread(attr_id, mtype_id, buf) < 0)
@@ -739,22 +738,22 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
             refbuf = NULL; /* set it to NULL to avoid double free since buf and refbuf are the same. */
 
         if (buf) {
-            HDfree(buf);
+            free(buf);
             buf = NULL;
         }
 
         if (refbuf) {
-            HDfree(refbuf);
+            free(refbuf);
             refbuf = NULL;
         }
 
         if (ref_comp_index) {
-            HDfree(ref_comp_index);
+            free(ref_comp_index);
             ref_comp_index = NULL;
         }
 
         if (ref_comp_size) {
-            HDfree(ref_comp_size);
+            free(ref_comp_size);
             ref_comp_size = NULL;
         }
 
@@ -777,15 +776,15 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
 
 done:
     if (refbuf)
-        HDfree(refbuf);
+        free(refbuf);
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     if (ref_comp_index)
-        HDfree(ref_comp_index);
+        free(ref_comp_index);
 
     if (ref_comp_size)
-        HDfree(ref_comp_size);
+        free(ref_comp_size);
 
     H5E_BEGIN_TRY
     {

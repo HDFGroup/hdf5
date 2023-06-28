@@ -144,7 +144,7 @@ do_sio(parameters param, results *res)
     /* IO type */
     iot = param.io_type;
 
-    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+    if (NULL == (fname = calloc(FILENAME_MAX, sizeof(char))))
         GOTOERROR(FAIL);
 
     switch (iot) {
@@ -268,8 +268,8 @@ done:
     }
 
     /* release generic resources */
-    HDfree(buffer);
-    HDfree(fname);
+    free(buffer);
+    free(fname);
 
     res->ret_code = ret_code;
 }
@@ -1169,7 +1169,7 @@ set_vfd(parameters *param)
 
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 
-        if (NULL == (sv = HDcalloc(1, sizeof(*sv))))
+        if (NULL == (sv = calloc(1, sizeof(*sv))))
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
@@ -1179,11 +1179,11 @@ set_vfd(parameters *param)
         }
 
         if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0) {
-            HDfree(sv);
+            free(sv);
             return -1;
         }
 
-        HDfree(sv);
+        free(sv);
     }
     else if (vfd == family) {
         hsize_t fam_size = 1 * 1024 * 1024; /*100 MB*/
@@ -1271,7 +1271,7 @@ do_cleanupfile(iotype iot, char *filename)
     hid_t  driver;
 
     temp_sz = (4096 + sizeof("-?.h5")) * sizeof(char);
-    if (NULL == (temp = HDcalloc(1, temp_sz)))
+    if (NULL == (temp = calloc(1, temp_sz)))
         goto done;
 
     if (clean_file_g == -1)
@@ -1332,5 +1332,5 @@ do_cleanupfile(iotype iot, char *filename)
     }
 
 done:
-    HDfree(temp);
+    free(temp);
 }

@@ -63,7 +63,7 @@ test_vltypes_alloc_custom(size_t size, void *mem_used)
                                                                *      DEC Alpha to keep the alignment correct - QAK)
                                                                */
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *(size_t *)mem_used += size;
     } /* end if */
@@ -93,7 +93,7 @@ test_vltypes_free_custom(void *_mem, void *mem_used)
         unsigned char *mem = ((unsigned char *)_mem) - extra;     /* Pointer to actual block allocated */
 
         *(size_t *)mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 }
 
@@ -257,7 +257,7 @@ test_vltypes_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(unsigned int));
+        wdata[i].p   = malloc((i + 1) * sizeof(unsigned int));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].p)[j] = i * 10 + j;
@@ -588,7 +588,7 @@ rewrite_vltypes_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + increment) * sizeof(unsigned int));
+        wdata[i].p   = malloc((i + increment) * sizeof(unsigned int));
         wdata[i].len = i + increment;
         for (j = 0; j < (i + increment); j++)
             ((unsigned int *)wdata[i].p)[j] = i * 20 + j;
@@ -750,7 +750,7 @@ test_vltypes_vlen_compound(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + 1) * sizeof(s1));
+        wdata[i].p   = malloc((i + 1) * sizeof(s1));
         wdata[i].len = i + 1;
         for (j = 0; j < (i + 1); j++) {
             ((s1 *)wdata[i].p)[j].i = (int)(i * 10 + j);
@@ -902,7 +902,7 @@ rewrite_vltypes_vlen_compound(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p   = HDmalloc((i + increment) * sizeof(s1));
+        wdata[i].p   = malloc((i + increment) * sizeof(s1));
         wdata[i].len = i + increment;
         for (j = 0; j < (i + increment); j++) {
             ((s1 *)wdata[i].p)[j].i = (int)(i * 40 + j);
@@ -1051,17 +1051,17 @@ test_vltypes_compound_vlen_vlen(void)
     MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
 
     /* Allocate and initialize VL data to write */
-    wdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK_PTR(wdata, "HDmalloc");
-    rdata = (s1 *)HDmalloc(sizeof(s1) * SPACE3_DIM1);
-    CHECK_PTR(rdata, "HDmalloc");
+    wdata = (s1 *)malloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK_PTR(wdata, "malloc");
+    rdata = (s1 *)malloc(sizeof(s1) * SPACE3_DIM1);
+    CHECK_PTR(rdata, "malloc");
     for (i = 0; i < SPACE3_DIM1; i++) {
         wdata[i].i     = (int)(i * 10);
         wdata[i].f     = (float)(i * 20) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + L1_INCM) * sizeof(hvl_t));
+        wdata[i].v.p   = malloc((i + L1_INCM) * sizeof(hvl_t));
         wdata[i].v.len = i + L1_INCM;
         for (t1 = (hvl_t *)((wdata[i].v).p), j = 0; j < (i + L1_INCM); j++, t1++) {
-            t1->p   = HDmalloc((j + L2_INCM) * sizeof(unsigned int));
+            t1->p   = malloc((j + L2_INCM) * sizeof(unsigned int));
             t1->len = j + L2_INCM;
             for (k = 0; k < j + L2_INCM; k++)
                 ((unsigned int *)t1->p)[k] = i * 100 + j * 10 + k;
@@ -1193,8 +1193,8 @@ test_vltypes_compound_vlen_vlen(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Release buffers */
-    HDfree(wdata);
-    HDfree(rdata);
+    free(wdata);
+    free(rdata);
 } /* end test_vltypes_compound_vlen_vlen() */
 
 /****************************************************************
@@ -1241,11 +1241,11 @@ test_vltypes_compound_vlstr(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].v.p   = (s2 *)HDmalloc((i + L3_INCM) * sizeof(s2));
+        wdata[i].v.p   = (s2 *)malloc((i + L3_INCM) * sizeof(s2));
         wdata[i].v.len = i + L3_INCM;
         for (t1 = (s2 *)((wdata[i].v).p), j = 0; j < (i + L3_INCM); j++, t1++) {
             HDstrcat(str, "m");
-            t1->string = (char *)HDmalloc(HDstrlen(str) * sizeof(char) + 1);
+            t1->string = (char *)malloc(HDstrlen(str) * sizeof(char) + 1);
             HDstrcpy(t1->string, str);
             /*t1->color = red;*/
             t1->color = blue;
@@ -1411,11 +1411,11 @@ test_vltypes_compound_vlstr(void)
     /* Use this part for new data */
     HDstrcpy(str, "bbbbbbbb\0");
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata2[i].v.p   = (s2 *)HDmalloc((i + 1) * sizeof(s2));
+        wdata2[i].v.p   = (s2 *)malloc((i + 1) * sizeof(s2));
         wdata2[i].v.len = i + 1;
         for (t1 = (s2 *)(wdata2[i].v).p, j = 0; j < i + 1; j++, t1++) {
             HDstrcat(str, "pp");
-            t1->string = (char *)HDmalloc(HDstrlen(str) * sizeof(char) + 1);
+            t1->string = (char *)malloc(HDstrlen(str) * sizeof(char) + 1);
             HDstrcpy(t1->string, str);
             t1->color = green;
         }
@@ -1529,7 +1529,7 @@ test_vltypes_compound_vlen_atomic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i     = (int)(i * 10);
         wdata[i].f     = (float)(i * 20) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + 1) * sizeof(unsigned int));
+        wdata[i].v.p   = malloc((i + 1) * sizeof(unsigned int));
         wdata[i].v.len = i + 1;
         for (j = 0; j < (i + 1); j++)
             ((unsigned int *)wdata[i].v.p)[j] = i * 10 + j;
@@ -1763,7 +1763,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
     for (i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i     = (int)(i * 40);
         wdata[i].f     = (float)(i * 50) / 3.0F;
-        wdata[i].v.p   = HDmalloc((i + increment) * sizeof(unsigned int));
+        wdata[i].v.p   = malloc((i + increment) * sizeof(unsigned int));
         wdata[i].v.len = i + increment;
         for (j = 0; j < (i + increment); j++)
             ((unsigned int *)wdata[i].v.p)[j] = i * 60 + j;
@@ -1937,14 +1937,14 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + 1;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + 1); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2138,14 +2138,14 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + increment) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + increment) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + increment;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + increment); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2318,14 +2318,14 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for (i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].p = HDmalloc((i + increment) * sizeof(hvl_t));
+        wdata[i].p = malloc((i + increment) * sizeof(hvl_t));
         if (wdata[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return;
         } /* end if */
         wdata[i].len = i + increment;
         for (t1 = (hvl_t *)(wdata[i].p), j = 0; j < (i + increment); j++, t1++) {
-            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            t1->p = malloc((j + 1) * sizeof(unsigned int));
             if (t1->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return;
@@ -2594,8 +2594,8 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Allocate space for the buffer to read data */
-    rbuf = (dtype1_struct *)HDmalloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
-    CHECK_PTR(rbuf, "HDmalloc");
+    rbuf = (dtype1_struct *)malloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
+    CHECK_PTR(rbuf, "malloc");
 
     /* Create the small & large dataspaces to use */
     small_dspace_id = H5Screate_simple(SPACE4_RANK, small_dims, NULL);
@@ -3215,7 +3215,7 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Release buffer */
-    HDfree(rbuf);
+    free(rbuf);
 } /* end test_vltypes_fill_value() */
 
 /****************************************************************

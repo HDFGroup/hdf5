@@ -229,7 +229,7 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     tparam->nsblks = 1 + (cparam->max_nelmts_bits - H5VM_log2_of2(cparam->data_blk_min_elmts));
 
     /* Allocate information for each super block */
-    tparam->sblk_info = (H5EA_sblk_info_t *)HDmalloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
+    tparam->sblk_info = (H5EA_sblk_info_t *)malloc(sizeof(H5EA_sblk_info_t) * tparam->nsblks);
     HDassert(tparam->sblk_info);
 
     /* Compute information about each super block */
@@ -266,7 +266,7 @@ static int
 finish_tparam(earray_test_param_t *tparam)
 {
     /* Release super block information */
-    HDfree(tparam->sblk_info);
+    free(tparam->sblk_info);
     tparam->sblk_info = NULL;
 
     return (0);
@@ -1300,7 +1300,7 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
     eiter_fw_t *eiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
+    eiter = (eiter_fw_t *)malloc(sizeof(eiter_fw_t));
     HDassert(eiter);
 
     /* Initialize the element iteration object */
@@ -1444,7 +1444,7 @@ eiter_fw_term(void *eiter)
     HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_fw_term() */
@@ -1487,7 +1487,7 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
     eiter_rv_t *eiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
+    eiter = (eiter_rv_t *)malloc(sizeof(eiter_rv_t));
     HDassert(eiter);
 
     /* Initialize reverse iteration info */
@@ -1669,7 +1669,7 @@ eiter_rv_term(void *eiter)
     HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rv_term() */
@@ -1711,11 +1711,11 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
     HDassert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
     HDassert(eiter->idx);
 
     /* Initialize reverse iteration info */
@@ -1822,10 +1822,10 @@ eiter_rnd_term(void *in_eiter)
     HDassert(eiter->idx);
 
     /* Free shuffled index array */
-    HDfree(eiter->idx);
+    free(eiter->idx);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_rnd_term() */
@@ -1860,11 +1860,11 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    eiter = (eiter_rnd_t *)malloc(sizeof(eiter_rnd_t));
     HDassert(eiter);
 
     /* Allocate space for the array of shuffled indices */
-    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    eiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
     HDassert(eiter->idx);
 
     /* Initialize reverse iteration info */
@@ -1877,7 +1877,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         hsize_t  sparse_cnt = (hsize_t)(cnt * EA_RND2_SCALE); /* Sparse range to choose from */
 
         /* Allocate temporary index array */
-        tmp_idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)sparse_cnt);
+        tmp_idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)sparse_cnt);
         HDassert(tmp_idx);
 
         /* Initialize temporary index array, for shuffling */
@@ -1894,7 +1894,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
         } /* end for */
 
         /* Release temporary array */
-        HDfree(tmp_idx);
+        free(tmp_idx);
     } /* end if */
     else {
         for (u = 0; u < (size_t)cnt; u++)
@@ -1942,7 +1942,7 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     eiter_cyc_t *eiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
+    eiter = (eiter_cyc_t *)malloc(sizeof(eiter_cyc_t));
     HDassert(eiter);
 
     /* Initialize reverse iteration info */
@@ -2037,7 +2037,7 @@ eiter_cyc_term(void *in_eiter)
     HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(eiter);
+    free(eiter);
 
     return (0);
 } /* end eiter_cyc_term() */

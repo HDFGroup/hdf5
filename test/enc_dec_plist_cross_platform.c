@@ -180,7 +180,7 @@ test_plists(const char *filename_prefix)
                 TEST_ERROR;
             size_1 = (size_t)HDlseek(fd_1, (HDoff_t)0, SEEK_END);
             HDlseek(fd_1, (HDoff_t)0, SEEK_SET);
-            buf_1 = (void *)HDmalloc(size_1);
+            buf_1 = (void *)malloc(size_1);
             if (HDread(fd_1, buf_1, size_1) < 0)
                 TEST_ERROR;
             HDclose(fd_1);
@@ -196,7 +196,7 @@ test_plists(const char *filename_prefix)
                 TEST_ERROR;
             size_2 = (size_t)HDlseek(fd_2, (HDoff_t)0, SEEK_END);
             HDlseek(fd_2, (HDoff_t)0, SEEK_SET);
-            buf_2 = (void *)HDmalloc(size_2);
+            buf_2 = (void *)malloc(size_2);
             if (HDread(fd_2, buf_2, size_2) < 0)
                 TEST_ERROR;
             HDclose(fd_2);
@@ -217,8 +217,8 @@ test_plists(const char *filename_prefix)
             if ((H5Pclose(plist_2)) < 0)
                 FAIL_STACK_ERROR;
 
-            HDfree(buf_1);
-            HDfree(buf_2);
+            free(buf_1);
+            free(buf_2);
         } /* end for */
 
     return 1;

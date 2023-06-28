@@ -81,7 +81,7 @@ test_1(hid_t fapl)
     TESTING("monotonically increasing lengths");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -136,7 +136,7 @@ test_1(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -154,7 +154,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -189,7 +189,7 @@ test_2(hid_t fapl)
     TESTING("monotonically decreasing lengths");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -236,7 +236,7 @@ test_2(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -254,7 +254,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -289,7 +289,7 @@ test_3(hid_t fapl)
     TESTING("complete object removal");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -326,7 +326,7 @@ test_3(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -344,7 +344,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -380,7 +380,7 @@ test_4(hid_t fapl)
     TESTING("partial object removal");
 
     /* Allocate buffer for H5HG_t */
-    if (NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+    if (NULL == (obj = (H5HG_t *)malloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
         goto error;
 
     /* Open a clean file */
@@ -422,7 +422,7 @@ test_4(hid_t fapl)
     }
 
     /* Release buffer */
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     if (H5Fclose(file) < 0)
@@ -440,7 +440,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 }
 
@@ -474,7 +474,7 @@ test_ooo_indices(hid_t fapl)
 
     TESTING("out of order indices");
 
-    if (NULL == (obj = (H5HG_t *)HDmalloc(2000 * sizeof(*obj))))
+    if (NULL == (obj = (H5HG_t *)malloc(2000 * sizeof(*obj))))
         goto error;
 
     /* Open a clean file */
@@ -546,7 +546,7 @@ test_ooo_indices(hid_t fapl)
         goto error;
     if (nerrors)
         goto error;
-    HDfree(obj);
+    free(obj);
     obj = NULL;
 
     PASSED();
@@ -559,7 +559,7 @@ error:
     }
     H5E_END_TRY
     if (obj)
-        HDfree(obj);
+        free(obj);
     return MAX(1, nerrors);
 } /* end test_ooo_indices */
 

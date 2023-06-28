@@ -1848,9 +1848,9 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                                     s_sizes, s_bufs) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
-        if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
-            (NULL == (mpi_displacements = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
-            (NULL == (mpi_bufs = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint))))) {
+        if ((NULL == (mpi_block_lengths = (int *)malloc((size_t)count * sizeof(int)))) ||
+            (NULL == (mpi_displacements = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint)))) ||
+            (NULL == (mpi_bufs = (MPI_Aint *)malloc((size_t)count * sizeof(MPI_Aint))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc mpi block lengths / displacement")
         }
@@ -1924,9 +1924,9 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 if (!sub_types) {
                     HDassert(!sub_types_created);
 
-                    if (NULL == (sub_types = HDmalloc((size_t)count * sizeof(MPI_Datatype))))
+                    if (NULL == (sub_types = malloc((size_t)count * sizeof(MPI_Datatype))))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types array")
-                    if (NULL == (sub_types_created = (uint8_t *)HDcalloc((size_t)count, 1))) {
+                    if (NULL == (sub_types_created = (uint8_t *)calloc((size_t)count, 1))) {
                         H5MM_free(sub_types);
                         sub_types = NULL;
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sub types created array")
@@ -1984,15 +1984,15 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
 
         /* Free up memory used to build types */
         HDassert(mpi_block_lengths);
-        HDfree(mpi_block_lengths);
+        free(mpi_block_lengths);
         mpi_block_lengths = NULL;
 
         HDassert(mpi_displacements);
-        HDfree(mpi_displacements);
+        free(mpi_displacements);
         mpi_displacements = NULL;
 
         HDassert(mpi_bufs);
-        HDfree(mpi_bufs);
+        free(mpi_bufs);
         mpi_bufs = NULL;
 
         if (sub_types) {
@@ -2002,9 +2002,9 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
                 if (sub_types_created[i])
                     MPI_Type_free(&sub_types[i]);
 
-            HDfree(sub_types);
+            free(sub_types);
             sub_types = NULL;
-            HDfree(sub_types_created);
+            free(sub_types_created);
             sub_types_created = NULL;
         }
 
@@ -2032,24 +2032,24 @@ done:
     /* free sorted vectors if they exist */
     if (!vector_was_sorted)
         if (s_types) {
-            HDfree(s_types);
+            free(s_types);
             s_types = NULL;
         }
 
     /* Clean up on error */
     if (ret_value < 0) {
         if (mpi_block_lengths) {
-            HDfree(mpi_block_lengths);
+            free(mpi_block_lengths);
             mpi_block_lengths = NULL;
         }
 
         if (mpi_displacements) {
-            HDfree(mpi_displacements);
+            free(mpi_displacements);
             mpi_displacements = NULL;
         }
 
         if (mpi_bufs) {
-            HDfree(mpi_bufs);
+            free(mpi_bufs);
             mpi_bufs = NULL;
         }
 
@@ -2060,9 +2060,9 @@ done:
                 if (sub_types_created[i])
                     MPI_Type_free(&sub_types[i]);
 
-            HDfree(sub_types);
+            free(sub_types);
             sub_types = NULL;
-            HDfree(sub_types_created);
+            free(sub_types_created);
             sub_types_created = NULL;
         }
     }
@@ -2198,7 +2198,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         /* free sorted addrs vector if it exists */
         if (!vector_was_sorted)
             if (s_addrs) {
-                HDfree(s_addrs);
+                free(s_addrs);
                 s_addrs = NULL;
             }
 
@@ -2458,15 +2458,15 @@ done:
     /* free sorted vectors if they exist */
     if (!vector_was_sorted) {
         if (s_addrs) {
-            HDfree(s_addrs);
+            free(s_addrs);
             s_addrs = NULL;
         }
         if (s_sizes) {
-            HDfree(s_sizes);
+            free(s_sizes);
             s_sizes = NULL;
         }
         if (s_bufs) {
-            HDfree(s_bufs);
+            free(s_bufs);
             s_bufs = NULL;
         }
     }
@@ -2598,15 +2598,15 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         /* free sorted vectors if they exist */
         if (!vector_was_sorted) {
             if (s_addrs) {
-                HDfree(s_addrs);
+                free(s_addrs);
                 s_addrs = NULL;
             }
             if (s_sizes) {
-                HDfree(s_sizes);
+                free(s_sizes);
                 s_sizes = NULL;
             }
             if (s_bufs) {
-                HDfree(s_bufs);
+                free(s_bufs);
                 s_bufs = NULL;
             }
         }
@@ -2762,15 +2762,15 @@ done:
     /* Cleanup on error */
     if (ret_value < 0 && !vector_was_sorted) {
         if (s_addrs) {
-            HDfree(s_addrs);
+            free(s_addrs);
             s_addrs = NULL;
         }
         if (s_sizes) {
-            HDfree(s_sizes);
+            free(s_sizes);
             s_sizes = NULL;
         }
         if (s_bufs) {
-            HDfree(s_bufs);
+            free(s_bufs);
             s_bufs = NULL;
         }
     }

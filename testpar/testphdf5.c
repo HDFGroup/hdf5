@@ -337,7 +337,7 @@ main(int argc, char **argv)
 
     HDmemset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
-        if (NULL == (filenames[i] = HDmalloc(PATH_MAX))) {
+        if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             HDprintf("couldn't allocate filename array\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -555,7 +555,7 @@ main(int argc, char **argv)
     }
 
     for (int i = 0; i < NFILENAME; i++) {
-        HDfree(filenames[i]);
+        free(filenames[i]);
         filenames[i] = NULL;
     }
 

@@ -41,7 +41,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
         TEST_ERROR;
 
     /* Allocate the buffer for encoding */
-    if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
         TEST_ERROR;
 
     /* Encode the property list to the buffer */
@@ -62,7 +62,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
 
     /* Free the buffer */
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Test H5Pencode1() */
@@ -71,7 +71,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
     if (H5Pencode1(orig_pl, NULL, &temp_size) < 0)
         STACK_ERROR;
 
-    if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
+    if (NULL == (temp_buf = (void *)malloc(temp_size)))
         TEST_ERROR;
 
     if (H5Pencode1(orig_pl, temp_buf, &temp_size) < 0)
@@ -87,7 +87,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
         STACK_ERROR;
 
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     if ((H5Pclose(fapl)) < 0)
@@ -98,7 +98,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
 
 error:
     if (temp_buf)
-        HDfree(temp_buf);
+        free(temp_buf);
 
     H5E_BEGIN_TRY
     {

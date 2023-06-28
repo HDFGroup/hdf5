@@ -77,7 +77,7 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Check to make sure that the property list getter works */
-    if (NULL == (location = (char *)HDcalloc(size, sizeof(char))))
+    if (NULL == (location = (char *)calloc(size, sizeof(char))))
         TEST_ERROR;
     if (H5Pget_mdc_log_options(fapl, &is_enabled_out, location, &size, &start_on_access_out) < 0)
         TEST_ERROR;
@@ -127,7 +127,7 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Clean up */
-    HDfree(location);
+    free(location);
     if (H5Fclose(fid) < 0)
         TEST_ERROR;
 

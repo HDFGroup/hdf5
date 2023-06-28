@@ -1027,7 +1027,7 @@ test_genprop_prop_crt_cb1(const char *name, size_t size, void *def_value)
     /* Set the information from the creation call */
     prop1_cb_info.crt_count++;
     prop1_cb_info.crt_name  = HDstrdup(name);
-    prop1_cb_info.crt_value = HDmalloc(size);
+    prop1_cb_info.crt_value = malloc(size);
     HDmemcpy(prop1_cb_info.crt_value, def_value, size);
 
     return (SUCCEED);
@@ -1047,7 +1047,7 @@ test_genprop_prop_set_cb1(hid_t plist_id, const char *name, size_t size, void *v
     if (prop1_cb_info.set_name == NULL)
         prop1_cb_info.set_name = HDstrdup(name);
     if (prop1_cb_info.set_value == NULL)
-        prop1_cb_info.set_value = HDmalloc(size);
+        prop1_cb_info.set_value = malloc(size);
     HDmemcpy(prop1_cb_info.set_value, value, size);
 
     return (SUCCEED);
@@ -1067,7 +1067,7 @@ test_genprop_prop_get_cb1(hid_t plist_id, const char *name, size_t size, void *v
     if (prop1_cb_info.get_name == NULL)
         prop1_cb_info.get_name = HDstrdup(name);
     if (prop1_cb_info.get_value == NULL)
-        prop1_cb_info.get_value = HDmalloc(size);
+        prop1_cb_info.get_value = malloc(size);
     HDmemcpy(prop1_cb_info.get_value, value, size);
 
     return (SUCCEED);
@@ -1086,7 +1086,7 @@ test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
     if (prop1_cb_info.cop_name == NULL)
         prop1_cb_info.cop_name = HDstrdup(name);
     if (prop1_cb_info.cop_value == NULL)
-        prop1_cb_info.cop_value = HDmalloc(size);
+        prop1_cb_info.cop_value = malloc(size);
     HDmemcpy(prop1_cb_info.cop_value, value, size);
 
     return (SUCCEED);
@@ -1133,7 +1133,7 @@ test_genprop_prop_cls_cb1(const char *name, size_t size, void *value)
     if (prop1_cb_info.cls_name == NULL)
         prop1_cb_info.cls_name = HDstrdup(name);
     if (prop1_cb_info.cls_value == NULL)
-        prop1_cb_info.cls_value = HDmalloc(size);
+        prop1_cb_info.cls_value = malloc(size);
     HDmemcpy(prop1_cb_info.cls_value, value, size);
 
     return (SUCCEED);
@@ -1151,7 +1151,7 @@ test_genprop_prop_del_cb2(hid_t plist_id, const char *name, size_t size, void *v
     prop2_cb_info.del_count++;
     prop2_cb_info.del_plist_id = plist_id;
     prop2_cb_info.del_name     = HDstrdup(name);
-    prop2_cb_info.del_value    = HDmalloc(size);
+    prop2_cb_info.del_value    = malloc(size);
     HDmemcpy(prop2_cb_info.del_value, value, size);
 
     return (SUCCEED);
@@ -1368,18 +1368,18 @@ test_genprop_list_callback(void)
     VERIFY(prop1_cb_info.cls_count, 2, "H5Pclose");
 
     /* Free memory allocated for tracking properties */
-    HDfree(prop1_cb_info.crt_name);
-    HDfree(prop1_cb_info.crt_value);
-    HDfree(prop1_cb_info.get_name);
-    HDfree(prop1_cb_info.get_value);
-    HDfree(prop1_cb_info.set_name);
-    HDfree(prop1_cb_info.set_value);
-    HDfree(prop1_cb_info.cop_name);
-    HDfree(prop1_cb_info.cop_value);
-    HDfree(prop1_cb_info.cls_name);
-    HDfree(prop1_cb_info.cls_value);
-    HDfree(prop2_cb_info.del_name);
-    HDfree(prop2_cb_info.del_value);
+    free(prop1_cb_info.crt_name);
+    free(prop1_cb_info.crt_value);
+    free(prop1_cb_info.get_name);
+    free(prop1_cb_info.get_value);
+    free(prop1_cb_info.set_name);
+    free(prop1_cb_info.set_value);
+    free(prop1_cb_info.cop_name);
+    free(prop1_cb_info.cop_value);
+    free(prop1_cb_info.cls_name);
+    free(prop1_cb_info.cls_value);
+    free(prop2_cb_info.del_name);
+    free(prop2_cb_info.del_value);
 
     /* Close class */
     ret = H5Pclose_class(cid1);

@@ -204,7 +204,7 @@ test_direct_chunk_write(hid_t file)
             direct_buf[i][j] = n++;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_dst_nbytes);
+    outbuf = malloc(z_dst_nbytes);
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -236,7 +236,7 @@ test_direct_chunk_write(hid_t file)
     }
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     if (H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
@@ -283,7 +283,7 @@ test_direct_chunk_write(hid_t file)
             direct_buf[i][j] = i + j;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_dst_nbytes);
+    outbuf = malloc(z_dst_nbytes);
     z_dst  = (Bytef *)outbuf;
 
     /* Perform compression from the source to the destination buffer */
@@ -316,7 +316,7 @@ test_direct_chunk_write(hid_t file)
     }
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     if (H5Fflush(dataset, H5F_SCOPE_LOCAL) < 0)
         goto error;
@@ -367,7 +367,7 @@ error:
     H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;
@@ -1510,7 +1510,7 @@ test_direct_chunk_read_no_cache(hid_t file)
         goto error;
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_src_nbytes);
+    outbuf = malloc(z_src_nbytes);
     z_src  = (Bytef *)outbuf;
 
     /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
@@ -1589,7 +1589,7 @@ test_direct_chunk_read_no_cache(hid_t file)
     H5Pclose(dapl);
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     PASSED();
     return 0;
@@ -1607,7 +1607,7 @@ error:
     H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;
@@ -1694,7 +1694,7 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     }
 
     /* Allocate output (compressed) buffer */
-    outbuf = HDmalloc(z_src_nbytes);
+    outbuf = malloc(z_src_nbytes);
     z_src  = (Bytef *)outbuf;
 
     /* For each chunk in the dataset, compare the result of H5Dread and H5Dread_chunk. */
@@ -1779,7 +1779,7 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     H5Pclose(dxpl);
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     PASSED();
     return 0;
@@ -1796,7 +1796,7 @@ error:
     H5E_END_TRY
 
     if (outbuf)
-        HDfree(outbuf);
+        free(outbuf);
 
     H5_FAILED();
     return 1;

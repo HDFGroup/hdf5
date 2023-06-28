@@ -86,7 +86,7 @@ AddTest(const char *TheName, void (*TheCall)(void), void (*Cleanup)(void), const
         unsigned    newAlloc = MAX(1, TestAlloc * 2); /* New array size */
 
         /* Reallocate array */
-        if (NULL == (newTest = (TestStruct *)HDrealloc(Test, newAlloc * sizeof(TestStruct)))) {
+        if (NULL == (newTest = (TestStruct *)realloc(Test, newAlloc * sizeof(TestStruct)))) {
             HDprintf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc,
                      newAlloc);
             HDexit(EXIT_FAILURE);
@@ -378,7 +378,7 @@ void
 TestShutdown(void)
 {
     if (Test)
-        HDfree(Test);
+        free(Test);
 }
 
 /*

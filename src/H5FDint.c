@@ -2283,7 +2283,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 
         srt_tmp_size = (count * sizeof(struct H5FD_vsrt_tmp_t));
 
-        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)HDmalloc(srt_tmp_size)))
+        if (NULL == (srt_tmp = (H5FD_vsrt_tmp_t *)malloc(srt_tmp_size)))
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
@@ -2305,11 +2305,11 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "duplicate addr in vector")
         }
 
-        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)HDmalloc(count * sizeof(H5FD_mem_t)))) ||
-            (NULL == (*s_addrs_ptr = (haddr_t *)HDmalloc(count * sizeof(haddr_t)))) ||
-            (NULL == (*s_sizes_ptr = (size_t *)HDmalloc(count * sizeof(size_t)))) ||
+        if ((NULL == (*s_types_ptr = (H5FD_mem_t *)malloc(count * sizeof(H5FD_mem_t)))) ||
+            (NULL == (*s_addrs_ptr = (haddr_t *)malloc(count * sizeof(haddr_t)))) ||
+            (NULL == (*s_sizes_ptr = (size_t *)malloc(count * sizeof(size_t)))) ||
             (NULL ==
-             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)HDmalloc(count * sizeof(H5_flexible_const_ptr_t))))) {
+             (*s_bufs_ptr = (H5_flexible_const_ptr_t *)malloc(count * sizeof(H5_flexible_const_ptr_t))))) {
 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc sorted vector(s)")
         }
@@ -2350,7 +2350,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
 done:
     if (srt_tmp) {
 
-        HDfree(srt_tmp);
+        free(srt_tmp);
         srt_tmp = NULL;
     }
 
@@ -2365,25 +2365,25 @@ done:
         /* free space allocated for sorted vectors */
         if (*s_types_ptr) {
 
-            HDfree(*s_types_ptr);
+            free(*s_types_ptr);
             *s_types_ptr = NULL;
         }
 
         if (*s_addrs_ptr) {
 
-            HDfree(*s_addrs_ptr);
+            free(*s_addrs_ptr);
             *s_addrs_ptr = NULL;
         }
 
         if (*s_sizes_ptr) {
 
-            HDfree(*s_sizes_ptr);
+            free(*s_sizes_ptr);
             *s_sizes_ptr = NULL;
         }
 
         if (*s_bufs_ptr) {
 
-            HDfree(*s_bufs_ptr);
+            free(*s_bufs_ptr);
             *s_bufs_ptr = NULL;
         }
     }

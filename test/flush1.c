@@ -138,7 +138,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
         STACK_ERROR;
 
     /* Write some data */
-    if (NULL == (data = (int *)HDcalloc((size_t)NELEMENTS, sizeof(int))))
+    if (NULL == (data = (int *)calloc((size_t)NELEMENTS, sizeof(int))))
         STACK_ERROR;
     for (i = 0; i < NELEMENTS; i++)
         data[i] = i;
@@ -152,7 +152,7 @@ add_dset_to_file(hid_t fid, const char *dset_name)
     if (H5Dclose(did) < 0)
         STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     return SUCCEED;
 
@@ -165,7 +165,7 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(data);
+    free(data);
 
     return FAIL;
 } /* end add_dset_to_file() */

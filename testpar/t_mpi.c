@@ -70,7 +70,7 @@ test_mpio_overlap_writes(char *filename)
     }
 
     bufsize = 4093; /* use some prime number for size */
-    if (NULL == (buf = HDmalloc((size_t)bufsize))) {
+    if (NULL == (buf = malloc((size_t)bufsize))) {
         if (MAINPROCESS)
             HDprintf("couldn't allocate buffer\n");
         return 1;
@@ -166,7 +166,7 @@ test_mpio_overlap_writes(char *filename)
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc == MPI_SUCCESS), "Sync before leaving test");
 
-    HDfree(buf);
+    free(buf);
 
     return (nerrs);
 }
@@ -282,7 +282,7 @@ test_mpio_gb_file(char *filename)
                  "because MPI_Offset cannot support it\n");
     }
     else {
-        buf = (char *)HDmalloc(MB);
+        buf = (char *)malloc(MB);
         VRFY((buf != NULL), "malloc succeed");
 
         /* open a new file. Remove it first in case it exists. */
@@ -401,7 +401,7 @@ test_mpio_gb_file(char *filename)
 
 finish:
     if (buf)
-        HDfree(buf);
+        free(buf);
     return (nerrs);
 }
 

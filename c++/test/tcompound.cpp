@@ -100,9 +100,9 @@ test_compound_2()
     SUBTEST("Compound Element Reordering");
     try {
         // Sizes should be the same, but be careful just in case
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -161,9 +161,9 @@ test_compound_2()
             }
         }
         // Release resources
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -213,9 +213,9 @@ test_compound_3()
     SUBTEST("Compound Datatype Subset Conversions");
     try {
         /* Initialize */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -271,9 +271,9 @@ test_compound_3()
         }
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -328,9 +328,9 @@ test_compound_4()
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
@@ -390,9 +390,9 @@ test_compound_4()
         }     // for
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();
@@ -439,8 +439,8 @@ test_compound_5()
     hsize_t    dims[1] = {4};
     src_typ_t  src[2]  = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
     dst_typ_t *dst;
-    void      *buf      = HDcalloc(2, sizeof(dst_typ_t));
-    void      *bkg      = HDcalloc(2, sizeof(dst_typ_t));
+    void      *buf      = calloc(2, sizeof(dst_typ_t));
+    void      *bkg      = calloc(2, sizeof(dst_typ_t));
     ArrayType *array_dt = NULL;
 
     // Output message about test being performed
@@ -490,8 +490,8 @@ test_compound_5()
         }
 
         /* Free memory buffers */
-        HDfree(buf);
-        HDfree(bkg);
+        free(buf);
+        free(bkg);
         dst = NULL;
         PASSED();
     } // end of try block
@@ -539,9 +539,9 @@ test_compound_6()
     SUBTEST("Compound Element Growing");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
-        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
-        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
+        buf  = static_cast<unsigned char *>(malloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(malloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(malloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
             s_ptr    = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->b = (i * 8 + 1) & 0x7fff;
@@ -574,9 +574,9 @@ test_compound_6()
         }
 
         /* Release resources */
-        HDfree(buf);
-        HDfree(bkg);
-        HDfree(orig);
+        free(buf);
+        free(bkg);
+        free(orig);
         s_ptr = NULL;
         d_ptr = NULL;
         st.close();

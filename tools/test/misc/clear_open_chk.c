@@ -54,10 +54,10 @@ main(int argc, char *argv[])
     /* Try opening the file */
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
-        HDfree(fname);
+        free(fname);
         HDexit(EXIT_FAILURE);
     }
-    HDfree(fname);
+    free(fname);
 
     /* Close the file */
     if (H5Fclose(fid) < 0) {

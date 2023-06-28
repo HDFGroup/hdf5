@@ -291,7 +291,7 @@ init_server_run(int argc, char **argv)
 {
     struct server_run *run;
 
-    run = (struct server_run *)HDmalloc(sizeof(struct server_run));
+    run = (struct server_run *)malloc(sizeof(struct server_run));
     if (run == NULL) {
         mirror_log(NULL, V_ERR, "can't allocate server_run struct");
         return NULL;
@@ -324,7 +324,7 @@ init_server_run(int argc, char **argv)
 
 error:
     if (run != NULL) {
-        HDfree(run);
+        free(run);
     }
     return NULL;
 
@@ -362,7 +362,7 @@ term_server_run(struct server_run *run)
 
     (run->magic)++;
     (run->opts.magic)++;
-    HDfree(run);
+    free(run);
     return 0;
 } /* end term_server_run() */
 
@@ -479,11 +479,11 @@ handle_requests(struct server_run *run)
         return 1;
     }
 
-    if (NULL == (mybuf = HDmalloc(H5FD_MIRROR_XMIT_OPEN_SIZE * sizeof(char)))) {
+    if (NULL == (mybuf = malloc(H5FD_MIRROR_XMIT_OPEN_SIZE * sizeof(char)))) {
         mirror_log(NULL, V_ERR, "out of memory");
         goto error;
     }
-    if (NULL == (xopen = HDmalloc(sizeof(H5FD_mirror_xmit_open_t)))) {
+    if (NULL == (xopen = malloc(sizeof(H5FD_mirror_xmit_open_t)))) {
         mirror_log(NULL, V_ERR, "out of memory");
         goto error;
     }
@@ -591,8 +591,8 @@ done:
         HDclose(connfd);
     }
 
-    HDfree(mybuf);
-    HDfree(xopen);
+    free(mybuf);
+    free(xopen);
 
     return ret_value;
 
@@ -600,8 +600,8 @@ error:
     if (connfd >= 0) {
         HDclose(connfd);
     }
-    HDfree(mybuf);
-    HDfree(xopen);
+    free(mybuf);
+    free(xopen);
     return -1;
 } /* end handle_requests() */
 

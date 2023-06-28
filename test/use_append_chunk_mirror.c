@@ -173,7 +173,7 @@ main(int argc, char *argv[])
     mirr_fa.handshake_port = SERVER_PORT;
     HDstrncpy(mirr_fa.remote_ip, SERVER_IP, H5FD_MIRROR_MAX_IP_LEN);
 
-    if (NULL == (split_fa = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
+    if (NULL == (split_fa = calloc(1, sizeof(H5FD_splitter_vfd_config_t)))) {
         HDfprintf(stderr, "can't allocate memory for splitter config\n");
         Hgoto_error(1);
     }
@@ -373,7 +373,7 @@ main(int argc, char *argv[])
     }
 
 done:
-    HDfree(split_fa);
+    free(split_fa);
 
     if (ret_value != 0) {
         HDprintf("Error(s) encountered\n");

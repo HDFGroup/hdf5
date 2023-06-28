@@ -356,9 +356,9 @@ main(int argc, char *argv[])
 
 done:
     if (fname)
-        HDfree(fname);
+        free(fname);
     if (fname_g)
-        HDfree(fname_g);
+        free(fname_g);
 
     H5E_BEGIN_TRY
     {

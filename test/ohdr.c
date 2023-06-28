@@ -360,7 +360,7 @@ test_ohdr_swmr(hbool_t new_format)
     } /* end else */
 
     /* Initialize data */
-    wbuf = (int *)HDcalloc(compact_size, sizeof(int));
+    wbuf = (int *)calloc(compact_size, sizeof(int));
     n    = 0;
     for (u = 0; u < compact_size; u++)
         wbuf[u] = n++;
@@ -440,7 +440,7 @@ test_ohdr_swmr(hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Free the buffer */
-    HDfree(wbuf);
+    free(wbuf);
 
     PASSED();
 
@@ -455,7 +455,7 @@ error:
         H5Pclose(plist);
         H5Pclose(fapl);
         HDremove(FILE_OHDR_SWMR);
-        HDfree(wbuf);
+        free(wbuf);
     }
     H5E_END_TRY
 
@@ -949,9 +949,9 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
      **********************************************/
 
     buf_size = HDstrlen(ATTR_LONG) + 1;
-    if (NULL == (in_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (in_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
-    if (NULL == (out_buf = (char *)HDcalloc(buf_size, sizeof(char))))
+    if (NULL == (out_buf = (char *)calloc(buf_size, sizeof(char))))
         TEST_ERROR;
 
     /* Create a string attribute on the dataset
@@ -1052,8 +1052,8 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* Free memory */
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     PASSED();
     return SUCCEED;
@@ -1069,8 +1069,8 @@ error:
     }
     H5E_END_TRY
 
-    HDfree(in_buf);
-    HDfree(out_buf);
+    free(in_buf);
+    free(out_buf);
 
     return FAIL;
 } /* test_minimized_dset_ohdr_attribute_addition */

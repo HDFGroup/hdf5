@@ -80,7 +80,7 @@ gen_name(int value)
     int      i;
 
     length                     = num_digits(MAX_NUM_NAME - 1);
-    temp                       = (char *)HDmalloc(NAME_OFFSET + length + 1);
+    temp                       = (char *)malloc(NAME_OFFSET + length + 1);
     temp                       = HDstrcpy(temp, "attrib");
     temp[NAME_OFFSET + length] = '\0';
 

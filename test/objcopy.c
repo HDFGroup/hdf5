@@ -197,7 +197,7 @@ token_insert(H5O_info2_t *oi)
     /* Extend the table */
     if (idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2 * idtab_g.nalloc);
-        idtab_g.obj    = (H5O_token_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj    = (H5O_token_t *)realloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     } /* end if */
 
     /* Insert the entry */
@@ -253,7 +253,7 @@ static void
 token_reset(void)
 {
     if (idtab_g.obj)
-        HDfree(idtab_g.obj);
+        free(idtab_g.obj);
     idtab_g.obj    = NULL;
     idtab_g.nalloc = idtab_g.nobjs = 0;
 } /* end token_reset() */
@@ -585,7 +585,7 @@ test_copy_attach_attribute_vl(hid_t loc_id)
 
     for (i = 0; i < 4; i++) {
         buf[i].len = i * 3 + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(j + 1);
     } /* end for */
@@ -851,9 +851,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from the source attribute */
@@ -884,9 +884,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -909,9 +909,9 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
 error:
     if (rbuf)
-        HDfree(rbuf);
+        free(rbuf);
     if (rbuf2)
-        HDfree(rbuf2);
+        free(rbuf2);
     H5E_BEGIN_TRY
     {
         H5Sclose(sid2);
@@ -1460,9 +1460,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Check the raw data is equal */
 
     /* Allocate & initialize space for the raw data buffers */
-    if ((rbuf = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
-    if ((rbuf2 = HDcalloc(elmt_size, (size_t)nelmts)) == NULL)
+    if ((rbuf2 = calloc(elmt_size, (size_t)nelmts)) == NULL)
         TEST_ERROR;
 
     /* Read data from datasets */
@@ -1491,9 +1491,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
             TEST_ERROR;
 
     /* Release raw data buffers */
-    HDfree(rbuf);
+    free(rbuf);
     rbuf = NULL;
-    HDfree(rbuf2);
+    free(rbuf2);
     rbuf2 = NULL;
 
     /* close the source dataspace */
@@ -1523,9 +1523,9 @@ error:
     H5E_BEGIN_TRY
     {
         if (rbuf)
-            HDfree(rbuf);
+            free(rbuf);
         if (rbuf2)
-            HDfree(rbuf2);
+            free(rbuf2);
         H5Pclose(dcpl2);
         H5Pclose(dcpl);
         H5Sclose(sid2);
@@ -6248,7 +6248,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -6410,7 +6410,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -6626,7 +6626,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -6961,7 +6961,7 @@ attach_attribute_compound_vlstr(hid_t loc_id)
     /* Write to the attribute */
     len   = HDstrlen(ATTR_CMPD_STRING) + 1;
     buf.i = 9;
-    if (NULL == (buf.v = (char *)HDcalloc(len, sizeof(char))))
+    if (NULL == (buf.v = (char *)calloc(len, sizeof(char))))
         goto done;
     HDstrncpy(buf.v, ATTR_CMPD_STRING, len);
     if (H5Awrite(aid, cmpd_tid, &buf) < 0)
@@ -6981,7 +6981,7 @@ done:
     if (aid > 0)
         H5Aclose(aid);
 
-    HDfree(buf.v);
+    free(buf.v);
 
     return ret_value;
 } /* attach_attribute_compound_vlstr */
@@ -7301,7 +7301,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     for (i = 0; i < DIM_SIZE_1; i++) {
         for (j = 0; j < DIM_SIZE_2; j++) {
             buf[i][j].len = (size_t)(j + 1);
-            buf[i][j].p   = (int *)HDmalloc(buf[i][j].len * sizeof(int));
+            buf[i][j].p   = (int *)malloc(buf[i][j].len * sizeof(int));
             for (k = 0; k < (int)buf[i][j].len; k++)
                 ((int *)buf[i][j].p)[k] = i * 10000 + j * 100 + k;
         }
@@ -9500,7 +9500,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -9684,7 +9684,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -9868,7 +9868,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -10059,7 +10059,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].len = i + 1;
-        buf[i].p   = (int *)HDmalloc(buf[i].len * sizeof(int));
+        buf[i].p   = (int *)malloc(buf[i].len * sizeof(int));
         for (j = 0; j < buf[i].len; j++)
             ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
@@ -10246,14 +10246,14 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             return 1;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
-            tvl->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 return 1;
@@ -10447,14 +10447,14 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
-            tvl->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
@@ -10642,14 +10642,14 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
-            tvl->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
@@ -10886,14 +10886,14 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
-        buf[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
+        buf[i].p = malloc((i + 1) * sizeof(hvl_t));
         if (buf[i].p == NULL) {
             TestErrPrintf("Cannot allocate memory for VL data! i=%u\n", i);
             TEST_ERROR;
         } /* end if */
         buf[i].len = i + 1;
         for (tvl = (hvl_t *)buf[i].p, j = 0; j < (i + 1); j++, tvl++) {
-            tvl->p = HDmalloc((j + 1) * sizeof(unsigned int));
+            tvl->p = malloc((j + 1) * sizeof(unsigned int));
             if (tvl->p == NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n", i, j);
                 TEST_ERROR;
@@ -11094,7 +11094,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a     = (int)(i * (i - 1));
         buf[i].b.len = i + 1;
-        buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        buf[i].b.p   = (int *)malloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
         buf[i].c = 1.0 / ((double)i + 1.0);
@@ -11270,7 +11270,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a     = (int)(i * (i - 1));
         buf[i].b.len = i + 1;
-        buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        buf[i].b.p   = (int *)malloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
         buf[i].c = 1.0 / ((double)i + 1.0);
@@ -11455,7 +11455,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a     = (int)(i * (i - 1));
         buf[i].b.len = i + 1;
-        buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
+        buf[i].b.p   = (int *)malloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
         buf[i].c = 1.0 / ((double)i + 1.0);

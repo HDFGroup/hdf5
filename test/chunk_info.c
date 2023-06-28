@@ -564,7 +564,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = HDcalloc(1, z_dst_nbytes);
+    inbuf = calloc(1, z_dst_nbytes);
 
     /* zlib-friendly alias for the input buffer */
     z_dst = (Bytef *)inbuf;
@@ -590,7 +590,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    if (NULL == (inbuf = HDcalloc(1, CHK_SIZE)))
+    if (NULL == (inbuf = calloc(1, CHK_SIZE)))
         TEST_ERROR;
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
@@ -609,7 +609,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Free the input buffer */
     if (inbuf)
-        HDfree(inbuf);
+        free(inbuf);
 
     if (H5Fflush(dset, H5F_SCOPE_LOCAL) < 0)
         TEST_ERROR;

@@ -86,7 +86,7 @@ test_create_file(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -100,7 +100,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -236,7 +236,7 @@ test_create_file_invalid_params(void)
     }
     END_MULTIPART;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     return 0;
@@ -251,7 +251,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -317,7 +317,7 @@ test_create_file_excl(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -332,7 +332,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -560,7 +560,7 @@ test_open_nonexistent_file(void)
         goto error;
     }
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -574,7 +574,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -791,7 +791,7 @@ test_file_permission(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -810,7 +810,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -1002,7 +1002,7 @@ test_flush_file(void)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -1018,7 +1018,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -1096,13 +1096,13 @@ test_file_is_accessible(void)
     }
     END_MULTIPART;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     return 0;
 
 error:
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -1386,9 +1386,9 @@ test_file_property_lists(void)
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename1);
+    free(prefixed_filename1);
     prefixed_filename1 = NULL;
-    HDfree(prefixed_filename2);
+    free(prefixed_filename2);
     prefixed_filename2 = NULL;
 
     PASSED();
@@ -1407,8 +1407,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename1);
-    HDfree(prefixed_filename2);
+    free(prefixed_filename1);
+    free(prefixed_filename2);
 
     return 1;
 }
@@ -1553,7 +1553,7 @@ test_get_file_intent(void)
     }
     END_MULTIPART;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     return 0;
@@ -1565,7 +1565,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -1888,9 +1888,9 @@ test_get_file_obj_count(void)
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename1);
+    free(prefixed_filename1);
     prefixed_filename1 = NULL;
-    HDfree(prefixed_filename2);
+    free(prefixed_filename2);
     prefixed_filename2 = NULL;
 
     PASSED();
@@ -1910,8 +1910,8 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename1);
-    HDfree(prefixed_filename2);
+    free(prefixed_filename1);
+    free(prefixed_filename2);
 
     return 1;
 }
@@ -2031,7 +2031,7 @@ test_file_open_overlap(void)
     if (H5Fclose(file_id2) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -2049,7 +2049,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -2122,7 +2122,7 @@ test_file_mounts(void)
     if (H5Fclose(child_fid) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -2138,7 +2138,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }
@@ -2192,7 +2192,7 @@ test_get_file_name(void)
         TEST_ERROR;
 
     /* Allocate buffer for file name */
-    if (NULL == (file_name_buf = (char *)HDmalloc((size_t)file_name_buf_len + 1)))
+    if (NULL == (file_name_buf = (char *)malloc((size_t)file_name_buf_len + 1)))
         TEST_ERROR;
 
     PASSED();
@@ -2458,14 +2458,14 @@ test_get_file_name(void)
     TESTING_2("test cleanup");
 
     if (file_name_buf) {
-        HDfree(file_name_buf);
+        free(file_name_buf);
         file_name_buf = NULL;
     }
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
     prefixed_filename = NULL;
 
     PASSED();
@@ -2476,7 +2476,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (file_name_buf)
-            HDfree(file_name_buf);
+            free(file_name_buf);
         H5Tclose(named_dtype_id);
         H5Sclose(dspace_id);
         H5Dclose(dset_id);
@@ -2486,7 +2486,7 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(prefixed_filename);
+    free(prefixed_filename);
 
     return 1;
 }

@@ -777,11 +777,11 @@ test_compound_2(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -839,9 +839,9 @@ test_compound_2(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -854,9 +854,9 @@ test_compound_2(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -904,11 +904,11 @@ test_compound_3(void)
         FAIL_STACK_ERROR;
 
     /* Initialize */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -963,9 +963,9 @@ test_compound_3(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -977,9 +977,9 @@ test_compound_3(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1031,11 +1031,11 @@ test_compound_4(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
@@ -1093,9 +1093,9 @@ test_compound_4(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -1107,9 +1107,9 @@ test_compound_4(void)
     return 0;
 
 error:
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1155,15 +1155,15 @@ test_compound_5(void)
     src_type_t src[2] = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
 
     dst_type_t *dst;
-    void       *buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
-    void       *bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *buf    = calloc((size_t)2, sizeof(dst_type_t));
+    void       *bkg    = calloc((size_t)2, sizeof(dst_type_t));
     int         retval = 1;
 
     TESTING("optimized struct converter");
 
     if (!buf || !bkg) {
-        HDfree(buf);
-        HDfree(bkg);
+        free(buf);
+        free(bkg);
         return 1;
     }
 
@@ -1215,8 +1215,8 @@ test_compound_5(void)
     }
 
     /* Free memory buffers */
-    HDfree(buf);
-    HDfree(bkg);
+    free(buf);
+    free(bkg);
     return retval;
 }
 
@@ -1259,11 +1259,11 @@ test_compound_6(void)
         FAIL_STACK_ERROR;
 
     /* Sizes should be the same, but be careful just in case */
-    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+    if (NULL == (buf = (unsigned char *)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
         goto error;
-    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+    if (NULL == (bkg = (unsigned char *)malloc(nelmts * sizeof(struct dt))))
         goto error;
-    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+    if (NULL == (orig = (unsigned char *)malloc(nelmts * sizeof(struct st))))
         goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr    = ((struct st *)((void *)orig)) + i;
@@ -1307,9 +1307,9 @@ test_compound_6(void)
     }
 
     /* Release resources */
-    HDfree(buf);
-    HDfree(bkg);
-    HDfree(orig);
+    free(buf);
+    free(bkg);
+    free(orig);
     CHECK_NMEMBS(nmembs, st, dt);
 
     PASSED();
@@ -1947,7 +1947,7 @@ test_compound_9(void)
 
     rdata.i1 = rdata.i2 = 0;
     if (rdata.str)
-        HDfree(rdata.str);
+        free(rdata.str);
 
     if (H5Dread(dset_id, dup_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED();
@@ -1972,7 +1972,7 @@ test_compound_9(void)
     rdata.str = NULL;
 
     if (rdata.str)
-        HDfree(rdata.str);
+        free(rdata.str);
 
     if (H5Dclose(dset_id) < 0)
         goto error;
@@ -2285,11 +2285,11 @@ test_compound_11(void)
         TEST_ERROR;
 
     /* Allocate buffers */
-    if ((buf = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((buf = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
-    if ((buf_orig = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((buf_orig = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
-    if ((bkg = HDmalloc(sizeof(big_t) * NTESTELEM)) == NULL)
+    if ((bkg = malloc(sizeof(big_t) * NTESTELEM)) == NULL)
         TEST_ERROR;
 
     /* Initialize buffer */
@@ -2299,7 +2299,7 @@ test_compound_11(void)
         ((big_t *)buf)[u].d3 = (double)u * 3.5;
         ((big_t *)buf)[u].i1 = (int)(u * 3);
         ((big_t *)buf)[u].i2 = (int)(u * 5);
-        ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
+        ((big_t *)buf)[u].s1 = (char *)malloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
         HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
@@ -2452,7 +2452,7 @@ test_compound_11(void)
 
     /* Free everything */
     for (u = 0; u < NTESTELEM; u++)
-        HDfree(((big_t *)buf_orig)[u].s1);
+        free(((big_t *)buf_orig)[u].s1);
     if (H5Sclose(space_id) < 0)
         TEST_ERROR;
     if (H5Tclose(opaq_dst_tid) < 0)
@@ -2475,11 +2475,11 @@ test_compound_11(void)
 
 error:
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (buf_orig)
-        HDfree(buf_orig);
+        free(buf_orig);
     if (bkg)
-        HDfree(bkg);
+        free(bkg);
     return retval;
 }
 
@@ -3093,12 +3093,12 @@ test_compound_14(void)
 
     rdata1.c1 = rdata1.c2 = 0;
     if (rdata1.str)
-        HDfree(rdata1.str);
+        free(rdata1.str);
 
     rdata2.c1 = rdata2.c2 = 0;
     rdata2.l1 = rdata2.l2 = rdata2.l3 = rdata2.l4 = 0;
     if (rdata2.str) {
-        HDfree(rdata2.str);
+        free(rdata2.str);
         rdata2.str = NULL;
     } /* end if */
 
@@ -4724,7 +4724,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_NULLTERM)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4741,7 +4741,7 @@ test_conv_str_1(void)
         HDputs("    Extended C-string test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4755,7 +4755,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_NULLPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4772,7 +4772,7 @@ test_conv_str_1(void)
         HDputs("    Extended C buffer test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4786,7 +4786,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)5, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4803,7 +4803,7 @@ test_conv_str_1(void)
         HDputs("    Extended Fortran-string test failed");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4820,7 +4820,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_NULLTERM)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4849,7 +4849,7 @@ test_conv_str_1(void)
         HDputs("    Non-terminated string test 2");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4863,7 +4863,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4922,7 +4922,7 @@ test_conv_str_1(void)
         HDputs("    Fortran to C string test 3");
         goto error;
     }
-    HDfree(buf);
+    free(buf);
     buf = NULL;
     if (H5Tclose(src_type) < 0)
         goto error;
@@ -4936,7 +4936,7 @@ test_conv_str_1(void)
         goto error;
     if ((dst_type = mkstr((size_t)10, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc((size_t)2, (size_t)10)))
+    if (NULL == (buf = (char *)calloc((size_t)2, (size_t)10)))
         goto error;
     HDmemcpy(buf, "abcdefghijabcdefghij", (size_t)20);
     if (H5Tconvert(src_type, dst_type, (size_t)2, buf, NULL, H5P_DEFAULT) < 0)
@@ -4999,7 +4999,7 @@ test_conv_str_1(void)
         goto error;
     if (H5Tclose(dst_type) < 0)
         goto error;
-    HDfree(buf);
+    free(buf);
 
     PASSED();
 
@@ -5018,7 +5018,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5058,7 +5058,7 @@ test_conv_str_2(void)
         goto error;
     if ((f_type = mkstr((size_t)8, H5T_STR_SPACEPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc(nelmts, (size_t)8)))
+    if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         goto error;
     for (i = 0; i < nelmts; i++) {
         nchars = (size_t)(HDrand() % 8);
@@ -5089,7 +5089,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5135,7 +5135,7 @@ test_conv_str_3(void)
      */
     if ((type = mkstr((size_t)8, H5T_STR_NULLPAD)) < 0)
         goto error;
-    if (NULL == (buf = (char *)HDcalloc(nelmts, (size_t)8)))
+    if (NULL == (buf = (char *)calloc(nelmts, (size_t)8)))
         FAIL_PUTS_ERROR("Allocation failed.");
     for (i = 0; i < nelmts; i++) {
         nchars = (size_t)(HDrand() % 8);
@@ -5226,7 +5226,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
     if (tag)
         H5free_memory(tag); /* Technically allocated by API call */
 
@@ -5277,7 +5277,7 @@ test_conv_enum_1(void)
     } /* end for */
 
     /* Initialize the buffer */
-    if (NULL == (buf = (int *)HDmalloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
+    if (NULL == (buf = (int *)malloc(nelmts * MAX(H5Tget_size(t1), H5Tget_size(t2)))))
         goto error;
     for (u = 0; u < nelmts; u++)
         buf[u] = HDrand() % 26;
@@ -5308,7 +5308,7 @@ error:
     H5E_END_TRY
 
     if (buf)
-        HDfree(buf);
+        free(buf);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -5357,7 +5357,7 @@ test_conv_enum_2(void)
         H5Tenum_insert(dsttype, mname[i], &i);
 
     /* Source data */
-    data = (int *)HDmalloc(NTESTELEM * sizeof(int));
+    data = (int *)malloc(NTESTELEM * sizeof(int));
     for (i = 0; i < NTESTELEM; i++) {
         ((char *)data)[i * 3 + 2] = (char)(i % 8);
         ((char *)data)[i * 3 + 0] = 0;
@@ -5378,7 +5378,7 @@ test_conv_enum_2(void)
     }
 
     /* Cleanup */
-    HDfree(data);
+    free(data);
     H5Tclose(srctype);
     H5Tclose(dsttype);
     H5Tclose(oddsize);
@@ -5800,7 +5800,7 @@ opaque_long(void)
         TEST_ERROR;
 
     /* Create long tag */
-    if (NULL == (long_tag = (char *)HDmalloc((size_t)(16384 + 1))))
+    if (NULL == (long_tag = (char *)malloc((size_t)(16384 + 1))))
         TEST_ERROR;
     HDmemset(long_tag, 'a', (size_t)16384);
     long_tag[16384] = '\0';
@@ -5819,7 +5819,7 @@ opaque_long(void)
         TEST_ERROR;
 
     /* Release memory for tag */
-    HDfree(long_tag);
+    free(long_tag);
 
     return 0;
 
@@ -5827,7 +5827,7 @@ error:
     if (dt > 0)
         H5Tclose(dt);
     if (long_tag)
-        HDfree(long_tag);
+        free(long_tag);
     H5_FAILED();
     return 1;
 }
@@ -6104,7 +6104,7 @@ test_encode(void)
     }
 
     if (cmpd_buf_size > 0)
-        cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
+        cmpd_buf = (unsigned char *)calloc((size_t)1, cmpd_buf_size);
 
     /* Try decoding an incorrect (empty) buffer (should fail) */
     H5E_BEGIN_TRY
@@ -6155,7 +6155,7 @@ test_encode(void)
     }
 
     if (enum_buf_size > 0)
-        enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
+        enum_buf = (unsigned char *)calloc((size_t)1, enum_buf_size);
 
     if (H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
@@ -6197,7 +6197,7 @@ test_encode(void)
     }
 
     if (vlstr_buf_size > 0)
-        vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
+        vlstr_buf = (unsigned char *)calloc((size_t)1, vlstr_buf_size);
 
     if (H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
         H5_FAILED();
@@ -6244,7 +6244,7 @@ test_encode(void)
         HDprintf("Can't close datatype\n");
         goto error;
     }
-    HDfree(cmpd_buf);
+    free(cmpd_buf);
     cmpd_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
@@ -6263,7 +6263,7 @@ test_encode(void)
         HDprintf("Can't close datatype\n");
         goto error;
     }
-    HDfree(enum_buf);
+    free(enum_buf);
     enum_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
@@ -6282,7 +6282,7 @@ test_encode(void)
         HDprintf("Can't close datatype\n");
         goto error;
     }
-    HDfree(vlstr_buf);
+    free(vlstr_buf);
     vlstr_buf_size = 0;
 
     /* Open the dataytpe for query */
@@ -6305,7 +6305,7 @@ test_encode(void)
     }
 
     if (cmpd_buf_size > 0)
-        cmpd_buf = (unsigned char *)HDcalloc((size_t)1, cmpd_buf_size);
+        cmpd_buf = (unsigned char *)calloc((size_t)1, cmpd_buf_size);
 
     if (H5Tencode(tid1, cmpd_buf, &cmpd_buf_size) < 0) {
         H5_FAILED();
@@ -6344,7 +6344,7 @@ test_encode(void)
     }
 
     if (enum_buf_size > 0)
-        enum_buf = (unsigned char *)HDcalloc((size_t)1, enum_buf_size);
+        enum_buf = (unsigned char *)calloc((size_t)1, enum_buf_size);
 
     if (H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
@@ -6386,7 +6386,7 @@ test_encode(void)
     }
 
     if (vlstr_buf_size > 0)
-        vlstr_buf = (unsigned char *)HDcalloc((size_t)1, vlstr_buf_size);
+        vlstr_buf = (unsigned char *)calloc((size_t)1, vlstr_buf_size);
 
     if (H5Tencode(tid3, vlstr_buf, &vlstr_buf_size) < 0) {
         H5_FAILED();
@@ -6400,7 +6400,7 @@ test_encode(void)
         HDprintf("Can't decode VL string type\n");
         goto error;
     }
-    HDfree(vlstr_buf);
+    free(vlstr_buf);
 
     /* Verify that the datatype was copied exactly */
     if (H5Tequal(decoded_tid3, tid3) <= 0) {
@@ -6519,8 +6519,8 @@ test_encode(void)
         goto error;
     }
 
-    HDfree(cmpd_buf);
-    HDfree(enum_buf);
+    free(cmpd_buf);
+    free(enum_buf);
 
     PASSED();
     return 0;

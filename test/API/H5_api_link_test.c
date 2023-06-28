@@ -307,7 +307,7 @@ test_create_hard_link_long_name(void)
         name_len = 99;
 
     /* Construct very long file name */
-    if ((objname = (char *)HDmalloc((size_t)(name_len + 1))) == NULL)
+    if ((objname = (char *)malloc((size_t)(name_len + 1))) == NULL)
         TEST_ERROR;
 
     for (u = 0; u < name_len; u++)
@@ -342,7 +342,7 @@ test_create_hard_link_long_name(void)
 
     /* Release memory */
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     PASSED();
 
@@ -358,7 +358,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 }
@@ -1493,7 +1493,7 @@ test_create_soft_link_long_name(void)
         name_len = 99;
 
     /* Construct very long file name */
-    if ((objname = (char *)HDmalloc((size_t)(name_len + 1))) == NULL)
+    if ((objname = (char *)malloc((size_t)(name_len + 1))) == NULL)
         TEST_ERROR;
 
     for (u = 0; u < name_len; u++)
@@ -1528,7 +1528,7 @@ test_create_soft_link_long_name(void)
 
     /* Release memory */
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     PASSED();
 
@@ -1544,7 +1544,7 @@ error:
     H5E_END_TRY;
 
     if (objname)
-        HDfree(objname);
+        free(objname);
 
     return 1;
 }
@@ -13810,7 +13810,7 @@ test_get_link_val_invalid_params(void)
     }
 
     link_val_buf_size = 100;
-    if (NULL == (link_val_buf = (char *)HDmalloc(link_val_buf_size))) {
+    if (NULL == (link_val_buf = (char *)malloc(link_val_buf_size))) {
         H5_FAILED();
         HDprintf("    couldn't allocate buffer for storing link value\n");
         goto error;
@@ -14048,7 +14048,7 @@ test_get_link_val_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (link_val_buf) {
-        HDfree(link_val_buf);
+        free(link_val_buf);
         link_val_buf = NULL;
     }
 
@@ -14069,7 +14069,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (link_val_buf)
-            HDfree(link_val_buf);
+            free(link_val_buf);
         H5Pclose(gcpl_id);
         H5Gclose(group_id);
         H5Gclose(container_group);
@@ -19425,7 +19425,7 @@ test_get_link_name_invalid_params(void)
     }
 
     link_name_buf_size = (size_t)ret;
-    if (NULL == (link_name_buf = (char *)HDmalloc(link_name_buf_size + 1)))
+    if (NULL == (link_name_buf = (char *)malloc(link_name_buf_size + 1)))
         TEST_ERROR;
 
     PASSED();
@@ -19582,7 +19582,7 @@ test_get_link_name_invalid_params(void)
     TESTING_2("test cleanup");
 
     if (link_name_buf) {
-        HDfree(link_name_buf);
+        free(link_name_buf);
         link_name_buf = NULL;
     }
 
@@ -19601,7 +19601,7 @@ error:
     H5E_BEGIN_TRY
     {
         if (link_name_buf)
-            HDfree(link_name_buf);
+            free(link_name_buf);
         H5Gclose(group_id);
         H5Gclose(container_group);
         H5Fclose(file_id);

@@ -696,8 +696,8 @@ H5CX_term_package(void)
     cnode = H5CX__pop_common(FALSE);
 
     /* Free the context node */
-    /* (Allocated with HDmalloc() in H5CX_push_special() ) */
-    HDfree(cnode);
+    /* (Allocated with malloc() in H5CX_push_special() ) */
+    free(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
     H5CX_head_g = NULL;
@@ -736,10 +736,10 @@ H5CX__get_context(void)
         /* Win32 has to use LocalAlloc to match the LocalFree in DllMain */
         ctx = (H5CX_node_t **)LocalAlloc(LPTR, sizeof(H5CX_node_t *));
 #else
-        /* Use HDmalloc here since this has to match the HDfree in the
+        /* Use malloc here since this has to match the free in the
          * destructor and we want to avoid the codestack there.
          */
-        ctx = (H5CX_node_t **)HDmalloc(sizeof(H5CX_node_t *));
+        ctx = (H5CX_node_t **)malloc(sizeof(H5CX_node_t *));
 #endif /* H5_HAVE_WIN_THREADS */
         HDassert(ctx);
 
@@ -852,7 +852,7 @@ H5CX_push_special(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Allocate & clear API context node, without using library API routines */
-    cnode = (H5CX_node_t *)HDcalloc(1, sizeof(H5CX_node_t));
+    cnode = (H5CX_node_t *)calloc(1, sizeof(H5CX_node_t));
     HDassert(cnode);
 
     /* Set context info */

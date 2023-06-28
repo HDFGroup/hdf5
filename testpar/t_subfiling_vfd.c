@@ -322,8 +322,8 @@ test_config_file(void)
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
-        config_filename = HDmalloc(PATH_MAX);
-        VRFY(config_filename, "HDmalloc succeeded");
+        config_filename = malloc(PATH_MAX);
+        VRFY(config_filename, "malloc succeeded");
 
         HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
                    SUBF_FILENAME, (uint64_t)file_info.st_ino);
@@ -331,7 +331,7 @@ test_config_file(void)
         config_file = HDfopen(config_filename, "r");
         VRFY(config_file, "HDfopen succeeded");
 
-        HDfree(config_filename);
+        free(config_filename);
 
         VRFY((HDfseek(config_file, 0, SEEK_END) >= 0), "HDfseek succeeded");
 
@@ -340,8 +340,8 @@ test_config_file(void)
 
         VRFY((HDfseek(config_file, 0, SEEK_SET) >= 0), "HDfseek succeeded");
 
-        config_buf = HDmalloc((size_t)config_file_len + 1);
-        VRFY(config_buf, "HDmalloc succeeded");
+        config_buf = malloc((size_t)config_file_len + 1);
+        VRFY(config_buf, "malloc succeeded");
 
         VRFY((HDfread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "HDfread succeeded");
         config_buf[config_file_len] = '\0';
@@ -376,8 +376,8 @@ test_config_file(void)
 
         VRFY((H5_dirname(resolved_path, &subfile_dir) >= 0), "H5_dirname succeeded");
 
-        tmp_buf = HDmalloc(PATH_MAX);
-        VRFY(tmp_buf, "HDmalloc succeeded");
+        tmp_buf = malloc(PATH_MAX);
+        VRFY(tmp_buf, "malloc succeeded");
 
         substr = HDstrstr(config_buf, "hdf5_file");
         VRFY(substr, "HDstrstr succeeded");
@@ -395,12 +395,12 @@ test_config_file(void)
 
         VRFY((HDstrcmp(tmp_buf, subfile_dir) == 0), "HDstrcmp succeeded");
 
-        HDfree(tmp_buf);
+        free(tmp_buf);
         H5MM_free(subfile_dir);
-        HDfree(resolved_path);
+        free(resolved_path);
 
-        subfile_name = HDmalloc(PATH_MAX);
-        VRFY(subfile_name, "HDmalloc succeeded");
+        subfile_name = malloc(PATH_MAX);
+        VRFY(subfile_name, "malloc succeeded");
 
         /* Verify the name of each subfile is in the configuration file */
         num_digits = (int)(HDlog10(cfg.stripe_count) + 1);
@@ -418,8 +418,8 @@ test_config_file(void)
         substr = HDstrstr(config_buf, subfile_name);
         VRFY(substr == NULL, "HDstrstr correctly failed");
 
-        HDfree(subfile_name);
-        HDfree(config_buf);
+        free(subfile_name);
+        free(config_buf);
 
         VRFY((HDfclose(config_file) >= 0), "HDfclose on configuration file succeeded");
     }
@@ -462,8 +462,8 @@ test_stripe_sizes(void)
     if (MAINPROCESS)
         TESTING_2("random subfiling stripe sizes");
 
-    tmp_filename = HDmalloc(PATH_MAX);
-    VRFY(tmp_filename, "HDmalloc succeeded");
+    tmp_filename = malloc(PATH_MAX);
+    VRFY(tmp_filename, "malloc succeeded");
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl_id >= 0), "DXPL creation succeeded");
@@ -511,8 +511,8 @@ test_stripe_sizes(void)
 
             nbytes = (size_t)(cfg.stripe_size * num_subfiles);
 
-            write_buf = HDmalloc(nbytes);
-            VRFY(write_buf, "HDmalloc succeeded");
+            write_buf = malloc(nbytes);
+            VRFY(write_buf, "malloc succeeded");
 
             HDmemset(write_buf, 255, nbytes);
 
@@ -635,7 +635,7 @@ test_stripe_sizes(void)
             subfile_ptr = HDfopen(tmp_filename, "r");
             VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
 
-            HDfree(write_buf);
+            free(write_buf);
             write_buf = NULL;
 
             VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
@@ -673,8 +673,8 @@ test_stripe_sizes(void)
 
         nbytes = (size_t)(cfg.stripe_size * num_subfiles);
 
-        write_buf = HDmalloc(nbytes);
-        VRFY(write_buf, "HDmalloc succeeded");
+        write_buf = malloc(nbytes);
+        VRFY(write_buf, "malloc succeeded");
 
         HDmemset(write_buf, 255, nbytes);
 
@@ -824,12 +824,12 @@ test_stripe_sizes(void)
         }
         H5E_END_TRY
 
-        HDfree(write_buf);
+        free(write_buf);
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
 
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
 
@@ -858,8 +858,8 @@ test_selection_strategies(void)
     if (MAINPROCESS)
         TESTING_2("I/O concentrator selection strategies");
 
-    tmp_filename = HDmalloc(PATH_MAX);
-    VRFY(tmp_filename, "HDmalloc succeeded");
+    tmp_filename = malloc(PATH_MAX);
+    VRFY(tmp_filename, "malloc succeeded");
 
     for (H5FD_subfiling_ioc_select_t strategy = 0; strategy < ioc_selection_options; strategy++) {
         /* Skip 1 IOC per node strategy since we assume it's
@@ -1024,7 +1024,7 @@ test_selection_strategies(void)
     mpi_code_g = MPI_Barrier(comm_g);
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
 
     CHECK_PASSED();
 }
@@ -1071,8 +1071,8 @@ test_read_different_stripe_size(void)
     if (MAINPROCESS)
         TESTING_2("file re-opening with different stripe size");
 
-    tmp_filename = HDmalloc(PATH_MAX);
-    VRFY(tmp_filename, "HDmalloc succeeded");
+    tmp_filename = malloc(PATH_MAX);
+    VRFY(tmp_filename, "malloc succeeded");
 
     /* Use a 1MiB stripe size and a subfile for each IOC */
     cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
@@ -1111,8 +1111,8 @@ test_read_different_stripe_size(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDmalloc succeeded");
+    buf = malloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "malloc succeeded");
 
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
@@ -1120,7 +1120,7 @@ test_read_different_stripe_size(void)
     VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
@@ -1181,8 +1181,8 @@ test_read_different_stripe_size(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDcalloc succeeded");
+    buf = calloc(1, count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "calloc succeeded");
 
     VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset read succeeded");
@@ -1193,7 +1193,7 @@ test_read_different_stripe_size(void)
         VRFY((buf_value == (SUBF_C_TYPE)((size_t)mpi_rank + i)), "data verification succeeded");
     }
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
@@ -1239,7 +1239,7 @@ test_read_different_stripe_size(void)
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
-    HDfree(tmp_filename);
+    free(tmp_filename);
 
     CHECK_PASSED();
 }
@@ -1331,8 +1331,8 @@ test_subfiling_precreate_rank_0(void)
             H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
-        buf = HDmalloc(dset_dims[0] * sizeof(SUBF_C_TYPE));
-        VRFY(buf, "HDmalloc succeeded");
+        buf = malloc(dset_dims[0] * sizeof(SUBF_C_TYPE));
+        VRFY(buf, "malloc succeeded");
 
         for (size_t i = 0; i < dset_dims[0]; i++)
             ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((i / n_elements_per_rank) + (i % n_elements_per_rank));
@@ -1340,7 +1340,7 @@ test_subfiling_precreate_rank_0(void)
         VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
              "Dataset write succeeded");
 
-        HDfree(buf);
+        free(buf);
         buf = NULL;
 
         VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
@@ -1357,8 +1357,8 @@ test_subfiling_precreate_rank_0(void)
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
-        tmp_filename = HDmalloc(PATH_MAX);
-        VRFY(tmp_filename, "HDmalloc succeeded");
+        tmp_filename = malloc(PATH_MAX);
+        VRFY(tmp_filename, "malloc succeeded");
 
         for (int i = 0; i < num_subfiles; i++) {
             h5_stat_t subfile_info;
@@ -1386,7 +1386,7 @@ test_subfiling_precreate_rank_0(void)
         subfile_ptr = HDfopen(tmp_filename, "r");
         VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
 
-        HDfree(tmp_filename);
+        free(tmp_filename);
         tmp_filename = NULL;
     }
 
@@ -1413,8 +1413,8 @@ test_subfiling_precreate_rank_0(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDcalloc succeeded");
+    buf = calloc(1, count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "calloc succeeded");
 
     VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset read succeeded");
@@ -1425,7 +1425,7 @@ test_subfiling_precreate_rank_0(void)
         VRFY((buf_value == (SUBF_C_TYPE)((size_t)mpi_rank + i)), "data verification succeeded");
     }
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
@@ -1522,8 +1522,8 @@ test_subfiling_write_many_read_one(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDmalloc succeeded");
+    buf = malloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "malloc succeeded");
 
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
@@ -1531,7 +1531,7 @@ test_subfiling_write_many_read_one(void)
     VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1550,8 +1550,8 @@ test_subfiling_write_many_read_one(void)
         dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        buf = HDcalloc(1, target_size);
-        VRFY(buf, "HDcalloc succeeded");
+        buf = calloc(1, target_size);
+        VRFY(buf, "calloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
@@ -1564,7 +1564,7 @@ test_subfiling_write_many_read_one(void)
             }
         }
 
-        HDfree(buf);
+        free(buf);
         buf = NULL;
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1678,8 +1678,8 @@ test_subfiling_write_many_read_few(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDmalloc succeeded");
+    buf = malloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "malloc succeeded");
 
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
@@ -1687,7 +1687,7 @@ test_subfiling_write_many_read_few(void)
     VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1736,8 +1736,8 @@ test_subfiling_write_many_read_few(void)
         dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        buf = HDcalloc(1, target_size);
-        VRFY(buf, "HDcalloc succeeded");
+        buf = calloc(1, target_size);
+        VRFY(buf, "calloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
@@ -1750,7 +1750,7 @@ test_subfiling_write_many_read_few(void)
             }
         }
 
-        HDfree(buf);
+        free(buf);
         buf = NULL;
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -1903,8 +1903,8 @@ test_subfiling_h5fuse(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDmalloc succeeded");
+    buf = malloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "malloc succeeded");
 
     for (size_t i = 0; i < count[0]; i++)
         ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
@@ -1912,7 +1912,7 @@ test_subfiling_h5fuse(void)
     VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, dxpl_id, buf) >= 0),
          "Dataset write succeeded");
 
-    HDfree(buf);
+    free(buf);
     buf = NULL;
 
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
@@ -1931,8 +1931,8 @@ test_subfiling_h5fuse(void)
             char *tmp_filename;
             char *args[7];
 
-            tmp_filename = HDmalloc(PATH_MAX);
-            VRFY(tmp_filename, "HDmalloc succeeded");
+            tmp_filename = malloc(PATH_MAX);
+            VRFY(tmp_filename, "malloc succeeded");
 
             /* Generate name for configuration file */
             HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
@@ -1980,8 +1980,8 @@ test_subfiling_h5fuse(void)
         dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        buf = HDcalloc(1, target_size);
-        VRFY(buf, "HDcalloc succeeded");
+        buf = calloc(1, target_size);
+        VRFY(buf, "calloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, dxpl_id, buf) >= 0),
              "Dataset read succeeded");
@@ -1994,7 +1994,7 @@ test_subfiling_h5fuse(void)
             }
         }
 
-        HDfree(buf);
+        free(buf);
         buf = NULL;
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
@@ -2024,8 +2024,8 @@ test_subfiling_h5fuse(void)
         }
         H5E_END_TRY;
 
-        filename_buf = HDmalloc(PATH_MAX);
-        VRFY(filename_buf, "HDmalloc succeeded");
+        filename_buf = malloc(PATH_MAX);
+        VRFY(filename_buf, "malloc succeeded");
 
         /* Generate name for configuration file */
         HDsnprintf(filename_buf, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
@@ -2049,7 +2049,7 @@ test_subfiling_h5fuse(void)
             }
         }
 
-        HDfree(filename_buf);
+        free(filename_buf);
     }
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
@@ -2248,7 +2248,7 @@ main(int argc, char **argv)
         HDprintf("Using seed: %u\n\n", seed);
 
     /* Allocate buffer for possible config file directory specified */
-    config_dir = HDmalloc(PATH_MAX);
+    config_dir = malloc(PATH_MAX);
     if (!config_dir) {
         if (MAINPROCESS)
             HDprintf("couldn't allocate space for subfiling config file directory buffer\n");

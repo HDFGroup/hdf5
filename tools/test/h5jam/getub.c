@@ -120,7 +120,7 @@ main(int argc, char *argv[])
         goto error;
     } /* end if */
 
-    if (NULL == (buf = (char *)HDmalloc((unsigned)(size + 1)))) {
+    if (NULL == (buf = (char *)malloc((unsigned)(size + 1)))) {
         error_msg("can't allocate buffer \n");
         goto error;
     } /* end if */
@@ -137,15 +137,15 @@ main(int argc, char *argv[])
     } /* end if */
 
     /* close things and exit */
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     HDclose(fd);
 
     return EXIT_SUCCESS;
 
 error:
-    HDfree(filename);
-    HDfree(buf);
+    free(filename);
+    free(buf);
     if (fd >= 0)
         HDclose(fd);
     return EXIT_FAILURE;

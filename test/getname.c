@@ -1470,7 +1470,7 @@ test_main(hid_t file_id, hid_t fapl)
         char *name3;
 
         /* Include the extra null character */
-        name3 = (char *)HDmalloc(name_len + 1);
+        name3 = (char *)malloc(name_len + 1);
         if (!name3)
             TEST_ERROR;
 
@@ -1493,7 +1493,7 @@ test_main(hid_t file_id, hid_t fapl)
         if (HDstrcmp(name3, "/g") != 0)
             TEST_ERROR;
 
-        HDfree(name3);
+        free(name3);
     }
 
     /* Close */

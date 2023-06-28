@@ -54,7 +54,7 @@ main(void)
 
     /* Initialize the data */
     /* (Try for something easily compressible) */
-    if (NULL == (data = (int *)HDmalloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
+    if (NULL == (data = (int *)malloc(SPACE_DIM1 * SPACE_DIM2 * sizeof(int))))
         TEST_ERROR;
 
     for (i = 0; i < SPACE_DIM1; i++)
@@ -97,13 +97,13 @@ main(void)
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
 
-    HDfree(data);
+    free(data);
 
     return EXIT_SUCCESS;
 
 error:
     if (data)
-        HDfree(data);
+        free(data);
     H5E_BEGIN_TRY
     {
         H5Pclose(dcpl_id);

@@ -364,7 +364,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
     /* Free the dataset names */
     for (i = 0; i < (NDATASETS + 2); i++)
-        HDfree(lnames[i]);
+        free(lnames[i]);
 } /* test_iter_group() */
 
 /****************************************************************
@@ -557,7 +557,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 
     /* Free the attribute names */
     for (i = 0; i < NATTR; i++)
-        HDfree(anames[i]);
+        free(anames[i]);
 
 } /* test_iter_attr() */
 
@@ -632,8 +632,8 @@ test_iter_group_large(hid_t fapl)
     } s1_t;
 
     /* Allocate & initialize array */
-    names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
-    CHECK_PTR(names, "HDcalloc");
+    names = (iter_info *)calloc(sizeof(iter_info), (ITER_NGROUPS + 2));
+    CHECK_PTR(names, "calloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -725,7 +725,7 @@ test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Release memory */
-    HDfree(names);
+    free(names);
 } /* test_iterate_group_large() */
 
 /****************************************************************
@@ -877,8 +877,8 @@ test_grp_memb_funcs(hid_t fapl)
 
     /* Free the dataset names */
     for (i = 0; i < (NDATASETS + 2); i++) {
-        HDfree(dnames[i]);
-        HDfree(obj_names[i]);
+        free(dnames[i]);
+        free(obj_names[i]);
     } /* end for */
 } /* test_grp_memb_funcs() */
 

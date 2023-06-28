@@ -52,15 +52,15 @@ static void
 leave(int ret)
 {
     if (fname_src)
-        HDfree(fname_src);
+        free(fname_src);
     if (fname_dst)
-        HDfree(fname_dst);
+        free(fname_dst);
     if (oname_dst)
-        HDfree(oname_dst);
+        free(oname_dst);
     if (oname_src)
-        HDfree(oname_src);
+        free(oname_src);
     if (str_flag)
-        HDfree(str_flag);
+        free(str_flag);
 
     h5tools_close();
     HDexit(ret);
@@ -419,15 +419,15 @@ main(int argc, char *argv[])
             if ('/' == oname_dst[i]) {
                 char *str_ptr;
 
-                str_ptr = (char *)HDcalloc(i + 1, sizeof(char));
+                str_ptr = (char *)calloc(i + 1, sizeof(char));
                 HDstrncpy(str_ptr, oname_dst, i);
                 str_ptr[i] = '\0';
                 if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0) {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
-                    HDfree(str_ptr);
+                    free(str_ptr);
                     H5TOOLS_GOTO_ERROR(EXIT_FAILURE, "H5Lexists failed");
                 }
-                HDfree(str_ptr);
+                free(str_ptr);
             }
         }
     }
@@ -458,7 +458,7 @@ main(int argc, char *argv[])
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     /* close propertis */
     if (H5Pclose(ocpl_id) < 0)
@@ -479,7 +479,7 @@ done:
 
     /* free link info path */
     if (linkinfo.trg_path)
-        HDfree(linkinfo.trg_path);
+        free(linkinfo.trg_path);
 
     H5E_BEGIN_TRY
     {

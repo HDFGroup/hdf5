@@ -119,9 +119,9 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
         HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
                   path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
                   bandwidth);
-        HDfree(timestrs.user);
-        HDfree(timestrs.system);
-        HDfree(timestrs.elapsed);
+        free(timestrs.user);
+        free(timestrs.system);
+        free(timestrs.elapsed);
     }
 #endif
 

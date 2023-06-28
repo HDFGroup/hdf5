@@ -1055,7 +1055,7 @@ test_array_alloc_custom(size_t size, void *info)
      */
     extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if ((ret_value = HDmalloc(extra + size)) != NULL) {
+    if ((ret_value = malloc(extra + size)) != NULL) {
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
@@ -1093,7 +1093,7 @@ test_array_free_custom(void *_mem, void *info)
     if (_mem != NULL) {
         mem = ((unsigned char *)_mem) - extra;
         *mem_used -= *(size_t *)((void *)mem);
-        HDfree(mem);
+        free(mem);
     } /* end if */
 
 } /* end test_array_free_custom() */
@@ -1136,7 +1136,7 @@ test_array_vlen_atomic(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int));
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int));
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 ((unsigned int *)wdata[i][j].p)[k] = (unsigned int)(i * 100 + j * 10 + k);
@@ -1357,7 +1357,7 @@ test_array_vlen_array(void)
     /* Initialize array data to write */
     for (i = 0; i < SPACE1_DIM1; i++)
         for (j = 0; j < ARRAY1_DIM1; j++) {
-            wdata[i][j].p   = HDmalloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
+            wdata[i][j].p   = malloc((size_t)(i + j + 1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
             wdata[i][j].len = (size_t)(i + j + 1);
             for (k = 0; k < (i + j + 1); k++)
                 for (l = 0; l < ARRAY1_DIM1; l++)
@@ -1632,8 +1632,8 @@ test_array_bkg(void)
 
     /* Initialize the data */
     /* ------------------- */
-    dtsinfo = (CmpDTSinfo *)HDmalloc(sizeof(CmpDTSinfo));
-    CHECK_PTR(dtsinfo, "HDmalloc");
+    dtsinfo = (CmpDTSinfo *)malloc(sizeof(CmpDTSinfo));
+    CHECK_PTR(dtsinfo, "malloc");
     HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
@@ -1662,7 +1662,7 @@ test_array_bkg(void)
     /* Initialize the names of data members */
     /* ------------------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        dtsinfo->name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
+        dtsinfo->name[i] = (char *)calloc((size_t)20, sizeof(char));
 
     HDstrcpy(dtsinfo->name[0], "One");
     HDstrcpy(dtsinfo->name[1], "Two");
@@ -1734,7 +1734,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo->nsubfields; i++)
-        HDfree(dtsinfo->name[i]);
+        free(dtsinfo->name[i]);
 
     /* Release IDs */
     /* ----------- */
@@ -1885,7 +1885,7 @@ test_array_bkg(void)
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
-    HDfree(dtsinfo);
+    free(dtsinfo);
 } /* end test_array_bkg() */
 
 /*-------------------------------------------------------------------------

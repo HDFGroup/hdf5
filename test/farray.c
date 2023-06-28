@@ -982,7 +982,7 @@ fiter_fw_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_para
     fiter_fw_t *fiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_fw_t *)HDmalloc(sizeof(fiter_fw_t));
+    fiter = (fiter_fw_t *)malloc(sizeof(fiter_fw_t));
     HDassert(fiter);
 
     /* Initialize the element iteration object */
@@ -1034,7 +1034,7 @@ fiter_term(void *fiter)
     HDassert(fiter);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_term() */
@@ -1068,7 +1068,7 @@ fiter_rv_init(const H5FA_create_t *cparam, const farray_test_param_t H5_ATTR_UNU
     fiter_rv_t *fiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rv_t *)HDmalloc(sizeof(fiter_rv_t));
+    fiter = (fiter_rv_t *)malloc(sizeof(fiter_rv_t));
     HDassert(fiter);
 
     /* Initialize reverse iteration info */
@@ -1134,11 +1134,11 @@ fiter_rnd_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_rnd_t *)HDmalloc(sizeof(fiter_rnd_t));
+    fiter = (fiter_rnd_t *)malloc(sizeof(fiter_rnd_t));
     HDassert(fiter);
 
     /* Allocate space for the array of shuffled indices */
-    fiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    fiter->idx = (hsize_t *)malloc(sizeof(hsize_t) * (size_t)cnt);
     HDassert(fiter->idx);
 
     /* Initialize reverse iteration info */
@@ -1209,10 +1209,10 @@ fiter_rnd_term(void *_fiter)
     HDassert(fiter->idx);
 
     /* Free shuffled index array */
-    HDfree(fiter->idx);
+    free(fiter->idx);
 
     /* Free iteration object */
-    HDfree(fiter);
+    free(fiter);
 
     return (0);
 } /* end fiter_rnd_term() */
@@ -1248,7 +1248,7 @@ fiter_cyc_init(const H5FA_create_t H5_ATTR_UNUSED *cparam, const farray_test_par
     fiter_cyc_t *fiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    fiter = (fiter_cyc_t *)HDmalloc(sizeof(fiter_cyc_t));
+    fiter = (fiter_cyc_t *)malloc(sizeof(fiter_cyc_t));
     HDassert(fiter);
 
     /* Initialize reverse iteration info */

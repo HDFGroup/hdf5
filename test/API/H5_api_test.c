@@ -288,7 +288,7 @@ main(int argc, char **argv)
     }
 
 done:
-    HDfree(vol_connector_string_copy);
+    free(vol_connector_string_copy);
 
     if (default_con_id >= 0 && H5VLclose(default_con_id) < 0) {
         HDfprintf(stderr, "Unable to close VOL connector ID\n");

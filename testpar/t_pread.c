@@ -162,7 +162,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* setup data to write */
     if (pass) {
-        if ((data_slice = (float *)HDmalloc(COUNT * sizeof(float))) == NULL) {
+        if ((data_slice = (float *)malloc(COUNT * sizeof(float))) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -439,7 +439,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
 
     /* free data_slice if it has been allocated */
     if (data_slice != NULL) {
-        HDfree(data_slice);
+        free(data_slice);
         data_slice = NULL;
     }
 
@@ -536,7 +536,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     /* allocate space for the data_slice array */
     if (pass) {
-        if ((data_slice = (float *)HDmalloc(COUNT * sizeof(float))) == NULL) {
+        if ((data_slice = (float *)malloc(COUNT * sizeof(float))) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -670,7 +670,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
     /* free data_slice if it has been allocated */
     if (data_slice != NULL) {
-        HDfree(data_slice);
+        free(data_slice);
         data_slice = NULL;
     }
 
@@ -710,7 +710,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
             failure_mssg = "H5Tclose failed.\n";
         };
 
-        if ((data_slice = (float *)HDmalloc((size_t)dset_size * filetype_size)) == NULL) {
+        if ((data_slice = (float *)malloc((size_t)dset_size * filetype_size)) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -861,7 +861,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         /* free data_slice if it has been allocated */
         if (data_slice != NULL) {
-            HDfree(data_slice);
+            free(data_slice);
             data_slice = NULL;
         }
 
@@ -869,7 +869,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
          * Read an H5S_ALL filespace into a hyperslab defined memory space
          */
 
-        if ((data_slice = (float *)HDmalloc((size_t)(dset_size * 2) * filetype_size)) == NULL) {
+        if ((data_slice = (float *)malloc((size_t)(dset_size * 2) * filetype_size)) == NULL) {
             pass         = FALSE;
             failure_mssg = "malloc of data_slice failed.\n";
         }
@@ -958,7 +958,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
 
         /* free data_slice if it has been allocated */
         if (data_slice != NULL) {
-            HDfree(data_slice);
+            free(data_slice);
             data_slice = NULL;
         }
 
