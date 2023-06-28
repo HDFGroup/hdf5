@@ -910,9 +910,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDmalloc
 #define HDmalloc(Z) malloc(Z)
 #endif
-#ifndef HDposix_memalign
-#define HDposix_memalign(P, A, Z) posix_memalign(P, A, Z)
-#endif
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
 #endif

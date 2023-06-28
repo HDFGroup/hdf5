@@ -788,10 +788,10 @@ test_direct(void)
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
      * memory address, size of data, and file address. */
-    if (0 != HDposix_memalign(&proto_points, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    if (0 != posix_memalign(&proto_points, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
     points = proto_points;
-    if (0 != HDposix_memalign(&proto_check, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+    if (0 != posix_memalign(&proto_check, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
     check = proto_check;
 
