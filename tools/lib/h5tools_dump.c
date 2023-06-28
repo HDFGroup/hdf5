@@ -344,9 +344,9 @@ h5tools_dump_region_attribute(hid_t region_id, FILE *stream, const h5tool_format
     hbool_t         past_catch = FALSE;
     hbool_t         ret_value  = TRUE;
 
-    HDassert(info);
-    HDassert(ctx);
-    HDassert(buffer);
+    assert(info);
+    assert(ctx);
+    assert(buffer);
 
     outputformat           = *info;
     outputformat.idx_fmt   = "";
@@ -497,10 +497,10 @@ h5tools_print_region_data_blocks(hid_t region_id, FILE *stream, const h5tool_for
     void             *region_buf = NULL;
     int               ret_value  = 0;
 
-    HDassert(info);
-    HDassert(cur_ctx);
-    HDassert(buffer);
-    HDassert(ptdata);
+    assert(info);
+    assert(cur_ctx);
+    assert(buffer);
+    assert(ptdata);
 
     HDmemset(&ctx, 0, sizeof(ctx));
 
@@ -674,9 +674,9 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     hbool_t         past_catch = FALSE;
     hbool_t         ret_value  = TRUE;
 
-    HDassert(info);
-    HDassert(ctx);
-    HDassert(buffer);
+    assert(info);
+    assert(ctx);
+    assert(buffer);
 
     H5TOOLS_START_DEBUG(" ");
     outputformat           = *info;
@@ -712,7 +712,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     h5tools_str_append(buffer, "REGION_TYPE BLOCK  ");
 
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-    HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+    assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
     if ((ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL)
         H5TOOLS_GOTO_ERROR(dimension_break, "Could not allocate buffer for ptdata");
 
@@ -893,11 +893,11 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id, FILE *stre
     hbool_t           past_catch = FALSE;
     int               ret_value  = 0;
 
-    HDassert(info);
-    HDassert(cur_ctx);
-    HDassert(buffer);
-    HDassert(ptdata);
-    HDassert(ndims > 0);
+    assert(info);
+    assert(cur_ctx);
+    assert(buffer);
+    assert(ptdata);
+    assert(ndims > 0);
 
     H5TOOLS_START_DEBUG(" ");
 
@@ -1033,9 +1033,9 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     hbool_t         past_catch = FALSE;
     hbool_t         ret_value  = TRUE;
 
-    HDassert(info);
-    HDassert(ctx);
-    HDassert(buffer);
+    assert(info);
+    assert(ctx);
+    assert(buffer);
 
     H5TOOLS_START_DEBUG(" ");
     outputformat           = *info;
@@ -1071,7 +1071,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     h5tools_str_append(buffer, "REGION_TYPE POINT  ");
 
     alloc_size = npoints * ndims * sizeof(ptdata[0]);
-    HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+    assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
     if (NULL == (ptdata = (hsize_t *)HDmalloc((size_t)alloc_size)))
         H5TOOLS_GOTO_ERROR(dimension_break, "Could not allocate buffer for ptdata");
 
@@ -1317,10 +1317,10 @@ h5tools_print_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_c
                         size = 1;
                     sm_size[i - 1] = MIN(total_size[i - 1], size);
                     sm_nbytes *= sm_size[i - 1];
-                    HDassert(sm_nbytes > 0);
+                    assert(sm_nbytes > 0);
                 }
 
-            HDassert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+            assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
             if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)sm_nelmts * p_type_nbytes)))
                 H5TOOLS_THROW(FAIL, "Could not allocate buffer for strip-mine");
 
@@ -1699,7 +1699,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     if (!sm_nbytes)
         goto done;
 
-    HDassert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+    assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
     if (NULL != (sm_buf = (unsigned char *)HDmalloc((size_t)sm_nbytes))) {
         H5TOOLS_DEBUG("stripmine size:%ld", sm_nbytes);
 
@@ -1848,7 +1848,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
         vl_data = TRUE;
 
     alloc_size = p_nelmts * H5Tget_size(p_type);
-    HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+    assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
     if (NULL != (buf = (unsigned char *)HDmalloc((size_t)alloc_size))) {
         H5TOOLS_DEBUG("ctx->ndims:%d", ctx->ndims);
 
@@ -2747,7 +2747,7 @@ h5tools_print_enum(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *i
     if ((snmembs = H5Tget_nmembers(type)) < 0)
         H5TOOLS_THROW((-1), "H5Tget_nmembers failed");
     nmembs = (unsigned)snmembs;
-    HDassert(nmembs > 0);
+    assert(nmembs > 0);
 
     if ((super = H5Tget_super(type)) < 0)
         H5TOOLS_THROW((-1), "H5Tget_super failed");
@@ -3382,12 +3382,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     ctx->indent_level++;
 
                     ssize_out = H5Pget_virtual_filename(dcpl_id, curr_vmap, NULL, 0);
-                    HDassert(ssize_out > 0);
-                    HDassert((size_t)ssize_out < sizeof(name));
+                    assert(ssize_out > 0);
+                    assert((size_t)ssize_out < sizeof(name));
                     H5Pget_virtual_filename(dcpl_id, curr_vmap, name, sizeof(name));
                     ssize_out = H5Pget_virtual_dsetname(dcpl_id, curr_vmap, NULL, 0);
-                    HDassert(ssize_out > 0);
-                    HDassert((size_t)ssize_out < sizeof(name));
+                    assert(ssize_out > 0);
+                    assert((size_t)ssize_out < sizeof(name));
                     H5Pget_virtual_dsetname(dcpl_id, curr_vmap, dsetname, sizeof(dsetname));
 
                     ctx->need_prefix = TRUE;
@@ -3660,7 +3660,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             break;
         case H5D_FILL_TIME_ERROR:
         default:
-            HDassert(0);
+            assert(0);
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -3684,7 +3684,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             break;
         case H5D_FILL_VALUE_ERROR:
         default:
-            HDassert(0);
+            assert(0);
             break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
@@ -3726,7 +3726,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
             case H5D_ALLOC_TIME_ERROR:
             case H5D_ALLOC_TIME_DEFAULT:
             default:
-                HDassert(0);
+                assert(0);
                 break;
         }
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);

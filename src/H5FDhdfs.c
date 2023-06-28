@@ -469,7 +469,7 @@ H5FD__hdfs_handle_open(const char *path, const char *namenode_name, const int32_
 done:
     if (ret_value == NULL && handle != NULL) {
         /* error; clean up */
-        HDassert(handle->magic == HDFS_HDFST_MAGIC);
+        assert(handle->magic == HDFS_HDFST_MAGIC);
         handle->magic++;
         if (handle->file != NULL)
             if (FAIL == (hdfsCloseFile(handle->filesystem, handle->file)))
@@ -558,7 +558,7 @@ H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
     if (fa->version != H5FD__CURR_HDFS_FAPL_T_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_hdfs_fapl_t version");
@@ -595,7 +595,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*#", fapl_id, fa);
 
-    HDassert(fa != NULL);
+    assert(fa != NULL);
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -758,7 +758,7 @@ H5FD__hdfs_fapl_free(void *_fa)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(fa != NULL); /* sanity check */
+    assert(fa != NULL); /* sanity check */
 
     H5MM_xfree(fa);
 
@@ -879,7 +879,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     if (handle == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "could not open")
 
-    HDassert(handle->magic == HDFS_HDFST_MAGIC);
+    assert(handle->magic == HDFS_HDFST_MAGIC);
 
     /* Create new file struct */
     file = H5FL_CALLOC(H5FD_hdfs_t);
@@ -1045,7 +1045,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
         re_dub = (double)min_meta;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
     }
 
@@ -1055,7 +1055,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
         re_dub = (double)min_raw;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
     }
 
@@ -1063,26 +1063,26 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     re_dub = (double)average_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)average_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
     HDfprintf(stream, "  max ");
     re_dub = (double)max_meta;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c ", re_dub, suffixes[suffix_i]);
 
     re_dub = (double)max_raw;
     for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
         re_dub /= 1024.0;
-    HDassert(suffix_i < sizeof(suffixes));
+    assert(suffix_i < sizeof(suffixes));
     HDfprintf(stream, "%8.3lf%c\n", re_dub, suffixes[suffix_i]);
 
     /******************************
@@ -1122,33 +1122,33 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
         bm_val = (double)m->bytes;
         for (suffix_i = 0; bm_val >= 1024.0; suffix_i++)
             bm_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         bm_suffix = suffixes[suffix_i];
 
         br_val = (double)r->bytes;
         for (suffix_i = 0; br_val >= 1024.0; suffix_i++)
             br_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         br_suffix = suffixes[suffix_i];
 
         if (m->count > 0)
             am_val = (double)(m->bytes) / (double)(m->count);
         for (suffix_i = 0; am_val >= 1024.0; suffix_i++)
             am_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         am_suffix = suffixes[suffix_i];
 
         if (r->count > 0)
             ar_val = (double)(r->bytes) / (double)(r->count);
         for (suffix_i = 0; ar_val >= 1024.0; suffix_i++)
             ar_val /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
         ar_suffix = suffixes[suffix_i];
 
         re_dub = (double)range_end;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
-        HDassert(suffix_i < sizeof(suffixes));
+        assert(suffix_i < sizeof(suffixes));
 
         HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
                   suffixes[suffix_i], /* bin ceiling      */
@@ -1196,9 +1196,9 @@ H5FD__hdfs_close(H5FD_t *_file)
 #endif
 
     /* Sanity checks */
-    HDassert(file != NULL);
-    HDassert(file->hdfs_handle != NULL);
-    HDassert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
+    assert(file != NULL);
+    assert(file->hdfs_handle != NULL);
+    assert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
 
     /* Close the underlying request handle */
     if (file->hdfs_handle != NULL)
@@ -1251,15 +1251,15 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
-    HDassert(f1->hdfs_handle != NULL);
-    HDassert(f2->hdfs_handle != NULL);
-    HDassert(f1->hdfs_handle->magic == HDFS_HDFST_MAGIC);
-    HDassert(f2->hdfs_handle->magic == HDFS_HDFST_MAGIC);
+    assert(f1->hdfs_handle != NULL);
+    assert(f2->hdfs_handle != NULL);
+    assert(f1->hdfs_handle->magic == HDFS_HDFST_MAGIC);
+    assert(f2->hdfs_handle->magic == HDFS_HDFST_MAGIC);
 
     finfo1 = f1->hdfs_handle->fileinfo;
     finfo2 = f2->hdfs_handle->fileinfo;
-    HDassert(finfo1 != NULL);
-    HDassert(finfo2 != NULL);
+    assert(finfo1 != NULL);
+    assert(finfo2 != NULL);
 
     if (finfo1->mKind != finfo2->mKind) {
         HGOTO_DONE(-1);
@@ -1427,8 +1427,8 @@ H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     HDfprintf(stdout, "called %s.\n", __func__);
 #endif
 
-    HDassert(file->hdfs_handle != NULL);
-    HDassert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
+    assert(file->hdfs_handle != NULL);
+    assert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
 
     FUNC_LEAVE_NOAPI((size_t)file->hdfs_handle->fileinfo->mSize)
 } /* end H5FD__hdfs_get_eof() */
@@ -1512,10 +1512,10 @@ H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     HDfprintf(stdout, "called %s.\n", __func__);
 #endif /* HDFS_DEBUG */
 
-    HDassert(file != NULL);
-    HDassert(file->hdfs_handle != NULL);
-    HDassert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
-    HDassert(buf != NULL);
+    assert(file != NULL);
+    assert(file->hdfs_handle != NULL);
+    assert(file->hdfs_handle->magic == HDFS_HDFST_MAGIC);
+    assert(buf != NULL);
 
     filesize = (size_t)file->hdfs_handle->fileinfo->mSize;
 

@@ -1032,7 +1032,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
 
             /* Go retrieve the data model & native object information */
             /* (don't need index & heap info) */
-            HDassert(obj_loc);
+            assert(obj_loc);
             if (H5O_get_info(obj_loc->oloc, &dm_info, H5O_INFO_BASIC | H5O_INFO_TIME) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get data model object info")
             if (H5O_get_native_info(obj_loc->oloc, &nat_info, H5O_INFO_HDR) < 0)
@@ -1099,8 +1099,8 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(loc);
-    HDassert(name && *name);
+    assert(loc);
+    assert(name && *name);
 
     /* Reset stat buffer */
     if (statbuf)
@@ -1137,7 +1137,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
             }
             else {
                 /* UD link. H5L_get_info checked for invalid link classes */
-                HDassert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
+                assert(linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX);
                 statbuf->type = H5G_UDLINK;
             }
         }

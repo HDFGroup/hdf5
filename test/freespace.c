@@ -198,8 +198,8 @@ TEST_sect_init_cls(H5FS_section_class_t *cls, void *_udata)
     unsigned *init_flags;
 
     /* Check arguments. */
-    HDassert(cls);
-    HDassert(_udata);
+    assert(cls);
+    assert(_udata);
 
     init_flags = (unsigned *)_udata;
     cls->flags |= *init_flags;
@@ -220,10 +220,10 @@ TEST_sect_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_info_t
     htri_t                     ret_value; /* Return value */
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert(sect2);
-    HDassert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
-    HDassert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
+    assert(sect1);
+    assert(sect2);
+    assert(sect1->sect_info.type == sect2->sect_info.type); /* Checks "MERGE_SYM" flag */
+    assert(H5_addr_lt(sect1->sect_info.addr, sect2->sect_info.addr));
 
     /* Check if second section adjoins first section */
     ret_value = H5_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr);
@@ -242,15 +242,15 @@ TEST_sect_merging(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2, voi
     herr_t                ret_value = SUCCEED; /* Return value */
 
     /* Check arguments. */
-    HDassert(sect1);
-    HDassert(((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
-             ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
-             ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
-    HDassert(sect2);
-    HDassert((sect2->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
-             (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
-             (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
-    HDassert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
+    assert(sect1);
+    assert(((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
+           ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
+           ((*sect1)->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
+    assert(sect2);
+    assert((sect2->sect_info.type == TEST_FSPACE_SECT_TYPE) ||
+           (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NEW) ||
+           (sect2->sect_info.type == TEST_FSPACE_SECT_TYPE_NONE));
+    assert(H5_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
     (*sect1)->sect_info.size += sect2->sect_info.size;
@@ -334,8 +334,8 @@ TEST_sects_cb(H5FS_section_info_t *_sect, void *_udata)
     TEST_iter_ud_t      *udata     = (TEST_iter_ud_t *)_udata;
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    HDassert(sect);
-    HDassert(udata);
+    assert(sect);
+    assert(udata);
 
     udata->tot_size += sect->sect_info.size;
     udata->tot_sect_count += 1;

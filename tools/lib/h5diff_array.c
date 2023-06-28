@@ -224,7 +224,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
         case H5T_NCLASSES:
         default:
             H5TOOLS_DEBUG("type_class:INVALID");
-            HDassert(0);
+            assert(0);
             break;
 
         /*-------------------------------------------------------------------------
@@ -707,7 +707,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
             size           = H5Tget_size(arr_opts.m_tid);
             ndims          = H5Tget_array_ndims(opts->m_tid);
             H5Tget_array_dims2(opts->m_tid, adims);
-            HDassert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+            assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
             H5TOOLS_DEBUG("attr ph=%d", arr_opts.print_header);
 
             /* calculate the number of array elements */
@@ -1386,9 +1386,9 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
      */
     if (nblocks1 > 0) {
         H5TOOLS_DEBUG("region compare blocks");
-        HDassert(ndims1 > 0);
+        assert(ndims1 > 0);
         alloc_size = (hsize_t)nblocks1 * (unsigned)ndims1 * 2 * sizeof(ptdata1[0]);
-        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
         if ((ptdata1 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
             opts->err_stat = H5DIFF_ERR;
@@ -1460,7 +1460,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
     if (npoints1 > 0) {
         H5TOOLS_DEBUG("region compare points");
         alloc_size = (hsize_t)npoints1 * (unsigned)ndims1 * sizeof(ptdata1[0]);
-        HDassert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
 
         if ((ptdata1 = (hsize_t *)HDmalloc((size_t)alloc_size)) == NULL) {
             opts->err_stat = H5DIFF_ERR;

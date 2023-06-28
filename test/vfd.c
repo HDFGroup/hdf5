@@ -104,7 +104,7 @@ static int __k;
                                                                                                              \
             if ((sizes_array)[idx] == 0) {                                                                   \
                                                                                                              \
-                HDassert((idx) > 0);                                                                         \
+                assert((idx) > 0);                                                                           \
                 (bool_size_fixed) = TRUE;                                                                    \
             }                                                                                                \
             else {                                                                                           \
@@ -131,7 +131,7 @@ static int __k;
                                                                                                              \
             if ((types_array)[idx] == H5FD_MEM_NOLIST) {                                                     \
                                                                                                              \
-                HDassert((idx) > 0);                                                                         \
+                assert((idx) > 0);                                                                           \
                 (bool_type_fixed) = TRUE;                                                                    \
             }                                                                                                \
             else {                                                                                           \
@@ -4184,7 +4184,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
      */
     fix_point = ((uint32_t)rand() & (count - 1)) / 2;
 
-    HDassert(fix_point < count / 2);
+    assert(fix_point < count / 2);
 
     for (i = 0; i < count; i++) {
 
@@ -4475,7 +4475,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
 
         SET_TYPE(type_fixed, types, type, i);
 
-        HDassert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
+        assert((H5FD_MEM_DEFAULT <= type) && (type <= H5FD_MEM_OHDR));
 
         w_buf = (const char *)(write_bufs[i]);
 
@@ -5220,7 +5220,7 @@ test_selection_io(const char *vfd_name)
          * Test 3: Strided <> Contiguous 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection in memory */
         start[0]  = 1;
@@ -5269,7 +5269,7 @@ test_selection_io(const char *vfd_name)
          * Test 4: Contiguous <> Strided 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Contiguous selection in memory */
         start[0]  = 1;
@@ -5318,7 +5318,7 @@ test_selection_io(const char *vfd_name)
          * Test 5: Strided <> Strided 1D I/O
          */
         /* SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection in memory */
         start[0]  = 1;
@@ -5474,8 +5474,8 @@ test_selection_io(const char *vfd_name)
          * Test 8: Strided <> Strided 2D I/O
          */
         /* SEL_IO_DIM0 and SEL_IO_DIM1 must be even */
-        HDassert(SEL_IO_DIM0 / 2 == (SEL_IO_DIM0 + 1) / 2);
-        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+        assert(SEL_IO_DIM0 / 2 == (SEL_IO_DIM0 + 1) / 2);
+        assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
         /* Strided selection (across dim 1) in memory */
         start[0]  = 0;
@@ -5509,7 +5509,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 1, j2 = 0; i < SEL_IO_DIM0; i++)
             for (j = 1; j < SEL_IO_DIM1; j += 2) {
-                HDassert(i2 < SEL_IO_DIM0);
+                assert(i2 < SEL_IO_DIM0);
                 fbuf2[i2][j2] = wbuf2[i][j];
                 if (++j2 == SEL_IO_DIM1) {
                     i2 += 2;
@@ -5571,7 +5571,7 @@ test_selection_io(const char *vfd_name)
 
         /* Update file buf */
         for (i = 1, i2 = 0, j2 = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2) {
-            HDassert(i2 < SEL_IO_DIM0);
+            assert(i2 < SEL_IO_DIM0);
             fbuf2[i2][j2] = wbuf1[i];
             j2 += 2;
             if (j2 >= SEL_IO_DIM1) {
@@ -5633,7 +5633,7 @@ test_selection_io(const char *vfd_name)
         /* Update file buf */
         for (i = 0, i2 = 0; i < SEL_IO_DIM0; i += 2)
             for (j = 0; j < SEL_IO_DIM1; j++) {
-                HDassert(i2 < (SEL_IO_DIM0 * SEL_IO_DIM1));
+                assert(i2 < (SEL_IO_DIM0 * SEL_IO_DIM1));
                 fbuf1[i2] = wbuf2[i][j];
                 i2 += 2;
             }
@@ -5668,7 +5668,7 @@ test_selection_io(const char *vfd_name)
              * Test 11: Strided <> Strided 1D and 2D I/O
              */
             /* SEL_IO_DIM1 must be even */
-            HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+            assert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
 
             /* Strided selection in memory (1D) */
             start[0]  = 0;
@@ -5717,7 +5717,7 @@ test_selection_io(const char *vfd_name)
                 fbuf1[(2 * i) + 1] = wbuf1[2 * i];
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5826,7 +5826,7 @@ test_selection_io(const char *vfd_name)
              * find 1D index into 2D array */
             for (i = 0, i2 = 0, j2 = 0; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf1[(i2 * SEL_IO_DIM1) + j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {
@@ -5836,7 +5836,7 @@ test_selection_io(const char *vfd_name)
                 }
             for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
                 for (j = 0; j < SEL_IO_DIM1; j++) {
-                    HDassert(i2 < SEL_IO_DIM0);
+                    assert(i2 < SEL_IO_DIM0);
                     fbuf2[i2][j2] = wbuf2[i][j];
                     j2 += 2;
                     if (j2 >= SEL_IO_DIM1) {

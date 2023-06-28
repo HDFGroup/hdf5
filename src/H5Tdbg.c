@@ -148,8 +148,8 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(dt);
-    HDassert(stream);
+    assert(dt);
+    assert(stream);
 
     switch (dt->shared->type) {
         case H5T_NO_CLASS:
@@ -224,7 +224,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             s2 = "[named,open]";
             break;
         default:
-            HDassert(0 && "This Should never be executed!");
+            assert(0 && "This Should never be executed!");
     } /* end switch */
 
     HDfprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));

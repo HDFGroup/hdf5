@@ -970,7 +970,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     /* case for atomic datatype */
     if (datatype == H5T_INTEGER) {
         /*check for overflow*/
-        HDassert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
+        assert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
         buf = (int *)HDmalloc((size_t)(nelmts * sizeof(int)));
 
         if (H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
@@ -996,7 +996,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     /* case for compound datatype */
     else if (datatype == H5T_COMPOUND) {
         /*check for overflow*/
-        HDassert((nelmts * sizeof(comp_datatype)) == (hsize_t)((size_t)(nelmts * sizeof(comp_datatype))));
+        assert((nelmts * sizeof(comp_datatype)) == (hsize_t)((size_t)(nelmts * sizeof(comp_datatype))));
         buf_c = (comp_datatype *)HDmalloc((size_t)nelmts * sizeof(comp_datatype));
 
         if (H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
@@ -1640,7 +1640,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     } /* end if */
     else {
         /* Sanity check */
-        HDassert(dtype_class == H5T_COMPOUND);
+        assert(dtype_class == H5T_COMPOUND);
 
         /* Initialize specific values for this datatype */
         val_size    = sizeof(comp_vl_datatype);
@@ -1692,7 +1692,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
     } /* end for */
 
     /* Check for overflow */
-    HDassert((nelmts * val_size) == (hsize_t)((size_t)(nelmts * val_size)));
+    assert((nelmts * val_size) == (hsize_t)((size_t)(nelmts * val_size)));
 
     /* Allocate & initialize buffer */
     buf = HDmalloc((size_t)(nelmts * val_size));

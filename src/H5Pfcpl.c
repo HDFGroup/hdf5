@@ -700,8 +700,8 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(btree_k);
-    HDassert(size);
+    assert(btree_k);
+    assert(size);
 
     if (NULL != *pp) {
         unsigned u; /* Local index variable */
@@ -749,9 +749,9 @@ H5P__fcrt_btree_rank_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(btree_k);
+    assert(pp);
+    assert(*pp);
+    assert(btree_k);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -987,8 +987,8 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(type_flags);
-    HDassert(size);
+    assert(type_flags);
+    assert(size);
 
     if (NULL != *pp) {
         unsigned u; /* Local index variable */
@@ -1037,9 +1037,9 @@ H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(type_flags);
+    assert(pp);
+    assert(*pp);
+    assert(type_flags);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -1078,8 +1078,8 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(minsizes);
-    HDassert(size);
+    assert(minsizes);
+    assert(size);
 
     if (NULL != *pp) {
         unsigned u; /* Local index variable */
@@ -1128,9 +1128,9 @@ H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(minsizes);
+    assert(pp);
+    assert(*pp);
+    assert(minsizes);
 
     /* Decode the size */
     enc_size = *(*pp)++;
@@ -1356,8 +1356,8 @@ H5P__fcrt_fspace_strategy_enc(const void *value, void **_pp, size_t *size)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
-    HDassert(strategy);
-    HDassert(size);
+    assert(strategy);
+    assert(size);
 
     if (NULL != *pp)
         /* Encode free-space strategy */
@@ -1393,9 +1393,9 @@ H5P__fcrt_fspace_strategy_dec(const void **_pp, void *_value)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(strategy);
+    assert(pp);
+    assert(*pp);
+    assert(strategy);
 
     /* Decode free-space strategy */
     *strategy = (H5F_fspace_strategy_t) * (*pp)++;

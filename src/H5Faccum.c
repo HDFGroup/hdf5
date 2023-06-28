@@ -107,8 +107,8 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(buf);
+    assert(f_sh);
+    assert(buf);
 
     /* Translate to file driver I/O info object */
     file = f_sh->lf;
@@ -122,7 +122,7 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
 
         if (size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
-            HDassert(!accum->buf || (accum->alloc_size >= accum->size));
+            assert(!accum->buf || (accum->alloc_size >= accum->size));
 
             /* Current read adjoins or overlaps with metadata accumulator */
             if (H5_addr_defined(accum->loc) &&
@@ -275,11 +275,11 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, H5FD_t *file, H5F_accum_adjust_t adju
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(accum);
-    HDassert(file);
-    HDassert(H5F_ACCUM_APPEND == adjust || H5F_ACCUM_PREPEND == adjust);
-    HDassert(size > 0);
-    HDassert(size <= H5F_ACCUM_MAX_SIZE);
+    assert(accum);
+    assert(file);
+    assert(H5F_ACCUM_APPEND == adjust || H5F_ACCUM_PREPEND == adjust);
+    assert(size > 0);
+    assert(size <= H5F_ACCUM_MAX_SIZE);
 
     /* Check if we need more buffer space */
     if ((size + accum->size) > accum->alloc_size) {
@@ -418,9 +418,9 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
-    HDassert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
-    HDassert(buf);
+    assert(f_sh);
+    assert(H5F_SHARED_INTENT(f_sh) & H5F_ACC_RDWR);
+    assert(buf);
 
     /* Translate to file driver pointer */
     file = f_sh->lf;
@@ -434,7 +434,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
 
         if (size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
-            HDassert(!accum->buf || (accum->alloc_size >= accum->size));
+            assert(!accum->buf || (accum->alloc_size >= accum->size));
 
             /* Check if there is already metadata in the accumulator */
             if (accum->size > 0) {
@@ -794,7 +794,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     size_t overlap_size; /* Size of overlapping region */
 
                     /* Sanity check */
-                    HDassert(H5_addr_gt(addr + size, accum->loc + accum->size));
+                    assert(H5_addr_gt(addr + size, accum->loc + accum->size));
 
                     /* Compute overlap size */
                     overlap_size = (size_t)((accum->loc + accum->size) - addr);
@@ -859,7 +859,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(f_sh);
+    assert(f_sh);
 
     /* Set up alias for file's metadata accumulator info */
     accum = &f_sh->accum;
@@ -874,8 +874,8 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
 
         /* Sanity check */
         /* (The metadata accumulator should not intersect w/raw data */
-        HDassert(H5FD_MEM_DRAW != type);
-        HDassert(H5FD_MEM_GHEAP != type); /* (global heap data is being treated as raw data currently) */
+        assert(H5FD_MEM_DRAW != type);
+        assert(H5FD_MEM_GHEAP != type); /* (global heap data is being treated as raw data currently) */
 
         /* Check for overlapping the beginning of the accumulator */
         if (H5_addr_le(addr, accum->loc)) {
@@ -952,7 +952,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                         write_size  = (size_t)(dirty_end - tail_addr);
                         dirty_delta = accum->dirty_len - write_size;
 
-                        HDassert(write_size > 0);
+                        assert(write_size > 0);
 
                         /* Write out the unfreed dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size,
@@ -973,7 +973,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
                         write_size  = (size_t)(dirty_end - tail_addr);
                         dirty_delta = accum->dirty_len - write_size;
 
-                        HDassert(write_size > 0);
+                        assert(write_size > 0);
 
                         /* Write out the unfreed end of the dirty region of the accumulator */
                         if (H5FD_write(file, H5FD_MEM_DEFAULT, dirty_start + dirty_delta, write_size,
@@ -1023,7 +1023,7 @@ H5F__accum_flush(H5F_shared_t *f_sh)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(f_sh);
+    assert(f_sh);
 
     /* Check if we need to flush out the metadata accumulator */
     if ((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && f_sh->accum.dirty) {
@@ -1065,7 +1065,7 @@ H5F__accum_reset(H5F_shared_t *f_sh, hbool_t flush)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(f_sh);
+    assert(f_sh);
 
     /* Flush any dirty data in accumulator, if requested */
     if (flush)

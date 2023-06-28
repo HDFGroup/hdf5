@@ -74,9 +74,9 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(*buf_size > 0);
-    HDassert(buf);
-    HDassert(*buf);
+    assert(*buf_size > 0);
+    assert(buf);
+    assert(*buf);
 
     /* Check arguments */
     if (cd_nelmts != 1 || cd_values[0] > 9)

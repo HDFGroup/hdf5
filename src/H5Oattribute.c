@@ -164,12 +164,12 @@ H5O__attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_U
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(udata);
-    HDassert(udata->f);
-    HDassert(udata->ainfo);
-    HDassert(attr);
+    assert(oh);
+    assert(mesg);
+    assert(udata);
+    assert(udata->f);
+    assert(udata->ainfo);
+    assert(attr);
 
     /* Insert attribute into dense storage */
     if (H5A__dense_insert(udata->f, udata->ainfo, attr) < 0)
@@ -210,8 +210,8 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(attr);
+    assert(loc);
+    assert(attr);
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -240,9 +240,9 @@ H5O__attr_create(const H5O_loc_t *loc, H5A_t *attr)
         } /* end if */
         else {
             /* Sanity check attribute info read in */
-            HDassert(ainfo.nattrs > 0);
-            HDassert(ainfo.track_corder == ((oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) > 0));
-            HDassert(ainfo.index_corder == ((oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) > 0));
+            assert(ainfo.nattrs > 0);
+            assert(ainfo.track_corder == ((oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) > 0));
+            assert(ainfo.index_corder == ((oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) > 0));
         } /* end else */
 
         /* Check if switching to "dense" attribute storage is possible */
@@ -404,9 +404,9 @@ H5O__attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(!udata->attr);
+    assert(oh);
+    assert(mesg);
+    assert(!udata->attr);
 
     /* Check for correct attribute message to modify */
     if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
@@ -452,8 +452,8 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name);
+    assert(loc);
+    assert(name);
 
     /* Protect the object header to iterate over */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -502,7 +502,7 @@ H5O__attr_open_by_name(const H5O_loc_t *loc, const char *name)
                 HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute: '%s'", name)
 
             /* Get attribute opened from object header */
-            HDassert(udata.attr);
+            assert(udata.attr);
             opened_attr = udata.attr;
         } /* end else */
 
@@ -547,8 +547,8 @@ H5O__attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr)
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(attr);
-    HDassert(ret_attr);
+    assert(attr);
+    assert(ret_attr);
 
     /* Copy attribute information.  Shared some attribute information. */
     if (NULL == (*ret_attr = H5A__copy(NULL, attr)))
@@ -583,7 +583,7 @@ H5O__attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* Build attribute operator info */
     attr_op.op_type  = H5A_ATTR_OP_LIB;
@@ -731,8 +731,8 @@ H5O__attr_update_shared(H5F_t *f, H5O_t *oh, H5A_t *attr, H5O_shared_t *update_s
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(f);
-    HDassert(attr);
+    assert(f);
+    assert(attr);
 
     /* Extract shared message info from current attribute (for later use) */
     if (H5O_set_shared(&sh_mesg, &(attr->sh_loc)) < 0)
@@ -805,9 +805,9 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(!udata->found);
+    assert(oh);
+    assert(mesg);
+    assert(!udata->found);
 
     /* Check for correct attribute message to modify */
     if (0 == HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name)) {
@@ -820,9 +820,9 @@ H5O__attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUS
          * The shared attribute structure will be different in that situation. SLU-2010/7/29 */
         if (((H5A_t *)mesg->native)->shared != udata->attr->shared) {
             /* Sanity check */
-            HDassert(((H5A_t *)mesg->native)->shared->data);
-            HDassert(udata->attr->shared->data);
-            HDassert(((H5A_t *)mesg->native)->shared->data != udata->attr->shared->data);
+            assert(((H5A_t *)mesg->native)->shared->data);
+            assert(udata->attr->shared->data);
+            assert(((H5A_t *)mesg->native)->shared->data != udata->attr->shared->data);
 
             /* (Needs to occur before updating the shared message, or the hash
              *      value on the old & new messages will be the same) */
@@ -885,8 +885,8 @@ H5O__attr_write(const H5O_loc_t *loc, H5A_t *attr)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(attr);
+    assert(loc);
+    assert(attr);
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -961,9 +961,9 @@ H5O__attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/,
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(!udata->found);
+    assert(oh);
+    assert(mesg);
+    assert(!udata->found);
 
     /* Check for existing attribute with new name */
     if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
@@ -1007,9 +1007,9 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(!udata->found);
+    assert(oh);
+    assert(mesg);
+    assert(!udata->found);
 
     /* Find correct attribute message to rename */
     if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
@@ -1045,7 +1045,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
         } /* end if */
         else {
             /* Sanity check */
-            HDassert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == FALSE);
+            assert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == FALSE);
 
             /* Check for attribute message changing size */
             if (HDstrlen(udata->new_name) != HDstrlen(udata->old_name) ||
@@ -1083,7 +1083,7 @@ H5O__attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR
                                 "unable to relocate renamed attribute in header")
 
                 /* Sanity check */
-                HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr) == FALSE);
+                assert(H5O_msg_is_shared(H5O_ATTR_ID, attr) == FALSE);
 
                 /* Close the local copy of the attribute */
                 H5A__close(attr);
@@ -1130,9 +1130,9 @@ H5O__attr_rename(const H5O_loc_t *loc, const char *old_name, const char *new_nam
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(old_name);
-    HDassert(new_name);
+    assert(loc);
+    assert(old_name);
+    assert(new_name);
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -1218,10 +1218,10 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, H5_index_t idx_type, H
     FUNC_ENTER_NOAPI_NOINIT_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5_addr_defined(loc->addr));
-    HDassert(attr_op);
+    assert(loc);
+    assert(loc->file);
+    assert(H5_addr_defined(loc->addr));
+    assert(attr_op);
 
     /* Protect the object header to iterate over */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -1302,7 +1302,7 @@ H5O__attr_iterate(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsiz
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(attr_op);
+    assert(attr_op);
 
     /* Look up location for location ID */
     if (H5G_loc(loc_id, &loc) < 0)
@@ -1346,9 +1346,9 @@ H5O__attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(oh);
-    HDassert(ainfo);
+    assert(loc);
+    assert(oh);
+    assert(ainfo);
 
     /* Decrement the number of attributes on the object */
     ainfo->nattrs--;
@@ -1466,9 +1466,9 @@ H5O__attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNU
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
-    HDassert(mesg);
-    HDassert(!udata->found);
+    assert(oh);
+    assert(mesg);
+    assert(!udata->found);
 
     /* Check for correct attribute message to modify */
     if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
@@ -1513,8 +1513,8 @@ H5O__attr_remove(const H5O_loc_t *loc, const char *name)
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name);
+    assert(loc);
+    assert(name);
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -1595,7 +1595,7 @@ H5O__attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
+    assert(loc);
 
     /* Pin the object header */
     if (NULL == (oh = H5O_pin(loc)))
@@ -1681,9 +1681,9 @@ H5O__attr_count_real(H5F_t *f, H5O_t *oh, hsize_t *nattrs)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(nattrs);
+    assert(f);
+    assert(oh);
+    assert(nattrs);
 
     /* Check for attributes stored densely */
     if (oh->version > H5O_VERSION_1) {
@@ -1737,8 +1737,8 @@ H5O__attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsig
     FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
-    HDassert(mesg);
-    HDassert(udata->exists && !*udata->exists);
+    assert(mesg);
+    assert(udata->exists && !*udata->exists);
 
     /* Check for correct attribute message */
     if (HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
@@ -1774,9 +1774,9 @@ H5O__attr_exists(const H5O_loc_t *loc, const char *name, hbool_t *attr_exists)
     FUNC_ENTER_PACKAGE_TAG(loc->addr)
 
     /* Check arguments */
-    HDassert(loc);
-    HDassert(name);
-    HDassert(attr_exists);
+    assert(loc);
+    assert(name);
+    assert(attr_exists);
 
     /* Protect the object header to iterate over */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -1840,9 +1840,9 @@ H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info)
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(f);
-    HDassert(oh);
-    HDassert(bh_info);
+    assert(f);
+    assert(oh);
+    assert(bh_info);
 
     /* Attributes are only stored in fractal heap & indexed w/v2 B-tree in later versions */
     if (oh->version > H5O_VERSION_1) {

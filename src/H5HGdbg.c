@@ -83,11 +83,11 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
-    HDassert(f);
-    HDassert(H5_addr_defined(addr));
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
+    assert(f);
+    assert(H5_addr_defined(addr));
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
     if (NULL == (h = H5HG__protect(f, addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap collection");

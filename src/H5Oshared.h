@@ -110,7 +110,7 @@ H5O_SHARED_ENCODE(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mes
 #endif /* H5O_SHARED_ENCODE_REAL */
 
     /* Sanity check */
-    HDassert(sh_mesg->type == H5O_SHARE_TYPE_UNSHARED || sh_mesg->msg_type_id == H5O_SHARED_TYPE->id);
+    assert(sh_mesg->type == H5O_SHARE_TYPE_UNSHARED || sh_mesg->msg_type_id == H5O_SHARED_TYPE->id);
 
     /* Check for message stored elsewhere */
     if (H5O_IS_STORED_SHARED(sh_mesg->type) && !disable_shared) {
@@ -349,11 +349,11 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(oloc_src->file);
-    HDassert(oloc_dst->file);
-    HDassert(mesg_src);
-    HDassert(mesg_dst);
-    HDassert(cpy_info);
+    assert(oloc_src->file);
+    assert(oloc_dst->file);
+    assert(mesg_src);
+    assert(mesg_dst);
+    assert(cpy_info);
 
 #ifndef H5O_SHARED_TYPE
 #error "Need to define H5O_SHARED_TYPE macro!"
@@ -384,8 +384,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t H5_ATTR_NDEBUG_UNUSED *oloc_src, const
 
     /* Make sure that if the source or destination is committed, both are
      * committed */
-    HDassert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) ==
-             (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
+    assert((shared_src->type == H5O_SHARE_TYPE_COMMITTED) == (shared_dst->type == H5O_SHARE_TYPE_COMMITTED));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -92,7 +92,7 @@ H5FA__dblk_page_alloc(H5FA_hdr_t *hdr, size_t nelmts)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate memory for the data block */
     if (NULL == (dblk_page = H5FL_CALLOC(H5FA_dblk_page_t)))
@@ -150,7 +150,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
-    HDassert(hdr);
+    assert(hdr);
 
     /* Allocate the data block page */
     if (NULL == (dblk_page = H5FA__dblk_page_alloc(hdr, nelmts)))
@@ -226,11 +226,11 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, haddr_t dblk_page_addr, size_t dblk_pag
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
-    HDassert(hdr);
-    HDassert(H5_addr_defined(dblk_page_addr));
+    assert(hdr);
+    assert(H5_addr_defined(dblk_page_addr));
 
     /* only the H5AC__READ_ONLY_FLAG is permitted */
-    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+    assert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up user data */
     udata.hdr            = hdr;
@@ -296,7 +296,7 @@ H5FA__dblk_page_unprotect(H5FA_dblk_page_t *dblk_page, unsigned cache_flags)
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
-    HDassert(dblk_page);
+    assert(dblk_page);
 
     /* Unprotect the data block page */
     if (H5AC_unprotect(dblk_page->hdr->f, H5AC_FARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
@@ -328,7 +328,7 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page)
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(dblk_page);
+    assert(dblk_page);
 
     /* Check if header field has been initialized */
     if (dblk_page->hdr) {
@@ -346,7 +346,7 @@ H5FA__dblk_page_dest(H5FA_dblk_page_t *dblk_page)
     } /* end if */
 
     /* Sanity check */
-    HDassert(NULL == dblk_page->top_proxy);
+    assert(NULL == dblk_page->top_proxy);
 
     /* Free the data block page itself */
     dblk_page = H5FL_FREE(H5FA_dblk_page_t, dblk_page);
