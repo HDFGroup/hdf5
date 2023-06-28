@@ -5666,7 +5666,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
 
         if (need_sort)
             qsort(chunk_fill_info->chunk_info, chunk_fill_info->num_chunks,
-                    sizeof(struct chunk_coll_fill_info), H5D__chunk_cmp_coll_fill_info);
+                  sizeof(struct chunk_coll_fill_info), H5D__chunk_cmp_coll_fill_info);
 
         /* Allocate buffer for block lengths if necessary */
         if (!all_same_block_len)

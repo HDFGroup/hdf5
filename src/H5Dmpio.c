@@ -1525,7 +1525,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_ran
             /* Sort sel_pieces if necessary */
             if (need_sort)
                 qsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
-                        H5D__cmp_piece_addr);
+                      H5D__cmp_piece_addr);
 
             /* Allocate chunking information */
             if (NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
@@ -3220,7 +3220,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const
         /* Ensure the chunk list is sorted in ascending order of offset in the file */
         if (need_sort)
             qsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
-                    H5D__cmp_filtered_collective_io_info_entry);
+                  H5D__cmp_filtered_collective_io_info_entry);
 
 #ifdef H5Dmpio_DEBUG
         H5D__mpio_dump_collective_filtered_chunk_list(local_info_array, num_chunks_selected, mpi_rank);
@@ -3528,7 +3528,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
 
         /* Sort collective chunk list according to chunk index */
         qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info);
+              H5D__cmp_chunk_redistribute_info);
 
         /*
          * Process all chunks in the collective chunk list.
@@ -3610,7 +3610,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
          *       but the current implementation is a quick and naive approach.
          */
         qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
-                H5D__cmp_chunk_redistribute_info_orig_owner);
+              H5D__cmp_chunk_redistribute_info_orig_owner);
     }
 
     if (all_ranks_involved) {
@@ -4996,7 +4996,7 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
      */
     if (need_sort)
         qsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
-                H5D__cmp_filtered_collective_io_info_entry);
+              H5D__cmp_filtered_collective_io_info_entry);
 
 done:
     H5MM_free(gathered_array);

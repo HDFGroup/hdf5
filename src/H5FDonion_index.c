@@ -883,7 +883,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
 
     /* Sort the new archival list */
     qsort(new_aix.list, new_aix.n_entries, sizeof(H5FD_onion_index_entry_t),
-            H5FD__onion_archival_index_list_sort_cmp);
+          H5FD__onion_archival_index_list_sort_cmp);
 
     /* Add the old archival index entries to a 'kept' list containing the
      * old archival list entries that are not also included in the revision
@@ -925,7 +925,7 @@ H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_i
 
     /* Sort this list */
     qsort(aix->list, aix->n_entries, sizeof(H5FD_onion_index_entry_t),
-            H5FD__onion_archival_index_list_sort_cmp);
+          H5FD__onion_archival_index_list_sort_cmp);
 
 done:
     /* Free the temporary lists */
