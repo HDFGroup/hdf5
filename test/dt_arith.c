@@ -2824,12 +2824,12 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
      */
     HDfflush(stdout);
     HDfflush(stderr);
-    if ((child_pid = HDfork()) < 0) {
+    if ((child_pid = fork()) < 0) {
         HDperror("fork");
         return 1;
     }
     else if (child_pid > 0) {
-        while (child_pid != HDwaitpid(child_pid, &status, 0)) /*void*/
+        while (child_pid != waitpid(child_pid, &status, 0)) /*void*/
             ;
         if (WIFEXITED(status) && 255 == WEXITSTATUS(status)) {
             return 0; /*child exit after catching SIGFPE*/

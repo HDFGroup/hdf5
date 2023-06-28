@@ -2258,7 +2258,7 @@ test_swmr_write_big(hbool_t newest_format)
         int   status; /* Status returned from child process */
 
         /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
-        if ((pid = HDfork()) < 0) {
+        if ((pid = fork()) < 0) {
             HDperror("fork");
             FAIL_STACK_ERROR;
         }
@@ -2271,13 +2271,13 @@ test_swmr_write_big(hbool_t newest_format)
             char        swmr_reader[] = SWMR_READER;
             char *const new_argv[]    = {swmr_reader, NULL};
             /* Run the reader */
-            status = HDexecv(SWMR_READER, new_argv);
+            status = execv(SWMR_READER, new_argv);
             printf("errno from execv = %s\n", HDstrerror(errno));
             FAIL_STACK_ERROR;
         } /* end if */
 
         /* Parent process -- wait for the child process to complete */
-        while (pid != HDwaitpid(pid, &status, 0))
+        while (pid != waitpid(pid, &status, 0))
             /*void*/;
 
         /* Check if child process terminates normally and its return value */

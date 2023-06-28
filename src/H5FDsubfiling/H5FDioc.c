@@ -819,6 +819,19 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Retrieve the HDF5 stub file ID for the current file */
     if (H5_subfiling_get_file_id_prop(plist_ptr, &file_ptr->file_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get stub file ID from FAPL");
+    if (file_ptr->file_id == UINT64_MAX) {
+        /* Since this VFD does no displaying of error stacks itself
+         * (it relies on the Subfiling VFD to do this), we must print
+         * the error stack here if we know it wasn't stacked under the
+         * Subfiling VFD.
+         */
+        H5_SUBFILING_DONE_ERROR(
+            H5E_PLIST, H5E_BADVALUE, NULL,
+            "subfiling stub file ID property was missing from FAPL - IOC VFD wasn't correctly stacked under "
+            "the Subfiling VFD and cannot currently be used alone");
+        PRINT_ERROR_STACK;
+        goto done;
+    }
 
     /*
      * Open the subfiles for this HDF5 file. A subfiling

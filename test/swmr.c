@@ -2501,7 +2501,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
      */
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2552,7 +2552,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2580,7 +2580,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) {                        /* Child process */
@@ -2745,7 +2745,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2772,7 +2772,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2822,7 +2822,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2848,7 +2848,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2902,7 +2902,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -2928,7 +2928,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -2982,7 +2982,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */
@@ -5236,7 +5236,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5289,7 +5289,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5313,7 +5313,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5366,7 +5366,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5391,7 +5391,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5444,7 +5444,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5469,7 +5469,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5527,7 +5527,7 @@ test_file_lock_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5633,7 +5633,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5686,7 +5686,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5711,7 +5711,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5764,7 +5764,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5789,7 +5789,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5842,7 +5842,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5866,7 +5866,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5919,7 +5919,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -5943,7 +5943,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -5999,7 +5999,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6023,7 +6023,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6076,7 +6076,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6101,7 +6101,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6154,7 +6154,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6179,7 +6179,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6232,7 +6232,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6257,7 +6257,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6313,7 +6313,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6338,7 +6338,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6391,7 +6391,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6416,7 +6416,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6469,7 +6469,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6494,7 +6494,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) { /* Child process */
@@ -6550,7 +6550,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         FAIL_STACK_ERROR;
 
     /* Check if child terminated normally */
@@ -6673,7 +6673,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         TEST_ERROR;
 
     if (childpid == 0) {
@@ -6729,7 +6729,7 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
         TEST_ERROR;
 
     /* Wait for child process to complete */
-    if (HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+    if (waitpid(childpid, &child_status, child_wait_option) < 0)
         TEST_ERROR;
 
     /* Check exit status of the child */
@@ -7172,7 +7172,7 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Fork child process */
-    if ((childpid = HDfork()) < 0)
+    if ((childpid = fork()) < 0)
         FAIL_STACK_ERROR;
 
     if (childpid == 0) {         /* Child process */
@@ -7347,7 +7347,7 @@ test_refresh_concur(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Wait for child process to complete */
-    if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
+    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check exit status of child process */

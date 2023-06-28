@@ -671,15 +671,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
 #endif
-#ifndef HDexecv
-#define HDexecv(S, AV) execv(S, AV)
-#endif
-#ifndef HDexecve
-#define HDexecve(S, AV, E) execve(S, AV, E)
-#endif
-#ifndef HDexecvp
-#define HDexecvp(S, AV) execvp(S, AV)
-#endif
 #ifndef HDexit
 #define HDexit(N) exit(N)
 #endif
@@ -753,9 +744,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfopen
 #define HDfopen(S, M) fopen(S, M)
-#endif
-#ifndef HDfork
-#define HDfork() fork()
 #endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
@@ -1223,12 +1211,6 @@ H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #ifndef HDvsnprintf
 #define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
-#ifndef HDwait
-#define HDwait(W) wait(W)
-#endif
-#ifndef HDwaitpid
-#define HDwaitpid(P, W, O) waitpid(P, W, O)
 #endif
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
