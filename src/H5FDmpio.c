@@ -3335,7 +3335,7 @@ H5FD__mpio_read_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED d
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
             fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__,
-                      file->mpi_rank, (long)mpi_off, (long long)bytes_read, H5FD__mem_t_to_str(type));
+                    file->mpi_rank, (long)mpi_off, (long long)bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
         /*
@@ -3625,7 +3625,7 @@ H5FD__mpio_write_selection(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
             fprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
-                      file->mpi_rank, (long)mpi_off, (long long)bytes_written, H5FD__mem_t_to_str(type));
+                    file->mpi_rank, (long)mpi_off, (long long)bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
         /* Each process will keep track of its perceived EOF value locally, and
