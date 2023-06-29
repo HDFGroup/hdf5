@@ -33,7 +33,7 @@
 /* Stream macros */
 #define FLUSHSTREAM(S)                                                                                       \
     if (S != NULL)                                                                                           \
-    HDfflush(S)
+    fflush(S)
 #define PRINTSTREAM(S, F, ...)                                                                               \
     if (S != NULL)                                                                                           \
     fprintf(S, F, __VA_ARGS__)

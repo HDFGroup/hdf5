@@ -686,9 +686,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
 #endif
-#ifndef HDferror
-#define HDferror(F) ferror(F)
-#endif
 #ifndef HDfgetc
 #define HDfgetc(F) fgetc(F)
 #endif
