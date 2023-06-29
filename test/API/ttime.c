@@ -216,12 +216,6 @@ test_time(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              October 19, 2000
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Dfill.c
- *			Jun 19 2007
- *			Quincey Koziol
  *
  * Purpose:		Fill value operations for datasets
  *
@@ -104,7 +102,6 @@ H5FL_EXTERN(H5S_sel_iter_t);
     If "fill" parameter is NULL, use all zeros as fill value.
  EXAMPLES
  REVISION LOG
-    Raymond Lu - 20 March 2007
     If there's VL type of data, the address of the data is copied multiple
     times into the buffer, causing some trouble when the data is released.
     Instead, make multiple copies of fill value first, then do conversion
@@ -297,9 +294,6 @@ done:
  * Purpose:	Initialize buffer filling operation
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		June 21, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -498,9 +492,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		June 21, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -581,9 +572,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		June 22, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -617,9 +605,6 @@ H5D__fill_release(H5D_fill_buf_info_t *fb_info)
  * Purpose:	Release fill value buffer info
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		June 21, 2007
  *
  *-------------------------------------------------------------------------
  */

@@ -75,9 +75,6 @@ static unsigned evict_on_close_test(hbool_t single_file_vfd);
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -403,9 +400,6 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/31/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -492,9 +486,6 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -858,9 +849,6 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -973,9 +961,6 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/15/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1258,9 +1243,6 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1535,9 +1517,6 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1798,9 +1777,6 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
  *           14) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/16/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2165,9 +2141,6 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/16/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2494,9 +2467,6 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              7/17/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2774,9 +2744,6 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
  *            7) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/17/15
  *
  *-------------------------------------------------------------------------
  */
@@ -3060,9 +3027,6 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
  *           15) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/17/15
  *
  *-------------------------------------------------------------------------
  */
@@ -3472,9 +3436,6 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              8/18/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3769,9 +3730,6 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
  *           13) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/18/15
  *
  *-------------------------------------------------------------------------
  */
@@ -4146,9 +4104,6 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
  *           13) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              8/18/15
  *
  *-------------------------------------------------------------------------
  */
@@ -4537,9 +4492,6 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
  *           19) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/15/15
  *
  *-------------------------------------------------------------------------
  */
@@ -5038,9 +4990,6 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/31/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5433,9 +5382,6 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/25/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -5800,9 +5746,6 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
  *           16) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/25/15
  *
  *-------------------------------------------------------------------------
  */
@@ -6202,9 +6145,6 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              12/29/16
- *
  *-------------------------------------------------------------------------
  */
 
@@ -6482,9 +6422,6 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
  *           17) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/25/15
  *
  *-------------------------------------------------------------------------
  */
@@ -7056,9 +6993,6 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/10/17
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7497,9 +7431,6 @@ get_free_sections_test(hbool_t single_file_vfd)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/23/17
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7816,9 +7747,6 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  John Mainzer
- *              6/24/04
  *
  *-------------------------------------------------------------------------
  */

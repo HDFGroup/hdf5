@@ -125,9 +125,6 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info2_t H5_ATTR
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -384,9 +381,6 @@ printelems(const Group &group, const H5std_string &dsname, const H5std_string &a
  * Function:    test_HDFFV_9920
  *
  * Purpose      Tests the fix for HDFFV-9920
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, September 9, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -443,9 +437,6 @@ test_HDFFV_9920()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Tuesday, September 6, 2016
  *-------------------------------------------------------------------------
  */
 extern "C" void

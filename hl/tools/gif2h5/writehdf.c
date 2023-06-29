@@ -23,10 +23,6 @@
  *
  * Purpose: Write the GIF image with the HDF5 Image API
  *
- * Programmer: Unknown
- *
- * Date: January, 31, 2006
- *
  *-------------------------------------------------------------------------
  */
 

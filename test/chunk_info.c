@@ -13,9 +13,6 @@
  *
  * Purpose:     Tests chunk query API functions
  *
- * Modification:
- *              Many tests were added for HDFFV-10677. -BMR, August 2019
- *
  * Test structure:
  *          main()
  *              test_basic_query()
@@ -2197,9 +2194,6 @@ error:
  * Purpose:     Tests functions related to chunk information
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Binh-Minh Ribler
- *              November 5, 2018
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Leon Arber  <larber@uiuc.edu>
- *              Sept. 28, 2006.
- *
  * Purpose:     This is the second half of a two-part test that makes sure
  *              that a file can be read after a parallel application crashes as long
  *              as the file was flushed first.  We simulate a crash by
@@ -35,10 +32,6 @@ static int *data_g = NULL;
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Leon Arber
- *              Sept. 26, 2006.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -129,10 +122,6 @@ error:
  * Purpose:     Part 2 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAIL
- *
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int

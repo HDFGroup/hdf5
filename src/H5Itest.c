@@ -58,9 +58,6 @@
  * Return:      Success: The length of name.
  *              Failure: -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 27, 2010
- *
  *-------------------------------------------------------------------------
  */
 ssize_t

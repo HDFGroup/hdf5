@@ -203,9 +203,6 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -252,9 +249,6 @@ done:
  * Return:      Success:    non-NULL
  *              Failure:    NULL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -281,9 +275,6 @@ H5D__earray_dst_context(void *_ctx)
  * Return:    Success:    non-negative
  *        Failure:    negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, January 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -309,9 +300,6 @@ H5D__earray_fill(void *nat_blk, size_t nelmts)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -353,9 +341,6 @@ H5D__earray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -396,9 +381,6 @@ H5D__earray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -427,9 +409,6 @@ H5D__earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -456,9 +435,6 @@ H5D__earray_filt_fill(void *nat_blk, size_t nelmts)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -504,9 +480,6 @@ H5D__earray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -550,9 +523,6 @@ H5D__earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -584,8 +554,6 @@ H5D__earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
  *
  * Return:      Success:    non-NULL
  *              Failure:    NULL
- *
- * Programmer:  Vailin Choi; July 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -659,8 +627,6 @@ done:
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Vailin Choi; July 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -688,9 +654,6 @@ H5D__earray_dst_dbg_context(void *_dbg_ctx)
  *
  * Return:      Success:    non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, June  2, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -755,9 +718,6 @@ done:
  * Return:      Success:    non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -804,9 +764,6 @@ done:
  * Purpose:     Initialize the indexing information for a dataset.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, May 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -876,9 +833,6 @@ done:
  *
  * Return:      Non-negative on success (with the LAYOUT argument initialized
  *              and ready to write to an object header). Negative on failure.
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -958,9 +912,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -980,8 +931,6 @@ H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Purpose:     Insert chunk address into the indexing structure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; May 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1050,9 +999,6 @@ done:
  *              supplied.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1148,9 +1094,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 23, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1196,8 +1139,6 @@ H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
  * Purpose:     Callback routine for extensible array element iteration.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1259,9 +1200,6 @@ H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
  *              when that's available.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1331,9 +1269,6 @@ done:
  * Purpose:     Remove chunk from index.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1446,9 +1381,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1486,9 +1418,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, January 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1542,9 +1471,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1595,9 +1521,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1632,9 +1555,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1688,9 +1608,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1718,9 +1635,6 @@ H5D__earray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1743,9 +1657,6 @@ H5D__earray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
  * Purpose:     Release indexing information in memory.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Saturday, January 31, 2009
  *
  *-------------------------------------------------------------------------
  */

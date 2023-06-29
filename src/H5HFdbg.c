@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFdbg.c
- *			Feb 24 2006
- *			Quincey Koziol
  *
  * Purpose:		Dump debugging information about a fractal heap
  *
@@ -95,9 +93,6 @@ static herr_t H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int 
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 20 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -166,9 +161,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 28 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -222,9 +214,6 @@ H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fw
  * Purpose:	Prints info about a fractal heap header.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 23 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -320,9 +309,6 @@ H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int i
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 24 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -362,9 +348,6 @@ done:
  * Purpose:	Detect free space within a direct block
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -444,9 +427,6 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
  * Purpose:	Prints debugging info about a fractal heap direct block.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 28 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -566,9 +546,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 23 2012
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -678,9 +655,6 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *st
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -735,9 +709,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -782,9 +753,6 @@ done:
  * Purpose:	Prints debugging info about free space sections for a fractal heap.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May  9 2006
  *
  *-------------------------------------------------------------------------
  */

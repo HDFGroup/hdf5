@@ -587,9 +587,6 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
  * Return:    Success:    non-negative
  *            Failure:    negative
  *
- * Programmer:    Quincey Koziol
- *              Saturday, November 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1433,9 +1430,6 @@ done:
  *
  * Return:     Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Monday, April 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1465,9 +1459,6 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
  * Return:     Success:    Positive if any action might have caused a
  *                            change in some other interface; zero otherwise.
  *             Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, September 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1667,9 +1658,6 @@ H5T_top_term_package(void)
  *                otherwise.
  *           Failure:    Negative
  *
- * Programmer:  Robb Matzke
- *              Friday, November 20, 1998
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1745,8 +1733,6 @@ done:
  *        DATATYPE  CANTINIT    Can't create type.
  *        DATATYPE  CANTREGISTER    Can't register datatype ID.
  *
- * Programmer:    Robb Matzke
- *        Friday, December  5, 1997
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -1887,8 +1873,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1983,9 +1967,6 @@ done:
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *        Wednesday, December 10, 1997
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2023,9 +2004,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Friday, January     9, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2059,9 +2037,6 @@ done:
  *
  *            Failure:    H5T_NO_CLASS (Negative)
  *
- * Programmer:    Robb Matzke
- *        Monday, December  8, 1997
- *
  *-------------------------------------------------------------------------
  */
 H5T_class_t
@@ -2092,9 +2067,6 @@ done:
  * Return:    Success:    One of the non-negative data type class constants.
  *
  *            Failure:    H5T_NO_CLASS (Negative)
- *
- * Programmer:    Robb Matzke
- *        Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -2129,8 +2101,6 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
  *
  * Return:     TRUE (1) or FALSE (0) on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        Wednesday, November 29, 2000
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2163,9 +2133,6 @@ done:
  *             datatype.
  *
  * Return:     TRUE (1) or FALSE (0) on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Wednesday, November 29, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -2239,9 +2206,6 @@ done:
  *
  * Return:    TRUE (1) or FALSE (0) on success/Negative on failure
  *
- * Programmer:    Raymond Lu
- *        November 4, 2002
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2272,9 +2236,6 @@ done:
  *
  * Return:    TRUE (1) or FALSE (0) on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
- *        October 17, 2007
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2295,9 +2256,6 @@ H5T_is_variable_str(const H5T_t *dt)
  *                datatype.
  *
  *            Failure:    0 (valid datatypes are never zero size)
- *
- * Programmer:    Robb Matzke
- *        Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -2339,9 +2297,6 @@ done:
  *        All datatypes have a positive size.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2386,8 +2341,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, December 23, 1998
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2426,9 +2379,6 @@ done:
  * Return:    Success:    Data type for base data type.
  *            Failure:        NULL
  *
- * Programmer:    Raymond Lu
- *                October 9, 2002
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -2456,8 +2406,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, March 7, 1998
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2502,8 +2450,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Friday, January     9, 1998
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2688,9 +2634,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *        Friday, January     9, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2737,9 +2680,6 @@ done:
  *
  * Return:    Success:    non-negative
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *        Tuesday, January 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2843,9 +2783,6 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
  *
  *            Failure:    negative
  *
- * Programmer:    Robb Matzke
- *        Tuesday, January 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2882,9 +2819,6 @@ done:
  * Return:    Success:    A pointer to a suitable conversion function.
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *        Tuesday, January 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2931,9 +2865,6 @@ done:
  *            FALSE:          soft conversion.
  *            FAIL:           failed.
  *
- * Programmer:    Raymond Lu
- *        Friday, Sept 2, 2005
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -2975,9 +2906,6 @@ done:
  *        information -QAK 7/1/99)
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *              Wednesday, June 10, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -3024,9 +2952,6 @@ done:
  *
  * Return:  Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, June 10, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3072,9 +2997,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Raymond Lu
- *              July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3109,9 +3031,6 @@ done:
  * Return:    Success:    datatype ID(non-negative)
  *
  *            Failure:    negative
- *
- * Programmer:    Raymond Lu
- *              July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -3159,9 +3078,6 @@ done:
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Raymond Lu
- *              July 14, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -3215,9 +3131,6 @@ done:
  *
  *            Failure:    negative
  *
- * Programmer:    Raymond Lu
- *              July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -3268,9 +3181,6 @@ done:
  * Return:    Success:    Pointer to the new type.
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *        Friday, December  5, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -3395,9 +3305,6 @@ done:
  * Note:      Common code for both H5T_copy and H5T_copy_reopen, as part of
  *            the const-correct datatype copying routines.
  *
- * Programmer:  David Young
- *              January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -3449,9 +3356,6 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:  David Young
- *              January 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 static H5T_t *
@@ -3476,9 +3380,6 @@ done:
  *
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3507,9 +3408,6 @@ done:
  *            Failure:    negative
  *
  * Note:      Common code for both H5T_copy and H5T_copy_reopen.
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3712,9 +3610,6 @@ done:
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *        Thursday, December  4, 1997
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -3787,9 +3682,6 @@ done:
  *
  * Return:    Success:    Pointer to a new copy of the OLD_DT argument.
  *            Failure:    NULL
- *
- * Programmer:  David Young
- *              January 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3898,8 +3790,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:    Robb Matzke
- *              Thursday, June  4, 1998
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3938,9 +3828,6 @@ done:
  * Purpose:   Allocates a new H5T_t structure, initializing it correctly.
  *
  * Return:    Pointer to new H5T_t on success/NULL on failure
- *
- * Programmer:    Quincey Koziol
- *        Monday, August 29, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -3991,9 +3878,6 @@ done:
  *            be done in H5T_close / H5T_close_real).
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Monday, January  6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4077,9 +3961,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer: Quincey Koziol
- *             Monday, February 12, 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -4118,9 +3999,6 @@ done:
  *              open named datatypes appropriately.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -4216,9 +4094,6 @@ done:
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *              Tuesday, December 22, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -4408,8 +4283,6 @@ done:
  *
  *            Failure:    0 (valid data types are never zero size)
  *
- * Programmer:    Robb Matzke
- *        Tuesday, December  9, 1997
  *-------------------------------------------------------------------------
  */
 size_t
@@ -4434,8 +4307,6 @@ H5T_get_size(const H5T_t *dt)
  *
  * Return:    TRUE/FALSE (never fails)
  *
- * Programmer:    Neil Fortner
- *        Thursday, January  21, 2021
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -4461,9 +4332,6 @@ H5T_get_force_conv(const H5T_t *dt)
  *                       >0 if DT1 is greater than DT2.
  *
  *            Failure:    0, never fails
- *
- * Programmer:    Robb Matzke
- *        Wednesday, December 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -4939,9 +4807,6 @@ done:
  *            Failure:    NULL if the path does not exist and no
  *                        function can be found to apply to the new path.
  *
- * Programmer:  Quincey Koziol
- *              Monday, March 5, 2018
- *
  *-------------------------------------------------------------------------
  */
 H5T_path_t *
@@ -4990,9 +4855,6 @@ done:
  *
  *            Failure:    NULL if the path does not exist and no
  *                        function can be found to apply to the new path.
- *
- * Programmer:  Robb Matzke
- *              Tuesday, January 13, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5048,7 +4910,6 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
      * then use entry[0], otherwise do a binary search over the
      * remaining entries.
      *
-     * Quincey Koziol, 2 July, 1999
      * Only allow the no-op conversion to occur if no "force conversion" flags
      * are set
      */
@@ -5300,8 +5161,6 @@ done:
  *
  * Return:    TRUE/FALSE (can't fail)
  *
- * Programmer:    Quincey Koziol
- *        Thursday, May  8, 2003
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -5332,9 +5191,6 @@ H5T_path_noop(const H5T_path_t *p)
  * Return:    A pointer to the subset info struct in p, or NULL if there are
  *            no compounds.  Points directly into the H5T_path_t structure.
  *
- * Programmer:    Raymond Lu
- *        8 June 2007
- *
  *-------------------------------------------------------------------------
  */
 H5T_subset_info_t *
@@ -5359,8 +5215,6 @@ H5T_path_compound_subset(const H5T_path_t *p)
  *
  * Return:    Background flag (can't fail)
  *
- * Programmer:    Quincey Koziol
- *        Thursday, May  8, 2003
  *-------------------------------------------------------------------------
  */
 H5T_bkg_t
@@ -5384,8 +5238,6 @@ H5T_path_bkg(const H5T_path_t *p)
  *            FALSE:          soft conversion.
  *            FAIL:           function failed.
  *
- * Programmer:    Raymond Lu
- *        Friday, Sept 2, 2005
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -5415,9 +5267,6 @@ done:
  * Return:    Success:    non-negative
  *
  *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *              Tuesday, December 15, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -5476,9 +5325,6 @@ done:
  * Return:    Success:    Ptr directly into named datatype
  *            Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *              Friday, June  5, 1998
- *
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
@@ -5515,9 +5361,6 @@ done:
  *
  * Return:    Success:    Ptr directly into named datatype
  *            Failure:    NULL
- *
- * Programmer:    Quincey Koziol
- *              Monday, September 12, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5556,8 +5399,6 @@ done:
  *
  *              FALSE
  *
- * Programmer:  Raymond Lu
- *              Friday, Dec 7, 2001
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -5613,8 +5454,6 @@ H5T_is_named(const H5T_t *dt)
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -5695,8 +5534,6 @@ H5T_get_ref_type(const H5T_t *dt)
  *
  *            Failure:    Negative
  *
- * Programmer:    Quincey Koziol
- *        Tuesday, June 11, 2002
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -5924,9 +5761,6 @@ done:
  *      FALSE - If the location of any vlen types is the same
  *  <0 is returned on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, June 24, 2004
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -5954,9 +5788,6 @@ H5T_is_relocatable(const H5T_t *dt)
  *
  * Return:      TRUE (1) or FALSE (0) on success
  *        (Can't fail)
- *
- * Programmer:  Quincey Koziol
- *              Saturday, January 5, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -6023,9 +5854,6 @@ done:
  *      FALSE - If the datatype will NOT be stored in a variable-length form
  *  <0 is returned on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, January 5, 2019
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -6060,9 +5888,6 @@ H5T_is_vl_storage(const H5T_t *dt)
  *              encoding routine.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -6115,9 +5940,6 @@ H5T__upgrade_version_cb(H5T_t *dt, void *op_value)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6147,8 +5969,6 @@ done:
  *              version.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; December 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -6188,9 +6008,6 @@ done:
  *              dt while dt is contained in the shared file's cache.
  *
  * Return:      SUCCEED
- *
- * Programmer:  Neil Fortner
- *              Thursday, July 14, 2011
  *
  *-------------------------------------------------------------------------
  */

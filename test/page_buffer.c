@@ -77,9 +77,6 @@ static const char *FILENAME[] = {"filepaged", NULL};
  * Return:      0 if test is successful
  *              1 if test fails
  *
- * Programmer:  unknown
- *              ?? / ?? / ??
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -216,9 +213,6 @@ error:
  *
  * Return:      0 if test is successful
  *              1 if test fails
- *
- * Programmer:  unknown
- *              ?? / ?? / ??
  *
  *-------------------------------------------------------------------------
  */
@@ -376,9 +370,6 @@ error:
  *
  * Return:      0 if test is successful
  *              1 if test fails
- *
- * Programmer:  unknown
- *              ?? / ?? / ??
  *
  *-------------------------------------------------------------------------
  */
@@ -550,9 +541,6 @@ error:
  *
  * Return:      0 if test is successful
  *              1 if test fails
- *
- * Programmer:  unknown
- *              ?? / ?? / ??
  *
  *-------------------------------------------------------------------------
  */
@@ -816,9 +804,6 @@ error:
  * Return:      0 if test is successful
  *              1 if test fails
  *
- * Programmer:  unknown
- *              ?? / ?? / ??
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1057,9 +1042,6 @@ error:
  *
  * Return:      0 if test is successful
  *              1 if test fails
- *
- * Programmer:  unknown
- *              ?? / ?? / ??
  *
  *-------------------------------------------------------------------------
  */
@@ -1680,9 +1662,6 @@ error:
  * Return:      0 if test is successful
  *              1 if test fails
  *
- * Programmer:  unknown
- *              ?? / ?? / ??
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1970,9 +1949,6 @@ error:
  * Return:      0 if test is successful
  *              1 if test fails
  *
- * Programmer:  John Mainzer
- *              03/21/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2082,9 +2058,6 @@ error:
  *
  * Return:      0 if test is successful
  *              1 if test fails
- *
- * Programmer:  unknown
- *              ?? / ?? / ??
  *
  *-------------------------------------------------------------------------
  */

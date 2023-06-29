@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5HFtiny.c
- *              Aug 14 2006
- *              Quincey Koziol
  *
  * Purpose:     Routines for "tiny" objects in fractal heap
  *
@@ -78,9 +76,6 @@ static herr_t H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operat
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -122,9 +117,6 @@ H5HF__tiny_init(H5HF_hdr_t *hdr)
  * Purpose:     Pack a 'tiny' object in a heap ID
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -181,9 +173,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -221,9 +210,6 @@ H5HF__tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
  * Purpose:     Internal routine to perform operation on 'tiny' object
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -272,9 +258,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Aug  8 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -306,9 +289,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sept 11 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -339,9 +319,6 @@ done:
  * Purpose:     Remove a 'tiny' object from the heap statistics
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Aug 14 2006
  *
  *-------------------------------------------------------------------------
  */

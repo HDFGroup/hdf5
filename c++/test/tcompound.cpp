@@ -40,9 +40,6 @@ typedef struct complex_t {
  * Purpose      Tests various things about compound data types.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -73,9 +70,6 @@ test_compound_1()
  *              elements.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -186,9 +180,6 @@ test_compound_2()
  *              members which appear in the source.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -296,9 +287,6 @@ test_compound_3()
  *              smaller.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -416,9 +404,6 @@ test_compound_4()
  *              which must undergo a conversion.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -511,9 +496,6 @@ test_compound_5()
  *              larger.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -596,9 +578,6 @@ test_compound_6()
  *              overlaps the end of the compound datatype.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -662,9 +641,6 @@ test_compound_7()
  * Purpose      Tests member function setSize() on compound datatype
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use partial C version test_ooo_order)
- *              March, 2014
  *-------------------------------------------------------------------------
  */
 const H5std_string COMPFILE("tcompound_types.h5");
@@ -750,9 +726,6 @@ test_compound_set_size()
  * Purpose      Main compound datatype testing routine
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler
- *              January 2007
  *-------------------------------------------------------------------------
  */
 extern "C" void

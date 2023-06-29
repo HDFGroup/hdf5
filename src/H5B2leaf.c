@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5B2leaf.c
- *			Dec 01 2016
- *			Quincey Koziol
  *
  * Purpose:		Routines for managing v2 B-tree leaf nodes.
  *
@@ -75,9 +73,6 @@ H5FL_DEFINE(H5B2_leaf_t);
  *              to point to it.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -162,9 +157,6 @@ done:
  * Purpose:	"Protect" an leaf node in the metadata cache
  *
  * Return:	Pointer to leaf node on success/NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		May  5 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -256,9 +248,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Mar  9 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -326,9 +315,6 @@ done:
  * Purpose:	Adds a new record to a B-tree leaf node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -440,9 +426,6 @@ done:
  *		H5B2_insert was called.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Dec 23 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -597,9 +580,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Mar  4 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -690,9 +670,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Apr 27 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -753,9 +730,6 @@ done:
  * Purpose:	Removes a record from a B-tree leaf node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar  3 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -862,9 +836,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Nov 14 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -962,9 +933,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 2 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1006,9 +974,6 @@ done:
  *
  * Return:	Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE herr_t
@@ -1026,9 +991,6 @@ H5B2__assert_leaf(const H5B2_hdr_t H5_ATTR_NDEBUG_UNUSED *hdr, const H5B2_leaf_t
  * Purpose:	Verify than a leaf node is mostly sane
  *
  * Return:	Non-negative on success, negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 19 2005
  *
  *-------------------------------------------------------------------------
  */

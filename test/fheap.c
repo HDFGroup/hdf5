@@ -183,9 +183,6 @@ static int del_objs(H5F_t *f, H5HF_t **fh, fheap_test_param_t *tparam, fheap_hea
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -219,9 +216,6 @@ init_small_cparam(H5HF_create_t *cparam)
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -253,9 +247,6 @@ init_large_cparam(H5HF_create_t *cparam)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -326,9 +317,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, September 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -358,9 +346,6 @@ op_memcpy(const void *obj, size_t obj_len, void *op_data)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -490,9 +475,6 @@ get_del_string(const fheap_test_param_t *tparam)
  * Return:      Size of object to pass down to "fill_heap" routine on
  *              success/can't fail
  *
- * Programmer:    Quincey Koziol
- *              Thursday, July 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE static size_t
@@ -521,9 +503,6 @@ get_fill_size(const fheap_test_param_t *tparam)
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -561,9 +540,6 @@ begin_test(fheap_test_param_t *tparam, const char *base_desc, fheap_heap_ids_t *
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -617,9 +593,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -729,9 +702,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -763,9 +733,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -829,9 +796,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -922,9 +886,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1012,9 +973,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1213,9 +1171,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1309,9 +1264,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1354,9 +1306,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1388,9 +1337,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1427,9 +1373,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1464,9 +1407,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1503,9 +1443,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1541,9 +1478,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1577,9 +1511,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1615,9 +1546,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1655,9 +1583,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1692,9 +1617,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1741,9 +1663,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1794,9 +1713,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1913,9 +1829,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2066,9 +1979,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2245,9 +2155,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, January  5, 2007
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2422,9 +2329,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2761,9 +2665,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -2882,9 +2783,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 14, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -3025,9 +2923,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Neil Fortner
- *              Tuesday, September 14, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3157,9 +3052,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, August 18, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3272,9 +3164,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3373,9 +3262,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3468,9 +3354,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3567,9 +3450,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3674,9 +3554,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3780,9 +3657,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -3892,9 +3766,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3987,9 +3858,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4091,9 +3959,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4191,9 +4056,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4302,9 +4164,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4400,9 +4259,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4495,9 +4351,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4597,9 +4450,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4708,9 +4558,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -4810,9 +4657,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -4922,9 +4766,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5030,9 +4871,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5127,9 +4965,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5237,9 +5072,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5339,9 +5171,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5449,9 +5278,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5561,9 +5387,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -5668,9 +5491,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5777,9 +5597,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -5892,9 +5709,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6014,9 +5828,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -6125,9 +5936,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6239,9 +6047,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6366,9 +6171,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6526,9 +6328,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6690,9 +6489,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -6885,9 +6681,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7053,9 +6846,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Saturday, June 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7293,9 +7083,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7592,9 +7379,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Sunday, April 1, 2012
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7722,9 +7506,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7794,9 +7575,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -7883,9 +7661,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, June  5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -7952,9 +7727,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, June 12, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8024,9 +7796,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8101,9 +7870,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8170,9 +7936,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, June 13, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8244,9 +8007,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8326,9 +8086,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, March 27, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8403,9 +8160,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8502,9 +8256,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, March 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8613,9 +8364,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -8709,9 +8457,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Saturday, April  1, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -8854,9 +8599,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9022,9 +8764,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -9148,9 +8887,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9277,9 +9013,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -9401,9 +9134,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9533,9 +9263,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9679,9 +9406,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -9843,9 +9567,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -9998,9 +9719,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10183,9 +9901,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -10313,9 +10028,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10454,9 +10166,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10607,9 +10316,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, April 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10765,9 +10471,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -10929,9 +10632,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tues, April 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11098,9 +10798,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Saturday, April 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -11260,9 +10957,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11443,9 +11137,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -11664,9 +11355,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -11863,9 +11551,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April 17, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12094,9 +11779,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, July 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12224,9 +11906,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12396,9 +12075,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -12507,9 +12183,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, July 25, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12621,9 +12294,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, August  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -12771,9 +12441,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -13001,9 +12668,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -13306,9 +12970,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Friday, August 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -13730,9 +13391,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -13943,9 +13601,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -14092,9 +13747,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -14323,9 +13975,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -14928,9 +14577,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -15100,9 +14746,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, October 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -15431,9 +15074,6 @@ error:
  *
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May  9, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -15634,9 +15274,6 @@ error:
  * Return:    Success:    0
  *
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, May 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -15846,9 +15483,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Monday, December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -16140,9 +15774,6 @@ error:
  * Return:    Success:    0
  *            Failure:    1
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -16310,9 +15941,6 @@ error:
  * Return:    Success:
  *
  *            Failure:
- *
- * Programmer:    Quincey Koziol
- *              Friday, February 24, 2006
  *
  *-------------------------------------------------------------------------
  */

@@ -22,9 +22,6 @@
  * Temporary files generated:
  *   ttsafe_dcreate.h5
  *
- * Created: Apr 28 2000
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 #include "ttsafe.h"
 

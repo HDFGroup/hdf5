@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:         H5B.c
- *                  Jul 10 1997
- *                  Robb Matzke
  *
  * Purpose:		Implements balanced, sibling-linked, N-ary trees
  *			capable of storing any type of data with unique key
@@ -194,9 +192,6 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
  *
  * 		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Jun 23 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -276,9 +271,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success (if found, values returned
  *              through the UDATA argument). Negative on failure (if not found,
  *              UDATA is undefined).
- *
- * Programmer:	Robb Matzke
- *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -372,9 +364,6 @@ done:
  *
  * Return:	Non-negative on success (The address of the new node is
  *              returned through the NEW_ADDR argument). Negative on failure.
- *
- * Programmer:	Robb Matzke
- *		Jul  3 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -524,9 +513,6 @@ done:
  * Purpose:	Adds a new item to the B-tree.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Jun 23 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -680,9 +666,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul  8 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -764,9 +747,6 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
  *				See also, declaration of H5B_ins_t.
  *
  *		Failure:	H5B_INS_ERROR
- *
- * Programmer:	Robb Matzke
- *		Jul  9 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1104,9 +1084,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jun 23 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1168,9 +1145,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jun 23 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1214,9 +1188,6 @@ H5B_iterate(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operator_t op, 
  *				also called by H5B_remove().
  *
  *		Failure:	H5B_INS_ERROR, a negative value.
- *
- * Programmer:	Robb Matzke
- *              Wednesday, September 16, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1544,9 +1515,6 @@ done:
  * Return:	Non-negative on success/Negative on failure (failure includes
  *		not being able to find the object which is to be removed).
  *
- * Programmer:	Robb Matzke
- *              Wednesday, September 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1587,9 +1555,6 @@ done:
  *              callbacks for each node.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1661,9 +1626,6 @@ done:
  * Return:	Success:	non-NULL pointer to struct allocated
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *		May 27 2008
- *
  *-------------------------------------------------------------------------
  */
 H5B_shared_t *
@@ -1732,9 +1694,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, May 27, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1764,9 +1723,6 @@ H5B_shared_free(void *_shared)
  * Return:	Success:	Pointer to H5B_t object.
  *
  * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Apr 18 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -1828,9 +1784,6 @@ done:
  * Purpose:	Walks the B-tree nodes, getting information for all of them.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jun  3 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1933,9 +1886,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi
- *              June 19, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1983,9 +1933,6 @@ done:
  * Purpose:     Attempt to load a B-tree node.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              March 17, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -2037,9 +1984,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              Mar 26, 2008
  *
  *-------------------------------------------------------------------------
  */

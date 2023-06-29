@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke
- *        Tuesday, December  9, 1997
- *
  * Purpose:    Tests the dataset interface (H5D)
  */
 #define H5D_FRIEND /*suppress error about including H5Dpkg      */
@@ -3692,9 +3689,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Xiaowen Wu
- *              Tuesday, Jan. 18th, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3906,9 +3900,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Xiaowen Wu
- *              Tuesday, Jan. 18th, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -4259,9 +4250,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Xiaowen Wu
- *              Thursday, Mar. 31th, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4463,9 +4451,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Raymond Lu
- *              19 November 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4642,9 +4627,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Raymond Lu
- *              19 November 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -4851,9 +4833,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Xiaowen Wu
- *              Monday, Feb. 14th, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4972,9 +4951,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Xiaowen Wu
- *              Tuesday, March 15th, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5116,9 +5092,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Xiaowen Wu
- *              Wednesday, Apr. 20th, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5238,9 +5211,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Xiaowen Wu
- *              Wednesday, Apr. 20th, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5383,9 +5353,6 @@ error:
  *
  *              Failure:        -1
  *
- * Programmer:  Xiaowen Wu
- *              Monday, Apr. 25th, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5505,9 +5472,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Xiaowen Wu
- *              Monday, Apr. 25th, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -5653,9 +5617,6 @@ error:
  *
  *              Failure:    -1
  *
- * Programmer:  Robb Matzke
- *              Tuesday, June  9, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -5730,9 +5691,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Monday, June  7, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -5852,9 +5810,6 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Friday, April  5, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6037,9 +5992,6 @@ const H5Z_class2_t H5Z_CAN_APPLY_TEST2[1] = {{
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Raymond Lu
- *              4 August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6181,9 +6133,6 @@ error:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Programmer:  Binh-Minh Ribler
- *              24 July 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6288,9 +6237,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6498,9 +6444,6 @@ const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Quincey Koziol
- *              Monday, April  7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6766,9 +6709,6 @@ error:
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Wednesday, January  7, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6868,9 +6808,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    -1
- *
- * Programmer:    Raymond Lu
- *              28 January 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -7029,9 +6966,6 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: Pedro Vicente
- *              Monday, January 26, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7182,9 +7116,6 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: Pedro Vicente
- *              Monday, March 8, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7267,9 +7198,6 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: Pedro Vicente
- *              Monday, March 8, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -7343,9 +7271,6 @@ error:
  *
  * Return: Success: 0
  *  Failure: -1
- *
- * Programmer: Quincey Koziol
- *              Tuesday, July 27, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -7554,9 +7479,6 @@ error:
  *
  * Return: Success: 0
  *  Failure: -1
- *
- * Programmer: Quincey Koziol
- *              Tuesday, August 25, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -7879,9 +7801,6 @@ make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
  *
  * Return: Success: 0
  *  Failure: -1
- *
- * Programmer: Christian Chilan
- *             Monday, March 26, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -8360,9 +8279,6 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: Christian Chilan
- *             Monday, March 26, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8407,9 +8323,6 @@ const H5Z_class1_t H5Z_DEPREC[1] = {{
  *
  * Return: Success: 0
  *  Failure: -1
- *
- * Programmer: Quincey Koziol
- *             Monday, October 8, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -8624,9 +8537,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Quincey Koziol
- *              Thursday, May  1, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -8754,9 +8664,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Neil Fortner
- *              Wednesday, October 29, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -9026,9 +8933,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Raymond Lu
- *              11 Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -9398,9 +9302,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, February  3, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -9819,9 +9720,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Vailin Choi
- *              April 13, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -9955,9 +9853,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Neil Fortner
- *              March 22, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -10123,9 +10018,6 @@ static size_t filter_expand_factor_g = 0;
  * Return:    Success:    Data chunk size
  *        Failure:    0
  *
- * Programmer:    Quincey Koziol
- *              Mar 31, 2009
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -10165,9 +10057,6 @@ filter_expand(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March 31, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -10711,8 +10600,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Vailin Choi; 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -11250,8 +11137,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Vailin Choi; July 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -11530,8 +11415,6 @@ error:
  *    Verify that the library can read datasets created with
  *    1.6/1.8 library that use the B-tree indexing method.
  *
- *  Programmer: Vailin Choi; 26th August, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -11608,8 +11491,6 @@ error:
  *  test_unfiltered_edge_chunks():
  *      Tests that partial edge chunks aren't filtered when the
  *      H5D_CHUNK_FILTER_PARTIAL_CHUNKS option is set.
- *
- *  Programmer: Neil Fortner; 17th March, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -11753,9 +11634,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Neil Fortner
- *              Monday, November 31, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -11888,9 +11766,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Mohamad Chaarawi
- *              Wednesdat, July 9, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -12635,9 +12510,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 11, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -13127,8 +12999,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Vailin Choi; June 2017
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -13219,9 +13089,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Neil Fortner
- *              Wednesday, January 16, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -13531,9 +13398,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Neil Fortner
- *              Wednesday, January 16, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -13899,9 +13763,6 @@ error:
  * Return:      Success: 0
  *              Failure: -1
  *
- * Programmer:  Neil Fortner
- *              Monday, February 4, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -14131,9 +13992,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer:  Neil Fortner
- *              Monday, February 4, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -14590,8 +14448,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Vailin Choi; April 2017
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -14871,8 +14727,6 @@ error:
  * Return:     Success/pass:   0
  *             Failure/error: -1
  *
- * Programmer: Jacob Smith
- *             2018 August 15
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -14998,9 +14852,6 @@ error:
  * Return:     Success/pass:   0
  *             Failure/error: -1
  *
- * Programmer: Quincey Koziol
- *             3 November 2020
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -15119,9 +14970,6 @@ error:
  *
  * Return:     Success/pass:   0
  *             Failure/error: -1
- *
- * Programmer: Quincey Koziol
- *             28 January 2021
  *
  *-----------------------------------------------------------------------------
  */
@@ -15362,9 +15210,6 @@ error:
  * Return:     Success/pass:   0
  *             Failure/error: -1
  *
- * Programmer: Quincey Koziol
- *             2020 April 30
- *
  *-----------------------------------------------------------------------------
  */
 static herr_t
@@ -15554,9 +15399,6 @@ error:
  * Purpose:     Tests the dataset interface (H5D)
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */

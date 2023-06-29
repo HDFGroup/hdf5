@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              April, 2019
- *
  * Purpose:     Private function for external.c and external_env.c
  */
 #ifndef EXTERNAL_COMMON_H

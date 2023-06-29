@@ -512,9 +512,6 @@ H5O__attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Tuesday, December  9, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -531,9 +528,6 @@ H5O__attr_reset(void H5_ATTR_UNUSED *_mesg)
  * Purpose:     Frees the message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 18, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -560,9 +554,6 @@ done:
  * Purpose:     Free file space referenced by message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -597,9 +588,6 @@ done:
  *              message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Friday, September 26, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -637,9 +625,6 @@ done:
  *              files for attribute messages.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, June 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -680,9 +665,6 @@ done:
  *
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
- *
- * Programmer:  Quincey Koziol
- *              November 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -725,9 +707,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Peter Cao
- *              March 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -753,9 +732,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 18, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -780,9 +756,6 @@ H5O__attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
  * Purpose:     Set creation index from the message
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Thursday, January 18, 2007
  *
  *-------------------------------------------------------------------------
  */

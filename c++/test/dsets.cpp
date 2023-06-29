@@ -404,9 +404,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  * Return       Success: Data chunk size
  *
  *              Failure: 0
- *
- * Programmer   Robb Matzke
- *              Tuesday, April 21, 1998
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1429,8 +1426,6 @@ test_dset()
  * Purpose      Cleanup temporary test files
  *
  * Return       None
- *
- * Programmer   (use C version)
  *-------------------------------------------------------------------------
  */
 extern "C" void

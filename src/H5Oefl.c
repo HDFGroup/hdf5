@@ -194,9 +194,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, November 25, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -254,9 +251,6 @@ H5O__efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
  * Return:	Success:	Ptr to _DEST
  *
  *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Tuesday, November 25, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -323,9 +317,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *		Tuesday, November 25, 1997
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -358,9 +349,6 @@ H5O__efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void 
  *		initialial state.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, November 25, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -399,9 +387,6 @@ H5O__efl_reset(void *_mesg)
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *              Tuesday, March  3, 1998
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -435,9 +420,6 @@ done:
  * Return:      Success:        Ptr to _DEST
  *
  *              Failure:        NULL
- *
- * Programmer:  Peter Cao
- *              September 29, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -521,9 +503,6 @@ done:
  * Purpose:	Prints debugging info for a message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, November 25, 1997
  *
  *-------------------------------------------------------------------------
  */

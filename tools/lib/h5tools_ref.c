@@ -49,8 +49,6 @@ static int ref_path_table_put(const char *, const H5O_token_t *token);
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -71,8 +69,6 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -124,8 +120,6 @@ ref_path_table_cmp(const void *key1, const void *key2)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -156,8 +150,6 @@ init_ref_path_table(void)
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -180,8 +172,6 @@ term_ref_path_table(void)
  *              token for the table entry is returned through the token
  *              parameter if the table entry is found by the given path
  *              name.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -228,8 +218,6 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
  *              NOTE: Takes ownership of the path name string passed in!
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */
@@ -312,8 +300,6 @@ ref_path_table_gen_fake(const char *path, H5O_token_t *token)
  *
  * Return:      Return a path to the object, or NULL if not found.
  *
- * Programmer:  REMcG
- *
  *-------------------------------------------------------------------------
  */
 const char *
@@ -370,8 +356,6 @@ lookup_ref_path(H5R_ref_t refbuf)
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
- *
- * Programmer:  REMcG
  *
  *-------------------------------------------------------------------------
  */

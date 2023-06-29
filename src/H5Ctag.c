@@ -114,9 +114,6 @@ H5FL_EXTERN(H5C_tag_info_t);
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Mike McGreevy
- *              December 1, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -140,9 +137,6 @@ H5C_ignore_tags(H5C_t *cache)
  *
  * Return:      'ignore_tags' value (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              April 30, 2016
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE hbool_t
@@ -163,8 +157,6 @@ H5C_get_ignore_tags(const H5C_t *cache)
  * Purpose:     Retrieve the 'num_objs_corked' field for the cache
  *
  * Return:      'num_objs_corked' value (can't fail)
- *
- * Programmer:  Vailin Choi; Feb 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -189,9 +181,6 @@ H5C_get_num_objs_corked(const H5C_t *cache)
  *              data access property list id before application.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              January 14, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -273,9 +262,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Quincey Koziol
- *              July 8, 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -329,9 +315,6 @@ H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Quincey Koziol
- *              June 7, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -384,9 +367,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Quincey Koziol
- *              June 7, 2016
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -425,9 +405,6 @@ done:
  * Purpose:     Callback for evicting tagged entries
  *
  * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -475,9 +452,6 @@ done:
  * Purpose:     Evicts all entries with the specified tag from cache
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -553,9 +527,6 @@ done:
  *
  * Return:      H5_ITER_CONT (can't fail)
  *
- * Programmer:  Mike McGreevy
- *              September 9, 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -582,9 +553,6 @@ H5C__mark_tagged_entries_cb(H5C_cache_entry_t *entry, void H5_ATTR_UNUSED *_ctx)
  *              the specified tag, as well as all globally tagged entries.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              September 9, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -615,9 +583,6 @@ done:
  * Purpose:     Flushes all marked entries in the cache.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              November 3, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -658,9 +623,6 @@ done:
  * Purpose:     Performs sanity checking on an entrytype/tag pair.
  *
  * Return:      SUCCEED or FAIL.
- *
- * Programmer:  Mike McGreevy
- *              January 14, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -729,9 +691,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -771,9 +730,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Mike McGreevy
- *              March 17, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -811,9 +767,6 @@ H5C_retag_entries(H5C_t *cache, haddr_t src_tag, haddr_t dest_tag)
  *
  * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
  *
- * Programmer:  Vailin Choi
- *		May 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -845,9 +798,6 @@ done:
  *              with 'tag' and type id.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Vailin Choi
- *		May 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -886,9 +836,6 @@ done:
  * Purpose:     Get the tag for a metadata cache entry.
  *
  * Return:      SUCCEED (can't fail)
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
  *
  *-------------------------------------------------------------------------
  */

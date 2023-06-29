@@ -111,9 +111,6 @@ H5FL_DEFINE_STATIC(H5EA__ctx_cb_t);
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -149,9 +146,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January 27, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -178,9 +172,6 @@ H5EA__test_dst_context(void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -206,9 +197,6 @@ H5EA__test_fill(void *nat_blk, size_t nelmts)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -257,9 +245,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -302,9 +287,6 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDE
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -333,8 +315,6 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *
  *
  * Return:      Success:        non-NULL
  *              Failure:        NULL
- *
- * Programmer:	Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -366,8 +346,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -392,9 +370,6 @@ H5EA__test_dst_dbg_context(void *_ctx)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -425,9 +400,6 @@ H5EA__get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 28, 2008
  *
  *-------------------------------------------------------------------------
  */

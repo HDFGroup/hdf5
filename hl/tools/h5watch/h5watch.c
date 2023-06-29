@@ -89,8 +89,6 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel",
  *
  * Return: 0 on success; negative on failure
  *
- * Programmer: Vailin Choi; August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -221,8 +219,6 @@ doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
  * Return:      Non-negative on success
  *              Negative on failure
  *
- * Programmer:  Vailin Choi; August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -276,8 +272,6 @@ done:
  *
  * Return:      Non-negative on success: dataset can be monitored
  *              Negative on failure: dataset cannot be monitored
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -402,8 +396,6 @@ done:
  *
  * Return: 0 on success; negative on failure
  *
- * Programmer:  Vailin Choi; August 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -480,8 +472,6 @@ done:
  *
  * Return:      Non-negative on success: dataset can be monitored
  *              Negative on failure: dataset cannot be monitored
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -580,8 +570,6 @@ done:
  *
  * Return:      Does not return
  *
- * Programmer:  Vailin Choi; August 2010
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -599,8 +587,6 @@ leave(int ret)
  * Purpose:     Print the usage message about h5watch (only long options)
  *
  * Return:      void
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -657,8 +643,6 @@ usage(const char *prog)
  *
  * Return:      Success:    Set the corresponding command flags and return void
  *              Failure:    Exits program with EXIT_FAILURE value.
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -764,8 +748,6 @@ parse_command_line(int argc, const char *const *argv)
  *
  * Return:      No return
  *
- * Programmer:  Vailin Choi; November 2014
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -782,8 +764,6 @@ catch_signal(int H5_ATTR_UNUSED signo)
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */

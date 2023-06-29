@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: John Mainzer -- 10/12/04
- *
  * Purpose:	This file contains declarations which are visible only within
  *		the H5C package.  Source files outside the H5C package should
  *		include H5Cprivate.h instead.
@@ -1016,8 +1014,6 @@ do {                                                                         \
  * Note:        This macro is set up so that H5C_DO_SANITY_CHECKS and
  *              H5C_DO_SLIST_SANITY_CHECKS can be selected independently.
  *
- * Programmer:  John Mainzer, 5/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1065,8 +1061,6 @@ do {                                                                           \
  *
  * Purpose:     Insert a cache entry into a cache's skip list.  Updates
  *              the associated length and size fields.
- *
- * Programmer:  John Mainzer, 5/10/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1117,8 +1111,6 @@ do {                                                                           \
  *
  * Purpose:     Update cache_ptr->slist_size for a change in the size of
  *              and entry in the slist.
- *
- * Programmer:  John Mainzer, 9/07/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1378,8 +1370,6 @@ do {                                                                          \
  * Purpose:     Update the replacement policy data structures for an
  *              eviction of the specified cache entry.
  *
- * Programmer:  John Mainzer, 5/10/04
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1409,8 +1399,6 @@ do {                                                                          \
  *
  * Purpose:     Update the replacement policy data structures for a flush
  *              of the specified cache entry.
- *
- * Programmer:  John Mainzer, 5/6/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1455,8 +1443,6 @@ do {                                                                          \
  *              new entry as the LEAST recently used entry, not the
  *              most recently used.
  *
- * Programmer:  John Mainzer, 8/15/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1493,8 +1479,6 @@ do {                                                                       \
  *
  * Purpose:     Update the replacement policy data structures for an
  *              insertion of the specified cache entry.
- *
- * Programmer:  John Mainzer, 5/17/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1538,8 +1522,6 @@ do {                                                                       \
  *              structures used by the replacement policy (or the pinned list,
  *              which is outside of the replacement policy), and add the
  *              entry to the protected list.
- *
- * Programmer:  John Mainzer, 5/17/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1585,8 +1567,6 @@ do {                                                                       \
  *
  * Purpose:     Update the replacement policy data structures for a
  *              move of the specified cache entry.
- *
- * Programmer:  John Mainzer, 5/17/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1634,8 +1614,6 @@ do {                                                                         \
  *
  *              If the entry is accessed with collective operations for
  *              parallel I/O, update that list.
- *
- * Programmer:  John Mainzer, 8/23/06
  *
  *-------------------------------------------------------------------------
  */
@@ -1701,8 +1679,6 @@ do {                                                                         \
  *              entry list, and re-insert it in the data structures used
  *              by the current replacement policy.
  *
- * Programmer:  John Mainzer, 3/22/06
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1744,8 +1720,6 @@ do {                                                                         \
  *              To do this, unlink the specified entry from the protected
  *              list, and re-insert it in the data structures used by the
  *              current replacement policy.
- *
- * Programmer:  John Mainzer, 5/19/04
  *
  *-------------------------------------------------------------------------
  */
@@ -1797,8 +1771,6 @@ do {                                                                       \
  *
  * Purpose:     Insert entry into collective entries list
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1821,8 +1793,6 @@ do {                                                                       \
  *
  * Purpose:     Remove entry from collective entries list
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1844,8 +1814,6 @@ do {                                                                       \
  * Macro:       H5C__MOVE_TO_TOP_IN_COLL_LIST
  *
  * Purpose:     Update entry position in collective entries list
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */

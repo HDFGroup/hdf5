@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
- *
  * Purpose:  Provides support functions for most of the hdf5 tests cases.
  *
  */
@@ -136,9 +133,6 @@ static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_su
  *
  *    Failure:  -1
  *
- * Programmer:  Robb Matzke
- *    Wednesday, March  4, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -156,9 +150,6 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
  *    base_name contains the list of test file names.
  *
  * Return:  void
- *
- * Programmer:  Neil Fortner
- *              June 1, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -186,9 +177,6 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  * Return:      void
  *
  *              Since this is a cleanup file, we don't care if it fails.
- *
- * Programmer:  Dana Robinson
- *              February 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -224,9 +212,6 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
  *
  *              Since this is a cleanup file, we don't care if it fails.
  *
- * Programmer:  Dana Robinson
- *              February 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -248,9 +233,6 @@ h5_delete_all_test_files(const char *base_name[], hid_t fapl)
  *    The file access property list is also closed.
  *
  * Return:  Non-zero if cleanup actions were performed; zero otherwise.
- *
- * Programmer:  Albert Cheng
- *              May 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -285,9 +267,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
  *
  * Return:      void
  *
- * Programmer:  Dana Robinson
- *              February 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -304,9 +283,6 @@ h5_test_shutdown(void)
  * Purpose:     Restore the default error handler.
  *
  * Return:      N/A
- *
- * Programmer:  Quincey Koziol
- *              Sept 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +328,6 @@ h5_reset(void)
  *
  * Return:      void
  *
- * Programmer:  Dana Robinson
- *              February 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -387,9 +360,6 @@ h5_test_init(void)
  *        pointer or if FULLNAME isn't large enough for
  *        the result.
  *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -411,9 +381,6 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
  *              Failure:    NULL if BASENAME or FULLNAME is the null
  *                          pointer or if FULLNAME isn't large enough for
  *                          the result.
- *
- * Programmer:  Dana Robinson
- *              Spring 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -456,9 +423,6 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
  *        pointer or if FULLNAME isn't large enough for
  *        the result.
  *
- * Programmer:  Neil Fortner
- *              Wednesday, July 15, 2015
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -483,9 +447,6 @@ h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size
  *    Failure:  NULL if BASENAME or FULLNAME is the null
  *        pointer or if FULLNAME isn't large enough for
  *        the result.
- *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -730,8 +691,6 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
  *
  * Return:  Success:  a pointer at the non-prefix part.
  *
- * Programmer:  Albert Cheng; Jun  1, 2006
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE const char *
@@ -756,9 +715,6 @@ h5_rmprefix(const char *filename)
  *
  * Return:      Success:    A file access property list
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -792,9 +748,6 @@ error:
  * Return:      Success:    A file access property list
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -825,9 +778,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              November 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -886,9 +836,6 @@ error:
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Friday, November 20, 1998
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -903,9 +850,6 @@ h5_no_hwconv(void)
  * Purpose:  Show hostname.  Show process ID if in MPI environment.
  *
  * Return:  void
- *
- * Programmer:  Albert Cheng
- *              2002/04/22
  *
  *-------------------------------------------------------------------------
  */
@@ -976,7 +920,6 @@ h5_show_hostname(void)
  * Purpose:     Process environment variables setting to set up MPI Info
  *              object.
  * Return:      0 if all is fine; otherwise non-zero.
- * Programmer:  Albert Cheng, 2002/05/21.
  */
 int
 h5_set_info_object(void)
@@ -1069,7 +1012,6 @@ h5_set_info_object(void)
  * Function:    h5_dump_info_object
  * Purpose:     Display content of an MPI Info object
  * Return:      void
- * Programmer:  Albert Cheng 2002/05/21
  */
 void
 h5_dump_info_object(MPI_Info info)
@@ -1102,9 +1044,6 @@ h5_dump_info_object(MPI_Info info)
  *
  * Return:  Success:  Size of file in bytes
  *    Failure:  -1
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 22, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1297,8 +1236,6 @@ print_func(const char *format, ...)
  *    0:  only decode is enabled
  *              -1: other
  *
- * Programmer:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1345,9 +1282,6 @@ h5_szip_can_encode(void)
  *
  * Return:  pointer to a string containing the value of the environment variable
  *     NULL if the variable doesn't exist in task 'root's environment.
- *
- * Programmer:  Leon Arber
- *              4/4/05
  *
  *-------------------------------------------------------------------------
  */
@@ -1429,9 +1363,6 @@ getenv_all(MPI_Comm comm, int root, const char *name)
  *
  *              Failure:        -1
  *
- * Programmer:  Larry Knox
- *              Monday, October 13, 2009
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1488,9 +1419,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Neil Fortner
- *              Tuesday, April 12, 2011
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1515,9 +1443,6 @@ h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name, const H5O_
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Neil Fortner
- *              Tuesday, April 12, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -1584,9 +1509,6 @@ error:
  *
  * Return:      void
  *
- * Programmer:  Mike McGreevy
- *              August 18, 2010
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1637,9 +1559,6 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
  *              and then exits, allowing the calling function to continue.
  *
  * Return:      void
- *
- * Programmer:  Mike McGreevy
- *              August 18, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1888,8 +1807,6 @@ h5_get_version_string(H5F_libver_t libver)
  * Return:      Success:  0, if files are identical
  *              Failure: -1, if files differ
  *
- * Programmer:  Binh-Minh Ribler
- *              October, 2018
  *-------------------------------------------------------------------------
  */
 int
@@ -2026,9 +1943,6 @@ H5_get_srcdir(void)
  *
  * Return:      Success:  0, completed successfully
  *              Failure: -1
- *
- * Programmer:  Jake Smith
- *              24 June 2020
  *
  *-------------------------------------------------------------------------
  */

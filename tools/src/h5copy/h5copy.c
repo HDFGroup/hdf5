@@ -43,9 +43,6 @@ static char                  *str_flag  = NULL;
  *
  * Return:      Does not return
  *
- * Programmer:  Quincey Koziol
- *              Saturday, 31. January 2004
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -72,8 +69,6 @@ leave(int ret)
  * Purpose: Prints a usage message on stderr and then returns.
  *
  * Return: void
- *
- * Programmer: Pedro Vicente Nunes, 7/8/2006
  *
  *-------------------------------------------------------------------------
  */
@@ -153,8 +148,6 @@ usage(void)
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
  *
- * Programmer: Pedro Vicente Nunes, 7/8/2006
- *
  *-------------------------------------------------------------------------
  */
 
@@ -198,8 +191,6 @@ parse_flag(const char *s_flag, unsigned *flag)
  * Function: main
  *
  * Purpose: main program
- *
- * Programmer: Pedro Vicente Nunes
  *
  *-------------------------------------------------------------------------
  */

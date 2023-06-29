@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESlist.c
- *              Nov  7 2020
- *	            Quincey Koziol
  *
  * Purpose:     Operations on "event lists" for managing asynchronous
  *                      operations.
@@ -74,9 +72,6 @@
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -112,9 +107,6 @@ H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE size_t
@@ -141,9 +133,6 @@ H5ES__list_count(const H5ES_event_list_t *el)
  *              the newest.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -187,9 +176,6 @@ H5ES__list_iterate(H5ES_event_list_t *el, H5_iter_order_t order, H5ES_list_iter_
  * Purpose:     Remove an event from an event list
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Houjun Tang
- *              Thursday, July 30, 2020
  *
  *-------------------------------------------------------------------------
  */

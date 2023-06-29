@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gtraverse.c
- *			Sep 13 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for traversing group hierarchy
  *
@@ -97,9 +95,6 @@ static herr_t H5G__traverse_real(const H5G_loc_t *loc, const char *name, unsigne
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -142,9 +137,6 @@ done:
  *              location ID and passes it to the user traversal callback.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -265,9 +257,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Friday, April 10, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -342,9 +331,6 @@ done:
  * Purpose:	Handle traversing special link situations
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov 20 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -446,9 +432,6 @@ done:
  *
  *		Failure:	Negative if the name could not be fully
  *				resolved.
- *
- * Programmer:	Robb Matzke
- *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -792,9 +775,6 @@ done:
  * Return:	Success:	Non-negative if path can be fully traversed.
  *		Failure:	Negative if the path could not be fully
  *				traversed.
- *
- * Programmer:	Quincey Koziol
- *		Sep 13 2005
  *
  *-------------------------------------------------------------------------
  */

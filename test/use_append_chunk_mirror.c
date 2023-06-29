@@ -86,8 +86,6 @@
  *         o The Reader will see all new data written by Writer.
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Jacob Smith, 2019 */
-
 #include "use.h"
 
 /* This test uses many POSIX things that are not available on

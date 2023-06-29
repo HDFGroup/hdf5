@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Thursday, November 09, 2000
- *
  * Purpose:	Create a two datasets with compound datatypes, one with no array
  *      fields and one with array fields.
  *		This program is used to create the test file `tarrold.h5' which has a
@@ -45,9 +42,6 @@
  * Return:	Success:
  *
  *		Failure:
- *
- * Programmer:	Robb Matzke
- *              Monday, October 26, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -3922,10 +3922,6 @@ out:
  *
  * Purpose: write datasets in LOC_ID
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -4764,10 +4760,6 @@ out:
  * Function: write_attr_in
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -5909,10 +5901,6 @@ out:
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -5961,10 +5949,6 @@ out:
  * Function: write_dset
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6023,10 +6007,6 @@ out:
  * Function: make_attr
  *
  * Purpose: utility function to write an attribute in LOC_ID
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -6197,7 +6177,6 @@ out:
  *  this function depends on locally created objects, however can be modified
  *  to be independent as necessary
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 add_attr_with_objref(hid_t file_id, hid_t obj_id)
@@ -6258,7 +6237,6 @@ out:
  *  this function depends on locally created objects, however can be modified
  *  to be independent as necessary
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 add_attr_with_regref(hid_t file_id, hid_t obj_id)
@@ -6323,7 +6301,6 @@ out:
  * Note:
  *  This function is to use along with gen_obj_ref() gen_region_ref()
  *
- * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_refered_objs(hid_t loc_id)
@@ -6442,7 +6419,6 @@ out:
  * Note:
  *  copied from h5copygentest.c and update to create named datatype
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_obj_ref(hid_t loc_id)
@@ -6549,7 +6525,6 @@ out:
  * Note:
  *  copied from h5copygentest.c
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
 static herr_t
 gen_region_ref(hid_t loc_id)
@@ -6677,7 +6652,6 @@ out:
  *
  * Purpose: create a file with obj and region references
  *
- * Programmer: Jonathan Kim (March 18, 2010)
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6720,7 +6694,6 @@ make_references(hid_t loc_id)
  *   3. obj ref in attribute of vlen type
  *   4. region ref in attribute of vlen type
  *
- * Programmer: Jonathan (March 25, 2010)
  *-------------------------------------------------------------------------
  */
 /* obj dset */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Raymond Lu
- *              October 14, 2001
- *
  * Purpose:    Tests Error API
  */
 #include "h5test.h"
@@ -51,9 +48,6 @@ herr_t custom_print_cb2(int n, H5E_error2_t *err_desc, void *client_data);
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -79,9 +73,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -105,9 +96,6 @@ error:
  *              for H5Ewalk1
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Raymond Lu
- *              4 October 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -153,9 +141,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              4 October 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -198,9 +183,6 @@ error:
  * Purpose:     Test the backward compatibility of H5Eset/get_auto
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Raymond Lu
- *              17 September 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -334,9 +316,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              July 10, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -421,9 +400,6 @@ error:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Raymond Lu
- *              July 17, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -449,9 +425,6 @@ error:
  * Function:    main
  *
  * Purpose:     Test error API
- *
- * Programmer:  Raymond Lu
- *              July 10, 2003
  *
  *-------------------------------------------------------------------------
  */

@@ -58,9 +58,6 @@
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, January  3, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t

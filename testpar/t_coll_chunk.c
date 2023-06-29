@@ -43,9 +43,6 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -92,9 +89,6 @@ coll_chunk1(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -140,9 +134,6 @@ coll_chunk2(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -193,9 +184,6 @@ coll_chunk3(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -242,9 +230,6 @@ coll_chunk4(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -295,9 +280,6 @@ coll_chunk5(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -344,9 +326,6 @@ coll_chunk6(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -395,9 +374,6 @@ coll_chunk7(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -444,9 +420,6 @@ coll_chunk8(void)
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -495,9 +468,6 @@ coll_chunk9(void)
  *
  *		Failure:	-1
  *
- * Programmer:	Unknown
- *		July 12th, 2004
- *
  *-------------------------------------------------------------------------
  */
 
@@ -545,9 +515,6 @@ coll_chunk10(void)
  *
  * Return:	Success:	0
  *		Failure:	-1
- *
- * Programmer:	Unknown
- *		July 12th, 2004
  *
  *-------------------------------------------------------------------------
  */

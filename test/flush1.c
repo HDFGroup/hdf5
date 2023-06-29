@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  * Purpose:	This is the first half of a two-part test that makes sure
  *		that a file can be read after an application crashes as long
  *		as the file was flushed first.  We simulate a crash by
@@ -51,9 +48,6 @@ static herr_t add_dset_to_file(hid_t fid, const char *dset_name);
  *
  * Return:      Success:	a valid file ID
  *              Failure:	-1
- *
- * Programmer:	Leon Arber
- *              Sept. 26, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -110,9 +104,6 @@ error:
  * Purpose:     Add a dataset to the file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Leon Arber
- *              Oct. 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -179,9 +170,6 @@ error:
  *              Part 1 of a two-part H5Fflush() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Friday, October 23, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -64,9 +64,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Mar 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t

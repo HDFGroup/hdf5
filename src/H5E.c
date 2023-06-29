@@ -194,9 +194,6 @@ done:
  *
  *              Failure:    Negative
  *
- * Programmer:	Raymond Lu
- *	        Tuesday, July 22, 2003
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -273,9 +270,6 @@ H5E_term_package(void)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, November 1, 2007
- *
  *--------------------------------------------------------------------------
  */
 static herr_t
@@ -312,9 +306,6 @@ H5E__set_default_auto(H5E_t *stk)
  * Return:      Success:    Pointer to an error stack struct (H5E_t *)
  *
  *              Failure:    NULL
- *
- * Programmer:	Chee Wai LEE
- *              April 24, 2000
  *
  *-------------------------------------------------------------------------
  */
@@ -363,9 +354,6 @@ H5E__get_stack(void)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *              Friday, January 22, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -392,9 +380,6 @@ H5E__free_class(H5E_cls_t *cls)
  *
  * Return:      Success:    An ID for the error class
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -430,9 +415,6 @@ done:
  *
  * Return:      Success:    Pointer to an error class struct
  *              Failure:    NULL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -479,9 +461,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -513,9 +492,6 @@ done:
  * Purpose:     Private function to close an error class.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -549,9 +525,6 @@ done:
  * Return:      Success:    Name length (zero means no name)
  *              Failure:    -1
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -582,9 +555,6 @@ done:
  *
  * Return:      Success:    Name length (zero means no name)
  *              Failure:    -1
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -621,9 +591,6 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
  * Return:      Success:    H5_ITER_CONT (0)
  *              Failure:    H5_ITER_ERROR (-1)
  *
- * Programmer:  Raymond Lu
- *              July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -657,9 +624,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -689,9 +653,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -717,9 +678,6 @@ H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
  *
  * Return:      Success:    An error ID
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -762,9 +720,6 @@ done:
  *
  * Return:      Success:    Pointer to a message struct
  *              Failure:    NULL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -810,9 +765,6 @@ done:
  * Return:      Success:    Message length (zero means no message)
  *              Failure:    -1
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 ssize_t
@@ -843,9 +795,6 @@ done:
  *
  * Return:      Success:    An error stack ID
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -882,9 +831,6 @@ done:
  * Return:      Success:    An error stack ID
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -916,9 +862,6 @@ done:
  *
  * Return:      Success:    Pointer to an error class struct
  *              Failure:    NULL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -996,9 +939,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Friday, July 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1036,9 +976,6 @@ done:
  * Purpose:     Private function to replace an error stack.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1102,9 +1039,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1139,9 +1073,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1168,9 +1099,6 @@ H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
  *
  * Return:      Success:    The number of errors
  *              Failure:    -1
- *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1215,9 +1143,6 @@ done:
  * Return:      Success:    The number of errors
  *              Failure:    -1 (can't fail at this time)
  *
- * Programmer:	Raymond Lu
- *              Friday, July 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 static ssize_t
@@ -1236,9 +1161,6 @@ H5E__get_num(const H5E_t *estack)
  * Purpose:     Deletes some error messages from the top of error stack.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1291,9 +1213,6 @@ done:
  *              be statically allocated.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
  *              function.
@@ -1362,9 +1281,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              Wednesday, July 16, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1405,9 +1321,6 @@ done:
  *              own more specific error handlers.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1475,9 +1388,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1524,9 +1434,6 @@ done:
  *              value is not returned.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Saturday, February 28, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1588,9 +1495,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Friday, February 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1651,9 +1555,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, September  8, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1699,9 +1600,6 @@ done:
  *
  * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Wednesday, October 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1742,9 +1640,6 @@ done:
  * Purpose:     Private function to append error stacks.
  *
  * Return:      Non-negative value on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, October 7, 2020
  *
  *-------------------------------------------------------------------------
  */

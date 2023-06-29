@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cimage.c
- *              July 20, 2015
- *              John Mainzer
  *
  * Purpose:     Functions in this file are specific to the implementation
  *		of the metadata cache image feature.
@@ -166,8 +164,6 @@ H5FL_DEFINE(H5C_cache_entry_t);
  *
  * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
  *
- * Programmer:  John Mainzer, 6/18/16
- *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -202,9 +198,6 @@ H5C_cache_image_pending(const H5C_t *cache_ptr)
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              12/29/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -238,9 +231,6 @@ H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *write_ci_ptr)
  *		should have removed all entries from its data structures.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              8/5/15
  *
  *-------------------------------------------------------------------------
  */
@@ -394,9 +384,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  Quincey Koziol
- *              1/26/17
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -447,9 +434,6 @@ done:
  *		should have removed all entries from its data structures.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              8/4/15
  *
  *-------------------------------------------------------------------------
  */
@@ -507,9 +491,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              7/3/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -537,9 +518,6 @@ done:
  *		in the file, and return it in the supplied buffer.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/16/15
  *
  *-------------------------------------------------------------------------
  */
@@ -607,9 +585,6 @@ done:
  *		cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *		7/6/15
  *
  *-------------------------------------------------------------------------
  */
@@ -703,9 +678,6 @@ done:
  *
  * Return:      SUCCEED
  *
- * Programmer:  John Mainzer
- *		7/6/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -746,9 +718,6 @@ H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_
  * Return:      An integer less than, equal to, or greater than zero if the
  *		first entry is considered to be respectively less than,
  *		equal to, or greater than the second.
- *
- * Programmer:  Quincey Koziol
- *		1/20/16
  *
  *-------------------------------------------------------------------------
  */
@@ -826,9 +795,6 @@ H5C__image_entry_cmp(const void *_entry1, const void *_entry2)
  *		code must be modified to support cache image.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/3/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1112,9 +1078,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *		7/3/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1189,9 +1152,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              6/15/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1240,9 +1200,6 @@ done:
  * Return:      Size of the header section of the metadata cache image
  *		block in bytes.
  *
- * Programmer:  John Mainzer
- *		7/27/15
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1276,9 +1233,6 @@ H5C__cache_image_block_entry_header_size(const H5F_t *f)
  * Return:      Size of the header section of the metadata cache image
  *		block in bytes.
  *
- * Programmer:  John Mainzer
- *		7/27/15
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -1307,9 +1261,6 @@ H5C__cache_image_block_header_size(const H5F_t *f)
  *		after the header image, or unchanged on failure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/6/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1391,9 +1342,6 @@ done:
  *		after the entry, or unchanged on failure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/6/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1548,9 +1496,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  John Mainzer
- *              8/6/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1622,9 +1567,6 @@ done:
  *		after the entry in the buffer, or unchanged on failure.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/6/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1762,9 +1704,6 @@ done:
  *		necessary to maintain flush ordering.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              9/6/16
  *
  *-------------------------------------------------------------------------
  */
@@ -1995,9 +1934,6 @@ done:
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/6/16
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2038,9 +1974,6 @@ H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, 
  *		the data necessary to construct the metadata cache image.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/4/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2176,9 +2109,6 @@ done:
  *		block.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/21/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2430,9 +2360,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              8/14/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2623,9 +2550,6 @@ done:
  * Return:      Pointer to the new instance of H5C_cache_entry on success,
  *		or NULL on failure.
  *
- * Programmer:  John Mainzer
- *              8/14/15
- *
  *-------------------------------------------------------------------------
  */
 static H5C_cache_entry_t *
@@ -2797,8 +2721,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer, 7/4/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2853,9 +2775,6 @@ done:
  *		location in file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              8/26/15
  *
  *-------------------------------------------------------------------------
  */

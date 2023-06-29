@@ -11,10 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Vailin Choi; Feb 2015
- */
-
-/*
  * We include the private header file so we can get to the uniform
  * programming environment it declares.
  * HDF5 API functions (except for H5G_basename())

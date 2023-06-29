@@ -11,8 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:
- *
  * Purpose:    Tests selection IO for the dataset interface (H5D)
  */
 
@@ -3103,8 +3101,6 @@ test_get_no_selection_io_cause(const char *filename, hid_t fapl)
  * Purpose:     Test cases for selection I/O
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:
  *
  *-------------------------------------------------------------------------
  */

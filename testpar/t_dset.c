@@ -2890,16 +2890,6 @@ none_selection_chunk(void)
  *          is not needed as they are covered by DIRECT_CHUNK_MIX and
  *          MULTI_CHUNK_MIX_DISAGREE cases. _DIRECT_ cases are only for testing
  *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO instead of num-threshold.
- *
- * Modification:
- *  - Refctore to remove multi-chunk-without-opimization test and update for
- *    testing direct to multi-chunk-io
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
- *
- * Programmer: Jacob Gruber
- * Date: 2011-04-06
  */
 static void
 test_actual_io_mode(int selection_mode)
@@ -3342,8 +3332,6 @@ test_actual_io_mode(int selection_mode)
  *
  * Purpose: Tests all possible cases of the actual_io_mode property.
  *
- * Programmer: Jacob Gruber
- * Date: 2011-04-06
  */
 void
 actual_io_mode_tests(void)
@@ -3438,8 +3426,6 @@ actual_io_mode_tests(void)
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
  *         Test for Externl-File storage as the cause of breaking collective I/O.
  *
- * Programmer: Jonathan Kim
- * Date: Aug, 2012
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
@@ -3780,8 +3766,6 @@ test_no_collective_cause_mode(int selection_mode)
  *
  * Purpose: Tests cases for broken collective IO.
  *
- * Programmer: Jonathan Kim
- * Date: Aug, 2012
  */
 void
 no_collective_cause_tests(void)
@@ -4153,8 +4137,6 @@ dataset_atomicity(void)
  *
  * Purpose: Test cases for writing dense attributes in parallel
  *
- * Programmer: Quincey Koziol
- * Date: April, 2013
  */
 void
 test_dense_attr(void)

@@ -153,8 +153,6 @@ H5FL_DEFINE_STATIC(H5PB_entry_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -194,8 +192,6 @@ H5PB_reset_stats(H5PB_t *page_buf)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -230,8 +226,6 @@ H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsigned hits[2], u
  *              Print out statistics collected for the page buffer layer.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -273,8 +267,6 @@ H5PB_print_stats(const H5PB_t *page_buf)
  * Purpose:     Create and setup the PB on the file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -350,8 +342,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -382,8 +372,6 @@ done:
  * Purpose:     Flush/Free all the PB entries to the file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -416,8 +404,6 @@ done:
  * Purpose:     Callback to free PB skiplist entries.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -452,8 +438,6 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
  * Purpose:     Flush and destroy the PB on the file if it exists.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -508,8 +492,6 @@ done:
  *              from the file is not necessary since it's an empty page.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -568,8 +550,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -614,8 +594,6 @@ H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf)
  *              Note: Update of raw data page (large or small sized) is handled by the PB cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -663,8 +641,6 @@ done:
  *              in the PB cache; otherwise reads in the page through the VFD.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -964,8 +940,6 @@ done:
  *              insert into cache.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -1309,8 +1283,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1388,8 +1360,6 @@ H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Mohamad Chaarawi
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1431,8 +1401,6 @@ done:
  *                                             JRM -- 12/22/16
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -1529,8 +1497,6 @@ done:
  *              What follows is my best understanding of Mohamad's intent.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */

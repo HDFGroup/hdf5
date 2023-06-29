@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gcompact.c
- *			Sep  5 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for handling compact storage.
  *
@@ -70,9 +68,6 @@ static herr_t H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED 
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sep  5 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -108,9 +103,6 @@ done:
  *
  * Return:	Success:        Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Sep  6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -170,9 +162,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  6 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -200,9 +189,6 @@ done:
  * Purpose:     Returns the name of objects in the group by giving index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *	        Sep  6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -253,9 +239,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep  5 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -292,9 +275,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -327,9 +307,6 @@ done:
  * Purpose:	Remove link from group, according to an index order.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -378,9 +355,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, October  3, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -421,9 +395,6 @@ done:
  *              name & getting object location for it
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -466,9 +437,6 @@ done:
  *
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Sep 20 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -507,9 +475,6 @@ done:
  *              according to the order of an index
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Nov  6 2006
  *
  *-------------------------------------------------------------------------
  */

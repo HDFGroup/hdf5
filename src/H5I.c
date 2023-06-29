@@ -192,10 +192,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  James Laird
- *              Nathaniel Furrer
- *              Friday, April 23, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -240,10 +236,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  James Laird
- *              Nathaniel Furrer
- *              Friday, April 23, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -273,9 +265,6 @@ done:
  *              interface to H5I__destroy_type.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Nathaniel Furrer
- *              James Laird
  *
  *-------------------------------------------------------------------------
  */
@@ -435,9 +424,6 @@ done:
  *                          calling H5I_object().
  *              Failure:    NULL
  *
- * Programmer:  James Laird
- *              Nathaniel Furrer
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -467,9 +453,6 @@ done:
  *
  * Return:      Success:    New reference count
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              Dec  7, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -782,9 +765,6 @@ done:
  * Return:      Success:    H5_ITER_CONT (0) or H5_ITER_STOP (1)
  *              Failure:    H5_ITER_ERROR (-1)
  *
- * Programmer:  Neil Fortner
- *              Friday, October 11, 2013
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -827,9 +807,6 @@ H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
  *              previous search left off.
  *
  * Return:      The last value returned by op
- *
- * Programmer:  Neil Fortner
- *              Friday, October 11, 2013
  *
  *-------------------------------------------------------------------------
  */

@@ -57,9 +57,6 @@ const H5std_string DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_in_Grou
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -159,9 +156,6 @@ test_get_objname()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -242,9 +236,6 @@ test_existance()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -341,9 +332,6 @@ test_get_objname_ontypes()
  *
  * Return       Success: 0
  *              Failure: -1
- *
- * Programmer   Binh-Minh Ribler
- *              Friday, March 4, 2014
  *-------------------------------------------------------------------------
  */
 static void
@@ -406,9 +394,6 @@ test_get_objtype()
  * Purpose      Test Group::getObjId function.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              March, 2017
  *-------------------------------------------------------------------------
  */
 const H5std_string GROUPNAME("group");

@@ -643,8 +643,6 @@ done:
  * Return:     Success: SUCCEED (0) (non-negative value)
  *             Failure: FAIL (-1) (negative value)
  *
- * Programmer: Jacob Smith
- *             16 August 2018
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -679,8 +677,6 @@ done:
  * Return:     Success: Positive value > 0
  *             Failure: 0
  *
- * Programmer: Jacob Smith
- *             16 August 2018
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -800,8 +796,6 @@ done:
  * Return:     Success: SUCCEED (0) (non-negative value)
  *             Failure: FAIL (-1) (negative value)
  *
- * Programmer: Jacob Smith
- *             16 August 2018
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2668,9 +2662,6 @@ done:
  *
  * Return:  Non-negative on success, negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, August 11, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2811,9 +2802,6 @@ done:
  *      VL data from the dataset.
  *
  * Return:  Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, December 20, 2019
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke
- *        Monday, November 10, 1997
- *
  * Purpose:    Implements a file driver which dispatches I/O requests to
  *        other file drivers depending on the purpose of the address
  *        region being accessed. For instance, all meta-data could be
@@ -231,9 +228,6 @@ static const H5FD_class_t H5FD_multi_g = {
  * Return:      Success:    The driver ID for the multi driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -254,9 +248,6 @@ H5FD_multi_init(void)
  * Purpose:     Shut down the VFD
  *
  * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
  *
  *---------------------------------------------------------------------------
  */
@@ -279,9 +270,6 @@ H5FD_multi_term(void)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August 11, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -375,9 +363,6 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const c
  *
  *            Failure:    Negative
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -411,9 +396,6 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_f
  * Return:    Success:    Non-negative
  *
  *            Failure:    Negative
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -708,9 +690,6 @@ H5FD_multi_populate_config(const H5FD_mem_t *memb_map, const hid_t *memb_fapl, c
  *
  *            Failure:    never fails
  *
- * Programmer:    Robb Matzke
- *              Monday, August 16, 1999
- *
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -759,9 +738,6 @@ H5FD_multi_sb_size(H5FD_t *_file)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Monday, August 16, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -840,9 +816,6 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Monday, August 16, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -989,9 +962,6 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  *
  *            Failure:    NULL
  *
- * Programmer:    Robb Matzke
- *              Friday, August 13, 1999
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1013,9 +983,6 @@ H5FD_multi_fapl_get(H5FD_t *_file)
  * Return:    Success:    Ptr to a new property list
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1074,9 +1041,6 @@ H5FD_multi_fapl_copy(const void *_old_fa)
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1111,9 +1075,6 @@ H5FD_multi_fapl_free(void *_fa)
  *                caller, which is always H5FD_open().
  *
  *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1227,9 +1188,6 @@ error:
  *                possible. The only subsequent operation
  *                permitted on the file is a close operation.
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1284,9 +1242,6 @@ H5FD_multi_close(H5FD_t *_file)
  *
  *            Failure:    never fails (arguments were checked by th caller).
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1329,9 +1284,6 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  *            Failure:    negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, September 26, 2000
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1360,9 +1312,6 @@ H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
  * Return:    Success:    non-negative
  *            Failure:    negative
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, October  9, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1386,9 +1335,6 @@ H5FD_multi_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
  * Return:    Success:    The end-of-address-marker
  *
  *            Failure:    HADDR_UNDEF
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1490,9 +1436,6 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1553,9 +1496,6 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
  *                EOA, whichever is larger.
  *
  *            Failure:          HADDR_UNDEF
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1645,9 +1585,6 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
  *
  * Returns:        Non-negative if succeed or negative if fails.
  *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1678,9 +1615,6 @@ H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
  * Return:    Success:    Address of new memory
  *
  *            Failure:    HADDR_UNDEF
- *
- * Programmer:    Robb Matzke
- *              Thursday, August 12, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1735,9 +1669,6 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Thursday, August 12, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1769,9 +1700,6 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
  *                buffer BUF.
  *
  *            Failure:    -1, contents of buffer BUF are undefined.
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1816,9 +1744,6 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
  *
  *            Failure:    -1
  *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1859,9 +1784,6 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
  * Return:    Success:    0
  *
  *            Failure:    -1, as many files flushed as possible.
- *
- * Programmer:    Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1933,9 +1855,6 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  * Return:    Success:    0
  *            Failure:    -1, as many files truncated as possible.
  *
- * Programmer:    Quincey Koziol
- *              Thursday, January 31, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1976,8 +1895,6 @@ H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
  *
  * Return:    Success:    0
  *            Failure:    -1
- *
- * Programmer:    Vailin Choi; March 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -2038,8 +1955,6 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
  * Return:    Success:    0
  *            Failure:    -1
  *
- * Programmer:    Vailin Choi; March 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2074,9 +1989,6 @@ H5FD_multi_unlock(H5FD_t *_file)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Monday, August 23, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -2117,9 +2029,6 @@ compute_next(H5FD_multi_t *file)
  * Return:    Success:    0
  *
  *            Failure:    -1
- *
- * Programmer:    Robb Matzke
- *              Monday, August 23, 1999
  *
  *-------------------------------------------------------------------------
  */

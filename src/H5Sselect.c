@@ -251,9 +251,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Friday, May 30, 2003
- *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
  *      defined in H5Sprivate.h.
@@ -284,9 +281,6 @@ done:
  *              selection
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, May 18, 2004
  *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
@@ -1271,9 +1265,6 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
  *              iterator on a dataspace
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, May 18, 2004
  *
  * Note: This routine participates in the "Inlining C function pointers"
  *      pattern, don't call it directly, use the appropriate macro
@@ -2813,7 +2804,6 @@ done:
     Creates a selection iterator and initializes it to start at the first
     element selected in the dataspace.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -2897,7 +2887,6 @@ done:
     further sequences of elements to retrieve, calls to this routine will
     set *NSEQ and *NELMTS to zero.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -3071,9 +3060,6 @@ done:
  *
  * Return:	Non-negative on success / Negative on failure
  *
- * Programmer:	Quincey Koziol
- *	        Wednesday, April 8, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3101,9 +3087,6 @@ done:
  * Purpose:	Releases a dataspace selection iterator and its memory.
  *
  * Return:	Non-negative on success / Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Monday, February 11, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -3142,7 +3125,6 @@ done:
  DESCRIPTION
     Close a dataspace selection iterator, releasing its state.
  PROGRAMMER
-    Quincey Koziol -  February 11, 2019
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES

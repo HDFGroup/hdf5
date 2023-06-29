@@ -188,9 +188,6 @@ H5FL_BLK_DEFINE(direct_block);
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 15, 2016
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -233,9 +230,6 @@ done:
  * Return:	Success:	Pointer to a new fractal heap
  *
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -281,9 +275,6 @@ H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
  * Return:	Success:	Pointer to a new fractal heap
  *
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -335,9 +326,6 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -371,9 +359,6 @@ H5HF__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		November 18, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -418,8 +403,6 @@ done:
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi; Aug 2015
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -454,9 +437,6 @@ H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
  *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +570,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -626,9 +603,6 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -711,9 +685,6 @@ done:
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -826,9 +797,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -860,9 +828,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -892,8 +857,6 @@ H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -933,9 +896,6 @@ H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
  *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1123,9 +1083,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1159,9 +1116,6 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1279,9 +1233,6 @@ done:
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1402,9 +1353,6 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1496,9 +1444,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1531,9 +1476,6 @@ done:
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1580,8 +1522,6 @@ H5HF__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
  *
  * Return:      Success:        TRUE/FALSE
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi; Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1710,9 +1650,6 @@ done:
  *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -1891,9 +1828,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2021,9 +1955,6 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -2393,9 +2324,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2443,9 +2371,6 @@ H5HF__cache_dblock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *		6/21/14
  *
  *-------------------------------------------------------------------------
  */
@@ -2508,9 +2433,6 @@ done:
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
  *
- * Programmer:	John Mainzer
- *		6/21/14
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2542,9 +2464,6 @@ done:
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		1/5/18
  *
  *-------------------------------------------------------------------------
  */
@@ -2624,9 +2543,6 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  *
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/25/14
  *
  *-------------------------------------------------------------------------
  */
@@ -2987,9 +2903,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	John Mainzer
- *		5/25/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -3102,9 +3015,6 @@ done:
  *		they also walk the data structure, and verify it.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/25/14
  *
  *-------------------------------------------------------------------------
  */
@@ -3265,9 +3175,6 @@ done:
  *
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/25/14
  *
  *-------------------------------------------------------------------------
  */

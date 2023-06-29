@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Edeprec.c
- *		April 11 2007
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5E interface.  These
  *              functions are here for compatibility purposes and may be
@@ -76,9 +74,6 @@
  * Return:      Success:    Pointer to the message
  *              Failure:    NULL
  *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
- *
  *-------------------------------------------------------------------------
  */
 char *
@@ -127,9 +122,6 @@ done:
  *
  * Return:      Success:    Pointer to the message
  *              Failure:    NULL
- *
- * Programmer:	Raymond Lu
- *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -187,9 +179,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		Tuesday, Sep 16, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -216,9 +205,6 @@ done:
  *              Clears the error stack for the specified error stack.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -249,9 +235,6 @@ done:
  *              own more specific error handlers.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Sep 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -285,9 +268,6 @@ done:
  *              function for each error along the way.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Sep 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -326,9 +306,6 @@ done:
  *              value is not returned.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Sep 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -379,9 +356,6 @@ done:
  *              direction.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *              Sep 16, 2003
  *
  *-------------------------------------------------------------------------
  */

@@ -641,9 +641,6 @@ done:
  * Return:    Success:    non-negative
  *        Failure:    negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, March 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t

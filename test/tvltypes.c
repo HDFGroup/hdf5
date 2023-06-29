@@ -3251,9 +3251,6 @@ test_vltypes(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              June 8, 1999
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -31,11 +31,6 @@
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -66,12 +61,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *  Bug fix: Added call to close the file with the error messages
- *  EP 11/26/01
  * SOURCE
  */
 int_f
@@ -114,10 +103,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- *
  * SOURCE
  */
 int_f
@@ -148,11 +133,6 @@ done:
  *  name - character string describing the error
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -196,11 +176,6 @@ done:
  *  name - character string describing the error
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, March 29, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -244,9 +219,6 @@ done:
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *   M. Scot Breitenfeld
- *  July 22, 2009
  * SOURCE
  */
 /* int_f */

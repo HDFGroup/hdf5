@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Raymond Lu
- *              Jan 3, 2003
- */
-
 #include "H5Zmodule.h" /* This source code file is part of the H5Z module */
 
 #include "H5private.h"   /* Generic Functions			*/
@@ -48,9 +43,6 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
  *
  * Return:	Success: Size of buffer filtered
  *		Failure: 0
- *
- * Programmer:	Raymond Lu
- *              Jan 3, 2003
  *
  *-------------------------------------------------------------------------
  */

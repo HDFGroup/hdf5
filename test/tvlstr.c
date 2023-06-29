@@ -992,9 +992,6 @@ test_vlstrings(void)
  *
  * Return:    none
  *
- * Programmer:    Quincey Koziol
- *              September 10, 1999
- *
  *-------------------------------------------------------------------------
  */
 void

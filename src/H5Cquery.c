@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cquery.c
- *              May 30 2016
- *              Quincey Koziol
  *
  * Purpose:     Routines which query different components of the generic
  *              cache structure or entries.
@@ -70,9 +68,6 @@
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *		10/8/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -106,9 +101,6 @@ done:
  *		parameters are NULL, skip that value.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *		10/8/04
  *
  *-------------------------------------------------------------------------
  */
@@ -177,9 +169,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *		10/7/04
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -221,9 +210,6 @@ done:
  *		associated data is not reported.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/1/05
  *
  *-------------------------------------------------------------------------
  */
@@ -290,9 +276,6 @@ done:
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- * Programmer:  John Mainzer
- *              7/27/07
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -324,9 +307,6 @@ done:
  *
  * Return:      NULL/non-NULL (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              6/29/15
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -349,9 +329,6 @@ H5C_get_aux_ptr(const H5C_t *cache_ptr)
  * 		On error, the value of *ring is not modified.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              9/8/15
  *
  *-------------------------------------------------------------------------
  */
@@ -389,8 +366,6 @@ done:
  * Purpose:	    To retrieve the address and size of the cache image in the file.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  Vailin Choi; March 2017
  *
  *-------------------------------------------------------------------------
  */

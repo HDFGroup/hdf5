@@ -5818,9 +5818,6 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, Februrary 13, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7116,9 +7113,6 @@ attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, February 20, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7135,9 +7129,6 @@ attr_iterate2_fail_cb(hid_t H5_ATTR_UNUSED group_id, const char H5_ATTR_UNUSED *
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, February 20, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -7812,9 +7803,6 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, February 21, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -8167,9 +8155,6 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, February 21, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -11930,12 +11915,6 @@ test_attr(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Albert Cheng
- *              July 2, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

@@ -38,8 +38,6 @@
 # major errors, but don't have to.  The section definition for each minor error
 # must come before any minor error that uses it.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2003/08/12
 
 # Major errors
 MAJOR, H5E_ARGS, Invalid arguments to routine

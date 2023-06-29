@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Cmpio.c
- *              June 20 2015
- *              Quincey Koziol
  *
  * Purpose:     Functions in this file implement support for parallel I/O for
  *              generic cache code.
@@ -149,9 +147,6 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  * Return:      Success:        SUCCEED
  *
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              3/17/10
  *
  *-------------------------------------------------------------------------
  */
@@ -406,9 +401,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              3/17/10
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -516,9 +508,6 @@ done:
  *
  *              Failure:        FAIL
  *
- * Programmer:  John Mainzer
- *              3/17/10
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -615,9 +604,6 @@ done:
  *              unprotected.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/5/05
  *
  *-------------------------------------------------------------------------
  */
@@ -826,9 +812,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  Mohamad Chaarawi
- *              April, 2015
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -875,9 +858,6 @@ done:
  * Purpose:     Perform a collective write of a list of metadata entries.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1023,9 +1003,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure.
  *
- * Programmer:  John Mainzer
- *              2/10/17
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1137,9 +1114,6 @@ done:
  *              (or cleared) in LRU order to avoid performance issues.
  *
  * Return:      Non-negative on success/Negative on failure.
- *
- * Programmer:  John Mainzer
- *              2/10/17
  *
  *-------------------------------------------------------------------------
  */

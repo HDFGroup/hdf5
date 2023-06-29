@@ -345,8 +345,6 @@ done:
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
  *
- * Programmer:  JRM -- 6/10/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -561,8 +559,6 @@ done:
  *              Failure:    FAIL
  *                          One or more writes failed.
  *
- * Programmer:  JRM -- 6/10/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -748,8 +744,6 @@ done:
  *
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
- *
- * Programmer:  NAF -- 5/13/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1079,8 +1073,6 @@ done:
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
  *
- * Programmer:  NAF -- 3/29/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1243,8 +1235,6 @@ done:
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
  *
- * Programmer:  NAF -- 5/19/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1395,8 +1385,6 @@ done:
  *
  *              Failure:    FAIL
  *                          One or more writes failed.
- *
- * Programmer:  NAF -- 5/13/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1724,8 +1712,6 @@ done:
  *              Failure:    FAIL
  *                          One or more writes failed.
  *
- * Programmer:  NAF -- 3/29/21
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1879,8 +1865,6 @@ done:
  *
  *              Failure:    FAIL
  *                          One or more writes failed.
- *
- * Programmer:  NAF -- 5/19/21
  *
  *-------------------------------------------------------------------------
  */

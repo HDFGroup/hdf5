@@ -45,9 +45,6 @@ static int external_link_env(hid_t fapl, hbool_t new_format);
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Vailin Choi
- *              Feb. 20, 2008
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -141,8 +138,6 @@ error:
  * Purpose:     Test external link with environment variable HDF5_EXT_PREFIX
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Vailin Choi; Nov 2010
  *
  *-------------------------------------------------------------------------
  */

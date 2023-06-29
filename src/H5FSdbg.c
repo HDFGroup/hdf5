@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FSdbg.c
- *              May  9 2006
- *              Quincey Koziol
  *
  * Purpose:     Dump debugging information about a free space manager
  *
@@ -72,9 +70,6 @@
  * Purpose:     Prints debugging info about a free space manager.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              May  9 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -157,9 +152,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              May 30 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -193,9 +185,6 @@ done:
  * Purpose:     Prints debugging info about the free space sections.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              May  9 2006
  *
  *-------------------------------------------------------------------------
  */

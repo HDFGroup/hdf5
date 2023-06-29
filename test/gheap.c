@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March 31, 1998
- *
  * Purpose:     Tests the global heap.  The global heap is the set of all
  *              collections but the collections are not related to one
  *              another by anything that appears in the file format.
@@ -58,9 +55,6 @@ static const char *FILENAME[] = {"gheap1", "gheap2", "gheap3", "gheap4", "gheapo
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +162,6 @@ error:
  *
  *              Failure:     number of errors
  *
- * Programmer:  Robb Matzke
- *              Tuesday, March 31, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -268,9 +259,6 @@ error:
  *
  *              Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -358,9 +346,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Tuesday, March 31, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -455,9 +440,6 @@ error:
  * Return:      Success:    0
  *
  *              Failure:    number of errors
- *
- * Programmer:    Neil Fortner
- *              Monday, October 26, 2009
  *
  *-------------------------------------------------------------------------
  */

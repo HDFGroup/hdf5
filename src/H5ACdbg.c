@@ -68,9 +68,6 @@
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Thursday, October 30, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -98,9 +95,6 @@ H5AC_stats(const H5F_t *f)
  *              to stdout.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              Sunday, October 10, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -159,8 +153,6 @@ done:
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 5/30/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -204,9 +196,6 @@ done:
  *
  * Return:      SUCCEED on success/FAIL on failure.  Note that
  *              *fd_exists_ptr is undefined on failure.
- *
- * Programmer:  John Mainzer
- *              9/28/16
  *
  *-------------------------------------------------------------------------
  */
@@ -254,8 +243,6 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
- * Programmer:  John Mainzer, 5/30/14
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -288,9 +275,6 @@ done:
  *              cache_ptr->serialization_in_progress.
  *
  * Return:      Current value of cache_ptr->serialization_in_progress.
- *
- * Programmer:  John Mainzer
- *              8/24/15
  *
  *-------------------------------------------------------------------------
  */
@@ -327,8 +311,6 @@ H5AC_get_serialization_in_progress(H5F_t *f)
  *              if not.  Throws an assertion failure on error.
  *
  * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
- *
- * Programmer:  John Mainzer, 6/18/16
  *
  *-------------------------------------------------------------------------
  */

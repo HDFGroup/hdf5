@@ -69,9 +69,6 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 27, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -448,9 +445,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 23, 2002
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -474,9 +468,6 @@ done:
  * Purpose:	Writes directly from application memory into a file
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, July 23, 2002
  *
  *-------------------------------------------------------------------------
  */

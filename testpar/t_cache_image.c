@@ -121,9 +121,6 @@ static hbool_t smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank,
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              1/25/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -381,9 +378,6 @@ construct_test_file(int test_file_index)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/15/15
  *
  *-------------------------------------------------------------------------
  */
@@ -708,9 +702,6 @@ create_data_sets(hid_t file_id, int min_dset, int max_dset)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              10/31/16
- *
  *-------------------------------------------------------------------------
  */
 #if 0
@@ -802,9 +793,6 @@ delete_data_sets(hid_t file_id, int min_dset, int max_dset)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1272,9 +1260,6 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/4/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1657,9 +1642,6 @@ par_create_dataset(int dset_num, hid_t file_id, int mpi_rank, int mpi_size)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/6/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1724,9 +1706,6 @@ par_delete_dataset(int dset_num, hid_t file_id, int mpi_rank)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              3/8/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1768,9 +1747,6 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/6/17
  *
  *-------------------------------------------------------------------------
  */
@@ -2023,9 +1999,6 @@ par_verify_dataset(int dset_num, hid_t file_id, int mpi_rank)
  *
  * Return:      TRUE if succussful, FALSE otherwise.
  *
- * Programmer:  John Mainzer
- *              3/8/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2132,9 +2105,6 @@ serial_insert_cache_image(int file_name_idx, int mpi_size)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/6/17
  *
  *-------------------------------------------------------------------------
  */
@@ -2359,9 +2329,6 @@ serial_verify_dataset(int dset_num, hid_t file_id, int mpi_size)
  *              Do nothing if pass is FALSE on entry.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              7/15/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2616,9 +2583,6 @@ verify_data_sets(hid_t file_id, int min_dset, int max_dset)
  *              6) Close the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/11/17
  *
  *-------------------------------------------------------------------------
  */
@@ -2879,9 +2843,6 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
  *              7) Delete the file.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              1/25/17
  *
  *-------------------------------------------------------------------------
  */
@@ -3146,8 +3107,6 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
  * Return:      Success:        TRUE
  *
  *              Failure:        FALSE
- *
- * Programmer:  JRM -- 3/6/17
  *
  *****************************************************************************/
 static hbool_t
@@ -3545,9 +3504,6 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
  * Return:      Success: 0
  *
  *              Failure: 1
- *
- * Programmer:  John Mainzer
- *              1/25/17
  *
  *-------------------------------------------------------------------------
  */

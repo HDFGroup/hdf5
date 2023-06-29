@@ -30,8 +30,6 @@ static const char *FILENAME[] = {"del_many_dense_attrs", NULL};
  *
  * Return:      No return
  *
- * Programmer:  Vailin Choi
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -49,8 +47,6 @@ catch_signal(int H5_ATTR_UNUSED signo)
  *
  * Return:	Success:	exit(EXIT_SUCCESS)
  *		    Failure:	exit(EXIT_FAILURE)
- *
- * Programmer:  Vailin Choi; Dec 2018
  *
  *-------------------------------------------------------------------------
  */

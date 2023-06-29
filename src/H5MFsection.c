@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  * Purpose:	Free space section callbacks for file.
  *
  */
@@ -179,9 +176,6 @@ H5FL_DEFINE_STATIC(H5MF_free_section_t);
  *
  * Return:	Pointer to new section on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		January  8 2008
- *
  *-------------------------------------------------------------------------
  */
 H5MF_free_section_t *
@@ -223,9 +217,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -251,9 +242,6 @@ H5MF__sect_free(H5FS_section_info_t *_sect)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -290,9 +278,6 @@ done:
  * Return:	Success:	non-negative
  *          Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -322,8 +307,6 @@ H5MF__sect_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_sect
  *
  * Return:	Success:	the fragment for aligning sect
  *          Failure:	null
- *
- * Programmer:	Vailin Choi, July 29, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -360,9 +343,6 @@ done:
  * Return:	Success:	non-negative (TRUE/FALSE)
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -396,9 +376,6 @@ H5MF__sect_simple_can_merge(const H5FS_section_info_t *_sect1, const H5FS_sectio
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -437,9 +414,6 @@ done:
  *
  * Return:	Success:	non-negative (TRUE/FALSE)
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -542,9 +516,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -609,8 +580,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -673,8 +642,6 @@ done:
  * Return:	Success:	non-negative (TRUE/FALSE)
  *          Failure:	negative
  *
- * Programmer:	Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -719,8 +686,6 @@ H5MF__sect_small_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -783,8 +748,6 @@ done:
  * Return:	Success:	non-negative (TRUE/FALSE)
  *          Failure:	negative
  *
- * Programmer:	Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -822,8 +785,6 @@ H5MF__sect_large_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section
  * Return:	Success:	non-negative
  *          Failure:	negative
  *
- * Programmer:	Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -860,8 +821,6 @@ done:
  *
  * Return:	Success:	non-negative (TRUE/FALSE)
  *          Failure:	negative
- *
- * Programmer:	Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -913,8 +872,6 @@ done:
  *
  * Return:      Success:	non-negative
  *              Failure:	negative
- *
- * Programmer:	Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */

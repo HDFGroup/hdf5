@@ -1,10 +1,5 @@
 #!/bin/sh
 # Build and Test HDF5 using cmake.
-# Author: Allen Byrne
-#         Albert Cheng
-# Creation Date: Nov 2012
-# Modified:
-#	Changed to use the quick steps described in INSTALL_CMake.txt. (AKC 2014/1/1)
 
 # Copyright: The HDF Group, 2012-14
 

@@ -24,7 +24,6 @@
  * write operation has returned success, all reads issued afterward should
  * get the same data the write has written.
  *
- * Created: Albert Cheng, 2013/8/28.
  *************************************************************/
 
 /***********************************************************

@@ -80,8 +80,6 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Vailin Choi; Jan 2014
- *
  * Note:
  * 	This routine is copied from the fast forward feature branch: features/hdf5_ff
  *	src/H5FF.c:H5DOappend() with the following modifications:

@@ -344,8 +344,6 @@ gtoken(char *s)
  *
  * Return:      0, success, -1, error
  *
- * Programmer:  pkmat
- *
  *-------------------------------------------------------------------------
  */
 
@@ -941,10 +939,6 @@ readFloatData(FILE *strm, struct Input *in)
  *  with a variable length type
  *
  * Return: 0, ok, -1 no
- *
- * Programmer: Pedro Vicente
- *
- * Date: July, 26, 2007
  *
  *-------------------------------------------------------------------------
  */

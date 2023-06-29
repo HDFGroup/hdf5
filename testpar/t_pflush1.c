@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Leon Arber  <larber@uiuc.edu>
- *              Sept. 28, 2006.
- *
  * Purpose:     This is the first half of a two-part test that makes sure
  *              that a file can be read after a parallel application crashes
  *              as long as the file was flushed first.  We simulate a crash by
@@ -35,10 +32,6 @@ static int *data_g = NULL;
  *
  * Return:      Success:    A valid file ID
  *              Failure:    H5I_INVALID_HID
- *
- * Programmer:  Leon Arber
- *              Sept. 26, 2006
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -104,10 +97,6 @@ error:
  * Purpose:     Part 1 of a two-part parallel H5Fflush() test.
  *
  * Return:      EXIT_FAILURE (always)
- *
- * Programmer:  Robb Matzke
- *              Friday, October 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 int

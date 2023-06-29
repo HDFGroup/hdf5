@@ -196,9 +196,6 @@ static H5L_class_t *H5L_table_g       = NULL;
  *
  *              Failure:	negative
  *
- * Programmer:	James Laird
- *              Thursday, July 13, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -222,9 +219,6 @@ done:
  * Purpose:     Terminate any resources allocated in H5L_init.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, January 24, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -255,9 +249,6 @@ H5L_term_package(void)
  *                              link class table.
  *		Failure:	Negative
  *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -284,9 +275,6 @@ done:
  *
  * Return:	Success:	Ptr to entry in global link class table.
  *		Failure:	NULL
- *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -318,9 +306,6 @@ done:
  *              See H5Lregister for full documentation.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -370,9 +355,6 @@ done:
  *              See H5Lunregister for full documentation.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, July 10, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -443,9 +425,6 @@ H5L_is_registered(H5L_type_t id, hbool_t *is_registered)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Tuesday, December 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -485,9 +464,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, April 9, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -525,9 +501,6 @@ done:
  * Purpose:	Callback for creating a link to an object.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -693,9 +666,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Monday, December  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -773,9 +743,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -845,9 +812,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *              Monday, April  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -891,9 +855,6 @@ done:
  *              full documentation.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Friday, May 19, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -948,9 +909,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1003,9 +961,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 20, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1047,9 +1002,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *              Monday, April 13, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1083,9 +1035,6 @@ done:
  *              index's order.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1134,9 +1083,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		December 27, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1174,9 +1120,6 @@ done:
  *              actually deletes the link
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 19, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1223,9 +1166,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, September 17, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1264,9 +1204,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Monday, November 13 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1303,9 +1240,6 @@ done:
  *              within a group.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		December 27, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -1344,9 +1278,6 @@ done:
  *              It is called by H5L__move_cb.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, April 3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1457,9 +1388,6 @@ done:
  *              in the path
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Friday, April 3, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1578,9 +1506,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, May 1, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1651,9 +1576,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 16 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1682,9 +1604,6 @@ H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
  *              component of a path
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1743,9 +1662,6 @@ done:
  *		as 'FALSE' instead of causing failures
  *
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1809,9 +1725,6 @@ done:
  *
  * Return:	Non-negative on success, with *exists set/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Friday, March 16 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1848,9 +1761,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *              Monday, April 17 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1885,9 +1795,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	James Laird
- *              Monday, April 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1915,9 +1822,6 @@ done:
  *              index's order.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2004,9 +1908,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Saturday, November 11 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2087,9 +1988,6 @@ done:
  *              another.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Sep 29 2006
  *
  *-------------------------------------------------------------------------
  */

@@ -38,9 +38,6 @@
  *  obj_type - type of the object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -119,9 +116,6 @@ DONE:
  *  nmemebers - number of members
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, August 5, 1999
  * SOURCE
  */
 int_f
@@ -166,9 +160,6 @@ DONE:
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -252,9 +243,6 @@ DONE:
  *  new_namelen - new_name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
  * HISTORY
  *
  * SOURCE
@@ -330,9 +318,6 @@ DONE:
  *  name - name of the object to unlink
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -375,9 +360,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -426,10 +408,6 @@ DONE:
  *  dst_namelen - new name length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, September 25, 2002
- *
  * SOURCE
  */
 
@@ -479,9 +457,6 @@ DONE:
  *  value - name to be returned
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 
@@ -542,11 +517,6 @@ DONE:
  *  commentlen - new comment length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
- * HISTORY
- *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -592,9 +562,6 @@ DONE:
  *  comment - the new comment
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Mingshi Chen
- *  Friday, August 6, 1999
  * SOURCE
  */
 int_f
@@ -655,9 +622,6 @@ DONE:
  *  grp_id - group identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f
@@ -687,9 +651,6 @@ done:
  *  gcpl_id - Group creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 15, 2008
  * SOURCE
  */
 int_f

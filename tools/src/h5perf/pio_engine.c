@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Author: Albert Cheng of NCSA, Oct 24, 2001.
- */
-
 #include "hdf5.h"
 
 #include <errno.h>
@@ -132,7 +128,6 @@ static off_t  sqrto(off_t);
  * Function:        do_pio
  * Purpose:         PIO Engine where Parallel IO are executed.
  * Return:          results
- * Programmer:      Albert Cheng, Bill Wendling 2001/12/12
  */
 results
 do_pio(parameters param)
@@ -379,7 +374,6 @@ done:
  *              doing. Also, place in the /tmp/{$USER,$LOGIN} directory if
  *              USER or LOGIN are specified in the environment.
  * Return:      Pointer to filename or NULL
- * Programmer:  Bill Wendling, 21. November 2001
  */
 static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
@@ -493,7 +487,6 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Function:        do_write
  * Purpose:         Write the required amount of data to the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Albert Cheng, Bill Wendling, 2001/12/13
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
@@ -1508,7 +1501,6 @@ sqrto(off_t x)
  * Function:        do_read
  * Purpose:         read the required amount of data from the file.
  * Return:          SUCCESS or FAIL
- * Programmer:      Albert Cheng 2001/12/13
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbytes, size_t buf_size,
@@ -2489,7 +2481,6 @@ done:
  * Function:    do_fopen
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
  */
 static herr_t
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
@@ -2598,7 +2589,6 @@ done:
  * Function:    do_fclose
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
- * Programmer:  Albert Cheng, Bill Wendling, 2001/12/13
  */
 static herr_t
 do_fclose(iotype iot, file_descr *fd /*out*/)
@@ -2654,7 +2644,6 @@ done:
  *      Only Proc 0 of the PIO communicator will do the cleanup.
  *      Other processes just return.
  * Return:      void
- * Programmer:  Albert Cheng 2001/12/12
  */
 static void
 do_cleanupfile(iotype iot, char *fname)

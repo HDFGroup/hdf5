@@ -709,12 +709,6 @@ test_coords(void)
  * Purpose:	Cleanup temporary test files
  *
  * Return:	none
- *
- * Programmer:	Raymond Lu
- *              20 Dec. 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

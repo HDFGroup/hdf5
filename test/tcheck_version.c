@@ -19,9 +19,6 @@
  * if it will indeed issue the warning message and aborts.  With environment
  * variable $HDF5_DISABLE_VERSION_CHECK sets to 1, it should issue warnings
  * but no abort.  If it is 2, no warning or abort.
- *
- * Programmer: Albert Cheng
- *             September 20, 2009
  */
 
 #include "h5test.h"

@@ -36,9 +36,6 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  *		Failure:	-1
  *
- * Programmer:  Pedro Vicente
- *              Thursday, March 25, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -125,9 +122,6 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *
  *		Failure:	0
  *
- * Programmer:	Raymond Lu
- *              2 June 2011
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -146,9 +140,6 @@ filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *              2 June 2011
  *
  *-------------------------------------------------------------------------
  */

@@ -83,10 +83,6 @@ int space5_data = 7;
  * Purpose      Test basic H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -209,10 +205,6 @@ test_h5s_basic()
  * Purpose      Test scalar H5S (dataspace) writing code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -266,10 +258,6 @@ test_h5s_scalar_write()
  * Purpose      Test scalar H5S (dataspace) reading code
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -320,10 +308,6 @@ test_h5s_scalar_read()
  * Purpose      Test null H5S (dataspace) code
  *
  * Return       None
- *
- * Programmer   Raymond Lu (using C version)
- *              May 18, 2004
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -367,10 +351,6 @@ test_h5s_null()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -428,10 +408,6 @@ test_h5s_compound_scalar_write()
  *              datatypes
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -492,9 +468,6 @@ test_h5s_compound_scalar_read()
  * Purpose      Main dataspace testing routine
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              Mar 2001
  *-------------------------------------------------------------------------
  */
 extern "C" void

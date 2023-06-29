@@ -20,8 +20,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Tvisit.c
- *			Jul 19 2007
- *			Quincey Koziol
  *
  * Purpose:		Visit all the components of a datatype
  *
@@ -76,9 +74,6 @@
  *              a callback for each.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, July 19, 2007
  *
  *-------------------------------------------------------------------------
  */

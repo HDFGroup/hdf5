@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Fmpi.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             MPI-related routines.
  *
@@ -77,9 +75,6 @@
  *
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, January 30, 2004
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -107,9 +102,6 @@ done:
  * Return:      Success:    The communicator (non-negative)
  *
  *              Failure:    Negative
- *
- * Programmer:  Quincey Koziol
- *              Friday, January 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -139,9 +131,6 @@ done:
  *
  *              Failure:        Negative
  *
- * Programmer:  John Mainzer
- *              Friday, May 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -169,9 +158,6 @@ done:
  * Return:      Success:        The size (positive)
  *
  *              Failure:        Negative
- *
- * Programmer:  John Mainzer
- *              Friday, May 6, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -231,9 +217,6 @@ done:
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -306,9 +289,6 @@ done:
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -349,9 +329,6 @@ done:
  * Return:      Success:    Non-negative
  *
  *              Failure:    Negative
- *
- * Programmer:  Mohamad Chaarawi
- *              Feb 14, 2012
  *
  *-------------------------------------------------------------------------
  */

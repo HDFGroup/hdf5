@@ -11,11 +11,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *              Tuesday, January  8, 2008
- *
  * Purpose:	Routines for aggregating free space allocations
- *
  */
 
 /****************/
@@ -79,9 +75,6 @@ static htri_t  H5MF__aggr_can_shrink_eoa(H5F_t *f, H5FD_mem_t type, H5F_blk_aggr
  * Return:      Success:        The file address of new chunk.
  *              Failure:        HADDR_UNDEF
  *
- * Programmer:  Vailin Choi; July 1st, 2009
- *		(The coding is from H5MF_alloc().)
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -134,9 +127,6 @@ done:
  *
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
- *
- * Programmer:  Quincey Koziol
- *              Thursday, December 13, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -413,9 +403,6 @@ done:
      *                              FALSE(0) - Block could not be extended
      * 		Failure:	FAIL
      *
-     * Programmer:  Quincey Koziol
-     *              Thursday, December 13, 2007
-     *
      *-------------------------------------------------------------------------
      */
     htri_t H5MF__aggr_try_extend(H5F_t * f, H5F_blk_aggr_t * aggr, H5FD_mem_t type, haddr_t blk_end,
@@ -511,9 +498,6 @@ done:
      *                              FALSE(0) - Section and aggregator can not be absorbed
      * 		Failure:	FAIL
      *
-     * Programmer:  Quincey Koziol
-     *              Friday, February  1, 2008
-     *
      *-------------------------------------------------------------------------
      */
     htri_t H5MF__aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr, const H5MF_free_section_t *sect,
@@ -566,9 +550,6 @@ done:
      *
      * Return:      Success:        Non-negative
      *              Failure:        Negative
-     *
-     * Programmer:  Quincey Koziol
-     *              Friday, February  1, 2008
      *
      *-------------------------------------------------------------------------
      */
@@ -668,9 +649,6 @@ done:
      * Return:      Success:        Non-negative
      *              Failure:        Negative
      *
-     * Programmer:  Quincey Koziol
-     *              Thursday, December 13, 2007
-     *
      *-------------------------------------------------------------------------
      */
     herr_t H5MF__aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr, haddr_t *addr, hsize_t *size)
@@ -701,9 +679,6 @@ done:
      *
      * Return:      Success:        Non-negative
      *              Failure:        Negative
-     *
-     * Programmer:  Quincey Koziol
-     *              Thursday, December 13, 2007
      *
      *-------------------------------------------------------------------------
      */
@@ -761,9 +736,6 @@ done:
      *
      * Return:      Success:        Non-negative
      *              Failure:        Negative
-     *
-     * Programmer:  Vailin Choi
-     *	        July 1st, 2009
      *
      *-------------------------------------------------------------------------
      */
@@ -828,8 +800,6 @@ done:
      * Return:      Success:        non-negative (TRUE/FALSE)
      *              Failure:        negative
      *
-     * Programmer:  Vailin Choi
-     *
      *-------------------------------------------------------------------------
      */
     static htri_t H5MF__aggr_can_shrink_eoa(H5F_t * f, H5FD_mem_t type, H5F_blk_aggr_t * aggr)
@@ -866,8 +836,6 @@ done:
      *
      * Return:      Success:        Non-negative
      *              Failure:        Negative
-     *
-     * Programmer:  Vailin Choi
      *
      *-------------------------------------------------------------------------
      */
@@ -909,8 +877,6 @@ done:
      *
      * Return:      Success:        Non-negative
      *              Failure:        Negative
-     *
-     * Programmer:  Vailin Choi
      *
      *-------------------------------------------------------------------------
      */

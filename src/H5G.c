@@ -964,9 +964,6 @@ done:
  *
  * Return:      Non-negative on success, negative on failure
  *
- * Programmer:  Mike McGreevy
- *              May 19, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1005,9 +1002,6 @@ done:
  * Purpose:     Refreshes all buffers associated with a group.
  *
  * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Mike McGreevy
- *              July 21, 2010
  *
  *-------------------------------------------------------------------------
  */

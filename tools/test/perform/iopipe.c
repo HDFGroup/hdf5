@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
- */
-
 /* See H5private.h for how to include headers */
 #include "hdf5.h"
 
@@ -45,9 +40,6 @@
  * Purpose:  Prints statistics
  *
  * Return:  void
- *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -86,9 +78,6 @@ print_stats(const char *prefix,
  *
  * Return:  void
  *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -115,9 +104,6 @@ synchronize(void)
  * Return:  Success:
  *
  *    Failure:
- *
- * Programmer:  Robb Matzke
- *              Thursday, March 12, 1998
  *
  *-------------------------------------------------------------------------
  */

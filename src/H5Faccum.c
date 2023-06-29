@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Faccum.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             File metadata "accumulator" routines.  (Used to
  *                      cache small metadata I/Os and group them into a
@@ -92,9 +90,6 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *		data into the metadata accumulator.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -263,9 +258,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jun 11 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -403,9 +395,6 @@ done:
  *              a file from a buffer.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -844,9 +833,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Jan 10 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1010,9 +996,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1051,9 +1034,6 @@ done:
  * Purpose:	Reset the metadata accumulator for the file
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
  */

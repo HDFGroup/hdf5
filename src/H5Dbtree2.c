@@ -206,8 +206,6 @@ H5FL_ARR_DEFINE_STATIC(uint32_t, H5O_LAYOUT_NDIMS);
  * Return:      Success:        non-NULL
  *              Failure:        NULL
  *
- * Programmer:  Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -263,8 +261,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -295,8 +291,6 @@ H5D__bt2_dst_context(void *_ctx)
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -320,8 +314,6 @@ H5D__bt2_store(void *record, const void *_udata)
  * Return:      <0 if rec1 < rec2
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
- *
- * Programmer:  Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -353,8 +345,6 @@ H5D__bt2_compare(const void *_udata, const void *_rec2, int *result)
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -388,8 +378,6 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -421,8 +409,6 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -459,8 +445,6 @@ H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth, const void *_record,
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer:  Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -496,8 +480,6 @@ H5D__bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -536,8 +518,6 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -573,9 +553,6 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth, const void *_record, c
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              Wednesday, May 23, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -600,9 +577,6 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, const H5S_t
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		Friday, December 18, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -667,8 +641,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -716,8 +688,6 @@ done:
  * Purpose:	Create the v2 B-tree for tracking dataset chunks
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -794,8 +764,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -818,8 +786,6 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -863,8 +829,6 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
  *		  If it was found but its size was the same, pass chunk address back up
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -934,8 +898,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -956,8 +918,6 @@ H5D__bt2_found_cb(const void *nrecord, void *op_data)
  *		supplied.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,8 +1014,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	Negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1081,8 +1039,6 @@ H5D__bt2_idx_iterate_cb(const void *_record, void *_udata)
  *              for each one.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1141,8 +1097,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1172,8 +1126,6 @@ done:
  * Purpose:	Remove chunk from index.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1236,8 +1188,6 @@ done:
  * Return:	Success:	Non-negative
  *		Failure:	negative
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1288,8 +1238,6 @@ done:
  * Purpose:	Set up any necessary information for copying chunks
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1342,8 +1290,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1380,8 +1326,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1429,8 +1373,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1456,8 +1398,6 @@ H5D__bt2_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; June 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1480,8 +1420,6 @@ H5D__bt2_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
  * Purpose:	Release indexing information in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 2010
  *
  *-------------------------------------------------------------------------
  */
