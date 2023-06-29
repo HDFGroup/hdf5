@@ -265,7 +265,7 @@
  * </tr>
  * <tr>
  * <td>#H5garbage_collect</td>
- * <td>Collects garbage on all free-lists of all types.</td>
+ * <td>Performs garbage collection (GC) on all free-lists of all types.</td>
  * </tr>
  * <tr>
  * <td>#H5get_libversion</td>
