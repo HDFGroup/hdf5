@@ -1708,5 +1708,5 @@ h5dwalk_exit(int status)
     if (require_finalize)
         MPI_Finalize();
 
-    HDexit(status);
+    exit(status);
 }

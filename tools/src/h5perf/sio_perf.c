@@ -873,7 +873,7 @@ parse_command_line(int argc, const char *const *argv)
                     }
                     else {
                         fprintf(stderr, "sio_perf: invalid --api option %s\n", buf);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -937,7 +937,7 @@ parse_command_line(int argc, const char *const *argv)
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
                             if (!HDisdigit(buf[j])) {
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                             }
 
                         sio_debug_level = atoi(buf);
@@ -963,7 +963,7 @@ parse_command_line(int argc, const char *const *argv)
                                 break;
                             default:
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                         }
                     }
 
@@ -1035,7 +1035,7 @@ parse_command_line(int argc, const char *const *argv)
                 }
                 else {
                     fprintf(stderr, "sio_perf: invalid --api option %s\n", H5_optarg);
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
                 break;
             case 'w':
@@ -1199,7 +1199,7 @@ parse_size_directive(const char *size)
 
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
     }
 

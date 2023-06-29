@@ -1306,7 +1306,7 @@ parse_command_line(int argc, const char *const *argv)
                     }
                     else {
                         fprintf(stderr, "pio_perf: invalid --api option %s\n", buf);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
 
                     if (*end == '\0')
@@ -1354,7 +1354,7 @@ parse_command_line(int argc, const char *const *argv)
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
                             if (!isdigit(buf[j])) {
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                             }
 
                         pio_debug_level = atoi(buf);
@@ -1380,7 +1380,7 @@ parse_command_line(int argc, const char *const *argv)
                                 break;
                             default:
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
-                                HDexit(EXIT_FAILURE);
+                                exit(EXIT_FAILURE);
                         }
                     }
 
@@ -1524,7 +1524,7 @@ parse_size_directive(const char *size)
                 break;
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
     }
 

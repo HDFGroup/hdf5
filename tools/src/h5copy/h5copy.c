@@ -63,7 +63,7 @@ leave(int ret)
         free(str_flag);
 
     h5tools_close();
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------

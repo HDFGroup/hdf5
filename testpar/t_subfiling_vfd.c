@@ -2469,7 +2469,7 @@ exit:
 
     MPI_Finalize();
 
-    HDexit(nerrors ? EXIT_FAILURE : EXIT_SUCCESS);
+    exit(nerrors ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
 #else /* H5_HAVE_SUBFILING_VFD */
@@ -2480,7 +2480,7 @@ main(void)
     h5_reset();
     printf("Testing Subfiling VFD functionality\n");
     printf("SKIPPED - Subfiling VFD not built\n");
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
 
 #endif /* H5_HAVE_SUBFILING_VFD */

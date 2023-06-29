@@ -1168,7 +1168,7 @@ main(int argc, char *argv[])
                 size_of_test |= TEST_MEDIUM;
             else {
                 printf("unrecognized argument: %s\n", argv[i]);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             } /* end else */
         }     /* end for */
     }         /* end else */
@@ -1385,7 +1385,7 @@ main(int argc, char *argv[])
         printf("***** %d HYPERSLAB TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
         if (HDisatty(1))
             printf("(Redirect output to a pager or a file to see debug output)\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     printf("All hyperslab tests passed.\n");
@@ -1394,5 +1394,5 @@ main(int argc, char *argv[])
     H5close();
 #endif /* H5_HAVE_THREADSAFE */
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

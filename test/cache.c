@@ -34069,7 +34069,7 @@ main(void)
 
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     if (create_entry_arrays() < 0) {

@@ -2656,11 +2656,11 @@ main(void)
 
     if (nerrors) {
         printf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All Virtual Object Layer (VOL) tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

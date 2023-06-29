@@ -90,7 +90,7 @@ error(const char *fmt, ...)
     H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     fprintf(stderr, "\n");
     va_end(ap);
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 /*

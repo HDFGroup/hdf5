@@ -66,7 +66,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
         switch (c) {
             case 'h':
                 usage(opts->progname);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'f': /* usecase data file name */
                 opts->filename = HDstrdup(optarg);

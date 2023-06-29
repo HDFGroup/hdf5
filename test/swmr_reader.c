@@ -382,7 +382,7 @@ usage(void)
     printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
     printf("and will generate a random seed (no -r given).\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -484,7 +484,7 @@ main(int argc, char *argv[])
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_reader.out.%u", random_seed);
         if (NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
             fprintf(stderr, "Can't open verbose output file!\n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     } /* end if */
 
@@ -507,7 +507,7 @@ main(int argc, char *argv[])
     /* Generate dataset names */
     if (generate_symbols() < 0) {
         fprintf(stderr, "Error generating symbol names!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Create datatype for creating datasets */
@@ -518,7 +518,7 @@ main(int argc, char *argv[])
     if (read_records(FILENAME, verbose, verbose_file, random_seed, (unsigned long)nseconds,
                      (unsigned)poll_time, (unsigned)ncommon, (unsigned)nrandom) < 0) {
         fprintf(stderr, "Error reading records from datasets (random_seed = %u)!\n", random_seed);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -528,7 +528,7 @@ main(int argc, char *argv[])
     /* Clean up the symbols */
     if (shutdown_symbols() < 0) {
         fprintf(stderr, "Error releasing symbols!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Emit informational message */
@@ -538,7 +538,7 @@ main(int argc, char *argv[])
     /* Close objects created */
     if (H5Tclose(symbol_tid) < 0) {
         fprintf(stderr, "Error closing symbol datatype!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

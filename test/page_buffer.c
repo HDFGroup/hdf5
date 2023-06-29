@@ -2111,7 +2111,7 @@ main(void)
 
         SKIPPED();
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     } /* end if */
 
     if ((fapl = h5_fileaccess()) < 0) {
@@ -2151,7 +2151,7 @@ main(void)
 
     HDputs("All Page Buffering tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     printf("***** %d Page Buffering TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
@@ -2165,5 +2165,5 @@ error:
     if (api_ctx_pushed)
         H5CX_pop(FALSE);
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* main() */

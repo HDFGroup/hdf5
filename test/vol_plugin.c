@@ -343,11 +343,11 @@ main(void)
 
     if (nerrors) {
         printf("***** %d VOL connector plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All VOL connector plugin tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 } /* end main() */

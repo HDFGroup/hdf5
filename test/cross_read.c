@@ -364,11 +364,11 @@ main(void)
      */
     if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0) {
         HDputs(" -- couldn't check if VFD is compatible with default VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
     if (!driver_is_default_compatible) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     HDputs("\n");

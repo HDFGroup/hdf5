@@ -189,7 +189,7 @@ main(int argc, char **argv)
      */
     if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, required, &provided)) {
         fprintf(stderr, "MPI_Init_thread failed\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -442,7 +442,7 @@ main(int argc, char **argv)
 
     MPI_Finalize();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     free(vol_connector_string_copy);
@@ -457,5 +457,5 @@ error:
 
     MPI_Finalize();
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

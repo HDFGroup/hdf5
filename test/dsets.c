@@ -15848,7 +15848,7 @@ main(void)
     free(points_dbl_data);
     free(check_dbl_data);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     free(points);
@@ -15863,5 +15863,5 @@ error:
 
     nerrors = MAX(1, nerrors);
     printf("***** %d DATASET TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

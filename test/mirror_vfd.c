@@ -2431,12 +2431,12 @@ main(int argc, char **argv)
 
     if (parse_args(argc, argv, &opts) < 0) {
         printf("Unable to parse arguments\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (confirm_server(&opts) < 0) {
         printf("Unable to confirm server is running\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* TESTS */

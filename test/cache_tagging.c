@@ -4574,7 +4574,7 @@ main(void)
     /* Only run with sec2/default driver */
     if (!h5_using_default_driver(NULL)) {
         HDputs(" -- SKIPPED for incompatible VFD --");
-        HDexit(EXIT_SUCCESS);
+        exit(EXIT_SUCCESS);
     }
 
     /* ========== */

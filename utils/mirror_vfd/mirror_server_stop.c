@@ -184,20 +184,20 @@ main(int argc, char **argv)
 
     if (parse_args(argc, argv, &opts) < 0) {
         printf("Unable to parse arguments\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (opts.help) {
         usage();
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (send_shutdown(&opts) < 0) {
         printf("Unable to send shutdown command\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */
 
 #else /* H5_HAVE_MIRROR_VFD */
@@ -207,7 +207,7 @@ int
 main(void)
 {
     printf("Mirror VFD not built -- unable to perform shutdown.\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 #endif /* H5_HAVE_MIRROR_VFD */

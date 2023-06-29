@@ -509,7 +509,7 @@ indentation(unsigned x)
     }
     else {
         fprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
-        HDexit(1);
+        exit(1);
     }
 }
 

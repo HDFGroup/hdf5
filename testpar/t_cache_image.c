@@ -1740,7 +1740,7 @@ par_insert_cache_image(int file_name_idx, int mpi_rank, int mpi_size)
             if (!serial_insert_cache_image(file_name_idx, mpi_size)) {
                 fprintf(stderr, "\n\nCache image insertion failed.\n");
                 fprintf(stderr, "  failure mssg = \"%s\"\n", failure_mssg);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         }
     }
@@ -3606,7 +3606,7 @@ main(int argc, char **argv)
             }
             else {
                 printf("failed.\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             i++;
         }

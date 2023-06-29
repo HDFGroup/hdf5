@@ -617,9 +617,6 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
 #endif
-#ifndef HDatexit
-#define HDatexit(F) atexit(F)
-#endif
 #ifndef HDceil
 #define HDceil(X) ceil(X)
 #endif
@@ -643,12 +640,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDdifftime
 #define HDdifftime(X, Y) difftime(X, Y)
-#endif
-#ifndef HDexit
-#define HDexit(N) exit(N)
-#endif
-#ifndef HD_exit
-#define HD_exit(N) _exit(N)
 #endif
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)

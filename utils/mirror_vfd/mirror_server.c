@@ -569,7 +569,7 @@ handle_requests(struct server_run *run)
                 }
                 HDclose(connfd);
 
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
             }      /* end if writer side of fork */
             else { /* parent process (server side of fork) */
                 mirror_log(run->loginfo, V_INFO, "tidying up from handshake");
@@ -614,7 +614,7 @@ main(int argc, char **argv)
     run = init_server_run(argc, argv);
     if (NULL == run) {
         mirror_log(NULL, V_ERR, "can't initialize run");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (handle_requests(run) < 0) {
@@ -623,10 +623,10 @@ main(int argc, char **argv)
 
     if (term_server_run(run) < 0) {
         mirror_log(NULL, V_ERR, "problem closing server run");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */
 
 #else /* H5_HAVE_MIRROR_VFD */
@@ -635,7 +635,7 @@ int
 main(void)
 {
     printf("Mirror VFD was not built -- cannot launch server.\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 #endif /* H5_HAVE_MIRROR_VFD */

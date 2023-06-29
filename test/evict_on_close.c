@@ -957,7 +957,7 @@ main(void)
 
     printf("All evict-on-close tests passed.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
@@ -971,7 +971,7 @@ error:
     }
     H5E_END_TRY
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* end main() */
 
@@ -1049,13 +1049,13 @@ main(void)
     printf("All evict-on-close tests passed.\n");
     printf("Note that EoC is not supported under parallel so most tests are skipped.\n");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
 
     printf("***** %u evict-on-close test%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
 
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 
 } /* main() - parallel */
 

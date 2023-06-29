@@ -89,7 +89,7 @@ leave(int ret)
 {
     h5tools_close();
 
-    HDexit(ret);
+    exit(ret);
 }
 
 /*-------------------------------------------------------------------------
@@ -395,7 +395,7 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
         res = HDfstat(infid, &sbuf);
         if (res < 0) {
             error_msg("Can't stat file \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         howmuch = (ssize_t)sbuf.st_size;
@@ -432,12 +432,12 @@ copy_some_to_file(int infid, int outfid, hsize_t starting, hsize_t startout, ssi
 
         if (nchars <= 0) {
             error_msg("Read error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
 
         if (HDwrite(outfid, buf, (unsigned)nchars) < 0) {
             error_msg("Write error \n");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         tot += nchars;

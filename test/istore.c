@@ -624,7 +624,7 @@ main(int argc, char *argv[])
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
         printf("Cannot create file %s; test aborted\n", filename);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Initialize chunk dimensions */
@@ -691,12 +691,12 @@ main(int argc, char *argv[])
 
     if (nerrors) {
         printf("***** %d I-STORE TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     printf("All i-store tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

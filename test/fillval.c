@@ -2649,7 +2649,7 @@ main(int argc, char *argv[])
                 test_compact = 1;
             else {
                 fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
         } /* end for */
     }     /* end if */
@@ -2725,9 +2725,9 @@ main(int argc, char *argv[])
     if (h5_cleanup(FILENAME, fapl))
         HDremove(FILE_NAME_RAW);
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     HDputs("***** FILL VALUE TESTS FAILED *****");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

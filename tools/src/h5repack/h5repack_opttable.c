@@ -200,7 +200,7 @@ options_add_layout(obj_list_t *obj_list, unsigned n_objs, pack_info_t *pack, pac
                     /* already chunk info inserted for this one; exit */
                     if (table->objs[i].chunk.rank > 0) {
                         H5TOOLS_INFO("chunk information already inserted for <%s>\n", obj_list[j].obj);
-                        HDexit(EXIT_FAILURE);
+                        exit(EXIT_FAILURE);
                     }
                     /* insert the layout info */
                     else {

@@ -430,10 +430,10 @@ main(void)
 
     if (nerrors) {
         printf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     HDputs("All VFD plugin tests passed.");
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }

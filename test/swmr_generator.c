@@ -253,7 +253,7 @@ usage(void)
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
     printf("seed (no -r given).\n");
     printf("\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end usage() */
 
 int
@@ -347,7 +347,7 @@ main(int argc, char *argv[])
     /* Generate file skeleton */
     if (gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
         fprintf(stderr, "Error generating skeleton file!\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     return 0;

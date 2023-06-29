@@ -608,7 +608,7 @@ main(void)
     api_ctx_pushed = FALSE;
 
     h5_cleanup(FILENAME, fapl_id);
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
     H5E_BEGIN_TRY
@@ -621,5 +621,5 @@ error:
         H5CX_pop(FALSE);
 
     HDputs("*** TESTS FAILED ***");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */

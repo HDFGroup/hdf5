@@ -136,7 +136,7 @@ parse_option(int argc, char *const argv[])
         switch (c) {
             case 'h':
                 usage(progname_g);
-                HDexit(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case 'b': /* number of planes to write/read */
                 if ((blocksize_g = atoi(optarg)) <= 0) {
@@ -395,12 +395,12 @@ main(int argc, char *argv[])
             printf("%d: launch reader process\n", mypid);
             if (read_wo_file() < 0) {
                 fprintf(stderr, "read_wo_file encountered error\n");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
 
             /* Reader is done. Clean up by removing the data file */
             HDremove(DATAFILE);
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
     }
 

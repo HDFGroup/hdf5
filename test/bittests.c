@@ -933,11 +933,11 @@ main(void)
 
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     printf("All bit tests passed.\n");
 
     H5close();
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* end main() */

@@ -45,7 +45,7 @@ main(int argc, char *argv[])
     /* Check the # of arguments */
     if (argc != 2) {
         usage();
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Get the file name */
@@ -55,16 +55,16 @@ main(int argc, char *argv[])
     if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, FALSE, NULL, (size_t)0)) < 0) {
         fprintf(stderr, "clear_open_chk: unable to open the file\n");
         free(fname);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     free(fname);
 
     /* Close the file */
     if (H5Fclose(fid) < 0) {
         fprintf(stderr, "clear_open_chk: cannot close the file\n");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     /* Return success */
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 } /* main() */

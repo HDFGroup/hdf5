@@ -65,7 +65,7 @@ usage(const char *progname)
                     "'k' for kB.\n");
     fprintf(stderr, "File family names include an integer printf "
                     "format such as '%%d'\n");
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 /*-------------------------------------------------------------------------
@@ -204,7 +204,7 @@ main(int argc, char *argv[])
         else if (!HDstrcmp(argv[argno], "-V")) {
             printf("This is %s version %u.%u release %u\n", prog_name, H5_VERS_MAJOR, H5_VERS_MINOR,
                    H5_VERS_RELEASE);
-            HDexit(EXIT_SUCCESS);
+            exit(EXIT_SUCCESS);
         }
         else if (!HDstrcmp(argv[argno], "-family_to_sec2")) {
             family_to_single = TRUE;
@@ -227,9 +227,9 @@ main(int argc, char *argv[])
 
     /* allocate names */
     if (NULL == (src_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     if (NULL == (dst_name = (char *)calloc((size_t)NAMELEN, sizeof(char))))
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
 
     /*
      * Get the name for the source file and open the first member.  The size
@@ -243,12 +243,12 @@ main(int argc, char *argv[])
 
     if ((src = HDopen(src_name, O_RDONLY)) < 0) {
         HDperror(src_name);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb) < 0) {
         HDperror("fstat");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     src_size = src_act_size = sb.st_size;
     if (verbose)
@@ -265,7 +265,7 @@ main(int argc, char *argv[])
 
     if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
         HDperror(dst_name);
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
     if (verbose)
         fprintf(stderr, "> %s\n", dst_name);
@@ -295,11 +295,11 @@ main(int argc, char *argv[])
             n = (size_t)MIN((off_t)n, src_act_size - src_offset);
             if ((nio = HDread(src, buf, n)) < 0) {
                 HDperror("read");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
                 fprintf(stderr, "%s: short read\n", src_name);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             for (i = 0; i < n; i++) {
                 if (buf[i])
@@ -321,15 +321,15 @@ main(int argc, char *argv[])
         if (need_write) {
             if (need_seek && HDlseek(dst, dst_offset, SEEK_SET) < 0) {
                 HDperror("HDlseek");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             if ((nio = HDwrite(dst, buf, n)) < 0) {
                 HDperror("write");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             else if ((size_t)nio != n) {
                 fprintf(stderr, "%s: short write\n", dst_name);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             need_seek = FALSE;
         }
@@ -359,11 +359,11 @@ main(int argc, char *argv[])
             }
             else if (src < 0) {
                 HDperror(src_name);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             if (HDfstat(src, &sb) < 0) {
                 HDperror("fstat");
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             src_act_size = sb.st_size;
             if (src_act_size > src_size) {
@@ -384,26 +384,26 @@ main(int argc, char *argv[])
             if (0 == dst_membno) {
                 if (HDlseek(dst, dst_size - 1, SEEK_SET) < 0) {
                     HDperror("HDHDlseek");
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
                 if (HDread(dst, buf, 1) < 0) {
                     HDperror("read");
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
                 if (HDlseek(dst, dst_size - 1, SEEK_SET) < 0) {
                     HDperror("HDlseek");
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
                 if (HDwrite(dst, buf, 1) < 0) {
                     HDperror("write");
-                    HDexit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
             }
             HDclose(dst);
             HDsnprintf(dst_name, NAMELEN, dst_gen_name, ++dst_membno);
             if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
                 HDperror(dst_name);
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             dst_offset = 0;
             need_seek  = FALSE;
@@ -420,19 +420,19 @@ main(int argc, char *argv[])
     if (need_seek) {
         if (HDlseek(dst, dst_offset - 1, SEEK_SET) < 0) {
             HDperror("HDlseek");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
         if (HDread(dst, buf, 1) < 0) {
             HDperror("read");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
         if (HDlseek(dst, dst_offset - 1, SEEK_SET) < 0) {
             HDperror("HDlseek");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
         if (HDwrite(dst, buf, 1) < 0) {
             HDperror("write");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     }
     HDclose(dst);
@@ -441,7 +441,7 @@ main(int argc, char *argv[])
      * These private properties are for this tool only. */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDperror("H5Pcreate");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     if (family_to_single) {
@@ -451,7 +451,7 @@ main(int argc, char *argv[])
          */
         if (H5Pset(fapl, H5F_ACS_FAMILY_TO_SINGLE_NAME, &family_to_single) < 0) {
             HDperror("H5Pset");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     }
     else {
@@ -460,14 +460,14 @@ main(int argc, char *argv[])
          * This private property is for this tool only. */
         if (H5Pset_fapl_family(fapl, H5F_FAMILY_DEFAULT, H5P_DEFAULT) < 0) {
             HDperror("H5Pset_fapl_family");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
 
         /* Set the property of the new member size as hsize_t */
         hdsize = (hsize_t)dst_size;
         if (H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) {
             HDperror("H5Pset");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -488,13 +488,13 @@ main(int argc, char *argv[])
     if (file >= 0) {
         if (H5Fclose(file) < 0) {
             HDperror("H5Fclose");
-            HDexit(EXIT_FAILURE);
+            exit(EXIT_FAILURE);
         } /* end if */
     }     /* end if */
 
     if (H5Pclose(fapl) < 0) {
         HDperror("H5Pclose");
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 
     /* Free resources and return */

@@ -218,11 +218,11 @@ H5_init_library(void)
          * This must be entered before the library cleanup code so it's
          * executed in LIFO order (i.e., last).
          */
-        (void)HDatexit(H5TS_win32_process_exit);
+        (void)atexit(H5TS_win32_process_exit);
 #endif /* H5_HAVE_THREADSAFE && H5_HAVE_WIN_THREADS */
 
         /* Normal library termination code */
-        (void)HDatexit(H5_term_library);
+        (void)atexit(H5_term_library);
 
         H5_dont_atexit_g = TRUE;
     } /* end if */

@@ -64,14 +64,14 @@ parse_command_line(int argc, const char *const *argv)
             case '?':
             default:
                 usage(h5tools_getprogname());
-                HDexit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         } /* end switch */
     }     /* end while */
 
     if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        HDexit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     } /* end if */
 } /* end parse_command_line() */
 

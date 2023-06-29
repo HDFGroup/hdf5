@@ -1325,8 +1325,8 @@ main(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR;
 
-    HDexit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 
 error:
-    HDexit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 } /* end main() */
