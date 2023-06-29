@@ -38,7 +38,6 @@ namespace H5 {
 // Description
 //              This constructor creates a PredType object by copying
 //              the provided HDF5 predefined datatype.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
 {
@@ -48,7 +47,6 @@ PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
 //--------------------------------------------------------------------------
 // Function:    PredType default constructor
 ///\brief       Default constructor: Creates a stub predefined datatype
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType() : AtomType()
 {
@@ -59,7 +57,6 @@ PredType::PredType() : AtomType()
 // Function:    PredType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 ///\param       original - IN: PredType instance to copy
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType(const PredType &original) : AtomType(original)
 {
@@ -74,7 +71,6 @@ PredType::PredType(const PredType &original) : AtomType(original)
 // Description
 //              Makes a copy of the type on the right hand side and stores
 //              the new id in the left hand side object.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType &
 PredType::operator=(const PredType &rhs)
@@ -116,7 +112,6 @@ PredType::committed()
 //--------------------------------------------------------------------------
 // Function:    PredType destructor
 ///\brief       Noop destructor.
-// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::~PredType()
 {
@@ -287,7 +282,6 @@ PredType *PredType::NATIVE_UINT_FAST64_;
 //              Note that, there is a similar function to getPredTypes() in
 //              other classes, that have global constants, is called getConstant().
 //
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 PredType *
 PredType::getPredTypes()
@@ -313,7 +307,6 @@ PredType::getPredTypes()
 //--------------------------------------------------------------------------
 // Function:    PredType::makePredTypes
 // Purpose      Allocate all PredType constants.
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void
 PredType::makePredTypes()
@@ -469,7 +462,6 @@ PredType::makePredTypes()
 //--------------------------------------------------------------------------
 // Function:    PredType::deleteConstants
 // Purpose      Deletes all PredType constant pointers.
-// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void
 PredType::deleteConstants()

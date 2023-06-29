@@ -55,9 +55,6 @@ typedef enum int_t {
  * Purpose      Tests 1-D array of compound datatypes (with array fields)
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -307,9 +304,6 @@ getArr()
  *
  * Return       None
  *
- * Programmer   Binh-Minh Ribler (using C version)
- *              March, 2016
- *
  * Description:
  *              Used user's sample code in HDFFV-9562
  *-------------------------------------------------------------------------
@@ -364,9 +358,6 @@ test_array_assignment()
  * Purpose      Tests getting array information using the const methods.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler
- *              April, 2016
  *-------------------------------------------------------------------------
  */
 static void
@@ -508,9 +499,6 @@ test_array()
  * Purpose      Cleanup temporary test files
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2016
  *-------------------------------------------------------------------------
  */
 extern "C" void

@@ -76,9 +76,6 @@ typedef struct {
  * Purpose      Test type classes
  *
  * Return       None.
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -113,9 +110,6 @@ test_classes()
  * Purpose      Test datatype copy functionality
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 static void
@@ -165,9 +159,6 @@ test_copy()
  * Purpose      Test DataType::detectClass()
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              August, 2017
  *-------------------------------------------------------------------------
  */
 typedef struct { /* Struct with atomic fields */
@@ -359,9 +350,6 @@ test_detect_type_class()
  * Purpose      Tests VarLenType class
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              August, 2017
  *-------------------------------------------------------------------------
  */
 static void
@@ -432,9 +420,6 @@ test_vltype()
  * Purpose      Tests query functions of compound and enumeration types.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 const H5std_string CompT_NAME("Compound_type");
@@ -557,9 +542,6 @@ test_query()
  * Purpose      Tests transient datatypes.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 
@@ -636,9 +618,6 @@ test_transient()
  * Purpose      Tests named datatypes.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (use C version)
- *              January, 2007
  *-------------------------------------------------------------------------
  */
 
@@ -803,9 +782,6 @@ test_named()
  * Purpose      Test datatype encode/decode functionality.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              August, 2017
  *-------------------------------------------------------------------------
  */
 const int ARRAY1_RANK = 1;
@@ -1028,9 +1004,6 @@ test_encode_decode()
  * Purpose      Test datatype encode/decode functionality.
  *
  * Return       None
- *
- * Programmer   Binh-Minh Ribler (using C version)
- *              August, 2017
  *-------------------------------------------------------------------------
  */
 
