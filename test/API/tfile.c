@@ -3278,8 +3278,6 @@ cal_chksum(const char *file, uint32_t *chksum)
 **    the superblock is used), this test is changed to use checksum
 **    instead of timestamp to verify the file is not changed.
 **
-**  Programmer: Vailin Choi; July 2013
-**
 *****************************************************************/
 #if 0
 static void
@@ -3326,9 +3324,6 @@ test_rw_noupdate(void)
 **
 **  test_userblock_alignment_helper1(): helper routine for
 **      test_userblock_alignment() test, to handle common testing
-**
-**  Programmer: Quincey Koziol
-**              Septmber 10, 2009
 **
 *****************************************************************/
 #if 0
@@ -3388,9 +3383,6 @@ test_userblock_alignment_helper1(hid_t fcpl, hid_t fapl)
 **
 **  test_userblock_alignment_helper2(): helper routine for
 **      test_userblock_alignment() test, to handle common testing
-**
-**  Programmer: Quincey Koziol
-**              Septmber 10, 2009
 **
 *****************************************************************/
 static int
@@ -3457,9 +3449,6 @@ test_userblock_alignment_helper2(hid_t fapl, hbool_t open_rw)
 **  test_userblock_alignment(): low-level file test routine.
 **      This test checks to ensure that files with both a userblock and a
 **      object [allocation] alignment size set interact properly.
-**
-**  Programmer: Quincey Koziol
-**              Septmber 8, 2009
 **
 *****************************************************************/
 static void
@@ -3680,8 +3669,6 @@ test_userblock_alignment(const char *env_h5_drvr)
 **      alignment interact properly:
 **        -- alignment via H5Pset_alignment
 **        -- alignment via paged aggregation
-**
-**  Programmer: Vailin Choi; March 2013
 **
 *****************************************************************/
 static void

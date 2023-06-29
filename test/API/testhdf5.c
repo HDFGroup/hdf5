@@ -176,9 +176,6 @@ getenv_all(MPI_Comm comm, int root, const char *name)
  * Return:      Success:    A file access property list
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, November 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -209,9 +206,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Quincey Koziol
- *              November 2018
  *
  *-------------------------------------------------------------------------
  */

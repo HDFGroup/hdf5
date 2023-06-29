@@ -51,9 +51,6 @@ void test_exit_definitions(void);
  *
  * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
