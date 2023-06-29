@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Neil Fortner
- *              December 16, 2010
- */
-
 #include "h5test.h"
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg	  */

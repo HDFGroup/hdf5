@@ -10,14 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Friday, October 10, 1997
- *
- * Purpose:    Hyperslab operations are rather complex, so this file
- *        attempts to test them extensively so we can be relatively
- *        sure they really work.    We only test 1d, 2d, and 3d cases
- *        because testing general dimensionalities would require us to
- *        rewrite much of the hyperslab stuff.
+/*
+ * Purpose: Hyperslab operations are rather complex, so this file
+ *          attempts to test them extensively so we can be relatively
+ *          sure they really work.    We only test 1d, 2d, and 3d cases
+ *          because testing general dimensionalities would require us to
+ *          rewrite much of the hyperslab stuff.
  */
 #include "h5test.h"
 #include "H5VMprivate.h"

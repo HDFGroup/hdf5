@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke
- *              Wednesday, October 22, 1997
- *
+/*
  * Purpose: The C STDIO virtual file driver which only uses calls from stdio.h.
  *          This also serves as an example of coding a simple file driver,
  *          therefore, it should not use any non-public definitions.
@@ -20,6 +18,7 @@
  * NOTE:    This driver is not as well tested as the standard SEC2 driver
  *          and is not intended for production use!
  */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>

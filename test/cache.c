@@ -10,11 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              6/9/04
- *
- *        This file contains tests for the cache implemented in
- *        H5C.c
+/*
+ *        This file contains tests for the cache implemented in H5C.c
  */
 #include "cache_common.h"
 #include "H5MFprivate.h"

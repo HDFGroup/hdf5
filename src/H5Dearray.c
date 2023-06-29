@@ -10,14 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:      Quincey Koziol
- *                  Tuesday, January 27, 2009
- *
+/*
  * Purpose:     Extensible array indexed (chunked) I/O functions.  The chunks
  *              are given a single-dimensional index which is used as the
  *              offset in an extensible array that maps a chunk coordinate to
  *              a disk address.
- *
  */
 
 /****************/

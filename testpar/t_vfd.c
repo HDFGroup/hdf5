@@ -10,9 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *
- *              This file is a catchall for parallel VFD tests.
+/*
+ *      This file is a catchall for parallel VFD tests.
  */
 
 #include "testphdf5.h"
