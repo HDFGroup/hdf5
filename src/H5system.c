@@ -167,7 +167,7 @@ Pflock(int fd, int operation)
     flk.l_pid    = 0; /* not used with set */
 
     /* Lock or unlock */
-    if (HDfcntl(fd, F_SETLK, &flk) < 0)
+    if (fcntl(fd, F_SETLK, &flk) < 0)
         return -1;
 
     return 0;

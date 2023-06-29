@@ -614,14 +614,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
 #endif
-#ifndef HDalarm
-#define HDalarm(N) alarm(N)
-#endif
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
-#endif
-#ifndef HDasprintf
-#define HDasprintf asprintf /*varargs*/
 #endif
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
@@ -646,9 +640,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDclock
 #define HDclock() clock()
-#endif
-#ifndef HDclock_gettime
-#define HDclock_gettime(CID, TS) clock_gettime(CID, TS)
 #endif
 #ifndef HDclose
 #define HDclose(F) close(F)
@@ -682,9 +673,6 @@ typedef off_t       h5_stat_size_t;
 #endif
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
-#endif
-#ifndef HDfcntl
-#define HDfcntl(F, C, ...) fcntl(F, C, __VA_ARGS__)
 #endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
@@ -793,14 +781,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgetenv
 #define HDgetenv(S) getenv(S)
 #endif
-#ifndef HDgethostname
-#define HDgethostname(N, L) gethostname(N, L)
-#endif
 #ifndef HDgetpid
 #define HDgetpid() getpid()
-#endif
-#ifndef HDgetrusage
-#define HDgetrusage(X, S) getrusage(X, S)
 #endif
 
 /* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
@@ -1139,9 +1121,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrtoumax
 #define HDstrtoumax(S, R, N) strtoumax(S, R, N)
-#endif
-#ifndef HDsymlink
-#define HDsymlink(F1, F2) symlink(F1, F2)
 #endif
 #ifndef HDtime
 #define HDtime(T) time(T)
