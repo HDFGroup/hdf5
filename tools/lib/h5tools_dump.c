@@ -230,8 +230,6 @@ h5tools_dump_init(void)
  *      END_OF_DATA).
  * Return: Success:    SUCCEED
  *         Failure:    FAIL
- * Programmer:
- *      Robb Matzke, Monday, April 26, 1999
  *
  *-------------------------------------------------------------------------
  */

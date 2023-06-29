@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
- *
  * Purpose:     Support functions for the various tools.
  */
 #ifndef H5TOOLS_H

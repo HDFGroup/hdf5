@@ -37,8 +37,6 @@
  *
  * Return: void
  *
- * Programmer:  Pedro Vicente Nunes
- *
  *-------------------------------------------------------------------------
  */
 static void

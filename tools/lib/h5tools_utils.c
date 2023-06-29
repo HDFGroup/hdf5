@@ -337,9 +337,6 @@ parse_subset_params(const char *dset)
  *                 NOTE: `cpy_out` string is malloc'd by function,
  *                       and should be freed when done.
  *
- * Programmer: Jacob Smith
- *             2017-11-10
- *
  *****************************************************************************
  */
 herr_t
@@ -1116,9 +1113,6 @@ done:
  *             * region, id, and optional key provided
  *                 * (&fa, {"...", "...", ""})
  *                 * (&fa, {"...", "...", "..."})
- *
- * Programmer: Jacob Smith
- *             2017-11-13
  *
  *----------------------------------------------------------------------------
  */

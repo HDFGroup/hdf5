@@ -659,8 +659,6 @@ gent_softlink(void)
  * Return:
  *    SUCCEED
  *    FAIL
- * Programmer: Jonathan Kim
- * Date: May 26, 2010
  *-------------------------------------------------------------------------*/
 #define NX 4
 #define NY 2
@@ -4026,10 +4024,6 @@ gent_char(void)
  *
  * Return: void
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 28, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4452,10 +4446,6 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  * Purpose: write datasets in LOC_ID
  *
  * Return: void
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 28, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -4889,10 +4879,6 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *
  * Return: void
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4958,10 +4944,6 @@ gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: Pedro Vicente
- *
- * Date: May 19, 2003
- *
  *-------------------------------------------------------------------------
  */
 
@@ -4995,10 +4977,6 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t t
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
  * Return:
- *
- * Programmer: Pedro Vicente
- *
- * Date: May 27, 2003
  *
  *-------------------------------------------------------------------------
  */

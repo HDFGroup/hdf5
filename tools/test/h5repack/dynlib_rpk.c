@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
- * Programmer:    Raymond Lu
- *        13 February 2013
- *
  * Purpose:    Tests the plugin module (H5PL)
  */
 
@@ -58,9 +55,6 @@ H5PLget_plugin_info(void)
  * Return:    Success:    Data chunk size
  *
  *        Failure:    0
- *
- * Programmer:    Raymond Lu
- *              29 March 2013
  *
  *-------------------------------------------------------------------------
  */

@@ -48,8 +48,6 @@ static mkgrp_opt_t params_g; /* Command line parameter settings */
  *
  * Return:      Does not return
  *
- * Programmer: Quincey Koziol, 2/13/2007
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -78,8 +76,6 @@ leave(int ret)
  * Purpose: Prints a usage message on stderr and then returns.
  *
  * Return: void
- *
- * Programmer: Quincey Koziol, 2/13/2007
  *
  *-------------------------------------------------------------------------
  */
@@ -131,8 +127,6 @@ usage(const char *prog)
  *
  * Return:      Success: 0
  *              Failure: -1
- *
- * Programmer: Quincey Koziol, 2/13/2007
  *
  *-------------------------------------------------------------------------
  */
@@ -281,8 +275,6 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
  * Function: main
  *
  * Purpose: Create group(s) in an HDF5 file
- *
- * Programmer: Quincey Koziol, 2/13/2007
  *
  *-------------------------------------------------------------------------
  */
