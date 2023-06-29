@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		tchecksum.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:		Test internal checksum routine(s)
  *
