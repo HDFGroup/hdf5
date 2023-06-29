@@ -2535,7 +2535,7 @@ get_width(void)
     /* Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong. */
     if ((s = HDgetenv("COLUMNS")) && *s && isdigit((int)*s))
-        width = (int)HDstrtol(s, NULL, 0);
+        width = (int)strtol(s, NULL, 0);
 
 #if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
@@ -2784,7 +2784,7 @@ main(int argc, char *argv[])
             vfd_info.info = (const void *)(argv[argno] + 11);
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
-            width_g = (int)HDstrtol(argv[argno] + 8, &rest, 0);
+            width_g = (int)strtol(argv[argno] + 8, &rest, 0);
 
             if (0 == width_g)
                 no_line_wrap_g = TRUE;
@@ -2801,7 +2801,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
             if (width_g <= 0 || *rest) {
                 usage();
                 leave(EXIT_FAILURE);
@@ -2828,7 +2828,7 @@ main(int argc, char *argv[])
             else {
                 s = argv[++argno];
             }
-            width_g = (int)HDstrtol(s, &rest, 0);
+            width_g = (int)strtol(s, &rest, 0);
 
             if (0 == width_g) {
                 no_line_wrap_g = TRUE;

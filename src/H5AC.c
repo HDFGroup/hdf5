@@ -150,7 +150,7 @@ H5AC_init(void)
 
         s = HDgetenv("H5_COLL_API_SANITY_CHECK");
         if (s && HDisdigit(*s)) {
-            long env_val               = HDstrtol(s, NULL, 0);
+            long env_val               = strtol(s, NULL, 0);
             H5_coll_api_sanity_check_g = (0 == env_val) ? FALSE : TRUE;
         }
     }

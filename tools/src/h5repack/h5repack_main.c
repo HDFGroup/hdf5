@@ -598,7 +598,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'm':
-                options->min_comp = HDstrtoull(H5_optarg, NULL, 0);
+                options->min_comp = strtoull(H5_optarg, NULL, 0);
                 if ((int)options->min_comp <= 0) {
                     error_msg("invalid minimum compress size <%s>\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
@@ -712,7 +712,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'a':
-                options->alignment = HDstrtoull(H5_optarg, NULL, 0);
+                options->alignment = strtoull(H5_optarg, NULL, 0);
                 if (options->alignment < 1) {
                     error_msg("invalid alignment size `%s`\n", H5_optarg);
                     h5tools_setstatus(EXIT_FAILURE);
@@ -759,7 +759,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'G':
-                options->fs_pagesize = HDstrtoll(H5_optarg, NULL, 0);
+                options->fs_pagesize = strtoll(H5_optarg, NULL, 0);
                 if (options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_pagesize = -1;
@@ -890,7 +890,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     if (in_vfd_info.u.name && !HDstrcmp(in_vfd_info.u.name, "onion")) {
         if (in_vfd_info.info) {
             errno                      = 0;
-            onion_fa_in_g.revision_num = HDstrtoull(in_vfd_info.info, NULL, 10);
+            onion_fa_in_g.revision_num = strtoull(in_vfd_info.info, NULL, 10);
             if (errno == ERANGE) {
                 printf("Invalid onion revision specified for the input file\n");
                 usage(h5tools_getprogname());

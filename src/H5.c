@@ -745,7 +745,7 @@ H5__debug_mask(const char *s)
             } /* end if-else */
         }
         else if (HDisdigit(*s)) {
-            int                     fd = (int)HDstrtol(s, &rest, 0);
+            int                     fd = (int)strtol(s, &rest, 0);
             H5_debug_open_stream_t *open_stream;
 
             if ((stream = HDfdopen(fd, "w")) != NULL) {
@@ -889,7 +889,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         s = HDgetenv("HDF5_DISABLE_VERSION_CHECK");
 
         if (s && HDisdigit(*s))
-            disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
+            disable_version_check = (unsigned int)strtol(s, NULL, 0);
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */

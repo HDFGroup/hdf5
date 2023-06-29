@@ -817,7 +817,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
      * e.g. {revision_num: 2; page_size: 4;}
      */
     if (config_str[0] != '{')
-        fa->revision_num = (uint64_t)HDstrtoull(config_str, NULL, 10);
+        fa->revision_num = (uint64_t)strtoull(config_str, NULL, 10);
     else {
         char *token1 = NULL, *token2 = NULL;
 
@@ -847,22 +847,22 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
                     else if (!strcmp(token2, "H5I_INVALID_HID"))
                         fa->backing_fapl_id = H5I_INVALID_HID;
                     else
-                        fa->backing_fapl_id = HDstrtoll(token2, NULL, 10);
+                        fa->backing_fapl_id = strtoll(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "page_size")) {
-                    fa->page_size = (uint32_t)HDstrtoul(token2, NULL, 10);
+                    fa->page_size = (uint32_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "revision_num")) {
                     if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
                         fa->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
                     else
-                        fa->revision_num = (uint64_t)HDstrtoull(token2, NULL, 10);
+                        fa->revision_num = (uint64_t)strtoull(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "force_write_open")) {
-                    fa->force_write_open = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->force_write_open = (uint8_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "creation_flags")) {
-                    fa->creation_flags = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->creation_flags = (uint8_t)strtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "comment")) {
                     HDstrcpy(fa->comment, token2);

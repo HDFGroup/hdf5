@@ -94,7 +94,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 } /* end switch (reader/writer-only mode toggle) */
                 break;
             case 'n': /* number of planes to write/read */
-                if ((opts->nplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
+                if ((opts->nplanes = strtoul(optarg, NULL, 0)) <= 0) {
                     fprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
@@ -110,7 +110,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 opts->use_swmr = (hbool_t)use_swmr;
                 break;
             case 'y': /* Number of planes per chunk */
-                if ((opts->chunkplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
+                if ((opts->chunkplanes = strtoul(optarg, NULL, 0)) <= 0) {
                     fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
                             optarg);
                     usage(opts->progname);
@@ -118,7 +118,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 }
                 break;
             case 'z': /* size of chunk=(z,z) */
-                if ((opts->chunksize = HDstrtoull(optarg, NULL, 0)) <= 0) {
+                if ((opts->chunksize = strtoull(optarg, NULL, 0)) <= 0) {
                     fprintf(stderr, "bad chunksize %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);

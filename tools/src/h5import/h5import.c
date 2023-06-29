@@ -212,7 +212,7 @@ main(int argc, char *argv[])
                 break;
 
             case 14: /* read data size */
-                if (getInputSize(in, (int)HDstrtol(argv[i], NULL, BASE_10)) == -1) {
+                if (getInputSize(in, (int)strtol(argv[i], NULL, BASE_10)) == -1) {
                     (void)fprintf(stderr, err8, argv[i]);
                     goto err;
                 }
@@ -600,7 +600,7 @@ readIntegerData(FILE *strm, struct Input *in)
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
-                        *in64 = (H5DT_INT64)HDstrtoll(buffer, NULL, 10);
+                        *in64 = (H5DT_INT64)strtoll(buffer, NULL, 10);
                     }
                     break;
 
@@ -767,7 +767,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
-                        *in64 = (H5DT_UINT64)HDstrtoll(buffer, NULL, 10);
+                        *in64 = (H5DT_UINT64)strtoll(buffer, NULL, 10);
                     }
                     break;
 
@@ -1570,7 +1570,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
-                                ival       = (int)HDstrtol(more, &more, 10);
+                                ival       = (int)strtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
                                     (void)fprintf(stderr, err5b, infile);
                                     goto error;
@@ -1669,7 +1669,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                         while (get_next_dim) {
                             char *more        = temp;
-                            temp_dims[icount] = HDstrtoull(more, &more, 10);
+                            temp_dims[icount] = strtoull(more, &more, 10);
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                 (void)fprintf(stderr, err6b, infile);
                                 goto error;
@@ -1758,7 +1758,7 @@ processConfigurationFile(char *infile, struct Input *in)
                                 }
                                 else {
                                     char *more                = temp;
-                                    in->maxsizeOfDimension[i] = HDstrtoull(more, &more, 10);
+                                    in->maxsizeOfDimension[i] = strtoull(more, &more, 10);
                                 }
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* max dim or end paren */
                                     (void)fprintf(stderr, err16c, infile);
@@ -1845,7 +1845,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                         while (get_next_dim) {
                             char *more              = temp;
-                            in->sizeOfChunk[icount] = HDstrtoull(more, &more, 10);
+                            in->sizeOfChunk[icount] = strtoull(more, &more, 10);
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                 (void)fprintf(stderr, err6b, infile);
                                 goto error;
@@ -2030,7 +2030,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             while (get_next_dim) {
                                 char *more        = temp;
-                                temp_dims[icount] = HDstrtoull(more, &more, 10);
+                                temp_dims[icount] = strtoull(more, &more, 10);
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                     (void)fprintf(stderr, err6b, infile);
                                     goto error;
@@ -2086,7 +2086,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             while (get_next_dim) {
                                 char *more        = temp;
-                                temp_dims[icount] = HDstrtoull(more, &more, 10);
+                                temp_dims[icount] = strtoull(more, &more, 10);
                                 if (HDfscanf(strm, "%254s", temp) != 1) { /* Dimension or end paren */
                                     (void)fprintf(stderr, err6b, infile);
                                     goto error;
@@ -2573,13 +2573,13 @@ parseDimensions(struct Input *in, char *strm)
     i = 0;
     HDstrncpy(temp, strm, sizeof(temp));
     temp[sizeof(temp) - 1]   = '\0';
-    in->sizeOfDimension[i++] = HDstrtoull(HDstrtok(temp, delimiter), NULL, BASE_10);
+    in->sizeOfDimension[i++] = strtoull(HDstrtok(temp, delimiter), NULL, BASE_10);
 
     while (1) {
         token = HDstrtok(NULL, delimiter);
         if (token == NULL)
             break;
-        in->sizeOfDimension[i++] = HDstrtoull(token, NULL, BASE_10);
+        in->sizeOfDimension[i++] = strtoull(token, NULL, BASE_10);
     }
     return (0);
 }

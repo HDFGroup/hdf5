@@ -211,7 +211,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if (HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+            p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
             while (HDisdigit(*ptr))
                 /* scroll to end of integer */
@@ -999,7 +999,7 @@ h5tools_getenv_update_hyperslab_bufsize(void)
     /* check if environment variable is set for the hyperslab buffer size */
     if (NULL != (env_str = HDgetenv("H5TOOLS_BUFSIZE"))) {
         errno                = 0;
-        hyperslab_bufsize_mb = HDstrtol(env_str, (char **)NULL, 10);
+        hyperslab_bufsize_mb = strtol(env_str, (char **)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
             H5TOOLS_GOTO_ERROR(FAIL, "hyperslab buffer size failed");
 
@@ -1283,7 +1283,7 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
         HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
     }
     if (HDstrncmp(props[4], "", 1)) {
-        k = HDstrtoul((const char *)props[4], NULL, 0);
+        k = strtoul((const char *)props[4], NULL, 0);
         if (errno == ERANGE)
             H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
         fapl_config_out->stream_buffer_size = (int32_t)k;

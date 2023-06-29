@@ -291,7 +291,7 @@ H5FD_mpio_init(void)
         /* Allow MPI buf-and-file-type optimizations? */
         s = HDgetenv("HDF5_MPI_OPT_TYPES");
         if (s && HDisdigit(*s))
-            H5FD_mpi_opt_types_g = (0 == HDstrtol(s, NULL, 0)) ? FALSE : TRUE;
+            H5FD_mpi_opt_types_g = (0 == strtol(s, NULL, 0)) ? FALSE : TRUE;
 
 #ifdef H5FDmpio_DEBUG
         /* Clear the flag buffer */

@@ -689,7 +689,7 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'w': /* --width=N */
-                g_display_width = (int)HDstrtol(H5_optarg, NULL, 0);
+                g_display_width = (int)strtol(H5_optarg, NULL, 0);
                 if (g_display_width < 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
@@ -709,8 +709,8 @@ parse_command_line(int argc, const char *const *argv)
                 break;
 
             case 'p': /* --polling=N */
-                /* g_polling_interval = HDstrtod(H5_optarg, NULL); */
-                if ((tmp = (int)HDstrtol(H5_optarg, NULL, 10)) <= 0) {
+                /* g_polling_interval = strtod(H5_optarg, NULL); */
+                if ((tmp = (int)strtol(H5_optarg, NULL, 10)) <= 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
