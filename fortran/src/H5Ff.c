@@ -36,9 +36,6 @@
  *  file_id - file identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, July 26, 1999
  * SOURCE
  */
 int_f
@@ -104,10 +101,6 @@ h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hi
  *  acc_prp - identifier of access property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, October 25, 1999
- * HISTORY
  */
 int_f
 h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp)
@@ -162,9 +155,6 @@ h5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid
  *  namelen - dsetname length
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Monday, October 25, 1999
  * SOURCE
  */
 int_f
@@ -210,9 +200,6 @@ h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
  *  prop_id - creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal, Xiangyang Su
- *  Wednesday, November 3, 1999
  * SOURCE
  */
 int_f
@@ -244,11 +231,6 @@ h5fget_create_plist_c(hid_t_f *file_id, hid_t_f *prop_id)
  *  access_id - access property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, September 30, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -280,13 +262,6 @@ h5fget_access_plist_c(hid_t_f *file_id, hid_t_f *access_id)
  * RETURNS
  *  obj_count - number of objects
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, September 30, 2002
- * HISTORY
- *
- *  Changed type of obj_count to size_t_f
- *  Thursday, September 25, 2008
  * SOURCE
  */
 
@@ -317,15 +292,6 @@ h5fget_obj_count_c(hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count)
  * RETURNS
  *  obj_ids  - iarray of open objects identifiers
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, September 30, 2002
- * HISTORY
- *
- *  Changed type of max_obj to size_t_f; added parameter for the
- *  number of open objects
- *  Thursday, September 25, 2008 EIP
- *
  * SOURCE
  */
 int_f
@@ -367,9 +333,6 @@ h5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f 
  * RETURNS
  *  free_space  - amount of free space in file
  *  0 on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Tuesday, October 7, 2003
  * SOURCE
  */
 
@@ -401,9 +364,6 @@ h5fget_freespace_c(hid_t_f *file_id, hssize_t_f *free_space)
  *  size - size of the file's name
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, July 6, 2004
  * SOURCE
  */
 int_f
@@ -449,9 +409,6 @@ done:
  *  size - size of the file
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, July 7, 2004
  * SOURCE
  */
 int_f
@@ -483,9 +440,6 @@ done:
  *  fileno - file number for open file
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  Saturday, April 13, 2019
  * SOURCE
  */
 int_f
@@ -523,9 +477,6 @@ done:
  *  buf_req    - The size in bytes of the buffer required to store the file image.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  November 26, 2012
  * SOURCE
  */
 int_f

@@ -1531,12 +1531,6 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
  * Return:
  *      On success, return SUCCEED. Otherwise, the function returns FAIL.
  *
- * Original programmer:
- *      Bill Wendling, Wednesday, March 07, 2001
- *
- * Rewritten with modified algorithm by:
- *      Pedro Vicente, Wednesday, January 16, 2008, contributions from Quincey Koziol
- *
  * Algorithm
  *
  * In a inner loop, the parameters from SSET are translated into temporary

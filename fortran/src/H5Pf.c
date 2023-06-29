@@ -49,10 +49,6 @@
  *  prp_id - identifier of the created property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 9, 2002
- *
  * SOURCE
  */
 
@@ -82,10 +78,6 @@ done:
  *  prp_id - identifier of the property list to be closed
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- *
  * SOURCE
  */
 
@@ -112,10 +104,6 @@ h5pclose_c(hid_t_f *prp_id)
  *  new_prp_id - identifier of the new property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- *
  * SOURCE
  */
 int_f
@@ -147,10 +135,6 @@ done:
  *  c_flag    - flag to indicate that lists are equal
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, September 30, 2002
- *
  * SOURCE
  */
 int_f
@@ -181,9 +165,6 @@ done:
  *  classtype - class type
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
  * SOURCE
  */
 
@@ -214,9 +195,6 @@ done:
  *  flag - TRUE/FALSE flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, February 17, 2000
  * SOURCE
  */
 
@@ -250,9 +228,6 @@ h5pset_preserve_c(hid_t_f *prp_id, int_f *flag)
  *  flag - TRUE/FALSE flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, February 17, 2000
  * SOURCE
  */
 
@@ -282,9 +257,6 @@ h5pget_preserve_c(hid_t_f *prp_id, int_f *flag)
  *  level - level of deflation
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
  * SOURCE
  */
 
@@ -318,8 +290,6 @@ h5pset_deflate_c(hid_t_f *prp_id, int_f *level)
  * RETURNS
  *  0 on success, -1 on failure
  *  Saturday, August 14, 1999
- * AUTHOR
- *  Elena Pourmal
  * SOURCE
  */
 
@@ -361,9 +331,6 @@ DONE:
  *  dims - array of the size of each chunk
  * RETURNS
  *  number of chunk's dimnesion on success, -1 on failure
- *  Saturday, August 14, 1999
- * AUTHOR
- *  Elena Pourmal
  * SOURCE
  */
 
@@ -402,9 +369,6 @@ h5pget_chunk_c(hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims)
  *  fillvalue - fillvalue
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
  * SOURCE
  */
 int_f
@@ -440,9 +404,6 @@ h5pset_fill_value_c(hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
  *  fillvalue - fillvalue
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
  * SOURCE
  */
 int_f
@@ -482,11 +443,6 @@ h5pget_fill_value_c(hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
  *  shhdr - array to put shared object header version number
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *  Removed extra length parameters EP 7/6/00
  * SOURCE
  */
 #ifdef H5_NO_DEPRECATED_SYMBOLS
@@ -542,9 +498,6 @@ h5pget_version_c(hid_t_f *prp_id, int_f *boot, int_f *freelist, int_f *stab, int
  *  Outputs      size - Size of the user-block in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
  * SOURCE
  */
 int_f
@@ -581,9 +534,6 @@ h5pget_userblock_c(hid_t_f *prp_id, hsize_t_f *size)
  *  size - Size of the user-block in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
  * SOURCE
  */
 int_f
@@ -620,11 +570,6 @@ h5pset_userblock_c(hid_t_f *prp_id, hsize_t_f *size)
  *  sizeof_size - Size of an object length in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *  Deleted extra length parameters. EP 6/7/00
  * SOURCE
  */
 int_f
@@ -663,11 +608,6 @@ h5pget_sizes_c(hid_t_f *prp_id, size_t_f *sizeof_addr, size_t_f *sizeof_size)
  *  sizeof_size - Size of an object length in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -705,9 +645,6 @@ h5pset_sizes_c(hid_t_f *prp_id, size_t_f *sizeof_addr, size_t_f *sizeof_size)
  *  lk - Symbol table node size
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
  * SOURCE
  */
 int_f
@@ -747,11 +684,6 @@ h5pset_sym_k_c(hid_t_f *prp_id, int_f *ik, int_f *lk)
  *  lk - Symbol table node size
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -788,11 +720,6 @@ h5pget_sym_k_c(hid_t_f *prp_id, int_f *ik, int_f *lk)
  *  ik - Symbol table tree rank
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -829,11 +756,6 @@ h5pset_istore_k_c(hid_t_f *prp_id, int_f *ik)
  *  ik - Symbol table tree rank
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -868,11 +790,6 @@ h5pget_istore_k_c(hid_t_f *prp_id, int_f *ik)
  *  driver - low-level file driver identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -906,11 +823,6 @@ DONE:
  *  prp_id - property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 7, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -944,11 +856,6 @@ h5pset_fapl_stdio_c(hid_t_f *prp_id)
  *  the functions declared in the stdio.h
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -982,11 +889,6 @@ h5pget_fapl_stdio_c(hid_t_f *prp_id, int_f *io)
  *  prp_id - property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1021,11 +923,6 @@ h5pset_fapl_sec2_c(hid_t_f *prp_id)
  *  the functions declared in the  unistd.h
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1060,11 +957,6 @@ h5pget_fapl_sec2_c(hid_t_f *prp_id, int_f *sec2)
  *  alignment - Alignment value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1100,11 +992,6 @@ h5pset_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment)
  *  alignment - Alignment value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1142,11 +1029,6 @@ h5pget_alignment_c(hid_t_f *prp_id, hsize_t_f *threshold, hsize_t_f *alignment)
  *  file contents to disk when the file is closed.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1183,11 +1065,6 @@ h5pset_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
  *  Outputs      increment - File block size in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1227,11 +1104,6 @@ h5pget_fapl_core_c(hid_t_f *prp_id, size_t_f *increment, int_f *flag)
  *  for each member of the family
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1269,11 +1141,6 @@ h5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f *memb_size, hid_t_f *memb_plist)
  *  for each member of the family
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1314,12 +1181,6 @@ h5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f *memb_size, hid_t_f *memb_plist)
  *  rdcc_w0 - Preemption policy
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *  Changed the type of the rdcc_w0 parameter to be real_f EP 7/7/00
- *  instead of double
  * SOURCE
  */
 int_f
@@ -1367,13 +1228,6 @@ h5pset_cache_c(hid_t_f *prp_id, int_f *mdc_nelmts, size_t_f *rdcc_nelmts, size_t
  *  rdcc_w0 - Preemption policy
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *  Changed type of the rdcc_w0 parameter to be real_f instead of double
- *  Changed type of the rdcc_nelmts parameter to be int_f.
- *                                                          EIP  October 10, 2003
  * SOURCE
  */
 int_f
@@ -1420,11 +1274,6 @@ h5pget_cache_c(hid_t_f *prp_id, int_f *mdc_nelmts, size_t_f *rdcc_nelmts, size_t
  *  raw_plist - Identifier of the raw  file access property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9, 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1487,11 +1336,6 @@ DONE:
  *  raw_plist - Identifier of the raw  file access property list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 9 , 2001
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1547,11 +1391,6 @@ h5pget_fapl_split_c(hid_t_f *prp_id, size_t_f *meta_ext_size, _fcd meta_ext, hid
  *  for the file
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1588,11 +1427,6 @@ h5pset_gc_references_c(hid_t_f *prp_id, int_f *gc_references)
  *  for the file
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1626,11 +1460,6 @@ h5pget_gc_references_c(hid_t_f *prp_id, int_f *gc_references)
  *  layout - Type of storage layout for raw data.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1666,11 +1495,6 @@ h5pset_layout_c(hid_t_f *prp_id, int_f *layout)
  *  layout - Type of storage layout for raw data.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1706,11 +1530,6 @@ h5pget_layout_c(hid_t_f *prp_id, int_f *layout)
  *  cd_values - Auxiliary data for the filter.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1758,9 +1577,6 @@ DONE:
  *  nfilters - number of filters defined in the filter pipeline
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
  * SOURCE
  */
 int_f
@@ -1862,12 +1678,6 @@ DONE:
  *  bytes   - Number of bytes reserved in the file for the data.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *  Changed type of 'offset' from int_f to off_t_f -- MSB January 9, 2012
- *
  * SOURCE
  */
 int_f
@@ -1915,11 +1725,6 @@ DONE:
  *  count - number of external files
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -1957,12 +1762,6 @@ h5pget_external_count_c(hid_t_f *prp_id, int_f *count)
  *  bytes - Number of bytes reserved in the file for the data.
  * RETURNS
  *  on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, February 23, 2000
- * HISTORY
- *  Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
- *
  * SOURCE
  */
 int_f
@@ -2017,12 +1816,10 @@ DONE:
  *  h5pset_btree_ratios_c
  * PURPOSE
  *  Call H5Pset_btree_ratios to set B-tree split ratios for B-tree split ratios for a dataset transfer
- * property list. a dataset transfer property list. INPUTS prp_id - property list identifier left - The B-tree
- * split ratio for left-most nodes. middle - The B-tree split ratio for all other nodes right - The B-tree
- * split ratio for right-most nodes and lone nodes. RETURNS 0 on success, -1 on failure AUTHOR Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *  Changed the type of the last three parameters from double to real_f
+ *  property list. a dataset transfer property list. INPUTS prp_id - property list identifier left - The B-tree
+ *  split ratio for left-most nodes. middle - The B-tree split ratio for all other nodes right - The B-tree
+ *  split ratio for right-most nodes and lone nodes.
+ * RETURNS 0 on success, -1 on failure
  * SOURCE
  */
 int_f
@@ -2064,11 +1861,6 @@ h5pset_btree_ratios_c(hid_t_f *prp_id, real_f *left, real_f *middle, real_f *rig
  *  and lone nodes.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, February 25, 2000
- * HISTORY
- *  Changed the type of the last three parameters from double to real_f
  * SOURCE
  */
 int_f
@@ -2109,11 +1901,6 @@ h5pget_btree_ratios_c(hid_t_f *prp_id, real_f *left, real_f *middle, real_f *rig
  *                      H5F_CLOSE_STRONG
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, September 26, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2148,11 +1935,6 @@ h5pget_fclose_degree_c(hid_t_f *fapl_id, int_f *degree)
  *                      H5F_CLOSE_STRONG
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, September 26, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2185,11 +1967,6 @@ h5pset_fclose_degree_c(hid_t_f *fapl_id, int_f *degree)
  *     NONE
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 2, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2219,11 +1996,6 @@ h5pset_buffer_c(hid_t_f *prp_id, hsize_t_f *size)
  *  size - size of conversion buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, October 2, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2254,11 +2026,6 @@ h5pget_buffer_c(hid_t_f *prp_id, hsize_t_f *size)
  *  flag - fill value status flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, October 4, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2289,11 +2056,6 @@ h5pfill_value_defined_c(hid_t_f *prp_id, int_f *flag)
  *  flag - allocation time flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, October 4, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2323,11 +2085,6 @@ h5pget_alloc_time_c(hid_t_f *prp_id, int_f *flag)
  *  flag - allocation time flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, October 4, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2358,11 +2115,6 @@ h5pset_alloc_time_c(hid_t_f *prp_id, int_f *flag)
  *  flag - fill value writing  time flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, October 4, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2392,11 +2144,6 @@ h5pget_fill_time_c(hid_t_f *prp_id, int_f *flag)
  *  flag - fill value writing  time flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, October 4, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2427,11 +2174,6 @@ h5pset_fill_time_c(hid_t_f *prp_id, int_f *flag)
  *     NONE
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2461,11 +2203,6 @@ h5pset_meta_block_size_c(hid_t_f *prp_id, hsize_t_f *size)
  *  size   - size of the metadata block
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2495,11 +2232,6 @@ h5pget_meta_block_size_c(hid_t_f *prp_id, hsize_t_f *size)
  *     NONE
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2529,11 +2261,6 @@ h5pset_sieve_buf_size_c(hid_t_f *prp_id, size_t_f *size)
  *  size   - size of the buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2563,11 +2290,6 @@ h5pget_sieve_buf_size_c(hid_t_f *prp_id, size_t_f *size)
  *     NONE
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2597,11 +2319,6 @@ h5pset_small_data_block_size_c(hid_t_f *prp_id, hsize_t_f *size)
  *  size   - size of the block
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2631,11 +2348,6 @@ h5pget_small_data_block_size_c(hid_t_f *prp_id, hsize_t_f *size)
  *     NONE
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2665,11 +2377,6 @@ h5pset_hyper_vector_size_c(hid_t_f *prp_id, size_t_f *size)
  *  size   - size of the vector
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, October 7, 2002
- * HISTORY
- *
  * SOURCE
  */
 
@@ -2701,13 +2408,6 @@ h5pget_hyper_vector_size_c(hid_t_f *prp_id, size_t_f *size)
  *  class - new class identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- *
- * HISTORY
- *  Added the callback parameters (FORTRAN 2003 compilers only)
- *  M. Scot Breitenfeld, July 3, 2008
  * SOURCE
  */
 int_f
@@ -2754,11 +2454,6 @@ DONE:
  *  value - property value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2797,11 +2492,6 @@ DONE:
  *  value - property value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2839,11 +2529,6 @@ DONE:
  *  name_len - length of the "name" buffer
  * RETURNS
  *  nonnegative on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2882,11 +2567,6 @@ DONE:
  *  cls - property class identifier
  * RETURNS
  *  nonnegative on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2921,11 +2601,6 @@ h5pisa_class_c(hid_t_f *plist, hid_t_f *cls)
  *  size - size of the property in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -2966,11 +2641,6 @@ DONE:
  *  nprops - number of properties in the list
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3005,11 +2675,6 @@ h5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
  *  parent_id - parent class identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3046,11 +2711,6 @@ h5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
  *  name_len - length of the "name" buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3090,11 +2750,6 @@ DONE:
  *  name_len - length of the "name" buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3133,11 +2788,6 @@ DONE:
  *  name_len - length of the "name" buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3174,11 +2824,6 @@ DONE:
  *  class - identifier of property class to close
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3209,11 +2854,6 @@ h5pclose_class_c(hid_t_f *cls)
  *  name_len - length of the "name" buffer
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3252,11 +2892,6 @@ DONE:
  *  value - property value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3296,11 +2931,6 @@ DONE:
  *  value - property value
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3337,11 +2967,6 @@ DONE:
  *  type_size - size of the datatype in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3368,11 +2993,6 @@ h5pset_shuffle_c(hid_t_f *prp_id)
  *  prp_id - dataset creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, March 13, 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3401,11 +3021,6 @@ h5pset_fletcher32_c(hid_t_f *prp_id)
  *  flag   - EDC flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, March 13, 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3436,11 +3051,6 @@ h5pset_edc_check_c(hid_t_f *prp_id, int_f *flag)
  *  Outouts:     flag   - EDC flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, March 13, 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3469,11 +3079,6 @@ h5pget_edc_check_c(hid_t_f *prp_id, int_f *flag)
  *  offset - offset in bytes
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, 19 March 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3509,11 +3114,6 @@ h5pset_family_offset_c(hid_t_f *prp_id, hsize_t_f *offset)
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday 24, March 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3601,11 +3201,6 @@ DONE:
  *  prp_id - file_creation property list identifier
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  March 31 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3646,11 +3241,6 @@ h5pset_fapl_multi_sc(hid_t_f *prp_id, int_f *flag)
  *  flag - flag allowing partila access when one of the files is missing
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday 24, March 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3729,11 +3319,6 @@ h5pget_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
  *  pixels_per_block -szip compression parameters
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  April 8 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3771,11 +3356,6 @@ h5pset_szip_c(hid_t_f *prp_id, int_f *options_mask, int_f *pixels_per_block)
  *  status - logical flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  April 10 2003
- * HISTORY
- *
  * SOURCE
  */
 
@@ -3820,11 +3400,6 @@ h5pall_filters_avail_c(hid_t_f *prp_id, int_f *status)
  *  name - Name of the filter
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena POurmal
- *  April 10, 2003
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3885,11 +3460,6 @@ DONE:
  *  cd_values - Auxiliary data for the filter.
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  April 10 2003
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -3935,9 +3505,6 @@ DONE:
  *  filter - Filter to be deleted
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Quincey Koziol
- *  January 27 2004
  * HISTORY
  *
  * SOURCE
@@ -3977,11 +3544,6 @@ DONE:
  *  min_dense      - Minimum number of attributes to be stored in dense storage
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4019,11 +3581,6 @@ h5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dens
  *  crt_order_flags - Flags specifying whether to track and index attribute creation order
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4062,11 +3619,6 @@ h5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4107,11 +3659,6 @@ h5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  January, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4147,11 +3694,6 @@ h5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4188,11 +3730,6 @@ h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 18, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4225,11 +3762,6 @@ h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
  *  min_dense    - Minimum number of attributes to be stored in dense storage
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 20, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4267,11 +3799,6 @@ h5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
  *  flag     - TRUE/FALSE flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 22, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -4309,11 +3836,6 @@ h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
  *  flag     - TRUE/FALSE flag
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 22, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -4352,11 +3874,6 @@ h5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
  *                       creation of an object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  February 22, 2008
- * HISTORY
- *
  * SOURCE
  */
 
@@ -4393,11 +3910,6 @@ h5pset_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4439,11 +3951,6 @@ h5pget_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4481,11 +3988,6 @@ h5pset_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4525,11 +4027,6 @@ h5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4565,11 +4062,6 @@ h5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 3, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4609,11 +4101,6 @@ h5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  *
  *  Success:  0
  *  Failure: -1
- *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 19, 2008
- * HISTORY
  *
  * SOURCE
  */
@@ -4672,11 +4159,6 @@ done:
  *  Success:  0
  *  Failure: -1
  *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 19, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4721,11 +4203,6 @@ done:
  *  Success:  0
  *  Failure: -1
  *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4763,11 +4240,6 @@ h5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  *
  *  Success:  0
  *  Failure: -1
- *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
  *
  * SOURCE
  */
@@ -4810,11 +4282,6 @@ h5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name
  *  Success:  0
  *  Failure: -1
  *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4851,11 +4318,6 @@ h5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  *  Success:  0
  *  Failure: -1
  *
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4888,11 +4350,6 @@ h5pset_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name
  *  Outputs
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -4928,11 +4385,6 @@ h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
  *  Outputs
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 #ifndef H5_HAVE_DIRECT
@@ -4977,11 +4429,6 @@ h5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *a
  *  cbuf_size  - Copy buffer size
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 #ifndef H5_HAVE_DIRECT
@@ -5030,11 +4477,6 @@ h5pget_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *a
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5066,11 +4508,6 @@ h5pset_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dens
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5102,9 +4539,6 @@ h5pset_nbit_c(hid_t_f *plist_id)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 21, 2008
  * SOURCE
  */
 int_f
@@ -5138,9 +4572,6 @@ h5pset_scaleoffset_c(hid_t_f *plist_id, int_f *scale_type, int_f *scale_factor)
  *  nlinks  - Maximum number of links to traverse
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 24, 2008
  * SOURCE
  */
 int_f
@@ -5176,11 +4607,6 @@ h5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  March 24, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5215,11 +4641,6 @@ h5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  *  the creation of an object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  April 4, 2008
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5387,11 +4808,6 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
  *  info   - MPI info object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, October 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5427,11 +4843,6 @@ h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  *  info   - buffer to return MPI info object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, October 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5468,10 +4879,6 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  *  info   - MPI info object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M.S. Breitenfeld
- *  October 2022
- *
  * SOURCE
  */
 int_f
@@ -5508,10 +4915,6 @@ h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  *  info   - MPI info object
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M.S. Breitenfeld
- *  October 2022
- *
  * SOURCE
  */
 int_f
@@ -5548,11 +4951,6 @@ h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
  *  data_xfer_mode - transfer mode
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, October 26, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5600,11 +4998,6 @@ h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode)
  *  data_xfer_mode  - buffer to retrieve transfer mode
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Thursday, June 15, 2000
- * HISTORY
- *
  * SOURCE
  */
 int_f
@@ -5656,9 +5049,6 @@ h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode)
  *
  * RETURNS
  *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  July 27, 2012
  * SOURCE
  */
 int_f

@@ -1409,14 +1409,6 @@ CONTAINS
 !                               Success:  0
 !                               Failure: -1
 !
-! AUTHOR
-!      Elena Pourmal
-!            August 12, 1999
-!
-! HISTORY
-!       Explicit Fortran interfaces were added for
-!                  called C functions (it is needed for Windows
-!                  port).  March 7, 2001
 ! SOURCE
 !  SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm)
 !  IMPLICIT NONE
