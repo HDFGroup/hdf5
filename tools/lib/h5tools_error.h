@@ -169,7 +169,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         fprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);    \
         fprintf(stderr, __VA_ARGS__);                                                                        \
         fprintf(stderr, "\n");                                                                               \
-        fflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #define H5TOOLS_DEBUG(...)                                                                                   \
@@ -177,7 +177,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         fprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);         \
         fprintf(stderr, __VA_ARGS__);                                                                        \
         fprintf(stderr, "\n");                                                                               \
-        fflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #define H5TOOLS_ENDDEBUG(...)                                                                                \
@@ -186,7 +186,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         fprintf(stderr, __VA_ARGS__);                                                                        \
         fprintf(stderr, "\n");                                                                               \
         H5tools_INDENT_g -= 2;                                                                               \
-        fflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
     } while (0)
 
 #else
