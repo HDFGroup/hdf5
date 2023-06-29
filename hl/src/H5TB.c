@@ -36,19 +36,11 @@ static hid_t H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_s
  */
 
 /*-------------------------------------------------------------------------
- * Function: H5TBmake_table
+ * Function:    H5TBmake_table
  *
- * Purpose: Make a table
+ * Purpose:     Make a table
  *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *             Quincey Koziol
- *
- * Date: January 17, 2001
- *
- * Comments:
- *
+ * Return:      Success: 0, Failure: -1
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -1182,17 +1182,11 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: H5LTget_dataset_info
+ * Function:    H5LTget_dataset_info
  *
- * Purpose: Gets information about a dataset.
+ * Purpose:     Gets information about a dataset.
  *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 4, 2001
- *  Modified: February 28, 2006: checked for NULL parameters
- *
+ * Return:      Success: 0, Failure: -1
  *-------------------------------------------------------------------------
  */
 
