@@ -132,7 +132,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             u++;             /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter not digit in <%s>\n", str);
@@ -182,7 +182,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             u++;             /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter is not a digit in <%s>\n", str);
@@ -242,13 +242,13 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                             u++; /* skip ',' */
                         }
                         c = str[u];
-                        if (!HDisdigit(c) && l == -1) {
+                        if (!isdigit(c) && l == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("filter number parameter is not a digit in <%s>\n", str);
                             exit(EXIT_FAILURE);
                         }
-                        else if (!HDisdigit(c) && f == -1) {
+                        else if (!isdigit(c) && f == -1) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("filter flag parameter is not a digit in <%s>\n", str);
@@ -267,7 +267,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     /* here we could have 1 or 2 digits  */
                     for (m = 0, u = i + 1; u < len; u++, m++) {
                         c = str[u];
-                        if (!HDisdigit(c)) {
+                        if (!isdigit(c)) {
                             if (obj_list)
                                 free(obj_list);
                             error_msg("compression parameter is not a digit in <%s>\n", str);
@@ -585,7 +585,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
             sdim[k] = c;
             k++; /*increment sdim index */
 
-            if (!HDisdigit(c) && c != 'x' && c != 'N' && c != 'O' && c != 'N' && c != 'E') {
+            if (!isdigit(c) && c != 'x' && c != 'N' && c != 'O' && c != 'N' && c != 'E') {
                 if (obj_list)
                     free(obj_list);
                 error_msg("in parse layout, <%s> Not a valid character in <%s>\n", sdim, str);

@@ -754,44 +754,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgmtime
 #define HDgmtime(T) gmtime(T)
 #endif
-#ifndef HDisalnum
-#define HDisalnum(C) isalnum((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisalpha
-#define HDisalpha(C) isalpha((int)(C)) /* Cast for Solaris warning */
-#endif
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
 #endif
-#ifndef HDiscntrl
-#define HDiscntrl(C) iscntrl((int)(C)) /* Cast for solaris warning */
-#endif
-#ifndef HDisdigit
-#define HDisdigit(C) isdigit((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisgraph
-#define HDisgraph(C) isgraph((int)(C)) /* Cast for Solaris warning*/
-#endif
-#ifndef HDislower
-#define HDislower(C) islower((int)(C)) /* Cast for Solaris warning */
-#endif
 #ifndef HDisnan
 #define HDisnan(X) isnan(X)
-#endif
-#ifndef HDisprint
-#define HDisprint(C) isprint((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDispunct
-#define HDispunct(C) ispunct((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisspace
-#define HDisspace(C) isspace((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisupper
-#define HDisupper(C) isupper((int)(C)) /* Cast for Solaris warning */
-#endif
-#ifndef HDisxdigit
-#define HDisxdigit(C) isxdigit((int)(C)) /* Cast for Solaris warning */
 #endif
 #ifndef HDlabs
 #define HDlabs(X) labs(X)
@@ -1449,34 +1416,34 @@ H5_DLL herr_t H5_trace_args(struct H5RS_str_t *rs, const char *type, va_list ap)
  *        Handles H5XY_.
  */
 #define H5_IS_API(S)                                                                                         \
-    ('_' != ((const char *)S)[2]                  /* underscore at position 2     */                         \
-     && '_' != ((const char *)S)[3]               /* underscore at position 3     */                         \
-     && !(                                        /* NOT              */                                     \
-          ((const char *)S)[4]                    /* pos 4 exists     */                                     \
-          && (HDisupper(S[3]) || HDisdigit(S[3])) /* pos 3 dig | uc   */                                     \
-          && '_' == ((const char *)S)[4]          /* pos 4 underscore */                                     \
+    ('_' != ((const char *)S)[2]              /* underscore at position 2     */                             \
+     && '_' != ((const char *)S)[3]           /* underscore at position 3     */                             \
+     && !(                                    /* NOT              */                                         \
+          ((const char *)S)[4]                /* pos 4 exists     */                                         \
+          && (isupper(S[3]) || isdigit(S[3])) /* pos 3 dig | uc   */                                         \
+          && '_' == ((const char *)S)[4]      /* pos 4 underscore */                                         \
           ))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S)                                                                                         \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && HDislower(S[2])) ||                                            \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && HDislower(S[3])) ||                                            \
-     (!S[4] || ((HDisdigit(S[3]) || HDisupper(S[3])) && HDislower(S[4]))))
+    (((isdigit(S[1]) || isupper(S[1])) && islower(S[2])) ||                                                  \
+     ((isdigit(S[2]) || isupper(S[2])) && islower(S[3])) ||                                                  \
+     (!S[4] || ((isdigit(S[3]) || isupper(S[3])) && islower(S[4]))))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a private library function */
 #define H5_IS_PRIV(S)                                                                                        \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && '_' == S[2] && HDislower(S[3])) ||                             \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && '_' == S[3] && HDislower(S[4])) ||                             \
-     ((HDisdigit(S[3]) || HDisupper(S[3])) && '_' == S[4] && HDislower(S[5])))
+    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && islower(S[3])) ||                                   \
+     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && islower(S[4])) ||                                   \
+     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && islower(S[5])))
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a package private function */
 #define H5_IS_PKG(S)                                                                                         \
-    (((HDisdigit(S[1]) || HDisupper(S[1])) && '_' == S[2] && '_' == S[3] && HDislower(S[4])) ||              \
-     ((HDisdigit(S[2]) || HDisupper(S[2])) && '_' == S[3] && '_' == S[4] && HDislower(S[5])) ||              \
-     ((HDisdigit(S[3]) || HDisupper(S[3])) && '_' == S[4] && '_' == S[5] && HDislower(S[6])))
+    (((isdigit(S[1]) || isupper(S[1])) && '_' == S[2] && '_' == S[3] && islower(S[4])) ||                    \
+     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && '_' == S[4] && islower(S[5])) ||                    \
+     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && '_' == S[5] && islower(S[6])))
 
 /* global library version information string */
 extern char H5_lib_vers_info_g[];

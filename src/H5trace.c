@@ -248,7 +248,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
         asize[i] = -1;
 
     /* Parse the argument types */
-    for (argno = 0; *type; argno++, type += (HDisupper(*type) ? 2 : 1)) {
+    for (argno = 0; *type; argno++, type += (isupper(*type) ? 2 : 1)) {
         /* Count levels of indirection */
         for (ptr = 0; '*' == *type; type++)
             ptr++;
@@ -3922,7 +3922,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                     break;
 
                 default:
-                    if (HDisupper(type[0]))
+                    if (isupper(type[0]))
                         H5RS_asprintf_cat(rs, "BADTYPE(%c%c)", type[0], type[1]);
                     else
                         H5RS_asprintf_cat(rs, "BADTYPE(%c)", type[0]);

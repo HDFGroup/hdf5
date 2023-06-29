@@ -119,7 +119,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
                 else {
                     c = buf[buf_offset + u + v];
 
-                    if (HDisprint(c))
+                    if (isprint(c))
                         HDfputc(c, stream);
                     else
                         HDfputc('.', stream);

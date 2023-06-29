@@ -187,7 +187,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
     /* count how many integers do we have */
     for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             if (!last_digit)
                 /* the last read character wasn't a digit */
                 size_count++;
@@ -209,11 +209,11 @@ parse_hsize_list(const char *h_list, subset_d *d)
         H5TOOLS_INFO("Unable to allocate space for subset data");
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (HDisdigit(*ptr)) {
+        if (isdigit(*ptr)) {
             /* we should have an integer now */
             p_list[i++] = (hsize_t)strtoull(ptr, NULL, 0);
 
-            while (HDisdigit(*ptr))
+            while (isdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }

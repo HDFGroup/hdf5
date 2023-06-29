@@ -184,7 +184,7 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
     if (H5_IS_BUFFER_OVERFLOW(p, 16, p_end))
         HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
     for (int i = 0; i < 14; i++)
-        if (!HDisdigit(p[i]))
+        if (!isdigit(p[i]))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
