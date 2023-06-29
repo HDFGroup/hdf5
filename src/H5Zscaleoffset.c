@@ -749,9 +749,6 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
  * Return:    Success: Non-negative
  *        Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Friday, February 4, 2005
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -800,9 +797,6 @@ done:
  *
  * Return:    Success: id number of integer type
  *        Failure: 0
- *
- * Programmer:    Xiaowen Wu
- *              Wednesday, April 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -874,9 +868,6 @@ done:
  * Return:    Success: Non-negative
  *        Failure: Negative
  *
- * Programmer:  Xiaowen Wu
- *              Monday, March 7, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -924,9 +915,6 @@ done:
  *
  * Return:    Success: Non-negative
  *        Failure: Negative
- *
- * Programmer:    Xiaowen Wu
- *              Friday, February 4, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1102,9 +1090,6 @@ done:
  *
  * Return:    Success: Size of buffer filtered
  *        Failure: 0
- *
- * Programmer:    Xiaowen Wu
- *              Monday, February 7, 2005
  *
  *-------------------------------------------------------------------------
  */

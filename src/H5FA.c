@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FA.c
- *              April 2009
- *              Vailin Choi
  *
  * Purpose:     Implements a Fixed Array for storing elements
  *              of datasets with fixed dimensions.
@@ -96,9 +94,6 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  * Return:	Pointer to farray wrapper success
  *              NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 17 2016
- *
  *-------------------------------------------------------------------------
  */
 static H5FA_t *
@@ -160,9 +155,6 @@ done:
  * Return:      Pointer to fixed array wrapper on success
  *              NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_t *
@@ -209,9 +201,6 @@ done:
  * Return:      Pointer to array wrapper on success
  *              NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 H5FA_t *
@@ -249,9 +238,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -275,9 +261,6 @@ H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts)
  * Purpose:     Query the address of the array
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -303,9 +286,6 @@ H5FA_get_addr(const H5FA_t *fa, haddr_t *addr)
  * Purpose:     Set an element of a fixed array
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -419,9 +399,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -523,9 +500,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -625,9 +599,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -678,9 +649,6 @@ done:
  *
  * Return:      H5_ITER_CONT/H5_ITER_ERROR
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -729,9 +697,6 @@ done:
  *              and another piece of metadata in the file.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESevent.c
- *              Nov  7 2020
- *              Quincey Koziol
  *
  * Purpose:     Operations on "events" for managing asynchronous
  *                      operations.
@@ -78,9 +76,6 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
  *
  * Return:      Non-NULL pointer to new event on success, NULL on failure
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 H5ES_event_t *
@@ -124,9 +119,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -169,9 +161,6 @@ done:
  * Purpose:     Handle a completed event
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Sunday, November 8, 2020
  *
  *-------------------------------------------------------------------------
  */

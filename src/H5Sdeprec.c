@@ -76,9 +76,6 @@
  * Return:	Success:	non-negative
  *		    Failure:	negative
  *
- * Programmer:	Raymond Lu
- *              July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 herr_t

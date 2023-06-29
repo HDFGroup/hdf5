@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer: Robb Matzke
- *	       Friday, October 10, 1997
- */
-
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h" /* Memory management			*/
@@ -48,9 +43,6 @@ static void H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /
  *              modified by this function.
  *
  * Return:      void
- *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -87,9 +79,6 @@ H5VM__stride_optimize1(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
  *              modified by this function.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -212,9 +201,6 @@ H5VM__stride_optimize2(unsigned *np /*in,out*/, hsize_t *elmt_size /*in,out*/, c
  *
  * Return:      Byte offset from beginning of array to start of striding.
  *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -307,9 +293,6 @@ H5VM_hyper_stride(unsigned n, const hsize_t *size, const hsize_t *total_size, co
  *
  *              Never returns FAIL
  *
- * Programmer:  Robb Matzke
- *              Friday, October 17, 1997
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -354,9 +337,6 @@ done:
  *              each dimension.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -424,9 +404,6 @@ H5VM_hyper_fill(unsigned n, const hsize_t *_size, const hsize_t *total_size, con
  *              destination hyperslab.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Friday, October 10, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -581,9 +558,6 @@ H5VM_hyper_copy(unsigned n, const hsize_t *_size, const hsize_t *dst_size, const
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -637,9 +611,6 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
  *              probably more efficient to use H5VM_stride_fill() instead.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -704,9 +675,6 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Saturday, October 11, 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -765,9 +733,6 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, June 18, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -818,9 +783,6 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
  *
  * Return:	    void
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 28, 2003
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -858,9 +820,6 @@ H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
  *
  * Return:      Byte offset from beginning of array to element offset
  *
- * Programmer:	Quincey Koziol
- *		        Tuesday, June 22, 1999
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -893,9 +852,6 @@ H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
  *              is at offset OFFSET.
  *
  * Return:      Byte offset from beginning of array to element offset
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, June 22, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -933,9 +889,6 @@ H5VM_array_offset(unsigned n, const hsize_t *total_size, const hsize_t *offset)
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Thursday, July 16, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -970,9 +923,6 @@ H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down, hsize_t *co
  *              are returned in COORD.  The linear offset is in OFFSET.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1035,9 +985,6 @@ done:
  *
  * Return:      Chunk index on success (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 21, 2003
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -1066,9 +1013,6 @@ H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, co
  * Purpose:     Compute the scaled coordinates for a chunk offset
  *
  * Return:      void
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, November 19, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1131,9 +1075,6 @@ H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk, h
  *
  * Return:      Chunk index on success (can't fail)
  *
- * Programmer:  Vailin Choi
- *              Monday, February 9, 2015
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -1180,9 +1121,6 @@ H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *ch
  *              H5VM_memcpyvv().  Changes should be made to both!
  *
  * Return:      Non-negative # of bytes operated on, on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, September 30, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -1384,9 +1322,6 @@ done:
  *              H5VM_opvv().  Changes should be made to both!
  *
  * Return:      Non-negative # of bytes copied on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Friday, May 2, 2003
  *
  *-------------------------------------------------------------------------
  */

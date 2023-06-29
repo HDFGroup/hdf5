@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Abtree2.c
- *			Dec  4 2006
- *			Quincey Koziol
  *
  * Purpose:		v2 B-tree callbacks for indexing attributes on objects
  *
@@ -138,9 +136,6 @@ const H5B2_class_t H5A_BT2_CORDER[1] = {{
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec  4 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -191,9 +186,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, December  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -221,9 +213,6 @@ H5A__dense_btree2_name_store(void *_nrecord, const void *_udata)
  * Return:	<0 if rec1 < rec2
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
- *
- * Programmer:	Quincey Koziol
- *              Monday, December  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -290,9 +279,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, December  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -319,9 +305,6 @@ H5A__dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_U
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, December  4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -350,9 +333,6 @@ H5A__dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_U
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, December  4, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -376,9 +356,6 @@ H5A__dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -406,9 +383,6 @@ H5A__dense_btree2_corder_store(void *_nrecord, const void *_udata)
  * Return:	<0 if rec1 < rec2
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -443,9 +417,6 @@ H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, i
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -472,9 +443,6 @@ H5A__dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -500,9 +468,6 @@ H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, February  6, 2007
  *
  *-------------------------------------------------------------------------
  */

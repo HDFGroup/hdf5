@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:   H5ACprivate.h
- *            Jul  9 1997
- *            Robb Matzke
  *
  * Purpose:   Constants and typedefs available to the rest of the
  *            library.

@@ -147,9 +147,6 @@ static const H5C_log_class_t H5C_trace_log_class_g = {"trace",
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -193,9 +190,6 @@ done:
  *              the H5C__trace_write_log_message function.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -278,9 +272,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -323,9 +314,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -359,9 +347,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -393,9 +378,6 @@ done:
  * Purpose:     Write a log message for insertion of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -431,9 +413,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -468,9 +447,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -504,9 +480,6 @@ done:
  * Purpose:     Write a log message for marking cache entries as unserialized.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -543,9 +516,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -581,9 +551,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -617,9 +584,6 @@ done:
  * Purpose:     Write a log message for pinning a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -655,9 +619,6 @@ done:
  *              two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -696,9 +657,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -733,9 +691,6 @@ done:
  * Purpose:     Write a log message for resizing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -772,9 +727,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -809,9 +761,6 @@ done:
  *              between two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -850,9 +799,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -886,9 +832,6 @@ done:
  * Purpose:     Write a log message for setting the cache configuration.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -936,9 +879,6 @@ done:
  * Purpose:     Write a log message for removing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */

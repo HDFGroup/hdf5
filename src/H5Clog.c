@@ -69,9 +69,6 @@
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -130,9 +127,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -173,9 +167,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -215,9 +206,6 @@ done:
  * Purpose:     Stop logging metadata cache operations.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -262,9 +250,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -290,9 +275,6 @@ H5C_get_logging_status(const H5C_t *cache, hbool_t *is_enabled, hbool_t *is_curr
  * Purpose:     Write a log message for cache creation.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -326,9 +308,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -357,9 +336,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -387,9 +363,6 @@ done:
  * Purpose:     Write a log message for expunge of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -420,9 +393,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -450,9 +420,6 @@ done:
  * Purpose:     Write a log message for insertion of cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -484,9 +451,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -516,9 +480,6 @@ done:
  * Purpose:     Write a log message for marking cache entries as clean.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -550,9 +511,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -582,9 +540,6 @@ done:
  * Purpose:     Write a log message for marking cache entries as serialize.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -616,9 +571,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -649,9 +601,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -681,9 +630,6 @@ done:
  *              two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -717,9 +663,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -750,9 +693,6 @@ done:
  * Purpose:     Write a log message for resizing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -785,9 +725,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -817,9 +754,6 @@ done:
  *              between two cache entries.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -853,9 +787,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -886,9 +817,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Dana Robinson
- *              Fall 2018
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -918,9 +846,6 @@ done:
  * Purpose:     Write a log message for removing a cache entry.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2018
  *
  *-------------------------------------------------------------------------
  */

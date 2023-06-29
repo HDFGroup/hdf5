@@ -132,9 +132,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -169,9 +166,6 @@ H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
  *
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
- *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -218,9 +212,6 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -251,9 +242,6 @@ H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  1 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -278,9 +266,6 @@ H5O__drvinfo_reset(void *_mesg)
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */

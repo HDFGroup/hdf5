@@ -86,9 +86,6 @@ H5FL_DEFINE(H5G_copy_file_ud_t);
  *
  *		Failure:	NULL
  *
- * Programmer:	Neil Fortner
- *              Thursday, July 30, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -115,9 +112,6 @@ done:
  *		object header from file to file.
  *
  * Return:	<none>
- *
- * Programmer:	Neil Fortner
- *              Thursday, July 30, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -152,9 +146,6 @@ H5O__group_free_copy_file_udata(void *_udata)
  *		Failure:	FAIL if the existence of certain messages
  *				cannot be determined.
  *
- * Programmer:	Robb Matzke
- *              Monday, November  2, 1998
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -187,9 +178,6 @@ done:
  *
  * Return:      Success:    Pointer to group data
  *              Failure:    NULL
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -226,9 +214,6 @@ done:
  *
  * Return:	Success:	Pointer to the group data structure
  *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, April 10, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -275,9 +260,6 @@ done:
  * Return:	Success:	Pointer to object header location
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
- *
  *-------------------------------------------------------------------------
  */
 static H5O_loc_t *
@@ -307,9 +289,6 @@ done:
  *		Retrieve storage for 1.6 btree and heap via H5G_stab_bh_info()
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              July 12 2007
  *
  *-------------------------------------------------------------------------
  */

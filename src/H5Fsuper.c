@@ -82,8 +82,6 @@ static const unsigned HDF5_superblock_ver_bounds[] = {
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -136,8 +134,6 @@ done:
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
  *
- * Programmer:  Vailin Choi; Feb 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -172,8 +168,6 @@ done:
  *
  * Return:     Success:        non-negative on success
  *             Failure:        Negative
- *
- * Programmer:  Vailin Choi; Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -229,9 +223,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              11/10/15
  *
  *-------------------------------------------------------------------------
  */
@@ -307,9 +298,6 @@ done:
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
- *
- * Programmer:  Bill Wendling
- *              Sept 12, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1076,9 +1064,6 @@ done:
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sept 15, 2003
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1514,9 +1499,6 @@ done:
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              January 4, 2017
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1561,9 +1543,6 @@ done:
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              August 14, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1594,9 +1573,6 @@ done:
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              April 1, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1623,9 +1599,6 @@ H5F__super_free(H5F_super_t *sblock)
  *
  * Return:      Success:        non-negative on success
  *              Failure:        Negative
- *
- * Programmer:  Vailin Choi
- *              July 11, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1686,8 +1659,6 @@ done:
  * Purpose:     Write the message with ID to the superblock extension
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1770,8 +1741,6 @@ done:
  * Purpose:     Remove the message with ID from the superblock extension
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; Feb 2009
  *
  *-------------------------------------------------------------------------
  */

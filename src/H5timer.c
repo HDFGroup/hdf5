@@ -12,8 +12,6 @@
 
 /*-------------------------------------------------------------------------
  * Created:		H5timer.c
- *			Aug 21 2006
- *			Quincey Koziol
  *
  * Purpose:             Internal, platform-independent 'timer' support routines.
  *
@@ -89,9 +87,6 @@
  *
  * Return:	void
  *
- * Programmer:	Robb Matzke
- *              Wednesday, August  5, 1998
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -146,9 +141,6 @@ H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds)
  *
  * Return:	# of seconds from the epoch (can't fail)
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 28, 2006
- *
  *-------------------------------------------------------------------------
  */
 time_t
@@ -176,9 +168,6 @@ H5_now(void)
  * Purpose:	Retrieves the current time, as microseconds after the UNIX epoch.
  *
  * Return:	# of microseconds from the epoch (can't fail)
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 28, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -225,8 +214,6 @@ H5_now_usec(void)
  * Return:      Success:    A non-negative time value
  *              Failure:    -1.0 (in theory, can't currently fail)
  *
- * Programmer:  Quincey Koziol
- *              October 05, 2016
  *--------------------------------------------------------------------------
  */
 double
@@ -265,9 +252,6 @@ H5_get_time(void)
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -366,9 +350,6 @@ H5__timer_get_timevals(H5_timevals_t *times /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -390,9 +371,6 @@ H5_timer_init(H5_timer_t *timer /*in,out*/)
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -420,9 +398,6 @@ H5_timer_start(H5_timer_t *timer /*in,out*/)
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -471,9 +446,6 @@ H5_timer_stop(H5_timer_t *timer /*in,out*/)
  *
  * Return:      Success:    0
  *              Failure:    -1
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -527,9 +499,6 @@ H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Dana Robinson
- *              May 2011
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -579,9 +548,6 @@ H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/)
  *                        "%.f h %.f m %.f s"   longer times
  *
  *              Failure:  NULL
- *
- * Programmer:  Dana Robinson
- *              May 2011
  *
  *-------------------------------------------------------------------------
  */

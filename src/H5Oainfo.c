@@ -172,9 +172,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -226,9 +223,6 @@ H5O__ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -265,9 +259,6 @@ done:
  * Return:      Success:        Message data size in bytes without alignment.
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -299,9 +290,6 @@ H5O__ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, March  6, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -324,9 +312,6 @@ H5O__ainfo_free(void *mesg)
  *              H5O_msg_delete must include an oh if the type is ainfo.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, March  6, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -362,9 +347,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, March  9, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -393,9 +375,6 @@ H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUS
  *
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
- *
- * Programmer:  Peter Cao
- *              July 18, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -459,9 +438,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              July 25, 2007
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -490,9 +466,6 @@ done:
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */

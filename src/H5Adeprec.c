@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:	H5Adeprec.c
- *		November 27 2006
- *		Quincey Koziol
  *
  * Purpose:	Deprecated functions from the H5A interface.  These
  *              functions are here for compatibility purposes and may be

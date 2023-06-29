@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, August 10, 1999
- *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
  *              only the HDF5 public API. This driver is useful for fast
  *              access to small, temporary hdf5 files.
@@ -454,9 +451,6 @@ H5FD__core_get_default_config(void)
  * Return:      Success:    The driver ID for the core driver
  *              Failure:    H5I_INVALID_HID
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -492,9 +486,6 @@ H5FD_core_init(void)
  *
  * Returns:     SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, Jan 30, 2004
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -515,9 +506,6 @@ H5FD__core_term(void)
  *              aggregation size.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -567,9 +555,6 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:  Dana Robinson
- *              Tuesday, April 8, 2014
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -609,9 +594,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, February 19, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -650,9 +632,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Tuesday, August 10, 1999
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -689,9 +668,6 @@ done:
  * Return:      Success:    Ptr to new file access properties.
  *              Failure:    NULL
  *
- * Programmer:  Robb Matzke
- *              Friday, August 13, 1999
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -727,9 +703,6 @@ done:
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
  *              Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -993,9 +966,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1048,9 +1018,6 @@ done:
  * Return:      Success:    A value like strcmp()
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1134,9 +1101,6 @@ done:
  *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October  7, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1177,9 +1141,6 @@ H5FD__core_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *
  * Return:      The end-of-address marker. (Can't fail)
  *
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1200,9 +1161,6 @@ H5FD__core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *              to tell the driver where the end of the HDF5 data is located.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1234,9 +1192,6 @@ done:
  *              the end of the "file", either the memory
  *              or the HDF5 file. (Can't fail)
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -1255,9 +1210,6 @@ H5FD__core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  * Purpose:        Gets the file handle of CORE file driver.
  *
  * Returns:        SUCCEED/FAIL
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -1319,9 +1271,6 @@ done:
  *                          buffer BUF.
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1377,9 +1326,6 @@ done:
  *              DXPL_ID.
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -1464,9 +1410,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Robb Matzke
- *              Friday, October 15, 1999
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1546,9 +1489,6 @@ done:
  *                                                                  -- JRM
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, October  7, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1649,8 +1589,6 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; May 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1694,8 +1632,6 @@ done:
  * Purpose:     To remove the existing lock on the file
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; May 2013
  *
  *-------------------------------------------------------------------------
  */

@@ -180,9 +180,6 @@ H5FL_DEFINE_STATIC(H5HF_huge_bt2_ctx_t);
  * Return:	Success:	non-NULL
  *		Failure:	NULL
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -222,9 +219,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Thursday, November 26, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -252,9 +246,6 @@ H5HF__huge_bt2_dst_context(void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August  8, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -275,9 +266,6 @@ H5HF__huge_bt2_indir_found(const void *nrecord, void *op_data)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -309,9 +297,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -333,9 +318,6 @@ H5HF__huge_bt2_indir_store(void *nrecord, const void *udata)
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -356,9 +338,6 @@ H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -389,9 +368,6 @@ H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -421,9 +397,6 @@ H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -449,9 +422,6 @@ H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *_nr
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August  8, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -472,9 +442,6 @@ H5HF__huge_bt2_filt_indir_found(const void *nrecord, void *op_data)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -507,9 +474,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -531,9 +495,6 @@ H5HF__huge_bt2_filt_indir_store(void *nrecord, const void *udata)
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -554,9 +515,6 @@ H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *res
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -589,9 +547,6 @@ H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -623,9 +578,6 @@ H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -651,9 +603,6 @@ H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August  8, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -685,9 +634,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -708,9 +654,6 @@ H5HF__huge_bt2_dir_store(void *nrecord, const void *udata)
  * Return:	<0 if rec1 < rec2
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -744,9 +687,6 @@ H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -774,9 +714,6 @@ H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -806,9 +743,6 @@ H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August  7, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -834,9 +768,6 @@ H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrec
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -857,9 +788,6 @@ H5HF__huge_bt2_filt_dir_found(const void *nrecord, void *op_data)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -892,9 +820,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -915,9 +840,6 @@ H5HF__huge_bt2_filt_dir_store(void *nrecord, const void *udata)
  * Return:	<0 if rec1 < rec2
  *              =0 if rec1 == rec2
  *              >0 if rec1 > rec2
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -951,9 +873,6 @@ H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *resul
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -984,9 +903,6 @@ H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1016,9 +932,6 @@ H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 15, 2006
  *
  *-------------------------------------------------------------------------
  */

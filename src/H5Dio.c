@@ -996,9 +996,6 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  4, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1466,9 +1463,6 @@ done:
  * Purpose:     Common logic for terminating a type info object
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */

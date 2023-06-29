@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Gloc.c
- *			Sep 13 2005
- *			Quincey Koziol
  *
  * Purpose:		Functions for working with group "locations"
  *
@@ -278,9 +276,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -311,9 +306,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -343,9 +335,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -374,9 +363,6 @@ done:
  * Purpose:	Callback for retrieving object location for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, October 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -412,9 +398,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -448,9 +431,6 @@ done:
  *              according to the order within an index
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, November 20, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -512,9 +492,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Monday, November 20, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -551,9 +528,6 @@ done:
  * Purpose:	Insert an object at a location
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, September 13, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -597,9 +571,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, February 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -637,9 +608,6 @@ done:
  * Return:	Success:	TRUE/FALSE
  * 		Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, February 2, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -668,9 +636,6 @@ done:
  * Purpose:	Callback for retrieving the address for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Saturday, December 21, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -707,9 +672,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -738,9 +700,6 @@ done:
  * Purpose:	Callback for retrieving data model info for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 23, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -778,9 +737,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -814,9 +770,6 @@ done:
  * Purpose:	Callback for retrieving native info for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, November 23, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -854,9 +807,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, November 23, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -890,9 +840,6 @@ done:
  * Purpose:	Callback for (re)setting object comment for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -948,9 +895,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, August 30, 2007
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -982,9 +926,6 @@ done:
  * Purpose:	Callback for retrieving object comment for an object in a group
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1033,9 +974,6 @@ done:
  *              and path to that object
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Thursday, August 30, 2007
  *
  *-------------------------------------------------------------------------
  */

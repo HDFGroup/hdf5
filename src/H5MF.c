@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5MF.c
- *                      Jul 11 1997
- *                      Robb Matzke
  *
  * Purpose:             File memory management functions.
  *
@@ -130,9 +128,6 @@ static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, February  1, 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -243,8 +238,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer: Vailin Choi; Nov 2016
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -288,9 +281,6 @@ H5MF__alloc_to_fs_type(H5F_shared_t *f_sh, H5FD_mem_t alloc_type, hsize_t size, 
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -365,9 +355,6 @@ done:
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -449,9 +436,6 @@ done:
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *		Jan  8 2008
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -497,8 +481,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer: 	Vailin Choi; April 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -569,8 +551,6 @@ done:
  * Return:      Success:        non-negative
  *              Failure:        negative
  *
- * Programmer: Vailin Choi; July 1st, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -613,8 +593,6 @@ done:
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; April 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -673,8 +651,6 @@ done:
  *
  * Return:	TRUE if a section is found to fulfill the request
  *		    FALSE if not
- *
- * Programmer:  Vailin Choi; April 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -759,9 +735,6 @@ done:
  *
  * Return:      Success:        The file address of new chunk.
  *              Failure:        HADDR_UNDEF
- *
- * Programmer:  Robb Matzke
- *              Jul 11 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -874,8 +847,6 @@ done:
  *
  * Return:      Success:        The file address of new chunk.
  *              Failure:        HADDR_UNDEF
- *
- * Programmer:  Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1020,9 +991,6 @@ done:
  * Return:      Success:        Temporary file address
  *              Failure:        HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Thursday, June  4, 2009
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -1067,9 +1035,6 @@ done:
  *              available for reuse.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Robb Matzke
- *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -1260,9 +1225,6 @@ done:
  *                              FALSE(0) - Block could not be extended
  * 		Failure:	FAIL
  *
- * Programmer:	Quincey Koziol
- *              Friday, June 11, 2004
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1438,9 +1400,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Feb 14 2008
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -1526,8 +1485,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1568,9 +1525,6 @@ done:
  *              Note that TYPE can be H5F_mem_page_t or H5FD_mem_t enum types.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Vailin Choi
- *              Jan 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1629,9 +1583,6 @@ done:
  *              to non-persistent.
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Vailin Choi
- *              Jan 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1735,9 +1686,6 @@ done:
  * Purpose:     Close the free space tracker(s) for a file: non-paged aggregation
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, January 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1901,8 +1849,6 @@ done:
  * Purpose:     Close the free space tracker(s) for a file: paged aggregation
  *
  * Return:      SUCCEED/FAIL
- *
- * Programmer:  Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2077,9 +2023,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Quincey Koziol
- *              Saturday, July 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2187,9 +2130,6 @@ done:
  *
  * Return:      Success:        Amount of free space in file
  *              Failure:        Negative
- *
- * Programmer:  Quincey Koziol
- *              Monday, October  6, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2332,8 +2272,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi; Dec 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2452,9 +2390,6 @@ done:
  *
  * Return:	Always succeed
  *
- * Programmer:  Vailin Choi
- *              July 1st, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2481,8 +2416,6 @@ H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata)
  *
  * Return:      Success:        non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2610,9 +2543,6 @@ done:
  *		   in H5MF_settle_meta_data_fsm()
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:  John Mainzer
- *	        5/25/16
  *
  *-------------------------------------------------------------------------
  */
@@ -3080,9 +3010,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:  John Mainzer
- *	        5/25/16
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3329,8 +3256,6 @@ done:
  *
  * Return:	    SUCCEED/FAIL
  *
- * Programmer:  Vailin Choi
- *              6/24/2019
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -3374,9 +3299,6 @@ H5MF__continue_alloc_fsm(H5F_shared_t *f_sh, H5FS_t *sm_hdr_fspace, H5FS_t *sm_s
  *		file space for free space managers.  Return FALSE otherwise.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:  John Mainzer
- *              12/6/16
  *
  *-------------------------------------------------------------------------
  */
@@ -3429,9 +3351,6 @@ H5MF__fsm_type_is_self_referential(H5F_shared_t *f_sh, H5F_mem_page_t fsm_type)
  *		file space for free space managers.  Return FALSE otherwise.
  *
  * Return:      TRUE/FALSE
- *
- * Programmer:  John Mainzer
- *              12/6/16
  *
  *-------------------------------------------------------------------------
  */

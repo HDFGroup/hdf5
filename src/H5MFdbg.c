@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5MFdbg.c
- *                      Jan 31 2008
- *                      Quincey Koziol
  *
  * Purpose:             File memory management debugging functions.
  *
@@ -82,9 +80,6 @@ static herr_t H5MF__sects_debug_cb(H5FS_section_info_t *_sect, void *_udata);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		January 31 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -133,9 +128,6 @@ done:
  * Purpose:	Iterate over free space sections for a file
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		January 31 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -193,9 +185,6 @@ done:
  * Purpose:	Prints debugging info about free space sections for a file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Jan 31 2008
  *
  *-------------------------------------------------------------------------
  */

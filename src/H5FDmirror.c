@@ -328,8 +328,6 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
  *
  * Return:      The number of bytes written to the buffer (8).
  *
- * Programmer:  Jacob Smith
- *              2020-03-05
  * ---------------------------------------------------------------------------
  */
 static hbool_t

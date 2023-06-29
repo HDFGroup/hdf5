@@ -13,11 +13,9 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5Ctest.c
- *              June 7 2016
- *              Quincey Koziol
  *
  * Purpose:     Functions in this file support the metadata cache regression
- *		tests>
+ *              tests
  *
  *-------------------------------------------------------------------------
  */
@@ -77,9 +75,6 @@ typedef struct {
  *
  * Return:      SUCCEED on success, FAIL on error
  *
- * Programmer:  Vailin Choi
- *		Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -114,9 +109,6 @@ done:
  *      the object tag are marked with the desired "cork" status.
  *
  * Return:      SUCCEED on success, FAIL on error
- *
- * Programmer:  Vailin Choi
- *		Feb 2014
  *
  *-------------------------------------------------------------------------
  */

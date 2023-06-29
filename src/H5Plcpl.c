@@ -102,8 +102,6 @@ static const unsigned H5L_def_intmd_group_g =
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -133,8 +131,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              May 08, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -167,8 +163,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              May 08, 2005
  *-------------------------------------------------------------------------
  */
 herr_t

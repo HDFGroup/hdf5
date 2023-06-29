@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5ESint.c
- *              Apr  8 2020
- *              Quincey Koziol
  *
  * Purpose:     Internal "event set" routines for managing asynchronous
  *                      operations.
@@ -156,9 +154,6 @@ done:
  *                          affect other interfaces; zero otherwise.
  *              Failure:    Negative
  *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -180,9 +175,6 @@ H5ES_term_package(void)
  * Purpose:     Called when the ref count reaches zero on an event set's ID
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -212,9 +204,6 @@ done:
  *
  * Return:      Success:    Pointer to an event set struct
  *              Failure:    NULL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -247,9 +236,6 @@ done:
  * Purpose:     Insert a request token into an event set
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -323,9 +309,6 @@ done:
  * Purpose:     Insert a request token into an event set
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, April 8, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -403,9 +386,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -435,9 +415,6 @@ done:
  *              the list.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Neil Fortner
- *              Tuesday, November 23, 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -476,9 +453,6 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Neil Fortner
- *              Tuesday, November 23, 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -515,9 +489,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Thursday, October 15, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -548,9 +519,6 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
  * Purpose:     Handle an operation completing
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Friday, December 11, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -644,9 +612,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Sunday, November 7, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -722,9 +687,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, July 13, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -764,9 +726,6 @@ done:
  * Purpose:     Callback for canceling operations
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -831,9 +790,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Thursday, December 10, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -872,9 +828,6 @@ done:
  * Purpose:     Retrieve information about a failed operation
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, November 11, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -947,9 +900,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Friday, November 6, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -990,9 +940,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:  Quincey Koziol
- *              Monday, November 11, 2020
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1024,9 +971,6 @@ done:
  * Purpose:     Destroy an event set object
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:  Quincey Koziol
- *              Monday, April 6, 2020
  *
  *-------------------------------------------------------------------------
  */

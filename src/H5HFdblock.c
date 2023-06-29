@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFdblock.c
- *			Apr 10 2006
- *			Quincey Koziol
  *
  * Purpose:		Direct block routines for fractal heaps.
  *
@@ -74,9 +72,6 @@ H5FL_DEFINE(H5HF_direct_t);
  * Purpose:	Allocate & initialize a managed direct block
  *
  * Return:	Pointer to new direct block on success, NULL on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -209,9 +204,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -321,9 +313,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 13 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -420,9 +409,6 @@ done:
  *
  * Return:	Pointer to direct block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		Apr 17 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_direct_t *
@@ -500,9 +486,6 @@ done:
  * Purpose:	Locate a direct block in a managed heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		May  8 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -609,9 +592,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Aug  7 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -671,9 +651,6 @@ done:
  * Purpose:	Destroys a fractal heap direct block in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
  */

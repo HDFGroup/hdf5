@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Fquery.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             File structure query routines.
  *
@@ -114,8 +112,6 @@ H5F_get_intent(const H5F_t *f)
  *
  * Return:  low_bound on success/abort on failure (shouldn't fail)
  *
- * Programmer:  Vailin Choi; June 2016
- *
  *-------------------------------------------------------------------------
  */
 H5F_libver_t
@@ -137,8 +133,6 @@ H5F_get_low_bound(const H5F_t *f)
  *          H5F_t data structure)
  *
  * Return:  high_bound on success/abort on failure (shouldn't fail)
- *
- * Programmer:  Vailin Choi; June 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -721,9 +715,6 @@ H5F_sieve_buf_size(const H5F_t *f)
  * Return:  Success:    The "garbage collect references flag" is returned.
  *          Failure:    (should not happen)
  *
- * Programmer:  Quincey Koziol
- *              Jul  8 2005
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -1076,9 +1067,6 @@ H5F_coll_md_read(const H5F_t *f)
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
- * Programmer:  Houjun Tang
- *              May 19, 2022
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1281,9 +1269,6 @@ H5F_get_null_fsm_addr(const H5F_t *f)
  *
  * Return:   VOL class pointer for file, can't fail
  *
- * Programmer:    Quincey Koziol
- *        Saturday, August 17, 2019
- *
  *-------------------------------------------------------------------------
  */
 const H5VL_class_t *
@@ -1323,9 +1308,6 @@ H5F_get_vol_obj(const H5F_t *f)
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:    Quincey Koziol
- *        Saturday, August 17, 2019
  *
  *-------------------------------------------------------------------------
  */

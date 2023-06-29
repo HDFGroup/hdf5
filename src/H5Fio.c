@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5Fio.c
- *                      Jan 10 2008
- *                      Quincey Koziol
  *
  * Purpose:             File I/O routines.
  *
@@ -74,9 +72,6 @@
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -115,9 +110,6 @@ done:
  *		address for the file.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -159,9 +151,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Jul 10 1997
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -201,9 +190,6 @@ done:
  *		address.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -247,9 +233,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Neil Fortner
- *              May 3 2021
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -291,9 +274,6 @@ done:
  *              the file.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              May 4 2021
  *
  *-------------------------------------------------------------------------
  */
@@ -413,9 +393,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mike McGreevy
- *              September 9, 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -447,9 +424,6 @@ done:
  * Purpose:     To evict all cache entries except the pinned superblock entry
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *		Dec 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -503,9 +477,6 @@ done:
  * Note:	Assumes that the checksum is the last data in the buffer
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *		Sept 2013
  *
  *-------------------------------------------------------------------------
  */

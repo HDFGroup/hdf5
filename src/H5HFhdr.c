@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5HFhdr.c
- *			Apr 10 2006
- *			Quincey Koziol
  *
  * Purpose:		Heap header routines for fractal heaps.
  *
@@ -90,9 +88,6 @@ H5FL_DEFINE_STATIC(H5HF_hdr_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
- *
  *-------------------------------------------------------------------------
  */
 H5HF_hdr_t *
@@ -131,9 +126,6 @@ done:
  *              different sizes.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -183,9 +175,6 @@ H5HF__hdr_compute_free_space(H5HF_hdr_t *hdr, unsigned iblock_row)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Aug 12 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -219,9 +208,6 @@ done:
  * Purpose:	Second phase to finish initializing info in shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Aug 12 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -274,9 +260,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -309,9 +292,6 @@ done:
  * Purpose:	Create new fractal heap header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -505,9 +485,6 @@ done:
  *
  * Return:	Pointer to indirect block on success, NULL on failure
  *
- * Programmer:	Quincey Koziol
- *		May  5 2010
- *
  *-------------------------------------------------------------------------
  */
 H5HF_hdr_t *
@@ -553,9 +530,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -586,9 +560,6 @@ done:
  * Purpose:	Decrement component reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -624,9 +595,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct  1 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -649,9 +617,6 @@ H5HF__hdr_fuse_incr(H5HF_hdr_t *hdr)
  * Purpose:	Decrement file reference count on shared heap header
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Oct  1 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -676,9 +641,6 @@ H5HF__hdr_fuse_decr(H5HF_hdr_t *hdr)
  * Purpose:	Mark heap header as dirty
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 27 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -712,9 +674,6 @@ done:
  *
  * Return:	SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May  9 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -747,9 +706,6 @@ done:
  * Purpose:	Adjust heap space
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Apr 10 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -787,9 +743,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 23 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -815,9 +768,6 @@ H5HF__hdr_inc_alloc(H5HF_hdr_t *hdr, size_t alloc_size)
  * Purpose:	Start "next block" iterator at an offset/entry in the heap
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May 30 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -852,9 +802,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 31 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -886,9 +833,6 @@ done:
  * Purpose:	Add skipped direct blocks to free space for heap
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Apr  3 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -936,9 +880,6 @@ done:
  * Note:	Creates necessary indirect blocks
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Mar 14 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1130,9 +1071,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 23 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1167,9 +1105,6 @@ done:
  *              location to allocate next block from is found
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		May 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1320,9 +1255,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		May 17 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1369,9 +1301,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Oct 27 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1408,9 +1337,6 @@ done:
  * Purpose:	Delete a fractal heap, starting with the header
  *
  * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Jan  5 2007
  *
  *-------------------------------------------------------------------------
  */

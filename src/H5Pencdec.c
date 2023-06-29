@@ -73,9 +73,6 @@ typedef struct {
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Sunday, July 29, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -114,9 +111,6 @@ H5P__encode_size_t(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 07, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -154,9 +148,6 @@ H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Sunday, July 29, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -192,9 +183,6 @@ H5P__encode_unsigned(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 07, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -227,9 +215,6 @@ H5P__encode_uint8_t(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -260,9 +245,6 @@ H5P__encode_hbool_t(const void *value, void **_pp, size_t *size)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Sunday, July 29, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -432,9 +414,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, August 2, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -471,9 +450,6 @@ H5P__decode_size_t(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 August 07, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -512,9 +488,6 @@ H5P__decode_hsize_t(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, August 2, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -551,9 +524,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Thursday, August 2, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -584,9 +554,6 @@ H5P__decode_uint8_t(const void **_pp, void *_value)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Wednesday, August 15, 2012
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -616,9 +583,6 @@ H5P__decode_hbool_t(const void **_pp, void *_value)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Quincey Koziol
- *                 Thursday, August 2, 2012
  *
  *-------------------------------------------------------------------------
  */

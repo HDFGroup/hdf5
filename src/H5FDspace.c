@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5FDspace.c
- *			Jan  3 2008
- *			Quincey Koziol
  *
  * Purpose:		Space allocation routines for the file driver code.
  *
@@ -82,9 +80,6 @@ H5FL_DEFINE(H5FD_free_t);
  * Return:      Success:    The address of the previous EOA.
  *              Failure:    The undefined address HADDR_UNDEF
  *
- * Programmer:  Bill Wendling
- *              Wednesday, 04. December, 2002
- *
  *-------------------------------------------------------------------------
  */
 static haddr_t
@@ -129,9 +124,6 @@ done:
  *
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
- *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -228,9 +220,6 @@ done:
  * Return:      Success:    The format address of the new file memory.
  *              Failure:    The undefined address HADDR_UNDEF
  *
- * Programmer:  Quincey Koziol
- *              Friday, August 14, 2009
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -266,9 +255,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
- *
- * Programmer:  Robb Matzke
- *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -352,9 +338,6 @@ done:
  * Return:      Success:        Non-negative
  *              Failure:        Negative
  *
- * Programmer:  Quincey Koziol
- *              Friday, August 14, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -394,9 +377,6 @@ done:
  * Return:	Success:	TRUE(1)  - Block was extended
  *                              FALSE(0) - Block could not be extended
  * 		Failure:	FAIL
- *
- * Programmer:  Quincey Koziol
- *              Thursday, 17. January, 2008
  *
  *-------------------------------------------------------------------------
  */

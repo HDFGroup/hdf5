@@ -342,9 +342,6 @@ done:
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, September 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 /* Disable warning for "format not a string literal" here -QAK */
@@ -406,9 +403,6 @@ H5_GCC_CLANG_DIAG_ON("format-nonliteral")
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Friday, September 18, 2020
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -454,9 +448,6 @@ done:
  *              necessary.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Friday, September 18, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -505,9 +496,6 @@ done:
  *              allocating the managed string if necessary.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Friday, September 18, 2020
  *
  *-------------------------------------------------------------------------
  */

@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5trace.c
- *              Aug 21 2006
- *              Quincey Koziol
  *
  * Purpose:     Internal code for tracing API calls
  *
@@ -85,9 +83,6 @@ static herr_t H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degr
  *
  * Return:      SUCCEED / FAIL
  *
- * Programmer:	Quincey Koziol
- *	        Monday, September 21, 2020
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -112,9 +107,6 @@ H5_trace_args_bool(H5RS_str_t *rs, hbool_t val)
  *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Sunday, September 20, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -168,9 +160,6 @@ H5_trace_args_cset(H5RS_str_t *rs, H5T_cset_t cset)
  *		the refcounted string (RS) argument.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Monday, September 21, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -226,9 +215,6 @@ H5_trace_args_close_degree(H5RS_str_t *rs, H5F_close_degree_t degree)
  *              separate perl script.
  *
  * Return:      SUCCEED / FAIL
- *
- * Programmer:	Quincey Koziol
- *	        Saturday, September 19, 2020
  *
  *-------------------------------------------------------------------------
  */
@@ -3965,9 +3951,6 @@ error:
  *              CAUSE LIBRARY INITIALIZATIONS THAT ARE NOT DESIRED.
  *
  * Return:      Execution time for an API call
- *
- * Programmer:  Robb Matzke
- *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
  */

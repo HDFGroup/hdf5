@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pfcpl.c
- *			January  6 1998
- *			Robb Matzke
  *
  * Purpose:		File creation property list class routines
  *
@@ -202,8 +200,6 @@ static const hsize_t               H5F_def_file_space_page_size_g = H5F_CRT_FILE
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              October 31, 2006
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -312,9 +308,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -359,9 +352,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -394,9 +384,6 @@ done:
  *		property to not change.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -450,9 +437,6 @@ done:
  *
  * Return:	Success:	Non-negative, sizes returned through arguments.
  *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -509,9 +493,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -557,9 +538,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -598,9 +576,6 @@ done:
  *		average rank of 1.5 times the value of IK.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Tuesday, January  6, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -647,9 +622,6 @@ done:
  *
  *		Failure:	Negative
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -685,9 +657,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -731,9 +700,6 @@ H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -780,9 +746,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *		Monday, October 9, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -818,9 +781,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *		Monday, October 9, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -854,9 +814,6 @@ done:
  *              they are numbered 0, 1, and 2).
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -917,9 +874,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -973,9 +927,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1020,9 +971,6 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1063,9 +1011,6 @@ done:
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1111,9 +1056,6 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Mohamad Chaarawi
- *                 August 7, 2012
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1158,9 +1100,6 @@ done:
  *              never be lists but will be created as B-trees.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1212,9 +1151,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	James Laird
- *		Wednesday, April 5, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1251,8 +1187,6 @@ done:
  *sections. Ignore "persist" and "threshold" for strategies that do not use free-space managers
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi; June 10, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -1298,8 +1232,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; June 10, 2009
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1341,9 +1273,6 @@ done:
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, December 27, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1379,9 +1308,6 @@ H5P__fcrt_fspace_strategy_enc(const void *value, void **_pp, size_t *size)
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
- * Programmer:     Quincey Koziol
- *                 Friday, December 27, 2013
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1409,8 +1335,6 @@ H5P__fcrt_fspace_strategy_dec(const void **_pp, void *_value)
  * Purpose:     Sets the file space page size for paged aggregation.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; August 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1448,8 +1372,6 @@ done:
  *		or raw data in the parameter "fsp_size".
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi; August 2012
  *
  *-------------------------------------------------------------------------
  */

@@ -155,9 +155,6 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              Aug 30 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -206,9 +203,6 @@ H5O__ginfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
  *
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              Aug 30 2005
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -246,9 +240,6 @@ done:
  *
  *              Failure:        zero
  *
- * Programmer:  Quincey Koziol
- *              Aug 30 2005
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -281,9 +272,6 @@ H5O__ginfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_sh
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, August 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -304,9 +292,6 @@ H5O__ginfo_free(void *mesg)
  * Purpose:     Prints debugging info for a message.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              Aug 30 2005
  *
  *-------------------------------------------------------------------------
  */

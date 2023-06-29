@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FSprivate.h
- *              May  2 2006
- *              Quincey Koziol
  *
  * Purpose:     Private header for library accessible file free space routines.
  *

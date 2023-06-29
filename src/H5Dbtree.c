@@ -191,9 +191,6 @@ H5FL_DEFINE_STATIC(H5O_layout_chunk_t);
  *
  *		Failure:	Can't fail
  *
- * Programmer:	Quincey Koziol
- *		Monday, July  5, 2004
- *
  *-------------------------------------------------------------------------
  */
 static H5UC_t *
@@ -224,9 +221,6 @@ H5D__btree_get_shared(const H5F_t H5_ATTR_UNUSED *f, const void *_udata)
  *				to the UDATA.
  *
  * 		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Tuesday, October 14, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -294,9 +288,6 @@ H5D__btree_new_node(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5B_ins_t op, void *_lt_key,
  *
  *		Failure:	FAIL (same as LT_KEY<RT_KEY)
  *
- * Programmer:	Robb Matzke
- *		Thursday, November  6, 1997
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -341,9 +332,6 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
  *				and RT_KEY.
  *
  *		Failure:	FAIL (same as UDATA < LT_KEY)
- *
- * Programmer:	Robb Matzke
- *		Wednesday, October  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -406,9 +394,6 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  *              chunk returned through the UDATA argument, if *FOUND is true.
  *              Negative on failure.
  *
- * Programmer:	Robb Matzke
- *		Thursday, October  9, 1997
- *
  *-------------------------------------------------------------------------
  */
 static htri_t
@@ -453,9 +438,6 @@ done:
  *
  * Return:	Success:	FALSE if they are not disjoint.
  *				TRUE if they are disjoint.
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, May 6, 2015
  *
  * Note:	Assumes that the chunk offsets are scaled coordinates
  *
@@ -505,9 +487,6 @@ done:
  *				argument.
  *
  *		Failure:	H5B_INS_ERROR
- *
- * Programmer:	Robb Matzke
- *		Thursday, October  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -594,9 +573,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Pedro Vicente
- * 		March 28, 2002
- *
  *-------------------------------------------------------------------------
  */
 static H5B_ins_t
@@ -675,9 +651,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Friday, October 10, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -717,9 +690,6 @@ H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -750,9 +720,6 @@ H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key, con
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 7, 2015
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -780,9 +747,6 @@ done:
  * Purpose:	Create & initialize B-tree shared info
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, September 27, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -830,9 +794,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Monday, May 18, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -874,9 +835,6 @@ done:
  * Return:	Non-negative on success (with the LAYOUT argument initialized
  *		and ready to write to an object header). Negative on failure.
  *
- * Programmer:	Robb Matzke
- *		Tuesday, October 21, 1997
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -914,9 +872,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -936,9 +891,6 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  * Purpose:	Insert chunk entry into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -978,9 +930,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Albert Cheng
- *              June 27, 1998
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1018,9 +967,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, May 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1061,9 +1007,6 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, const void *_lt_key, haddr_t 
  *              for each one.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, May 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -1106,9 +1049,6 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t c
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 22, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1144,9 +1084,6 @@ done:
  *
  * Return:	Success:	Non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1203,9 +1140,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 29, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1250,9 +1184,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, May 29, 2008
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1282,9 +1213,6 @@ done:
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *              June 8, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1328,9 +1256,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1355,9 +1280,6 @@ H5D__btree_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, January 15, 2009
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1379,9 +1301,6 @@ H5D__btree_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
  * Purpose:	Release indexing information in memory.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -1414,9 +1333,6 @@ done:
  * Purpose:	Debugs a B-tree node for indexed raw data storage.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
  *
  *-------------------------------------------------------------------------
  */

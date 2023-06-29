@@ -67,9 +67,6 @@
  *
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Friday, February 24, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -102,9 +99,6 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -219,9 +213,6 @@ done:
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -249,9 +240,6 @@ H5HF_get_max_root_rows(const H5HF_t *fh)
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -278,9 +266,6 @@ H5HF_get_dtable_width_test(const H5HF_t *fh)
  * Return:	Success:	Max. # of direct block rows
  *
  *		Failure:	0
- *
- * Programmer:	Quincey Koziol
- *              Monday, May 22, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -313,9 +298,6 @@ H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, May 22, 2006
- *
  *-------------------------------------------------------------------------
  */
 unsigned
@@ -343,9 +325,6 @@ H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
  * Return:	Success:	Size of direct block
  *
  *		Failure:	0
- *
- * Programmer:	Quincey Koziol
- *              Monday, May 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -375,9 +354,6 @@ H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
  *
  *		Failure:	0
  *
- * Programmer:	Quincey Koziol
- *              Monday, April 10, 2006
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
@@ -404,9 +380,6 @@ H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
  * Return:	Success:	non-negative
  *
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, May 15, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -438,9 +411,6 @@ H5HF_get_id_off_test(const H5HF_t *fh, const void *_id, hsize_t *obj_off)
  * Return:	Success:	non-negative
  *		Failure:	negative
  *
- * Programmer:	Quincey Koziol
- *              Monday, August 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -467,9 +437,6 @@ H5HF_get_id_type_test(const void *_id, unsigned char *obj_type)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -498,9 +465,6 @@ H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool_t *len_extended
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, August 14, 2006
  *
  *-------------------------------------------------------------------------
  */
