@@ -1816,11 +1816,9 @@ DONE:
  *  h5pset_btree_ratios_c
  * PURPOSE
  *  Call H5Pset_btree_ratios to set B-tree split ratios for B-tree split ratios for a dataset transfer
- *  property list. a dataset transfer property list. INPUTS prp_id - property list identifier left - The B-tree
- *  split ratio for left-most nodes. middle - The B-tree split ratio for all other nodes right - The B-tree
- *  split ratio for right-most nodes and lone nodes.
- * RETURNS 0 on success, -1 on failure
- * SOURCE
+ *  property list. a dataset transfer property list. INPUTS prp_id - property list identifier left - The
+ * B-tree split ratio for left-most nodes. middle - The B-tree split ratio for all other nodes right - The
+ * B-tree split ratio for right-most nodes and lone nodes. RETURNS 0 on success, -1 on failure SOURCE
  */
 int_f
 h5pset_btree_ratios_c(hid_t_f *prp_id, real_f *left, real_f *middle, real_f *right)
