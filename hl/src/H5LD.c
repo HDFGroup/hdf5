@@ -34,8 +34,6 @@ static herr_t H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsi
  *
  * Return: void
  *
- * Programmer:  Vailin Choi; Aug 2010
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -74,8 +72,6 @@ H5LD_clean_vector(H5LD_memb_t *listv[])
  *
  * Return: Success: 0
  *       Failure: negative
- *
- * Programmer:  Vailin Choi; Aug 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -146,8 +142,6 @@ done:
  *
  * Return: Success: # of comma-separated fields in "fields"
  *       Failure: negative value
- *
- * Programmer:  Vailin Choi; Aug 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -275,8 +269,6 @@ done:
  * Return: Success: 0
  *       Failure: negative value
  *
- * Programmer:  Vailin Choi; March 2010
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -320,8 +312,6 @@ done:
  *
  * Return: Success: size of the dataset's datatype
  *       Failure: 0 (valid datatypes are never zero size)
- *
- * Programmer:  Vailin Choi; March 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -401,8 +391,6 @@ done:
  *
  * Return: Success: 0
  *       Failure: negative
- *
- * Programmer:  Vailin Choi; August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -578,8 +566,6 @@ done:
  * Return: Success: 0
  *       Failure: negative value
  *
- * Programmer:  Vailin Choi; March 2010
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -596,8 +582,6 @@ H5LDget_dset_dims(hid_t did, hsize_t *cur_dims)
  * Return: Success: size in bytes of the dataset's datatype
  *       Failure: 0 (valid datatypes are never zero size)
  *
- * Programmer:  Vailin Choi; March 2010
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -613,8 +597,6 @@ H5LDget_dset_type_size(hid_t did, const char *fields)
  *
  * Return: Success: 0
  *       Failure: negative value
- *
- * Programmer:  Vailin Choi; March 2010
  *
  *-------------------------------------------------------------------------
  */

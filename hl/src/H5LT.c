@@ -91,10 +91,6 @@ static herr_t udata_free(void *udata);
  * Return: Address of "allocated" buffer, if successful. Otherwise, it returns
  *         NULL.
  *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -189,10 +185,6 @@ out:
  * Return: The address of the destination buffer, if successful. Otherwise, it
  *         returns NULL.
  *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -271,10 +263,6 @@ out:
  * Return: Address of reallocated buffer, if successful. Otherwise, it returns
  *         NULL.
  *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -327,10 +315,6 @@ out:
  *          deallocated if there are no outstanding references.
  *
  * Return: SUCCEED or FAIL
- *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -408,10 +392,6 @@ out:
  * Return: Address of "newly allocated" structure, if successful. Otherwise, it
  *         returns NULL.
  *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -441,10 +421,6 @@ out:
  *          actually deallocated when there are no outstanding references.
  *
  * Return: SUCCEED or FAIL
- *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -488,10 +464,6 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id, const char *obj_name, const c
  * Purpose: Creates and writes a dataset of a type tid
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Quincey Koziol
- *
- * Date: October 10, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -553,10 +525,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: March 19, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -576,10 +544,6 @@ H5LTmake_dataset(hid_t loc_id, const char *dset_name, int rank, const hsize_t *d
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -597,10 +561,6 @@ H5LTmake_dataset_char(hid_t loc_id, const char *dset_name, int rank, const hsize
  * Purpose: Creates and writes a dataset of H5T_NATIVE_SHORT type
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
  *
  * Comments:
  *
@@ -620,10 +580,6 @@ H5LTmake_dataset_short(hid_t loc_id, const char *dset_name, int rank, const hsiz
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -641,10 +597,6 @@ H5LTmake_dataset_int(hid_t loc_id, const char *dset_name, int rank, const hsize_
  * Purpose: Creates and writes a dataset of H5T_NATIVE_LONG type
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
  *
  * Comments:
  *
@@ -664,10 +616,6 @@ H5LTmake_dataset_long(hid_t loc_id, const char *dset_name, int rank, const hsize
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -685,10 +633,6 @@ H5LTmake_dataset_float(hid_t loc_id, const char *dset_name, int rank, const hsiz
  * Purpose: Creates and writes a dataset of H5T_NATIVE_DOUBLE type
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 14, 2001
  *
  * Comments:
  *
@@ -708,10 +652,6 @@ H5LTmake_dataset_double(hid_t loc_id, const char *dset_name, int rank, const hsi
  * Purpose: Creates and writes a dataset of H5T_C_S1 type
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
  *
  * Comments:
  *
@@ -782,10 +722,6 @@ out:
  * Purpose: Open a user supplied file image using the core file driver.
  *
  * Return: File identifier, Failure: -1
- *
- * Programmer: Christian Chilan
- *
- * Date: October 3, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -897,10 +833,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Quincey Koziol
- *
- * Date: October 8, 2007
- *
  *-------------------------------------------------------------------------
  */
 
@@ -939,10 +871,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: June 13, 2001
- *
  *-------------------------------------------------------------------------
  */
 
@@ -958,10 +886,6 @@ H5LTread_dataset(hid_t loc_id, const char *dset_name, hid_t tid, void *data)
  * Purpose: Reads a dataset from disk.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -979,10 +903,6 @@ H5LTread_dataset_char(hid_t loc_id, const char *dset_name, char *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
- *
  *-------------------------------------------------------------------------
  */
 
@@ -998,10 +918,6 @@ H5LTread_dataset_short(hid_t loc_id, const char *dset_name, short *data)
  * Purpose: Reads a dataset from disk.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1019,10 +935,6 @@ H5LTread_dataset_int(hid_t loc_id, const char *dset_name, int *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1038,10 +950,6 @@ H5LTread_dataset_long(hid_t loc_id, const char *dset_name, long *data)
  * Purpose: Reads a dataset from disk.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1059,10 +967,6 @@ H5LTread_dataset_float(hid_t loc_id, const char *dset_name, float *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 5, 2001
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1078,10 +982,6 @@ H5LTread_dataset_double(hid_t loc_id, const char *dset_name, double *data)
  * Purpose: Reads a dataset
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: October 05, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1131,10 +1031,6 @@ out:
  * Purpose: Gets the dimensionality of a dataset.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 4, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1257,10 +1153,6 @@ out:
  *
  * Purpose: operator function used by H5LTfind_dataset
  *
- * Programmer: Pedro Vicente
- *
- * Date: June 21, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1298,10 +1190,6 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
  *
  * Purpose:  Inquires if a dataset named dset_name exists attached
  *           to the object loc_id.
- *
- * Programmer: Pedro Vicente
- *
- * Date: July 15, 2001
  *
  * Return:
  *     Success: The return value of the first operator that
@@ -1341,10 +1229,6 @@ H5_GCC_CLANG_DIAG_ON("cast-qual")
  *          it to the object specified by the name obj_name.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: July 23, 2001
  *
  * Comments: If the attribute already exists, it is overwritten
  *
@@ -1430,10 +1314,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: July 25, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1503,10 +1383,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 7, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1529,10 +1405,6 @@ H5LTset_attribute_char(hid_t loc_id, const char *obj_name, const char *attr_name
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -1557,10 +1429,6 @@ H5LTset_attribute_uchar(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 7, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1583,10 +1451,6 @@ H5LTset_attribute_short(hid_t loc_id, const char *obj_name, const char *attr_nam
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -1611,10 +1475,6 @@ H5LTset_attribute_ushort(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 7, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1636,10 +1496,6 @@ H5LTset_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name,
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -1664,10 +1520,6 @@ H5LTset_attribute_uint(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: November 7, 2001
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1689,10 +1541,6 @@ H5LTset_attribute_long(hid_t loc_id, const char *obj_name, const char *attr_name
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Elena Pourmal
- *
- * Date: June 17, 2005
  *
  * Comments: This function was added to support attributes of type long long
  *
@@ -1717,10 +1565,6 @@ H5LTset_attribute_long_long(hid_t loc_id, const char *obj_name, const char *attr
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1744,10 +1588,6 @@ H5LTset_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Alessandro Felder
- *
- * Date: August 27, 2021
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -1769,10 +1609,6 @@ H5LTset_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_na
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: July 25, 2001
  *
  * Comments:
  *
@@ -1796,10 +1632,6 @@ H5LTset_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_nam
  * Purpose: Create and write an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: November 7, 2001
  *
  * Comments:
  *
@@ -1846,10 +1678,6 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  * Purpose: Gets the dimensionality of an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 4, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1911,10 +1739,6 @@ out:
  * Purpose: Gets information about an attribute.
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 4, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -1993,10 +1817,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Raymond Lu
- *
- * Date: October 6, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -2041,10 +1861,6 @@ out:
  * Purpose:     Expand the buffer and append a string to it.
  *
  * Return:      void
- *
- * Programmer:  Raymond Lu
- *
- * Date:        29 September 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2112,10 +1928,6 @@ out:
  *
  * Return:      void
  *
- * Programmer:  Raymond Lu
- *
- * Date:        December 6, 2005
- *
  *-------------------------------------------------------------------------
  */
 static char *
@@ -2145,8 +1957,6 @@ out:
  * Purpose:     prints the enum data
  *
  * Return:      Success: 0, Failure: -1
- *
- * Programmer:  Raymond Lu
  *
  *-----------------------------------------------------------------------*/
 static char *
@@ -2274,10 +2084,6 @@ out:
  *
  * Return:      Success: 0, Failure: -1
  *
- * Programmer:  Raymond Lu
- *
- * Date:        December 6, 2005
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -2322,10 +2128,6 @@ out:
  * Purpose:     Private function to convert HDF5 data type to DDL description.
  *
  * Return:      Success: 0, Failure: -1
- *
- * Programmer:  Raymond Lu
- *
- * Date:        December 20, 2005
  *
  * Comments:
  *
@@ -2931,10 +2733,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -2976,10 +2774,6 @@ H5LTget_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3000,10 +2794,6 @@ H5LTget_attribute_char(hid_t loc_id, const char *obj_name, const char *attr_name
  * Purpose: Reads an attribute named attr_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -3026,10 +2816,6 @@ H5LTget_attribute_uchar(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3050,10 +2836,6 @@ H5LTget_attribute_short(hid_t loc_id, const char *obj_name, const char *attr_nam
  * Purpose: Reads an attribute named attr_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -3076,10 +2858,6 @@ H5LTget_attribute_ushort(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3100,10 +2878,6 @@ H5LTget_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name,
  * Purpose: Reads an attribute named attr_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
  *
  * Comments:
  *
@@ -3126,10 +2900,6 @@ H5LTget_attribute_uint(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3150,10 +2920,6 @@ H5LTget_attribute_long(hid_t loc_id, const char *obj_name, const char *attr_name
  * Purpose: Reads an attribute named attr_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Elena Pourmal
- *
- * Date: June 17, 2005
  *
  * Comments: This function was added to support INTEGER*8 Fortran types
  *
@@ -3176,10 +2942,6 @@ H5LTget_attribute_long_long(hid_t loc_id, const char *obj_name, const char *attr
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: March 8, 2004
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3201,10 +2963,6 @@ H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Alessandro Felder
- *
- * Date: August 27, 2021
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3225,10 +2983,6 @@ H5LTget_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_na
  * Purpose: Reads an attribute named attr_name
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
  *
  * Comments:
  *
@@ -3252,10 +3006,6 @@ H5LTget_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3277,10 +3027,6 @@ H5LTget_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  * Purpose: Reads an attribute named attr_name with the memory type mem_type_id
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
  *
  * Comments: Private function
  *
@@ -3308,10 +3054,6 @@ H5LTget_attribute(hid_t loc_id, const char *obj_name, const char *attr_name, hid
  * Purpose: Reads an attribute named attr_name with the memory type mem_type_id
  *
  * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
  *
  * Comments: Private function
  *
@@ -3368,10 +3110,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente
- *
- * Date: September 19, 2002
- *
  * Comments:
  *
  *-------------------------------------------------------------------------
@@ -3413,10 +3151,6 @@ out:
  * Purpose: creates and writes an attribute named NAME to the dataset DSET_ID
  *
  * Return: FAIL on error, SUCCESS on success
- *
- * Programmer: Pedro Vicente
- *
- * Date: January 04, 2005
  *
  * Comments:
  *

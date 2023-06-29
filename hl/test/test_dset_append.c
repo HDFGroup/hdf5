@@ -40,8 +40,6 @@
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Vailin Choi; Aug 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -154,8 +152,6 @@ append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -311,8 +307,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Vailin Choi; Jan 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -446,8 +440,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -592,8 +584,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -756,8 +746,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Vailin Choi; Jan 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -910,8 +898,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1073,8 +1059,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Vailin Choi; Jan 2014
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1223,8 +1207,6 @@ error:
  *              along with H5DOappend().
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Vailin Choi; Jan 2014
  *
  *-------------------------------------------------------------------------
  */
