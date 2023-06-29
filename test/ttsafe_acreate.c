@@ -25,9 +25,6 @@
  *        dataset), there is a small chance that consecutive reads occur
  *        before a write to that shared variable.
  *
- * Created: Oct 5 1999
- * Programmer: Chee Wai LEE
- *
  ********************************************************************/
 
 #include "ttsafe.h"

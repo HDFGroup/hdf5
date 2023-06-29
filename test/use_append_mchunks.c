@@ -48,8 +48,6 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Albert Cheng, 2013/6/1 */
-
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on

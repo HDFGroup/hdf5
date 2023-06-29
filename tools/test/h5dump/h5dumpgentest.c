@@ -7255,8 +7255,6 @@ gent_dataset_idx(void)
  *   Four more datasets of 1, 2, 4 and 8 bytes of signed int types are created.
  *   Fill them with raw data such that no bit will be all zero in a dataset.
  *   A dummy dataset of double type is created for failure test.
- * Created:  Albert Cheng, 2010/5/10.
- * Modified: Allen Byrne, 2011/1/5 Use file to test Signed/Unsigned datatypes
  *-------------------------------------------------------------------------
  */
 static void
