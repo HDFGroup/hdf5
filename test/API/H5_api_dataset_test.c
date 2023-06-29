@@ -3656,7 +3656,7 @@ test_dataset_property_lists(void)
             {
                 hsize_t tmp_chunk_dims[DATASET_PROPERTY_LIST_TEST_SPACE_RANK];
 
-                HDmemset(tmp_chunk_dims, 0, sizeof(tmp_chunk_dims));
+                memset(tmp_chunk_dims, 0, sizeof(tmp_chunk_dims));
 
                 if (H5Pget_chunk(dcpl_id1, DATASET_PROPERTY_LIST_TEST_SPACE_RANK, tmp_chunk_dims) < 0) {
                     H5_FAILED();
@@ -3771,7 +3771,7 @@ test_dataset_property_lists(void)
                     PART_ERROR(H5Dget_access_plist);
                 }
 
-                HDmemset(tmp_prefix, 0, (size_t)buf_size + 1);
+                memset(tmp_prefix, 0, (size_t)buf_size + 1);
 
                 if (H5Pget_efile_prefix(dapl_id2, tmp_prefix, (size_t)buf_size) < 0) {
                     H5_FAILED();
@@ -3858,7 +3858,7 @@ test_dataset_property_lists(void)
             {
                 hsize_t tmp_chunk_dims[DATASET_PROPERTY_LIST_TEST_SPACE_RANK];
 
-                HDmemset(tmp_chunk_dims, 0, sizeof(tmp_chunk_dims));
+                memset(tmp_chunk_dims, 0, sizeof(tmp_chunk_dims));
 
                 if (H5Pget_chunk(dcpl_id1, DATASET_PROPERTY_LIST_TEST_SPACE_RANK, tmp_chunk_dims) < 0) {
                     H5_FAILED();
@@ -7217,7 +7217,7 @@ test_dataset_set_extent_chunked_unlimited(void)
          * Remember the current dimensionality of the dataset before
          * changing them again.
          */
-        HDmemcpy(dims, new_dims, sizeof(new_dims));
+        memcpy(dims, new_dims, sizeof(new_dims));
     }
 
     /*
@@ -7282,7 +7282,7 @@ test_dataset_set_extent_chunked_unlimited(void)
          * Remember the current dimensionality of the dataset before
          * changing them again.
          */
-        HDmemcpy(dims, new_dims, sizeof(new_dims));
+        memcpy(dims, new_dims, sizeof(new_dims));
     }
 
     if (H5Pclose(dcpl_id) < 0)
@@ -7478,7 +7478,7 @@ test_dataset_set_extent_chunked_fixed(void)
          * Remember the current dimensionality of the dataset before
          * changing them again.
          */
-        HDmemcpy(dims, new_dims, sizeof(new_dims));
+        memcpy(dims, new_dims, sizeof(new_dims));
     }
 
     /*
@@ -7556,7 +7556,7 @@ test_dataset_set_extent_chunked_fixed(void)
          * Remember the current dimensionality of the dataset before
          * changing them again.
          */
-        HDmemcpy(dims2, new_dims, sizeof(new_dims));
+        memcpy(dims2, new_dims, sizeof(new_dims));
     }
 
     if (H5Pclose(dcpl_id) < 0)

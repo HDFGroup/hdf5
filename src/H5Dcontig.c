@@ -1267,7 +1267,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
 
             /* Clear memory */
             if (dset_contig->sieve_size > len)
-                HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
+                memset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
 
             /* Determine the new sieve buffer size & location */
             dset_contig->sieve_loc = addr;
@@ -1352,8 +1352,8 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
                     /* Prepend to existing sieve buffer */
                     if ((addr + len) == sieve_start) {
                         /* Move existing sieve information to correct location */
-                        HDmemmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
-                                  dset_contig->sieve_size);
+                        memmove(dset_contig->sieve_buf + len, dset_contig->sieve_buf,
+                                dset_contig->sieve_size);
 
                         /* Copy in new information (must be first in sieve buffer) */
                         H5MM_memcpy(dset_contig->sieve_buf, buf, len);
@@ -1798,7 +1798,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             H5MM_memcpy(reclaim_buf, buf, mem_nbytes);
 
             /* Set background buffer to all zeros */
-            HDmemset(bkg, 0, buf_size);
+            memset(bkg, 0, buf_size);
 
             /* Convert from memory to destination file */
             if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -1820,7 +1820,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(buf, 0, src_nbytes);
+                memset(buf, 0, src_nbytes);
         } /* end if */
 
         /* Write raw data to destination file */

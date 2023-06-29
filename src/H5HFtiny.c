@@ -152,7 +152,7 @@ H5HF__tiny_insert(H5HF_hdr_t *hdr, size_t obj_size, const void *obj, void *_id)
     } /* end else */
 
     H5MM_memcpy(id, obj, obj_size);
-    HDmemset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
+    memset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
 
     /* Update statistics about heap */
     hdr->tiny_size += obj_size;

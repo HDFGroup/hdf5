@@ -344,7 +344,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
      */
     if (NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
+    memset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
     /* "pre copy" pass over messages, to gather information for actual message copy operation
      * (for messages which depend on information from other messages)
@@ -944,7 +944,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     assert(oloc_dst->file);
 
     /* Initialize copy info before errors can be thrown */
-    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
+    memset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */
     if (NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))

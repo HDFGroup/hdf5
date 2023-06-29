@@ -389,7 +389,7 @@ ioc_main(ioc_data_t *ioc_data)
              * Zero out work request, since the received message should
              * be smaller than sizeof(sf_work_request_t)
              */
-            HDmemset(&wk_req, 0, sizeof(sf_work_request_t));
+            memset(&wk_req, 0, sizeof(sf_work_request_t));
 
             if (MPI_SUCCESS != (mpi_code = MPI_Recv(&wk_req, count, MPI_BYTE, source, tag,
                                                     context->sf_msg_comm, MPI_STATUS_IGNORE)))
@@ -1086,7 +1086,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
             assert(bytes_remaining > 0);
 
             /* end of file but not end of format address space */
-            HDmemset(this_buffer, 0, (size_t)bytes_remaining);
+            memset(this_buffer, 0, (size_t)bytes_remaining);
             break;
         }
         else {
@@ -1304,7 +1304,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     assert(entry_ptr);
     assert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
 
-    HDmemcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
+    memcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
 
     /* must obtain io_queue mutex before appending */
     hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);

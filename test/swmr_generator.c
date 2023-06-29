@@ -169,7 +169,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp
     /* Currently fill values do not work because they can bump the dataspace
      * message to the second object header chunk.  We should enable the fillval
      * here when this is fixed.  -NAF 8/11/11 */
-    HDmemset(&fillval, 0, sizeof(fillval));
+    memset(&fillval, 0, sizeof(fillval));
     fillval.rec_id = (uint64_t)ULLONG_MAX;
     if (H5Pset_fill_value(dcpl, tid, &fillval) < 0)
         return -1;

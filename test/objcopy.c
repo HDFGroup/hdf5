@@ -1063,7 +1063,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
-                    if (HDmemcmp(memb1, memb2, memb_size) != 0)
+                    if (memcmp(memb1, memb2, memb_size) != 0)
                         TEST_ERROR;
 
                     /* Update member pointers */
@@ -1285,7 +1285,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
         else
             TEST_ERROR;
     } /* end else */
-    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
+    else if (memcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
         TEST_ERROR;
 
     /* Data should be the same. :-) */
@@ -1670,7 +1670,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         TEST_ERROR;
 
                     /* Compare link data */
-                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size) != 0)
+                    if (memcmp(linkval, linkval2, linfo.u.val_size) != 0)
                         TEST_ERROR;
                 } /* end else-if */
                 else {
@@ -2867,7 +2867,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
 
     TESTING("H5Ocopy(): compound dataset");
 
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
         buf[i].d = 1.0 / (double)(i + 1);
@@ -6918,7 +6918,7 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
         FAIL_STACK_ERROR;
     if (HDstrlen(rbuf.v) != HDstrlen(rbuf2.v))
         FAIL_STACK_ERROR;
-    if (HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)) != 0)
+    if (memcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)) != 0)
         FAIL_STACK_ERROR;
 
     /* Reclaim vlen buffer */
@@ -11436,7 +11436,7 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
     TESTING("H5Ocopy(): NULL references");
 
     /* Initialize "zeros" array */
-    HDmemset(zeros, 0, sizeof(zeros));
+    memset(zeros, 0, sizeof(zeros));
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -11512,9 +11512,9 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
         TEST_ERROR;
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
+    if (memcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR;
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
+    if (memcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR;
 
     /* Close datasets */
@@ -11557,9 +11557,9 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
         TEST_ERROR;
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
+    if (memcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR;
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
+    if (memcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -11631,7 +11631,7 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     TESTING("H5Ocopy(): NULL references for opened datasets");
 
     /* Initialize "zeros" array */
-    HDmemset(zeros, 0, sizeof(zeros));
+    memset(zeros, 0, sizeof(zeros));
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -11716,9 +11716,9 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
+    if (memcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR;
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
+    if (memcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR;
 
     /* Create destination file */
@@ -11761,9 +11761,9 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
+    if (memcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR;
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
+    if (memcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -12106,7 +12106,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -12194,7 +12194,7 @@ test_copy_committed_datatype_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -12419,7 +12419,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -12477,7 +12477,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         TEST_ERROR;
     if (!token_cmp)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -12560,7 +12560,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -12594,7 +12594,7 @@ test_copy_committed_datatype_merge_same_file(hid_t fcpl, hid_t fapl, hbool_t reo
         TEST_ERROR;
     if (!token_cmp)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -12806,7 +12806,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -12861,7 +12861,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -12886,7 +12886,7 @@ test_copy_committed_dt_merge_sugg(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13109,7 +13109,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Aclose(aid) < 0)
@@ -13423,7 +13423,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token_int, &oinfo.token, sizeof(exp_token_int));
+    memcpy(&exp_token_int, &oinfo.token, sizeof(exp_token_int));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13432,7 +13432,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token_short, &oinfo.token, sizeof(exp_token_short));
+    memcpy(&exp_token_short, &oinfo.token, sizeof(exp_token_short));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13879,7 +13879,7 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13900,7 +13900,7 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13921,7 +13921,7 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -13942,7 +13942,7 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14112,7 +14112,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14160,7 +14160,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14215,7 +14215,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14265,7 +14265,7 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14456,7 +14456,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -14510,7 +14510,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -14573,7 +14573,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -14631,7 +14631,7 @@ test_copy_cdt_merge_dset_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
     if (H5Dclose(did) < 0)
@@ -15489,7 +15489,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -15556,7 +15556,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -15611,7 +15611,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -15636,7 +15636,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -15700,7 +15700,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 
@@ -15725,7 +15725,7 @@ test_copy_set_mcdt_search_cb(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
         TEST_ERROR;
     if (H5Oget_info3(tid, &oinfo, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&exp_token, &oinfo.token, sizeof(exp_token));
+    memcpy(&exp_token, &oinfo.token, sizeof(exp_token));
     if (H5Tclose(tid) < 0)
         TEST_ERROR;
 

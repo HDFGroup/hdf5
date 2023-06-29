@@ -669,7 +669,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                 /* XXX: Should we allow user to control the group creation params here? -QAK */
                 gcrt_info.gcpl_id    = H5P_GROUP_CREATE_DEFAULT;
                 gcrt_info.cache_type = H5G_NOTHING_CACHED;
-                HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+                memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
                 if (H5G__obj_create_real(grp_oloc.file, ginfo, linfo, pline, &gcrt_info,
                                          obj_loc.oloc /*out*/) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")

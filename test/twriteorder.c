@@ -266,10 +266,10 @@ write_wo_file(void)
         blkaddr = i * part_size_g + i;
 
         /* store old block address in byte 0-3 */
-        HDmemcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
+        memcpy(&buffer[0], &blkaddr_old, sizeof(blkaddr_old));
 
         /* fill the rest with the lowest byte of i */
-        HDmemset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
+        memset(&buffer[4], i & 0xff, (size_t)(BLOCKSIZE_DFT - 4));
 
         /* write the block */
         HDlseek(write_fd_g, (HDoff_t)blkaddr, SEEK_SET);
@@ -326,7 +326,7 @@ read_wo_file(void)
         }
 
         /* retrieve the block address in byte 0-3 */
-        HDmemcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
+        memcpy(&blkaddr, &buffer[0], sizeof(blkaddr));
     }
 
     return 0;

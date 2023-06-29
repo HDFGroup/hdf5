@@ -414,7 +414,7 @@ H5E__print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
         eprint.stream = stream;
 
     /* Reset the original error class information */
-    HDmemset(&eprint.cls, 0, sizeof(H5E_cls_t));
+    memset(&eprint.cls, 0, sizeof(H5E_cls_t));
 
     /* Walk the error stack */
     if (bk_compatible) {

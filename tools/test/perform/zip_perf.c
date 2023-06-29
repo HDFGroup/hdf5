@@ -342,7 +342,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     if (compress_percent) {
         size_t s = (size_t)((src_len * (uLongf)compress_percent) / 100);
 
-        HDmemset(src, '\0', s);
+        memset(src, '\0', s);
     }
 }
 

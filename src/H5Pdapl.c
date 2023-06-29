@@ -1315,7 +1315,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     info.func  = func;
     info.udata = udata;
 
-    HDmemset(info.boundary, 0, sizeof(info.boundary));
+    memset(info.boundary, 0, sizeof(info.boundary));
     /* boundary can be 0 to indicate no boundary is set */
     for (u = 0; u < ndims; u++) {
         if (boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
@@ -1365,7 +1365,7 @@ H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_appe
 
     /* Assign return values */
     if (boundary) {
-        HDmemset(boundary, 0, ndims * sizeof(hsize_t));
+        memset(boundary, 0, ndims * sizeof(hsize_t));
         if (info.ndims > 0)
             for (u = 0; u < info.ndims && u < ndims; u++)
                 boundary[u] = info.boundary[u];

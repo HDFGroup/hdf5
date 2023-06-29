@@ -47,8 +47,8 @@ files_have_same_contents(const char *name1, const char *name2)
 
     /* Loop until files are empty or we encounter a problem */
     while (1) {
-        HDmemset(buf1, 0, sizeof(buf1));
-        HDmemset(buf2, 0, sizeof(buf2));
+        memset(buf1, 0, sizeof(buf1));
+        memset(buf2, 0, sizeof(buf2));
 
         n1 = HDread(fd1, buf1, sizeof(buf1));
         if (n1 < 0 || (size_t)n1 > sizeof(buf1))
@@ -65,7 +65,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
         }
 
-        if (HDmemcmp(buf1, buf2, (size_t)n1) != 0)
+        if (memcmp(buf1, buf2, (size_t)n1) != 0)
             break;
 
     } /* end while */
@@ -720,7 +720,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -738,7 +738,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, hs_space, hs_space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
 
@@ -962,7 +962,7 @@ test_path_absolute(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1049,7 +1049,7 @@ test_path_relative(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1170,7 +1170,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
@@ -1207,7 +1207,7 @@ test_path_relative_cwd(hid_t fapl)
         FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
-    HDmemset(whole, 0, sizeof(whole));
+    memset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
         FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)

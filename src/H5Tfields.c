@@ -308,8 +308,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
             assert(size <= sizeof(tbuf));
             for (i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
                 for (j = 0, swapped = FALSE; j < i; j++) {
-                    if (HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
-                                 (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
+                    if (memcmp((uint8_t *)dt->shared->u.enumer.value + (j * size),
+                               (uint8_t *)dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
                         /* Swap names */
                         char *tmp                        = dt->shared->u.enumer.name[j];
                         dt->shared->u.enumer.name[j]     = dt->shared->u.enumer.name[j + 1];
@@ -336,8 +336,8 @@ H5T__sort_value(const H5T_t *dt, int *map)
 #ifndef NDEBUG
             /* I never trust a sort :-) -RPM */
             for (i = 0; i < (nmembs - 1); i++)
-                assert(HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
-                                (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
+                assert(memcmp((uint8_t *)dt->shared->u.enumer.value + (i * size),
+                              (uint8_t *)dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
 #endif
         } /* end if */
     }     /* end else */

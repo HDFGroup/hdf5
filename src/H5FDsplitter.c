@@ -406,7 +406,7 @@ H5FD__splitter_populate_config(H5FD_splitter_vfd_config_t *vfd_config, H5FD_spli
 
     assert(fapl_out);
 
-    HDmemset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
+    memset(fapl_out, 0, sizeof(H5FD_splitter_fapl_t));
 
     if (!vfd_config) {
         vfd_config = H5MM_calloc(sizeof(H5FD_splitter_vfd_config_t));

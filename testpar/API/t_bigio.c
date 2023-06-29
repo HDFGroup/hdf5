@@ -787,7 +787,7 @@ dataset_big_read(void)
     wdata = (B_DATATYPE *)malloc(bigcount * sizeof(B_DATATYPE));
     VRFY_G((wdata != NULL), "wdata malloc succeeded");
 
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
 
     /* setup file access template */
     acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
@@ -867,7 +867,7 @@ dataset_big_read(void)
 
     if (mpi_rank_g == 0)
         printf("\nRead Testing Dataset2 by ROW\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET2, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -930,7 +930,7 @@ dataset_big_read(void)
 
     if (mpi_rank_g == 0)
         printf("\nRead Testing Dataset3 read select ALL proc 0, NONE others\n");
-    HDmemset(rdata, 0, bigcount * sizeof(B_DATATYPE));
+    memset(rdata, 0, bigcount * sizeof(B_DATATYPE));
     dataset = H5Dopen2(fid, DATASET3, H5P_DEFAULT);
     VRFY_G((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -1153,7 +1153,7 @@ single_rank_independent_io(void)
         VRFY_G((ret >= 0), "H5Dwrite succeeded");
 
         /* Wipe buffer */
-        HDmemset(data, 0, dims[0] * sizeof(int));
+        memset(data, 0, dims[0] * sizeof(int));
 
         /* Read data back */
         ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);

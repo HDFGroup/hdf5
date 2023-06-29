@@ -1396,7 +1396,7 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
     nused = (size_t)enc_value;
 
     /* Set property default value */
-    HDmemset(pline, 0, sizeof(H5O_pline_t));
+    memset(pline, 0, sizeof(H5O_pline_t));
     *pline = H5O_def_pline_g;
 
     for (u = 0; u < nused; u++) {

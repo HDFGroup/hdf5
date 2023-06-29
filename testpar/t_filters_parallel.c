@@ -522,7 +522,7 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -673,7 +673,7 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -829,7 +829,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -981,7 +981,7 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -1119,13 +1119,13 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
         dset_id = H5Dopen2(group_id, WRITE_UNSHARED_ONE_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        HDmemset(read_buf, 255, data_size);
+        memset(read_buf, 255, data_size);
 
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify the correct data was written */
-        VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
         if (i < (size_t)WRITE_UNSHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
             /* Extend the dataset by count[1] chunks in the extensible dimension */
@@ -1272,13 +1272,13 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
         dset_id = H5Dopen2(group_id, WRITE_SHARED_ONE_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        HDmemset(read_buf, 255, data_size);
+        memset(read_buf, 255, data_size);
 
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify correct data was written */
-        VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
         if (i < (size_t)WRITE_SHARED_ONE_UNLIM_DIM_NLOOPS - 1) {
             /* Extend the dataset by count[1] chunks in the extensible dimension */
@@ -1436,13 +1436,13 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
         dset_id = H5Dopen2(group_id, WRITE_UNSHARED_TWO_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        HDmemset(read_buf, 255, data_size);
+        memset(read_buf, 255, data_size);
 
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify the correct data was written */
-        VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
         if (i < (size_t)WRITE_UNSHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
             /*
@@ -1603,13 +1603,13 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
         dset_id = H5Dopen2(group_id, WRITE_SHARED_TWO_UNLIM_DIM_DATASET_NAME, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        HDmemset(read_buf, 255, data_size);
+        memset(read_buf, 255, data_size);
 
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
         /* Verify correct data was written */
-        VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
         if (i < (size_t)WRITE_SHARED_TWO_UNLIM_DIM_NLOOPS - 1) {
             /* Extend the dataset by the size of a chunk in each extensible dimension */
@@ -1764,9 +1764,8 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
 
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    HDmemset(correct_buf +
-                 ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*data));
+    memset(correct_buf + ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+           0, segment_length * sizeof(*data));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -1789,7 +1788,7 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -1912,7 +1911,7 @@ test_write_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filte
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -2052,7 +2051,7 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (coords)
         free(coords);
@@ -2218,7 +2217,7 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -2381,7 +2380,7 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
 
@@ -2547,7 +2546,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -2708,7 +2707,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -2881,7 +2880,7 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -3059,7 +3058,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
 
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -3244,7 +3243,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
 
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -3440,7 +3439,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
 
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -3637,7 +3636,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
 
     VRFY((H5Dread(dset_id, memtype, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0), "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -3834,7 +3833,7 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -4032,7 +4031,7 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -4248,7 +4247,7 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
         }
     }
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -4322,8 +4321,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
 
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    HDmemset(correct_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*correct_buf));
+    memset(correct_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+           0, segment_length * sizeof(*correct_buf));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4474,7 +4473,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
                                             recvcounts, displs, C_DATATYPE_MPI, comm)),
              "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -4615,7 +4614,7 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (read_buf)
         free(read_buf);
@@ -4816,7 +4815,7 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
         }
     }
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -5047,7 +5046,7 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
         }
     }
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -5258,7 +5257,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
                                        resized_vector_type, comm)),
          "MPI_Allgather succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
     VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
@@ -5485,7 +5484,7 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -5695,7 +5694,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -5927,7 +5926,7 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
                                        resized_vector_type, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     VRFY((MPI_SUCCESS == MPI_Type_free(&vector_type)), "MPI_Type_free succeeded");
     VRFY((MPI_SUCCESS == MPI_Type_free(&resized_vector_type)), "MPI_Type_free succeeded");
@@ -6150,7 +6149,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
                                         global_buf, recvcounts, displs, MPI_BYTE, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -6381,7 +6380,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
                                         global_buf, recvcounts, displs, MPI_BYTE, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -6614,7 +6613,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
                                         global_buf, recvcounts, displs, MPI_BYTE, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -6854,7 +6853,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
                                         global_buf, recvcounts, displs, MPI_BYTE, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (displs)
         free(displs);
@@ -6997,7 +6996,7 @@ test_write_serial_read_parallel(const char *parent_group, H5Z_filter_t filter_id
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (correct_buf)
         free(correct_buf);
@@ -7175,7 +7174,7 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
         VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) >= 0),
              "Dataset read succeeded");
 
-        VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+        VRFY((0 == memcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
         VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
         VRFY((H5Gclose(group_id) >= 0), "Group close succeeded");
@@ -7293,7 +7292,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
     for (i = 0; i < SHRINKING_GROWING_CHUNKS_NLOOPS; i++) {
         /* Continually write random float data, followed by zeroed-out data */
         if (i % 2)
-            HDmemset(data, 0, data_size);
+            memset(data, 0, data_size);
         else {
             size_t j;
             for (j = 0; j < data_size / sizeof(*data); j++) {
@@ -7308,16 +7307,16 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
         verify_space_alloc_status(dset_id, plist_id, ALL_CHUNKS_WRITTEN);
 
         if (i % 2) {
-            HDmemset(read_buf, 255, data_size);
+            memset(read_buf, 255, data_size);
         }
         else {
-            HDmemset(read_buf, 0, data_size);
+            memset(read_buf, 0, data_size);
         }
 
         VRFY((H5Dread(dset_id, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl_id, read_buf) >= 0),
              "Dataset read succeeded");
 
-        VRFY((0 == HDmemcmp(read_buf, data, data_size)), "data verification succeeded");
+        VRFY((0 == memcmp(read_buf, data, data_size)), "data verification succeeded");
     }
 
     if (read_buf)
@@ -7457,7 +7456,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
@@ -7516,12 +7515,12 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
     dset_id = H5Dopen2(group_id, WRITE_UNSHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
-    HDmemset(read_buf, 255, data_size);
+    memset(read_buf, 255, data_size);
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     if (data)
         free(data);
@@ -7660,7 +7659,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
 
@@ -7720,12 +7719,12 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
     dset_id = H5Dopen2(group_id, WRITE_SHARED_FILTERED_EDGE_CHUNKS_DATASET_NAME2, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset open succeeded");
 
-    HDmemset(read_buf, 255, data_size);
+    memset(read_buf, 255, data_size);
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_BLOCK, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, data, data_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, data, data_size)), "Data verification succeeded");
 
     if (data)
         free(data);
@@ -7845,7 +7844,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
         correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -7921,7 +7920,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -7993,7 +7992,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     for (i = 0; i < read_buf_size / sizeof(*read_buf); i++)
         correct_buf[i] = FILL_VALUES_TEST_FILL_VAL;
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8057,7 +8056,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                                         displs, C_DATATYPE_MPI, comm)),
          "MPI_Allgatherv succeeded");
 
-    VRFY((0 == HDmemcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 == memcmp(read_buf, correct_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned
@@ -8436,7 +8435,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * values to all be the fill value, so this should be
      * a safe comparison in theory.
      */
-    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 != memcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to part of the first chunk in the dataset with
@@ -8517,7 +8516,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
      * values to all be the fill value, so this should be
      * a safe comparison in theory.
      */
-    VRFY((0 != HDmemcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
+    VRFY((0 != memcmp(read_buf, fill_buf, read_buf_size)), "Data verification succeeded");
 
     /*
      * Write to whole dataset and ensure fill value isn't returned

@@ -99,7 +99,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fractal heap direct block")
 
     /* Reset the metadata cache info for the heap header */
-    HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
     dblock->hdr = hdr;
@@ -129,7 +129,7 @@ H5HF__man_dblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
     /* XXX: Change to using free-list factories */
     if ((dblock->blk = H5FL_BLK_MALLOC(direct_block, dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(dblock->blk, 0, dblock->size);
+    memset(dblock->blk, 0, dblock->size);
 
     dblock->write_buf  = NULL;
     dblock->write_size = 0;

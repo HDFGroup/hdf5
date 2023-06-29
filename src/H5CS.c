@@ -248,7 +248,7 @@ H5CS_copy_stack(void)
 
     /* Copy pointers on old stack to new one */
     /* (Strings don't need to be duplicated, they are statically allocated) */
-    HDmemcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
+    memcpy(new_stack->rec, old_stack->rec, sizeof(char *) * old_stack->nused);
     new_stack->nused = new_stack->nalloc = old_stack->nused;
 
     /* Set the return value */

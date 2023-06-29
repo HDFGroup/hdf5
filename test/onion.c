@@ -1335,7 +1335,7 @@ test_revision_record_encode_decode(void)
 
     TESTING("encode/decode revision record");
 
-    HDmemcpy(record.time_of_creation, "19411207T190643Z", 16);
+    memcpy(record.time_of_creation, "19411207T190643Z", 16);
     record.archival_index.list = calloc(record.archival_index.n_entries, sizeof(H5FD_onion_index_entry_t));
     if (NULL == record.archival_index.list)
         TEST_ERROR;
@@ -1602,8 +1602,8 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     uint32_t                     buf_checksum = 0;
 
     /* memset to avoid bad frees on errors */
-    HDmemset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
-    HDmemset(&history_out, 0, sizeof(H5FD_onion_history_t));
+    memset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
+    memset(&history_out, 0, sizeof(H5FD_onion_history_t));
 
     hdr_out.version = H5FD_ONION_HEADER_VERSION_CURR;
 
@@ -2036,7 +2036,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
             TEST_ERROR;
         if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, 4, buf) < 0)
             TEST_ERROR;
-        if (HDmemcmp(a_list_s, buf, 4) != 0)
+        if (memcmp(a_list_s, buf, 4) != 0)
             TEST_ERROR;
         free(buf);
         buf = NULL;
@@ -2056,7 +2056,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
             TEST_ERROR;
         if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, buf_size, buf) < 0)
             TEST_ERROR;
-        if (HDmemcmp(a_list_s + half_size, buf, buf_size) != 0)
+        if (memcmp(a_list_s + half_size, buf, buf_size) != 0)
             TEST_ERROR;
         free(buf);
         buf = NULL;
@@ -2072,7 +2072,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
             TEST_ERROR;
         if (H5FDread(vfile_rw, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
             TEST_ERROR;
-        if (HDmemcmp(a_list_s, buf, a_list_size_s) != 0)
+        if (memcmp(a_list_s, buf, a_list_size_s) != 0)
             TEST_ERROR;
         free(buf);
         buf = NULL;
@@ -2139,7 +2139,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
             TEST_ERROR;
         if (H5FDread(vfile_ro, H5FD_MEM_DRAW, H5P_DEFAULT, 0, a_list_size_s, buf) < 0)
             TEST_ERROR;
-        if (HDmemcmp(a_list_s, buf, a_list_size_s) != 0)
+        if (memcmp(a_list_s, buf, a_list_size_s) != 0)
             TEST_ERROR;
         free(buf);
         buf = NULL;
@@ -2366,7 +2366,7 @@ test_several_revisions_with_logical_gaps(void)
         if (0 != buf[i])
             TEST_ERROR;
     }
-    if (HDmemcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
+    if (memcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
         TEST_ERROR;
     free(buf);
     buf = NULL;
@@ -2380,7 +2380,7 @@ test_several_revisions_with_logical_gaps(void)
         if (0 != buf[i])
             TEST_ERROR;
     }
-    if (HDmemcmp(buf + size, a_list_s, ONION_TEST_PAGE_SIZE_5 - size) != 0)
+    if (memcmp(buf + size, a_list_s, ONION_TEST_PAGE_SIZE_5 - size) != 0)
         TEST_ERROR;
     free(buf);
     buf = NULL;
@@ -2414,13 +2414,13 @@ test_several_revisions_with_logical_gaps(void)
         if (0 != buf[i])
             TEST_ERROR;
     }
-    if (HDmemcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
+    if (memcmp(buf + a_off, a_list_s, a_list_size_s) != 0)
         TEST_ERROR;
     for (i = a_off + a_list_size_s; i < b_off; i++) {
         if (0 != buf[i])
             TEST_ERROR;
     }
-    if (HDmemcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
+    if (memcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
         TEST_ERROR;
     free(buf);
     buf = NULL;
@@ -2451,15 +2451,15 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
         TEST_ERROR;
-    if (HDmemcmp(buf, a_list_s, a_list_size_s) != 0)
+    if (memcmp(buf, a_list_s, a_list_size_s) != 0)
         TEST_ERROR;
-    if (HDmemcmp(buf + a_list_size_s, a_list_s + a_list_size_s - a_off, a_off) != 0)
+    if (memcmp(buf + a_list_size_s, a_list_s + a_list_size_s - a_off, a_off) != 0)
         TEST_ERROR;
     for (i = a_off + a_list_size_s; i < b_off; i++) {
         if (0 != buf[i])
             TEST_ERROR;
     }
-    if (HDmemcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
+    if (memcmp(buf + b_off, b_list_s, b_list_size_s) != 0)
         TEST_ERROR;
     free(buf);
     buf = NULL;
@@ -2587,7 +2587,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
         onion_info_p->revision_num = about[i].revision_num;
         if (about[i].comment != NULL) {
             j = MIN(HDstrlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
-            HDmemcpy(onion_info_p->comment, about[i].comment, j);
+            memcpy(onion_info_p->comment, about[i].comment, j);
         }
         onion_info_p->comment[j] = '\0';
         fapl_id                  = H5Pcreate(H5P_FILE_ACCESS);
@@ -2613,7 +2613,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 TEST_ERROR;
             if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, wi->offset, wi->size, buf_vfy) < 0)
                 TEST_ERROR;
-            if (HDmemcmp(buf_vfy, wi->buf, wi->size) != 0) {
+            if (memcmp(buf_vfy, wi->buf, wi->size) != 0) {
                 const unsigned char *_buf = wi->buf;
                 size_t               z    = 0;
                 HDputs("i  exp  act");
@@ -2744,7 +2744,7 @@ test_page_aligned_history_create(void)
         TEST_ERROR;
     if (H5FDread(file, H5FD_MEM_DRAW, H5P_DEFAULT, 0, b_list_size_s, buf) < 0)
         TEST_ERROR;
-    if (HDmemcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
+    if (memcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");
@@ -2754,7 +2754,7 @@ test_page_aligned_history_create(void)
         fflush(stdout);
         TEST_ERROR;
     }
-    if (HDmemcmp(b_list_s, buf, a_off) != 0) {
+    if (memcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
         printf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");

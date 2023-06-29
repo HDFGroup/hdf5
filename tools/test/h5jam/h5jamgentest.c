@@ -326,7 +326,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
             goto error;
 
         /* Fill buf with pattern */
-        HDmemset(buf, '\0', ub_size);
+        memset(buf, '\0', ub_size);
         bp = buf;
         for (u = 0; u < ub_fill; u++)
             *bp++ = pattern[u % 10];

@@ -215,7 +215,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out
      */
     if (NULL == (bt = H5FL_MALLOC(H5B_t)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for B-tree root node")
-    HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&bt->cache_info, 0, sizeof(H5AC_info_t));
     bt->level     = 0;
     bt->left      = HADDR_UNDEF;
     bt->right     = HADDR_UNDEF;
@@ -703,7 +703,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
     } /* end if */
     else {
         /* Make room for the new key */
-        HDmemmove(base + shared->type->sizeof_nkey, base, (bt->nchildren - idx) * shared->type->sizeof_nkey);
+        memmove(base + shared->type->sizeof_nkey, base, (bt->nchildren - idx) * shared->type->sizeof_nkey);
         H5MM_memcpy(base, md_key, shared->type->sizeof_nkey);
 
         /* The MD_KEY is the left key of the new node */
@@ -711,7 +711,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
             idx++;
 
         /* Make room for the new child address */
-        HDmemmove(bt->child + idx + 1, bt->child + idx, (bt->nchildren - idx) * sizeof(haddr_t));
+        memmove(bt->child + idx + 1, bt->child + idx, (bt->nchildren - idx) * sizeof(haddr_t));
     } /* end if */
 
     bt->child[idx] = child;
@@ -1401,8 +1401,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
              */
             if (type->critical_key == H5B_LEFT) {
                 /* Slide all keys down 1, update lt_key */
-                HDmemmove(H5B_NKEY(bt, shared, 0), H5B_NKEY(bt, shared, 1),
-                          bt->nchildren * type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, 0), H5B_NKEY(bt, shared, 1), bt->nchildren * type->sizeof_nkey);
                 H5MM_memcpy(lt_key, H5B_NKEY(bt, shared, 0), type->sizeof_nkey);
                 *lt_key_changed = TRUE;
             }
@@ -1410,10 +1409,10 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                 /* Slide all but the leftmost 2 keys down, leaving the leftmost
                  * key intact (the right key of the leftmost child is
                  * overwritten) */
-                HDmemmove(H5B_NKEY(bt, shared, 1), H5B_NKEY(bt, shared, 2),
-                          (bt->nchildren - 1) * type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, 1), H5B_NKEY(bt, shared, 2),
+                        (bt->nchildren - 1) * type->sizeof_nkey);
 
-            HDmemmove(bt->child, bt->child + 1, (bt->nchildren - 1) * sizeof(haddr_t));
+            memmove(bt->child, bt->child + 1, (bt->nchildren - 1) * sizeof(haddr_t));
 
             bt->nchildren -= 1;
             bt_flags |= H5AC__DIRTIED_FLAG;
@@ -1428,8 +1427,8 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
             if (type->critical_key == H5B_LEFT)
                 /* Slide the rightmost key down one, overwriting the left key of
                  * the deleted (rightmost) child */
-                HDmemmove(H5B_NKEY(bt, shared, bt->nchildren - 1), H5B_NKEY(bt, shared, bt->nchildren),
-                          type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, bt->nchildren - 1), H5B_NKEY(bt, shared, bt->nchildren),
+                        type->sizeof_nkey);
             else {
                 /* Just update rt_key */
                 H5MM_memcpy(rt_key, H5B_NKEY(bt, shared, bt->nchildren - 1), type->sizeof_nkey);
@@ -1449,13 +1448,13 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
              * Return H5B_INS_NOOP.
              */
             if (type->critical_key == H5B_LEFT)
-                HDmemmove(H5B_NKEY(bt, shared, idx), H5B_NKEY(bt, shared, idx + 1),
-                          (bt->nchildren - idx) * type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, idx), H5B_NKEY(bt, shared, idx + 1),
+                        (bt->nchildren - idx) * type->sizeof_nkey);
             else
-                HDmemmove(H5B_NKEY(bt, shared, idx + 1), H5B_NKEY(bt, shared, idx + 2),
-                          (bt->nchildren - 1 - idx) * type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, idx + 1), H5B_NKEY(bt, shared, idx + 2),
+                        (bt->nchildren - 1 - idx) * type->sizeof_nkey);
 
-            HDmemmove(bt->child + idx, bt->child + idx + 1, (bt->nchildren - 1 - idx) * sizeof(haddr_t));
+            memmove(bt->child + idx, bt->child + idx + 1, (bt->nchildren - 1 - idx) * sizeof(haddr_t));
 
             bt->nchildren -= 1;
             bt_flags |= H5AC__DIRTIED_FLAG;
@@ -1662,7 +1661,7 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     /* Allocate and clear shared buffers */
     if (NULL == (shared->page = H5FL_BLK_MALLOC(page, shared->sizeof_rnode)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree page")
-    HDmemset(shared->page, 0, shared->sizeof_rnode);
+    memset(shared->page, 0, shared->sizeof_rnode);
 
     if (NULL == (shared->nkey = H5FL_SEQ_MALLOC(size_t, (size_t)(shared->two_k + 1))))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree native keys")
@@ -1750,7 +1749,7 @@ H5B__copy(const H5B_t *old_bt)
     H5MM_memcpy(new_node, old_bt, sizeof(H5B_t));
 
     /* Reset cache info */
-    HDmemset(&new_node->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&new_node->cache_info, 0, sizeof(H5AC_info_t));
 
     if (NULL == (new_node->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys)) ||
         NULL == (new_node->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k)))
@@ -1907,7 +1906,7 @@ H5B_get_info(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_info_t *bt_inf
     assert(udata);
 
     /* Portably initialize B-tree info struct */
-    HDmemset(bt_info, 0, sizeof(*bt_info));
+    memset(bt_info, 0, sizeof(*bt_info));
 
     /* Set up internal user-data for the B-tree 'get info' helper routine */
     info_udata.bt_info = bt_info;

@@ -48,7 +48,7 @@ dump_datatype(hid_t type)
     h5tools_context_t ctx; /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -72,7 +72,7 @@ dump_dataspace(hid_t space)
     h5tools_context_t ctx; /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -99,7 +99,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     hid_t  attr_id;
     herr_t ret = SUCCEED;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level  = dump_indent / COL;
     ctx.cur_column    = dump_indent;
     ctx.display_index = dump_opts.display_ai;
@@ -163,9 +163,9 @@ dump_all_cb(hid_t group, const char *name, const H5L_info2_t *linfo, void H5_ATT
     hsize_t           curr_pos = 0; /* total data element position   */
 
     /* setup */
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -634,9 +634,9 @@ dump_named_datatype(hid_t tid, const char *name)
     h5tool_format_t   string_dataformat;
 
     /* setup */
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -790,9 +790,9 @@ dump_group(hid_t gid, const char *name)
     }
 
     /* setup */
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -925,7 +925,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     h5tools_str_t     buffer;       /* string into which to render   */
     hsize_t           curr_pos = 0; /* total data element position   */
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
     ctx.cur_column   = dump_indent;
 
@@ -958,7 +958,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     }
 
     /* setup */
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     ctx.need_prefix = TRUE;
     h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -1112,7 +1112,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     string_dataformat.do_escape = dump_opts.display_escape;
     outputformat                = &string_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level  = dump_indent / COL;
     ctx.cur_column    = dump_indent;
     ctx.sset          = sset;
@@ -1344,7 +1344,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
             else {
                 size_t buffer_space = w - 1;
 
-                HDmemset(obj_name, '\0', w);
+                memset(obj_name, '\0', w);
                 if (op_name[0] != '/') {
                     HDstrncat(obj_name, buf, buffer_space);
                     buffer_space -= MIN(buffer_space, u);
@@ -1554,7 +1554,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     } /* end else */
 
     dump_indent += COL;
-    HDmemset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
     ctx.indent_level  = dump_indent / COL;
     ctx.cur_column    = dump_indent;
     ctx.display_index = dump_opts.display_ai;
@@ -1582,7 +1582,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
     /* handle error case: cannot open the object with the attribute */
     if ((oid = H5Oopen(fid, obj_name, H5P_DEFAULT)) < 0) {
         /* setup */
-        HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+        memset(&buffer, 0, sizeof(h5tools_str_t));
 
         ctx.need_prefix = TRUE;
 

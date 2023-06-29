@@ -651,7 +651,7 @@ H5O__pline_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int in
          */
         char name[64];
 
-        HDmemset(name, 0, 64);
+        memset(name, 0, 64);
         HDsnprintf(name, sizeof(name), "Filter at position %zu", i);
 
         fprintf(stream, "%*s%-*s\n", indent, "", fwidth, name);

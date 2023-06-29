@@ -73,7 +73,7 @@ pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *at
     if (attr != NULL)
         return EINVAL;
 
-    HDmemset(barrier, 0, sizeof(*barrier));
+    memset(barrier, 0, sizeof(*barrier));
 
     barrier->count = count;
 

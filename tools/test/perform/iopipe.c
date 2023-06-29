@@ -148,7 +148,7 @@ main(void)
     the_data = (unsigned char *)malloc((size_t)(size[0] * size[1]));
 
     /* initial fill for lazy malloc */
-    HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
+    memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
 
     /* Fill raw */
     synchronize();
@@ -160,7 +160,7 @@ main(void)
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
         fflush(stderr);
-        HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
+        memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
     }
 #ifdef H5_HAVE_GETRUSAGE
     getrusage(RUSAGE_SELF, &r_stop);

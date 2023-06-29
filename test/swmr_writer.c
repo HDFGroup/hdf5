@@ -159,7 +159,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)

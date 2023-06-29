@@ -86,7 +86,7 @@ test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, (size_t)NAME_LEN);
+    memset(dset_name, 0, (size_t)NAME_LEN);
     HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");
@@ -258,7 +258,7 @@ test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     hsize_t mem3_block[4]  = {1, 3, 6, 1};
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, NAME_LEN);
+    memset(dset_name, 0, NAME_LEN);
     HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");
@@ -461,7 +461,7 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    HDmemset(dset_name, 0, NAME_LEN);
+    memset(dset_name, 0, NAME_LEN);
     HDstrcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
     if (is_chunked)
         HDstrcat(dset_name, "_chunked");

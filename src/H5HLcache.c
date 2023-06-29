@@ -158,7 +158,7 @@ H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image, size_t len, H5HL_cache
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -355,7 +355,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, voi
     assert(actual_len);
     assert(*actual_len == image_len);
 
-    HDmemset(&heap, 0, sizeof(H5HL_t));
+    memset(&heap, 0, sizeof(H5HL_t));
 
     /* Deserialize the heap's header */
     if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, image_len, udata) < 0)
@@ -574,7 +574,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
              * the prefix and the data block due to alignment constraints.
              */
             gap = heap->prfx_size - (size_t)(image - (uint8_t *)_image);
-            HDmemset(image, 0, gap);
+            memset(image, 0, gap);
             image += gap;
         }
 
@@ -592,7 +592,7 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
         assert((size_t)(image - (uint8_t *)_image) <= len);
 
         /* Clear rest of local heap */
-        HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+        memset(image, 0, len - (size_t)(image - (uint8_t *)_image));
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)

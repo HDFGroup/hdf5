@@ -367,7 +367,7 @@ H5T__vlen_mem_seq_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     /* Copy to ensure correct alignment.  memcpy is best here because
      * it optimizes to fast code.
      */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    memcpy(&vl, _vl, sizeof(hvl_t));
 
     *len = vl.len;
 
@@ -393,7 +393,7 @@ H5T__vlen_mem_seq_getptr(void *_vl)
     /* check parameters, return result */
     assert(_vl);
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    memcpy(&vl, _vl, sizeof(hvl_t));
 
     FUNC_LEAVE_NOAPI(vl.p)
 } /* end H5T__vlen_mem_seq_getptr() */
@@ -418,7 +418,7 @@ H5T__vlen_mem_seq_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
     assert(_vl);
 
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    memcpy(&vl, _vl, sizeof(hvl_t));
 
     *isnull = ((vl.len == 0 || vl.p == NULL) ? TRUE : FALSE);
 
@@ -474,7 +474,7 @@ H5T__vlen_mem_seq_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
     assert(buf);
     assert(_vl);
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&vl, _vl, sizeof(hvl_t));
+    memcpy(&vl, _vl, sizeof(hvl_t));
     assert(vl.p);
 
     H5MM_memcpy(buf, vl.p, len);
@@ -553,7 +553,7 @@ H5T__vlen_mem_str_getlen(H5VL_object_t H5_ATTR_UNUSED *file, const void *_vl, si
     assert(_vl);
 
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    memcpy(&s, _vl, sizeof(char *));
 
     *len = HDstrlen(s);
 
@@ -579,7 +579,7 @@ H5T__vlen_mem_str_getptr(void *_vl)
     /* check parameters */
     assert(_vl);
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    memcpy(&s, _vl, sizeof(char *));
 
     FUNC_LEAVE_NOAPI(s)
 } /* end H5T__vlen_mem_str_getptr() */
@@ -601,7 +601,7 @@ H5T__vlen_mem_str_isnull(const H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, hb
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Copy to ensure correct alignment. */
-    HDmemcpy(&s, _vl, sizeof(char *));
+    memcpy(&s, _vl, sizeof(char *));
 
     *isnull = (s == NULL ? TRUE : FALSE);
 
@@ -651,7 +651,7 @@ H5T__vlen_mem_str_read(H5VL_object_t H5_ATTR_UNUSED *file, void *_vl, void *buf,
         assert(buf);
         assert(_vl);
         /* Copy to ensure correct alignment. */
-        HDmemcpy(&s, _vl, sizeof(char *));
+        memcpy(&s, _vl, sizeof(char *));
 
         H5MM_memcpy(buf, s, len);
     } /* end if */

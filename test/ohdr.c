@@ -79,8 +79,8 @@ test_cont(char *filename, hid_t fapl)
 
     TESTING("object header continuation block");
 
-    HDmemset(&oh_locA, 0, sizeof(oh_locA));
-    HDmemset(&oh_locB, 0, sizeof(oh_locB));
+    memset(&oh_locA, 0, sizeof(oh_locA));
+    memset(&oh_locB, 0, sizeof(oh_locB));
 
     /* Create the file to operate on */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -227,7 +227,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Create an object header */
-    HDmemset(&oh_loc, 0, sizeof(oh_loc));
+    memset(&oh_loc, 0, sizeof(oh_loc));
     if (H5O_create(f, (size_t)2048, (size_t)1, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
         FAIL_STACK_ERROR;
 
@@ -979,7 +979,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
         TEST_ERROR;
 
     /* modify the string attribute */
-    HDmemset(in_buf, 0, buf_size);
+    memset(in_buf, 0, buf_size);
     HDstrcpy(in_buf, ATTR_LONG);
     if (H5Awrite(aid, H5T_NATIVE_CHAR, in_buf) < 0)
         TEST_ERROR;
@@ -1899,7 +1899,7 @@ main(void)
              * (using default group creation property list only because it's convenient)
              */
             TESTING("object header creation");
-            HDmemset(&oh_loc, 0, sizeof(oh_loc));
+            memset(&oh_loc, 0, sizeof(oh_loc));
             if (H5O_create(f, (size_t)64, (size_t)0, H5P_GROUP_CREATE_DEFAULT, &oh_loc /*out*/) < 0)
                 FAIL_STACK_ERROR;
             PASSED();

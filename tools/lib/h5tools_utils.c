@@ -784,7 +784,7 @@ add_obj(table_t *table, const H5O_token_t *obj_token, const char *objname, hbool
     u = table->nobjs++;
 
     /* Set information about object */
-    HDmemcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
+    memcpy(&table->objs[u].obj_token, obj_token, sizeof(H5O_token_t));
     table->objs[u].objname   = HDstrdup(objname);
     table->objs[u].recorded  = record;
     table->objs[u].displayed = 0;
@@ -927,7 +927,7 @@ H5tools_get_symlink_info(hid_t file_id, const char *linkpath, h5tool_link_info_t
         } /* end if */
 
         /* set target obj type to return */
-        HDmemcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
+        memcpy(&link_info->obj_token, &trg_oinfo.token, sizeof(H5O_token_t));
         link_info->trg_type = trg_oinfo.type;
         link_info->fileno   = trg_oinfo.fileno;
     } /* end if */
@@ -1180,7 +1180,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
+            memcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
             if (show_progress) {
                 printf("  aws_region set\n");
             }
@@ -1192,7 +1192,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
+            memcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
             if (show_progress) {
                 printf("  secret_id set\n");
             }
@@ -1204,7 +1204,7 @@ h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
                 ret_value = 0;
                 goto done;
             }
-            HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
+            memcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
             if (show_progress) {
                 printf("  secret_key set\n");
             }

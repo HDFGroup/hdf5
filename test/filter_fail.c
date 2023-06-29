@@ -257,7 +257,7 @@ test_filter_read(char *file_name, hid_t my_fapl)
         TEST_ERROR;
 
     /* Read the chunks */
-    HDmemset(rbuf, 0, DIM * sizeof(int));
+    memset(rbuf, 0, DIM * sizeof(int));
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 
@@ -284,8 +284,8 @@ test_filter_read(char *file_name, hid_t my_fapl)
     if ((sid = H5Dget_space(dataset)) < 0)
         TEST_ERROR;
 
-    HDmemset(hs_offset, 0, sizeof(hs_offset));
-    HDmemset(hs_size, 0, sizeof(hs_size));
+    memset(hs_offset, 0, sizeof(hs_offset));
+    memset(hs_size, 0, sizeof(hs_size));
     hs_size[0] = DIM / 2;
 
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, stride, hs_size, NULL) < 0)
@@ -295,12 +295,12 @@ test_filter_read(char *file_name, hid_t my_fapl)
     if ((mspace = H5Screate_simple(1, dims, NULL)) < 0)
         TEST_ERROR;
 
-    HDmemset(zero, 0, sizeof zero);
+    memset(zero, 0, sizeof zero);
 
     if (H5Sselect_hyperslab(mspace, H5S_SELECT_SET, zero, stride, &nelmts, NULL) < 0)
         TEST_ERROR;
 
-    HDmemset(rbuf, 0, DIM * sizeof(int));
+    memset(rbuf, 0, DIM * sizeof(int));
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rbuf) < 0)
         TEST_ERROR;
 

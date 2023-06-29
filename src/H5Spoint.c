@@ -749,7 +749,7 @@ H5S_select_elements(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize
         /* Set the bound box to the default value */
         H5VM_array_fill(space->select.sel_info.pnt_lst->low_bounds, &tmp, sizeof(hsize_t),
                         space->extent.rank);
-        HDmemset(space->select.sel_info.pnt_lst->high_bounds, 0, sizeof(hsize_t) * space->extent.rank);
+        memset(space->select.sel_info.pnt_lst->high_bounds, 0, sizeof(hsize_t) * space->extent.rank);
     }
 
     /* Add points to selection */
@@ -1051,7 +1051,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     FUNC_ENTER_PACKAGE
 
     /* Get bounding box for the selection */
-    HDmemset(bounds_end, 0, sizeof(bounds_end));
+    memset(bounds_end, 0, sizeof(bounds_end));
     if (H5S__point_bounds(space, bounds_start, bounds_end) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get selection bounds")
 
@@ -1403,7 +1403,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
-        (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        (void)memset(dims, 0, (size_t)rank * sizeof(dims[0]));
         if (H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
     } /* end if */
@@ -2282,7 +2282,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
         rank_diff = base_space->extent.rank - new_space->extent.rank;
 
         /* Calculate offset of selection in projected buffer */
-        HDmemset(block, 0, sizeof(block));
+        memset(block, 0, sizeof(block));
         H5MM_memcpy(block, base_space->select.sel_info.pnt_lst->head->pnt, sizeof(hsize_t) * rank_diff);
         *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block);
 
@@ -2338,7 +2338,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             new_node->next = NULL;
 
             /* Copy over the point's coordinates */
-            HDmemset(new_node->pnt, 0, sizeof(hsize_t) * rank_diff);
+            memset(new_node->pnt, 0, sizeof(hsize_t) * rank_diff);
             H5MM_memcpy(&new_node->pnt[rank_diff], base_node->pnt,
                         (base_space->extent.rank * sizeof(hsize_t)));
 

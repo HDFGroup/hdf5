@@ -1606,7 +1606,7 @@ main(int argc, char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    HDmemset(&iter, 0, sizeof(iter));
+    memset(&iter, 0, sizeof(iter));
 
     if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;

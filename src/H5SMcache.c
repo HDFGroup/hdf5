@@ -227,7 +227,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED l
     assert(table->table_size == len);
 
     /* Check magic number */
-    if (HDmemcmp(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM table signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -537,7 +537,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     /* Allocate space for the SOHM list data structure */
     if (NULL == (list = H5FL_MALLOC(H5SM_list_t)))
         HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&list->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&list->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Allocate list in memory as an array*/
     if (NULL == (list->messages = (H5SM_sohm_t *)H5FL_ARR_MALLOC(H5SM_sohm_t, udata->header->list_max)))
@@ -545,7 +545,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED le
     list->header = udata->header;
 
     /* Check magic number */
-    if (HDmemcmp(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -670,7 +670,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_U
     assert((size_t)(image - (uint8_t *)_image) <= list->header->list_size);
 
     /* Clear memory */
-    HDmemset(image, 0, (list->header->list_size - (size_t)(image - (uint8_t *)_image)));
+    memset(image, 0, (list->header->list_size - (size_t)(image - (uint8_t *)_image)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

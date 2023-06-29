@@ -666,7 +666,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                         for (j = 0; j < ((hvl_t *)buf)[i].len; j++) {
                             if (update_ref_value(attr_id, H5R_OBJECT, &(ptr[j]), fidout, &ref_out, travt) < 0)
                                 continue;
-                            HDmemcpy(&(ptr[j]), &ref_out, msize);
+                            memcpy(&(ptr[j]), &ref_out, msize);
                         }
                     } /* for (i=0; i<nelems; i++) */
                 }
@@ -680,7 +680,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                             if (update_ref_value(attr_id, H5R_DATASET_REGION, &(ptr[j]), fidout, &ref_out,
                                                  travt) < 0)
                                 continue;
-                            HDmemcpy(&(ptr[j]), &ref_out, msize);
+                            memcpy(&(ptr[j]), &ref_out, msize);
                         }
                     } /* for (i=0; i<nelems; i++) */
                 }
@@ -711,7 +711,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                                                  travt) < 0) /* Extra (void *) cast to quiet "cast to create
                                                                 alignment" warning - 2019/07/05, QAK */
                                 continue;
-                            HDmemcpy(((char *)buf) + idx, &ref_out, ref_comp_size[j]);
+                            memcpy(((char *)buf) + idx, &ref_out, ref_comp_size[j]);
                         } /* if */
                         else if (ref_comp_size[j] == H5R_DSET_REG_REF_BUF_SIZE) {
                             size_t idx = i * msize + H5Tget_member_offset(mtype_id, ref_comp_index[j]);
@@ -721,7 +721,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                                                  (hdset_reg_ref_t *)(((char *)buf) + idx), fidout, &ref_out,
                                                  travt) < 0)
                                 continue;
-                            HDmemcpy(((char *)buf) + idx, &ref_out, ref_comp_size[j]);
+                            memcpy(((char *)buf) + idx, &ref_out, ref_comp_size[j]);
                         } /* else if */
                     }     /* j */
                 }         /* i */

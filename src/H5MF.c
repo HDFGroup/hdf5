@@ -195,7 +195,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
     switch (mapping_type) {
         case H5MF_AGGR_MERGE_SEPARATE:
             /* Don't merge any metadata together */
-            HDmemset(f_sh->fs_aggr_merge, 0, sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, 0, sizeof(f_sh->fs_aggr_merge));
 
             /* Check if merging raw data should be allowed */
             /* (treat global heaps as raw data) */
@@ -208,7 +208,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
 
         case H5MF_AGGR_MERGE_DICHOTOMY:
             /* Merge all metadata together (but not raw data) */
-            HDmemset(f_sh->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f_sh->fs_aggr_merge));
 
             /* Allow merging raw data allocations together */
             /* (treat global heaps as raw data) */
@@ -218,8 +218,8 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
 
         case H5MF_AGGR_MERGE_TOGETHER:
             /* Merge all allocation types together */
-            HDmemset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA),
-                     sizeof(f_sh->fs_aggr_merge));
+            memset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA),
+                   sizeof(f_sh->fs_aggr_merge));
             break;
 
         default:
@@ -2568,8 +2568,8 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     assert(fsm_settled);
 
     /* Initialize structs */
-    HDmemset(&fsinfo, 0, sizeof(fsinfo));
-    HDmemset(&fs_stat, 0, sizeof(fs_stat));
+    memset(&fsinfo, 0, sizeof(fsinfo));
+    memset(&fs_stat, 0, sizeof(fs_stat));
 
     /*
      * Only need to settle things if we are persisting free space and
@@ -2591,8 +2591,8 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled)
         assert(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2);
 
         /* Initialize fsm_opened and fsm_visited */
-        HDmemset(fsm_opened, 0, sizeof(fsm_opened));
-        HDmemset(fsm_visited, 0, sizeof(fsm_visited));
+        memset(fsm_opened, 0, sizeof(fsm_opened));
+        memset(fsm_visited, 0, sizeof(fsm_visited));
 
         /* 1) Reduce the EOA to the extent possible. */
 

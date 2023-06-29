@@ -3874,10 +3874,10 @@ gent_multi(void)
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
-    HDmemset(memb_map, 0, sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
+    memset(memb_map, 0, sizeof memb_map);
+    memset(memb_fapl, 0, sizeof memb_fapl);
+    memset(memb_name, 0, sizeof memb_name);
+    memset(memb_addr, 0, sizeof memb_addr);
 
     assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
 

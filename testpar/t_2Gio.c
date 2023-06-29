@@ -4134,11 +4134,11 @@ test_no_collective_cause_mode(int selection_mode)
          "reading and writing are the same for global cause of Broken Collective I/O");
 
     /* Test values */
-    HDmemset(message, 0, sizeof(message));
+    memset(message, 0, sizeof(message));
     HDsnprintf(message, sizeof(message),
                "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
-    HDmemset(message, 0, sizeof(message));
+    memset(message, 0, sizeof(message));
     HDsnprintf(message, sizeof(message),
                "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
@@ -4616,7 +4616,7 @@ main(int argc, char **argv)
     MPI_Comm_size(test_comm, &mpi_size);
     MPI_Comm_rank(test_comm, &mpi_rank);
 
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
 
     dim0 = BIG_X_FACTOR;
     dim1 = BIG_Y_FACTOR;
@@ -4635,7 +4635,7 @@ main(int argc, char **argv)
     };
     H5open();
 
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");

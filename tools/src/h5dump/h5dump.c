@@ -595,7 +595,7 @@ parse_mask_list(const char *h_list)
 
     /* sanity check */
     if (h_list) {
-        HDmemset(packed_mask, 0, sizeof(packed_mask));
+        memset(packed_mask, 0, sizeof(packed_mask));
 
         packed_bits_num = 0;
         /* scan in pair of offset,length separated by commas. */

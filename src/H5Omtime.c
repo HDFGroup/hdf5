@@ -188,7 +188,7 @@ H5O__mtime_decode(H5F_t H5_ATTR_NDEBUG_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
     /* Convert YYYYMMDDhhmmss UTC to a time_t. */
-    HDmemset(&tm, 0, sizeof tm);
+    memset(&tm, 0, sizeof tm);
     tm.tm_year  = (p[0] - '0') * 1000 + (p[1] - '0') * 100 + (p[2] - '0') * 10 + (p[3] - '0') - 1900;
     tm.tm_mon   = (p[4] - '0') * 10 + (p[5] - '0') - 1;
     tm.tm_mday  = (p[6] - '0') * 10 + (p[7] - '0');

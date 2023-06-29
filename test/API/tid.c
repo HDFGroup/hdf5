@@ -740,7 +740,7 @@ test_remove_clear_type(void)
          * Build object list *
          *********************/
 
-        HDmemset(obj_list.objects, 0, list_size);
+        memset(obj_list.objects, 0, list_size);
 
         /* The number of objects used is a random number between the min and max */
         obj_list.count = obj_list.remaining =

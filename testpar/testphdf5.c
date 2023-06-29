@@ -334,7 +334,7 @@ main(int argc, char **argv)
     H5open();
     h5_show_hostname();
 
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");

@@ -272,7 +272,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
         if ((n = HDread(fd, buf, to_read)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file")
         else if ((size_t)n < to_read)
-            HDmemset(buf + n, 0, to_read - (size_t)n);
+            memset(buf + n, 0, to_read - (size_t)n);
         full_name = (char *)H5MM_xfree(full_name);
         HDclose(fd);
         fd = -1;

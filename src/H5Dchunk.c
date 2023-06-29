@@ -1604,7 +1604,7 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
     /* Set initial chunk location, partial dimensions, etc */
     num_partial_dims = 0;
-    HDmemset(zeros, 0, sizeof(zeros));
+    memset(zeros, 0, sizeof(zeros));
     for (u = 0; u < fm->f_ndims; u++) {
         /* Validate this chunk dimension */
         if (di->layout->u.chunk.dim[u] == 0)
@@ -2771,7 +2771,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
         /* Set up contiguous I/O info object */
         H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
-        HDmemcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
+        memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
         ctg_dset_info.store      = &ctg_store;
         ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
         ctg_io_info.dsets_info   = &ctg_dset_info;
@@ -2783,7 +2783,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
         /* Set up compact I/O info object */
         H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
-        HDmemcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
+        memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
         cpt_dset_info.store      = &cpt_store;
         cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
         cpt_io_info.dsets_info   = &cpt_dset_info;
@@ -2930,7 +2930,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Set up contiguous I/O info object */
     H5MM_memcpy(&ctg_io_info, io_info, sizeof(ctg_io_info));
-    HDmemcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
+    memcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
     ctg_dset_info.store      = &ctg_store;
     ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
     ctg_io_info.dsets_info   = &ctg_dset_info;
@@ -2942,7 +2942,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 
     /* Set up compact I/O info object */
     H5MM_memcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
-    HDmemcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
+    memcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
     cpt_dset_info.store      = &cpt_store;
     cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
     cpt_io_info.dsets_info   = &cpt_dset_info;
@@ -3422,7 +3422,7 @@ H5D__chunk_dest(H5D_t *dset)
     /* Release cache structures */
     if (rdcc->slot)
         rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
-    HDmemset(rdcc, 0, sizeof(H5D_rdcc_t));
+    memset(rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Compose chunked index info struct */
     idx_info.f       = dset->oloc.file;
@@ -4398,7 +4398,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
 
             /* In the case that some dataset functions look through this data,
              * clear it to all 0s. */
-            HDmemset(chunk, 0, chunk_size);
+            memset(chunk, 0, chunk_size);
         } /* end if */
         else {
             /*
@@ -4490,7 +4490,7 @@ H5D__chunk_lock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_ds
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "can't refill fill value buffer")
                 } /* end if */
                 else
-                    HDmemset(chunk, 0, chunk_size);
+                    memset(chunk, 0, chunk_size);
 
                 /* Increment # of creations */
                 rdcc->stats.ninits++;
@@ -4650,7 +4650,7 @@ H5D__chunk_unlock(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_
         if (dirty) {
             H5D_rdcc_ent_t fake_ent; /* "fake" chunk cache entry */
 
-            HDmemset(&fake_ent, 0, sizeof(fake_ent));
+            memset(&fake_ent, 0, sizeof(fake_ent));
             fake_ent.dirty = TRUE;
             if (is_unfiltered_edge_chunk)
                 fake_ent.edge_chunk_state = H5D_RDCC_DISABLE_FILTERS;
@@ -4992,7 +4992,7 @@ H5D__chunk_allocate(const H5D_t *dset, hbool_t full_overwrite, const hsize_t old
             continue;
         else {
             /* Reset the chunk offset indices */
-            HDmemset(scaled, 0, (space_ndims * sizeof(scaled[0])));
+            memset(scaled, 0, (space_ndims * sizeof(scaled[0])));
             scaled[op_dim] = min_unalloc[op_dim];
 
             if (has_unfilt_edge_chunks) {
@@ -5356,7 +5356,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
             assert(max_edge_chunk_sc[op_dim] == old_edge_chunk_sc[op_dim]);
 
             /* Reset the chunk offset indices */
-            HDmemset(chunk_sc, 0, (space_ndims * sizeof(chunk_sc[0])));
+            memset(chunk_sc, 0, (space_ndims * sizeof(chunk_sc[0])));
             chunk_sc[op_dim] = old_edge_chunk_sc[op_dim];
 
             carry = FALSE;
@@ -5985,7 +5985,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
 
     /* Reset hyperslab start array */
     /* (hyperslabs will always start from origin) */
-    HDmemset(hyper_start, 0, sizeof(hyper_start));
+    memset(hyper_start, 0, sizeof(hyper_start));
 
     /* Set up chunked I/O info object, for operations on chunks (in callback)
      * Note that we only need to set scaled once, as the array's address
@@ -6007,7 +6007,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
     /* Initialize the user data for the iteration */
-    HDmemset(&udata, 0, sizeof udata);
+    memset(&udata, 0, sizeof udata);
     udata.common.layout   = &layout->u.chunk;
     udata.common.storage  = sc;
     udata.common.scaled   = scaled;
@@ -6032,8 +6032,8 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
     /*
      * Determine the chunks which need to be filled or removed
      */
-    HDmemset(min_mod_chunk_sc, 0, sizeof(min_mod_chunk_sc));
-    HDmemset(max_mod_chunk_sc, 0, sizeof(max_mod_chunk_sc));
+    memset(min_mod_chunk_sc, 0, sizeof(min_mod_chunk_sc));
+    memset(max_mod_chunk_sc, 0, sizeof(max_mod_chunk_sc));
     for (op_dim = 0; op_dim < (unsigned)space_ndims; op_dim++) {
         /* Validate this chunk dimension */
         if (chunk_dim[op_dim] == 0)
@@ -6099,7 +6099,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
             assert(max_mod_chunk_sc[op_dim] >= min_mod_chunk_sc[op_dim]);
 
             /* Reset the chunk offset indices */
-            HDmemset(scaled, 0, (space_ndims * sizeof(scaled[0])));
+            memset(scaled, 0, (space_ndims * sizeof(scaled[0])));
             scaled[op_dim] = min_mod_chunk_sc[op_dim];
 
             /* Initialize "dims_outside_fill" array */
@@ -6302,7 +6302,7 @@ H5D__chunk_addrmap(const H5D_t *dset, haddr_t chunk_addr[])
     assert(chunk_addr);
 
     /* Set up user data for B-tree callback */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
     udata.common.layout  = &dset->shared->layout.u.chunk;
     udata.common.storage = sc;
     udata.chunk_addr     = chunk_addr;
@@ -6360,7 +6360,7 @@ H5D__chunk_delete(H5F_t *f, H5O_t *oh, H5O_storage_t *storage)
         pline_read = TRUE;
     } /* end else if */
     else
-        HDmemset(&pline, 0, sizeof(pline));
+        memset(&pline, 0, sizeof(pline));
 
     /* Retrieve dataset layout message */
     if ((exists = H5O_msg_exists_oh(oh, H5O_LAYOUT_ID)) < 0)
@@ -6425,7 +6425,7 @@ H5D__chunk_update_cache(H5D_t *dset)
     assert((dset->shared->layout.u.chunk.ndims - 1) > 1);
 
     /* Add temporary entry list to rdcc */
-    (void)HDmemset(&tmp_head, 0, sizeof(tmp_head));
+    (void)memset(&tmp_head, 0, sizeof(tmp_head));
     rdcc->tmp_head = &tmp_head;
     tmp_tail       = &tmp_head;
 
@@ -6580,7 +6580,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
                             "memory allocation failed for raw data chunk")
             udata->bkg = new_buf;
             if (!udata->cpy_info->expand_ref)
-                HDmemset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
+                memset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
 
             bkg = udata->bkg;
         } /* end if */
@@ -6669,7 +6669,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         H5MM_memcpy(reclaim_buf, buf, reclaim_buf_size);
 
         /* Set background buffer to all zeros */
-        HDmemset(bkg, 0, buf_size);
+        memset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
         if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -6803,7 +6803,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
 
     /* Initialize the temporary pipeline info */
     if (NULL == pline_src) {
-        HDmemset(&_pline, 0, sizeof(_pline));
+        memset(&_pline, 0, sizeof(_pline));
         pline = &_pline;
     } /* end if */
     else
@@ -6940,7 +6940,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         /* Check for reference datatype and no expanding references & clear background buffer */
         if (!cpy_info->expand_ref && ((H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) && (f_src != f_dst)))
             /* Reset value to zero */
-            HDmemset(bkg, 0, buf_size);
+            memset(bkg, 0, buf_size);
     } /* end if */
 
     /* Allocate memory for copying the chunk */
@@ -6948,7 +6948,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
 
     /* Initialize the callback structure for the source */
-    HDmemset(&udata, 0, sizeof udata);
+    memset(&udata, 0, sizeof udata);
     udata.common.layout    = layout_src;
     udata.common.storage   = storage_src;
     udata.file_src         = f_src;
@@ -7070,7 +7070,7 @@ H5D__chunk_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5O_layout_t *layout, hsize_
         pline_read = TRUE;
     } /* end else if */
     else
-        HDmemset(&pline, 0, sizeof(pline));
+        memset(&pline, 0, sizeof(pline));
 
     /* Compose chunked index info struct */
     idx_info.f       = loc->file;
@@ -8216,7 +8216,7 @@ H5D__chunk_get_offset_copy(const H5D_t *dset, const hsize_t *offset, hsize_t *of
      * So transfer the offset array to an internal offset array that we
      * can properly terminate (handled via the memset call).
      */
-    HDmemset(offset_copy, 0, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
+    memset(offset_copy, 0, H5O_LAYOUT_NDIMS * sizeof(hsize_t));
 
     for (u = 0; u < dset->shared->ndims; u++) {
         /* Make sure the offset doesn't exceed the dataset's dimensions */

@@ -1634,7 +1634,7 @@ test_array_bkg(void)
     /* ------------------- */
     dtsinfo = (CmpDTSinfo *)malloc(sizeof(CmpDTSinfo));
     CHECK_PTR(dtsinfo, "malloc");
-    HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
+    memset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
         for (j = 0; j < ALEN; j++) {
             cf[i].a[j] = 100 * (i + 1) + j;
@@ -1849,7 +1849,7 @@ test_array_bkg(void)
 
     /* Reset the data to read in */
     /* ------------------------- */
-    HDmemset(cfr, 0, sizeof(CmpField) * LENGTH);
+    memset(cfr, 0, sizeof(CmpField) * LENGTH);
 
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");

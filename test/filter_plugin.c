@@ -124,7 +124,7 @@ allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_value
     /* Copy over the data elements */
     if (initial_values) {
         n_bytes = r * c * sizeof(int);
-        HDmemcpy((*arr)[0], initial_values[0], n_bytes);
+        memcpy((*arr)[0], initial_values[0], n_bytes);
     }
 
     return SUCCEED;

@@ -717,7 +717,7 @@ test_vol_registration(void)
     /* Test registering a VOL connector with an incompatible version # */
     if (NULL == (bad_fake_vol_class = malloc(sizeof(H5VL_class_t))))
         TEST_ERROR;
-    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    memcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
     bad_fake_vol_class->version = H5VL_VERSION + 1;
     H5E_BEGIN_TRY
     {

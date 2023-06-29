@@ -557,7 +557,7 @@ H5O__msg_reset_real(const H5O_msg_class_t *type, void *native)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "reset method failed")
         } /* end if */
         else
-            HDmemset(native, 0, type->native_size);
+            memset(native, 0, type->native_size);
     } /* end if */
 
 done:
@@ -1529,7 +1529,7 @@ H5O_msg_reset_share(unsigned H5_ATTR_NDEBUG_UNUSED type_id, void *mesg)
     assert(mesg);
 
     /* Reset the shared component in the message to zero. */
-    HDmemset((H5O_shared_t *)mesg, 0, sizeof(H5O_shared_t));
+    memset((H5O_shared_t *)mesg, 0, sizeof(H5O_shared_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_msg_reset_share() */

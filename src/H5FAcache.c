@@ -248,7 +248,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
     hdr->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -537,7 +537,7 @@ H5FA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
 
     /* Set up fake data block for computing size on disk */
     /* (Note: extracted from H5FA__dblock_alloc) */
-    HDmemset(&dblock, 0, sizeof(dblock));
+    memset(&dblock, 0, sizeof(dblock));
 
     /* Set up fake data block for computing size on disk
      *
@@ -632,7 +632,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     dblock->addr = udata->dblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_FARRAY, H5E_BADVALUE, NULL, "wrong fixed array data block signature")
     image += H5_SIZEOF_MAGIC;
 

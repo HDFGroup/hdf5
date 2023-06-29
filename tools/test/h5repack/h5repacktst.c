@@ -194,8 +194,8 @@ main(void)
     h5tools_init();
 
     /* initialize */
-    HDmemset(&diff_options, 0, sizeof(diff_opt_t));
-    HDmemset(&pack_options, 0, sizeof(pack_opt_t));
+    memset(&diff_options, 0, sizeof(diff_opt_t));
+    memset(&pack_options, 0, sizeof(pack_opt_t));
 
     /* run tests  */
     puts("Testing h5repack:");
@@ -4241,7 +4241,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf12, 'z', sizeof buf12);
+        memset(buf12, 'z', sizeof buf12);
     }
 
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
@@ -4259,7 +4259,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf22, 0, sizeof buf22);
+        memset(buf22, 0, sizeof buf22);
     }
 
     if ((tid = H5Tcopy(H5T_STD_B8LE)) < 0)
@@ -4288,7 +4288,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf32, 0, sizeof buf32);
+        memset(buf32, 0, sizeof buf32);
     }
 
     if ((tid = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) < 0)
@@ -4377,7 +4377,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf62, 0, sizeof buf62);
+        memset(buf62, 0, sizeof buf62);
     }
 
     if ((tid = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray)) < 0)
@@ -4393,8 +4393,8 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf72, 0, sizeof buf72);
-        HDmemset(buf82, 0, sizeof buf82);
+        memset(buf72, 0, sizeof buf72);
+        memset(buf82, 0, sizeof buf82);
     }
 
     if ((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -4431,7 +4431,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf13, 'z', sizeof buf13);
+        memset(buf13, 'z', sizeof buf13);
     }
 
     if ((tid = H5Tcopy(H5T_C_S1)) < 0)
@@ -5124,7 +5124,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      *-------------------------------------------------------------------------
      */
     if (make_diffs) {
-        HDmemset(buf12, 'z', sizeof buf12);
+        memset(buf12, 'z', sizeof buf12);
     }
 
     /*
@@ -5163,7 +5163,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf22, 0, sizeof buf22);
+        memset(buf22, 0, sizeof buf22);
     }
 
     /*
@@ -5221,7 +5221,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      *-------------------------------------------------------------------------
      */
     if (make_diffs) {
-        HDmemset(buf32, 0, sizeof buf32);
+        memset(buf32, 0, sizeof buf32);
     }
 
     /*
@@ -5368,7 +5368,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf62, 0, sizeof buf62);
+        memset(buf62, 0, sizeof buf62);
     }
     /*
     buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
@@ -5410,8 +5410,8 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf72, 0, sizeof buf72);
-        HDmemset(buf82, 0, sizeof buf82);
+        memset(buf72, 0, sizeof buf72);
+        memset(buf82, 0, sizeof buf82);
     }
     /*
     Attribute:   <integer2D> and <integer2D>
@@ -5451,7 +5451,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
      */
 
     if (make_diffs) {
-        HDmemset(buf13, 'z', sizeof buf13);
+        memset(buf13, 'z', sizeof buf13);
     }
 
     /*

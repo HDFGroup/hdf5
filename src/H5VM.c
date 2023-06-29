@@ -580,7 +580,7 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
     for (i = 0; i < nelmts; i++) {
         /* Copy an element */
         H5_CHECK_OVERFLOW(elmt_size, hsize_t, size_t);
-        HDmemset(dst, (int)fill_value, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
+        memset(dst, (int)fill_value, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
 
         /* Decrement indices and advance pointer */
         for (j = (int)(n - 1), carry = TRUE; j >= 0 && carry; --j) {

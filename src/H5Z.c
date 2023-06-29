@@ -325,7 +325,7 @@ H5Z_register(const H5Z_class2_t *cls)
         i = H5Z_table_used_g++;
         H5MM_memcpy(H5Z_table_g + i, cls, sizeof(H5Z_class2_t));
 #ifdef H5Z_DEBUG
-        HDmemset(H5Z_stat_table_g + i, 0, sizeof(H5Z_stats_t));
+        memset(H5Z_stat_table_g + i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
     }  /* end if */
     /* Filter already registered */
@@ -428,11 +428,11 @@ H5Z__unregister(H5Z_filter_t filter_id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5Z_table_g[filter_index], &H5Z_table_g[filter_index + 1],
-              sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
+    memmove(&H5Z_table_g[filter_index], &H5Z_table_g[filter_index + 1],
+            sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
 #ifdef H5Z_DEBUG
-    HDmemmove(&H5Z_stat_table_g[filter_index], &H5Z_stat_table_g[filter_index + 1],
-              sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
+    memmove(&H5Z_stat_table_g[filter_index], &H5Z_stat_table_g[filter_index + 1],
+            sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
 #endif /* H5Z_DEBUG */
     H5Z_table_used_g--;
 
@@ -1636,7 +1636,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
         pline->nused--;
 
         /* Reset information for previous last filter in pipeline */
-        HDmemset(&pline->filter[pline->nused], 0, sizeof(H5Z_filter_info_t));
+        memset(&pline->filter[pline->nused], 0, sizeof(H5Z_filter_info_t));
     } /* end else */
 
 done:

@@ -658,7 +658,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     int                ret_value = 0;
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /*-------------------------------------------------------------------------
      * copy the supplied object list
@@ -877,7 +877,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_create_plist failed");
                         if ((rank = H5Sget_simple_extent_ndims(f_space_id)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(f_space_id, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         if (H5Dget_space_status(dset_in, &space_status) < 0)
@@ -1116,8 +1116,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         hslab_space  = H5Screate_simple(1, &hslab_nelmts, NULL);
 
                                         /* the hyperslab selection loop */
-                                        HDmemset(hs_sel_offset, 0, sizeof hs_sel_offset);
-                                        HDmemset(zero, 0, sizeof zero);
+                                        memset(hs_sel_offset, 0, sizeof hs_sel_offset);
+                                        memset(zero, 0, sizeof zero);
 
                                         for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_select_nelmts) {
                                             if (rank > 0) {

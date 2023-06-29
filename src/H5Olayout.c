@@ -815,7 +815,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 if (mesg->storage.u.compact.buf)
                     H5MM_memcpy(p, mesg->storage.u.compact.buf, mesg->storage.u.compact.size);
                 else
-                    HDmemset(p, 0, mesg->storage.u.compact.size);
+                    memset(p, 0, mesg->storage.u.compact.size);
                 p += mesg->storage.u.compact.size;
             } /* end if */
             break;

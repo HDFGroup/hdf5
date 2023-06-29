@@ -217,7 +217,7 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* init linkinfo struct */
-    HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
+    memset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /* Check for no command line parameters */
     if (argc == 1) {

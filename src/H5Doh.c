@@ -378,7 +378,7 @@ H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info)
 
     if (exists && H5D__efl_is_space_alloc(&layout.storage)) {
         /* Start with clean EFL info */
-        HDmemset(&efl, 0, sizeof(efl));
+        memset(&efl, 0, sizeof(efl));
 
         /* Get External File List message from the object header */
         if (NULL == H5O_msg_read_oh(loc->file, oh, H5O_EFL_ID, &efl))

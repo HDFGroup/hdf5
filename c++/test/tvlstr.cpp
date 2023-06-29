@@ -179,7 +179,7 @@ test_vlstring_dataset()
         dset1 = root.createDataSet("test_scalar_small", vlst, ds_space);
 
         dynstring_ds_write = static_cast<char *>(calloc(2, sizeof(char)));
-        HDmemset(dynstring_ds_write, 'A', 1);
+        memset(dynstring_ds_write, 'A', 1);
 
         // Write data to the dataset, then read it back.
         dset1.write(&dynstring_ds_write, vlst);
@@ -277,7 +277,7 @@ test_vlstring_array_dataset()
         // Create and write another dataset.
         DataSet dataset2(file1->createDataSet("Dataset2", vlst, scalar_space));
         char   *wdata2 = static_cast<char *>(calloc(65534, sizeof(char)));
-        HDmemset(wdata2, 'A', 65533);
+        memset(wdata2, 'A', 65533);
         dataset2.write(&wdata2, vlst);
 
         char *rdata2;
@@ -654,7 +654,7 @@ test_vlstring_attribute()
         gr_attr = root.createAttribute("test_scalar_large", vlst, att_space);
 
         string_att_write = static_cast<char *>(calloc(8192, sizeof(char)));
-        HDmemset(string_att_write, 'A', 8191);
+        memset(string_att_write, 'A', 8191);
 
         // Write data to the attribute, then read it back.
         gr_attr.write(vlst, &string_att_write);

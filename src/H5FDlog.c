@@ -304,7 +304,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     /* Do this first, so that we don't try to free a wild pointer if
      * H5P_object_verify() fails.
      */
-    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -830,9 +830,9 @@ H5FD__log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
         HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
         HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
@@ -916,7 +916,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-            HDmemset(&file->flavor[addr], (int)type, (size_t)size);
+            memset(&file->flavor[addr], (int)type, (size_t)size);
         }
 
         if (file->fa.flags & H5FD_LOG_ALLOC)
@@ -952,7 +952,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             assert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-            HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
+            memset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
         }
 
         /* Log the file memory freed */
@@ -1013,7 +1013,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
                 assert(addr < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-                HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
+                memset(&file->flavor[file->eoa], (int)type, (size_t)size);
             }
 
             /* Log the extension like an allocation */
@@ -1031,7 +1031,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
             if (file->fa.flags & H5FD_LOG_FLAVOR) {
                 assert((addr + size) < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-                HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
+                memset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
             }
 
             /* Log the shrink like a free */
@@ -1246,7 +1246,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 
         if (0 == bytes_read) {
             /* End of file but not end of format address space */
-            HDmemset(buf, 0, size);
+            memset(buf, 0, size);
             break;
         }
 
@@ -1494,7 +1494,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
          * algorithm */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {
-                HDmemset(&file->flavor[orig_addr], (int)type, orig_size);
+                memset(&file->flavor[orig_addr], (int)type, orig_size);
                 fprintf(file->logfp, " (fresh)");
             }
         }

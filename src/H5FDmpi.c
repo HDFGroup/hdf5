@@ -273,7 +273,7 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     assert(H5FD_MPIO == file->pub.driver_id);
 
     /* Portably initialize MPI status variable */
-    HDmemset(&rcvstat, 0, sizeof(MPI_Status));
+    memset(&rcvstat, 0, sizeof(MPI_Status));
 
     /* p0 has no left neighbor; all other procs wait for msg */
     if (file->mpi_rank != 0) {

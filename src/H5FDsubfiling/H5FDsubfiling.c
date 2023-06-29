@@ -553,7 +553,7 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
     }
     else {
         /* Copy the subfiling fapl data out */
-        HDmemcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
+        memcpy(config_out, config_ptr, sizeof(H5FD_subfiling_config_t));
 
         /* Copy the driver info value */
         if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(config_out->ioc_fapl_id)) < 0)
@@ -574,7 +574,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 
     assert(config_out);
 
-    HDmemset(config_out, 0, sizeof(*config_out));
+    memset(config_out, 0, sizeof(*config_out));
 
     config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
     config_out->version     = H5FD_SUBFILING_CURR_FAPL_VERSION;
@@ -811,7 +811,7 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 
     /* Encode config file prefix string */
     if (sf_context->config_file_prefix) {
-        HDmemcpy(p, sf_context->config_file_prefix, prefix_len);
+        memcpy(p, sf_context->config_file_prefix, prefix_len);
         p += prefix_len;
     }
 
@@ -819,14 +819,14 @@ H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
     if (file->sf_file) {
         char ioc_name[9];
 
-        HDmemset(ioc_name, 0, sizeof(ioc_name));
+        memset(ioc_name, 0, sizeof(ioc_name));
 
         if (H5FD_sb_encode(file->sf_file, ioc_name, p + 9) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL,
                                     "unable to encode IOC VFD's superblock information");
 
         /* Copy the IOC VFD's name into our buffer */
-        HDmemcpy(p, ioc_name, 9);
+        memcpy(p, ioc_name, 9);
     }
 
 done:
@@ -893,7 +893,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate space for config file prefix string");
 
-            HDmemcpy(sf_context->config_file_prefix, p, tmpu64);
+            memcpy(sf_context->config_file_prefix, p, tmpu64);
 
             /* Just in case.. */
             sf_context->config_file_prefix[tmpu64 - 1] = '\0';
@@ -905,7 +905,7 @@ H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *
     if (file->sf_file) {
         char ioc_name[9];
 
-        HDmemcpy(ioc_name, p, 9);
+        memcpy(ioc_name, p, 9);
         p += 9;
 
         if (H5FD_sb_load(file->sf_file, ioc_name, p) < 0)
@@ -960,7 +960,7 @@ H5FD__subfiling_fapl_get(H5FD_t *_file)
     }
 
     /* Copy the fields of the structure */
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
+    memcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
 
     /* Copy the driver info value */
     if (H5FD__copy_plist(file->fa.ioc_fapl_id, &(fa->ioc_fapl_id)) < 0)
@@ -1036,7 +1036,7 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
+    memcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
 
     if (H5FD__copy_plist(old_fa->ioc_fapl_id, &(new_fa->ioc_fapl_id)) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL");
@@ -1169,7 +1169,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         config_ptr = &default_config;
     }
 
-    HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
+    memcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0) {
         file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
@@ -2844,9 +2844,9 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         _target_file_offset = target_file_offset + output_offset;
         _io_block_len       = io_block_len + output_offset;
 
-        HDmemset(_mem_buf_offset, 0, (max_iovec_len * sizeof(*_mem_buf_offset)));
-        HDmemset(_target_file_offset, 0, (max_iovec_len * sizeof(*_target_file_offset)));
-        HDmemset(_io_block_len, 0, (max_iovec_len * sizeof(*_io_block_len)));
+        memset(_mem_buf_offset, 0, (max_iovec_len * sizeof(*_mem_buf_offset)));
+        memset(_target_file_offset, 0, (max_iovec_len * sizeof(*_target_file_offset)));
+        memset(_io_block_len, 0, (max_iovec_len * sizeof(*_io_block_len)));
 
         if (total_bytes == data_size) {
             *n_subfiles_used = i;

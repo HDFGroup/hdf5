@@ -124,7 +124,7 @@ H5RS__xstrdup(H5RS_str_t *rs, const char *s)
         if (NULL == (rs->s = (char *)H5FL_BLK_MALLOC(str_buf, rs->max)))
             HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, FAIL, "memory allocation failed")
         if (len)
-            HDmemcpy(rs->s, s, len);
+            memcpy(rs->s, s, len);
         rs->end  = rs->s + len;
         *rs->end = '\0';
         rs->len  = len;
@@ -430,7 +430,7 @@ H5RS_acat(H5RS_str_t *rs, const char *s)
                 HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer")
 
         /* Append the string */
-        HDmemcpy(rs->end, s, len);
+        memcpy(rs->end, s, len);
         rs->end += len;
         *rs->end = '\0';
         rs->len += len;
@@ -479,7 +479,7 @@ H5RS_ancat(H5RS_str_t *rs, const char *s, size_t n)
                 HGOTO_ERROR(H5E_RS, H5E_CANTRESIZE, FAIL, "can't resize ref-counted string buffer")
 
         /* Append the string */
-        HDmemcpy(rs->end, s, n);
+        memcpy(rs->end, s, n);
         rs->end += n;
         *rs->end = '\0';
         rs->len += n;

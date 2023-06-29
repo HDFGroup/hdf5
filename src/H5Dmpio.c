@@ -117,7 +117,7 @@
  */
 #define H5D_MPIO_INIT_CHUNK_UD_INFO(chunk_ud, index_info_ptr)                                                \
     do {                                                                                                     \
-        HDmemset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                      \
+        memset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                        \
         chunk_ud.common.layout  = (index_info_ptr)->layout;                                                  \
         chunk_ud.common.storage = (index_info_ptr)->storage;                                                 \
     } while (0)
@@ -541,7 +541,7 @@ H5D__mpio_debug_init(void)
     assert(!H5D_mpio_debug_inited);
 
     /* Clear the debug flag buffer */
-    HDmemset(H5D_mpio_debug_flags_s, 0, sizeof(H5D_mpio_debug_flags_s));
+    memset(H5D_mpio_debug_flags_s, 0, sizeof(H5D_mpio_debug_flags_s));
 
     /* Retrieve and parse the H5Dmpio debug string */
     debug_str = HDgetenv("H5D_mpio_Debug");
@@ -3487,7 +3487,7 @@ H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chun
         int                            new_chunk_owner;
 
         /* Clear the mapping from rank value -> number of assigned chunks */
-        HDmemset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
+        memset(num_chunks_assigned_map, 0, (size_t)mpi_size * sizeof(*num_chunks_assigned_map));
 
         /* Sort collective chunk list according to chunk index */
         qsort(coll_chunk_list, coll_chunk_list_num_entries, sizeof(H5D_chunk_redistribute_info_t),
@@ -3838,7 +3838,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
             mod_data_p = msg_send_bufs[num_send_requests];
 
             /* Store the chunk's index into the buffer */
-            HDmemcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
+            memcpy(mod_data_p, &chunk_entry->index_info.chunk_idx, sizeof(hsize_t));
             mod_data_p += sizeof(hsize_t);
 
             /* Serialize the chunk's file dataspace into the buffer */
@@ -4691,7 +4691,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         if (msg_ptr) {
             /* Retrieve the chunk's index value */
-            HDmemcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
+            memcpy(&chunk_idx, msg_ptr, sizeof(hsize_t));
             msg_ptr += sizeof(hsize_t);
 
             /* Find the chunk entry according to its chunk index */
@@ -5153,8 +5153,8 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
          */
         for (size_t dbg_idx = 0; dbg_idx < chunk_list_num_entries; dbg_idx++) {
             if (coll_entry->index_info.chunk_idx == chunk_list[dbg_idx].index_info.chunk_idx) {
-                hbool_t coords_match = !HDmemcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
-                                                 di->dset->shared->ndims * sizeof(hsize_t));
+                hbool_t coords_match = !memcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
+                                               di->dset->shared->ndims * sizeof(hsize_t));
 
                 assert(coords_match && "Calculated scaled coordinates for chunk didn't match "
                                        "chunk's actual scaled coordinates!");

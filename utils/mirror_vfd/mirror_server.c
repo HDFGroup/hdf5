@@ -177,8 +177,8 @@ parse_args(int argc, char **argv, struct op_args *args_out)
     args_out->verbosity        = MIRROR_LOG_DEFAULT_VERBOSITY;
 
     /* Preset empty strings */
-    HDmemset(args_out->log_path, 0, PATH_MAX + 1);
-    HDmemset(args_out->writer_log_path, 0, PATH_MAX + 1);
+    memset(args_out->log_path, 0, PATH_MAX + 1);
+    memset(args_out->writer_log_path, 0, PATH_MAX + 1);
 
     if (argv == NULL || *argv == NULL) {
         mirror_log(NULL, V_ERR, "invalid argv pointer");

@@ -125,7 +125,7 @@ trav_token_add(trav_addr_t *visited, H5O_token_t *token, const char *path)
 
     /* Append it */
     idx = visited->nused++;
-    HDmemcpy(&visited->objs[idx].token, token, sizeof(H5O_token_t));
+    memcpy(&visited->objs[idx].token, token, sizeof(H5O_token_t));
     visited->objs[idx].path = HDstrdup(path);
 } /* end trav_token_add() */
 
@@ -354,7 +354,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     else
         H5Oget_info3(loc_id, &oinfo, H5O_INFO_BASIC);
 
-    HDmemcpy(&info->paths[idx].obj_token, &oinfo.token, sizeof(H5O_token_t));
+    memcpy(&info->paths[idx].obj_token, &oinfo.token, sizeof(H5O_token_t));
     info->paths[idx].fileno = oinfo.fileno;
 } /* end trav_fileinfo_add() */
 
@@ -381,7 +381,7 @@ trav_info_visit_obj(const char *path, const H5O_info2_t *oinfo, const char H5_AT
     /* set object addr and fileno. These are for checking same object */
     info_p = (trav_info_t *)udata;
     idx    = info_p->nused - 1;
-    HDmemcpy(&info_p->paths[idx].obj_token, &oinfo->token, sizeof(H5O_token_t));
+    memcpy(&info_p->paths[idx].obj_token, &oinfo->token, sizeof(H5O_token_t));
     info_p->paths[idx].fileno = oinfo->fileno;
 
     return (0);
@@ -658,7 +658,7 @@ trav_table_add(trav_table_t *table, const char *path, const H5O_info2_t *oinfo)
 
         new_obj = table->nobjs++;
         if (oinfo)
-            HDmemcpy(&table->objs[new_obj].obj_token, &oinfo->token, sizeof(H5O_token_t));
+            memcpy(&table->objs[new_obj].obj_token, &oinfo->token, sizeof(H5O_token_t));
         else
             /* Set token to 'undefined' values */
             table->objs[new_obj].obj_token = H5O_TOKEN_UNDEF;

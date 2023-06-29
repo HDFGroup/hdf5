@@ -129,7 +129,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata, ui
     /* Allocate "page" for node I/O */
     if (NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    HDmemset(hdr->page, 0, hdr->node_size);
+    memset(hdr->page, 0, hdr->node_size);
 
     /* Allocate array of node info structs */
     if (NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))

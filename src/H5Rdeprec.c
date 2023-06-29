@@ -195,7 +195,7 @@ H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t t
         /* Zero the heap ID out, may leak heap space if user is re-using
          * reference and doesn't have garbage collection turned on
          */
-        HDmemset(buf, 0, buf_size);
+        memset(buf, 0, buf_size);
 
         /* Get the amount of space required to serialize the selection */
         if ((data_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)

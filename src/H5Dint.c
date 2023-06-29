@@ -167,7 +167,7 @@ H5D_init(void)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the "default dataset" information */
-    HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
+    memset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
     H5D_def_dset.type_id = H5I_INVALID_HID;
     H5D_def_dset.dapl_id = H5I_INVALID_HID;
     H5D_def_dset.dcpl_id = H5I_INVALID_HID;
@@ -1599,7 +1599,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
     assert(dset->shared);
 
     /* Set default append flush values */
-    HDmemset(&dset->shared->append_flush, 0, sizeof(dset->shared->append_flush));
+    memset(&dset->shared->append_flush, 0, sizeof(dset->shared->append_flush));
 
     /* If the dataset is chunked and there is a non-default DAPL */
     if (dapl_id != H5P_DATASET_ACCESS_DEFAULT && dset->shared->layout.type == H5D_CHUNKED) {
@@ -2303,7 +2303,7 @@ H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwr
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                         "unable to allocate memory for compact dataset")
                         if (!full_overwrite)
-                            HDmemset(layout->storage.u.compact.buf, 0, layout->storage.u.compact.size);
+                            memset(layout->storage.u.compact.buf, 0, layout->storage.u.compact.size);
                         layout->storage.u.compact.dirty = TRUE;
 
                         /* Indicate that we should initialize storage space */
@@ -3573,7 +3573,7 @@ H5D_get_create_plist(const H5D_t *dset)
     switch (copied_layout.type) {
         case H5D_COMPACT:
             copied_layout.storage.u.compact.buf = H5MM_xfree(copied_layout.storage.u.compact.buf);
-            HDmemset(&copied_layout.storage.u.compact, 0, sizeof(copied_layout.storage.u.compact));
+            memset(&copied_layout.storage.u.compact, 0, sizeof(copied_layout.storage.u.compact));
             break;
 
         case H5D_CONTIGUOUS:

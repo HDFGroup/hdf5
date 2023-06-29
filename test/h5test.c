@@ -465,7 +465,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
@@ -1731,7 +1731,7 @@ h5_get_dummy_vfd_class(void)
         TEST_ERROR;
 
     /* Copy the dummy VFD */
-    HDmemcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
+    memcpy(vfd_class, &H5FD_dummy_g, sizeof(H5FD_class_t));
 
     return vfd_class;
 

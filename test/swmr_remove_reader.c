@@ -205,7 +205,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Emit informational message */
     if (verbose)
@@ -291,7 +291,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                 /* Check common dataset */
                 if (check_dataset(fid, verbose, sym_com[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 
@@ -306,7 +306,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
                 /* Check random dataset */
                 if (check_dataset(fid, verbose, sym_rand[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 

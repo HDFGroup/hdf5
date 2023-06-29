@@ -8319,8 +8319,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8365,8 +8365,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -8388,8 +8388,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -25203,8 +25203,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;
@@ -31046,8 +31046,8 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
             expected[i].serialized   = FALSE;
             expected[i].destroyed    = FALSE;
 
-            HDmemset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
-            HDmemset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
+            memset(expected[i].flush_dep_par_type, 0, sizeof(expected[i].flush_dep_par_type));
+            memset(expected[i].flush_dep_par_idx, 0, sizeof(expected[i].flush_dep_par_idx));
 
             expected[i].flush_dep_npar       = 0;
             expected[i].flush_dep_nchd       = 0;

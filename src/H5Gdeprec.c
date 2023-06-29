@@ -1075,7 +1075,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
 
     /* Reset stat buffer */
     if (statbuf)
-        HDmemset(statbuf, 0, sizeof(H5G_stat_t));
+        memset(statbuf, 0, sizeof(H5G_stat_t));
 
     /* Set up user data for retrieving information */
     udata.statbuf     = statbuf;

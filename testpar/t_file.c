@@ -542,7 +542,7 @@ create_file(const char *filename, hid_t fcpl, hid_t fapl, int metadata_write_str
         ret = H5Dclose(dset_id);
         VRFY((ret == 0), "");
 
-        HDmemset(data_array, 0, num_elements * sizeof(DATATYPE));
+        memset(data_array, 0, num_elements * sizeof(DATATYPE));
         dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT);
         VRFY((dset_id >= 0), "");
 

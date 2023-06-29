@@ -373,7 +373,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     H5MM_memcpy(p, attr->shared->name, name_len);
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
         /* Pad to the correct number of bytes */
-        HDmemset(p + name_len, 0, H5O_ALIGN_OLD(name_len) - name_len);
+        memset(p + name_len, 0, H5O_ALIGN_OLD(name_len) - name_len);
         p += H5O_ALIGN_OLD(name_len);
     } /* end if */
     else
@@ -384,7 +384,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute datatype")
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
-        HDmemset(p + attr->shared->dt_size, 0, H5O_ALIGN_OLD(attr->shared->dt_size) - attr->shared->dt_size);
+        memset(p + attr->shared->dt_size, 0, H5O_ALIGN_OLD(attr->shared->dt_size) - attr->shared->dt_size);
         p += H5O_ALIGN_OLD(attr->shared->dt_size);
     } /* end if */
     else
@@ -395,7 +395,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "can't encode attribute dataspace")
 
     if (attr->shared->version < H5O_ATTR_VERSION_2) {
-        HDmemset(p + attr->shared->ds_size, 0, H5O_ALIGN_OLD(attr->shared->ds_size) - attr->shared->ds_size);
+        memset(p + attr->shared->ds_size, 0, H5O_ALIGN_OLD(attr->shared->ds_size) - attr->shared->ds_size);
         p += H5O_ALIGN_OLD(attr->shared->ds_size);
     } /* end if */
     else
@@ -405,7 +405,7 @@ H5O__attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     if (attr->shared->data)
         H5MM_memcpy(p, attr->shared->data, attr->shared->data_size);
     else
-        HDmemset(p, 0, attr->shared->data_size);
+        memset(p, 0, attr->shared->data_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

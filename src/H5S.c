@@ -1259,7 +1259,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims, const hs
     /* Selection related cleanup */
 
     /* Set offset to zeros */
-    HDmemset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
+    memset(space->select.offset, 0, sizeof(hsize_t) * space->extent.rank);
     space->select.offset_changed = FALSE;
 
     /* If the selection is 'all', update the number of elements selected */

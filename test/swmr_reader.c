@@ -210,7 +210,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record read, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Emit informational message */
     if (verbose)
@@ -305,7 +305,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
                 /* Check common dataset */
                 if (check_dataset(fid, verbose, verbose_file, sym_com[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 
@@ -320,7 +320,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
                 /* Check random dataset */
                 if (check_dataset(fid, verbose, verbose_file, sym_rand[v]->name, &record, mem_sid) < 0)
                     return -1;
-                HDmemset(&record, 0, sizeof(record));
+                memset(&record, 0, sizeof(record));
             } /* end for */
         }     /* end if */
 

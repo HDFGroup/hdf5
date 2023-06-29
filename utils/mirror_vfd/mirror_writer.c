@@ -194,7 +194,7 @@ session_init(struct mirror_writer_opts *opts)
     session->reply.pub.version       = H5FD_MIRROR_XMIT_CURR_VERSION;
     session->reply.pub.op            = H5FD_MIRROR_OP_REPLY;
     session->reply.pub.session_token = 0;
-    HDmemset(session->reply.message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    memset(session->reply.message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
 
     /* Options-derived population */
 
@@ -358,7 +358,7 @@ reply_ok(struct mirror_session *session)
     mirror_log(session->loginfo, V_ALL, "reply_ok()");
 
     reply->status = H5FD_MIRROR_STATUS_OK;
-    HDmemset(reply->message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
+    memset(reply->message, 0, H5FD_MIRROR_STATUS_MESSAGE_MAX);
     return _xmit_reply(session);
 } /* end reply_ok() */
 
@@ -820,7 +820,7 @@ receive_communique(struct mirror_session *session, struct sock_comm *comm)
 
     mirror_log(session->loginfo, V_INFO, "receive_communique()");
 
-    HDmemset(comm->raw, 0, comm->raw_size);
+    memset(comm->raw, 0, comm->raw_size);
     comm->recd_die = 0;
 
     mirror_log(session->loginfo, V_INFO, "ready to receive"); /* TODO */

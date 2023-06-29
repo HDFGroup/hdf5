@@ -648,7 +648,7 @@ test_select_point(hid_t xfer_plist)
     /* Save points for later iteration */
     /* (these are in the second half of the buffer, because we are prepending */
     /*  the next list of points to the beginning of the point selection list) */
-    HDmemcpy(((char *)pi.coord) + sizeof(coord2), coord2, sizeof(coord2));
+    memcpy(((char *)pi.coord) + sizeof(coord2), coord2, sizeof(coord2));
 
     ret = (int)H5Sget_select_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_npoints");
@@ -688,7 +688,7 @@ test_select_point(hid_t xfer_plist)
     VERIFY(ret, 20, "H5Sget_select_npoints");
 
     /* Save points for later iteration */
-    HDmemcpy(pi.coord, coord2, sizeof(coord2));
+    memcpy(pi.coord, coord2, sizeof(coord2));
 
     /* Create a dataset */
     dataset = H5Dcreate2(fid1, SPACE1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1536,7 +1536,7 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12) != 0)
+    if (memcmp(rbuf, wbuf, sizeof(uint16_t) * 30 * 12) != 0)
         TestErrPrintf("hyperslab values don't match! Line=%d\n", __LINE__);
 
     /* Close memory dataspace */
@@ -1679,7 +1679,7 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, wbuf, sizeof(uint16_t) * 2 * SPACE8_DIM3 * SPACE8_DIM2 * SPACE8_DIM1) != 0)
+    if (memcmp(rbuf, wbuf, sizeof(uint16_t) * 2 * SPACE8_DIM3 * SPACE8_DIM2 * SPACE8_DIM1) != 0)
         TestErrPrintf("Error: hyperslab values don't match!\n");
 
     /* Close memory dataspace */
@@ -2195,7 +2195,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
      */
 
     /* zero out the in-memory large cube */
-    HDmemset(large_cube_buf_1, 0, large_cube_size * sizeof(uint16_t));
+    memset(large_cube_buf_1, 0, large_cube_size * sizeof(uint16_t));
 
     u = 0;
     do {
@@ -2264,7 +2264,7 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
                         TestErrPrintf("large cube read from small cube has bad data! Line=%u\n", __LINE__);
 
                     /* Zero out the buffer for the next pass */
-                    HDmemset(large_cube_buf_1 + start_index, 0, small_cube_size * sizeof(uint16_t));
+                    memset(large_cube_buf_1 + start_index, 0, small_cube_size * sizeof(uint16_t));
 
                     x++;
                 } while ((large_rank >= 2) && (small_rank <= 1) && (x < edge_size));
@@ -3166,7 +3166,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     VERIFY(check, TRUE, "H5Sselect_shape_same");
 
                     /* zero the buffer that we will be using for reading */
-                    HDmemset(small_cube_buf_1, 0, sizeof(*small_cube_buf_1) * small_cube_size);
+                    memset(small_cube_buf_1, 0, sizeof(*small_cube_buf_1) * small_cube_size);
 
                     /* Read selection from disk */
                     ret = H5Dread(large_cube_dataset, H5T_NATIVE_UINT16, mem_small_cube_sid,
@@ -3246,7 +3246,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     VERIFY(check, TRUE, "H5Sselect_shape_same");
 
                     /* zero out the in memory large cube */
-                    HDmemset(large_cube_buf_1, 0, sizeof(*large_cube_buf_1) * large_cube_size);
+                    memset(large_cube_buf_1, 0, sizeof(*large_cube_buf_1) * large_cube_size);
 
                     /* Read selection from disk */
                     ret = H5Dread(small_cube_dataset, H5T_NATIVE_UINT16, mem_large_cube_sid,
@@ -3373,7 +3373,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     CHECK(ret, FAIL, "H5Dwrite");
 
                     /* zero the buffer that we will be using for reading */
-                    HDmemset(small_cube_buf_1, 0, sizeof(*small_cube_buf_1) * small_cube_size);
+                    memset(small_cube_buf_1, 0, sizeof(*small_cube_buf_1) * small_cube_size);
 
                     /* read the on disk small cube into memory */
                     ret = H5Dread(small_cube_dataset, H5T_NATIVE_UINT16, full_small_cube_sid,
@@ -3469,7 +3469,7 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
                     CHECK(ret, FAIL, "H5Dwrite");
 
                     /* zero out the in memory large cube */
-                    HDmemset(large_cube_buf_1, 0, sizeof(*large_cube_buf_1) * large_cube_size);
+                    memset(large_cube_buf_1, 0, sizeof(*large_cube_buf_1) * large_cube_size);
 
                     /* read the on disk large cube into memory */
                     ret = H5Dread(large_cube_dataset, H5T_NATIVE_UINT16, full_large_cube_sid,
@@ -3786,7 +3786,7 @@ test_select_hyper_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
+    if (memcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
         TestErrPrintf("hyperslab values don't match! Line=%d\n", __LINE__);
 
     /* Close memory dataspace */
@@ -3999,7 +3999,7 @@ test_select_point_copy(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    if (HDmemcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
+    if (memcmp(rbuf, rbuf2, sizeof(uint16_t) * SPACE3_DIM1 * SPACE3_DIM2) != 0)
         TestErrPrintf("point values don't match!\n");
 
     /* Close memory dataspace */
@@ -5260,7 +5260,7 @@ test_select_hyper_union_stagger(void)
     CHECK(error, FAIL, "H5Fclose");
 
     /* Initialize input buffer */
-    HDmemset(data_out, 0, 7 * 7 * sizeof(int));
+    memset(data_out, 0, 7 * 7 * sizeof(int));
 
     /* Open file */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -6390,7 +6390,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
         } /* end if */
 
         /* Set the read buffer back to all zeroes */
-        HDmemset(rbuf, 0, (size_t)SPACE6_DIM1);
+        memset(rbuf, 0, (size_t)SPACE6_DIM1);
     } /* end for */
 
     /* Close memory dataspace */
@@ -7122,7 +7122,7 @@ test_select_combine(void)
     VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7157,7 +7157,7 @@ test_select_combine(void)
     VERIFY(nblocks, 2, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7196,7 +7196,7 @@ test_select_combine(void)
     VERIFY(nblocks, 2, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7255,7 +7255,7 @@ test_select_combine(void)
     VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7310,7 +7310,7 @@ test_select_combine(void)
     VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7365,7 +7365,7 @@ test_select_combine(void)
     VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
 
     /* Retrieve the block defined */
-    HDmemset(blocks, -1, sizeof(blocks)); /* Reset block list */
+    memset(blocks, -1, sizeof(blocks)); /* Reset block list */
     error = H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks, (hsize_t *)blocks);
     CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
 
@@ -7550,14 +7550,14 @@ test_select_fill_point(hssize_t *offset)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     if (offset != NULL) {
-        HDmemcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
+        memcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
 
         /* Set offset, if provided */
         ret = H5Soffset_simple(sid1, real_offset);
         CHECK(ret, FAIL, "H5Soffset_simple");
     } /* end if */
     else
-        HDmemset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
+        memset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
 
     /* Set fill value */
     fill_value = SPACE7_FILL;
@@ -7654,14 +7654,14 @@ test_select_fill_hyper_simple(hssize_t *offset)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     if (offset != NULL) {
-        HDmemcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
+        memcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
 
         /* Set offset, if provided */
         ret = H5Soffset_simple(sid1, real_offset);
         CHECK(ret, FAIL, "H5Soffset_simple");
     } /* end if */
     else
-        HDmemset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
+        memset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
 
     /* Set fill value */
     fill_value = SPACE7_FILL;
@@ -7769,14 +7769,14 @@ test_select_fill_hyper_regular(hssize_t *offset)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     if (offset != NULL) {
-        HDmemcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
+        memcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
 
         /* Set offset, if provided */
         ret = H5Soffset_simple(sid1, real_offset);
         CHECK(ret, FAIL, "H5Soffset_simple");
     } /* end if */
     else
-        HDmemset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
+        memset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
 
     /* Set fill value */
     fill_value = SPACE7_FILL;
@@ -7893,14 +7893,14 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     if (offset != NULL) {
-        HDmemcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
+        memcpy(real_offset, offset, SPACE7_RANK * sizeof(hssize_t));
 
         /* Set offset, if provided */
         ret = H5Soffset_simple(sid1, real_offset);
         CHECK(ret, FAIL, "H5Soffset_simple");
     } /* end if */
     else
-        HDmemset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
+        memset(real_offset, 0, SPACE7_RANK * sizeof(hssize_t));
 
     /* Set fill value */
     fill_value = SPACE7_FILL;
@@ -14301,7 +14301,7 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t en
     CHECK(lim_sid, FAIL, "H5Scopy");
 
     /* "And" lim_sid with dims to create limited selection */
-    HDmemset(start, 0, sizeof(start));
+    memset(start, 0, sizeof(start));
     ret = H5Sselect_hyperslab(lim_sid, H5S_SELECT_AND, start, NULL, dims, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -14328,18 +14328,18 @@ test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t endpoints, hssize_t en
 
             /* Verify blocklist */
             if (nblocks == (hssize_t)1) {
-                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0)
+                if (memcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0)
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end if */
             else {
                 assert(nblocks == (hssize_t)2);
-                if (HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0) {
-                    if (HDmemcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])) != 0)
+                if (memcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])) != 0) {
+                    if (memcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])) != 0)
                         ERROR("H5Sget_select_hyper_blocklist");
-                    if (HDmemcmp(&blocklist[6], eblock1, 6 * sizeof(eblock1[0])) != 0)
+                    if (memcmp(&blocklist[6], eblock1, 6 * sizeof(eblock1[0])) != 0)
                         ERROR("H5Sget_select_hyper_blocklist");
                 } /* end if */
-                else if (HDmemcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])) != 0)
+                else if (memcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])) != 0)
                     ERROR("H5Sget_select_hyper_blocklist");
             } /* end else */
         }     /* end if */
@@ -15108,7 +15108,7 @@ test_irreg_io(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Reset the buffer */
-    HDmemset(rbuf, 0, sizeof(rbuf));
+    memset(rbuf, 0, sizeof(rbuf));
 
     /* Read selection from disk */
     ret = H5Dread(did, H5T_NATIVE_UCHAR, mem_sid, sid, H5P_DEFAULT, rbuf);

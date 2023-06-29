@@ -260,7 +260,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
 
     /* Set fractal heap creation parameters */
     /* XXX: Give some control of these to applications? */
-    HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
+    memset(&fheap_cparam, 0, sizeof(fheap_cparam));
     fheap_cparam.managed.width            = H5G_FHEAP_MAN_WIDTH;
     fheap_cparam.managed.start_block_size = H5G_FHEAP_MAN_START_BLOCK_SIZE;
     fheap_cparam.managed.max_direct_size  = H5G_FHEAP_MAN_MAX_DIRECT_SIZE;
@@ -285,7 +285,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     assert(fheap_id_len == H5G_DENSE_FHEAP_ID_LEN);
 
     /* Create the name index v2 B-tree */
-    HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+    memset(&bt2_cparam, 0, sizeof(bt2_cparam));
     bt2_cparam.cls       = H5G_BT2_NAME;
     bt2_cparam.node_size = (size_t)H5G_NAME_BT2_NODE_SIZE;
     H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
@@ -303,7 +303,7 @@ H5G__dense_create(H5F_t *f, H5O_linfo_t *linfo, const H5O_pline_t *pline)
     /* Check if we should create a creation order index v2 B-tree */
     if (linfo->index_corder) {
         /* Create the creation order index v2 B-tree */
-        HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+        memset(&bt2_cparam, 0, sizeof(bt2_cparam));
         bt2_cparam.cls       = H5G_BT2_CORDER;
         bt2_cparam.node_size = (size_t)H5G_CORDER_BT2_NODE_SIZE;
         H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);

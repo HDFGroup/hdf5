@@ -122,7 +122,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
 
     H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
-    HDmemset(opts, 0, sizeof(diff_opt_t));
+    memset(opts, 0, sizeof(diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;

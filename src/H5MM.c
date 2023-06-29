@@ -308,7 +308,7 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     assert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
 
     /* Copy */
-    ret = HDmemcpy(dest, src, n);
+    ret = memcpy(dest, src, n);
 
     FUNC_LEAVE_NOAPI(ret)
 

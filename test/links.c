@@ -2019,7 +2019,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if (H5Gget_objinfo(file_id, "/group1/link_to_group2", TRUE, &sb_hard2) < 0)
         FAIL_STACK_ERROR;
 
-    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
+    if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
         HDputs("    Hard link test failed.  Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -2032,7 +2032,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
     if (H5Gget_objinfo(file_id, "/group2/link_to_group1", TRUE, &sb_hard2) < 0)
         FAIL_STACK_ERROR;
 
-    if (HDmemcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
+    if (memcmp(&sb_hard1.objno, sb_hard2.objno, sizeof(sb_hard1.objno)) != 0) {
         H5_FAILED();
         HDputs("    Hard link test failed.  Link seems not to point to the ");
         HDputs("    expected file location.");
@@ -4867,7 +4867,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     HDsnprintf(valname, sizeof(valname), "value %02u", (unsigned)n);
 
     /* Verify the link information for first link, in increasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) <
         0)
         TEST_ERROR;
@@ -4875,7 +4875,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
         TEST_ERROR;
 
     /* Verify the link information for new link, in increasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -4883,7 +4883,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
 
     /* Verify value for new soft link, in increasing creation order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -4892,7 +4892,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     } /* end if */
 
     /* Verify the name for new link, in increasing creation order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE,
                            H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -4905,7 +4905,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
      */
     if (use_index) {
         /* Verify the link information for first link, in native creation order (which is increasing) */
-        HDmemset(&linfo, 0, sizeof(linfo));
+        memset(&linfo, 0, sizeof(linfo));
         if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &linfo,
                                 H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -4913,7 +4913,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
             TEST_ERROR;
 
         /* Verify the link information for new link, in native creation order (which is increasing) */
-        HDmemset(&linfo, 0, sizeof(linfo));
+        memset(&linfo, 0, sizeof(linfo));
         if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &linfo, H5P_DEFAULT) <
             0)
             TEST_ERROR;
@@ -4922,7 +4922,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
 
         /* Verify value for new soft link, in native creation order (which is increasing) */
         if (!hard_link) {
-            HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpval,
                                   (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -4931,7 +4931,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
         } /* end if */
 
         /* Verify the name for new link, in native creation order (which is increasing) */
-        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname,
                                (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -4940,14 +4940,14 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     } /* end if */
 
     /* Verify the link information for first link, in decreasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in decreasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) <
         0)
         TEST_ERROR;
@@ -4956,7 +4956,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
 
     /* Verify value for new soft link, in decreasing creation order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -4965,7 +4965,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     } /* end if */
 
     /* Verify the name for new link, in decreasing creation order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname,
                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -4973,14 +4973,14 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
         TEST_ERROR;
 
     /* Verify the link information for first link, in increasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in increasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -4988,7 +4988,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
 
     /* Verify value for new soft link, in increasing link name order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE,
                               H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -4997,7 +4997,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     } /* end if */
 
     /* Verify the name for new link, in increasing link name order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE,
                            H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -5009,14 +5009,14 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
      */
 
     /* Verify the link information for first link, in decreasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in decreasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -5024,7 +5024,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
 
     /* Verify value for new soft link, in decreasing link name order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -5033,7 +5033,7 @@ link_info_by_idx_check_deprec(hid_t group_id, const char *linkname, hsize_t n, h
     } /* end if */
 
     /* Verify the name for new link, in decreasing link name order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -5648,7 +5648,7 @@ delete_by_idx_deprec(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx1(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -5662,7 +5662,7 @@ delete_by_idx_deprec(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -5722,7 +5722,7 @@ delete_by_idx_deprec(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx1(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -5736,7 +5736,7 @@ delete_by_idx_deprec(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -5800,7 +5800,7 @@ delete_by_idx_deprec(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for current link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx1(group_id, ".", idx_type, order, (hsize_t)u, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -5814,7 +5814,7 @@ delete_by_idx_deprec(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for current link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)u, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -5834,7 +5834,7 @@ delete_by_idx_deprec(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx1(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -5848,7 +5848,7 @@ delete_by_idx_deprec(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -6003,7 +6003,7 @@ delete_by_idx_old_deprec(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for first link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -6016,7 +6016,7 @@ delete_by_idx_old_deprec(hid_t fapl)
             } /* end else */
 
             /* Verify the name for first link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -6077,7 +6077,7 @@ delete_by_idx_old_deprec(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for current link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -6090,7 +6090,7 @@ delete_by_idx_old_deprec(hid_t fapl)
             } /* end else */
 
             /* Verify the name for current link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -6111,7 +6111,7 @@ delete_by_idx_old_deprec(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for first link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx1(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -6124,7 +6124,7 @@ delete_by_idx_old_deprec(hid_t fapl)
             } /* end else */
 
             /* Verify the name for first link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -6295,7 +6295,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate1(group_id, idx_type, order, &skip, link_iterate_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6312,7 +6312,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6329,7 +6329,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate1(group_id, idx_type, order, &skip, link_iterate_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6364,7 +6364,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6399,7 +6399,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_deprec_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -6413,7 +6413,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Giterate(group_id, ".", &gskip, group_iterate_deprec_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -6775,7 +6775,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate1(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6792,7 +6792,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_old_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6809,7 +6809,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate1(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6844,7 +6844,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_old_deprec_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -6879,7 +6879,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Literate1(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_deprec_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -6893,7 +6893,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Giterate(group_id, ".", &gskip, group_iterate_old_deprec_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -9035,11 +9035,11 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[37], fam_fapl, filename2A, sizeof filename2A);
 
     /* settings for multi file */
-    HDmemset(memb_map, 0, sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
-    HDmemset(sv, 0, sizeof sv);
+    memset(memb_map, 0, sizeof memb_map);
+    memset(memb_fapl, 0, sizeof memb_fapl);
+    memset(memb_name, 0, sizeof memb_name);
+    memset(memb_addr, 0, sizeof memb_addr);
+    memset(sv, 0, sizeof sv);
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_map[mt]  = H5FD_MEM_SUPER;
@@ -13654,7 +13654,7 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Compare the data read should be the same as wbuf */
-    if (HDmemcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+    if (memcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
         FAIL_STACK_ERROR;
 
     /* Close the dataset */
@@ -17995,7 +17995,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     HDsnprintf(valname, sizeof(valname), "value %02u", (unsigned)n);
 
     /* Verify the link information for first link, in increasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) <
         0)
         TEST_ERROR;
@@ -18003,7 +18003,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
         TEST_ERROR;
 
     /* Verify the link information for new link, in increasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -18011,7 +18011,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
 
     /* Verify value for new soft link, in increasing creation order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18020,7 +18020,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     } /* end if */
 
     /* Verify the name for new link, in increasing creation order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE,
                            H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -18033,7 +18033,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
      */
     if (use_index) {
         /* Verify the link information for first link, in native creation order (which is increasing) */
-        HDmemset(&linfo, 0, sizeof(linfo));
+        memset(&linfo, 0, sizeof(linfo));
         if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, (hsize_t)0, &linfo,
                                 H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18041,7 +18041,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
             TEST_ERROR;
 
         /* Verify the link information for new link, in native creation order (which is increasing) */
-        HDmemset(&linfo, 0, sizeof(linfo));
+        memset(&linfo, 0, sizeof(linfo));
         if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, &linfo, H5P_DEFAULT) <
             0)
             TEST_ERROR;
@@ -18050,7 +18050,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
 
         /* Verify value for new soft link, in native creation order (which is increasing) */
         if (!hard_link) {
-            HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpval,
                                   (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -18059,7 +18059,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
         } /* end if */
 
         /* Verify the name for new link, in native creation order (which is increasing) */
-        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname,
                                (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18068,14 +18068,14 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     } /* end if */
 
     /* Verify the link information for first link, in decreasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in decreasing creation order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) <
         0)
         TEST_ERROR;
@@ -18084,7 +18084,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
 
     /* Verify value for new soft link, in decreasing creation order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18093,7 +18093,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     } /* end if */
 
     /* Verify the name for new link, in decreasing creation order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname,
                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -18101,14 +18101,14 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
         TEST_ERROR;
 
     /* Verify the link information for first link, in increasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in increasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -18116,7 +18116,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
 
     /* Verify value for new soft link, in increasing link name order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpval, (size_t)NAME_BUF_SIZE,
                               H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18125,7 +18125,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     } /* end if */
 
     /* Verify the name for new link, in increasing link name order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE,
                            H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -18137,14 +18137,14 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
      */
 
     /* Verify the link information for first link, in decreasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, n, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != 0)
         TEST_ERROR;
 
     /* Verify the link information for new link, in decreasing link name order */
-    HDmemset(&linfo, 0, sizeof(linfo));
+    memset(&linfo, 0, sizeof(linfo));
     if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
         TEST_ERROR;
     if (linfo.corder != (int64_t)n)
@@ -18152,7 +18152,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
 
     /* Verify value for new soft link, in decreasing link name order */
     if (!hard_link) {
-        HDmemset(tmpval, 0, (size_t)NAME_BUF_SIZE);
+        memset(tmpval, 0, (size_t)NAME_BUF_SIZE);
         if (H5Lget_val_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpval,
                               (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
             TEST_ERROR;
@@ -18161,7 +18161,7 @@ link_info_by_idx_check(hid_t group_id, const char *linkname, hsize_t n, hbool_t 
     } /* end if */
 
     /* Verify the name for new link, in decreasing link name order */
-    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
     if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -18482,7 +18482,7 @@ link_info_by_idx_old(hid_t fapl)
                 if (H5Oget_info3(group_id2, &oi, H5O_INFO_BASIC) < 0)
                     TEST_ERROR;
 
-                HDmemcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
+                memcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
 
                 /* Close group */
                 if (H5Gclose(group_id2) < 0)
@@ -18790,7 +18790,7 @@ delete_by_idx(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx2(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -18804,7 +18804,7 @@ delete_by_idx(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -18864,7 +18864,7 @@ delete_by_idx(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx2(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -18878,7 +18878,7 @@ delete_by_idx(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -18942,7 +18942,7 @@ delete_by_idx(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for current link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx2(group_id, ".", idx_type, order, (hsize_t)u, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -18956,7 +18956,7 @@ delete_by_idx(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for current link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)u, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -18976,7 +18976,7 @@ delete_by_idx(hid_t fapl)
                         TEST_ERROR;
 
                     /* Verify the link information for first link in appropriate order */
-                    HDmemset(&linfo, 0, sizeof(linfo));
+                    memset(&linfo, 0, sizeof(linfo));
                     if (H5Lget_info_by_idx2(group_id, ".", idx_type, order, (hsize_t)0, &linfo, H5P_DEFAULT) <
                         0)
                         TEST_ERROR;
@@ -18990,7 +18990,7 @@ delete_by_idx(hid_t fapl)
                     } /* end else */
 
                     /* Verify the name for first link in appropriate order */
-                    HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+                    memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
                     if (H5Lget_name_by_idx(group_id, ".", idx_type, order, (hsize_t)0, tmpname,
                                            (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                         TEST_ERROR;
@@ -19121,7 +19121,7 @@ delete_by_idx_old(hid_t fapl)
             if (H5Oget_info3(group_id2, &oi, H5O_INFO_BASIC) < 0)
                 TEST_ERROR;
 
-            HDmemcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
+            memcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
 
             /* Close group */
             if (H5Gclose(group_id2) < 0)
@@ -19155,7 +19155,7 @@ delete_by_idx_old(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for first link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -19172,7 +19172,7 @@ delete_by_idx_old(hid_t fapl)
             } /* end else */
 
             /* Verify the name for first link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -19218,7 +19218,7 @@ delete_by_idx_old(hid_t fapl)
             if (H5Oget_info3(group_id2, &oi, H5O_INFO_BASIC) < 0)
                 TEST_ERROR;
 
-            HDmemcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
+            memcpy(&objtoken[u], &oi.token, sizeof(H5O_token_t));
 
             /* Close group */
             if (H5Gclose(group_id2) < 0)
@@ -19234,7 +19234,7 @@ delete_by_idx_old(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for current link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -19251,7 +19251,7 @@ delete_by_idx_old(hid_t fapl)
             } /* end else */
 
             /* Verify the name for current link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -19272,7 +19272,7 @@ delete_by_idx_old(hid_t fapl)
                 TEST_ERROR;
 
             /* Verify the link information for first link in appropriate order */
-            HDmemset(&linfo, 0, sizeof(linfo));
+            memset(&linfo, 0, sizeof(linfo));
             if (H5Lget_info_by_idx2(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &linfo, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if (order == H5_ITER_INC) {
@@ -19289,7 +19289,7 @@ delete_by_idx_old(hid_t fapl)
             } /* end else */
 
             /* Verify the name for first link in appropriate order */
-            HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
+            memset(tmpname, 0, (size_t)NAME_BUF_SIZE);
             if (H5Lget_name_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, tmpname,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -19469,7 +19469,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19487,7 +19487,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19505,7 +19505,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19541,7 +19541,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19577,7 +19577,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -19592,7 +19592,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -19963,7 +19963,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19981,7 +19981,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -19999,7 +19999,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -20035,7 +20035,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = -1;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if (H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info) < 0)
         TEST_ERROR;
 
@@ -20071,7 +20071,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -20086,7 +20086,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     iter_info->stop     = 3;
     iter_info->ncalled  = 0;
     iter_info->curr     = order != H5_ITER_DEC ? 0 : (max_links - 1);
-    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    memset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if ((ret = H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info)) < 0)
         TEST_ERROR;
     if (ret != CORDER_ITER_STOP)
@@ -20334,7 +20334,7 @@ open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
     /* Get the address of the root group in the file to mount */
     if (H5Oget_info3(mount_file_id, &oi, H5O_INFO_BASIC) < 0)
         TEST_ERROR;
-    HDmemcpy(&mnt_root_token, &oi.token, sizeof(mnt_root_token));
+    memcpy(&mnt_root_token, &oi.token, sizeof(mnt_root_token));
 
     /* Mount a file over a group in main group */
     mnt_idx = 2;

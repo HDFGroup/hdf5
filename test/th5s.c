@@ -144,7 +144,7 @@ test_h5s_basic(void)
 
     rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, max2);
     CHECK(sid2, FAIL, "H5Screate_simple");
@@ -159,16 +159,16 @@ test_h5s_basic(void)
 
     rank = H5Sget_simple_extent_dims(sid2, tdims, tmax);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tmax, max2, SPACE2_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tdims, dims2, SPACE2_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tmax, max2, SPACE2_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
     /* Change max dims to be equal to the dimensions */
     ret = H5Sset_extent_simple(sid1, SPACE1_RANK, dims1, NULL);
     CHECK(ret, FAIL, "H5Sset_extent_simple");
     rank = H5Sget_simple_extent_dims(sid1, tdims, tmax);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tmax, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tmax, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -1025,7 +1025,7 @@ test_h5s_zero_dim(void)
 
         rank = H5Sget_simple_extent_dims(sid_chunk, tdims, NULL);
         CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-        VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+        VERIFY(memcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
         /* Set it to chunked dataset */
         plist_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -1289,7 +1289,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
     /* Retrieve and verify the dataspace dimensions */
     rank = H5Sget_simple_extent_dims(decoded_sid1, tdims, NULL);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
     /* Verify the type of dataspace selection */
     sel_type = H5Sget_select_type(decoded_sid1);
@@ -1481,7 +1481,7 @@ test_h5s_encode1(void)
     /* Retrieve and verify the dataspace dimensions */
     rank = H5Sget_simple_extent_dims(decoded_sid1, tdims, NULL);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
+    VERIFY(memcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0, "H5Sget_simple_extent_dims");
 
     /* Verify the type of dataspace selection */
     sel_type = H5Sget_select_type(decoded_sid1);
@@ -2460,7 +2460,7 @@ test_h5s_compound_scalar_read(void)
 
     ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
+    if (memcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
         printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1, rdata.c1);
         printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n", space4_data.u, rdata.u);
         printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n", (double)space4_data.f,
@@ -2565,8 +2565,8 @@ test_h5s_chunk(void)
     CHECK(status, FAIL, "H5Fclose");
 
     /* Reset/initialize the data arrays to read in */
-    HDmemset(chunk_data_dbl_data, 0, sizeof(double) * CHUNK_DATA_NX * CHUNK_DATA_NY);
-    HDmemset(chunk_data_flt_data, 0, sizeof(float) * CHUNK_DATA_NX * CHUNK_DATA_NY);
+    memset(chunk_data_dbl_data, 0, sizeof(double) * CHUNK_DATA_NX * CHUNK_DATA_NY);
+    memset(chunk_data_flt_data, 0, sizeof(float) * CHUNK_DATA_NX * CHUNK_DATA_NY);
 
     fileID = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fileID, FAIL, "H5Fopen");

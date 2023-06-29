@@ -685,7 +685,7 @@ TestHDFFV_9758()
         ptable.ResetIndex();
         for (size_t i = 0; i < NUM_PACKETS; i++) {
             s1_t s2;
-            HDmemset(&s2, 0, sizeof(s1_t));
+            memset(&s2, 0, sizeof(s1_t));
             err = ptable.GetNextPacket(&s2);
             if (err < 0)
                 goto error;

@@ -1003,7 +1003,7 @@ test_array_fill(size_t lo, size_t hi)
                 if (dst[(u * ARRAY_FILL_SIZE) + v] != src[v])
                     TEST_ERROR;
 
-        HDmemset(dst, 0, sizeof(int) * ARRAY_FILL_SIZE * w);
+        memset(dst, 0, sizeof(int) * ARRAY_FILL_SIZE * w);
     } /* end for */
 
     PASSED();

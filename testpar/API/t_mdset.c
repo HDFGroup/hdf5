@@ -730,7 +730,7 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* set entire read buffer with the constant 2 */
-        HDmemset(rdata, 2, (size_t)(dset_size * sizeof(int)));
+        memset(rdata, 2, (size_t)(dset_size * sizeof(int)));
 
         /* Read the entire dataset back */
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);
@@ -820,7 +820,7 @@ dataset_fillvalue(void)
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* set entire read buffer with the constant 2 */
-        HDmemset(rdata, 2, (size_t)(dset_size * sizeof(int)));
+        memset(rdata, 2, (size_t)(dset_size * sizeof(int)));
 
         /* Read the entire dataset back */
         ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, rdata);

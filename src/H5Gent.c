@@ -266,7 +266,7 @@ H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
     /* fill with zero */
     if (*pp < p_ret)
-        HDmemset(*pp, 0, (size_t)(p_ret - *pp));
+        memset(*pp, 0, (size_t)(p_ret - *pp));
     *pp = p_ret;
 
 done:
@@ -336,7 +336,7 @@ H5G__ent_reset(H5G_entry_t *ent)
     assert(ent);
 
     /* Clear the symbol table entry to an empty state */
-    HDmemset(ent, 0, sizeof(H5G_entry_t));
+    memset(ent, 0, sizeof(H5G_entry_t));
     ent->header = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI_VOID

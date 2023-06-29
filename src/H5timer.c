@@ -359,7 +359,7 @@ H5_timer_init(H5_timer_t *timer /*in,out*/)
     assert(timer);
 
     /* Initialize everything */
-    HDmemset(timer, 0, sizeof(H5_timer_t));
+    memset(timer, 0, sizeof(H5_timer_t));
 
     return 0;
 } /* end H5_timer_init() */

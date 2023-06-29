@@ -239,7 +239,7 @@ test_array_compound_array()
         verify_val(ndims, ARRAY1_RANK, "f2_atype_check.getArrayNDims", __LINE__, __FILE__);
 
         // Get the array dimensions
-        HDmemset(rdims1, 0, sizeof(rdims1));
+        memset(rdims1, 0, sizeof(rdims1));
         f2_atype_check.getArrayDims(rdims1);
 
         // Check the array dimensions

@@ -1104,7 +1104,7 @@ test_mf_fs_start(hid_t fapl)
     if (f->shared->fs_man[H5FD_MEM_SUPER]->client != H5FS_CLIENT_FILE_ID)
         TEST_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
 
     if (check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
         TEST_ERROR;
@@ -1225,7 +1225,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1303,7 +1303,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1379,7 +1379,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1411,7 +1411,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     if (tmp != TBLOCK_ADDR70)
         TEST_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     if (check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
         TEST_ERROR;
 
@@ -1555,7 +1555,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1665,7 +1665,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1770,7 +1770,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE30;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -1876,7 +1876,7 @@ test_mf_fs_extend(hid_t fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node1))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += (TBLOCK_SIZE30 - 10);
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -3028,7 +3028,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Verify that meta_aggr's unused space of 1968 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += (TBLOCK_SIZE2048 - (TBLOCK_SIZE30 + TBLOCK_SIZE50));
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -3218,7 +3218,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
             TEST_ERROR;
 
         /* Verify that meta_aggr's unused space of 1968 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += (TBLOCK_SIZE2048 - (TBLOCK_SIZE30 + TBLOCK_SIZE50));
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -3913,7 +3913,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (ma_addr || ma_size)
             TEST_ERROR;
 
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -4186,7 +4186,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE50;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -4250,7 +4250,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
         FAIL_STACK_ERROR;
 
-    HDmemset(&state, 0, sizeof(H5FS_stat_t));
+    memset(&state, 0, sizeof(H5FS_stat_t));
     state.tot_space += TBLOCK_SIZE8000;
     state.tot_sect_count += 1;
     state.serial_sect_count += 1;
@@ -4337,7 +4337,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (H5MF__add_sect(f, H5FD_MEM_SUPER, f->shared->fs_man[H5FD_MEM_SUPER], sect_node))
             FAIL_STACK_ERROR;
 
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         state.tot_space += TBLOCK_SIZE700;
         state.tot_sect_count += 1;
         state.serial_sect_count += 1;
@@ -4557,7 +4557,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -4820,7 +4820,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -5166,7 +5166,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -5480,7 +5480,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t));
+        memset(&state, 0, sizeof(H5FS_stat_t));
         if (mis_align) {
             state.tot_space += mis_align;
             state.tot_sect_count += 1;
@@ -5704,7 +5704,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -5970,7 +5970,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR;
 
         /* fragment for alignment of block 30 in meta_aggr is freed to free-space */
-        HDmemset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
+        memset(&state, 0, sizeof(H5FS_stat_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
             state[type].tot_space += mis_align;
             state[type].tot_sect_count += 1;
@@ -6182,7 +6182,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
             H5FD_mem_t mt;
 
             /* Get current multi settings */
-            HDmemset(memb_name, 0, sizeof memb_name);
+            memset(memb_name, 0, sizeof memb_name);
             if (H5Pget_fapl_multi(copied_fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
                 TEST_ERROR;
 
@@ -6570,11 +6570,11 @@ error:
 #define MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)                                           \
     {                                                                                                        \
         H5FD_mem_t mt;                                                                                       \
-        HDmemset(memb_map, 0, sizeof memb_map);                                                              \
-        HDmemset(memb_fapl, 0, sizeof memb_fapl);                                                            \
-        HDmemset(memb_name, 0, sizeof memb_name);                                                            \
-        HDmemset(memb_addr, 0, sizeof memb_addr);                                                            \
-        HDmemset(sv, 0, sizeof sv);                                                                          \
+        memset(memb_map, 0, sizeof memb_map);                                                                \
+        memset(memb_fapl, 0, sizeof memb_fapl);                                                              \
+        memset(memb_name, 0, sizeof memb_name);                                                              \
+        memset(memb_addr, 0, sizeof memb_addr);                                                              \
+        memset(sv, 0, sizeof sv);                                                                            \
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {                                            \
             memb_map[mt]  = H5FD_MEM_SUPER;                                                                  \
             memb_fapl[mt] = H5P_DEFAULT;                                                                     \
@@ -7492,7 +7492,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    HDmemset(&fs_state_zero, 0, sizeof(H5FS_stat_t));
+    memset(&fs_state_zero, 0, sizeof(H5FS_stat_t));
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -7512,7 +7512,7 @@ test_mf_strat_thres_gone(const char *env_h5_drvr, hid_t fapl, hbool_t new_format
                 continue;
 
             /* Clear out free-space statistics */
-            HDmemset(&fs_state, 0, sizeof(H5FS_stat_t));
+            memset(&fs_state, 0, sizeof(H5FS_stat_t));
 
             /* Create file-creation template */
             if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -7757,7 +7757,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t is_multi_or_split)
 
     assert(is_multi_or_split);
 
-    HDmemset(memb_name, 0, sizeof memb_name);
+    memset(memb_name, 0, sizeof memb_name);
 
     /* Get current split settings */
     if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)
@@ -8882,7 +8882,7 @@ test_page_alignment(const char *env_h5_drvr, hid_t fapl)
             if (H5Pset_alignment(memb_fapl, 0, (hsize_t)TEST_ALIGN16) < 0)
                 TEST_ERROR;
 
-            HDmemset(memb_name, 0, sizeof memb_name);
+            memset(memb_name, 0, sizeof memb_name);
 
             if (split) {
                 /* Set split driver with new FAPLs */

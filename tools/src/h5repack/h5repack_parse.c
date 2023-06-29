@@ -52,7 +52,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
     unsigned    pixels_per_block;
 
     /* initialize compression  info */
-    HDmemset(filt, 0, sizeof(filter_info_t));
+    memset(filt, 0, sizeof(filter_info_t));
     *is_glb = 0;
 
     /* check for the end of object list and number of objects */
@@ -95,7 +95,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                     sobj[k + 1] = '\0';
 
                 HDstrcpy(obj_list[n].obj, sobj);
-                HDmemset(sobj, 0, sizeof(sobj));
+                memset(sobj, 0, sizeof(sobj));
                 n++;
                 k = -1;
             }
@@ -492,9 +492,9 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
     char        sdim[10];
     char        slayout[10];
 
-    HDmemset(sdim, '\0', sizeof(sdim));
-    HDmemset(sobj, '\0', sizeof(sobj));
-    HDmemset(slayout, '\0', sizeof(slayout));
+    memset(sdim, '\0', sizeof(sdim));
+    memset(sobj, '\0', sizeof(sobj));
+    memset(slayout, '\0', sizeof(slayout));
 
     /* check for the end of object list and number of objects */
     for (i = 0, n = 0; i < len; i++) {
@@ -528,7 +528,7 @@ parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about
                 else
                     sobj[k + 1] = '\0';
                 HDstrcpy(obj_list[n].obj, sobj);
-                HDmemset(sobj, 0, sizeof(sobj));
+                memset(sobj, 0, sizeof(sobj));
                 n++;
                 k = -1;
             }

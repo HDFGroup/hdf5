@@ -945,7 +945,7 @@ H5HF__man_iblock_create(H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblock, unsigned p
                     "memory allocation failed for fractal heap indirect block")
 
     /* Reset the metadata cache info for the heap header */
-    HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Share common heap information */
     iblock->hdr = hdr;

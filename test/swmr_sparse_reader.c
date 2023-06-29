@@ -209,7 +209,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    HDmemset(&record, 0, sizeof(record));
+    memset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to read */
     if ((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -284,7 +284,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         /* Check dataset */
         if (check_dataset(fid, verbose, symbol, &record, mem_sid) < 0)
             return -1;
-        HDmemset(&record, 0, sizeof(record));
+        memset(&record, 0, sizeof(record));
 
         /* Check for reopen */
         iter_to_reopen--;

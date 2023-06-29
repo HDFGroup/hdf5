@@ -1047,7 +1047,7 @@ test_reference_cmpnd_obj(void)
     CHECK(dataset, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Reset buffer for writing */
-    HDmemset(&cmpnd_wbuf, 0, sizeof(cmpnd_wbuf));
+    memset(&cmpnd_wbuf, 0, sizeof(cmpnd_wbuf));
 
     /* Create reference to dataset */
     ret = H5Rcreate_object(fid1, "/Group1/Dataset1", H5P_DEFAULT, &cmpnd_wbuf.ref0);

@@ -142,7 +142,7 @@ H5HG__create(H5F_t *f, size_t size)
 
     if (NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
-    HDmemset(heap->chunk, 0, size);
+    memset(heap->chunk, 0, size);
     heap->nalloc = H5HG_NOBJS(f, size);
     heap->nused  = 1; /* account for index 0, which is used for the free object */
     if (NULL == (heap->obj = H5FL_SEQ_MALLOC(H5HG_obj_t, heap->nalloc)))
@@ -303,7 +303,7 @@ H5HG__alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, 0, "memory allocation failed")
 
         /* Clear newly allocated space */
-        HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+        memset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
 
         /* Update heap information */
         heap->nalloc = new_alloc;
@@ -401,7 +401,7 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
     /* Re-allocate the heap information in memory */
     if (NULL == (new_chunk = H5FL_BLK_REALLOC(gheap_chunk, heap->chunk, (heap->size + need))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed")
-    HDmemset(new_chunk + heap->size, 0, need);
+    memset(new_chunk + heap->size, 0, need);
 
     /* Adjust the size of the heap */
     old_size = heap->size;
@@ -745,7 +745,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
     } /* end if */
     else
         heap->obj[0].size += need;
-    HDmemmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
+    memmove(obj_start, obj_start + need, heap->size - (size_t)((obj_start + need) - heap->chunk));
     if (heap->obj[0].size >= H5HG_SIZEOF_OBJHDR(f)) {
         p = heap->obj[0].begin;
         UINT16ENCODE(p, 0); /*id*/
@@ -753,7 +753,7 @@ H5HG_remove(H5F_t *f, H5HG_t *hobj)
         UINT32ENCODE(p, 0); /*reserved*/
         H5F_ENCODE_LENGTH(f, p, heap->obj[0].size);
     } /* end if */
-    HDmemset(heap->obj + hobj->idx, 0, sizeof(H5HG_obj_t));
+    memset(heap->obj + hobj->idx, 0, sizeof(H5HG_obj_t));
     flags |= H5AC__DIRTIED_FLAG;
 
     if ((heap->obj[0].size + H5HG_SIZEOF_HDR(f)) == heap->size) {

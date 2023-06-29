@@ -488,14 +488,14 @@ test_reference_group()
 
         // Check object type using Group::getObjinfo()
         H5O_info2_t oinfo;
-        HDmemset(&oinfo, 0, sizeof(oinfo));
+        memset(&oinfo, 0, sizeof(oinfo));
         group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, 0, oinfo);
         verify_val(static_cast<long>(oinfo.type), static_cast<long>(H5O_TYPE_DATASET), "Group::getObjinfo",
                    __LINE__, __FILE__);
 
         // Check for out of bound query by index
         try {
-            HDmemset(&oinfo, 0, sizeof(oinfo));
+            memset(&oinfo, 0, sizeof(oinfo));
             group.getObjinfo(".", H5_INDEX_NAME, H5_ITER_INC, 9, oinfo);
 
             // Should FAIL but didn't, so throw an invalid action exception

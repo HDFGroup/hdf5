@@ -385,7 +385,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     if (!base_name || !fullname || size < 1)
         return NULL;
 
-    HDmemset(fullname, 0, size);
+    memset(fullname, 0, size);
 
     switch (iot) {
         case POSIXIO:
@@ -594,7 +594,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
 
         /* Prepare buffer for verifying data */
         if (parms->verify)
-            HDmemset(buffer, pio_mpi_rank_g + 1, buf_size * blk_size);
+            memset(buffer, pio_mpi_rank_g + 1, buf_size * blk_size);
     } /* end else */
 
     /* Calculate the total number of bytes (bytes_count) to be

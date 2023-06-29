@@ -533,7 +533,7 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
         old_fa = H5FD__core_get_default_config();
 
     /* Set VFD info values */
-    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = old_fa->increment;
     fa.backing_store  = old_fa->backing_store;
     fa.write_tracking = is_enabled;
@@ -611,7 +611,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /* Set VFD info values */
-    HDmemset(&fa, 0, sizeof(H5FD_core_fapl_t));
+    memset(&fa, 0, sizeof(H5FD_core_fapl_t));
     fa.increment      = increment;
     fa.backing_store  = backing_store;
     fa.write_tracking = H5FD_CORE_WRITE_TRACKING_FLAG;
@@ -752,7 +752,7 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     /* If the file image exists and this is an open, make sure the file doesn't exist */
     assert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
            ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
-    HDmemset(&sb, 0, sizeof(sb));
+    memset(&sb, 0, sizeof(sb));
     if ((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if (HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW) >= 0)
             HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists")
@@ -1000,7 +1000,7 @@ H5FD__core_close(H5FD_t *_file)
         else
             H5MM_xfree(file->mem);
     } /* end if */
-    HDmemset(file, 0, sizeof(H5FD_core_t));
+    memset(file, 0, sizeof(H5FD_core_t));
     H5MM_xfree(file);
 
 done:
@@ -1059,9 +1059,9 @@ H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
          * determine if the values are the same or not.  The actual return value
          * shouldn't really matter...
          */
-        if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+        if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
             HGOTO_DONE(-1)
-        if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+        if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
             HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
@@ -1312,7 +1312,7 @@ H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
     /* Read zeros for the part which is after the EOF markers */
     if (size > 0)
-        HDmemset(buf, 0, size);
+        memset(buf, 0, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1374,7 +1374,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                             "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
         } /* end else */
 
-        HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+        memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
         file->mem = x;
 
         file->eof = new_eof;
@@ -1532,7 +1532,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
             } /* end else */
 
             if (file->eof < new_eof)
-                HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+                memset(x + file->eof, 0, (size_t)(new_eof - file->eof));
             file->mem = x;
 
             /* Update backing store, if using it and if closing */

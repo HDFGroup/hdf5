@@ -429,7 +429,7 @@ H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_typ
                     MPI_Aint temp;
 
                     temp = disp[u];
-                    HDmemmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
+                    memmove(disp + m + 1, disp + m, (u - m) * sizeof(MPI_Aint));
                     disp[m] = temp;
                 } /* end if */
                 (*permute)[u] = m;
@@ -571,8 +571,8 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
                 if ((*permute)[u] != num_points) {
                     MPI_Aint temp = disp[u];
 
-                    HDmemmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
-                              (u - (*permute)[u]) * sizeof(MPI_Aint));
+                    memmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
+                            (u - (*permute)[u]) * sizeof(MPI_Aint));
                     disp[(*permute)[u]] = temp;
                 } /* end if */
 

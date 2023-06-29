@@ -92,13 +92,13 @@ test_skiplist_init(void)
     } /* end for */
 
     /* Copy random values to sorted array */
-    HDmemcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
+    memcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
     qsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
 
     /* Copy random values to reverse sorted array */
-    HDmemcpy(rev_sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
+    memcpy(rev_sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
     qsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);

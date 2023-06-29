@@ -337,7 +337,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 #endif /* H5FL_TRACK */
 
 #ifdef H5FL_DEBUG
-    HDmemset(obj, 255, head->size);
+    memset(obj, 255, head->size);
 #endif /* H5FL_DEBUG */
 
     /* Make certain that the free list is initialized */
@@ -470,7 +470,7 @@ H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 
     /* Clear to zeros */
     /* (Accommodate tracking information, if present) */
-    HDmemset(ret_value, 0, head->size - H5FL_TRACK_SIZE);
+    memset(ret_value, 0, head->size - H5FL_TRACK_SIZE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -917,7 +917,7 @@ H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear the block to zeros */
-    HDmemset(ret_value, 0, size);
+    memset(ret_value, 0, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -957,7 +957,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        HDmemcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -979,7 +979,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif /* H5FL_TRACK */
 
@@ -993,7 +993,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     free_size = temp->size;
 
 #ifdef H5FL_DEBUG
-    HDmemset(temp, 255, free_size + sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE);
+    memset(temp, 255, free_size + sizeof(H5FL_blk_list_t) + H5FL_TRACK_SIZE);
 #endif /* H5FL_DEBUG */
 
     /* Check if there is a free list for native blocks of this size */
@@ -1079,7 +1079,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 unsigned char *block_ptr = ((unsigned char *)block) - sizeof(H5FL_track_t);
                 H5FL_track_t   trk;
 
-                HDmemcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+                memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
                 /* Release previous tracking information */
                 H5CS_close_stack(trk.stack);
@@ -1099,7 +1099,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
                 trk.func = call_func;
                 trk.line = call_line;
 
-                HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+                memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
             }
 #endif /* H5FL_TRACK */
             ret_value = block;
@@ -1380,7 +1380,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
         H5FL_track_t   trk;
 
-        HDmemcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+        memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk.stack);
@@ -1402,7 +1402,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
                 trk.next->prev = trk.prev;
         } /* end else */
 
-        HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+        memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
     }
 #endif
 
@@ -1570,7 +1570,7 @@ H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear to zeros */
-    HDmemset(ret_value, 0, head->list_arr[elem].size);
+    memset(ret_value, 0, head->list_arr[elem].size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1631,7 +1631,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             unsigned char *block_ptr = ((unsigned char *)obj) - sizeof(H5FL_track_t);
             H5FL_track_t   trk;
 
-            HDmemcpy(&trk, block_ptr, sizeof(H5FL_track_t));
+            memcpy(&trk, block_ptr, sizeof(H5FL_track_t));
 
             /* Release previous tracking information */
             H5CS_close_stack(trk.stack);
@@ -1651,7 +1651,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PA
             trk.func = call_func;
             trk.line = call_line;
 
-            HDmemcpy(block_ptr, &trk, sizeof(H5FL_track_t));
+            memcpy(block_ptr, &trk, sizeof(H5FL_track_t));
 #endif
             ret_value = obj;
         }
@@ -2047,7 +2047,7 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
 #endif /* H5FL_TRACK */
 
 #ifdef H5FL_DEBUG
-    HDmemset(obj, 255, head->size);
+    memset(obj, 255, head->size);
 #endif /* H5FL_DEBUG */
 
     /* Make certain that the free list is initialized */
@@ -2178,7 +2178,7 @@ H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
 
     /* Clear to zeros */
     /* (Accommodate tracking information, if present) */
-    HDmemset(ret_value, 0, head->size - H5FL_TRACK_SIZE);
+    memset(ret_value, 0, head->size - H5FL_TRACK_SIZE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

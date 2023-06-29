@@ -116,7 +116,7 @@ H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, size_t len, const
     /* Magic number */
     if (H5_IS_BUFFER_OVERFLOW(image, H5_SIZEOF_MAGIC, p_end))
         HGOTO_ERROR(H5E_HEAP, H5E_OVERFLOW, FAIL, "ran off end of input buffer while decoding");
-    if (HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -312,7 +312,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata, hbool
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
                 /* Clear newly allocated space */
-                HDmemset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
+                memset(&new_obj[heap->nalloc], 0, (new_alloc - heap->nalloc) * sizeof(heap->obj[0]));
 
                 /* Update heap information */
                 heap->nalloc = new_alloc;

@@ -177,7 +177,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
 
     /* Set fractal heap creation parameters */
     /* XXX: Give some control of these to applications? */
-    HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
+    memset(&fheap_cparam, 0, sizeof(fheap_cparam));
     fheap_cparam.managed.width            = H5O_FHEAP_MAN_WIDTH;
     fheap_cparam.managed.start_block_size = H5O_FHEAP_MAN_START_BLOCK_SIZE;
     fheap_cparam.managed.max_direct_size  = H5O_FHEAP_MAN_MAX_DIRECT_SIZE;
@@ -206,7 +206,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
 #endif /* NDEBUG */
 
     /* Create the name index v2 B-tree */
-    HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+    memset(&bt2_cparam, 0, sizeof(bt2_cparam));
     bt2_cparam.cls       = H5A_BT2_NAME;
     bt2_cparam.node_size = (size_t)H5A_NAME_BT2_NODE_SIZE;
     bt2_cparam.rrec_size = 4 +               /* Name's hash value */
@@ -225,7 +225,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
     /* Check if we should create a creation order index v2 B-tree */
     if (ainfo->index_corder) {
         /* Create the creation order index v2 B-tree */
-        HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
+        memset(&bt2_cparam, 0, sizeof(bt2_cparam));
         bt2_cparam.cls       = H5A_BT2_CORDER;
         bt2_cparam.node_size = (size_t)H5A_CORDER_BT2_NODE_SIZE;
         bt2_cparam.rrec_size = 4 +               /* Creation order index */

@@ -710,7 +710,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
 
         /* Check if the attribute has any data yet, if not, fill with zeroes */
         if (attr->obj_opened && !attr->shared->data)
-            HDmemset(buf, 0, (dst_type_size * nelmts));
+            memset(buf, 0, (dst_type_size * nelmts));
         else { /* Attribute exists and has a value */
             /* Convert memory buffer into disk buffer */
             /* Set up type conversion function */
@@ -869,7 +869,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                     /* Clear background buffer if it's not supposed to be initialized with file
                      * contents */
                     if (need_bkg == H5T_BKG_TEMP)
-                        HDmemset(bkg_buf, 0, dst_type_size * nelmts);
+                        memset(bkg_buf, 0, dst_type_size * nelmts);
                 }
                 else if (NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
@@ -2281,7 +2281,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
 
             /* Set background buffer to all zeros */
             if (bkg_buf)
-                HDmemset(bkg_buf, 0, buf_size);
+                memset(bkg_buf, 0, buf_size);
 
             /* Convert from memory to destination file */
             if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf) < 0)
@@ -2424,7 +2424,7 @@ H5A__attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src, H5O_l
         } /* end if */
         else
             /* Reset value to zero */
-            HDmemset(attr_dst->shared->data, 0, attr_dst->shared->data_size);
+            memset(attr_dst->shared->data, 0, attr_dst->shared->data_size);
     } /* end if */
 
 done:

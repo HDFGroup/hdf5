@@ -43,7 +43,7 @@ test_find(void)
     TESTING("bit search operations");
 
     /* The zero length buffer */
-    HDmemset(v1, 0xaa, sizeof v1);
+    memset(v1, 0xaa, sizeof v1);
     n = H5T__bit_find(v1, (size_t)0, (size_t)0, H5T_BIT_LSB, TRUE);
     if (-1 != n) {
         H5_FAILED();
@@ -58,7 +58,7 @@ test_find(void)
     }
 
     /* The zero buffer */
-    HDmemset(v1, 0, sizeof v1);
+    memset(v1, 0, sizeof v1);
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, TRUE);
     if (-1 != n) {
         H5_FAILED();
@@ -74,7 +74,7 @@ test_find(void)
 
     /* Try all combinations of one byte */
     for (i = 0; i < 8 * (int)sizeof(v1); i++) {
-        HDmemset(v1, 0, sizeof v1);
+        memset(v1, 0, sizeof v1);
         v1[i / 8] = (uint8_t)(1 << (i % 8));
         n         = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, TRUE);
         if ((ssize_t)i != n) {
@@ -91,7 +91,7 @@ test_find(void)
     }
 
     /* The one buffer */
-    HDmemset(v1, 0xff, sizeof v1);
+    memset(v1, 0xff, sizeof v1);
     n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, FALSE);
     if (-1 != n) {
         H5_FAILED();
@@ -107,7 +107,7 @@ test_find(void)
 
     /* Try all combinations of one byte */
     for (i = 0; i < 8 * (int)sizeof(v1); i++) {
-        HDmemset(v1, 0xff, sizeof v1);
+        memset(v1, 0xff, sizeof v1);
         v1[i / 8] &= (uint8_t) ~(1 << (i % 8));
         n = H5T__bit_find(v1, (size_t)0, 8 * sizeof(v1), H5T_BIT_LSB, FALSE);
         if ((ssize_t)i != n) {
@@ -160,8 +160,8 @@ test_copy(void)
         d_offset = (size_t)HDrand() % (8 * sizeof v2);
         size     = (unsigned)HDrand() % MIN(8 * sizeof(v1), 8 * sizeof(v2));
         size     = MIN3(size, 8 * sizeof(v1) - s_offset, 8 * sizeof(v2) - d_offset);
-        HDmemset(v1, 0xff, sizeof v1);
-        HDmemset(v2, 0x00, sizeof v2);
+        memset(v1, 0xff, sizeof v1);
+        memset(v2, 0x00, sizeof v2);
 
         /* Copy some bits to v2 and make sure something was copied */
         H5T__bit_copy(v2, d_offset, v1, s_offset, size);
@@ -285,7 +285,7 @@ test_shift(void)
         shift_dist = (ssize_t)((size_t)HDrand() % size);
 
         /*-------- LEFT-shift some bits and make sure something was shifted --------*/
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
         H5T__bit_set(vector, offset, size, 1);
 
         H5T__bit_shift(vector, shift_dist, offset, size);
@@ -314,7 +314,7 @@ test_shift(void)
         }
 
         /*-------- RIGHT-shift some bits and make sure something was shifted --------*/
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
         H5T__bit_set(vector, offset, size, 1);
 
         H5T__bit_shift(vector, -shift_dist, offset, size);
@@ -351,7 +351,7 @@ test_shift(void)
         else
             shift_dist = -((ssize_t)size);
 
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
         H5T__bit_set(vector, offset, size, 1);
 
         H5T__bit_shift(vector, shift_dist, offset, size);
@@ -417,7 +417,7 @@ test_increment(void)
         if (size == 0)
             continue;
 
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
         if (size > 1) /* if size=6, make a sequence like 011111 */
             H5T__bit_set(vector, offset, size - 1, 1);
         else /* if size=1, just set this one bit to 1 */
@@ -504,7 +504,7 @@ test_decrement(void)
             continue;
 
         /* All-zero sequence will become 111111(size=6) after decrement */
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
 
         /* decrement the sequence by one */
         H5T__bit_dec(vector, offset, size);
@@ -573,7 +573,7 @@ test_negate(void)
             continue;
 
         /* All-zero sequence will become 111111(size=6) after negating */
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
 
         /* negate the sequence */
         H5T__bit_neg(vector, offset, size);
@@ -602,7 +602,7 @@ test_negate(void)
         }
 
         /* All-one sequence will become 000000(size=6) after negating */
-        HDmemset(vector, 0x00, sizeof vector);
+        memset(vector, 0x00, sizeof vector);
         H5T__bit_set(vector, offset, size, 1);
 
         /* negate the sequence */
@@ -668,7 +668,7 @@ test_set(void)
         d_offset = (size_t)HDrand() % (8 * sizeof v2);
         size     = (size_t)HDrand() % (8 * sizeof(v2));
         size     = MIN(size, 8 * sizeof(v2) - d_offset);
-        HDmemset(v2, 0x00, sizeof v2);
+        memset(v2, 0x00, sizeof v2);
 
         /* Set some bits in v2 */
         H5T__bit_set(v2, d_offset, size, TRUE);
@@ -783,7 +783,7 @@ test_clear(void)
         d_offset = (size_t)HDrand() % (8 * sizeof v2);
         size     = (size_t)HDrand() % (8 * sizeof(v2));
         size     = MIN(size, 8 * sizeof(v2) - d_offset);
-        HDmemset(v2, 0xff, sizeof v2);
+        memset(v2, 0xff, sizeof v2);
 
         /* Clear some bits in v2 */
         H5T__bit_set(v2, d_offset, size, FALSE);

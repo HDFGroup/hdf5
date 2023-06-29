@@ -2338,7 +2338,7 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     CHECK_PTR(user_block, "calloc");
 
     /* Copy in the user block data */
-    HDmemcpy(user_block, str, HDstrlen(str));
+    memcpy(user_block, str, HDstrlen(str));
 
     /* Open the new file */
     new_fp = fopen(new_name, "wb");
@@ -2833,10 +2833,10 @@ test_misc16(void)
 
     /* Initialize the data */
     /* (Note that these are supposed to stress the code, so are a little weird) */
-    HDmemcpy(wdata[0], "1234567", MISC16_STR_SIZE);
-    HDmemcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
-    HDmemcpy(wdata[2], "12345678", MISC16_STR_SIZE);
-    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
+    memcpy(wdata[0], "1234567", MISC16_STR_SIZE);
+    memcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
+    memcpy(wdata[2], "12345678", MISC16_STR_SIZE);
+    memcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
 
     /* Create the file */
     file = H5Fcreate(MISC16_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2921,10 +2921,10 @@ test_misc17(void)
 
     /* Initialize the data */
     /* (Note that these are supposed to stress the code, so are a little weird) */
-    HDmemcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
+    memcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
+    memcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
+    memcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
+    memcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
 
     /* Create the file */
     file = H5Fcreate(MISC17_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

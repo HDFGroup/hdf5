@@ -329,7 +329,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
     hsize_t  ii, jj;                                       /* Array indices */
     int      n;
 
-    HDmemset(&read_buf, 0, sizeof(read_buf));
+    memset(&read_buf, 0, sizeof(read_buf));
 
     /* Initialize the array of chunk data for all NUM_CHUNKS chunks, this is
        the same as the written data and will be used to verify the read data */
@@ -351,7 +351,7 @@ verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsiz
                 TEST_ERROR;
 
             /* Verify that read chunk is the same as the corresponding written one */
-            if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
+            if (memcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
                 fprintf(stderr,
                         "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
                         offset[0], offset[1]);
@@ -589,7 +589,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     /* Allocate input (non-compressed) buffer */
     if (NULL == (inbuf = calloc(1, CHK_SIZE)))
         TEST_ERROR;
-    HDmemcpy(inbuf, direct_buf, CHK_SIZE);
+    memcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Write only NUM_CHUNKS_WRITTEN chunks at the following logical coords:
@@ -2118,7 +2118,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
         TEST_ERROR;
 
     /* Read the raw chunk back with H5Dread_chunk */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if (H5Dread_chunk(dset, H5P_DEFAULT, offset, &read_flt_msk, read_direct_buf) < 0)
         TEST_ERROR;
     if (read_flt_msk != flt_msk)

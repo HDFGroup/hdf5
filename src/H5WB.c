@@ -216,7 +216,7 @@ H5WB_actual_clear(H5WB_t *wb, size_t need)
         HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Clear the buffer */
-    HDmemset(ret_value, 0, need);
+    memset(ret_value, 0, need);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

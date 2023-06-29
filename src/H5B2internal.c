@@ -104,14 +104,14 @@ H5B2__create_internal(H5B2_hdr_t *hdr, void *parent, H5B2_node_ptr_t *node_ptr, 
     if (NULL == (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed for B-tree internal native keys")
-    HDmemset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
+    memset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
 
     /* Allocate space for the node pointers in memory */
     if (NULL ==
         (internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed for B-tree internal node pointers")
-    HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
+    memset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
 
     /* Set depth of the node */
     internal->depth = depth;

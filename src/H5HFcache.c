@@ -203,7 +203,7 @@ H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref)
     assert(image);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -945,7 +945,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     assert(iblock->size == len);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap indirect block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1602,7 +1602,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     chk_p -= H5HF_SIZEOF_CHKSUM;
 
     /* Reset checksum field, for computing the checksum */
-    HDmemset(chk_p, 0, (size_t)H5HF_SIZEOF_CHKSUM);
+    memset(chk_p, 0, (size_t)H5HF_SIZEOF_CHKSUM);
 
     /* Compute checksum on entire direct block */
     computed_chksum = H5_checksum_metadata(read_buf, len, 0);
@@ -1680,7 +1680,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     /* Allocate space for the fractal heap direct block */
     if (NULL == (dblock = H5FL_CALLOC(H5HF_direct_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
+    memset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set the shared heap header's file context for this operation */
     hdr->f = udata->f;
@@ -1759,7 +1759,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     image = dblock->blk;
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
+    if (memcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap direct block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -2048,7 +2048,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
         uint32_t metadata_chksum; /* Computed metadata checksum value */
 
         /* Clear the checksum field, to compute the checksum */
-        HDmemset(image, 0, (size_t)H5HF_SIZEOF_CHKSUM);
+        memset(image, 0, (size_t)H5HF_SIZEOF_CHKSUM);
 
         /* Compute checksum on entire direct block */
         metadata_chksum = H5_checksum_metadata(dblock->blk, dblock->size, 0);
