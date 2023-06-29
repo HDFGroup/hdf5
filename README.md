@@ -75,7 +75,7 @@ SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE
 --------------------------------------------
 Periodically development code snapshots are provided at the following URL:
     
-   https://gamma.hdfgroup.org/ftp/pub/outgoing/hdf5/snapshots/
+   https://github.com/HDFGroup/hdf5/releases/tag/snapshot
 
 Source packages for current and previous releases are located at:
     
