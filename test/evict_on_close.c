@@ -183,7 +183,7 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 
@@ -278,7 +278,7 @@ generate_eoc_test_file(hid_t fapl_id)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 
@@ -619,7 +619,7 @@ check_group_layout(hid_t fid, const char *group_name)
         char subgroup_name[SUBGROUP_NAME_SIZE];
 
         /* Create the group name */
-        HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
+        memset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR;
 

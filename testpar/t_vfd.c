@@ -353,8 +353,8 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
 
-            HDmemset(&ioc_config, 0, sizeof(ioc_config));
-            HDmemset(&subfiling_conf, 0, sizeof(subfiling_conf));
+            memset(&ioc_config, 0, sizeof(ioc_config));
+            memset(&subfiling_conf, 0, sizeof(subfiling_conf));
 
             /* Get subfiling VFD defaults */
             if ((pass) && (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {

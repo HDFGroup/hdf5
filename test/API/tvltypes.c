@@ -1633,7 +1633,7 @@ test_vltypes_compound_vlen_atomic(void)
     CHECK(dcpl_pid, FAIL, "H5Pcreate");
 
     /* Set the fill value for the second dataset */
-    HDmemset(&fill, 0, sizeof(s1));
+    memset(&fill, 0, sizeof(s1));
     ret = H5Pset_fill_value(dcpl_pid, tid2, &fill);
     CHECK(ret, FAIL, "H5Pset_fill_value");
 
@@ -2835,7 +2835,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -2893,7 +2893,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -3048,7 +3048,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from dataset */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
@@ -3136,7 +3136,7 @@ test_vltypes_fill_value(void)
             CHECK(ret, FAIL, "H5Treclaim");
 
             /* Clear the read buffer */
-            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+            memset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
 
             /* Read in non-contiguous selection from dataset */
             ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);

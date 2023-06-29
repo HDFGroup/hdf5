@@ -1096,7 +1096,7 @@ setup_derived_types(void)
     MPI_Aint      displs[9];
     struct mssg_t sample; /* used to compute displacements */
 
-    HDmemset(&sample, 0, sizeof(struct mssg_t));
+    memset(&sample, 0, sizeof(struct mssg_t));
 
     /* setup the displacements array */
     if ((MPI_SUCCESS != MPI_Get_address(&sample.req, &displs[0])) ||
@@ -6862,7 +6862,7 @@ main(int argc, char **argv)
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    HDmemset(filenames, 0, sizeof(filenames));
+    memset(filenames, 0, sizeof(filenames));
     for (int i = 0; i < NFILENAME; i++) {
         if (NULL == (filenames[i] = malloc(PATH_MAX))) {
             printf("couldn't allocate filename array\n");

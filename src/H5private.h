@@ -835,18 +835,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDlstat
 #define HDlstat(S, B) lstat(S, B)
 #endif
-#ifndef HDmemcmp
-#define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
-#endif
-#ifndef HDmemcpy
-#define HDmemcpy(X, Y, Z) memcpy(X, Y, Z)
-#endif
-#ifndef HDmemmove
-#define HDmemmove(X, Y, Z) memmove((char *)(X), (const char *)(Y), Z)
-#endif
-#ifndef HDmemset
-#define HDmemset(X, C, Z) memset(X, C, Z)
-#endif
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
 #endif

@@ -611,7 +611,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  */
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id)                                                             \
     {                                                                                                        \
-        HDmemset(&rdata, 0, sizeof(rdata));                                                                  \
+        memset(&rdata, 0, sizeof(rdata));                                                                  \
         if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) {                     \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
@@ -633,7 +633,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
         test_file_closing = FALSE;
 
     /* Initialize wdata */
-    HDmemset(&wdata, 0, sizeof(wdata));
+    memset(&wdata, 0, sizeof(wdata));
     wdata.i1 = 11;
     HDstrcpy(wdata.str, "string");
     wdata.i2 = 22;
@@ -646,7 +646,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
     wdata.f1 = 0.0F;
 
     /* Initialize rdata */
-    HDmemset(&rdata, 0, sizeof(rdata));
+    memset(&rdata, 0, sizeof(rdata));
 
     dtype1_id = make_dtype_1();
     if (dtype1_id < 0)
@@ -1170,7 +1170,7 @@ sohm_attr_helper(hid_t fcpl_id)
 
         /* Verify */
         attr_read_id = (op_index == 2) ? attr_id2 : attr_id;
-        HDmemset(rdata, 0, sizeof(rdata));
+        memset(rdata, 0, sizeof(rdata));
         ret = H5Aread(attr_read_id, H5T_NATIVE_INT, rdata);
         CHECK_I(ret, "H5Aread");
         for (x = 0; x < (size_t)dims; ++x)
@@ -1423,12 +1423,12 @@ size2_verify_plist1(hid_t plist)
     /* Check fill value */
     dtype1_id = make_dtype_1();
     CHECK_I(dtype1_id, "make_dtype_1");
-    HDmemset(&fill1_correct, '1', sizeof(fill1_correct));
+    memset(&fill1_correct, '1', sizeof(fill1_correct));
 
     ret = H5Pget_fill_value(plist, dtype1_id, &fill1);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
+    ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
@@ -1494,12 +1494,12 @@ size2_verify_plist2(hid_t plist)
     /* Check fill value */
     dtype2_id = make_dtype_2();
     CHECK_I(dtype2_id, "make_dtype_2");
-    HDmemset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill2_correct, '2', (size_t)DTYPE2_SIZE);
 
     ret = H5Pget_fill_value(plist, dtype2_id, &fill2);
     CHECK_I(ret, "H5Pget_fill_value");
 
-    ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
+    ret = memcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
     VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype2_id);
@@ -1625,8 +1625,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* fill1 and fill2 are fill values for the two datatypes.
      * We'll set them in the DCPL.
      */
-    HDmemset(&fill1, '1', sizeof(dtype1_struct));
-    HDmemset(&fill2, '2', (size_t)DTYPE2_SIZE);
+    memset(&fill1, '1', sizeof(dtype1_struct));
+    memset(&fill2, '2', (size_t)DTYPE2_SIZE);
 
     dcpl1_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK_I(dcpl1_id, "H5Pcreate");
@@ -1669,8 +1669,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     size2_verify_plist2(dcpl2_id);
 
     /* Set up attribute data */
-    HDmemset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string1, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string2, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_string1, LONG_STRING);
     HDstrcpy(attr_string2, LONG_STRING);
     attr_string2[1] = '1'; /* The second string starts "01 index..." */
@@ -2079,8 +2079,8 @@ size2_verify(void)
     group2_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
     CHECK_I(group2_id, "H5Gopen2");
 
-    HDmemset(attr_string, 0, (size_t)NAME_BUF_SIZE);
-    HDmemset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_string, 0, (size_t)NAME_BUF_SIZE);
+    memset(attr_correct_string, 0, (size_t)NAME_BUF_SIZE);
     HDstrcpy(attr_correct_string, LONG_STRING);
     HDstrcpy(attr_name, "00 index");
 

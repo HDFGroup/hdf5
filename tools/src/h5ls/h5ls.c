@@ -962,13 +962,13 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
             else if (H5T_SGN_NONE == H5Tget_sign(native)) {
                 unsigned long long copy;
 
-                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                memcpy(&copy, value + i * dst_size, sizeof(copy));
                 h5tools_str_append(buffer, "%llu", copy);
             }
             else {
                 long long copy;
 
-                HDmemcpy(&copy, value + i * dst_size, sizeof(copy));
+                memcpy(&copy, value + i * dst_size, sizeof(copy));
                 h5tools_str_append(buffer, "%lld", copy);
             }
         }
@@ -1329,8 +1329,8 @@ dump_dataset_values(hid_t dset)
     f_type = H5Dget_type(dset);
     space  = H5Dget_space(dset);
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     outputformat          = *info;
     outputformat.line_1st = NULL;
@@ -1498,8 +1498,8 @@ dump_attribute_values(hid_t attr)
     f_type = H5Aget_type(attr);
     space  = H5Aget_space(attr);
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     outputformat          = *info;
     outputformat.line_1st = NULL;
@@ -1671,8 +1671,8 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     ctx.indent_level = 2;
     ctx.cur_column   = (size_t)curr_pos;
@@ -1777,8 +1777,8 @@ dataset_list1(hid_t dset)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -1849,8 +1849,8 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2056,8 +2056,8 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
         h5tools_context_t ctx;          /* print context  */
         h5tool_format_t  *info = &ls_dataformat;
 
-        HDmemset(&ctx, 0, sizeof(ctx));
-        HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+        memset(&ctx, 0, sizeof(ctx));
+        memset(&buffer, 0, sizeof(h5tools_str_t));
 
         h5tools_str_reset(&buffer);
 
@@ -2093,8 +2093,8 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2271,13 +2271,13 @@ list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
     h5tools_context_t  ctx;    /* print context  */
     h5tool_format_t   *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
     /* init linkinfo struct */
-    HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
+    memset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
     /* if verbose, make H5tools_get_symlink_info() display more */
     if (verbose_g)
@@ -2457,8 +2457,8 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t  *info = &ls_dataformat;
 
-    HDmemset(&ctx, 0, sizeof(ctx));
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+    memset(&ctx, 0, sizeof(ctx));
+    memset(&buffer, 0, sizeof(h5tools_str_t));
 
     h5tools_str_reset(&buffer);
 
@@ -2689,8 +2689,8 @@ main(int argc, char *argv[])
     h5tools_init();
 
     /* Initialize fapl info structs */
-    HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
-    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    memset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -3100,8 +3100,8 @@ main(int argc, char *argv[])
                 h5tools_context_t ctx;          /* print context  */
                 h5tool_format_t  *info = &ls_dataformat;
 
-                HDmemset(&ctx, 0, sizeof(ctx));
-                HDmemset(&buffer, 0, sizeof(h5tools_str_t));
+                memset(&ctx, 0, sizeof(ctx));
+                memset(&buffer, 0, sizeof(h5tools_str_t));
 
                 h5tools_str_reset(&buffer);
                 print_obj_name(&buffer, &iter, oname, "**NOT FOUND**");

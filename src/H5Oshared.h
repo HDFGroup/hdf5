@@ -308,7 +308,7 @@ H5O_SHARED_COPY_FILE(H5F_t *file_src, void *_native_src, H5F_t *file_dst, hbool_
 #endif /* H5O_SHARED_COPY_FILE_REAL */
 
     /* Reset shared message info for new message */
-    HDmemset(dst_mesg, 0, sizeof(H5O_shared_t));
+    memset(dst_mesg, 0, sizeof(H5O_shared_t));
 
     /* Handle sharing destination message */
     if (H5O__shared_copy_file(file_src, file_dst, H5O_SHARED_TYPE, _native_src, dst_mesg, recompute_size,

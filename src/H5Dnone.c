@@ -241,7 +241,7 @@ H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t ch
     assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
-    HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
+    memset(&chunk_rec, 0, sizeof(chunk_rec));
     chunk_rec.nbytes      = idx_info->layout->size;
     chunk_rec.filter_mask = 0;
 

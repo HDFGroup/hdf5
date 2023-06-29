@@ -351,7 +351,7 @@ H5FD__direct_populate_config(size_t boundary, size_t block_size, size_t cbuf_siz
 
     assert(fa_out);
 
-    HDmemset(fa_out, 0, sizeof(H5FD_direct_fapl_t));
+    memset(fa_out, 0, sizeof(H5FD_direct_fapl_t));
 
     if (boundary != 0)
         fa_out->mboundary = boundary;
@@ -685,9 +685,9 @@ H5FD__direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
      * determine if the values are the same or not.  The actual return value
      * shouldn't really matter...
      */
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) < 0)
         HGOTO_DONE(-1)
-    if (HDmemcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
+    if (memcmp(&(f1->device), &(f2->device), sizeof(dev_t)) > 0)
         HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
@@ -921,7 +921,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
                 HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
             if (0 == nbytes) {
                 /* end of file but not end of format address space */
-                HDmemset(buf, 0, size);
+                memset(buf, 0, size);
                 break;
             }
             assert(nbytes >= 0);
@@ -963,7 +963,7 @@ H5FD__direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
              * system calls and partial results like sec2 driver does because the
              * data may no longer be aligned. It's especially true when the data in
              * file is smaller than ALLOC_SIZE. */
-            HDmemset(copy_buf, 0, alloc_size);
+            memset(copy_buf, 0, alloc_size);
 
             /* Calculate how much data we have to read in this iteration
              * (including unused parts of blocks) */
@@ -1150,7 +1150,7 @@ H5FD__direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_
              * both ends are misaligned, otherwise only read the block on the
              * misaligned end.
              */
-            HDmemset(copy_buf, 0, _fbsize);
+            memset(copy_buf, 0, _fbsize);
 
             if (copy_offset > 0) {
                 if ((write_addr + write_size) > (addr + size)) {

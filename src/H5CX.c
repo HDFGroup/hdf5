@@ -491,7 +491,7 @@ H5CX_init(void)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Reset the "default DXPL cache" information */
-    HDmemset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
+    memset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
 
     /* Get the default DXPL cache information */
 
@@ -588,7 +588,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve modify write buffer property")
 
     /* Reset the "default LCPL cache" information */
-    HDmemset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
+    memset(&H5CX_def_lcpl_cache, 0, sizeof(H5CX_lcpl_cache_t));
 
     /* Get the default LCPL cache information */
 
@@ -605,7 +605,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve intermediate group creation flag")
 
     /* Reset the "default LAPL cache" information */
-    HDmemset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
+    memset(&H5CX_def_lapl_cache, 0, sizeof(H5CX_lapl_cache_t));
 
     /* Get the default LAPL cache information */
 
@@ -618,7 +618,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve number of soft / UD links to traverse")
 
     /* Reset the "default DCPL cache" information */
-    HDmemset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
+    memset(&H5CX_def_dcpl_cache, 0, sizeof(H5CX_dcpl_cache_t));
 
     /* Get the default DCPL cache information */
 
@@ -635,7 +635,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve object header flags")
 
     /* Reset the "default DAPL cache" information */
-    HDmemset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
+    memset(&H5CX_def_dapl_cache, 0, sizeof(H5CX_dapl_cache_t));
 
     /* Get the default DAPL cache information */
 
@@ -652,7 +652,7 @@ H5CX_init(void)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve prefix for VDS")
 
     /* Reset the "default FAPL cache" information */
-    HDmemset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
+    memset(&H5CX_def_fapl_cache, 0, sizeof(H5CX_fapl_cache_t));
 
     /* Get the default FAPL cache information */
 
@@ -1698,7 +1698,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
         /* Get the value */
         H5MM_memcpy(vol_connector_prop, &(*head)->ctx.vol_connector_prop, sizeof(H5VL_connector_prop_t));
     else
-        HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
+        memset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_connector_prop() */

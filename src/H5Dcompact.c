@@ -620,7 +620,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
         H5MM_memcpy(reclaim_buf, buf, buf_size);
 
         /* Set background buffer to all zeros */
-        HDmemset(bkg, 0, buf_size);
+        memset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
         if (H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg) < 0)
@@ -643,7 +643,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
             } /* end if */
             else
                 /* Reset value to zero */
-                HDmemset(storage_dst->buf, 0, storage_src->size);
+                memset(storage_dst->buf, 0, storage_src->size);
         } /* end if */
         else
             /* Type conversion not necessary */

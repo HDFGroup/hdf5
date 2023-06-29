@@ -759,7 +759,7 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     virt->list        = H5MM_xfree(virt->list);
     virt->list_nalloc = (size_t)0;
     virt->list_nused  = (size_t)0;
-    (void)HDmemset(virt->min_dims, 0, sizeof(virt->min_dims));
+    (void)memset(virt->min_dims, 0, sizeof(virt->min_dims));
 
     /* Close access property lists */
     if (virt->source_fapl >= 0) {
@@ -1602,7 +1602,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                             storage->list[i].sub_dset = tmp_sub_dset;
 
                             /* Clear new space in sub_dset */
-                            (void)HDmemset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
+                            (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
                                            storage->list[i].sub_dset_nalloc *
                                                sizeof(H5O_storage_virtual_srcdset_t));
 
@@ -2073,7 +2073,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                     storage->list[i].sub_dset = tmp_sub_dset;
 
                     /* Clear new space in sub_dset */
-                    (void)HDmemset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
+                    (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
                                    (sub_dset_max - storage->list[i].sub_dset_nalloc) *
                                        sizeof(H5O_storage_virtual_srcdset_t));
 
@@ -2529,7 +2529,7 @@ H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storag
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
                         /* Clip virtual selection to real virtual extent */
-                        (void)HDmemset(start, 0, sizeof(start));
+                        (void)memset(start, 0, sizeof(start));
                         if (H5S_select_hyperslab(storage->list[i].sub_dset[j].clipped_virtual_select,
                                                  H5S_SELECT_AND, start, NULL, tmp_dims, NULL) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "unable to clip hyperslab")

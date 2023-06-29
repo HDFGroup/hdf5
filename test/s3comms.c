@@ -2417,7 +2417,7 @@ test_trim(void)
     assert(str == NULL);
     str = (char *)malloc(sizeof(char *) * 11);
     assert(str != NULL);
-    HDmemcpy(str, "some text ", 11); /* string with null terminator */
+    memcpy(str, "some text ", 11); /* string with null terminator */
     JSVERIFY(FAIL, H5FD_s3comms_trim(NULL, str, 10, &dest_len), "destination for trim cannot be NULL");
     free(str);
     str = NULL;

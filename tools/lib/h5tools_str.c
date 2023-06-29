@@ -65,7 +65,7 @@ h5tools_str_close(h5tools_str_t *str)
 {
     if (str && str->nalloc) {
         free(str->s);
-        HDmemset(str, 0, sizeof(h5tools_str_t));
+        memset(str, 0, sizeof(h5tools_str_t));
     }
 }
 
@@ -716,21 +716,21 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     /* if (H5Tequal(type, H5T_NATIVE_FLOAT)) */
                     float tempfloat;
 
-                    HDmemcpy(&tempfloat, vp, sizeof(float));
+                    memcpy(&tempfloat, vp, sizeof(float));
                     h5tools_str_append(str, OPT(info->fmt_float, "%g"), (double)tempfloat);
                 }
                 else if (sizeof(double) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_DOUBLE)) */
                     double tempdouble;
 
-                    HDmemcpy(&tempdouble, vp, sizeof(double));
+                    memcpy(&tempdouble, vp, sizeof(double));
                     h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
                 }
                 else if (sizeof(long double) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) */
                     long double templdouble;
 
-                    HDmemcpy(&templdouble, vp, sizeof(long double));
+                    memcpy(&templdouble, vp, sizeof(long double));
                     h5tools_str_append(str, "%Lg", templdouble);
                 }
                 else {
@@ -830,7 +830,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else if (H5T_SGN_NONE == nsign) {
                         unsigned char tempuchar;
 
-                        HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
+                        memcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(unsigned char))
                                 tempuchar = 0;
@@ -844,7 +844,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         signed char tempchar;
 
-                        HDmemcpy(&tempchar, cp_vp, sizeof(char));
+                        memcpy(&tempchar, cp_vp, sizeof(char));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(char))
                                 tempchar = 0;
@@ -860,7 +860,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (H5T_SGN_NONE == nsign) {
                         unsigned int tempuint;
 
-                        HDmemcpy(&tempuint, vp, sizeof(unsigned int));
+                        memcpy(&tempuint, vp, sizeof(unsigned int));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(unsigned int))
                                 tempuint = 0;
@@ -872,7 +872,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         int tempint;
 
-                        HDmemcpy(&tempint, vp, sizeof(int));
+                        memcpy(&tempint, vp, sizeof(int));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(int))
                                 tempint = 0;
@@ -887,7 +887,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (H5T_SGN_NONE == nsign) {
                         unsigned short tempushort;
 
-                        HDmemcpy(&tempushort, vp, sizeof(unsigned short));
+                        memcpy(&tempushort, vp, sizeof(unsigned short));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(unsigned short))
                                 tempushort = 0;
@@ -901,7 +901,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         short tempshort;
 
-                        HDmemcpy(&tempshort, vp, sizeof(short));
+                        memcpy(&tempshort, vp, sizeof(short));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(short))
                                 tempshort = 0;
@@ -916,7 +916,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (H5T_SGN_NONE == nsign) {
                         unsigned long tempulong;
 
-                        HDmemcpy(&tempulong, vp, sizeof(unsigned long));
+                        memcpy(&tempulong, vp, sizeof(unsigned long));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(unsigned long))
                                 tempulong = 0;
@@ -928,7 +928,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         long templong;
 
-                        HDmemcpy(&templong, vp, sizeof(long));
+                        memcpy(&templong, vp, sizeof(long));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(long))
                                 templong = 0;
@@ -944,7 +944,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     if (H5T_SGN_NONE == nsign) {
                         unsigned long long tempullong;
 
-                        HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
+                        memcpy(&tempullong, vp, sizeof(unsigned long long));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(unsigned long long))
                                 tempullong = 0;
@@ -956,7 +956,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     else {
                         long long templlong;
 
-                        HDmemcpy(&templlong, vp, sizeof(long long));
+                        memcpy(&templlong, vp, sizeof(long long));
                         if (packed_bits_num) {
                             if (packed_data_offset >= 8 * sizeof(long long))
                                 templlong = 0;
@@ -1558,8 +1558,8 @@ h5tools_escape(char *s /*in,out*/, size_t size)
                 /*would overflow*/
                 return NULL;
 
-            HDmemmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
-            HDmemcpy(s + i, escape, esc_size);             /*insert*/
+            memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
+            memcpy(s + i, escape, esc_size);             /*insert*/
             n += esc_size - 1;                             /* adjust total string size */
             i += esc_size;                                 /* adjust string position */
         }
@@ -1628,11 +1628,11 @@ h5tools_str_replace(const char *string, const char *substr, const char *replacem
             free(oldstr);
             return NULL;
         }
-        HDmemcpy(newstr, oldstr, (size_t)(tok - oldstr));
-        HDmemcpy(newstr + (tok - oldstr), replacement, HDstrlen(replacement));
-        HDmemcpy(newstr + (tok - oldstr) + HDstrlen(replacement), tok + HDstrlen(substr),
+        memcpy(newstr, oldstr, (size_t)(tok - oldstr));
+        memcpy(newstr + (tok - oldstr), replacement, HDstrlen(replacement));
+        memcpy(newstr + (tok - oldstr) + HDstrlen(replacement), tok + HDstrlen(substr),
                  HDstrlen(oldstr) - HDstrlen(substr) - (size_t)(tok - oldstr));
-        HDmemset(newstr + HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement), 0, 1);
+        memset(newstr + HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement), 0, 1);
         /* move back head right after the last replacement */
         head = newstr + (tok - oldstr) + HDstrlen(replacement);
         free(oldstr);

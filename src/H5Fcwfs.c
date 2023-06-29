@@ -119,13 +119,13 @@ H5F_cwfs_add(H5F_t *f, H5HG_heap_t *heap)
 
         for (i = H5F_NCWFS - 1; i >= 0; --i)
             if (H5HG_FREE_SIZE(f->shared->cwfs[i]) < H5HG_FREE_SIZE(heap)) {
-                HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, (size_t)i * sizeof(H5HG_heap_t *));
+                memmove(f->shared->cwfs + 1, f->shared->cwfs, (size_t)i * sizeof(H5HG_heap_t *));
                 f->shared->cwfs[0] = heap;
                 break;
             } /* end if */
     }
     else {
-        HDmemmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
+        memmove(f->shared->cwfs + 1, f->shared->cwfs, f->shared->ncwfs * sizeof(H5HG_heap_t *));
         f->shared->cwfs[0] = heap;
         f->shared->ncwfs += 1;
     } /* end else */
@@ -303,7 +303,7 @@ H5F_cwfs_remove_heap(H5F_shared_t *shared, H5HG_heap_t *heap)
     for (u = 0; u < shared->ncwfs; u++) {
         if (shared->cwfs[u] == heap) {
             shared->ncwfs -= 1;
-            HDmemmove(shared->cwfs + u, shared->cwfs + u + 1, (shared->ncwfs - u) * sizeof(H5HG_heap_t *));
+            memmove(shared->cwfs + u, shared->cwfs + u + 1, (shared->ncwfs - u) * sizeof(H5HG_heap_t *));
             break;
         } /* end if */
     }     /* end for */

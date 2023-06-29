@@ -8640,11 +8640,11 @@ test_hyperslab(const char *fname, int make_diffs /* flag to modify data buffers 
         }
 
         /* set the hyperslab values */
-        HDmemset(buf, c, nelmts);
+        memset(buf, c, nelmts);
 
         /* make a different hyperslab at this position */
         if (make_diffs && i == 512 * 512)
-            HDmemset(buf, 0, nelmts);
+            memset(buf, 0, nelmts);
 
         hs_start[0] = (unsigned long long)i * GBLL / (1024 * 1024);
         if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)

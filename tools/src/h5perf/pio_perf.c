@@ -1289,7 +1289,7 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1342,7 +1342,7 @@ parse_command_line(int argc, const char *const *argv)
                     char buf[10];
                     int  i;
 
-                    HDmemset(buf, '\0', sizeof(buf));
+                    memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (HDisalnum(*end) && i < 10)

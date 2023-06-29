@@ -1291,7 +1291,7 @@ H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buff
     FUNC_ENTER_PACKAGE
 
     /* may not have to initialize to zeros */
-    HDmemset(data, 0, d_nelmts * (size_t)parms[4]);
+    memset(data, 0, d_nelmts * (size_t)parms[4]);
 
     /* initialization before the loop */
     j       = 0;
@@ -1561,7 +1561,7 @@ H5Z__nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer
     unsigned     parms_index; /* index in array parms used by compression/decompression functions */
 
     /* must initialize buffer to be zeros */
-    HDmemset(buffer, 0, *buffer_size);
+    memset(buffer, 0, *buffer_size);
 
     /* initialization before the loop */
     buf_len = sizeof(unsigned char) * 8;

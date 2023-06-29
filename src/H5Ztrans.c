@@ -1072,8 +1072,8 @@ H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_
     /* check args */
     assert(tree);
 
-    HDmemset(&resl, 0, sizeof(H5Z_result));
-    HDmemset(&resr, 0, sizeof(H5Z_result));
+    memset(&resl, 0, sizeof(H5Z_result));
+    memset(&resr, 0, sizeof(H5Z_result));
 
     if (tree->type == H5Z_XFORM_INTEGER) {
         res->type          = H5Z_XFORM_INTEGER;

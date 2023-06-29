@@ -71,7 +71,7 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
 {
     int k, n;
 
-    HDmemset(options, 0, sizeof(pack_opt_t));
+    memset(options, 0, sizeof(pack_opt_t));
     options->min_comp   = 0;
     options->verbose    = verbose;
     options->latest     = latest;
@@ -259,7 +259,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
                 *named_dt_head_p = dt;
 
                 /* Update the token/address and id */
-                HDmemcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
+                memcpy(&dt->obj_token, &travt->objs[i].obj_token, sizeof(H5O_token_t));
                 dt->id_out = H5I_INVALID_HID;
 
                 /* Check if this type is the one requested */
@@ -282,7 +282,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         *named_dt_head_p = dt_ret;
 
         /* Update the token/address and id */
-        HDmemcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
+        memcpy(&dt_ret->obj_token, &oinfo.token, sizeof(H5O_token_t));
         dt_ret->id_out = H5I_INVALID_HID;
     } /* end if requested datatype not found */
 
@@ -854,7 +854,7 @@ check_objects(const char *fname, pack_opt_t *options)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dget_space failed");
                         if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_ndims failed");
-                        HDmemset(dims, 0, sizeof dims);
+                        memset(dims, 0, sizeof dims);
                         if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Sget_simple_extent_dims failed");
                         for (j = 0; j < rank; j++)

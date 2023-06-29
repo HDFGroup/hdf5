@@ -670,7 +670,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
     /* Construct very long object name template */
     if (NULL == (objname = (char *)malloc((size_t)(LONG_COMPACT_LENGTH + 1))))
         TEST_ERROR;
-    HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
+    memset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
     /* Re-open file */

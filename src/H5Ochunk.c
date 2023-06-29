@@ -179,7 +179,7 @@ H5O__chunk_protect(H5F_t *f, H5O_t *oh, unsigned idx)
 
         /* Construct the user data for protecting chunk proxy */
         /* (and _not_ decoding it) */
-        HDmemset(&chk_udata, 0, sizeof(chk_udata));
+        memset(&chk_udata, 0, sizeof(chk_udata));
         chk_udata.oh      = oh;
         chk_udata.chunkno = idx;
         chk_udata.size    = oh->chunk[idx].size;
@@ -324,7 +324,7 @@ H5O__chunk_update_idx(H5F_t *f, H5O_t *oh, unsigned idx)
 
     /* Construct the user data for protecting chunk proxy */
     /* (and _not_ decoding it) */
-    HDmemset(&chk_udata, 0, sizeof(chk_udata));
+    memset(&chk_udata, 0, sizeof(chk_udata));
     chk_udata.oh      = oh;
     chk_udata.chunkno = idx;
     chk_udata.size    = oh->chunk[idx].size;

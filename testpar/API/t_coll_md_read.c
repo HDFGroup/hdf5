@@ -205,7 +205,7 @@ test_partial_no_selection_coll_md_read(void)
      * Check data integrity just to be sure.
      */
     if (!PARTIAL_NO_SELECTION_NO_SEL_PROCESS) {
-        VRFY((!HDmemcmp(data, read_buf,
+        VRFY((!memcmp(data, read_buf,
                         count[1] * (PARTIAL_NO_SELECTION_Y_DIM_SCALE * PARTIAL_NO_SELECTION_X_DIM_SCALE) *
                             sizeof(int))),
              "memcmp succeeded");

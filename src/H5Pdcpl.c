@@ -1332,7 +1332,7 @@ H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t H5_ATTR_UNUSED
     if (fill1->buf != NULL && fill2->buf == NULL)
         HGOTO_DONE(1);
     if (fill1->buf != NULL)
-        if ((cmp_value = HDmemcmp(fill1->buf, fill2->buf, (size_t)fill1->size)) != 0)
+        if ((cmp_value = memcmp(fill1->buf, fill2->buf, (size_t)fill1->size)) != 0)
             HGOTO_DONE(cmp_value);
 
     /* Check the allocation time for the fill values */
@@ -2018,7 +2018,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 
     /* Verify & initialize property's chunk dims */
     H5MM_memcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
-    HDmemset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
+    memset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
     chunk_nelmts = 1;
     for (u = 0; u < (unsigned)ndims; u++) {
         if (dim[u] == 0)
@@ -2188,7 +2188,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const 
 
     /* Add virtual dataset mapping entry */
     ent = &virtual_layout.storage.u.virt.list[virtual_layout.storage.u.virt.list_nused];
-    HDmemset(ent, 0, sizeof(H5O_storage_virtual_ent_t)); /* Clear before starting to set up */
+    memset(ent, 0, sizeof(H5O_storage_virtual_ent_t)); /* Clear before starting to set up */
     if (NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
     if (NULL == (ent->source_file_name = H5MM_xstrdup(src_file_name)))
@@ -3244,7 +3244,7 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
 
     /* Check for "default" fill value */
     if (fill.size == 0) {
-        HDmemset(value, 0, H5T_get_size(type));
+        memset(value, 0, H5T_get_size(type));
         HGOTO_DONE(SUCCEED);
     } /* end if */
 

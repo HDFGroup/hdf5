@@ -70,7 +70,7 @@ int
 setup_parameters(int argc, char *const argv[], options_t *opts)
 {
     /* use case defaults */
-    HDmemset(opts, 0, sizeof(options_t));
+    memset(opts, 0, sizeof(options_t));
     opts->chunksize   = Chunksize_DFT;
     opts->use_swmr    = 1; /* use swmr open */
     opts->iterations  = 1;

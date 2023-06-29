@@ -146,7 +146,7 @@ send_shutdown(struct mshs_opts *opts)
     target_addr.sin_family      = AF_INET;
     target_addr.sin_port        = htons((uint16_t)opts->portno);
     target_addr.sin_addr.s_addr = inet_addr(opts->ip);
-    HDmemset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
+    memset(target_addr.sin_zero, 0, sizeof(target_addr.sin_zero));
 
     if (connect(live_socket, (struct sockaddr *)&target_addr, (socklen_t)sizeof(target_addr)) < 0) {
         printf("ERROR connect() (%d)\n%s\n", errno, HDstrerror(errno));

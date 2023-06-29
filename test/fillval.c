@@ -1032,7 +1032,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     }
     /* case for compound datatype */
     else if (datatype == H5T_COMPOUND) {
-        HDmemset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
+        memset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
         for (u = 0; u < nelmts; u++) {
             buf_c[u].a = 1111.11F;
             buf_c[u].x = 2222;
@@ -1285,7 +1285,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
          * as compound type */
         if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
             goto error;
-        HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
+        memset(&fill_ctype, 0, sizeof(fill_ctype));
         fill_ctype.y = 4444.4444;
         if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
             goto error;
@@ -1351,7 +1351,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
      * as compound type */
     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
         goto error;
-    HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
+    memset(&fill_ctype, 0, sizeof(fill_ctype));
     fill_ctype.y = 4444.4444;
     if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
         goto error;
@@ -1677,7 +1677,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1741,7 +1741,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1789,7 +1789,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1835,7 +1835,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1883,7 +1883,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;
@@ -1938,7 +1938,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
         TEST_ERROR;
 
     /* Clear the read buffer */
-    HDmemset(val_rd, 0, val_size);
+    memset(val_rd, 0, val_size);
 
     /* Set location for another element initialized by H5Dset_extent() */
     hs_offset[3] -= 1;
@@ -1960,7 +1960,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
         TEST_ERROR;
 
     /* Clear the read buffer */
-    HDmemset(val_rd, 0, val_size);
+    memset(val_rd, 0, val_size);
 
     /* Read some data and make sure it's the right value */
     for (i = 0; i < 1000; i++) {
@@ -1991,7 +1991,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t 
             TEST_ERROR;
 
         /* Clear the read buffer */
-        HDmemset(val_rd, 0, val_size);
+        memset(val_rd, 0, val_size);
     } /* end for */
     if (H5Sclose(mspace) < 0)
         TEST_ERROR;

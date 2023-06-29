@@ -139,7 +139,7 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
 
     /* Copy data from temporary buffer to destination buffer */
-    HDmemcpy(icheck2, tmp, (size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
+    memcpy(icheck2, tmp, (size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
     free(tmp);
     tmp = NULL;
 
@@ -546,7 +546,7 @@ test_compound_dtype2(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -767,7 +767,7 @@ test_compound_dtype(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -997,7 +997,7 @@ test_compound_dtype3(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -1225,7 +1225,7 @@ test_compound_opaque(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -1403,7 +1403,7 @@ test_enum_dtype(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(scheck2, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(scheck2, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
 
     if (H5Tconvert(native_type, tid_m, (DIM0 * DIM1), scheck2, NULL, H5P_DEFAULT) < 0)
         TEST_ERROR;
@@ -1574,7 +1574,7 @@ test_array_dtype(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(check, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -1731,7 +1731,7 @@ test_array_dtype2(hid_t file)
     if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
         TEST_ERROR;
 
-    HDmemcpy(icheck3, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
+    memcpy(icheck3, tmp, DIM0 * DIM1 * H5Tget_size(native_type));
     free(tmp);
     tmp = NULL;
 
@@ -1916,7 +1916,7 @@ test_vl_dtype(hid_t file)
              * platforms like Cray */
             if (NULL == (tmp = (void **)malloc(t2->len * sizeof(unsigned int))))
                 TEST_ERROR;
-            HDmemcpy(tmp, t2->p, t2->len * H5Tget_size(nat_super_type));
+            memcpy(tmp, t2->p, t2->len * H5Tget_size(nat_super_type));
 
             if (H5Tconvert(nat_super_type, H5T_NATIVE_UINT, t2->len, tmp, NULL, H5P_DEFAULT) < 0)
                 TEST_ERROR;
@@ -2991,7 +2991,7 @@ test_ninteger(void)
     /* get rank */
     if ((rank = H5Sget_simple_extent_ndims(sid1)) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(dims, 0, sizeof dims);
+    memset(dims, 0, sizeof dims);
 
     /* get dimension */
     if (H5Sget_simple_extent_dims(sid1, dims, NULL) < 0)

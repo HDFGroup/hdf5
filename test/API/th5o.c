@@ -1463,8 +1463,8 @@ test_h5o_getinfo_same_file(void)
     CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
     ret = H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC);
@@ -1475,8 +1475,8 @@ test_h5o_getinfo_same_file(void)
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info3");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
     ret = H5Oget_info_by_name3(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -1507,8 +1507,8 @@ test_h5o_getinfo_same_file(void)
     CHECK(gid2, FAIL, "H5Gopen2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, through group IDs */
     ret = H5Oget_info3(gid1, &oinfo1, H5O_INFO_BASIC);
@@ -1519,8 +1519,8 @@ test_h5o_getinfo_same_file(void)
     VERIFY(oinfo1.fileno, oinfo2.fileno, "file number from H5Oget_info3");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for each object, by name */
     ret = H5Oget_info_by_name3(fid1, "group1", &oinfo1, H5O_INFO_BASIC, H5P_DEFAULT);
@@ -1782,8 +1782,8 @@ test_h5o_getinfo_visit(void)
     CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for "group1" via H5Oget_info1 and H5Oget_info2 */
     ret = H5Oget_info1(gid1, &oinfo1);
@@ -1796,8 +1796,8 @@ test_h5o_getinfo_visit(void)
     VERIFY(oinfo1.num_attrs, oinfo2.num_attrs, "obj info from H5Oget_info1/2");
 
     /* Reset object info */
-    HDmemset(&oinfo1, 0, sizeof(oinfo1));
-    HDmemset(&oinfo2, 0, sizeof(oinfo2));
+    memset(&oinfo1, 0, sizeof(oinfo1));
+    memset(&oinfo2, 0, sizeof(oinfo2));
 
     /* Query the object info for "group2" via H5Oget_info1 and H5Oget_info2 */
     ret = H5Oget_info_by_name1(fid, "group2", &oinfo1, H5P_DEFAULT);

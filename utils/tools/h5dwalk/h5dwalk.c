@@ -299,7 +299,7 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
         pos = low;
 
     if (pos < count)
-        HDmemmove(&option->separators[low + 1], &option->separators[low],
+        memmove(&option->separators[low + 1], &option->separators[low],
                   sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
@@ -1175,7 +1175,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 
     argv[k++] = HDstrdup(toolname);
 
-    HDmemset(cmdline, 0, sizeof(cmdline));
+    memset(cmdline, 0, sizeof(cmdline));
     buf += HDstrlen(toolname) + 1;
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
@@ -1184,7 +1184,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             mfu_flist   flist_arg;
             void       *check_ptr[2] = {NULL, NULL};
 
-            HDmemcpy(check_ptr, &buf[1], sizeof(void *));
+            memcpy(check_ptr, &buf[1], sizeof(void *));
             flist_arg = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
@@ -1607,10 +1607,10 @@ main(int argc, char *argv[])
                 *ptr++ = '&';
                 /* Select which argument list should be used */
                 if (k == 0) {
-                    HDmemcpy(ptr, &flist1, sizeof(void *));
+                    memcpy(ptr, &flist1, sizeof(void *));
                 }
                 if (k == 1) {
-                    HDmemcpy(ptr, &flist2, sizeof(void *));
+                    memcpy(ptr, &flist2, sizeof(void *));
                 }
                 ptr += sizeof(mfu_flist *);
                 k++;

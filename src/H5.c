@@ -183,7 +183,7 @@ H5_init_library(void)
     /*
      * Make sure the package information is updated.
      */
-    HDmemset(&H5_debug_g, 0, sizeof H5_debug_g);
+    memset(&H5_debug_g, 0, sizeof H5_debug_g);
     H5_debug_g.pkg[H5_PKG_A].name  = "a";
     H5_debug_g.pkg[H5_PKG_AC].name = "ac";
     H5_debug_g.pkg[H5_PKG_B].name  = "b";

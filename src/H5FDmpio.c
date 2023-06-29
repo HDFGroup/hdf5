@@ -295,7 +295,7 @@ H5FD_mpio_init(void)
 
 #ifdef H5FDmpio_DEBUG
         /* Clear the flag buffer */
-        HDmemset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
+        memset(H5FD_mpio_debug_flags_s, 0, sizeof(H5FD_mpio_debug_flags_s));
 
         /* Retrieve MPI-IO debugging environment variable */
         s = HDgetenv("H5FD_mpio_Debug");
@@ -1298,7 +1298,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     assert(buf);
 
     /* Portably initialize MPI status variable */
-    HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
+    memset(&mpi_stat, 0, sizeof(MPI_Status));
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off /*out*/) < 0)
@@ -1492,7 +1492,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
      * This gives us zeroes beyond end of physical MPI file.
      */
     if ((n = (io_size - bytes_read)) > 0)
-        HDmemset((char *)buf + bytes_read, 0, (size_t)n);
+        memset((char *)buf + bytes_read, 0, (size_t)n);
 
 done:
     if (derived_type)
@@ -1571,7 +1571,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     assert(!H5CX_get_mpi_file_flushing());
 
     /* Portably initialize MPI status variable */
-    HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
+    memset(&mpi_stat, 0, sizeof(MPI_Status));
 
     /* some numeric conversions */
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
@@ -2203,7 +2203,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             }
 
         /* Portably initialize MPI status variable */
-        HDmemset(&mpi_stat, 0, sizeof(mpi_stat));
+        memset(&mpi_stat, 0, sizeof(mpi_stat));
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
@@ -2335,7 +2335,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #endif
                 assert(bytes_read >= 0);
 
-                HDmemset((char *)s_bufs[i] + bytes_read, 0, (size_t)io_size);
+                memset((char *)s_bufs[i] + bytes_read, 0, (size_t)io_size);
 
                 n -= io_size;
                 i--;
@@ -2402,7 +2402,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             /* Check if we actually need to do I/O */
             if (addrs[i] < max_addr) {
                 /* Portably initialize MPI status variable */
-                HDmemset(&mpi_stat, 0, sizeof(mpi_stat));
+                memset(&mpi_stat, 0, sizeof(mpi_stat));
 
                 /* Issue read */
                 if (MPI_SUCCESS !=
@@ -2435,13 +2435,13 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                  * addresses.
                  */
                 if ((n = (io_size - bytes_read)) > 0) {
-                    HDmemset((char *)bufs[i] + bytes_read, 0, (size_t)n);
+                    memset((char *)bufs[i] + bytes_read, 0, (size_t)n);
                     max_addr = addrs[i] + (haddr_t)bytes_read;
                 }
             }
             else {
                 /* Read is past the max address, fill in zeroes */
-                HDmemset((char *)bufs[i], 0, size);
+                memset((char *)bufs[i], 0, size);
             }
         }
     }
@@ -2612,7 +2612,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
         }
 
         /* Portably initialize MPI status variable */
-        HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
+        memset(&mpi_stat, 0, sizeof(MPI_Status));
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)

@@ -361,7 +361,7 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
 
             assert(cache_ptr->image_entries[u].image_ptr);
             assert(fake_cache_ptr->image_entries[u].image_ptr);
-            assert(!HDmemcmp(cache_ptr->image_entries[u].image_ptr,
+            assert(!memcmp(cache_ptr->image_entries[u].image_ptr,
                              fake_cache_ptr->image_entries[u].image_ptr, cache_ptr->image_entries[u].size));
 
             fake_cache_ptr->image_entries[u].image_ptr =
@@ -1335,7 +1335,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     p = *buf;
 
     /* Check signature */
-    if (HDmemcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN) != 0)
+    if (memcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN) != 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image header signature")
     p += H5C__MDCI_BLOCK_SIGNATURE_LEN;
 

@@ -176,7 +176,7 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
     }
 
     if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+        memset(&grp_info, 0, sizeof(grp_info));
         ret = H5Gget_info(gid, &grp_info);
 
         if (ret < 0) {
@@ -434,7 +434,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
     }
 
     if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+        memset(&grp_info, 0, sizeof(grp_info));
         ret = H5Gget_info(gid, &grp_info);
 
         if (ret < 0) {
@@ -480,7 +480,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
         }
         assert(link_exists >= 0);
 
-        HDmemset(&lnk_info, 0, sizeof(grp_info));
+        memset(&lnk_info, 0, sizeof(grp_info));
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
@@ -550,7 +550,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             }
             assert(H5L_TYPE_HARD == lnk_info.type);
 
-            HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
+            memset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {
@@ -844,7 +844,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
     }
 
     if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+        memset(&grp_info, 0, sizeof(grp_info));
         ret = H5Gget_info(gid, &grp_info);
 
         if (ret < 0) {
@@ -889,7 +889,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
         }
         assert(link_exists >= 0);
 
-        HDmemset(&lnk_info, 0, sizeof(grp_info));
+        memset(&lnk_info, 0, sizeof(grp_info));
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
@@ -959,7 +959,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             }
             assert(H5L_TYPE_HARD == lnk_info.type);
 
-            HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
+            memset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
             if (ret < 0) {
                 pass         = FALSE;
@@ -1204,7 +1204,7 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
     }
 
     if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+        memset(&grp_info, 0, sizeof(grp_info));
         ret = H5Gget_info(gid, &grp_info);
 
         if (ret < 0) {
@@ -1439,7 +1439,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
     }
 
     if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+        memset(&grp_info, 0, sizeof(grp_info));
 
         ret = H5Gget_info(gid, &grp_info);
 
@@ -1485,7 +1485,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         }
         assert(link_exists >= 0);
 
-        HDmemset(&lnk_info, 0, sizeof(grp_info));
+        memset(&lnk_info, 0, sizeof(grp_info));
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
@@ -1553,7 +1553,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             }
             assert(H5L_TYPE_HARD == lnk_info.type);
 
-            HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
+            memset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {

@@ -191,13 +191,13 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     assert(mpi_rank < mpi_size);
 
     /* Initialize the entries_to_flush and entries_to_clear arrays */
-    HDmemset(entries_to_flush, 0, sizeof(entries_to_flush));
-    HDmemset(entries_to_clear, 0, sizeof(entries_to_clear));
+    memset(entries_to_flush, 0, sizeof(entries_to_flush));
+    memset(entries_to_clear, 0, sizeof(entries_to_clear));
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     fprintf(stdout, "%s:%d: setting up candidate assignment table.\n", __func__, mpi_rank);
 
-    HDmemset(tbl_buf, 0, sizeof(tbl_buf));
+    memset(tbl_buf, 0, sizeof(tbl_buf));
 
     HDsnprintf(tbl_buf, sizeof(tbl_buf), "candidate list = ");
     for (u = 0; u < num_candidates; u++)

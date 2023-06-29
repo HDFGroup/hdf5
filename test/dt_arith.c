@@ -116,8 +116,8 @@ static int without_hardware_g = 0;
         NELMTS = SRC_PREC * 3;                                                                               \
         BUF    = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                          \
         SAVED  = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                          \
-        HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
-        HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
+        memset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
+        memset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
                                                                                                              \
         buf_p   = BUF;                                                                                       \
         saved_p = SAVED;                                                                                     \
@@ -126,14 +126,14 @@ static int without_hardware_g = 0;
         /*VALUE2 ascends from 00000000, to 00000011, 00000111,...,  until 11111111.*/                        \
         for (n = 0; n < SRC_PREC; n++) {                                                                     \
             {                                                                                                \
-                HDmemcpy(buf_p, &value1, SRC_SIZE);                                                          \
-                HDmemcpy(saved_p, &value1, SRC_SIZE);                                                        \
+                memcpy(buf_p, &value1, SRC_SIZE);                                                          \
+                memcpy(saved_p, &value1, SRC_SIZE);                                                        \
                 buf_p += SRC_SIZE;                                                                           \
                 saved_p += SRC_SIZE;                                                                         \
             }                                                                                                \
             {                                                                                                \
-                HDmemcpy(buf_p, &value2, SRC_SIZE);                                                          \
-                HDmemcpy(saved_p, &value2, SRC_SIZE);                                                        \
+                memcpy(buf_p, &value2, SRC_SIZE);                                                          \
+                memcpy(saved_p, &value2, SRC_SIZE);                                                        \
                 buf_p += SRC_SIZE;                                                                           \
                 saved_p += SRC_SIZE;                                                                         \
             }                                                                                                \
@@ -152,8 +152,8 @@ static int without_hardware_g = 0;
         /* VALUE2 descends from 11111111 to 11111110, 11111100, ..., until 10000000. */                      \
         for (n = 0; n < SRC_PREC - 1; n++) {                                                                 \
             {                                                                                                \
-                HDmemcpy(buf_p, &value2, SRC_SIZE);                                                          \
-                HDmemcpy(saved_p, &value2, SRC_SIZE);                                                        \
+                memcpy(buf_p, &value2, SRC_SIZE);                                                          \
+                memcpy(saved_p, &value2, SRC_SIZE);                                                        \
                 buf_p += SRC_SIZE;                                                                           \
                 saved_p += SRC_SIZE;                                                                         \
             }                                                                                                \
@@ -233,8 +233,8 @@ static int without_hardware_g = 0;
         /* Allocate buffers */                                                                               \
         BUF   = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
         SAVED = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
-        HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
-        HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
+        memset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
+        memset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
                                                                                                              \
         buf_p   = BUF;                                                                                       \
         saved_p = SAVED;                                                                                     \
@@ -244,15 +244,15 @@ static int without_hardware_g = 0;
         value2 = -SRC_MIN;                                                                                   \
         for (n = 0; n < num_norm; n++) {                                                                     \
             if (value1 < SRC_MAX) { /*positive*/                                                             \
-                HDmemcpy(buf_p, &value1, SRC_SIZE);                                                          \
-                HDmemcpy(saved_p, &value1, SRC_SIZE);                                                        \
+                memcpy(buf_p, &value1, SRC_SIZE);                                                          \
+                memcpy(saved_p, &value1, SRC_SIZE);                                                        \
                 value1 *= multiply;                                                                          \
                 buf_p += SRC_SIZE;                                                                           \
                 saved_p += SRC_SIZE;                                                                         \
             }                                                                                                \
             if (value2 > -SRC_MAX) { /*negative*/                                                            \
-                HDmemcpy(buf_p, &value2, SRC_SIZE);                                                          \
-                HDmemcpy(saved_p, &value2, SRC_SIZE);                                                        \
+                memcpy(buf_p, &value2, SRC_SIZE);                                                          \
+                memcpy(saved_p, &value2, SRC_SIZE);                                                        \
                 value2 *= multiply;                                                                          \
                 buf_p += SRC_SIZE;                                                                           \
                 saved_p += SRC_SIZE;                                                                         \
@@ -260,14 +260,14 @@ static int without_hardware_g = 0;
         }                                                                                                    \
                                                                                                              \
         value1 = SRC_MAX; /*maximal value*/                                                                  \
-        HDmemcpy(buf_p, &value1, SRC_SIZE);                                                                  \
-        HDmemcpy(saved_p, &value1, SRC_SIZE);                                                                \
+        memcpy(buf_p, &value1, SRC_SIZE);                                                                  \
+        memcpy(saved_p, &value1, SRC_SIZE);                                                                \
         buf_p += SRC_SIZE;                                                                                   \
         saved_p += SRC_SIZE;                                                                                 \
                                                                                                              \
         value2 = -SRC_MAX; /*negative value*/                                                                \
-        HDmemcpy(buf_p, &value2, SRC_SIZE);                                                                  \
-        HDmemcpy(saved_p, &value2, SRC_SIZE);                                                                \
+        memcpy(buf_p, &value2, SRC_SIZE);                                                                  \
+        memcpy(saved_p, &value2, SRC_SIZE);                                                                \
         buf_p += SRC_SIZE;                                                                                   \
         saved_p += SRC_SIZE;                                                                                 \
     } while (0)
@@ -288,8 +288,8 @@ static int without_hardware_g = 0;
         /* Allocate buffers */                                                                               \
         BUF   = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
         SAVED = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
-        HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
-        HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
+        memset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
+        memset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
                                                                                                              \
         tmp1 = (unsigned char *)calloc((size_t)1, (size_t)SRC_SIZE);                                         \
         tmp2 = (unsigned char *)calloc((size_t)1, (size_t)SRC_SIZE);                                         \
@@ -299,14 +299,14 @@ static int without_hardware_g = 0;
                                                                                                              \
         /*Denormalized values. Exponent is 0. Let mantissa starts from 00000001, 00000011,                   \
          *00000111,..., until 11111111.*/                                                                    \
-        HDmemset(tmp1, 0, SRC_SIZE);                                                                         \
-        HDmemset(tmp2, 0, SRC_SIZE);                                                                         \
+        memset(tmp1, 0, SRC_SIZE);                                                                         \
+        memset(tmp2, 0, SRC_SIZE);                                                                         \
         H5T__bit_set(tmp2, SRC_PREC - 1, (size_t)1, TRUE); /*the negative value*/                            \
         for (n = 0; n < SRC_MANT_DIG - 1; n++) {                                                             \
             H5T__bit_set(tmp1, n, (size_t)1, TRUE); /*turn on 1 bit each time*/                              \
             CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                          \
-            HDmemcpy(buf_p, tmp1, SRC_SIZE);                                                                 \
-            HDmemcpy(saved_p, tmp1, SRC_SIZE);                                                               \
+            memcpy(buf_p, tmp1, SRC_SIZE);                                                                 \
+            memcpy(saved_p, tmp1, SRC_SIZE);                                                               \
             CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/              \
             buf_p += SRC_SIZE;                                                                               \
             saved_p += SRC_SIZE;                                                                             \
@@ -314,8 +314,8 @@ static int without_hardware_g = 0;
             /*negative values*/                                                                              \
             H5T__bit_set(tmp2, n, (size_t)1, TRUE);                                                          \
             CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                          \
-            HDmemcpy(buf_p, tmp2, SRC_SIZE);                                                                 \
-            HDmemcpy(saved_p, tmp2, SRC_SIZE);                                                               \
+            memcpy(buf_p, tmp2, SRC_SIZE);                                                                 \
+            memcpy(saved_p, tmp2, SRC_SIZE);                                                               \
             CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                          \
             buf_p += SRC_SIZE;                                                                               \
             saved_p += SRC_SIZE;                                                                             \
@@ -340,24 +340,24 @@ static int without_hardware_g = 0;
         /* Allocate buffers */                                                                               \
         BUF   = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
         SAVED = (unsigned char *)aligned_malloc(NELMTS * MAX(SRC_SIZE, DST_SIZE));                           \
-        HDmemset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
-        HDmemset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
+        memset(BUF, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                   \
+        memset(SAVED, 0, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                                 \
         value = (unsigned char *)calloc(SRC_SIZE, sizeof(unsigned char));                                    \
                                                                                                              \
         buf_p = BUF;                                                                                         \
                                                                                                              \
         /* +0 */                                                                                             \
         H5T__bit_set(value, (size_t)0, SRC_PREC, FALSE);                                                     \
-        HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                            \
+        memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                            \
         buf_p += SRC_SIZE;                                                                                   \
                                                                                                              \
         for (n = 0; n < 2; n++) {                                                                            \
             if (n == 1) {                                                                                    \
-                HDmemset(value, 0, SRC_SIZE * sizeof(unsigned char));                                        \
+                memset(value, 0, SRC_SIZE * sizeof(unsigned char));                                        \
                 /* -0 */                                                                                     \
                 H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                \
                 CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                     \
-                HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                    \
+                memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                    \
                 CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/         \
                 buf_p += SRC_SIZE;                                                                           \
             }                                                                                                \
@@ -365,26 +365,26 @@ static int without_hardware_g = 0;
             /* +/-infinity */                                                                                \
             H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC - SRC_MANT_DIG, TRUE);                  \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
-            HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
+            memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
             buf_p += SRC_SIZE;                                                                               \
                                                                                                              \
             /* +/-SNaN */                                                                                    \
             H5T__bit_set(value, (size_t)0, (size_t)1, TRUE);                                                 \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
-            HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
+            memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
             buf_p += SRC_SIZE;                                                                               \
                                                                                                              \
             /* +/-QNaN */                                                                                    \
             H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                                \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change order for big endian*/                         \
-            HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
+            memcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                        \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE); /*change back the order for bit operation*/             \
             buf_p += SRC_SIZE;                                                                               \
         }                                                                                                    \
                                                                                                              \
-        HDmemcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
+        memcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
         free(value);                                                                                         \
     } while (0)
 
@@ -648,8 +648,8 @@ test_particular_fp_integer(void)
     buf1       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
     saved_buf1 = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size1, dst_size1));
 
-    HDmemcpy(buf1, &src_d, src_size1);
-    HDmemcpy(saved_buf1, &src_d, src_size1);
+    memcpy(buf1, &src_d, src_size1);
+    memcpy(saved_buf1, &src_d, src_size1);
 
     /* Register exception handling function and signal the destination is "signed char". */
     flag = 1;
@@ -666,7 +666,7 @@ test_particular_fp_integer(void)
         goto error;
     }
 
-    HDmemcpy(&dst_c, buf1, dst_size1);
+    memcpy(&dst_c, buf1, dst_size1);
 
     /* Print errors */
     if (dst_c != SCHAR_MAX) {
@@ -681,14 +681,14 @@ test_particular_fp_integer(void)
         for (j = 0; j < src_size1; j++)
             printf(" %02x", saved_buf1[ENDIAN(src_size1, j, endian)]);
 
-        HDmemcpy(&x, saved_buf1, src_size1);
+        memcpy(&x, saved_buf1, src_size1);
         printf(" %29.20e\n", x);
 
         printf("        dst = ");
         for (j = 0; j < dst_size1; j++)
             printf(" %02x", buf1[ENDIAN(dst_size1, j, endian)]);
 
-        HDmemcpy(&y, buf1, dst_size1);
+        memcpy(&y, buf1, dst_size1);
         printf(" %29d\n", y);
     }
 
@@ -697,8 +697,8 @@ test_particular_fp_integer(void)
     dst_size2  = H5Tget_size(H5T_NATIVE_INT);
     buf2       = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
     saved_buf2 = (unsigned char *)calloc((size_t)1, (size_t)MAX(src_size2, dst_size2));
-    HDmemcpy(buf2, &src_f, src_size2);
-    HDmemcpy(saved_buf2, &src_f, src_size2);
+    memcpy(buf2, &src_f, src_size2);
+    memcpy(saved_buf2, &src_f, src_size2);
 
     /* signal exception handling function that the destination is "int". */
     flag = 0;
@@ -710,7 +710,7 @@ test_particular_fp_integer(void)
         goto error;
     }
 
-    HDmemcpy(&dst_i, buf2, dst_size2);
+    memcpy(&dst_i, buf2, dst_size2);
 
     /* Print errors */
     if (dst_i != fill_value) {
@@ -725,14 +725,14 @@ test_particular_fp_integer(void)
         for (j = 0; j < src_size2; j++)
             printf(" %02x", saved_buf2[ENDIAN(src_size2, j, endian)]);
 
-        HDmemcpy(&x, saved_buf2, src_size2);
+        memcpy(&x, saved_buf2, src_size2);
         printf(" %29.20e\n", (double)x);
 
         printf("        dst = ");
         for (j = 0; j < dst_size2; j++)
             printf(" %02x", buf2[ENDIAN(dst_size2, j, endian)]);
 
-        HDmemcpy(&y, buf2, dst_size2);
+        memcpy(&y, buf2, dst_size2);
         printf(" %29d\n", y);
     }
 
@@ -943,8 +943,8 @@ test_derived_flt(void)
     endian    = H5Tget_order(H5T_NATIVE_INT);
     buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, size)));
     saved_buf = (unsigned char *)malloc(nelmts * src_size);
-    HDmemset(buf, 0, nelmts * MAX(src_size, size));
-    HDmemset(saved_buf, 0, nelmts * src_size);
+    memset(buf, 0, nelmts * MAX(src_size, size));
+    memset(saved_buf, 0, nelmts * src_size);
     aligned = (int *)calloc((size_t)1, src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
@@ -986,14 +986,14 @@ test_derived_flt(void)
         for (j = 0; j < src_size; j++)
             printf(" %02x", saved_buf[i * src_size + ENDIAN(src_size, j, endian)]);
 
-        HDmemcpy(aligned, saved_buf + i * sizeof(int), sizeof(int));
+        memcpy(aligned, saved_buf + i * sizeof(int), sizeof(int));
         printf(" %29d\n", *aligned);
 
         printf("        dst = ");
         for (j = 0; j < src_size; j++)
             printf(" %02x", buf[i * src_size + ENDIAN(src_size, j, endian)]);
 
-        HDmemcpy(aligned, buf + i * sizeof(int), sizeof(int));
+        memcpy(aligned, buf + i * sizeof(int), sizeof(int));
         printf(" %29d\n", *aligned);
 
         if (fails_this_test >= max_fails) {
@@ -1104,8 +1104,8 @@ test_derived_flt(void)
     endian    = H5Tget_order(tid2);
     buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, dst_size)));
     saved_buf = (unsigned char *)malloc(nelmts * src_size);
-    HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
-    HDmemset(saved_buf, 0, nelmts * src_size);
+    memset(buf, 0, nelmts * MAX(src_size, dst_size));
+    memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
         buf[i] = saved_buf[i] = (unsigned char)HDrand();
@@ -1428,8 +1428,8 @@ test_derived_integer(void)
     endian    = H5Tget_order(tid1);
     buf       = (unsigned char *)malloc(nelmts * (MAX(src_size, dst_size)));
     saved_buf = (unsigned char *)malloc(nelmts * src_size);
-    HDmemset(buf, 0, nelmts * MAX(src_size, dst_size));
-    HDmemset(saved_buf, 0, nelmts * src_size);
+    memset(buf, 0, nelmts * MAX(src_size, dst_size));
+    memset(saved_buf, 0, nelmts * src_size);
 
     for (i = 0; i < nelmts * src_size; i++)
         buf[i] = saved_buf[i] = (unsigned char)HDrand();
@@ -1761,43 +1761,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_char;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_char = (signed char)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_char = (signed char)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_char = (signed char)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_char = (signed char)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_char = (signed char)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_char = (signed char)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_char = (signed char)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_char = (signed char)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_char = (signed char)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_char = (signed char)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -1813,43 +1813,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_uchar;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_uchar = (unsigned char)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_uchar = (unsigned char)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_uchar = (unsigned char)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_uchar = (unsigned char)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_uchar = (unsigned char)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_uchar = (unsigned char)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_uchar = (unsigned char)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_uchar = (unsigned char)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_uchar = (unsigned char)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_uchar = (unsigned char)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -1865,43 +1865,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_short;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(char), sizeof(char));
+                    memcpy(aligned, saved + j * sizeof(char), sizeof(char));
                     hw_short = (short)(*((char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_short = (short)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_short = (short)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_short = (short)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_short = (short)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_short = (short)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_short = (short)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_short = (short)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_short = (short)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_short = (short)(*((unsigned long long *)aligned));
                     break;
 
@@ -1918,43 +1918,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ushort;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_ushort = (unsigned short)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_ushort = (unsigned short)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_ushort = (unsigned short)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_ushort = (unsigned short)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_ushort = (unsigned short)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_ushort = (unsigned short)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_ushort = (unsigned short)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_ushort = (unsigned short)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_ushort = (unsigned short)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_ushort = (unsigned short)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -1970,43 +1970,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_int;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_int = (int)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_int = (int)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_int = (int)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_int = (int)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_int = (int)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_int = (int)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_int = (int)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_int = (int)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_int = (int)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_int = (int)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2022,43 +2022,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_uint;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_uint = (unsigned int)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_uint = (unsigned int)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_uint = (unsigned int)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_uint = (unsigned int)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_uint = (unsigned int)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_uint = (unsigned int)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_uint = (unsigned int)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_uint = (unsigned int)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_uint = (unsigned int)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_uint = (unsigned int)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2074,43 +2074,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_long;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_long = (long int)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_long = (long int)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_long = (long int)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_long = (long int)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_long = (long int)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_long = (long int)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_long = (long int)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_long = (long int)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_long = (long int)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_long = (long int)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2126,43 +2126,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ulong;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_ulong = (unsigned long)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_ulong = (unsigned long)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_ulong = (unsigned long)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_ulong = (unsigned long)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_ulong = (unsigned long)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_ulong = (unsigned long)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_ulong = (unsigned long)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_ulong = (unsigned long)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_ulong = (unsigned long)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_ulong = (unsigned long)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2178,43 +2178,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_llong;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(char), sizeof(char));
+                    memcpy(aligned, saved + j * sizeof(char), sizeof(char));
                     hw_llong = (long long)(*((char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_llong = (long long)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_llong = (long long)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_llong = (long long)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_llong = (long long)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_llong = (long long)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_llong = (long long)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_llong = (long long)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_llong = (long long)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_llong = (long long)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2230,43 +2230,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ullong;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_ullong = (unsigned long long)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_ullong = (unsigned long long)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_ullong = (unsigned long long)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_ullong = (unsigned long long)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_ullong = (unsigned long long)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_ullong = (unsigned long long)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_ullong = (unsigned long long)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_ullong = (unsigned long long)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_ullong = (unsigned long long)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_ullong = (unsigned long long)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -2412,43 +2412,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         switch (src_type) {
             case INT_SCHAR:
-                HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                 printf(" %29d\n", (int)*((signed char *)aligned));
                 break;
             case INT_UCHAR:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                 printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
                 break;
             case INT_SHORT:
-                HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                 printf(" %29hd\n", *((short *)aligned));
                 break;
             case INT_USHORT:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                 printf(" %29hu\n", *((unsigned short *)aligned));
                 break;
             case INT_INT:
-                HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                 printf(" %29d\n", *((int *)aligned));
                 break;
             case INT_UINT:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                 printf(" %29u\n", *((unsigned *)aligned));
                 break;
             case INT_LONG:
-                HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                 printf(" %29ld\n", *((long *)aligned));
                 break;
             case INT_ULONG:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                 printf(" %29lu\n", *((unsigned long *)aligned));
                 break;
             case INT_LLONG:
-                HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                 fprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                 fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
@@ -2466,43 +2466,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
-                HDmemcpy(aligned, buf + j * sizeof(signed char), sizeof(signed char));
+                memcpy(aligned, buf + j * sizeof(signed char), sizeof(signed char));
                 printf(" %29d\n", (int)*((signed char *)aligned));
                 break;
             case INT_UCHAR:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned char), sizeof(unsigned char));
+                memcpy(aligned, buf + j * sizeof(unsigned char), sizeof(unsigned char));
                 printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
                 break;
             case INT_SHORT:
-                HDmemcpy(aligned, buf + j * sizeof(short), sizeof(short));
+                memcpy(aligned, buf + j * sizeof(short), sizeof(short));
                 printf(" %29hd\n", *((short *)aligned));
                 break;
             case INT_USHORT:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned short), sizeof(unsigned short));
+                memcpy(aligned, buf + j * sizeof(unsigned short), sizeof(unsigned short));
                 printf(" %29hu\n", *((unsigned short *)aligned));
                 break;
             case INT_INT:
-                HDmemcpy(aligned, buf + j * sizeof(int), sizeof(int));
+                memcpy(aligned, buf + j * sizeof(int), sizeof(int));
                 printf(" %29d\n", *((int *)aligned));
                 break;
             case INT_UINT:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned), sizeof(unsigned));
+                memcpy(aligned, buf + j * sizeof(unsigned), sizeof(unsigned));
                 printf(" %29u\n", *((unsigned *)aligned));
                 break;
             case INT_LONG:
-                HDmemcpy(aligned, buf + j * sizeof(long), sizeof(long));
+                memcpy(aligned, buf + j * sizeof(long), sizeof(long));
                 printf(" %29ld\n", *((long *)aligned));
                 break;
             case INT_ULONG:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned long), sizeof(unsigned long));
+                memcpy(aligned, buf + j * sizeof(unsigned long), sizeof(unsigned long));
                 printf(" %29lu\n", *((unsigned long *)aligned));
                 break;
             case INT_LLONG:
-                HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
+                memcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
                 fprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
-                HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(unsigned long long));
+                memcpy(aligned, buf + j * sizeof(long long), sizeof(unsigned long long));
                 fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
@@ -2672,18 +2672,18 @@ my_isnan(dtype_t type, void *val)
 
     if (FLT_FLOAT == type) {
         float x = 0.0;
-        HDmemcpy(&x, val, sizeof(float));
+        memcpy(&x, val, sizeof(float));
         retval = isnan(x);
     }
     else if (FLT_DOUBLE == type) {
         double x = 0.0;
-        HDmemcpy(&x, val, sizeof(double));
+        memcpy(&x, val, sizeof(double));
         retval = isnan(x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     }
     else if (FLT_LDOUBLE == type) {
         long double x = 0.0L;
-        HDmemcpy(&x, val, sizeof(long double));
+        memcpy(&x, val, sizeof(long double));
         retval = isnan(x);
 #endif
     }
@@ -2699,20 +2699,20 @@ my_isnan(dtype_t type, void *val)
         if (FLT_FLOAT == type) {
             float x = 0.0;
 
-            HDmemcpy(&x, val, sizeof(float));
+            memcpy(&x, val, sizeof(float));
             HDsnprintf(s, sizeof(s), "%g", (double)x);
         }
         else if (FLT_DOUBLE == type) {
             double x = 0.0;
 
-            HDmemcpy(&x, val, sizeof(double));
+            memcpy(&x, val, sizeof(double));
             HDsnprintf(s, sizeof(s), "%g", x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else if (FLT_LDOUBLE == type) {
             long double x = 0.0L;
 
-            HDmemcpy(&x, val, sizeof(long double));
+            memcpy(&x, val, sizeof(long double));
             HDsnprintf(s, sizeof(s), "%Lg", x);
 #endif
         }
@@ -3032,7 +3032,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         /* The hardware conversion */
         /* Check for underflow when src is a "larger" float than dst.*/
         if (FLT_FLOAT == src_type) {
-            HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+            memcpy(aligned, saved + j * sizeof(float), sizeof(float));
             if (FLT_FLOAT == dst_type) {
                 hw_f = *((float *)aligned);
                 hw   = (unsigned char *)&hw_f;
@@ -3049,7 +3049,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             }
         }
         else if (FLT_DOUBLE == src_type) {
-            HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+            memcpy(aligned, saved + j * sizeof(double), sizeof(double));
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)(*((double *)aligned));
                 hw        = (unsigned char *)&hw_f;
@@ -3069,7 +3069,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else {
-            HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+            memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_f;
@@ -3158,7 +3158,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 
             if (FLT_FLOAT == dst_type) {
                 float x = 0.0;
-                HDmemcpy(&x, &buf[j * dst_size], sizeof(float));
+                memcpy(&x, &buf[j * dst_size], sizeof(float));
                 if (underflow && HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
                     continue; /* all underflowed, no error */
                 if (overflow && my_isinf(dendian, buf + j * sizeof(float), dst_size, dst_mpos, dst_msize,
@@ -3169,7 +3169,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             }
             else if (FLT_DOUBLE == dst_type) {
                 double x = 0.0;
-                HDmemcpy(&x, &buf[j * dst_size], sizeof(double));
+                memcpy(&x, &buf[j * dst_size], sizeof(double));
                 if (underflow && HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
                     continue; /* all underflowed, no error */
                 if (overflow && my_isinf(dendian, buf + j * sizeof(double), dst_size, dst_mpos, dst_msize,
@@ -3181,7 +3181,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             }
             else {
                 long double x = 0.0L;
-                HDmemcpy(&x, &buf[j * dst_size], sizeof(long double));
+                memcpy(&x, &buf[j * dst_size], sizeof(long double));
                 /* dst is largest float, no need to check underflow. */
                 check_mant[0] = (double)HDfrexpl(x, check_expo + 0);
                 check_mant[1] = (double)HDfrexpl(hw_ld, check_expo + 1);
@@ -3228,18 +3228,18 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         if (FLT_FLOAT == src_type) {
             float x = 0.0;
-            HDmemcpy(&x, &saved[j * src_size], sizeof(float));
+            memcpy(&x, &saved[j * src_size], sizeof(float));
             printf(" %29.20e\n", (double)x);
         }
         else if (FLT_DOUBLE == src_type) {
             double x = 0.0;
-            HDmemcpy(&x, &saved[j * src_size], sizeof(double));
+            memcpy(&x, &saved[j * src_size], sizeof(double));
             printf(" %29.20e\n", x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else {
             long double x = 0.0L;
-            HDmemcpy(&x, &saved[j * src_size], sizeof(long double));
+            memcpy(&x, &saved[j * src_size], sizeof(long double));
             fprintf(stdout, " %29.20Le\n", x);
 #endif
         }
@@ -3250,18 +3250,18 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         if (FLT_FLOAT == dst_type) {
             float x = 0.0;
-            HDmemcpy(&x, &buf[j * dst_size], sizeof(float));
+            memcpy(&x, &buf[j * dst_size], sizeof(float));
             printf(" %29.20e\n", (double)x);
         }
         else if (FLT_DOUBLE == dst_type) {
             double x = 0.0;
-            HDmemcpy(&x, &buf[j * dst_size], sizeof(double));
+            memcpy(&x, &buf[j * dst_size], sizeof(double));
             printf(" %29.20e\n", x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else {
             long double x = 0.0L;
-            HDmemcpy(&x, &buf[j * dst_size], sizeof(long double));
+            memcpy(&x, &buf[j * dst_size], sizeof(long double));
             fprintf(stdout, " %29.20Le\n", x);
 #endif
         }
@@ -3606,7 +3606,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
      * 12 bytes but precision is 10 bytes.  The 2 unused bytes may
      * have garbage causing wrong value comparison.
      */
-    HDmemset(&hw_ldouble, 0, sizeof(long double));
+    memset(&hw_ldouble, 0, sizeof(long double));
 
     /* Create a dataset transfer property list and datatype conversion
      * exception handler function and pass in fill value.  This is mainly
@@ -3721,43 +3721,43 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_float;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_float = (float)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_float = (float)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_float = (float)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_float = (float)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_float = (float)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_float = (float)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_float = (float)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_float = (float)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_float = (float)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_float = (float)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -3773,43 +3773,43 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_double;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_double = (double)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_double = (double)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_double = (double)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_double = (double)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_double = (double)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_double = (double)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_double = (double)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_double = (double)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_double = (double)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_double = (double)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -3825,43 +3825,43 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ldouble;
             switch (src_type) {
                 case INT_SCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                    memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                     hw_ldouble = (long double)(*((signed char *)aligned));
                     break;
                 case INT_UCHAR:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                    memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                     hw_ldouble = (long double)(*((unsigned char *)aligned));
                     break;
                 case INT_SHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                    memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                     hw_ldouble = (long double)(*((short *)aligned));
                     break;
                 case INT_USHORT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                    memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                     hw_ldouble = (long double)(*((unsigned short *)aligned));
                     break;
                 case INT_INT:
-                    HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                    memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                     hw_ldouble = (long double)(*((int *)aligned));
                     break;
                 case INT_UINT:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                    memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                     hw_ldouble = (long double)(*((unsigned *)aligned));
                     break;
                 case INT_LONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                    memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                     hw_ldouble = (long double)(*((long *)aligned));
                     break;
                 case INT_ULONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                     hw_ldouble = (long double)(*((unsigned long *)aligned));
                     break;
                 case INT_LLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                    memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                     hw_ldouble = (long double)(*((long long *)aligned));
                     break;
                 case INT_ULLONG:
-                    HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                    memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                     hw_ldouble = (long double)(*((unsigned long long *)aligned));
                     break;
                 case FLT_FLOAT:
@@ -3877,15 +3877,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_schar;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_schar = (signed char)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_schar = (signed char)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_schar = (signed char)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -3908,15 +3908,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_uchar;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_uchar = (unsigned char)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_uchar = (unsigned char)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_uchar = (unsigned char)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -3939,15 +3939,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_short;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_short = (short)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_short = (short)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_short = (short)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -3970,15 +3970,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ushort;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_ushort = (unsigned short)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_ushort = (unsigned short)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_ushort = (unsigned short)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4001,15 +4001,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_int;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_int = (int)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_int = (int)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_int = (int)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4032,15 +4032,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_uint;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_uint = (unsigned int)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_uint = (unsigned int)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_uint = (unsigned int)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4063,15 +4063,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_long;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_long = (long)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_long = (long)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_long = (long)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4094,15 +4094,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ulong;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_ulong = (unsigned long)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_ulong = (unsigned long)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_ulong = (unsigned long)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4125,15 +4125,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_llong;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_llong = (long long)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_llong = (long long)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_llong = (long long)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4156,15 +4156,15 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             hw = (unsigned char *)&hw_ullong;
             switch (src_type) {
                 case FLT_FLOAT:
-                    HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                    memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                     hw_ullong = (unsigned long long)(*((float *)aligned));
                     break;
                 case FLT_DOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                    memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                     hw_ullong = (unsigned long long)(*((double *)aligned));
                     break;
                 case FLT_LDOUBLE:
-                    HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                    memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                     hw_ullong = (unsigned long long)(*((long double *)aligned));
                     break;
                 case INT_SCHAR:
@@ -4329,55 +4329,55 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)dst_size - (ssize_t)src_size)), "");
         switch (src_type) {
             case INT_SCHAR:
-                HDmemcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
+                memcpy(aligned, saved + j * sizeof(signed char), sizeof(signed char));
                 printf(" %29d\n", (int)*((signed char *)aligned));
                 break;
             case INT_UCHAR:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
+                memcpy(aligned, saved + j * sizeof(unsigned char), sizeof(unsigned char));
                 printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
                 break;
             case INT_SHORT:
-                HDmemcpy(aligned, saved + j * sizeof(short), sizeof(short));
+                memcpy(aligned, saved + j * sizeof(short), sizeof(short));
                 printf(" %29hd\n", *((short *)aligned));
                 break;
             case INT_USHORT:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
+                memcpy(aligned, saved + j * sizeof(unsigned short), sizeof(unsigned short));
                 printf(" %29hu\n", *((unsigned short *)aligned));
                 break;
             case INT_INT:
-                HDmemcpy(aligned, saved + j * sizeof(int), sizeof(int));
+                memcpy(aligned, saved + j * sizeof(int), sizeof(int));
                 printf(" %29d\n", *((int *)aligned));
                 break;
             case INT_UINT:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
+                memcpy(aligned, saved + j * sizeof(unsigned), sizeof(unsigned));
                 printf(" %29u\n", *((unsigned *)aligned));
                 break;
             case INT_LONG:
-                HDmemcpy(aligned, saved + j * sizeof(long), sizeof(long));
+                memcpy(aligned, saved + j * sizeof(long), sizeof(long));
                 printf(" %29ld\n", *((long *)aligned));
                 break;
             case INT_ULONG:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
+                memcpy(aligned, saved + j * sizeof(unsigned long), sizeof(unsigned long));
                 printf(" %29lu\n", *((unsigned long *)aligned));
                 break;
             case INT_LLONG:
-                HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
+                memcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
                 fprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
-                HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                memcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
                 fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
-                HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
+                memcpy(aligned, saved + j * sizeof(float), sizeof(float));
                 printf(" %29f\n", (double)*((float *)aligned));
                 break;
             case FLT_DOUBLE:
-                HDmemcpy(aligned, saved + j * sizeof(double), sizeof(double));
+                memcpy(aligned, saved + j * sizeof(double), sizeof(double));
                 printf(" %29f\n", *((double *)aligned));
                 break;
             case FLT_LDOUBLE:
-                HDmemcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
+                memcpy(aligned, saved + j * sizeof(long double), sizeof(long double));
                 printf(" %29Lf\n", *((long double *)aligned));
                 break;
             case OTHER:
@@ -4392,55 +4392,55 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         printf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
         switch (dst_type) {
             case INT_SCHAR:
-                HDmemcpy(aligned, buf + j * sizeof(signed char), sizeof(signed char));
+                memcpy(aligned, buf + j * sizeof(signed char), sizeof(signed char));
                 printf(" %29d\n", (int)*((signed char *)aligned));
                 break;
             case INT_UCHAR:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned char), sizeof(unsigned char));
+                memcpy(aligned, buf + j * sizeof(unsigned char), sizeof(unsigned char));
                 printf(" %29u\n", (unsigned)*((unsigned char *)aligned));
                 break;
             case INT_SHORT:
-                HDmemcpy(aligned, buf + j * sizeof(short), sizeof(short));
+                memcpy(aligned, buf + j * sizeof(short), sizeof(short));
                 printf(" %29hd\n", *((short *)aligned));
                 break;
             case INT_USHORT:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned short), sizeof(unsigned short));
+                memcpy(aligned, buf + j * sizeof(unsigned short), sizeof(unsigned short));
                 printf(" %29hu\n", *((unsigned short *)aligned));
                 break;
             case INT_INT:
-                HDmemcpy(aligned, buf + j * sizeof(int), sizeof(int));
+                memcpy(aligned, buf + j * sizeof(int), sizeof(int));
                 printf(" %29d\n", *((int *)aligned));
                 break;
             case INT_UINT:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned), sizeof(unsigned));
+                memcpy(aligned, buf + j * sizeof(unsigned), sizeof(unsigned));
                 printf(" %29u\n", *((unsigned *)aligned));
                 break;
             case INT_LONG:
-                HDmemcpy(aligned, buf + j * sizeof(long), sizeof(long));
+                memcpy(aligned, buf + j * sizeof(long), sizeof(long));
                 printf(" %29ld\n", *((long *)aligned));
                 break;
             case INT_ULONG:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned long), sizeof(unsigned long));
+                memcpy(aligned, buf + j * sizeof(unsigned long), sizeof(unsigned long));
                 printf(" %29lu\n", *((unsigned long *)aligned));
                 break;
             case INT_LLONG:
-                HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
+                memcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
                 fprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
-                HDmemcpy(aligned, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
+                memcpy(aligned, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
                 fprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
-                HDmemcpy(aligned, buf + j * sizeof(float), sizeof(float));
+                memcpy(aligned, buf + j * sizeof(float), sizeof(float));
                 printf(" %29f\n", (double)*((float *)aligned));
                 break;
             case FLT_DOUBLE:
-                HDmemcpy(aligned, buf + j * sizeof(double), sizeof(double));
+                memcpy(aligned, buf + j * sizeof(double), sizeof(double));
                 printf(" %29f\n", *((double *)aligned));
                 break;
             case FLT_LDOUBLE:
-                HDmemcpy(aligned, buf + j * sizeof(long double), sizeof(long double));
+                memcpy(aligned, buf + j * sizeof(long double), sizeof(long double));
                 printf(" %29Lf\n", *((long double *)aligned));
                 break;
             case OTHER:
@@ -4585,8 +4585,8 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     ssize_t       indx;
     unsigned char bits[32], mant_bits[32];
 
-    HDmemset(bits, 0, (size_t)32);
-    HDmemset(mant_bits, 0, (size_t)32);
+    memset(bits, 0, (size_t)32);
+    memset(mant_bits, 0, (size_t)32);
 
     /*
      * Sometimes, type size isn't equal to the precision like Linux's "long
@@ -4598,7 +4598,7 @@ overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits)
     bias = H5Tget_ebias(src_id);
     norm = H5Tget_norm(src_id);
 
-    HDmemcpy(bits, origin_bits, src_prec / 8 + 1);
+    memcpy(bits, origin_bits, src_prec / 8 + 1);
 
     /*Check for special cases: +Inf, -Inf*/
     if (H5T__bit_find(bits, mpos, mant_digits, H5T_BIT_LSB, TRUE) < 0) {

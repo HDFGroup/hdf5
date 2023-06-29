@@ -3609,7 +3609,7 @@ H5S__hyper_get_version_enc_size(H5S_t *space, hsize_t block_count, uint32_t *ver
     FUNC_ENTER_PACKAGE
 
     /* Get bounding box for the selection */
-    HDmemset(bounds_end, 0, sizeof(bounds_end));
+    memset(bounds_end, 0, sizeof(bounds_end));
 
     if (space->select.sel_info.hslab->unlim_dim < 0) /* ! H5S_UNLIMITED */
         /* Get bounding box for the selection */
@@ -4326,7 +4326,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p, const size_t p_size, hb
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
-        HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        memset(dims, 0, (size_t)rank * sizeof(dims[0]));
         if (H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
     } /* end if */
@@ -5579,8 +5579,8 @@ H5S__hyper_spans_shape_same(const H5S_hyper_span_info_t *span_info1, const H5S_h
     assert(ndims > 0);
 
     /* Initialize arrays */
-    HDmemset(offset, 0, sizeof(offset));
-    HDmemset(rest_zeros, 0, sizeof(rest_zeros));
+    memset(offset, 0, sizeof(offset));
+    memset(rest_zeros, 0, sizeof(rest_zeros));
 
     /* Check for an offset between the two selections */
     span1       = span_info1->head;
@@ -6870,7 +6870,7 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             hsize_t block[H5S_MAX_RANK];                   /* Block selected in base dataspace */
 
             /* Compute the offset for the down-projection */
-            HDmemset(block, 0, sizeof(block));
+            memset(block, 0, sizeof(block));
             for (u = 0; u < (base_space->extent.rank - new_space->extent.rank); u++)
                 block[u] = opt_diminfo[u].start;
             *offset = H5VM_array_offset(base_space->extent.rank, base_space->extent.size, block);
@@ -6953,7 +6953,7 @@ H5S__hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
             unsigned                curr_dim;            /* Current dimension being operated on */
 
             /* Clear the block buffer */
-            HDmemset(block, 0, sizeof(block));
+            memset(block, 0, sizeof(block));
 
             /* Advance down selected spans */
             curr     = base_space->select.sel_info.hslab->span_lst->head;
@@ -7188,7 +7188,7 @@ H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust selection")
 
         /* Zero out the selection offset */
-        HDmemset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
+        memset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
 
         /* Indicate that the offset was normalized */
         ret_value = TRUE;
@@ -11785,7 +11785,7 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
 
     /* Initialize udata */
     /* We will use op_info[0] for nelem and op_info[1] for copied spans */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
     udata.ds_span[0]      = ds_span_info->head;
     udata.ds_low[0]       = udata.ds_span[0]->low;
     udata.ss_rank         = H5S_GET_EXTENT_NDIMS(src_space);
@@ -12013,7 +12013,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
 
             /* Last block is partial, need to construct compound selection */
             /* Fill start with zeros */
-            HDmemset(start, 0, sizeof(start));
+            memset(start, 0, sizeof(start));
 
             /* Set block to clip_size in unlimited dimension, H5S_MAX_SIZE in
              * others so only unlimited dimension is clipped */

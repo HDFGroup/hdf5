@@ -388,7 +388,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to serialize entry")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    assert(0 == HDmemcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
+    assert(0 == memcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
                          H5C_IMAGE_EXTRA_SPACE));
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
@@ -1097,7 +1097,7 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
                     if (coll_access) {
                         /* Push an error, but still participate in following MPI_Bcast */
-                        HDmemset(image, 0, len);
+                        memset(image, 0, len);
                         HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
                     }
                     else
@@ -1155,7 +1155,7 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
                                 if (coll_access) {
                                     /* Push an error, but still participate in following MPI_Bcast */
-                                    HDmemset(image + len, 0, actual_len - len);
+                                    memset(image + len, 0, actual_len - len);
                                     HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
                                 }
                                 else
@@ -4038,7 +4038,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
     /* Remove parent entry from child's parent array */
     if (u < (child_entry->flush_dep_nparents - 1))
-        HDmemmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
+        memmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
                   (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
     child_entry->flush_dep_nparents--;
 

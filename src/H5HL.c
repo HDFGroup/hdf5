@@ -719,7 +719,7 @@ H5HL_insert(H5F_t *f, H5HL_t *heap, size_t buf_size, const void *buf, size_t *of
 
         /* Clear new section so junk doesn't appear in the file */
         /* (Avoid clearing section which will be overwritten with newly inserted data) */
-        HDmemset(heap->dblk_image + offset + buf_size, 0, (new_dblk_size - (offset + buf_size)));
+        memset(heap->dblk_image + offset + buf_size, 0, (new_dblk_size - (offset + buf_size)));
     }
 
     /* Copy the data into the heap */

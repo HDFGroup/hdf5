@@ -341,7 +341,7 @@ coll_write_test(int chunk_factor)
     matrix_out  = (int *)malloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
     matrix_out1 = (int *)malloc(sizeof(int) * (size_t)mdim[0] * (size_t)mdim[1] * (size_t)mpi_size);
 
-    HDmemset(vector, 0, sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
+    memset(vector, 0, sizeof(int) * (size_t)mdim1[0] * (size_t)mpi_size);
     vector[0] = vector[MSPACE1_DIM * mpi_size - 1] = -1;
     for (i = 1; i < MSPACE1_DIM * mpi_size - 1; i++)
         vector[i] = (int)i;
@@ -664,8 +664,8 @@ coll_write_test(int chunk_factor)
      * Initialize data buffer.
      */
 
-    HDmemset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
-    HDmemset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
     /*
      * Read data back to the buffer matrix_out.
      */
@@ -905,8 +905,8 @@ coll_read_test(void)
      * Initialize data buffer.
      */
 
-    HDmemset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
-    HDmemset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
+    memset(matrix_out1, 0, sizeof(int) * (size_t)MSPACE_DIM1 * (size_t)MSPACE_DIM2 * (size_t)mpi_size);
 
     /*
      * Read data back to the buffer matrix_out.

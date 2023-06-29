@@ -498,7 +498,7 @@ test_core(void)
     for (i = 0; i < CORE_DSET_DIM1; i++)
         for (j = 0; j < CORE_DSET_DIM2; j++)
             *pw++ = val++;
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    memset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
 
     /* Create the dataspace */
     dims[0] = CORE_DSET_DIM1;
@@ -589,7 +589,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Read the data back from the dataset */
-    HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    memset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
         TEST_ERROR;
 
@@ -1525,11 +1525,11 @@ test_multi(void)
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    HDmemset(memb_map, 0, sizeof(memb_map));
-    HDmemset(memb_fapl, 0, sizeof(memb_fapl));
-    HDmemset(memb_name, 0, sizeof(memb_name));
-    HDmemset(memb_addr, 0, sizeof(memb_addr));
-    HDmemset(sv, 0, sizeof(sv));
+    memset(memb_map, 0, sizeof(memb_map));
+    memset(memb_fapl, 0, sizeof(memb_fapl));
+    memset(memb_name, 0, sizeof(memb_name));
+    memset(memb_addr, 0, sizeof(memb_addr));
+    memset(sv, 0, sizeof(sv));
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
         memb_fapl[mt] = H5P_DEFAULT;
@@ -1777,11 +1777,11 @@ test_multi_compat(void)
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    HDmemset(memb_map, 0, sizeof memb_map);
-    HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset(memb_name, 0, sizeof memb_name);
-    HDmemset(memb_addr, 0, sizeof memb_addr);
-    HDmemset(sv, 0, sizeof sv);
+    memset(memb_map, 0, sizeof memb_map);
+    memset(memb_fapl, 0, sizeof memb_fapl);
+    memset(memb_name, 0, sizeof memb_name);
+    memset(memb_addr, 0, sizeof memb_addr);
+    memset(sv, 0, sizeof sv);
 
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
         memb_map[mt] = H5FD_MEM_SUPER;
@@ -2996,7 +2996,7 @@ splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def 
     if (sizeof((void *)buf) != sizeof(data->buf)) {
         SPLITTER_TEST_FAULT("invariant size of expected data does not match that received!\n");
     }
-    HDmemcpy(expected, data->buf, sizeof(expected));
+    memcpy(expected, data->buf, sizeof(expected));
 
     dset_id = H5Dopen2(file_id, data->dset_name, H5P_DEFAULT);
     if (dset_id < 0) {

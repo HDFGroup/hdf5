@@ -59,7 +59,7 @@ static int
 init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
 {
     /* Wipe out background */
-    HDmemset(cparam, 0, sizeof(*cparam));
+    memset(cparam, 0, sizeof(*cparam));
 
     /* General parameters */
     cparam->cls           = H5B2_TEST;
@@ -69,7 +69,7 @@ init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
     cparam->merge_percent = 40;
 
     /* Wipe out background */
-    HDmemset(cparam2, 0, sizeof(*cparam2));
+    memset(cparam2, 0, sizeof(*cparam2));
 
     /* General parameters */
     cparam2->cls           = H5B2_TEST2;

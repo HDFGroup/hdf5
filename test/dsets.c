@@ -1824,11 +1824,11 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
 
     if (NULL == (data = malloc((size_t)length)))
         TEST_ERROR;
-    HDmemset(data, (int)value, (size_t)length);
+    memset(data, (int)value, (size_t)length);
 
     if (flags & H5Z_FLAG_REVERSE) { /* Verify data is actually corrupted during read */
         dst += offset;
-        if (HDmemcmp(data, dst, (size_t)length) != 0)
+        if (memcmp(data, dst, (size_t)length) != 0)
             TEST_ERROR;
         else {
             *buf_size = nbytes;
@@ -1837,7 +1837,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
     }      /* end if */
     else { /* Write corrupted data */
         dst += offset;
-        HDmemcpy(dst, data, (size_t)length);
+        memcpy(dst, data, (size_t)length);
         *buf_size = nbytes;
         ret_value = *buf_size;
     } /* end else */
@@ -4348,7 +4348,7 @@ test_nbit_compound_3(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++) {
         power = HDpow(2.0, 17.0 - 1.0);
-        HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
+        memset(&orig_data[i], 0, sizeof(orig_data[i]));
         orig_data[i].i = (int)(HDrandom() % (long)power);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
@@ -7212,7 +7212,7 @@ auxread_fdata(hid_t fid, const char *name)
         goto error;
     if ((rank = H5Sget_simple_extent_ndims(space_id)) < 0)
         goto error;
-    HDmemset(dims, 0, sizeof dims);
+    memset(dims, 0, sizeof dims);
     if (H5Sget_simple_extent_dims(space_id, dims, NULL) < 0)
         goto error;
     nelmts = 1;
@@ -11451,7 +11451,7 @@ test_single_chunk(hid_t fapl)
             if ((did = H5Dopen2(fid, DSET_SINGLE_NOMAX, H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
-            HDmemset(rbuf, 0, sizeof(int) * (DSET_DIM1 * DSET_DIM2));
+            memset(rbuf, 0, sizeof(int) * (DSET_DIM1 * DSET_DIM2));
 
             /* Read from dataset */
             if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rbuf) < 0)
@@ -12534,7 +12534,7 @@ test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
     TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
 
     /* Initialize struct */
-    HDmemset(&info, 0, sizeof(info));
+    memset(&info, 0, sizeof(info));
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -12691,7 +12691,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -12740,7 +12740,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -12801,7 +12801,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -12862,7 +12862,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -12923,7 +12923,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -12984,7 +12984,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -13045,7 +13045,7 @@ test_storage_size(hid_t fapl)
         FAIL_STACK_ERROR;
 
     /* Initialize buffer to zeroes */
-    HDmemset(wdata, 0, sizeof(wdata));
+    memset(wdata, 0, sizeof(wdata));
 
     /* write elements to dataset */
     if (H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0)
@@ -13304,14 +13304,14 @@ test_scatter(void)
         TEST_ERROR;
 
     /* Initialize dst_buf and expect_dst_buf */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     for (i = 0; i < 8; i++)
         expect_dst_buf[0][0][i] = src_buf[i];
 
     /* Loop over buffer sizes */
     for (src_buf_size = 1; src_buf_size <= 9; src_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Set up scatter info */
         scatter_info.src_buf = src_buf;
@@ -13340,7 +13340,7 @@ test_scatter(void)
         TEST_ERROR;
 
     /* Initialize expect_dst_buf */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     src_i = 0;
     for (i = 3; i < 5; i++)
         for (j = 2; j < 5; j++)
@@ -13350,7 +13350,7 @@ test_scatter(void)
     /* Loop over buffer sizes */
     for (src_buf_size = 1; src_buf_size <= 13; src_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Set up scatter info */
         scatter_info.src_buf = src_buf;
@@ -13388,7 +13388,7 @@ test_scatter(void)
     /* Iterate over block containing selection, checking if each element is in
      * selection.  Note that the algorithm used here (if statement) would not
      * work for overlapping hyperslabs. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     src_i = 0;
     for (i = 1; i < 8; i++)
         for (j = 1; j < 4; j++)
@@ -13404,7 +13404,7 @@ test_scatter(void)
     /* Loop over buffer sizes */
     for (src_buf_size = 1; src_buf_size <= 37; src_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Set up scatter info */
         scatter_info.src_buf = src_buf;
@@ -13443,7 +13443,7 @@ test_scatter(void)
     /* Initialize expect_dst_buf */
     /* Iterate over block containing selection, checking if each element is in
      * selection. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     src_i = 0;
     for (i = 1; i < 4; i++)
         for (j = 1; j < 4; j++)
@@ -13459,7 +13459,7 @@ test_scatter(void)
     /* Loop over buffer sizes */
     for (src_buf_size = 1; src_buf_size <= 17; src_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Set up scatter info */
         scatter_info.src_buf = src_buf;
@@ -13484,14 +13484,14 @@ test_scatter(void)
     /* Initialize expect_dst_buf */
     /* Iterate over block containing selection, checking if each element is in
      * selection. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     for (i = 0; i < (int)(sizeof(point) / sizeof(point[0])); i++)
         expect_dst_buf[point[i][0]][point[i][1]][point[i][2]] = src_buf[i];
 
     /* Loop over buffer sizes */
     for (src_buf_size = 1; src_buf_size <= 5; src_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Set up scatter info */
         scatter_info.src_buf = src_buf;
@@ -13625,14 +13625,14 @@ test_gather(void)
         TEST_ERROR;
 
     /* Initialize expect_dst_buf */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     for (i = 0; i < 8; i++)
         expect_dst_buf[i] = src_buf[0][0][i];
 
     /* Loop over buffer sizes */
     for (dst_buf_size = 1; dst_buf_size <= 9; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
@@ -13653,7 +13653,7 @@ test_gather(void)
     /* Loop over buffer sizes */
     for (dst_buf_size = 8; dst_buf_size <= 9; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Gather data */
         if (H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, NULL, NULL) <
@@ -13669,7 +13669,7 @@ test_gather(void)
     /* Test with a dst_buf_size that is not a multiple of the datatype size */
     /* Reset dst_buf */
     dst_buf_size = 7;
-    (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+    (void)memset(dst_buf, 0, sizeof(dst_buf));
 
     /* Initialize gather_info */
     gather_info.expect_dst_buf = expect_dst_buf;
@@ -13699,7 +13699,7 @@ test_gather(void)
         TEST_ERROR;
 
     /* Initialize expect_dst_buf */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     dst_i = 0;
     for (i = 3; i < 5; i++)
         for (j = 2; j < 5; j++)
@@ -13709,7 +13709,7 @@ test_gather(void)
     /* Loop over buffer sizes */
     for (dst_buf_size = 1; dst_buf_size <= 13; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
@@ -13749,7 +13749,7 @@ test_gather(void)
     /* Iterate over block containing selection, checking if each element is in
      * selection.  Note that the algorithm used here (if statement) would not
      * work for overlapping hyperslabs. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     dst_i = 0;
     for (i = 1; i < 8; i++)
         for (j = 1; j < 4; j++)
@@ -13765,7 +13765,7 @@ test_gather(void)
     /* Loop over buffer sizes */
     for (dst_buf_size = 1; dst_buf_size <= 37; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
@@ -13806,7 +13806,7 @@ test_gather(void)
     /* Initialize expect_dst_buf */
     /* Iterate over block containing selection, checking if each element is in
      * selection. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     dst_i = 0;
     for (i = 1; i < 4; i++)
         for (j = 1; j < 4; j++)
@@ -13822,7 +13822,7 @@ test_gather(void)
     /* Loop over buffer sizes */
     for (dst_buf_size = 1; dst_buf_size <= 17; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
@@ -13849,14 +13849,14 @@ test_gather(void)
     /* Initialize expect_dst_buf */
     /* Iterate over block containing selection, checking if each element is in
      * selection. */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     for (i = 0; i < (int)(sizeof(point) / sizeof(point[0])); i++)
         expect_dst_buf[i] = src_buf[point[i][0]][point[i][1]][point[i][2]];
 
     /* Loop over buffer sizes */
     for (dst_buf_size = 1; dst_buf_size <= 5; dst_buf_size++) {
         /* Reset dst_buf */
-        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+        (void)memset(dst_buf, 0, sizeof(dst_buf));
 
         /* Initialize gather_info */
         gather_info.expect_dst_buf = expect_dst_buf;
@@ -14173,7 +14173,7 @@ test_gather_error(void)
         TEST_ERROR;
 
     /* Initialize expect_dst_buf */
-    (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
+    (void)memset(expect_dst_buf, 0, sizeof(expect_dst_buf));
     for (i = 0; i < 6; i++)
         expect_dst_buf[i] = src_buf[i + 2];
 
@@ -15053,7 +15053,7 @@ test_h5s_block(void)
         FAIL_STACK_ERROR;
 
     /* Reset the memory buffer */
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
     /* Read the entire dataset */
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -15234,7 +15234,7 @@ test_h5s_plist(void)
         FAIL_STACK_ERROR;
 
     /* Reset the memory buffer */
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
     /* Read the entire dataset */
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -15246,7 +15246,7 @@ test_h5s_plist(void)
             TEST_ERROR;
 
     /* Reset the memory buffer */
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
     /* Set valid selection in DXPL */
     if (H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, &count, &block) <
@@ -15263,7 +15263,7 @@ test_h5s_plist(void)
             TEST_ERROR;
 
     /* Reset the memory buffer */
-    HDmemset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
     /* Check for copying property list w/selection */
     if ((dxpl_id_copy = H5Pcopy(dxpl_id)) < 0)
@@ -15464,7 +15464,7 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
                     FAIL_STACK_ERROR;
 
                 /* Retrieve & verify the dataset's index info */
-                HDmemset(&nat_info, 0, sizeof(nat_info));
+                memset(&nat_info, 0, sizeof(nat_info));
                 if (H5Oget_native_info(dset_id, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
                     FAIL_STACK_ERROR;
                 if (0 != nat_info.meta_size.obj.index_size)
@@ -15503,7 +15503,7 @@ test_0sized_dset_metadata_alloc(hid_t fapl_id)
                         FAIL_STACK_ERROR;
 
                     /* Retrieve & verify the dataset's index info */
-                    HDmemset(&nat_info, 0, sizeof(nat_info));
+                    memset(&nat_info, 0, sizeof(nat_info));
                     if (H5Oget_native_info(dset_id, &nat_info, H5O_NATIVE_INFO_META_SIZE) < 0)
                         FAIL_STACK_ERROR;
                     if (0 == nat_info.meta_size.obj.index_size)

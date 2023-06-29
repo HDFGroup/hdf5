@@ -493,7 +493,7 @@ H5SM__create_index(H5F_t *f, H5SM_index_header_t *header)
     } /* end else */
 
     /* Create a heap to hold the shared messages that the list or B-tree will index */
-    HDmemset(&fheap_cparam, 0, sizeof(fheap_cparam));
+    memset(&fheap_cparam, 0, sizeof(fheap_cparam));
     fheap_cparam.managed.width            = H5O_FHEAP_MAN_WIDTH;
     fheap_cparam.managed.start_block_size = H5O_FHEAP_MAN_START_BLOCK_SIZE;
     fheap_cparam.managed.max_direct_size  = H5O_FHEAP_MAN_MAX_DIRECT_SIZE;
@@ -1402,7 +1402,7 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
          *      shared message is serialized. -QAK
          */
         if (defer)
-            HDmemset(&shared.u, 0, sizeof(shared.u));
+            memset(&shared.u, 0, sizeof(shared.u));
 #endif /* H5_USING_MEMCHECKER */
     }  /* end if */
     else {
@@ -1996,8 +1996,8 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "shared message info message not present")
 
         /* Portably initialize the arrays */
-        HDmemset(index_flags, 0, sizeof(index_flags));
-        HDmemset(minsizes, 0, sizeof(minsizes));
+        memset(index_flags, 0, sizeof(index_flags));
+        memset(minsizes, 0, sizeof(minsizes));
 
         /* Set SOHM info from file */
         H5F_SET_SOHM_ADDR(f, sohm_table.addr);

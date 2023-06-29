@@ -262,7 +262,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id, hid_t g
     /* Set up group creation info */
     gcrt_info.gcpl_id    = gcpl_id;
     gcrt_info.cache_type = H5G_NOTHING_CACHED;
-    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+    memset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
 
     /* Set up object creation information */
     ocrt_info.obj_type = H5O_TYPE_GROUP;
@@ -1157,7 +1157,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
     herr_t              ret_value = FAIL;      /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(FAIL)
 

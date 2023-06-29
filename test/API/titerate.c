@@ -444,7 +444,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 
     if ((vol_cap_flags_g & H5VL_CAP_FLAG_ITERATE) && (vol_cap_flags_g & H5VL_CAP_FLAG_FILE_BASIC) &&
         (vol_cap_flags_g & H5VL_CAP_FLAG_DATASET_BASIC) && (vol_cap_flags_g & H5VL_CAP_FLAG_ATTR_BASIC)) {
-        HDmemset(&info, 0, sizeof(iter_info));
+        memset(&info, 0, sizeof(iter_info));
 
         /* Create the test file with the datasets */
         file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);

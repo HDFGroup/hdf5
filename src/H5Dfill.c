@@ -319,7 +319,7 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
     assert(dset_type_id > 0);
 
     /* Reset fill buffer information */
-    HDmemset(fb_info, 0, sizeof(*fb_info));
+    memset(fb_info, 0, sizeof(*fb_info));
 
     /* Cache constant information from the dataset */
     fb_info->fill            = fill;
@@ -457,13 +457,13 @@ H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf, H5MM_allocat
             fb_info->fill_buf            = caller_fill_buf;
             fb_info->use_caller_fill_buf = TRUE;
 
-            HDmemset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
+            memset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
         } /* end if */
         else {
             if (alloc_func) {
                 fb_info->fill_buf = alloc_func(fb_info->fill_buf_size, alloc_info);
 
-                HDmemset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
+                memset(fb_info->fill_buf, 0, fb_info->fill_buf_size);
             } /* end if */
             else {
                 htri_t buf_avail = H5FL_BLK_AVAIL(
@@ -521,7 +521,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
 
     /* Reset first element of background buffer, if necessary */
     if (H5T_path_bkg(fb_info->fill_to_mem_tpath))
-        HDmemset(fb_info->bkg_buf, 0, fb_info->max_elmt_size);
+        memset(fb_info->bkg_buf, 0, fb_info->max_elmt_size);
 
     /* Type convert the dataset buffer, to copy any VL components */
     if (H5T_convert(fb_info->fill_to_mem_tpath, fb_info->file_tid, fb_info->mem_tid, (size_t)1, (size_t)0,
@@ -535,7 +535,7 @@ H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts)
 
     /* Reset the entire background buffer, if necessary */
     if (H5T_path_bkg(fb_info->mem_to_dset_tpath))
-        HDmemset(fb_info->bkg_buf, 0, fb_info->bkg_buf_size);
+        memset(fb_info->bkg_buf, 0, fb_info->bkg_buf_size);
 
     /* Make a copy of the fill buffer so we can free dynamic elements after conversion */
     if (fb_info->fill_alloc_func)

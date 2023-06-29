@@ -114,7 +114,7 @@ test_compound_2()
             s_ptr->d    = i * 8 + 6;
             s_ptr->e    = i * 8 + 7;
         }
-        HDmemcpy(buf, orig, nelmts * sizeof(src_typ_t));
+        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         // Build hdf5 datatypes
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);

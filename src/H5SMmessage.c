@@ -90,7 +90,7 @@ H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
         udata->ret = -1;
     else
         /* Sizes are the same.  Return result of memcmp */
-        udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
+        udata->ret = memcmp(udata->key->encoding, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__compare_cb() */
@@ -146,7 +146,7 @@ H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                                 "unable to encode object header message")
 
             assert(udata->key->encoding_size <= mesg->raw_size);
-            udata->ret = HDmemcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
+            udata->ret = memcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
         } /* end else */
 
         /* Indicate that we found the message we were looking for */

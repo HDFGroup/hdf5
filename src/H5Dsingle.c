@@ -311,7 +311,7 @@ H5D__single_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
     assert(H5_addr_defined(idx_info->storage->idx_addr));
 
     /* Initialize generic chunk record */
-    HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
+    memset(&chunk_rec, 0, sizeof(chunk_rec));
     chunk_rec.chunk_addr = idx_info->storage->idx_addr;
 
     if (idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {

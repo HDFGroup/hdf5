@@ -163,7 +163,7 @@ test_vlstrings_basic(void)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     wdata2 = (char *)calloc((size_t)65534, sizeof(char));
-    HDmemset(wdata2, 'A', (size_t)65533);
+    memset(wdata2, 'A', (size_t)65533);
 
     ret = H5Dwrite(dataset2, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -626,7 +626,7 @@ test_write_vl_string_attribute(void)
     CHECK(att, FAIL, "H5Acreate2");
 
     string_att_write = (char *)calloc((size_t)8192, sizeof(char));
-    HDmemset(string_att_write, 'A', (size_t)8191);
+    memset(string_att_write, 'A', (size_t)8191);
 
     ret = H5Awrite(att, type, &string_att_write);
     CHECK(ret, FAIL, "H5Awrite");

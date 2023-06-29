@@ -1982,7 +1982,7 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
         HGOTO_DONE(1);
     if (info1->driver_info) {
         assert(cls1->fapl_size > 0);
-        if (0 != (cmp_value = HDmemcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
+        if (0 != (cmp_value = memcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
             HGOTO_DONE(cmp_value);
     } /* end if */
 
@@ -3876,7 +3876,7 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_
     if (info1->buffer == NULL && info2->buffer != NULL)
         HGOTO_DONE(1)
     if (info1->buffer != NULL && info2->buffer != NULL)
-        ret_value = HDmemcmp(info1->buffer, info2->buffer, size);
+        ret_value = memcmp(info1->buffer, info2->buffer, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

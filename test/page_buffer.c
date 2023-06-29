@@ -150,7 +150,7 @@ create_file(char *filename, hid_t fcpl, hid_t fapl)
         if (H5Dclose(dset_id) < 0)
             FAIL_STACK_ERROR;
 
-        HDmemset(data, 0, (size_t)num_elements * sizeof(int));
+        memset(data, 0, (size_t)num_elements * sizeof(int));
         if ((dset_id = H5Dopen2(grp_id, dset_name, H5P_DEFAULT)) < 0)
             FAIL_STACK_ERROR;
         if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
@@ -324,7 +324,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 
     if (split || multi) {
 
-        HDmemset(memb_name, 0, sizeof memb_name);
+        memset(memb_name, 0, sizeof memb_name);
 
         /* Get current split settings */
         if (H5Pget_fapl_multi(fapl, memb_map, memb_fapl_arr, memb_name, memb_addr, &relax) < 0)

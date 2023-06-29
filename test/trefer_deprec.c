@@ -1317,7 +1317,7 @@ test_reference_obj_deleted(void)
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Read selection from disk */
-    HDmemset(&oref, 0, sizeof(hobj_ref_t));
+    memset(&oref, 0, sizeof(hobj_ref_t));
     ret = H5Dread(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &oref);
     CHECK(ret, FAIL, "H5Dread");
 
@@ -1326,7 +1326,7 @@ test_reference_obj_deleted(void)
     VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Open nonsense reference */
-    HDmemset(&oref, 0, sizeof(hobj_ref_t));
+    memset(&oref, 0, sizeof(hobj_ref_t));
     dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &oref);
     VERIFY(dset2, FAIL, "H5Rdereference2");
 

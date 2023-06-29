@@ -188,7 +188,7 @@ ph5diff_worker(int nID)
                     char out_data[PRINT_DATA_MAX_SIZE];
                     int  tmp;
 
-                    HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                    memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                     i = 0;
 
                     rewind(overflow_file);
@@ -198,7 +198,7 @@ ph5diff_worker(int nID)
                             MPI_Send(out_data, PRINT_DATA_MAX_SIZE, MPI_BYTE, 0, MPI_TAG_PRINT_DATA,
                                      MPI_COMM_WORLD);
                             i = 0;
-                            HDmemset(out_data, 0, PRINT_DATA_MAX_SIZE);
+                            memset(out_data, 0, PRINT_DATA_MAX_SIZE);
                         }
                     }
 
@@ -211,7 +211,7 @@ ph5diff_worker(int nID)
                 }
 
                 fflush(stdout);
-                HDmemset(outBuff, 0, OUTBUFF_SIZE);
+                memset(outBuff, 0, OUTBUFF_SIZE);
                 outBuffOffset = 0;
 
                 MPI_Send(&diffs, sizeof(diffs), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
@@ -264,7 +264,7 @@ print_manager_output(void)
         }
 
         fflush(stdout);
-        HDmemset(outBuff, 0, OUTBUFF_SIZE);
+        memset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }
     else if ((outBuffOffset > 0) && !g_Parallel) {

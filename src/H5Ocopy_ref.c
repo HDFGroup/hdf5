@@ -171,8 +171,8 @@ H5O__copy_expand_ref_object1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
         H5O_token_t          tmp_token = {0};
 
         /* If data is not initialized, copy zeros and skip */
-        if (0 == HDmemcmp(src_buf, zeros, buf_size))
-            HDmemset(dst_buf, 0, buf_size);
+        if (0 == memcmp(src_buf, zeros, buf_size))
+            memset(dst_buf, 0, buf_size);
         else {
             /* Set up for the object copy for the reference */
             if (H5R__decode_token_obj_compat(src_buf, &buf_size, &tmp_token, token_size) < 0)
@@ -234,8 +234,8 @@ H5O__copy_expand_ref_region1(H5O_loc_t *src_oloc, const void *buf_src, H5O_loc_t
         uint8_t             *q;
 
         /* If data is not initialized, copy zeros and skip */
-        if (0 == HDmemcmp(src_buf, zeros, buf_size))
-            HDmemset(dst_buf, 0, buf_size);
+        if (0 == memcmp(src_buf, zeros, buf_size))
+            memset(dst_buf, 0, buf_size);
         else {
             /* Read from heap */
             if (H5R__decode_heap(src_oloc->file, src_buf, &buf_size, &data, &data_size) < 0)
@@ -359,7 +359,7 @@ H5O__copy_expand_ref_object2(H5O_loc_t *src_oloc, hid_t tid_src, const H5T_t *dt
         H5R_ref_priv_t *ref     = (H5R_ref_priv_t *)&ref_ptr[i];
 
         /* Check for null reference - only expand reference if it is not null */
-        if (HDmemcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
+        if (memcmp(ref, zeros, H5R_REF_BUF_SIZE)) {
             H5O_token_t tmp_token = {0};
 
             /* Get src object address */

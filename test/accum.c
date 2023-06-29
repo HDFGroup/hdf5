@@ -204,7 +204,7 @@ test_write_read(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(0, 1024, read_buf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(write_buf, read_buf, (size_t)1024) != 0)
+    if (memcmp(write_buf, read_buf, (size_t)1024) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -269,7 +269,7 @@ test_write_read_nonacc_front(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(0, 1024, read_buf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(write_buf, read_buf, (size_t)1024) != 0)
+    if (memcmp(write_buf, read_buf, (size_t)1024) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -334,7 +334,7 @@ test_write_read_nonacc_end(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(1024, 1024, read_buf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(write_buf, read_buf, (size_t)1024) != 0)
+    if (memcmp(write_buf, read_buf, (size_t)1024) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -421,7 +421,7 @@ test_free(H5F_t *f)
     /* Check that the accumulator still contains the correct data */
     if (accum_read(1 * sizeof(int32_t), 127 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf + 1, rbuf, 127 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf + 1, rbuf, 127 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Free the block of 4B at 127*4B */
@@ -431,7 +431,7 @@ test_free(H5F_t *f)
     /* Check that the accumulator still contains the correct data */
     if (accum_read(1 * sizeof(int32_t), 126 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf + 1, rbuf, 126 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf + 1, rbuf, 126 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Free the block of 4B at 2*4B */
@@ -441,125 +441,125 @@ test_free(H5F_t *f)
     /* Check that the accumulator still contains the correct data */
     if (accum_read(1 * sizeof(int32_t), 1 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf + 1, rbuf, 1 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf + 1, rbuf, 1 * sizeof(int32_t)) != 0)
         TEST_ERROR;
     if (accum_read(3 * sizeof(int32_t), 124 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf + 3, rbuf, 124 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf + 3, rbuf, 124 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section that overlaps the start of the accumulator and is
      * entirely before dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(68 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
+    memcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
     if (accum_free(f, 62 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(66 * sizeof(int32_t), 126 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 66, rbuf, 126 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 66, rbuf, 126 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section that overlaps the start of the accumulator and
      * completely contains dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(68 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
+    memcpy(expect + 68, wbuf, 4 * sizeof(int32_t));
     if (accum_free(f, 62 * sizeof(int32_t), 16 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(78 * sizeof(int32_t), 114 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 78, rbuf, 114 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 78, rbuf, 114 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section completely contained in accumulator and is entirely
      * before dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
+    memcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
     if (accum_free(f, 66 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(70 * sizeof(int32_t), 122 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 70, rbuf, 122 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 70, rbuf, 122 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section completely contained in accumulator, starts before
      * dirty section, and ends in dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
+    memcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
     if (accum_free(f, 70 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(74 * sizeof(int32_t), 118 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 74, rbuf, 118 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 74, rbuf, 118 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section completely contained in accumulator and completely
      * contains dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(72 * sizeof(int32_t), 4 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
+    memcpy(expect + 72, wbuf, 4 * sizeof(int32_t));
     if (accum_free(f, 70 * sizeof(int32_t), 8 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(78 * sizeof(int32_t), 114 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 78, rbuf, 114 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 78, rbuf, 114 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Test freeing section completely contained in accumulator, starts at start
      * of dirty section, and ends in dirty section */
     if (accum_write(64 * sizeof(int32_t), 128 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
+    memcpy(expect + 64, wbuf, 128 * sizeof(int32_t));
     if (accum_flush(f) < 0)
         FAIL_STACK_ERROR;
     if (accum_write(72 * sizeof(int32_t), 8 * sizeof(int32_t), wbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemcpy(expect + 72, wbuf, 8 * sizeof(int32_t));
+    memcpy(expect + 72, wbuf, 8 * sizeof(int32_t));
     if (accum_free(f, 72 * sizeof(int32_t), 4 * sizeof(int32_t)) < 0)
         FAIL_STACK_ERROR;
 
     /* Check that the accumulator still contains the correct data */
     if (accum_read(76 * sizeof(int32_t), 116 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(expect + 76, rbuf, 116 * sizeof(int32_t)) != 0)
+    if (memcmp(expect + 76, rbuf, 116 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     free(wbuf);
@@ -626,7 +626,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(40, 10 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 2: End of new piece aligns with start of accumulated data */
@@ -638,7 +638,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(20, 5 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 3: Start of new piece aligns with start of accumulated data */
@@ -650,7 +650,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(20, 3 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 4: New piece overlaps start of accumulated data */
@@ -662,7 +662,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(8, 5 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 5: New piece completely within accumulated data */
@@ -674,7 +674,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(48, 4 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 6: End of new piece aligns with end of accumulated data */
@@ -686,7 +686,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(68, 3 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 7: New piece overlaps end of accumulated data */
@@ -698,7 +698,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(76, 5 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 8: Start of new piece aligns with end of accumulated data */
@@ -710,7 +710,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(96, 3 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Set up expected data buffer and verify contents of
@@ -735,7 +735,7 @@ test_accum_overlap(H5F_t *f)
         wbuf[i] = 8;
     if (accum_read(8, 25 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 25 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 25 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 9: New piece completely before accumulated data */
@@ -747,7 +747,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(0, 1 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 1 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 1 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 10: New piece completely after accumulated data */
@@ -759,7 +759,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(116, 4 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 11: New piece completely overlaps accumulated data */
@@ -771,7 +771,7 @@ test_accum_overlap(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(112, 6 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 6 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 6 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -833,7 +833,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(40, 10 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 2: End of new piece aligns with start of clean accumulated data */
@@ -847,7 +847,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(20, 5 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 5 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 3: Start of new piece aligns with start of accumulated data,
@@ -860,7 +860,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(20, 6 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 6 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 6 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 4: New piece completely within accumulated data, overlaps
@@ -873,7 +873,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(40, 2 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 5: New piece completely within accumulated data, completely
@@ -886,7 +886,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(52, 2 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 6: New piece completely within clean accumulated data */
@@ -900,7 +900,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(44, 3 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 7: New piece overlaps start of clean accumulated data */
@@ -914,7 +914,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(16, 2 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 8: New piece overlaps start of accumulated data, completely
@@ -927,7 +927,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(12, 4 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 9: Start of new piece aligns with end of clean accumulated data */
@@ -941,7 +941,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(80, 3 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 3 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 10: New piece overlaps end of clean accumulated data */
@@ -955,7 +955,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(88, 2 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 2 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 11: New piece overlaps end of accumulated data, completely encloses
@@ -968,7 +968,7 @@ test_accum_overlap_clean(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(84, 4 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 4 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Set up expected data buffer and verify contents of
@@ -991,7 +991,7 @@ test_accum_overlap_clean(H5F_t *f)
         wbuf[i] = 7;
     if (accum_read(12, 22 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 22 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 22 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -1052,7 +1052,7 @@ test_accum_non_overlap_size(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(140, 10 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 9: New piece completely before accumulated data */
@@ -1064,7 +1064,7 @@ test_accum_non_overlap_size(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(0, 20 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 20 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 20 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -1126,7 +1126,7 @@ test_accum_overlap_size(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(64, 10 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 10 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     /* Case 9: New piece completely before accumulated data */
@@ -1138,7 +1138,7 @@ test_accum_overlap_size(H5F_t *f)
         FAIL_STACK_ERROR;
     if (accum_read(60, 72 * sizeof(int32_t), rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, 72 * sizeof(int32_t)) != 0)
+    if (memcmp(wbuf, rbuf, 72 * sizeof(int32_t)) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -1229,13 +1229,13 @@ test_accum_adjust(H5F_t *f)
     /* Read back and verify first write */
     if (accum_read((1024 * 1024), (1024 * 1024) - 1, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)((1024 * 1024) - 1)) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)((1024 * 1024) - 1)) != 0)
         TEST_ERROR;
 
     /* Read back and verify second write */
     if (accum_read((1024 * 1024) - 1024, 1024, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
 
     /* Reset accumulator for next case */
@@ -1266,12 +1266,12 @@ test_accum_adjust(H5F_t *f)
     /* Read back and verify both pieces of data */
     if (accum_read(1048576, 1048575, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)1048576) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1048576) != 0)
         TEST_ERROR;
 
     if (accum_read(5, 1048571, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)1048571) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1048571) != 0)
         TEST_ERROR;
 
     /* Reset accumulator for next case */
@@ -1313,7 +1313,7 @@ test_accum_adjust(H5F_t *f)
         the data is as expected */
     if (accum_read((1024 * 1024) - 1, 1024, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
 
     /* Reset accumulator for next case */
@@ -1361,7 +1361,7 @@ test_accum_adjust(H5F_t *f)
         the data is as expected */
     if (accum_read(1048571, 349523, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)349523) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)349523) != 0)
         TEST_ERROR;
 
     /* Reset accumulator for next case */
@@ -1406,7 +1406,7 @@ test_accum_adjust(H5F_t *f)
         the data is as expected */
     if (accum_read((1024 * 1024) - 5, 10, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)10) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)10) != 0)
         TEST_ERROR;
 
     /* Reset accumulator for next case */
@@ -1444,7 +1444,7 @@ test_accum_adjust(H5F_t *f)
         the data is as expected */
     if (accum_read(1048571, 349523, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)349523) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)349523) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -1533,7 +1533,7 @@ test_read_after(H5F_t *f)
         the data is as expected */
     if (accum_read(512, 512, rbuf) < 0)
         FAIL_STACK_ERROR;
-    if (HDmemcmp(wbuf, rbuf, (size_t)128) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)128) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -1602,13 +1602,13 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, BIG_BUF_SIZE, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
+    memset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1622,17 +1622,17 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(zbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(zbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf, rbuf + 1024, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf + 1024, (size_t)1024) != 0)
         TEST_ERROR;
-    if (HDmemcmp(zbuf, rbuf + 2048, (size_t)(BIG_BUF_SIZE - 2048)) != 0)
+    if (memcmp(zbuf, rbuf + 2048, (size_t)(BIG_BUF_SIZE - 2048)) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(1024, 1024, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
+    memset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1646,15 +1646,15 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(zbuf, rbuf, (size_t)(BIG_BUF_SIZE - 512)) != 0)
+    if (memcmp(zbuf, rbuf, (size_t)(BIG_BUF_SIZE - 512)) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf, rbuf + (BIG_BUF_SIZE - 512), (size_t)512) != 0)
+    if (memcmp(wbuf, rbuf + (BIG_BUF_SIZE - 512), (size_t)512) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(BIG_BUF_SIZE - 512, 1024, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
+    memset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1668,15 +1668,15 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf + 512, rbuf, (size_t)512) != 0)
+    if (memcmp(wbuf + 512, rbuf, (size_t)512) != 0)
         TEST_ERROR;
-    if (HDmemcmp(zbuf, rbuf + 512, (size_t)(BIG_BUF_SIZE - 512)) != 0)
+    if (memcmp(zbuf, rbuf + 512, (size_t)(BIG_BUF_SIZE - 512)) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, 1024, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
+    memset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1696,13 +1696,13 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, BIG_BUF_SIZE, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
+    memset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1722,15 +1722,15 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf + 512, rbuf + BIG_BUF_SIZE, (size_t)512) != 0)
+    if (memcmp(wbuf + 512, rbuf + BIG_BUF_SIZE, (size_t)512) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, BIG_BUF_SIZE + 512, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
+    memset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1755,17 +1755,17 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
-    if (HDmemcmp(zbuf, rbuf + BIG_BUF_SIZE, (size_t)512) != 0)
+    if (memcmp(zbuf, rbuf + BIG_BUF_SIZE, (size_t)512) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf, rbuf + BIG_BUF_SIZE + 512, (size_t)512) != 0)
+    if (memcmp(wbuf, rbuf + BIG_BUF_SIZE + 512, (size_t)512) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, BIG_BUF_SIZE + 1536, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1024));
+    memset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1024));
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1792,15 +1792,15 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(zbuf, rbuf, (size_t)1536) != 0)
+    if (memcmp(zbuf, rbuf, (size_t)1536) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(1536, BIG_BUF_SIZE, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
+    memset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1825,15 +1825,15 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(zbuf, rbuf, (size_t)512) != 0)
+    if (memcmp(zbuf, rbuf, (size_t)512) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(512, BIG_BUF_SIZE, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
+    memset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1858,17 +1858,17 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
-    if (HDmemcmp(zbuf, rbuf + 1024, (size_t)512) != 0)
+    if (memcmp(zbuf, rbuf + 1024, (size_t)512) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     /* Reset data in file back to zeros & reset the read buffer */
     if (accum_write(0, BIG_BUF_SIZE + 1536, zbuf) < 0)
         FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
+    memset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
     if (accum_reset(f) < 0)
         FAIL_STACK_ERROR;
 
@@ -1893,9 +1893,9 @@ test_big(H5F_t *f)
         FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if (HDmemcmp(wbuf, rbuf, (size_t)512) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)512) != 0)
         TEST_ERROR;
-    if (HDmemcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -2032,7 +2032,7 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
         /* Verify individual reads */
         if (accum_read(RANDOM_BASE_OFF + off[u], len[u], rbuf) < 0)
             FAIL_STACK_ERROR;
-        if (HDmemcmp(wbuf + off[u], rbuf, len[u]) != 0)
+        if (memcmp(wbuf + off[u], rbuf, len[u]) != 0)
             TEST_ERROR;
     } /* end for */
 
@@ -2041,7 +2041,7 @@ fprintf(stderr, "Random # seed was: %u\n", seed);
         FAIL_STACK_ERROR;
 
     /* Verify data read back in */
-    if (HDmemcmp(wbuf, rbuf, (size_t)RANDOM_BUF_SIZE) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)RANDOM_BUF_SIZE) != 0)
         TEST_ERROR;
 
     if (accum_reset(f) < 0)
@@ -2189,7 +2189,7 @@ test_swmr_write_big(hbool_t newest_format)
     if (H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
         FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if (HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
     /* Flush the data to disk */
     if (accum_reset(rf) < 0)
@@ -2210,7 +2210,7 @@ test_swmr_write_big(hbool_t newest_format)
     if (H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, rbuf) < 0)
         FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if (HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+    if (memcmp(wbuf, rbuf, (size_t)1024) != 0)
         TEST_ERROR;
     /* The data stays in the accumulator */
 
@@ -2221,7 +2221,7 @@ test_swmr_write_big(hbool_t newest_format)
     if (H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, rbuf) < 0)
         FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if (HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+    if (memcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
 #if defined(H5_HAVE_WIN32_API)

@@ -1085,7 +1085,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t c
     assert(chunk_udata);
 
     /* Initialize userdata */
-    HDmemset(&udata, 0, sizeof udata);
+    memset(&udata, 0, sizeof udata);
     udata.common.layout  = idx_info->layout;
     udata.common.storage = idx_info->storage;
     udata.cb             = chunk_cb;
@@ -1177,7 +1177,7 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
         /* Set up B-tree user data */
-        HDmemset(&udata, 0, sizeof udata);
+        memset(&udata, 0, sizeof udata);
         udata.layout  = idx_info->layout;
         udata.storage = &tmp_storage;
 
@@ -1306,7 +1306,7 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     assert(index_size);
 
     /* Initialize B-tree node user-data */
-    HDmemset(&udata, 0, sizeof udata);
+    memset(&udata, 0, sizeof udata);
     udata.layout  = idx_info->layout;
     udata.storage = idx_info->storage;
 
@@ -1434,11 +1434,11 @@ H5D_btree_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, un
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Reset "fake" storage info */
-    HDmemset(&storage, 0, sizeof(storage));
+    memset(&storage, 0, sizeof(storage));
     storage.idx_type = H5D_CHUNK_IDX_BTREE;
 
     /* Reset "fake" layout info */
-    HDmemset(&layout, 0, sizeof(layout));
+    memset(&layout, 0, sizeof(layout));
     layout.ndims = ndims;
     for (u = 0; u < ndims; u++)
         layout.dim[u] = dim[u];

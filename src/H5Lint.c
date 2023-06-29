@@ -397,7 +397,7 @@ H5L_unregister(H5L_type_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
+    memmove(&H5L_table_g[i], &H5L_table_g[i + 1], sizeof(H5L_class_t) * ((H5L_table_used_g - 1) - i));
     H5L_table_used_g--;
 
 done:
@@ -651,7 +651,7 @@ done:
         H5O_loc_t oloc; /* Object location for created object */
 
         /* Set up object location */
-        HDmemset(&oloc, 0, sizeof(oloc));
+        memset(&oloc, 0, sizeof(oloc));
         oloc.file = grp_loc->oloc->file;
         oloc.addr = udata->lnk->u.hard.addr;
 

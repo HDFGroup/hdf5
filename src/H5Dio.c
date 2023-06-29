@@ -896,7 +896,7 @@ H5D__ioinfo_init(size_t count, H5D_io_op_type_t op_type, H5D_dset_io_info_t *dse
     assert(io_info);
 
     /* Zero out struct */
-    HDmemset(io_info, 0, sizeof(*io_info));
+    memset(io_info, 0, sizeof(*io_info));
 
     /* Set up simple fields */
     io_info->op_type = op_type;
@@ -1027,7 +1027,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
-    HDmemset(type_info, 0, sizeof(*type_info));
+    memset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if (NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))

@@ -312,8 +312,8 @@ test_pmdset(size_t niter, unsigned flags)
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
-        (void)HDmemset(rbuf, 0, buf_size);
-        (void)HDmemset(erbuf, 0, buf_size);
+        (void)memset(rbuf, 0, buf_size);
+        (void)memset(erbuf, 0, buf_size);
 
         /* Initialize write buffer */
         for (j = 0; j < max_dsets; j++)
@@ -323,7 +323,7 @@ test_pmdset(size_t niter, unsigned flags)
                                                 (j * MAX_DSET_X * MAX_DSET_Y) + (k * MAX_DSET_Y) + l);
 
         /* Initialize expected file buffer */
-        (void)HDmemset(efbuf, 0, buf_size);
+        (void)memset(efbuf, 0, buf_size);
 
         /* Set last_read to TRUE so we don't reopen the file on the first
          * iteration */
@@ -384,7 +384,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                 /* Reset dataset usage array, if writing */
                 if (!do_read)
-                    HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                    memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                 /* Iterate over processes */
                 for (l = 0; l < (size_t)mpi_size; l++) {
@@ -473,7 +473,7 @@ test_pmdset(size_t niter, unsigned flags)
                         /* Reset dataset usage array if reading, since in this case we don't care
                          * about overlapping selections between processes */
                         if (do_read)
-                            HDmemset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
+                            memset(dset_usage, 0, max_dsets * MAX_DSET_X * MAX_DSET_Y);
 
                         /* Generate points */
                         for (m = 0; m < npoints; m++) {

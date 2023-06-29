@@ -535,10 +535,10 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
     int                ret_value = 0;
 
     /* Initialize fapl info structs */
-    HDmemset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
-    HDmemset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
-    HDmemset(&in_vfd_info, 0, sizeof(h5tools_vfd_info_t));
-    HDmemset(&out_vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    memset(&in_vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&out_vol_info, 0, sizeof(h5tools_vol_info_t));
+    memset(&in_vfd_info, 0, sizeof(h5tools_vfd_info_t));
+    memset(&out_vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* parse command line options */
     while (EOF != (opt = H5_get_option(argc, argv, s_opts, l_opts))) {
@@ -966,7 +966,7 @@ main(int argc, char **argv)
     pack_opt_t options; /*the global options */
     int        parse_ret;
 
-    HDmemset(&options, 0, sizeof(pack_opt_t));
+    memset(&options, 0, sizeof(pack_opt_t));
 
     /* Initialize h5tools lib */
     h5tools_init();

@@ -1722,7 +1722,7 @@ test_pack_ooo(void)
 
         /* Reshape free_order to remove j (which is no longer free) */
         if (j < (num_free - 1))
-            HDmemmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
+            memmove(&free_order[j], &free_order[j + 1], (num_free - j - 1) * sizeof(free_order[0]));
     } /* end for */
 
     /* Generate order to insert inner compound type */

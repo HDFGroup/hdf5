@@ -514,7 +514,7 @@ test_stripe_sizes(void)
             write_buf = malloc(nbytes);
             VRFY(write_buf, "malloc succeeded");
 
-            HDmemset(write_buf, 255, nbytes);
+            memset(write_buf, 255, nbytes);
 
             c_write_buf = write_buf;
 
@@ -676,7 +676,7 @@ test_stripe_sizes(void)
         write_buf = malloc(nbytes);
         VRFY(write_buf, "malloc succeeded");
 
-        HDmemset(write_buf, 255, nbytes);
+        memset(write_buf, 255, nbytes);
 
         c_write_buf = write_buf;
 

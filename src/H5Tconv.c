@@ -2331,11 +2331,11 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                                         xbuf + src_memb->offset, xbkg + dst_memb->offset) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, dst_memb->size);
                         offset += dst_memb->size;
                     } /* end if */
                     else {
-                        HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                        memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                         offset += src_memb->size;
                     } /* end else */
                 }     /* end for */
@@ -2365,7 +2365,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
                     } /* end if */
                     else
                         offset -= dst_memb->size;
-                    HDmemmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
+                    memmove(xbkg + dst_memb->offset, xbuf + offset, dst_memb->size);
                 } /* end for */
                 assert(0 == offset);
 
@@ -2385,7 +2385,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, 
              * buffer.
              */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_delta;
             } /* end for */
@@ -2579,7 +2579,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                 copy_size = priv->subset_info.copy_size;
 
                 for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                    HDmemmove(xbkg, xbuf, copy_size);
+                    memmove(xbkg, xbuf, copy_size);
 
                     /* Update pointers */
                     xbuf += buf_stride;
@@ -2609,14 +2609,14 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
                     }     /* end if */
                     else {
                         for (xbuf = buf, elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
+                            memmove(xbuf + offset, xbuf + src_memb->offset, src_memb->size);
                             xbuf += buf_stride;
                         } /* end for */
                         offset += src_memb->size;
@@ -2646,7 +2646,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                         "unable to convert compound datatype member")
                         for (elmtno = 0; elmtno < nelmts; elmtno++) {
-                            HDmemmove(xbkg, xbuf, dst_memb->size);
+                            memmove(xbkg, xbuf, dst_memb->size);
                             xbuf += buf_stride;
                             xbkg += bkg_stride;
                         } /* end for */
@@ -2659,7 +2659,7 @@ H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelm
 
             /* Move background buffer into result buffer */
             for (xbuf = buf, xbkg = bkg, elmtno = 0; elmtno < nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->shared->size);
+                memmove(xbuf, xbkg, dst->shared->size);
                 xbuf += buf_stride;
                 xbkg += bkg_stride;
             } /* end for */
@@ -2947,7 +2947,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                                           cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
-                            HDmemset(d, 0xff, dst->shared->size);
+                            memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "can't handle conversion exception")
@@ -2967,7 +2967,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
                     while (lt < rt) {
                         md  = (lt + rt) / 2;
-                        cmp = HDmemcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
+                        cmp = memcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
                                        src->shared->size);
                         if (cmp < 0)
                             rt = md;
@@ -2984,7 +2984,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                                           cb_struct.user_data);
 
                         if (except_ret == H5T_CONV_UNHANDLED)
-                            HDmemset(d, 0xff, dst->shared->size);
+                            memset(d, 0xff, dst->shared->size);
                         else if (except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL,
                                         "can't handle conversion exception")
@@ -3355,7 +3355,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 if (NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                 "memory allocation failed for type conversion")
-                                HDmemset(conv_buf, 0, conv_buf_size);
+                                memset(conv_buf, 0, conv_buf_size);
                             } /* end else-if */
 
                             /* Read in VL sequence */
@@ -3373,7 +3373,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 if (NULL == (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                 "memory allocation failed for type conversion")
-                                HDmemset(tmp_buf, 0, tmp_buf_size);
+                                memset(tmp_buf, 0, tmp_buf_size);
                             } /* end if */
 
                             /* If we are writing and there is a nested VL type, read
@@ -3395,7 +3395,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                             (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                                         "memory allocation failed for type conversion")
-                                        HDmemset(tmp_buf, 0, tmp_buf_size);
+                                        memset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
 
                                     /* Read in background VL sequence */
@@ -3407,7 +3407,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
 
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
                                 if (bg_seq_len < seq_len)
-                                    HDmemset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
+                                    memset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
                                              (seq_len - bg_seq_len) * dst_base_size);
                             } /* end if */
 
@@ -3602,7 +3602,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
             /* Perform the actual conversion */
             for (elmtno = 0; elmtno < nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                HDmemmove(dp, sp, src->shared->size);
+                memmove(dp, sp, src->shared->size);
 
                 /* Convert array */
                 if (H5T_convert(tpath, tsrc_id, tdst_id, src->shared->u.array.nelem, (size_t)0, bkg_stride,
@@ -3792,7 +3792,7 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                             if (NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                                             "memory allocation failed for type conversion")
-                            HDmemset(conv_buf, 0, conv_buf_size);
+                            memset(conv_buf, 0, conv_buf_size);
                         } /* end if */
 
                         if (dst_copy && (src->shared->u.atomic.u.r.loc == H5T_LOC_DISK))
@@ -8998,7 +8998,7 @@ next:
                     dp += direction * (ssize_t)dst_p->shared->size;
                 }
 
-                HDmemset(int_buf, 0, buf_size);
+                memset(int_buf, 0, buf_size);
             }
 
             break;
@@ -9354,7 +9354,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                         /*make destination infinity by setting exponent to maximal number and
                          *mantissa to zero.*/
                         expo = expo_max;
-                        HDmemset(int_buf, 0, buf_size);
+                        memset(int_buf, 0, buf_size);
                     }
                 }
 
@@ -9424,7 +9424,7 @@ padding:
                     dp += direction * (ssize_t)dst_p->shared->size;
                 }
 
-                HDmemset(int_buf, 0, buf_size);
+                memset(int_buf, 0, buf_size);
             }
 
             break;

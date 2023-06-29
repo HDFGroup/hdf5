@@ -536,7 +536,7 @@ H5G_name_reset(H5G_name_t *name)
     assert(name);
 
     /* Clear the group hier. name to an empty state */
-    HDmemset(name, 0, sizeof(H5G_name_t));
+    memset(name, 0, sizeof(H5G_name_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_name_reset() */
@@ -1165,7 +1165,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
     herr_t          ret_value = SUCCEED; /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     FUNC_ENTER_NOAPI(FAIL)
 

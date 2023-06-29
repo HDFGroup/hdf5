@@ -185,7 +185,7 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
     for (i = 0; i < dt->shared->u.enumer.nmembs; i++) {
         if (!HDstrcmp(dt->shared->u.enumer.name[i], name))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "name redefinition")
-        if (!HDmemcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value,
+        if (!memcmp((uint8_t *)dt->shared->u.enumer.value + (i * dt->shared->size), value,
                       dt->shared->size))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "value redefinition")
     }
@@ -387,7 +387,7 @@ H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t 
     rt = copied_dt->shared->u.enumer.nmembs;
     while (lt < rt) {
         md  = (lt + rt) / 2;
-        cmp = HDmemcmp(value, (uint8_t *)copied_dt->shared->u.enumer.value + (md * copied_dt->shared->size),
+        cmp = memcmp(value, (uint8_t *)copied_dt->shared->u.enumer.value + (md * copied_dt->shared->size),
                        copied_dt->shared->size);
         if (cmp < 0)
             rt = md;

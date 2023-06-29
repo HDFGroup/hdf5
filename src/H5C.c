@@ -307,7 +307,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->epoch_marker_ringbuf_size  = 0;
 
     /* Initialize all epoch marker entries' fields to zero/FALSE/NULL */
-    HDmemset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
+    memset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
 
     /* Set non-zero/FALSE/NULL fields for epoch markers */
     for (i = 0; i < H5C__MAX_EPOCH_MARKERS; i++) {

@@ -3048,8 +3048,8 @@ test_start_swmr_write_stress_ohdr(hid_t in_fapl)
     TESTING("H5Fstart_swmr_write()--stress object header messages");
 
     /* Initialize buffers */
-    HDmemset(fill, 0, sizeof(fill));
-    HDmemset(attr_data, 0, sizeof(attr_data));
+    memset(fill, 0, sizeof(fill));
+    memset(attr_data, 0, sizeof(attr_data));
 
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -3992,7 +3992,7 @@ test_append_flush_generic(void)
         TEST_ERROR;
 
     /* Verify expected values: with boundary rank < set boundary rank */
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     if (H5Pget_append_flush(dapl, 1, ret_boundary, NULL, NULL) < 0)
         TEST_ERROR;
     if (ret_boundary[0] != 1 || ret_boundary[1] != 0 || boundary[2] != 0)
@@ -4123,7 +4123,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Set boundary dimension rank > the rank of dataset to be created */
-    HDmemset(boundary, 0, sizeof(boundary));
+    memset(boundary, 0, sizeof(boundary));
     if (H5Pset_append_flush(dapl, 3, boundary, NULL, NULL) < 0)
         FAIL_STACK_ERROR;
 
@@ -4185,7 +4185,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     if ((ddapl = H5Dget_access_plist(did2)) < 0)
         FAIL_STACK_ERROR;
 
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     ret_cb    = NULL;
     ret_count = NULL;
     /* Retrieve the append flush property values */
@@ -4198,7 +4198,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     if (ret_boundary[0] != 0 || ret_boundary[1] != 1 || ret_boundary[2] != 0)
         TEST_ERROR;
 
-    HDmemset(ret_boundary, 0, sizeof(ret_boundary));
+    memset(ret_boundary, 0, sizeof(ret_boundary));
     /* Retrieve the append flush property values */
     if (H5Pget_append_flush(ddapl, 1, ret_boundary, NULL, NULL) < 0)
         TEST_ERROR;
@@ -4396,7 +4396,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
      *      zero boundary, null callback function, null user data
      */
 
-    HDmemset(boundary, 0, sizeof(boundary));
+    memset(boundary, 0, sizeof(boundary));
     if (H5Pset_append_flush(dapl, 1, boundary, append_cb, &count) < 0)
         FAIL_STACK_ERROR;
     if ((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)

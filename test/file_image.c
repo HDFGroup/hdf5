@@ -132,7 +132,7 @@ test_properties(void)
     VERIFY(temp != NULL, "temp is null!");
     VERIFY(temp_size == size, "Sizes of buffers don't match");
     VERIFY(temp != buffer, "Retrieved buffer is the same as original");
-    VERIFY(0 == HDmemcmp(temp, buffer, size), "Buffers contain different data");
+    VERIFY(0 == memcmp(temp, buffer, size), "Buffers contain different data");
 
     /* Copy the fapl */
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
@@ -147,7 +147,7 @@ test_properties(void)
     VERIFY(temp2 != NULL, "Received buffer not set");
     VERIFY(temp2 != buffer, "Retrieved buffer is the same as original");
     VERIFY(temp2 != temp, "Retrieved buffer is the same as previously retrieved buffer");
-    VERIFY(0 == HDmemcmp(temp2, buffer, size), "Buffers contain different data");
+    VERIFY(0 == memcmp(temp2, buffer, size), "Buffers contain different data");
 
     retval = 0;
 
@@ -209,7 +209,7 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
 
     u->used_callbacks |= MEMCPY;
     u->memcpy_src = op;
-    return HDmemcpy(dest, src, size);
+    return memcpy(dest, src, size);
 }
 
 /******************************************************************************

@@ -1038,7 +1038,7 @@ H5O_protect(const H5O_loc_t *loc, unsigned prot_flags, hbool_t pin_all_chunks)
     udata.common.f                = loc->file;
     udata.common.file_intent      = file_intent;
     udata.common.merged_null_msgs = 0;
-    HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
+    memset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
     udata.common.addr          = loc->addr;
 
@@ -1863,7 +1863,7 @@ H5O_loc_reset(H5O_loc_t *loc)
     assert(loc);
 
     /* Clear the object location to an empty state */
-    HDmemset(loc, 0, sizeof(H5O_loc_t));
+    memset(loc, 0, sizeof(H5O_loc_t));
     loc->addr = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -2068,7 +2068,7 @@ H5O_get_hdr_info(const H5O_loc_t *loc, H5O_hdr_info_t *hdr)
     assert(hdr);
 
     /* Reset the object header info structure */
-    HDmemset(hdr, 0, sizeof(*hdr));
+    memset(hdr, 0, sizeof(*hdr));
 
     /* Get the object header */
     if (NULL == (oh = H5O_protect(loc, H5AC__READ_ONLY_FLAG, FALSE)))
@@ -2309,7 +2309,7 @@ H5O_get_native_info(const H5O_loc_t *loc, H5O_native_info_t *oinfo, unsigned fie
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object class")
 
     /* Reset the object info structure */
-    HDmemset(oinfo, 0, sizeof(*oinfo));
+    memset(oinfo, 0, sizeof(*oinfo));
 
     /* Get the information for the object header, if requested */
     if (fields & H5O_NATIVE_INFO_HDR)
@@ -2771,7 +2771,7 @@ H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_or
     FUNC_ENTER_PACKAGE
 
     /* Portably initialize user data struct to zeros */
-    HDmemset(&udata, 0, sizeof(udata));
+    memset(&udata, 0, sizeof(udata));
 
     /* Check args */
     assert(loc);
@@ -3088,7 +3088,7 @@ H5O__reset_info2(H5O_info2_t *oinfo)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
-    HDmemset(oinfo, 0, sizeof(H5O_info2_t));
+    memset(oinfo, 0, sizeof(H5O_info2_t));
     oinfo->type  = H5O_TYPE_UNKNOWN;
     oinfo->token = H5O_TOKEN_UNDEF;
 

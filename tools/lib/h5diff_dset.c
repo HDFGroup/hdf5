@@ -532,17 +532,17 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
             }
 
             /* the stripmine loop */
-            HDmemset(hs_offset1, 0, sizeof hs_offset1);
-            HDmemset(hs_stride1, 0, sizeof hs_stride1);
-            HDmemset(hs_count1, 0, sizeof hs_count1);
-            HDmemset(hs_block1, 0, sizeof hs_block1);
-            HDmemset(hs_size1, 0, sizeof hs_size1);
-            HDmemset(hs_offset2, 0, sizeof hs_offset2);
-            HDmemset(hs_stride2, 0, sizeof hs_stride2);
-            HDmemset(hs_count2, 0, sizeof hs_count2);
-            HDmemset(hs_block2, 0, sizeof hs_block2);
-            HDmemset(hs_size2, 0, sizeof hs_size2);
-            HDmemset(zero, 0, sizeof zero);
+            memset(hs_offset1, 0, sizeof hs_offset1);
+            memset(hs_stride1, 0, sizeof hs_stride1);
+            memset(hs_count1, 0, sizeof hs_count1);
+            memset(hs_block1, 0, sizeof hs_block1);
+            memset(hs_size1, 0, sizeof hs_size1);
+            memset(hs_offset2, 0, sizeof hs_offset2);
+            memset(hs_stride2, 0, sizeof hs_stride2);
+            memset(hs_count2, 0, sizeof hs_count2);
+            memset(hs_block2, 0, sizeof hs_block2);
+            memset(hs_size2, 0, sizeof hs_size2);
+            memset(zero, 0, sizeof zero);
 
             /* if subsetting was requested - initialize the subsetting variables */
             H5TOOLS_DEBUG("compare by hyperslabs: opts->nelmts=%ld - opts->m_size=%ld", opts->nelmts,

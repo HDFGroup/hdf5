@@ -1128,7 +1128,7 @@ serialize(const H5F_t H5_ATTR_UNUSED *f, void *image_ptr, size_t len, void *thin
     assert(entry->num_flush_ops < MAX_FLUSH_OPS);
 
     /* null out the image to avoid spurious failures */
-    HDmemset(image_ptr, 0, len);
+    memset(image_ptr, 0, len);
 
     if ((type == PICO_ENTRY_TYPE) || (type == VARIABLE_ENTRY_TYPE) || (type == NOTIFY_ENTRY_TYPE)) {
         assert(entry->size >= PICO_ENTRY_SIZE);
@@ -2130,7 +2130,7 @@ reset_entries(void)
             } /* end for */
 
             /* Make copy of entries in base_addr for later */
-            HDmemcpy(orig_base_addr, base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
+            memcpy(orig_base_addr, base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
         } /* end for */
 
         /* Indicate that we've made a copy for later */
@@ -2143,7 +2143,7 @@ reset_entries(void)
             orig_base_addr = orig_entries[i];
 
             /* Make copy of entries in base_addr for later */
-            HDmemcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
+            memcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof(*base_addr));
         } /* end for */
     }     /* end else */
 
@@ -4794,10 +4794,10 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
                 break;
         assert(i < chd_entry_ptr->flush_dep_npar);
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
+            memmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
                       (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
         if (i < chd_entry_ptr->flush_dep_npar - 1)
-            HDmemmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
+            memmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
                       (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
         chd_entry_ptr->flush_dep_npar--;
         par_entry_ptr->flush_dep_nchd--;

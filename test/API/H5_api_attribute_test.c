@@ -4932,7 +4932,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info(attr_id, &attr_info) < 0) {
                 H5_FAILED();
                 printf("    couldn't get attribute info\n");
@@ -4975,7 +4975,7 @@ test_get_attribute_info(void)
         {
             TESTING_2("H5Aget_info_by_name");
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_name(group_id, ".", ATTRIBUTE_GET_INFO_TEST_ATTR_NAME, &attr_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -4998,7 +4998,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_name);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_name(group_id, ".", ATTRIBUTE_GET_INFO_TEST_ATTR_NAME2, &attr_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5021,7 +5021,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_name);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_name(group_id, ".", ATTRIBUTE_GET_INFO_TEST_ATTR_NAME3, &attr_info,
                                     H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5058,7 +5058,7 @@ test_get_attribute_info(void)
                 PART_EMPTY(H5Aget_info_by_idx_crt_order_increasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 0, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5083,7 +5083,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_crt_order_increasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 1, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5108,7 +5108,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_crt_order_increasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, 2, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5147,7 +5147,7 @@ test_get_attribute_info(void)
                 PART_EMPTY(H5Aget_info_by_idx_crt_order_decreasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 2, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5172,7 +5172,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_crt_order_decreasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 1, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5197,7 +5197,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_crt_order_decreasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, 0, &attr_info,
                                    H5P_DEFAULT) < 0) {
                 H5_FAILED();
@@ -5230,7 +5230,7 @@ test_get_attribute_info(void)
         {
             TESTING_2("H5Aget_info_by_idx by alphabetical order in increasing order");
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
@@ -5255,7 +5255,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_name_order_increasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 1, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
@@ -5280,7 +5280,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_name_order_increasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_INC, 2, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
@@ -5313,7 +5313,7 @@ test_get_attribute_info(void)
         {
             TESTING_2("H5Aget_info_by_idx by alphabetical order in decreasing order");
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 2, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
@@ -5338,7 +5338,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_name_order_decreasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 1, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();
@@ -5363,7 +5363,7 @@ test_get_attribute_info(void)
                 PART_ERROR(H5Aget_info_by_idx_name_order_decreasing);
             }
 
-            HDmemset(&attr_info, 0, sizeof(attr_info));
+            memset(&attr_info, 0, sizeof(attr_info));
             if (H5Aget_info_by_idx(group_id, ".", H5_INDEX_NAME, H5_ITER_DEC, 0, &attr_info, H5P_DEFAULT) <
                 0) {
                 H5_FAILED();

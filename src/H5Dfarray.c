@@ -1184,10 +1184,10 @@ H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info, H5D_chunk_cb_func_t 
         H5D_farray_it_ud_t udata; /* User data for iteration callback */
 
         /* Initialize userdata */
-        HDmemset(&udata, 0, sizeof udata);
+        memset(&udata, 0, sizeof udata);
         udata.common.layout  = idx_info->layout;
         udata.common.storage = idx_info->storage;
-        HDmemset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
+        memset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
         udata.filtered = (idx_info->pline->nused > 0);
         if (!udata.filtered) {
             udata.chunk_rec.nbytes      = idx_info->layout->size;

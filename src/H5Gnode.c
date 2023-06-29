@@ -642,7 +642,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
         snrt_flags |= H5AC__DIRTIED_FLAG;
 
         /* The left node */
-        HDmemset(sn->entry + H5F_SYM_LEAF_K(f), 0, H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
+        memset(sn->entry + H5F_SYM_LEAF_K(f), 0, H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
         sn->nsyms = H5F_SYM_LEAF_K(f);
         sn_flags |= H5AC__DIRTIED_FLAG;
 
@@ -677,7 +677,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
 
     /* Move entries down to make room for new entry */
     assert(idx >= 0);
-    HDmemmove(insert_into->entry + idx + 1, insert_into->entry + idx,
+    memmove(insert_into->entry + idx + 1, insert_into->entry + idx,
               (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
@@ -845,7 +845,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
              */
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
-            HDmemmove(sn->entry + idx, sn->entry + idx + 1, (sn->nsyms - idx) * sizeof(H5G_entry_t));
+            memmove(sn->entry + idx, sn->entry + idx + 1, (sn->nsyms - idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
         }
         else if (idx + 1 == sn->nsyms) {
@@ -867,7 +867,7 @@ H5G__node_remove(H5F_t *f, haddr_t addr, void H5_ATTR_NDEBUG_UNUSED *_lt_key /*i
              */
             sn->nsyms -= 1;
             sn_flags |= H5AC__DIRTIED_FLAG;
-            HDmemmove(sn->entry + idx, sn->entry + idx + 1, (sn->nsyms - idx) * sizeof(H5G_entry_t));
+            memmove(sn->entry + idx, sn->entry + idx + 1, (sn->nsyms - idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
         } /* end else */
     }     /* end if */

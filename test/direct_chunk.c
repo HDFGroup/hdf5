@@ -620,7 +620,7 @@ test_skip_compress_write1(hid_t file)
         goto error;
 
     /* Read the raw chunk back */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if ((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if (read_filter_mask != filter_mask)
@@ -896,7 +896,7 @@ test_skip_compress_write2(hid_t file)
         goto error;
 
     /* Read the raw chunk back */
-    HDmemset(&read_direct_buf, 0, sizeof(read_direct_buf));
+    memset(&read_direct_buf, 0, sizeof(read_direct_buf));
     if ((status = H5Dread_chunk(dataset, H5P_DEFAULT, offset, &read_filter_mask, read_direct_buf)) < 0)
         goto error;
     if (read_filter_mask != filter_mask)
@@ -1910,7 +1910,7 @@ test_read_unfiltered_dset(hid_t file)
             offset[0] = (hsize_t)i * CHUNK_NX;
             offset[1] = (hsize_t)j * CHUNK_NY;
             /* Read the raw chunk back */
-            HDmemset(&direct_buf, 0, sizeof(direct_buf));
+            memset(&direct_buf, 0, sizeof(direct_buf));
             filter_mask = UINT_MAX;
             if ((status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, direct_buf)) < 0)
                 goto error;
@@ -2014,7 +2014,7 @@ test_read_unallocated_chunk(hid_t file)
         FAIL_STACK_ERROR;
 
     /* Write a single chunk to initialize the chunk storage */
-    HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
+    memset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
     offset[0] = 0;
     offset[1] = 0;
 

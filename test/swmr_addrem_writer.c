@@ -151,7 +151,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     assert(fid > 0);
 
     /* Reset the buffer */
-    HDmemset(&buf, 0, sizeof(buf));
+    memset(&buf, 0, sizeof(buf));
 
     /* Create a dataspace for the record to add */
     if ((mem_sid = H5Screate_simple(2, count, NULL)) < 0)

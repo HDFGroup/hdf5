@@ -68,7 +68,7 @@ H5F__close_mounts(H5F_t *f)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
 
             /* Eliminate the mount point from the table */
-            HDmemmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
+            memmove(f->shared->mtab.child + u, f->shared->mtab.child + u + 1,
                       (f->shared->mtab.nmounts - u - 1) * sizeof(f->shared->mtab.child[0]));
             f->shared->mtab.nmounts--;
             f->nmounts--;
@@ -201,7 +201,7 @@ H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UN
     }
 
     /* Insert into table */
-    HDmemmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
+    memmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
               (parent->shared->mtab.nmounts - md) * sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts++;
     parent->nmounts++;
@@ -365,7 +365,7 @@ H5F_unmount(const H5G_loc_t *loc, const char *name)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
-    HDmemmove(parent->shared->mtab.child + (unsigned)child_idx,
+    memmove(parent->shared->mtab.child + (unsigned)child_idx,
               (parent->shared->mtab.child + (unsigned)child_idx) + 1,
               ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) *
                   sizeof(parent->shared->mtab.child[0]));

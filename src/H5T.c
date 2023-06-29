@@ -2580,7 +2580,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
                 (tmp_did = H5I_register(H5I_DATATYPE, H5T_copy(old_path->dst, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                             "unable to register data types for conv query")
-            HDmemset(&cdata, 0, sizeof cdata);
+            memset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
             if (conv->is_app) {
                 if ((conv->u.app_func)(tmp_sid, tmp_did, &cdata, (size_t)0, (size_t)0, (size_t)0, NULL, NULL,
@@ -2767,7 +2767,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
             if (func && func != soft->conv.u.app_func)
                 continue;
 
-            HDmemmove(H5T_g.soft + i, H5T_g.soft + i + 1,
+            memmove(H5T_g.soft + i, H5T_g.soft + i + 1,
                       (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
         } /* end for */
@@ -2793,7 +2793,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         } /* end if */
         else {
             /* Remove from table */
-            HDmemmove(H5T_g.path + i, H5T_g.path + i + 1,
+            memmove(H5T_g.path + i, H5T_g.path + i + 1,
                       (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
             --H5T_g.npaths;
 
@@ -3636,7 +3636,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
                 }
                 else {
                     /* Empty enum */
-                    HDmemset(&new_dt->shared->u.enumer, 0, sizeof(H5T_enum_t));
+                    memset(&new_dt->shared->u.enumer, 0, sizeof(H5T_enum_t));
                 }
                 break;
 
@@ -4708,7 +4708,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     idx = u;
                 } /* end else */
 
-                tmp = HDmemcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
+                tmp = memcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
                                (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
@@ -5162,14 +5162,14 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         if (H5T_g.soft[i].conv.is_app) {
             if ((H5T_g.soft[i].conv.u.app_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0,
                                                 (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
-                HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
+                memset(&(path->cdata), 0, sizeof(H5T_cdata_t));
                 H5E_clear_stack(NULL); /*ignore the error*/
                 path_init_error = TRUE;
             } /* end if */
         }     /* end if */
         else if ((H5T_g.soft[i].conv.u.lib_func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0,
                                                  (size_t)0, NULL, NULL) < 0) {
-            HDmemset(&(path->cdata), 0, sizeof(H5T_cdata_t));
+            memset(&(path->cdata), 0, sizeof(H5T_cdata_t));
             H5E_clear_stack(NULL); /*ignore the error*/
             path_init_error = TRUE;
         } /* end if */
@@ -5257,7 +5257,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
         } /* end if */
         if (cmp > 0)
             md++;
-        HDmemmove(H5T_g.path + md + 1, H5T_g.path + md, (size_t)(H5T_g.npaths - md) * sizeof(H5T_path_t *));
+        memmove(H5T_g.path + md + 1, H5T_g.path + md, (size_t)(H5T_g.npaths - md) * sizeof(H5T_path_t *));
         H5T_g.npaths++;
         H5T_g.path[md] = path;
         table          = path;

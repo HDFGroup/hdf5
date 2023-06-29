@@ -1229,8 +1229,8 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_context
 
     H5TOOLS_START_DEBUG(" ");
 
-    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
-    HDmemset(&str, 0, sizeof(h5tools_str_t));
+    memset(&prefix, 0, sizeof(h5tools_str_t));
+    memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     H5TOOLS_DEBUG("before CR elmtno=%ld, ctx->cur_column=%d, info->idx_fmt=%s, info->line_suf=%s", elmtno,
@@ -1324,8 +1324,8 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info, h5tools_
     if (!ctx->need_prefix)
         return;
 
-    HDmemset(&prefix, 0, sizeof(h5tools_str_t));
-    HDmemset(&str, 0, sizeof(h5tools_str_t));
+    memset(&prefix, 0, sizeof(h5tools_str_t));
+    memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
@@ -1842,7 +1842,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     s = (char *)mem;
                 }
                 for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
-                    HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
+                    memcpy(&tempuchar, &s[i], sizeof(unsigned char));
                     if (1 != fwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                         H5TOOLS_THROW((-1), "fwrite failed");
                 } /* i */
@@ -1946,11 +1946,11 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     if (size > sizeof(tref))
                         H5TOOLS_THROW((-1), "unexpectedly large ref");
 
-                    HDmemset(&tref, 0, sizeof(tref));
+                    memset(&tref, 0, sizeof(tref));
 
                     for (block_index = 0; block_index < block_nelmts; block_index++) {
                         mem = ((unsigned char *)_mem) + block_index * size;
-                        HDmemcpy(&tref, mem, size);
+                        memcpy(&tref, mem, size);
                         if ((region_id = H5Ropen_object(&tref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                         else {

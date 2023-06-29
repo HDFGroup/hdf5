@@ -318,7 +318,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         /* Fill the source array */
         if (0 == nelmts)
             continue;
-        HDmemset(buf, (signed)(128 + ctr), (size_t)nelmts);
+        memset(buf, (signed)(128 + ctr), (size_t)nelmts);
 
         /* Create dataspace for selection in memory */
         if ((mspace = H5Screate_simple(1, &nelmts, NULL)) < 0)
@@ -336,13 +336,13 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         }
 
         /* Read from disk */
-        HDmemset(check, 0xff, (size_t)nelmts);
+        memset(check, 0xff, (size_t)nelmts);
         if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check) < 0) {
             H5_FAILED();
             fprintf(stderr, "    Read failed: ctr=%lu\n", (unsigned long)ctr);
             goto error;
         }
-        if (HDmemcmp(buf, check, (size_t)nelmts) != 0) {
+        if (memcmp(buf, check, (size_t)nelmts) != 0) {
             H5_FAILED();
             fprintf(stderr, "    Read check failed: ctr=%lu\n", (unsigned long)ctr);
             fprintf(stderr, "    Wrote:\n");
@@ -366,7 +366,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
     }
 
     /* Now read the entire array back out and check it */
-    HDmemset(buf, 0xff, nx * ny * nz);
+    memset(buf, 0xff, nx * ny * nz);
     if (H5Dread(dataset, TEST_DATATYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
         H5_FAILED();
         fprintf(stderr, "    Read failed for whole array.\n");
@@ -472,7 +472,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         return SUCCEED;
     }
     buf = (uint8_t *)malloc(nx * ny * nz);
-    HDmemset(buf, 128, nx * ny * nz);
+    memset(buf, 128, nx * ny * nz);
 
     /* Set dimensions of dataset */
     for (u = 0; u < (size_t)ndims; u++)

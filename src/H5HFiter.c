@@ -91,7 +91,7 @@ H5HF__man_iter_init(H5HF_block_iter_t *biter)
     assert(biter);
 
     /* Reset block iterator information */
-    HDmemset(biter, 0, sizeof(H5HF_block_iter_t));
+    memset(biter, 0, sizeof(H5HF_block_iter_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__man_iter_init() */
