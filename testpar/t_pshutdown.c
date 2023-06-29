@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi
- *              February 2015
- *
  * Purpose: This test creates a file and a bunch of objects in the
  * file and then calls MPI_Finalize without closing anything. The
  * library should exercise the attribute callback destroy attached to

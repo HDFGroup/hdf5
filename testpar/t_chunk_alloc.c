@@ -13,9 +13,6 @@
 /*
  * This verifies if the storage space allocation methods are compatible between
  * serial and parallel modes.
- *
- * Created by: Christian Chilan and Albert Cheng
- * Date: 2006/05/25
  */
 
 #include "testphdf5.h"

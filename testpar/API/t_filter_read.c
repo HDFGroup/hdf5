@@ -13,9 +13,6 @@
 /*
  * This verifies the correctness of parallel reading of a dataset that has been
  * written serially using filters.
- *
- * Created by: Christian Chilan
- * Date: 2007/05/15
  */
 
 #include "hdf5.h"
@@ -83,10 +80,6 @@ h5_szip_can_encode(void)
  * Purpose:     Tests parallel reading of a 2D dataset written serially using
  *              filters. During the parallel reading phase, the dataset is
  *              divided evenly among the processors in vertical hyperslabs.
- *
- * Programmer:  Christian Chilan
- *              Tuesday, May 15, 2007
- *
  *-------------------------------------------------------------------------
  */
 static void

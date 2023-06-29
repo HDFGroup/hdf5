@@ -3332,8 +3332,6 @@ test_actual_io_mode(int selection_mode)
  *
  * Purpose: Tests all possible cases of the actual_io_mode property.
  *
- * Programmer: Jacob Gruber
- * Date: 2011-04-06
  */
 void
 actual_io_mode_tests(void)
@@ -3428,8 +3426,6 @@ actual_io_mode_tests(void)
  *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
  *         Test for Externl-File storage as the cause of breaking collective I/O.
  *
- * Programmer: Jonathan Kim
- * Date: Aug, 2012
  */
 #define FILE_EXTERNAL "nocolcause_extern.data"
 static void
@@ -3770,8 +3766,6 @@ test_no_collective_cause_mode(int selection_mode)
  *
  * Purpose: Tests cases for broken collective IO.
  *
- * Programmer: Jonathan Kim
- * Date: Aug, 2012
  */
 void
 no_collective_cause_tests(void)
@@ -4143,8 +4137,6 @@ dataset_atomicity(void)
  *
  * Purpose: Test cases for writing dense attributes in parallel
  *
- * Programmer: Quincey Koziol
- * Date: April, 2013
  */
 void
 test_dense_attr(void)
