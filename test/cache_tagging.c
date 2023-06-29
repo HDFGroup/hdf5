@@ -10,11 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              January 25, 2010
- *
+/*
  *              This file contains tests for metadata tagging.
  */
+
 #define H5F_FRIEND /*suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"

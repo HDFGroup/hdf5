@@ -10,11 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: Robb Matzke
- *	       Friday, September 19, 1997
- *
- */
-
 /****************/
 /* Module Setup */
 /****************/

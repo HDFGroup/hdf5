@@ -10,13 +10,10 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
- *
+/*
  * Purpose:     Fixed array indexed (chunked) I/O functions.
  *              The chunk coordinate is mapped as an index into an array of
  *              disk addresses for the chunks.
- *
  */
 
 /****************/

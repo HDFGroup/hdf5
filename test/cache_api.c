@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              11/10/05
- *
+/*
  *        This file contains tests for the API calls associated
  *        with the cache implemented in H5C.c
  */

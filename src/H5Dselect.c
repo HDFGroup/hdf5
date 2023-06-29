@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, September 30, 2004
- *
+/*
  * Purpose:	Dataspace I/O functions.
  */
 
