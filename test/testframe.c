@@ -530,7 +530,7 @@ ParseTestVerbosity(char *argv)
     else if (*argv == 'h')
         SetTestVerbosity(VERBO_HI);
     else
-        SetTestVerbosity(HDatoi(argv));
+        SetTestVerbosity(atoi(argv));
 }
 
 /*
