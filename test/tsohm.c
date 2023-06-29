@@ -611,7 +611,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
  */
 #define TSOHM_S1H_VERIFY_DATA(dset_id, dtype_id)                                                             \
     {                                                                                                        \
-        memset(&rdata, 0, sizeof(rdata));                                                                  \
+        memset(&rdata, 0, sizeof(rdata));                                                                    \
         if (0 > H5Dread((dset_id), (dtype_id), H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata)) {                     \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \

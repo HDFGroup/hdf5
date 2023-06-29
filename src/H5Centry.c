@@ -389,7 +389,7 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
     assert(0 == memcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
-                         H5C_IMAGE_EXTRA_SPACE));
+                       H5C_IMAGE_EXTRA_SPACE));
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     entry_ptr->image_up_to_date = TRUE;
@@ -4039,7 +4039,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
     /* Remove parent entry from child's parent array */
     if (u < (child_entry->flush_dep_nparents - 1))
         memmove(&child_entry->flush_dep_parent[u], &child_entry->flush_dep_parent[u + 1],
-                  (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
+                (child_entry->flush_dep_nparents - u - 1) * sizeof(child_entry->flush_dep_parent[0]));
     child_entry->flush_dep_nparents--;
 
     /* Adjust parent entry's nchildren and unpin parent if it goes to zero */

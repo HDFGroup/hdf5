@@ -1224,7 +1224,7 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
                                     "memory allocation failed for page buffer entry")
                     memset(new_page_buf, 0, (size_t)offset);
                     memset((uint8_t *)new_page_buf + offset + access_size, 0,
-                             page_size - ((size_t)offset + access_size));
+                           page_size - ((size_t)offset + access_size));
 
                     page_entry->page_buf_ptr = new_page_buf;
 

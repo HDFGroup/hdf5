@@ -706,7 +706,7 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
          * the same as the one being brought in from disk.
          */
         assert(0 == memcmp(image, udata->oh->chunk[chk_proxy->chunkno].image,
-                             udata->oh->chunk[chk_proxy->chunkno].size));
+                           udata->oh->chunk[chk_proxy->chunkno].size));
     }
 
     /* Increment reference count of object header */
@@ -1574,7 +1574,7 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
     if (oh->version > H5O_VERSION_1)
         /* Make certain the magic # is present */
         assert(!memcmp(oh->chunk[chunkno].image, (chunkno == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC),
-                         H5_SIZEOF_MAGIC));
+                       H5_SIZEOF_MAGIC));
     else
         /* Gaps should never occur in version 1 of the format */
         assert(oh->chunk[chunkno].gap == 0);
@@ -1587,8 +1587,8 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
         /* Check for gap in chunk & zero it out */
         if (oh->chunk[chunkno].gap)
             memset((oh->chunk[chunkno].image + oh->chunk[chunkno].size) -
-                         (H5O_SIZEOF_CHKSUM + oh->chunk[chunkno].gap),
-                     0, oh->chunk[chunkno].gap);
+                       (H5O_SIZEOF_CHKSUM + oh->chunk[chunkno].gap),
+                   0, oh->chunk[chunkno].gap);
 
         /* Compute metadata checksum */
         metadata_chksum =

@@ -429,10 +429,10 @@ H5Z__unregister(H5Z_filter_t filter_id)
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
     memmove(&H5Z_table_g[filter_index], &H5Z_table_g[filter_index + 1],
-              sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
+            sizeof(H5Z_class2_t) * ((H5Z_table_used_g - 1) - filter_index));
 #ifdef H5Z_DEBUG
     memmove(&H5Z_stat_table_g[filter_index], &H5Z_stat_table_g[filter_index + 1],
-              sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
+            sizeof(H5Z_stats_t) * ((H5Z_table_used_g - 1) - filter_index));
 #endif /* H5Z_DEBUG */
     H5Z_table_used_g--;
 

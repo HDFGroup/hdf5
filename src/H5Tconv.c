@@ -2968,7 +2968,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     while (lt < rt) {
                         md  = (lt + rt) / 2;
                         cmp = memcmp(s, (uint8_t *)src->shared->u.enumer.value + (md * src->shared->size),
-                                       src->shared->size);
+                                     src->shared->size);
                         if (cmp < 0)
                             rt = md;
                         else if (cmp > 0)
@@ -3408,7 +3408,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                                 /* If the sequence gets shorter, pad out the original sequence with zeros */
                                 if (bg_seq_len < seq_len)
                                     memset((uint8_t *)tmp_buf + dst_base_size * bg_seq_len, 0,
-                                             (seq_len - bg_seq_len) * dst_base_size);
+                                           (seq_len - bg_seq_len) * dst_base_size);
                             } /* end if */
 
                             /* Convert VL sequence */

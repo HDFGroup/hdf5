@@ -1774,9 +1774,8 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
 
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
-    memset(correct_buf +
-                 ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*data));
+    memset(correct_buf + ((size_t)WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
+           0, segment_length * sizeof(*data));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -4363,7 +4362,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     /* Compute the correct offset into the buffer for the process having no selection and clear it */
     segment_length = dataset_dims[0] * dataset_dims[1] / (hsize_t)mpi_size;
     memset(correct_buf + ((size_t)READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC * segment_length),
-             0, segment_length * sizeof(*correct_buf));
+           0, segment_length * sizeof(*correct_buf));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);

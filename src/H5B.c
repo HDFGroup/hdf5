@@ -1430,8 +1430,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
              */
             if (type->critical_key == H5B_LEFT) {
                 /* Slide all keys down 1, update lt_key */
-                memmove(H5B_NKEY(bt, shared, 0), H5B_NKEY(bt, shared, 1),
-                          bt->nchildren * type->sizeof_nkey);
+                memmove(H5B_NKEY(bt, shared, 0), H5B_NKEY(bt, shared, 1), bt->nchildren * type->sizeof_nkey);
                 H5MM_memcpy(lt_key, H5B_NKEY(bt, shared, 0), type->sizeof_nkey);
                 *lt_key_changed = TRUE;
             }
@@ -1440,7 +1439,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                  * key intact (the right key of the leftmost child is
                  * overwritten) */
                 memmove(H5B_NKEY(bt, shared, 1), H5B_NKEY(bt, shared, 2),
-                          (bt->nchildren - 1) * type->sizeof_nkey);
+                        (bt->nchildren - 1) * type->sizeof_nkey);
 
             memmove(bt->child, bt->child + 1, (bt->nchildren - 1) * sizeof(haddr_t));
 
@@ -1458,7 +1457,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                 /* Slide the rightmost key down one, overwriting the left key of
                  * the deleted (rightmost) child */
                 memmove(H5B_NKEY(bt, shared, bt->nchildren - 1), H5B_NKEY(bt, shared, bt->nchildren),
-                          type->sizeof_nkey);
+                        type->sizeof_nkey);
             else {
                 /* Just update rt_key */
                 H5MM_memcpy(rt_key, H5B_NKEY(bt, shared, bt->nchildren - 1), type->sizeof_nkey);
@@ -1479,10 +1478,10 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
              */
             if (type->critical_key == H5B_LEFT)
                 memmove(H5B_NKEY(bt, shared, idx), H5B_NKEY(bt, shared, idx + 1),
-                          (bt->nchildren - idx) * type->sizeof_nkey);
+                        (bt->nchildren - idx) * type->sizeof_nkey);
             else
                 memmove(H5B_NKEY(bt, shared, idx + 1), H5B_NKEY(bt, shared, idx + 2),
-                          (bt->nchildren - 1 - idx) * type->sizeof_nkey);
+                        (bt->nchildren - 1 - idx) * type->sizeof_nkey);
 
             memmove(bt->child + idx, bt->child + idx + 1, (bt->nchildren - 1 - idx) * sizeof(haddr_t));
 

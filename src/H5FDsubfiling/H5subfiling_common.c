@@ -180,7 +180,7 @@ H5_get_subfiling_object(int64_t object_id)
 
             /* Clear newly-allocated entries */
             memset(&sf_context_cache[old_num_entries], 0,
-                     (sf_context_cache_size - old_num_entries) * sizeof(*sf_context_cache));
+                   (sf_context_cache_size - old_num_entries) * sizeof(*sf_context_cache));
 
             /*
              * If we had to make more space, the given object index
@@ -237,7 +237,7 @@ H5_get_subfiling_object(int64_t object_id)
 
             /* Clear newly-allocated entries */
             memset(&sf_topology_cache[old_num_entries], 0,
-                     (sf_topology_cache_size - old_num_entries) * sizeof(*sf_topology_cache));
+                   (sf_topology_cache_size - old_num_entries) * sizeof(*sf_topology_cache));
 
             /*
              * If we had to make more space, the given object index

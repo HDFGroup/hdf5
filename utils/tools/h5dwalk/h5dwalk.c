@@ -300,7 +300,7 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
 
     if (pos < count)
         memmove(&option->separators[low + 1], &option->separators[low],
-                  sizeof(*option->separators) * (uint64_t)(count - pos));
+                sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
     return 0;

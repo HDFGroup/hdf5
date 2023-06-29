@@ -6570,11 +6570,11 @@ error:
 #define MULTI_SETUP(memb_map, memb_fapl, memb_name, memb_addr, sv)                                           \
     {                                                                                                        \
         H5FD_mem_t mt;                                                                                       \
-        memset(memb_map, 0, sizeof memb_map);                                                              \
-        memset(memb_fapl, 0, sizeof memb_fapl);                                                            \
-        memset(memb_name, 0, sizeof memb_name);                                                            \
-        memset(memb_addr, 0, sizeof memb_addr);                                                            \
-        memset(sv, 0, sizeof sv);                                                                          \
+        memset(memb_map, 0, sizeof memb_map);                                                                \
+        memset(memb_fapl, 0, sizeof memb_fapl);                                                              \
+        memset(memb_name, 0, sizeof memb_name);                                                              \
+        memset(memb_addr, 0, sizeof memb_addr);                                                              \
+        memset(sv, 0, sizeof sv);                                                                            \
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {                                            \
             memb_map[mt]  = H5FD_MEM_SUPER;                                                                  \
             memb_fapl[mt] = H5P_DEFAULT;                                                                     \

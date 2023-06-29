@@ -224,7 +224,7 @@ H5MF_init_merge_flags(H5F_shared_t *f_sh)
         case H5MF_AGGR_MERGE_TOGETHER:
             /* Merge all allocation types together */
             memset(f_sh->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA),
-                     sizeof(f_sh->fs_aggr_merge));
+                   sizeof(f_sh->fs_aggr_merge));
             break;
 
         default:

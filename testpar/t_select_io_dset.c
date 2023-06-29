@@ -3218,8 +3218,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             /* Copy wbufs if the library will be modifying them */
             if (mwbuf) {
                 memcpy(total_wbuf1_bak, total_wbuf1, ndsets * DSET_SELECT_DIM * sizeof(int));
-                memcpy(ul_total_wbuf2_bak, ul_total_wbuf2,
-                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                memcpy(ul_total_wbuf2_bak, ul_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
                 memcpy(l_total_wbuf2_bak, l_total_wbuf2, ndsets * DSET_SELECT_DIM * sizeof(long));
                 memcpy(s1_total_wbuf3_bak, s1_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
                 memcpy(s4_total_wbuf3_bak, s4_total_wbuf3, ndsets * DSET_SELECT_DIM * sizeof(s4_t));
@@ -3231,8 +3230,7 @@ test_multi_dsets_all(int niter, hid_t fid, unsigned chunked, unsigned mwbuf)
             /* Restore wbufs from backup if the library modified them */
             if (mwbuf) {
                 memcpy(total_wbuf1, total_wbuf1_bak, ndsets * DSET_SELECT_DIM * sizeof(int));
-                memcpy(ul_total_wbuf2, ul_total_wbuf2_bak,
-                         ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
+                memcpy(ul_total_wbuf2, ul_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(unsigned long));
                 memcpy(l_total_wbuf2, l_total_wbuf2_bak, ndsets * DSET_SELECT_DIM * sizeof(long));
                 memcpy(s1_total_wbuf3, s1_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s1_t));
                 memcpy(s4_total_wbuf3, s4_total_wbuf3_bak, ndsets * DSET_SELECT_DIM * sizeof(s4_t));

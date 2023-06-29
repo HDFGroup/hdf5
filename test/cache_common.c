@@ -4795,10 +4795,10 @@ destroy_flush_dependency(int32_t par_type, int32_t par_idx, int32_t chd_type, in
         assert(i < chd_entry_ptr->flush_dep_npar);
         if (i < chd_entry_ptr->flush_dep_npar - 1)
             memmove(&chd_entry_ptr->flush_dep_par_type[i], &chd_entry_ptr->flush_dep_par_type[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_type[0]));
         if (i < chd_entry_ptr->flush_dep_npar - 1)
             memmove(&chd_entry_ptr->flush_dep_par_idx[i], &chd_entry_ptr->flush_dep_par_idx[i + 1],
-                      (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
+                    (chd_entry_ptr->flush_dep_npar - i - 1) * sizeof(chd_entry_ptr->flush_dep_par_idx[0]));
         chd_entry_ptr->flush_dep_npar--;
         par_entry_ptr->flush_dep_nchd--;
         if (par_entry_ptr->flush_dep_nchd == 0) {

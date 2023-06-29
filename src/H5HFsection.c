@@ -2899,7 +2899,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
                 if (sect->u.indirect.dir_nrows > 0) {
                     assert(sect->u.indirect.dir_rows);
                     memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[1],
-                              sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
+                            sect->u.indirect.dir_nrows * sizeof(H5HF_free_section_t *));
                     assert(sect->u.indirect.dir_rows[0]);
 
                     /* Make new "first row" in indirect section */
@@ -2993,7 +2993,7 @@ H5HF__sect_indirect_reduce_row(H5HF_hdr_t *hdr, H5HF_free_section_t *row_sect, h
             H5MM_memcpy(&peer_sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[0],
                         (sizeof(H5HF_free_section_t *) * peer_dir_nrows));
             memmove(&sect->u.indirect.dir_rows[0], &sect->u.indirect.dir_rows[peer_dir_nrows],
-                      (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
+                    (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
             sect->u.indirect.dir_nrows -= peer_dir_nrows;
             assert(row_sect == sect->u.indirect.dir_rows[0]);
 
@@ -3146,7 +3146,7 @@ H5HF__sect_indirect_reduce(H5HF_hdr_t *hdr, H5HF_free_section_t *sect, unsigned 
             /* Adjust indirect entry information */
             sect->u.indirect.indir_nents--;
             memmove(&sect->u.indirect.indir_ents[0], &sect->u.indirect.indir_ents[1],
-                      sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
+                    sect->u.indirect.indir_nents * sizeof(H5HF_free_section_t *));
             assert(sect->u.indirect.indir_ents[0]);
 
             /* Make new "first row" in new first indirect child section */

@@ -1603,8 +1603,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
 
                             /* Clear new space in sub_dset */
                             (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                           storage->list[i].sub_dset_nalloc *
-                                               sizeof(H5O_storage_virtual_srcdset_t));
+                                         storage->list[i].sub_dset_nalloc *
+                                             sizeof(H5O_storage_virtual_srcdset_t));
 
                             /* Update sub_dset_nalloc */
                             storage->list[i].sub_dset_nalloc *= 2;
@@ -2074,8 +2074,8 @@ H5D__virtual_init_all(const H5D_t *dset)
 
                     /* Clear new space in sub_dset */
                     (void)memset(&storage->list[i].sub_dset[storage->list[i].sub_dset_nalloc], 0,
-                                   (sub_dset_max - storage->list[i].sub_dset_nalloc) *
-                                       sizeof(H5O_storage_virtual_srcdset_t));
+                                 (sub_dset_max - storage->list[i].sub_dset_nalloc) *
+                                     sizeof(H5O_storage_virtual_srcdset_t));
 
                     /* Update sub_dset_nalloc */
                     storage->list[i].sub_dset_nalloc = sub_dset_max;

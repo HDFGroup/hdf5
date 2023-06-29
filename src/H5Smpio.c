@@ -585,7 +585,7 @@ H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Da
                     MPI_Aint temp = disp[u];
 
                     memmove(disp + (*permute)[u] + 1, disp + (*permute)[u],
-                              (u - (*permute)[u]) * sizeof(MPI_Aint));
+                            (u - (*permute)[u]) * sizeof(MPI_Aint));
                     disp[(*permute)[u]] = temp;
                 } /* end if */
 

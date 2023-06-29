@@ -361,8 +361,8 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
 
             assert(cache_ptr->image_entries[u].image_ptr);
             assert(fake_cache_ptr->image_entries[u].image_ptr);
-            assert(!memcmp(cache_ptr->image_entries[u].image_ptr,
-                             fake_cache_ptr->image_entries[u].image_ptr, cache_ptr->image_entries[u].size));
+            assert(!memcmp(cache_ptr->image_entries[u].image_ptr, fake_cache_ptr->image_entries[u].image_ptr,
+                           cache_ptr->image_entries[u].size));
 
             fake_cache_ptr->image_entries[u].image_ptr =
                 H5MM_xfree(fake_cache_ptr->image_entries[u].image_ptr);

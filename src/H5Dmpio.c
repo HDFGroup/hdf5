@@ -123,7 +123,7 @@
  */
 #define H5D_MPIO_INIT_CHUNK_UD_INFO(chunk_ud, index_info_ptr)                                                \
     do {                                                                                                     \
-        memset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                      \
+        memset(&chunk_ud, 0, sizeof(H5D_chunk_ud_t));                                                        \
         chunk_ud.common.layout  = (index_info_ptr)->layout;                                                  \
         chunk_ud.common.storage = (index_info_ptr)->storage;                                                 \
     } while (0)
@@ -5191,7 +5191,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         for (size_t dbg_idx = 0; dbg_idx < chunk_list_num_entries; dbg_idx++) {
             if (coll_entry->index_info.chunk_idx == chunk_list[dbg_idx].index_info.chunk_idx) {
                 hbool_t coords_match = !memcmp(scaled_coords, chunk_list[dbg_idx].chunk_info->scaled,
-                                                 di->dset->shared->ndims * sizeof(hsize_t));
+                                               di->dset->shared->ndims * sizeof(hsize_t));
 
                 assert(coords_match && "Calculated scaled coordinates for chunk didn't match "
                                        "chunk's actual scaled coordinates!");

@@ -2767,8 +2767,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
             if (func && func != soft->conv.u.app_func)
                 continue;
 
-            memmove(H5T_g.soft + i, H5T_g.soft + i + 1,
-                      (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
+            memmove(H5T_g.soft + i, H5T_g.soft + i + 1, (size_t)(H5T_g.nsoft - (i + 1)) * sizeof(H5T_soft_t));
             --H5T_g.nsoft;
         } /* end for */
     }     /* end if */
@@ -2794,7 +2793,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         else {
             /* Remove from table */
             memmove(H5T_g.path + i, H5T_g.path + i + 1,
-                      (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
+                    (size_t)(H5T_g.npaths - (i + 1)) * sizeof(H5T_path_t *));
             --H5T_g.npaths;
 
             /* Shut down path */
@@ -4709,7 +4708,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 } /* end else */
 
                 tmp = memcmp((uint8_t *)dt1->shared->u.enumer.value + idx1[u] * base_size,
-                               (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
+                             (uint8_t *)dt2->shared->u.enumer.value + idx2[idx] * base_size, base_size);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
                 if (tmp > 0)

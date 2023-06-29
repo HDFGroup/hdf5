@@ -678,7 +678,7 @@ H5G__node_insert(H5F_t *f, haddr_t addr, void H5_ATTR_UNUSED *_lt_key, hbool_t H
     /* Move entries down to make room for new entry */
     assert(idx >= 0);
     memmove(insert_into->entry + idx + 1, insert_into->entry + idx,
-              (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
+            (insert_into->nsyms - (unsigned)idx) * sizeof(H5G_entry_t));
 
     /* Copy new entry into table */
     H5G__ent_copy(&(insert_into->entry[idx]), &ent, H5_COPY_SHALLOW);
