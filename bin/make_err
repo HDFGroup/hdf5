@@ -20,8 +20,6 @@ use warnings;
 # Read in the error description text file and create the appropriate headers
 # needed by the library.
 #
-# Programmer: Quincey Koziol
-# Creation Date: 2003/08/12
 
 ##############################################################################
 # Print the copyright into an open file
