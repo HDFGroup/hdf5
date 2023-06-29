@@ -244,10 +244,6 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmers:
- *  Pedro Vicente
- *  Quincey Koziol
- *
  * Comments: Uses memory offsets
  *
  *-------------------------------------------------------------------------
