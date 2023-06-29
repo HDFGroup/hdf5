@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Author: Albert Cheng of NCSA, Oct 24, 2001.
- */
-
 #include "hdf5.h"
 
 #include <errno.h>

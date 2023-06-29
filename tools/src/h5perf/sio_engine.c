@@ -10,10 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Author: Christian Chilan, April 2008
- */
-
 #include "hdf5.h"
 
 #include <errno.h>
