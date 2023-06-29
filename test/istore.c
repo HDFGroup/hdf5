@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke
- *        Wednesday, October 15, 1997
- *
+/*
  * Purpose:    Tests various aspects of indexed raw data storage.
  */
 

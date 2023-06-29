@@ -570,7 +570,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             case 'v':
                 if (H5_optarg != NULL) {
-                    if (2 == HDatoi(H5_optarg))
+                    if (2 == atoi(H5_optarg))
                         options->verbose = 2;
                 }
                 else
@@ -625,7 +625,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'j':
-                bound = HDatoi(H5_optarg);
+                bound = atoi(H5_optarg);
                 if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing low bound\n");
                     h5tools_setstatus(EXIT_FAILURE);
@@ -636,7 +636,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'k':
-                bound = HDatoi(H5_optarg);
+                bound = atoi(H5_optarg);
                 if (bound < H5F_LIBVER_EARLIEST || bound > H5F_LIBVER_LATEST) {
                     error_msg("in parsing high bound\n");
                     h5tools_setstatus(EXIT_FAILURE);
@@ -655,13 +655,13 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'c':
-                options->grp_compact = HDatoi(H5_optarg);
+                options->grp_compact = atoi(H5_optarg);
                 if (options->grp_compact > 0)
                     options->latest = TRUE; /* must use latest format */
                 break;
 
             case 'd':
-                options->grp_indexed = HDatoi(H5_optarg);
+                options->grp_indexed = atoi(H5_optarg);
                 if (options->grp_indexed > 0)
                     options->latest = TRUE; /* must use latest format */
                 break;
@@ -672,7 +672,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 char *msgPtr    = HDstrchr(H5_optarg, ':');
                 options->latest = TRUE; /* must use latest format */
                 if (msgPtr == NULL) {
-                    ssize = HDatoi(H5_optarg);
+                    ssize = atoi(H5_optarg);
                     for (idx = 0; idx < 5; idx++)
                         options->msg_size[idx] = ssize;
                 }
@@ -681,7 +681,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
                     HDstrcpy(msgType, msgPtr + 1);
                     msgPtr[0] = '\0';
-                    ssize     = HDatoi(H5_optarg);
+                    ssize     = atoi(H5_optarg);
                     if (!HDstrncmp(msgType, "dspace", 6))
                         options->msg_size[0] = ssize;
                     else if (!HDstrncmp(msgType, "dtype", 5))
@@ -700,15 +700,15 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
                 break;
 
             case 'b':
-                options->ublock_size = (hsize_t)HDatol(H5_optarg);
+                options->ublock_size = (hsize_t)atol(H5_optarg);
                 break;
 
             case 'M':
-                options->meta_block_size = (hsize_t)HDatol(H5_optarg);
+                options->meta_block_size = (hsize_t)atol(H5_optarg);
                 break;
 
             case 't':
-                options->threshold = (hsize_t)HDatol(H5_optarg);
+                options->threshold = (hsize_t)atol(H5_optarg);
                 break;
 
             case 'a':
@@ -745,14 +745,14 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
             } break;
 
             case 'P':
-                options->fs_persist = HDatoi(H5_optarg);
+                options->fs_persist = atoi(H5_optarg);
                 if (options->fs_persist == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_persist = -1;
                 break;
 
             case 'T':
-                options->fs_threshold = HDatol(H5_optarg);
+                options->fs_threshold = atol(H5_optarg);
                 if (options->fs_threshold == 0)
                     /* To distinguish the "specified" zero value */
                     options->fs_threshold = -1;
@@ -785,14 +785,14 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
 
             case '1':
                 in_vol_info.type    = VOL_BY_VALUE;
-                in_vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                in_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 custom_in_vol       = TRUE;
                 break;
 
@@ -808,7 +808,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             case '4':
                 out_vol_info.type    = VOL_BY_VALUE;
-                out_vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                out_vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 custom_out_vol       = TRUE;
                 break;
 
@@ -824,7 +824,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             case '7':
                 in_vfd_info.type    = VFD_BY_VALUE;
-                in_vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                in_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 custom_in_vfd       = TRUE;
                 break;
 
@@ -840,7 +840,7 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
 
             case '0':
                 out_vfd_info.type    = VFD_BY_VALUE;
-                out_vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                out_vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 custom_out_vfd       = TRUE;
                 break;
 

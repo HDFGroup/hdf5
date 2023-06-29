@@ -10,13 +10,11 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Vailin Choi
- *              Feb 20, 2014
- *
- * This file contains tests for:
- *  H5Odisable_mdc_flushes()
- *  H5Oenable_mdc_flushes()
- *  H5Oare_mdc_flushes_disabled()
+/*
+ *      This file contains tests for:
+ *          * H5Odisable_mdc_flushes()
+ *          * H5Oenable_mdc_flushes()
+ *          * H5Oare_mdc_flushes_disabled()
  */
 #include "h5test.h"
 

@@ -108,21 +108,21 @@ parse_option(int argc, char *const argv[])
                 filename_g = optarg;
                 break;
             case 'n': /* number of planes to write/read */
-                if ((nplanes_g = (hsize_t)HDatoi(optarg)) <= 0) {
+                if ((nplanes_g = (hsize_t)atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 's': /* use swmr file open mode */
-                if ((use_swmr_g = HDatoi(optarg)) < 0) {
+                if ((use_swmr_g = atoi(optarg)) < 0) {
                     fprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'y': /* Number of planes per chunk */
-                if ((chunkplanes_g = HDatoi(optarg)) <= 0) {
+                if ((chunkplanes_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n",
                             optarg);
                     usage(progname_g);
@@ -130,7 +130,7 @@ parse_option(int argc, char *const argv[])
                 };
                 break;
             case 'z': /* size of chunk=(z,z) */
-                if ((chunksize_g = HDatoi(optarg)) <= 0) {
+                if ((chunksize_g = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad chunksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);

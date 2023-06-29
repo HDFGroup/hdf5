@@ -297,7 +297,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = HDatol(argv[u + 1]);
+                        flush_count = atol(argv[u + 1]);
                         if (flush_count < 0)
                             usage();
                         u += 2;
@@ -312,7 +312,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed    = TRUE;
-                        temp        = HDatoi(argv[u + 1]);
+                        temp        = atoi(argv[u + 1]);
                         random_seed = (unsigned)temp;
                         u += 2;
                         break;
@@ -330,7 +330,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 

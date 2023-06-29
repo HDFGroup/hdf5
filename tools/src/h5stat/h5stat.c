@@ -841,7 +841,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'E':
                 if (H5_optarg != NULL)
-                    enable_error_stack = HDatoi(H5_optarg);
+                    enable_error_stack = atoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -868,7 +868,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'l':
                 if (H5_optarg) {
-                    sgroups_threshold = HDatoi(H5_optarg);
+                    sgroups_threshold = atoi(H5_optarg);
                     if (sgroups_threshold < 1) {
                         error_msg("Invalid threshold for small groups\n");
                         goto error;
@@ -891,7 +891,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'm':
                 if (H5_optarg) {
-                    sdsets_threshold = HDatoi(H5_optarg);
+                    sdsets_threshold = atoi(H5_optarg);
                     if (sdsets_threshold < 1) {
                         error_msg("Invalid threshold for small datasets\n");
                         goto error;
@@ -914,7 +914,7 @@ parse_command_line(int argc, const char *const *argv, struct handler_t **hand_re
 
             case 'a':
                 if (H5_optarg) {
-                    sattrs_threshold = HDatoi(H5_optarg);
+                    sattrs_threshold = atoi(H5_optarg);
                     if (sattrs_threshold < 1) {
                         error_msg("Invalid threshold for small # of attributes\n");
                         goto error;

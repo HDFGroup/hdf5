@@ -358,7 +358,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of reads between reopens */
                     case 'n':
-                        reopen_count = HDatoi(argv[u + 1]);
+                        reopen_count = atoi(argv[u + 1]);
                         if (reopen_count < 0)
                             usage();
                         u += 2;
@@ -372,7 +372,7 @@ main(int argc, char *argv[])
 
                     /* # of seconds between polling */
                     case 's':
-                        poll_time = HDatoi(argv[u + 1]);
+                        poll_time = atoi(argv[u + 1]);
                         if (poll_time < 0)
                             usage();
                         u += 2;
@@ -385,7 +385,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to read */
-                nrecords = HDatol(argv[u]);
+                nrecords = atol(argv[u]);
                 if (nrecords <= 0)
                     usage();
 

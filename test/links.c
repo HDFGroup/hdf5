@@ -12519,7 +12519,7 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
     /* Create symbolic link #1 in temporary directory #1 to file #2 in temporary directory #2 */
     /* (i.e. tmp_links/sym1.h5 -> <full path to>/tmp2_links/extlinks21B.h5) */
-    if (HDsymlink(filename2b, SYMLINK1) < 0 && errno != EEXIST)
+    if (symlink(filename2b, SYMLINK1) < 0 && errno != EEXIST)
         TEST_ERROR;
 
     /* set up name for file #3 in temporary directory #2: "tmp2_links/extlinks21C" */
@@ -12533,7 +12533,7 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
 
     /* Create symbolic link #2 in temporary directory #2 to file #4 in temporary directory #1 */
     /* (i.e. tmp2_links/sym2.h5 -> <full path to>/tmp_links/extlinks21D.h5) */
-    if (HDsymlink(filename4b, SYMLINK2) < 0 && errno != EEXIST)
+    if (symlink(filename4b, SYMLINK2) < 0 && errno != EEXIST)
         TEST_ERROR;
 
     /* set up name for file #5 in temporary directory #1: "tmp_links/extlinks21E" */

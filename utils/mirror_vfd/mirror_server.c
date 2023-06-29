@@ -194,11 +194,11 @@ parse_args(int argc, char **argv, struct op_args *args_out)
         } /* end if help */
         else if (!HDstrncmp(argv[i], "--port=", 7)) {
             mirror_log(NULL, V_INFO, "parsing 'main_port' (%s)", argv[i] + 7);
-            args_out->main_port = HDatoi(argv[i] + 7);
+            args_out->main_port = atoi(argv[i] + 7);
         } /* end if port */
         else if (!HDstrncmp(argv[i], "--verbosity=", 12)) {
             mirror_log(NULL, V_INFO, "parsing 'verbosity' (%s)", argv[i] + 12);
-            args_out->verbosity = (unsigned int)HDatoi(argv[i] + 12);
+            args_out->verbosity = (unsigned int)atoi(argv[i] + 12);
         } /* end if verbosity */
         else if (!HDstrncmp(argv[i], "--logpath=", 10)) {
             mirror_log(NULL, V_INFO, "parsing 'logpath' (%s)", argv[i] + 10);

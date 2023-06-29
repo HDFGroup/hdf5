@@ -99,7 +99,7 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
             HDstrncpy(opts->ip, argv[i] + 5, MSHS_IP_STR_SIZE);
         }
         else if (!HDstrncmp(argv[i], "--port=", 7)) {
-            opts->portno = HDatoi(argv[i] + 7);
+            opts->portno = atoi(argv[i] + 7);
         }
         else {
             printf("Unrecognized option: '%s'\n", argv[i]);

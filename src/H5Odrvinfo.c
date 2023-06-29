@@ -10,11 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, March  1, 2007
- *
- * Purpose:	A message holding driver info settings
- *              in the superblock extension.
+/*
+ * Purpose: A message holding driver info settings in the superblock extension
  */
 
 #include "H5Omodule.h" /* This source code file is part of the H5O module */

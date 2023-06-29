@@ -1396,13 +1396,13 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->num_bpp = parse_size_directive(H5_optarg);
                 break;
             case 'F':
-                cl_opts->num_files = HDatoi(H5_optarg);
+                cl_opts->num_files = atoi(H5_optarg);
                 break;
             case 'g':
                 cl_opts->dim2d = 1;
                 break;
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = atoi(H5_optarg);
                 break;
             case 'I':
                 cl_opts->interleaved = 1;
@@ -1411,10 +1411,10 @@ parse_command_line(int argc, const char *const *argv)
                 cl_opts->output_file = H5_optarg;
                 break;
             case 'p':
-                cl_opts->min_num_procs = HDatoi(H5_optarg);
+                cl_opts->min_num_procs = atoi(H5_optarg);
                 break;
             case 'P':
-                cl_opts->max_num_procs = HDatoi(H5_optarg);
+                cl_opts->max_num_procs = atoi(H5_optarg);
                 break;
             case 'T':
                 cl_opts->h5_threshold = parse_size_directive(H5_optarg);

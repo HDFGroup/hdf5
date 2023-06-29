@@ -1003,7 +1003,7 @@ parse_command_line(int argc, const char *const *argv)
             break;
 
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = atoi(H5_optarg);
                 break;
             case 'o':
                 cl_opts->output_file = H5_optarg;
