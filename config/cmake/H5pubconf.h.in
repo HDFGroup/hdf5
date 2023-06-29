@@ -265,9 +265,6 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
-/* Define to 1 if you have the `setsysinfo' function. */
-#cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
-
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
