@@ -330,8 +330,8 @@ h5_restore_err(void)
 void
 h5_reset(void)
 {
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
@@ -360,8 +360,8 @@ h5_reset(void)
 void
 h5_test_init(void)
 {
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     H5close();
 
     /* Save current error stack reporting routine and redirect to our local one */
@@ -1595,7 +1595,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
     FILE *signalfile = NULL;
 
     /* Create signal file (which will send signal to some other process) */
-    signalfile = HDfopen(TMP_SIGNAL_FILE, "w+");
+    signalfile = fopen(TMP_SIGNAL_FILE, "w+");
 
     /* Write messages to signal file, if provided */
     if (arg2 != NULL) {
@@ -1611,7 +1611,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
         assert(arg2 == NULL);
     } /* end else */
 
-    HDfclose(signalfile);
+    fclose(signalfile);
 
     HDrename(TMP_SIGNAL_FILE, send);
 } /* h5_send_message() */
@@ -1655,7 +1655,7 @@ h5_wait_message(const char *waitfor)
     HDtime(&t0);
 
     /* Wait for return signal from some other process */
-    while ((returnfile = HDfopen(waitfor, "r")) == NULL) {
+    while ((returnfile = fopen(waitfor, "r")) == NULL) {
 
         /* make note of current time. */
         HDtime(&t1);
@@ -1669,7 +1669,7 @@ h5_wait_message(const char *waitfor)
         } /* end if */
     }     /* end while */
 
-    HDfclose(returnfile);
+    fclose(returnfile);
     HDunlink(waitfor);
 
     return SUCCEED;
@@ -1905,13 +1905,13 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     int   ret_value = 0; /* for error handling */
 
     /* Open files for reading */
-    f1ptr = HDfopen(f1name, "rb");
+    f1ptr = fopen(f1name, "rb");
     if (f1ptr == NULL) {
         fprintf(stderr, "Unable to fopen() %s\n", f1name);
         ret_value = -1;
         goto done;
     }
-    f2ptr = HDfopen(f2name, "rb");
+    f2ptr = fopen(f2name, "rb");
     if (f2ptr == NULL) {
         fprintf(stderr, "Unable to fopen() %s\n", f2name);
         ret_value = -1;
@@ -1936,11 +1936,11 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     HDrewind(f1ptr);
     HDrewind(f2ptr);
     for (ii = 0; ii < f1size; ii++) {
-        if (HDfread(&f1char, 1, 1, f1ptr) != 1) {
+        if (fread(&f1char, 1, 1, f1ptr) != 1) {
             ret_value = -1;
             goto done;
         }
-        if (HDfread(&f2char, 1, 1, f2ptr) != 1) {
+        if (fread(&f2char, 1, 1, f2ptr) != 1) {
             ret_value = -1;
             goto done;
         }
@@ -1953,9 +1953,9 @@ h5_compare_file_bytes(char *f1name, char *f2name)
 
 done:
     if (f1ptr)
-        HDfclose(f1ptr);
+        fclose(f1ptr);
     if (f2ptr)
-        HDfclose(f2ptr);
+        fclose(f2ptr);
     return ret_value;
 } /* end h5_compare_file_bytes() */
 
@@ -2045,7 +2045,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 
     max_buf = 4096 * sizeof(char);
 
-    orig_ptr = HDfopen(orig, "rb");
+    orig_ptr = fopen(orig, "rb");
     if (NULL == orig_ptr) {
         ret_value = -1;
         goto done;
@@ -2055,7 +2055,7 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     fsize = (hsize_t)HDftell(orig_ptr);
     HDrewind(orig_ptr);
 
-    dest_ptr = HDfopen(dest, "wb");
+    dest_ptr = fopen(dest, "wb");
     if (NULL == dest_ptr) {
         ret_value = -1;
         goto done;
@@ -2069,20 +2069,20 @@ h5_duplicate_file_by_bytes(const char *orig, const char *dest)
     }
 
     while (read_size > 0) {
-        if (HDfread(dup_buf, read_size, 1, orig_ptr) != 1) {
+        if (fread(dup_buf, read_size, 1, orig_ptr) != 1) {
             ret_value = -1;
             goto done;
         }
-        HDfwrite(dup_buf, read_size, 1, dest_ptr);
+        fwrite(dup_buf, read_size, 1, dest_ptr);
         fsize -= read_size;
         read_size = MIN(fsize, max_buf);
     }
 
 done:
     if (orig_ptr != NULL)
-        HDfclose(orig_ptr);
+        fclose(orig_ptr);
     if (dest_ptr != NULL)
-        HDfclose(dest_ptr);
+        fclose(dest_ptr);
     if (dup_buf != NULL)
         free(dup_buf);
     return ret_value;

@@ -219,7 +219,7 @@ test_error_compat(void)
 
     /* Add a newline and flush so the output file looks nicer */
     printf("\n");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create the dataspace */
     dims[0] = DIM0;
@@ -352,7 +352,7 @@ test_h5epush1(hid_t file)
 
     /* Add a newline and flush so the output file looks nicer */
     printf("\n");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create the dataspace */
     dims[0] = DIM0;

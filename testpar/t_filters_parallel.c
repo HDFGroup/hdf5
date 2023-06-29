@@ -475,7 +475,7 @@ test_write_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t fil
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -631,7 +631,7 @@ test_write_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fi
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -778,7 +778,7 @@ test_write_filtered_dataset_no_overlap_partial(const char *parent_group, H5Z_fil
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -939,7 +939,7 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -1110,7 +1110,7 @@ test_write_filtered_dataset_single_unlim_dim_no_overlap(const char *parent_group
                    ", %" PRIuHSIZE " ]\n",
                    mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
                    block[1]);
-            HDfflush(stdout);
+            fflush(stdout);
         }
 
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -1263,7 +1263,7 @@ test_write_filtered_dataset_single_unlim_dim_overlap(const char *parent_group, H
                    ", %" PRIuHSIZE " ]\n",
                    mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
                    block[1]);
-            HDfflush(stdout);
+            fflush(stdout);
         }
 
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -1427,7 +1427,7 @@ test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char *parent_group,
                    ", %" PRIuHSIZE " ]\n",
                    mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
                    block[1]);
-            HDfflush(stdout);
+            fflush(stdout);
         }
 
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -1594,7 +1594,7 @@ test_write_filtered_dataset_multi_unlim_dim_overlap(const char *parent_group, H5
                    ", %" PRIuHSIZE " ]\n",
                    mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0],
                    block[1]);
-            HDfflush(stdout);
+            fflush(stdout);
         }
 
         VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -1740,7 +1740,7 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2176,7 +2176,7 @@ test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filt
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2347,7 +2347,7 @@ test_write_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2520,7 +2520,7 @@ test_write_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_grou
                " ]\n",
                mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
                start[2], block[0], block[1], block[2]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2682,7 +2682,7 @@ test_write_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H
                " ]\n",
                mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
                start[2], block[0], block[1], block[2]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -2843,7 +2843,7 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
                " ]\n",
                mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], start[0], start[1],
                start[2], block[0], block[1], block[2]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -3031,7 +3031,7 @@ test_write_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -3212,7 +3212,7 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, 
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -3419,7 +3419,7 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_gro
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -3618,7 +3618,7 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -3834,7 +3834,7 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4034,7 +4034,7 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4236,7 +4236,7 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -4463,7 +4463,7 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC)
@@ -5043,7 +5043,7 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5269,7 +5269,7 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5494,7 +5494,7 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5713,7 +5713,7 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -5935,7 +5935,7 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -6173,7 +6173,7 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -6406,7 +6406,7 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -6641,7 +6641,7 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -6883,7 +6883,7 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -7173,7 +7173,7 @@ test_write_parallel_read_serial(const char *parent_group, H5Z_filter_t filter_id
                " ]\n",
                mpi_rank, count[0], count[1], count[2], stride[0], stride[1], stride[2], offset[0], offset[1],
                offset[2], block[0], block[1], block[2]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7340,7 +7340,7 @@ test_shrinking_growing_chunks(const char *parent_group, H5Z_filter_t filter_id, 
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7488,7 +7488,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7562,7 +7562,7 @@ test_edge_chunks_no_overlap(const char *parent_group, H5Z_filter_t filter_id, hi
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7691,7 +7691,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7766,7 +7766,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -7936,7 +7936,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -8013,7 +8013,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -8084,7 +8084,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -8149,7 +8149,7 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -8303,7 +8303,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -8358,7 +8358,7 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
@@ -8527,7 +8527,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     /* Select hyperslab in the file */
@@ -8609,7 +8609,7 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
                ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
                ", %" PRIuHSIZE " ]\n",
                mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
-        HDfflush(stdout);
+        fflush(stdout);
     }
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),

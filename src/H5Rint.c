@@ -94,7 +94,7 @@
         fprintf(stdout, " # %s(): ", __func__);                                                              \
         fprintf(stdout, __VA_ARGS__);                                                                        \
         fprintf(stdout, "\n");                                                                               \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 static const char *
 H5R__print_token(const H5O_token_t token)

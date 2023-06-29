@@ -70,10 +70,10 @@ static FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
     {                                                                                                        \
-        errorfile = HDfopen(ERRFILE, "w+");                                                                  \
+        errorfile = fopen(ERRFILE, "w+");                                                                    \
         fprintf(errorfile, "Error occurred in flushrefresh.\n");                                             \
-        HDfflush(errorfile);                                                                                 \
-        HDfclose(errorfile);                                                                                 \
+        fflush(errorfile);                                                                                   \
+        fclose(errorfile);                                                                                   \
         TEST_ERROR;                                                                                          \
     }
 
@@ -1385,8 +1385,8 @@ check_for_errors(void)
 {
     FILE *file;
 
-    if ((file = HDfopen(ERRFILE, "r"))) {
-        HDfclose(file);
+    if ((file = fopen(ERRFILE, "r"))) {
+        fclose(file);
         HDremove(ERRFILE);
         return FAIL;
     } /* end if */

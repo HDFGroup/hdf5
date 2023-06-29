@@ -49,7 +49,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"i", requir
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]\n", prog);
     fprintf(stdout, "\n");
     fprintf(stdout, "Adds user block to front of an HDF5 file and creates a new concatenated file.\n");

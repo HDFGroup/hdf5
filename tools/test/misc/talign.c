@@ -197,6 +197,6 @@ out:
     H5Pclose(plist);
     H5Fclose(fil);
     HDunlink(fname);
-    HDfflush(stdout);
+    fflush(stdout);
     return result;
 }

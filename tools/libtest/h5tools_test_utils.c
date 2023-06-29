@@ -616,7 +616,7 @@ test_populate_ros3_fa(void)
 #ifndef H5_HAVE_ROS3_VFD
     HDputs(" -SKIP-");
     HDputs("    Read-Only S3 VFD not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 #else
 #if H5TOOLS_UTILS_TEST_DEBUG > 0

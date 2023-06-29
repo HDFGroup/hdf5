@@ -173,7 +173,7 @@ main(void)
     fprintf(stderr, HEADING, "fill raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         HDmemset(the_data, 0xAA, (size_t)(size[0] * size[1]));
     }
 #ifdef H5_HAVE_GETRUSAGE
@@ -196,7 +196,7 @@ main(void)
     fprintf(stderr, HEADING, "fill hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
@@ -220,7 +220,7 @@ main(void)
     fprintf(stderr, HEADING, "out raw");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
         n = HDwrite(fd, the_data, (size_t)(size[0] * size[1]));
@@ -246,7 +246,7 @@ main(void)
     fprintf(stderr, HEADING, "out hdf5");
     for (u = 0; u < nwrite; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dwrite(dset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
@@ -270,7 +270,7 @@ main(void)
     fprintf(stderr, HEADING, "in raw");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         offset = HDlseek(fd, (off_t)0, SEEK_SET);
         assert(0 == offset);
         n = HDread(fd, the_data, (size_t)(size[0] * size[1]));
@@ -296,7 +296,7 @@ main(void)
     fprintf(stderr, HEADING, "in hdf5");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }
@@ -325,7 +325,7 @@ main(void)
     fprintf(stderr, HEADING, "in hdf5 partial");
     for (u = 0; u < nread; u++) {
         HDputc(PROGRESS, stderr);
-        HDfflush(stderr);
+        fflush(stderr);
         status = H5Dread(dset, H5T_NATIVE_UCHAR, file_space, file_space, H5P_DEFAULT, the_data);
         assert(status >= 0);
     }

@@ -249,7 +249,7 @@ H5C__log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mp
         HDsnprintf(file_name, n_chars, "RANK_%d.%s", mpi_rank, log_location);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (json_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (json_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(json_udata->outfile, NULL);
 
@@ -303,7 +303,7 @@ H5C__json_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(json_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(json_udata->outfile))
+    if (EOF == fclose(json_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     json_udata->outfile = NULL;
 

@@ -599,7 +599,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         /* Set the log file pointer */
         if (fa->logfile)
-            file->logfp = HDfopen(fa->logfile, "w");
+            file->logfp = fopen(fa->logfile, "w");
         else
             file->logfp = stderr;
 
@@ -797,7 +797,7 @@ H5FD__log_close(H5FD_t *_file)
         if (file->fa.flags & H5FD_LOG_FLAVOR)
             file->flavor = (unsigned char *)H5MM_xfree(file->flavor);
         if (file->logfp != stderr)
-            HDfclose(file->logfp);
+            fclose(file->logfp);
     } /* end if */
 
     if (file->fa.logfile)

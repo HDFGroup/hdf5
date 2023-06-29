@@ -488,7 +488,7 @@ H5_term_library(void)
         H5_debug_open_stream_t *tmp_open_stream;
 
         tmp_open_stream = H5_debug_g.open_stream;
-        (void)HDfclose(H5_debug_g.open_stream->stream);
+        (void)fclose(H5_debug_g.open_stream->stream);
         H5_debug_g.open_stream = H5_debug_g.open_stream->next;
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
@@ -753,7 +753,7 @@ H5__debug_mask(const char *s)
 
                 if (NULL ==
                     (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
-                    (void)HDfclose(stream);
+                    (void)fclose(stream);
                     return;
                 } /* end if */
 

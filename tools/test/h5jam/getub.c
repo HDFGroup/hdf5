@@ -35,7 +35,7 @@ static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s -c nb file] \n", prog);
     fprintf(stdout, "           print first 'nb' byts of file to stdoug.\n");
 }

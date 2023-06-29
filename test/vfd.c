@@ -2388,7 +2388,7 @@ error:
         AT();                                                                                                \
         fprintf(stderr, mesg);                                                                               \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
-        HDfflush(stderr);                                                                                    \
+        fflush(stderr);                                                                                      \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
     } while (0)
@@ -2600,7 +2600,7 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     }
 
     /* Verify existence of logfile if appropriate */
-    logfile = HDfopen(vfd_config->log_file_path, "r");
+    logfile = fopen(vfd_config->log_file_path, "r");
     if ((TRUE == provide_logfile_path && NULL == logfile) ||
         (FALSE == provide_logfile_path && NULL != logfile)) {
         SPLITTER_TEST_FAULT("no logfile when one was expected\n");
@@ -2621,7 +2621,7 @@ done:
     }
 
     if (logfile != NULL)
-        HDfclose(logfile);
+        fclose(logfile);
 
     free(vfd_config);
     free(filename_rw);
@@ -3503,7 +3503,7 @@ setup_rand(void)
         seed = predefined_seed;
 
         fprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
-        HDfflush(stdout);
+        fflush(stdout);
 
         HDsrand(seed);
     }
@@ -3512,14 +3512,14 @@ setup_rand(void)
         if (HDgettimeofday(&tv, NULL) != 0) {
 
             fprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", __func__);
-            HDfflush(stdout);
+            fflush(stdout);
         }
         else {
 
             seed = (unsigned)tv.tv_usec;
 
             fprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
-            HDfflush(stdout);
+            fflush(stdout);
 
             HDsrand(seed);
         }

@@ -433,7 +433,7 @@ static FILE             *debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank);                      \
-            HDfflush(debug_stream);                                                                          \
+            fflush(debug_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -442,7 +442,7 @@ static FILE             *debug_stream             = NULL;
     do {                                                                                                     \
         if (debug_stream && H5D_MPIO_DEBUG_THIS_RANK(rank)) {                                                \
             fprintf(debug_stream, "%*s(Rank %d) " string "\n", debug_indent, "", rank, __VA_ARGS__);         \
-            HDfflush(debug_stream);                                                                          \
+            fflush(debug_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 
@@ -1145,7 +1145,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
 
         HDsnprintf(debug_log_filename, 1024, "H5Dmpio_debug.rank%d", mpi_rank);
 
-        if (NULL == (debug_log_file = HDfopen(debug_log_filename, "a")))
+        if (NULL == (debug_log_file = fopen(debug_log_filename, "a")))
             HGOTO_ERROR(H5E_IO, H5E_OPENERROR, FAIL, "couldn't open debugging log file")
 
         /* Print a short header for this I/O operation */
@@ -1357,7 +1357,7 @@ done:
     /* Close debugging log file */
     if (debug_log_file) {
         fprintf(debug_log_file, "##############\n\n");
-        if (EOF == HDfclose(debug_log_file))
+        if (EOF == fclose(debug_log_file))
             HDONE_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "couldn't close debugging log file")
         debug_stream = H5DEBUG(D);
     }

@@ -210,7 +210,7 @@ ph5diff_worker(int nID)
                     overflow_file = NULL;
                 }
 
-                HDfflush(stdout);
+                fflush(stdout);
                 HDmemset(outBuff, 0, OUTBUFF_SIZE);
                 outBuffOffset = 0;
 
@@ -263,7 +263,7 @@ print_manager_output(void)
             overflow_file = NULL;
         }
 
-        HDfflush(stdout);
+        fflush(stdout);
         HDmemset(outBuff, 0, OUTBUFF_SIZE);
         outBuffOffset = 0;
     }

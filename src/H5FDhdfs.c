@@ -1158,7 +1158,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
                 br_val, br_suffix,  /* raw data bytes    */
                 am_val, am_suffix,  /* metadata average */
                 ar_val, ar_suffix); /* raw data average  */
-        HDfflush(stream);
+        fflush(stream);
     }
 
 done:

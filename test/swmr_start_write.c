@@ -449,7 +449,7 @@ main(int argc, char *argv[])
         char verbose_name[1024];
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.out.%u", random_seed);
-        if (NULL == (verbose_file = HDfopen(verbose_name, "w"))) {
+        if (NULL == (verbose_file = fopen(verbose_name, "w"))) {
             fprintf(stderr, "Can't open verbose output file!\n");
             exit(EXIT_FAILURE);
         }

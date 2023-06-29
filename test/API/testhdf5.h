@@ -211,32 +211,32 @@
 #define TESTING(WHAT)                                                                                        \
     {                                                                                                        \
         printf("Testing %-62s", WHAT);                                                                       \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
         printf("  Testing %-60s", WHAT);                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define PASSED()                                                                                             \
     {                                                                                                        \
         HDputs(" PASSED");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
         HDputs("*FAILED*");                                                                                  \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define H5_WARNING()                                                                                         \
     {                                                                                                        \
         HDputs("*WARNING*");                                                                                 \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define SKIPPED()                                                                                            \
     {                                                                                                        \
         HDputs(" -SKIP-");                                                                                   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     }
 #define PUTS_ERROR(s)                                                                                        \
     {                                                                                                        \

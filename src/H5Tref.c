@@ -49,7 +49,7 @@
         fprintf(stdout, " # %s(): ", __func__);                                                              \
         fprintf(stdout, __VA_ARGS__);                                                                        \
         fprintf(stdout, "\n");                                                                               \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5T_REF_LOG_DEBUG(...)                                                                               \

@@ -3592,17 +3592,17 @@ main(int argc, char **argv)
         int i;
 
         fprintf(stdout, "Constructing test files: \n");
-        HDfflush(stdout);
+        fflush(stdout);
 
         i = 0;
         while ((FILENAMES[i] != NULL) && (i < TEST_FILES_TO_CONSTRUCT)) {
             fprintf(stdout, "   writing %s ... ", FILENAMES[i]);
-            HDfflush(stdout);
+            fflush(stdout);
             construct_test_file(i);
 
             if (pass) {
                 printf("done.\n");
-                HDfflush(stdout);
+                fflush(stdout);
             }
             else {
                 printf("failed.\n");

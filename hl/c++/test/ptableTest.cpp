@@ -81,7 +81,7 @@ BasicTest()
     int     error;
 
     printf("Testing %-62s", "basic functionality");
-    HDfflush(stdout);
+    fflush(stdout);
 
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, BASICTEST_PT, H5T_NATIVE_INT, 1);
     if (!wrapper.IsValid())
@@ -139,7 +139,7 @@ TestCompoundDatatype()
     int     error;
 
     printf("Testing %-62s", "compound datatypes");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create compound datatype */
     typedef struct {
@@ -210,7 +210,7 @@ TestGetNext()
     int i;
 
     printf("Testing %-62s", "GetNextPacket");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, H5P_DEFAULT, GETNEXT_PT, H5T_NATIVE_INT, 500);
@@ -277,7 +277,7 @@ TestCompress()
     size_t       cd_nelemts = 0;
 
     printf("Testing %-62s", "compression");
-    HDfflush(stdout);
+    fflush(stdout);
     try {
         /* Prepare property list to set compression, randomly use deflate */
         DSetCreatPropList dscreatplist;
@@ -326,7 +326,7 @@ TestGetPacket()
     int theRecs[3];
     int i;
     printf("Testing %-62s", "GetPacket");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create a dataset.  Does not need to specify property list because
        there is no compression. */
@@ -365,7 +365,7 @@ int
 TestErrors()
 {
     printf("Testing %-62s", "error conditions");
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Create a dataset */
     FL_PacketTable wrapper(fileID, PT_TESTERROR, H5T_NATIVE_INT, 1);
@@ -484,7 +484,7 @@ int
 SystemTest()
 {
     printf("Testing %-62s", "multiple datatypes");
-    HDfflush(stdout);
+    fflush(stdout);
 
     hid_t   dtypeID1, dtypeID2;
     hsize_t count;
@@ -626,7 +626,7 @@ TestHDFFV_9758()
     }
 
     printf("Testing %-62s", "data corruption in packed structs (HDFFV-9758)");
-    HDfflush(stdout);
+    fflush(stdout);
 
     // Build a compound datatype
     compound_type = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));

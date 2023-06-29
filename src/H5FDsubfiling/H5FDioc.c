@@ -92,7 +92,7 @@ typedef struct H5FD_ioc_t {
 #define H5FD_IOC_LOG_CALL(name)                                                                              \
     do {                                                                                                     \
         printf("called %s()\n", (name));                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define H5FD_IOC_LOG_CALL(name) /* no-op */
@@ -1498,7 +1498,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
                    prefix_env ? prefix_env : file_dirname, base_filename, (uint64_t)st.st_ino);
 
-        if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
+        if (NULL == (config_file = fopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
 #ifdef H5FD_IOC_DEBUG
                 printf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
@@ -1518,7 +1518,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         n_subfiles = (int32_t)read_n_subfiles;
 
         /* Delete the Subfiling configuration file */
-        if (EOF == HDfclose(config_file)) {
+        if (EOF == fclose(config_file)) {
             config_file = NULL;
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                         "can't close subfiling config file");
@@ -1555,7 +1555,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
 done:
     if (config_file)
-        if (EOF == HDfclose(config_file))
+        if (EOF == fclose(config_file))
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfiling config file");
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */

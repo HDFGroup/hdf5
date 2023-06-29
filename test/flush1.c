@@ -315,8 +315,8 @@ main(void)
         printf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");
 
     /* Flush console output streams */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* DO NOT CLOSE FILE ID! */
     if (H5Pclose(fapl_id) < 0)

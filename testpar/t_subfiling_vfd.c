@@ -328,8 +328,8 @@ test_config_file(void)
         HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, config_dir,
                    SUBF_FILENAME, (uint64_t)file_info.st_ino);
 
-        config_file = HDfopen(config_filename, "r");
-        VRFY(config_file, "HDfopen succeeded");
+        config_file = fopen(config_filename, "r");
+        VRFY(config_file, "fopen succeeded");
 
         free(config_filename);
 
@@ -343,7 +343,7 @@ test_config_file(void)
         config_buf = malloc((size_t)config_file_len + 1);
         VRFY(config_buf, "malloc succeeded");
 
-        VRFY((HDfread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "HDfread succeeded");
+        VRFY((fread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "fread succeeded");
         config_buf[config_file_len] = '\0';
 
         /* Check the stripe_size field in the configuration file */
@@ -421,7 +421,7 @@ test_config_file(void)
         free(subfile_name);
         free(config_buf);
 
-        VRFY((HDfclose(config_file) >= 0), "HDfclose on configuration file succeeded");
+        VRFY((fclose(config_file) >= 0), "fclose on configuration file succeeded");
     }
 
     mpi_code_g = MPI_Barrier(comm_g);
@@ -570,9 +570,9 @@ test_stripe_sizes(void)
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "fopen on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -586,8 +586,8 @@ test_stripe_sizes(void)
                        (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
             /* Set EOA for following write call */
             VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
@@ -616,9 +616,9 @@ test_stripe_sizes(void)
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "fopen on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -632,8 +632,8 @@ test_stripe_sizes(void)
                        (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
             free(write_buf);
             write_buf = NULL;
@@ -736,9 +736,9 @@ test_stripe_sizes(void)
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "fopen on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -752,8 +752,8 @@ test_stripe_sizes(void)
                        (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
         }
 
         mpi_code_g = MPI_Barrier(comm_g);
@@ -793,9 +793,9 @@ test_stripe_sizes(void)
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
                 /* Ensure file exists */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "fopen on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
                 /* Check file size */
                 VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -809,8 +809,8 @@ test_stripe_sizes(void)
                        (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
             /* Ensure file doesn't exist */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
         }
 
         VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
@@ -985,9 +985,9 @@ test_selection_strategies(void)
                                    (uint64_t)file_info.st_ino, num_digits, i + 1, expected_num_subfiles);
 
                         /* Ensure file exists */
-                        subfile_ptr = HDfopen(tmp_filename, "r");
-                        VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                        VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                        subfile_ptr = fopen(tmp_filename, "r");
+                        VRFY(subfile_ptr, "fopen on subfile succeeded");
+                        VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
                     }
 
                     /* Ensure no extra subfiles are present */
@@ -996,8 +996,8 @@ test_selection_strategies(void)
                                expected_num_subfiles);
 
                     /* Ensure file doesn't exist */
-                    subfile_ptr = HDfopen(tmp_filename, "r");
-                    VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+                    subfile_ptr = fopen(tmp_filename, "r");
+                    VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
                     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
@@ -1144,9 +1144,9 @@ test_read_different_stripe_size(void)
                        (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
 
             /* Ensure file exists */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-            VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
             VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -1215,14 +1215,14 @@ test_read_different_stripe_size(void)
 
             if (j < (num_subfiles / 2)) {
                 /* Ensure file exists */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "fopen on subfile succeeded");
+                VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
             }
             else {
                 /* Ensure file doesn't exist */
-                subfile_ptr = HDfopen(tmp_filename, "r");
-                VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+                subfile_ptr = fopen(tmp_filename, "r");
+                VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
             }
         }
     }
@@ -1367,9 +1367,9 @@ test_subfiling_precreate_rank_0(void)
                        (uint64_t)file_info.st_ino, num_digits, i + 1, num_subfiles);
 
             /* Ensure file exists */
-            subfile_ptr = HDfopen(tmp_filename, "r");
-            VRFY(subfile_ptr, "HDfopen on subfile succeeded");
-            VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+            subfile_ptr = fopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "fopen on subfile succeeded");
+            VRFY((fclose(subfile_ptr) >= 0), "fclose on subfile succeeded");
 
             /* Check file size */
             VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
@@ -1383,8 +1383,8 @@ test_subfiling_precreate_rank_0(void)
                    (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
 
         /* Ensure file doesn't exist */
-        subfile_ptr = HDfopen(tmp_filename, "r");
-        VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+        subfile_ptr = fopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "fopen on subfile correctly failed");
 
         free(tmp_filename);
         tmp_filename = NULL;
@@ -1829,9 +1829,9 @@ test_subfiling_h5fuse(void)
     if (MAINPROCESS) {
         FILE *h5fuse_script;
 
-        h5fuse_script = HDfopen("h5fuse.sh", "r");
+        h5fuse_script = fopen("h5fuse.sh", "r");
         if (h5fuse_script)
-            HDfclose(h5fuse_script);
+            fclose(h5fuse_script);
         else
             skip_test = 1;
     }
@@ -1958,13 +1958,13 @@ test_subfiling_h5fuse(void)
 
                 if ((ret = WEXITSTATUS(status)) != 0) {
                     printf("h5fuse process exited with error code %d\n", ret);
-                    HDfflush(stdout);
+                    fflush(stdout);
                     MPI_Abort(comm_g, -1);
                 }
             }
             else {
                 printf("h5fuse process terminated abnormally\n");
-                HDfflush(stdout);
+                fflush(stdout);
                 MPI_Abort(comm_g, -1);
             }
         }

@@ -5071,7 +5071,7 @@ test_conv_str_2(void)
     /* Do the conversions */
     HDsnprintf(s, sizeof(s), "Testing random string conversion speed");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     if (H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
@@ -5285,14 +5285,14 @@ test_conv_enum_1(void)
     /* Conversions */
     HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N)");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();
 
     HDsnprintf(s, sizeof(s), "Testing random enum conversion O(N log N)");
     printf("%-70s", s);
-    HDfflush(stdout);
+    fflush(stdout);
     if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0)
         goto error;
     PASSED();

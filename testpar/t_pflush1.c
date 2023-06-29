@@ -169,8 +169,8 @@ main(int argc, char *argv[])
     if (mpi_rank == 0)
         PASSED();
 
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     /* Some systems like AIX do not like files not being closed when MPI_Finalize
      * is called.  So, we need to get the MPI file handles, close them by hand.
@@ -191,8 +191,8 @@ main(int argc, char *argv[])
     if (MPI_File_close(mpifh_p) != MPI_SUCCESS)
         goto error;
 
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
 
     if (data_g) {
         free(data_g);
@@ -210,11 +210,11 @@ main(int argc, char *argv[])
     _exit(EXIT_FAILURE);
 
 error:
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     printf("*** ERROR ***\n");
     printf("THERE WAS A REAL ERROR IN t_pflush1.\n");
-    HDfflush(stdout);
+    fflush(stdout);
 
     if (data_g)
         free(data_g);

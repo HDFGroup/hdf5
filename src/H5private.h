@@ -650,20 +650,8 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDfabsl
 #define HDfabsl(X) fabsl(X)
 #endif
-#ifndef HDfclose
-#define HDfclose(F) fclose(F)
-#endif
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
-#endif
-#ifndef HDfeof
-#define HDfeof(F) feof(F)
-#endif
-#ifndef HDferror
-#define HDferror(F) ferror(F)
-#endif
-#ifndef HDfflush
-#define HDfflush(F) fflush(F)
 #endif
 #ifndef HDfgetc
 #define HDfgetc(F) fgetc(F)
@@ -703,17 +691,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfloor
 #define HDfloor(X) floor(X)
 #endif
-#ifndef HDfopen
-#define HDfopen(S, M) fopen(S, M)
-#endif
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif
 #ifndef HDfputs
 #define HDfputs(S, F) fputs(S, F)
-#endif
-#ifndef HDfread
-#define HDfread(M, Z, N, F) fread(M, Z, N, F)
 #endif
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
@@ -738,9 +720,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
-#endif
-#ifndef HDfwrite
-#define HDfwrite(M, Z, N, F) fwrite(M, Z, N, F)
 #endif
 #ifndef HDgetc
 #define HDgetc(F) getc(F)

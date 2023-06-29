@@ -229,7 +229,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
     for (node_ptr = (*L); node_ptr != NULL; node_ptr = node_ptr->next)
         fprintf(stdout, "{%s}\n->", node_ptr->cat);
     printf("(null)\n");
-    HDfflush(stdout);
+    fflush(stdout);
     node_ptr = NULL;
 #endif
 
@@ -302,7 +302,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         else {
 #if S3COMMS_DEBUG
             printf("CREATE NEW\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             /*******************
              * CREATE NEW LIST *
@@ -333,7 +333,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         if (value == NULL) {
 #if S3COMMS_DEBUG
             printf("REMOVE HEAD\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             /***************
              * REMOVE HEAD *
@@ -343,39 +343,39 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
 #if S3COMMS_DEBUG
             printf("FREEING CAT (node)\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(node_ptr->cat);
 #if S3COMMS_DEBUG
             printf("FREEING LOWERNAME (node)\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(node_ptr->lowername);
 #if S3COMMS_DEBUG
             printf("FREEING NAME (node)\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(node_ptr->name);
 #if S3COMMS_DEBUG
             printf("FREEING VALUE (node)\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(node_ptr->value);
 #if S3COMMS_DEBUG
             printf("MAGIC OK? %s\n", (node_ptr->magic == S3COMMS_HRB_NODE_MAGIC) ? "YES" : "NO");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             assert(node_ptr->magic == S3COMMS_HRB_NODE_MAGIC);
             node_ptr->magic += 1ul;
 #if S3COMMS_DEBUG
             printf("FREEING POINTER\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(node_ptr);
 
 #if S3COMMS_DEBUG
             printf("FREEING WORKING LOWERNAME\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             H5MM_xfree(lowername);
             lowername = NULL;
@@ -383,7 +383,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         else {
 #if S3COMMS_DEBUG
             printf("MODIFY HEAD\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             /***************
              * MODIFY HEAD *
@@ -413,7 +413,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
         else {
 #if S3COMMS_DEBUG
             printf("PREPEND NEW HEAD\n");
-            HDfflush(stdout);
+            fflush(stdout);
 #endif
             /*******************
              * INSERT NEW HEAD *
@@ -442,7 +442,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             else {
 #if S3COMMS_DEBUG
                 printf("APPEND A NODE\n");
-                HDfflush(stdout);
+                fflush(stdout);
 #endif
                 /*******************
                  * APPEND NEW NODE *
@@ -465,7 +465,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             else {
 #if S3COMMS_DEBUG
                 printf("INSERT A NODE\n");
-                HDfflush(stdout);
+                fflush(stdout);
 #endif
                 /*******************
                  * INSERT NEW NODE *
@@ -494,7 +494,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
 
 #if S3COMMS_DEBUG
                 printf("REMOVE A NODE\n");
-                HDfflush(stdout);
+                fflush(stdout);
 #endif
                 H5MM_xfree(tmp->cat);
                 H5MM_xfree(tmp->lowername);
@@ -511,7 +511,7 @@ H5FD_s3comms_hrb_node_set(hrb_node_t **L, const char *name, const char *value)
             else {
 #if S3COMMS_DEBUG
                 printf("MODIFY A NODE\n");
-                HDfflush(stdout);
+                fflush(stdout);
 #endif
                 /*****************
                  * MODIFY A NODE *
@@ -2077,12 +2077,12 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     if (ret < 0 || (size_t)ret >= 128)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL, "unable to format credentials path")
 
-    credfile = HDfopen(filepath, "r");
+    credfile = fopen(filepath, "r");
     if (credfile != NULL) {
         if (H5FD__s3comms_load_aws_creds_from_file(credfile, profile_name, key_id_out, secret_access_key_out,
                                                    aws_region_out) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws credentials")
-        if (HDfclose(credfile) == EOF)
+        if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close credentials file")
         credfile = NULL;
     } /* end if credential file opened */
@@ -2090,14 +2090,14 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
     ret = HDsnprintf(filepath, 128, "%s%s", awspath, "config");
     if (ret < 0 || (size_t)ret >= 128)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL, "unable to format config path")
-    credfile = HDfopen(filepath, "r");
+    credfile = fopen(filepath, "r");
     if (credfile != NULL) {
         if (H5FD__s3comms_load_aws_creds_from_file(
                 credfile, profile_name, (*key_id_out == 0) ? key_id_out : NULL,
                 (*secret_access_key_out == 0) ? secret_access_key_out : NULL,
                 (*aws_region_out == 0) ? aws_region_out : NULL) == FAIL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to load from aws config")
-        if (HDfclose(credfile) == EOF)
+        if (fclose(credfile) == EOF)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close config file")
         credfile = NULL;
     } /* end if credential file opened */
@@ -2108,7 +2108,7 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 
 done:
     if (credfile != NULL)
-        if (HDfclose(credfile) == EOF)
+        if (fclose(credfile) == EOF)
             HDONE_ERROR(H5E_ARGS, H5E_ARGS, FAIL, "problem error-closing aws configuration file")
 
     FUNC_LEAVE_NOAPI(ret_value)

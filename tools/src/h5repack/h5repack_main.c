@@ -392,7 +392,7 @@ read_info(const char *filename, pack_opt_t *options)
     int   i;
     int   ret_value = EXIT_SUCCESS;
 
-    if (NULL == (fp = HDfopen(filename, "r"))) {
+    if (NULL == (fp = fopen(filename, "r"))) {
         error_msg("cannot open options file %s\n", filename);
         h5tools_setstatus(EXIT_FAILURE);
         ret_value = EXIT_FAILURE;
@@ -416,26 +416,26 @@ read_info(const char *filename, pack_opt_t *options)
         i = 0;
         c = '0';
         while (c != ' ') {
-            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && ferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
             }
-            if (HDfeof(fp))
+            if (feof(fp))
                 break;
         }
         c = '0';
         /* go until end */
         while (c != ' ') {
-            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && ferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
                 goto done;
             }
             comp_info[i++] = c;
-            if (HDfeof(fp))
+            if (feof(fp))
                 break;
             if (c == 10 /*eol*/)
                 break;
@@ -462,7 +462,7 @@ read_info(const char *filename, pack_opt_t *options)
 
 done:
     if (fp)
-        HDfclose(fp);
+        fclose(fp);
 
     return ret_value;
 }

@@ -758,7 +758,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE *config = HDfopen(config_filename, "r");
+    FILE *config = fopen(config_filename, "r");
     if (config == NULL)
         return -1;
     while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
@@ -774,7 +774,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
         }
         linebuf[0] = 0;
     }
-    HDfclose(config);
+    fclose(config);
     return index;
 }
 
@@ -1257,7 +1257,7 @@ process_input_file(char *inputname, int myrank, int size)
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE     *config = HDfopen(inputname, "r");
+    FILE     *config = fopen(inputname, "r");
     mfu_flist flist1 = NULL;
 
     if (config == NULL)
@@ -1317,7 +1317,7 @@ process_input_file(char *inputname, int myrank, int size)
     if (output_log_file) {
         dh5tool_flist_write_text(output_log_file, flist1);
     }
-    HDfclose(config);
+    fclose(config);
 
     mfu_flist_free(&flist1);
     return 0;

@@ -1669,7 +1669,7 @@ error:
         for (_i = 0; _i < PACK_NMEMBS; _i++)                                                                 \
             printf(" %d", order[_i]);                                                                        \
         printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]);   \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
         goto error;                                                                                          \
     }
 

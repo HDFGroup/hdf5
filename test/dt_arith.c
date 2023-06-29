@@ -758,7 +758,7 @@ test_particular_fp_integer(void)
     return 0;
 
 error:
-    HDfflush(stdout);
+    fflush(stdout);
     H5E_BEGIN_TRY
     {
         H5Pclose(dxpl_id);
@@ -977,7 +977,7 @@ test_derived_flt(void)
             HDsnprintf(str, sizeof(str),
                        "\nTesting random sw derived floating-point -> derived floating-point conversions");
             printf("%-70s", str);
-            HDfflush(stdout);
+            fflush(stdout);
             H5_FAILED();
         }
         printf("    test %u elmt %u: \n", 1, (unsigned)i);
@@ -1146,7 +1146,7 @@ test_derived_flt(void)
             HDsnprintf(str, sizeof(str),
                        "\nTesting random sw derived floating-point -> derived floating-point conversions");
             printf("%-70s", str);
-            HDfflush(stdout);
+            fflush(stdout);
             H5_FAILED();
         }
         printf("    test %u elmt %u: \n", 1, (unsigned)i);
@@ -1212,7 +1212,7 @@ error:
         free(saved_buf);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
     H5E_BEGIN_TRY
     {
         H5Tclose(tid1);
@@ -1462,7 +1462,7 @@ test_derived_integer(void)
             HDsnprintf(str, sizeof(str),
                        "\nTesting random sw derived integer -> derived integer conversions");
             printf("%-70s", str);
-            HDfflush(stdout);
+            fflush(stdout);
             H5_FAILED();
         }
         printf("    test %u elmt %u: \n", 1, (unsigned)i);
@@ -1524,7 +1524,7 @@ error:
         free(buf);
     if (saved_buf)
         free(saved_buf);
-    HDfflush(stdout);
+    fflush(stdout);
     H5E_BEGIN_TRY
     {
         H5Tclose(tid1);
@@ -1700,7 +1700,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     else {
         HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name, dst_type_name);
         printf("%-70s", str);
-        HDfflush(stdout);
+        fflush(stdout);
         fails_this_test = 0;
     }
 
@@ -2573,7 +2573,7 @@ done:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -2589,7 +2589,7 @@ error:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -2622,7 +2622,7 @@ test_conv_int_2(void)
     char *buf;
 
     printf("%-70s", "Testing overlap calculations");
-    HDfflush(stdout);
+    fflush(stdout);
 
     buf = (char *)calloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
     assert(buf);
@@ -2822,8 +2822,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
      * fork here and let the child run the test and return the number of
      * failures with the exit status.
      */
-    HDfflush(stdout);
-    HDfflush(stderr);
+    fflush(stdout);
+    fflush(stderr);
     if ((child_pid = fork()) < 0) {
         HDperror("fork");
         return 1;
@@ -2931,7 +2931,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                        dst_type_name);
 
         printf("%-70s", str);
-        HDfflush(stdout);
+        fflush(stdout);
         fails_this_test = 0;
     }
 
@@ -3302,7 +3302,7 @@ done:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
         exit(MIN((int)fails_all_tests, 254));
@@ -3331,7 +3331,7 @@ error:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
 #ifdef HANDLE_SIGFPE
     if (run_test == TEST_NOOP || run_test == TEST_NORMAL)
         exit(MIN(MAX((int)fails_all_tests, 1), 254));
@@ -3572,7 +3572,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         INT_LLONG == src_type || INT_ULLONG == src_type) {
         HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name, dst_type_name);
         printf("%-70s", str);
-        HDfflush(stdout);
+        fflush(stdout);
         fails_this_test = 0;
     }
     else {
@@ -3586,7 +3586,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             HDsnprintf(str, sizeof(str), "Testing %s special %s -> %s conversions", name, src_type_name,
                        dst_type_name);
         printf("%-70s", str);
-        HDfflush(stdout);
+        fflush(stdout);
         fails_this_test = 0;
     }
 
@@ -4522,7 +4522,7 @@ done:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -4542,7 +4542,7 @@ error:
         aligned_free(saved);
     if (aligned)
         free(aligned);
-    HDfflush(stdout);
+    fflush(stdout);
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();

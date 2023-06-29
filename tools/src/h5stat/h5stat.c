@@ -207,7 +207,7 @@ leave(int ret)
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s [OPTIONS] file\n", prog);
     fprintf(stdout, "\n");
     fprintf(stdout, "      ERROR\n");
