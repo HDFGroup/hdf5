@@ -1819,9 +1819,6 @@ error:
  * Return:      Success: 0
  *              Failure: 1
  *
- * Programmer:  Robb Matzke
- *              Tuesday, November 24, 1998
- *
  *-------------------------------------------------------------------------
  */
 int

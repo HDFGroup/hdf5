@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu
- *              Thursday, March 23, 2006
- *
  * Purpose:     Check if floating-point data created on big-endian and
  *              little-endian machines can be read on the machine running this test.
  */
@@ -63,9 +60,6 @@ static const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Raymond Lu
- *              17 May 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -138,9 +132,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Raymond Lu
- *              17 May 2011
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -211,9 +202,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        Number of failures
- *
- * Programmer:  Raymond Lu
- *              21 January 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -344,9 +332,6 @@ error:
  * Purpose:     Tests reading files created on LE and BE systems.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Raymond Lu
- *              Thursday, March 23, 2006
  *
  *-------------------------------------------------------------------------
  */

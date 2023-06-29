@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner
- *              March 10, 2014
- *
  * Purpose:     Test H5Dwrite_multi() and H5Dread_multi using randomized
  *              parameters.  Also tests H5Dwrite() and H5Dread() using a similar
  *              method.
@@ -171,9 +168,6 @@ error:
  *              way that the shapesame code is not designed to handle.
  *
  * Return:      Number of errors
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -637,9 +631,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Neil Fortner
- *              Monday, March 10, 2014
  *
  *-------------------------------------------------------------------------
  */

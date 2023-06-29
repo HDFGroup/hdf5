@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:     Peter X. Cao
- *                 May 01, 2005
- *
  * Purpose:    Test H5Ocopy() for references.
  */
 
@@ -87,9 +84,6 @@ static int compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned 
  *
  * Return:      void
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -121,9 +115,6 @@ token_insert(H5O_info2_t *oinfo)
  * Return:      Success:    TRUE/FALSE
  *              Failure:    (can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
- *
  *-------------------------------------------------------------------------
  */
 static H5_ATTR_PURE hbool_t
@@ -151,9 +142,6 @@ token_lookup(hid_t loc_id, H5O_info2_t *oinfo)
  * Purpose:     Reset the token tracking data structures
  *
  * Return:      void
- *
- * Programmer:  Quincey Koziol
- *              Saturday, November  5, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -253,9 +241,6 @@ error:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              Monday, March 5, 2006
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -352,9 +337,6 @@ error:
  * Purpose:     Create a dataset with region references
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Peter Cao
- *              Friday, August 4, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -484,9 +466,6 @@ error:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -553,9 +532,6 @@ done:
  * Purpose:     Compare two attributes to check that they are equal
  *
  * Return:      TRUE if attributes are equal/FALSE if they are different
- *
- * Programmer:  Peter Cao
- *              Saturday, December 17, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -714,9 +690,6 @@ error:
  *
  * Return:    TRUE if objects have same attributes/FALSE if they are different
  *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
- *
  * Note:    This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
  *
@@ -800,9 +773,6 @@ error:
  * Purpose:     Compare two buffers of data to check that they are equal
  *
  * Return:    TRUE if buffer are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, November 21, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1053,9 +1023,6 @@ error:
  *
  * Return:    TRUE if datasets are equal/FALSE if they are different
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, October 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1255,9 +1222,6 @@ error:
  * Purpose:     Compare two groups to check that they are "equal"
  *
  * Return:    TRUE if group are equal/FALSE if they are different
- *
- * Programmer:  Quincey Koziol
- *              Monday, October 31, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1459,9 +1423,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Peter Cao
- *               March 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1845,9 +1806,6 @@ error:
  *              both, or neither of the source and destination files.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Peter Cao
- *              Friday, September 30, 2005
  *
  *-------------------------------------------------------------------------
  */

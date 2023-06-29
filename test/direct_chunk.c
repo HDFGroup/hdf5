@@ -114,9 +114,6 @@ static const H5Z_class2_t H5Z_BOGUS2[1] = {{
  * Return:        Success:    0
  *                Failure:    1
  *
- * Programmer:  Raymond Lu
- *              30 November 2012
- *
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -382,9 +379,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Dana Robinson
- *              Spring 2017
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -490,9 +484,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -672,9 +663,6 @@ error:
  *
  * Return:        Success:    Data chunk size
  *
- * Programmer:  Raymond Lu
- *              30 November 2012
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -709,8 +697,6 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Return:    Success:    Data chunk size
  *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -746,9 +732,6 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -948,9 +931,6 @@ error:
  *
  * Return:    Success:    0
  *            Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1184,9 +1164,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -1430,9 +1407,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              14 February 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1812,9 +1786,6 @@ error:
  * Return:      Success:        0
  *              Failure:        1
  *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              30 November 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1967,9 +1938,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        1
- *
- * Programmer:  Matthew Strong (GE Healthcare)
- *              30 November 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -2252,9 +2220,6 @@ error:
  *
  * Return:        Success:    0
  *                Failure:    1
- *
- * Programmer:  Raymond Lu
- *              30 November 2012
  *
  *-------------------------------------------------------------------------
  */

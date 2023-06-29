@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*
- * Programmer:	Raymond Lu
- *              24 April 2013
- *
  * Purpose:	Tests H5Zunregister function
  */
 #include "h5test.h"

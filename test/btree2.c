@@ -50,9 +50,6 @@ typedef struct bt2_test_param_t {
  * Return:    Success:    0
  *        Failure:    -1
  *
- * Programmer:    Quincey Koziol
- *              Thursday, October 29, 2009
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -88,9 +85,6 @@ init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -128,9 +122,6 @@ error:
  *
  * Return:    Success:    0
  *        Failure:    1
- *
- * Programmer:    Quincey Koziol
- *              Thursday, November  5, 2009
  *
  *-------------------------------------------------------------------------
  */

@@ -239,9 +239,6 @@ test_checksum(void)
  *
  * Return:	none
  *
- * Programmer:	Quincey Koziol
- *              August 21, 2006
- *
  *-------------------------------------------------------------------------
  */
 void

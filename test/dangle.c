@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, May 13, 2003
- *
  * Purpose:    Test dangling IDs
  */
 #include "h5test.h"
@@ -35,9 +32,6 @@ static const char *FILENAME[] = {"dangle", NULL};
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -133,9 +127,6 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -225,9 +216,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -322,9 +310,6 @@ error:
  * Return:    Success:    zero
  *        Failure:    non-zero
  *
- * Programmer:    Quincey Koziol
- *              Thursday, August 25, 2005
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -406,9 +391,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Wednesday, June 18, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -513,9 +495,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Friday, October 29, 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -638,9 +617,6 @@ error:
  *
  * Return:    Success:    zero
  *        Failure:    non-zero
- *
- * Programmer:    Quincey Koziol
- *              Tuesday, May 13, 2003
  *
  *-------------------------------------------------------------------------
  */

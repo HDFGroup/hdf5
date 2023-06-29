@@ -51,9 +51,6 @@ void test_exit_definitions(void);
  *
  * Return:    none (error is fed back via global variable num_errs)
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -72,9 +69,6 @@ test_configure(void)
  *
  * Return:    none
  *
- * Programmer:    Albert Cheng
- *              September 25, 2001
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -89,9 +83,6 @@ cleanup_configure(void)
  * Purpose:    test C language data type sizes
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              September 25, 2001
  *
  *-------------------------------------------------------------------------
  */
@@ -173,9 +164,6 @@ test_config_ctypes(void)
  * Purpose:    test the exit macros values
  *
  * Return:    none (error is fed back via global variable num_errs)
- *
- * Programmer:    Albert Cheng
- *              October 12, 2009
  *
  *-------------------------------------------------------------------------
  */

@@ -37,9 +37,6 @@
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -114,9 +111,6 @@ ns_grp_0(hid_t fid, const char *group_name)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -231,9 +225,6 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -371,9 +362,6 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -647,9 +635,6 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -781,9 +766,6 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1054,9 +1036,6 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1141,9 +1120,6 @@ os_grp_0(hid_t fid, const char *group_name)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1258,9 +1234,6 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1377,9 +1350,6 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1604,9 +1574,6 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -1698,9 +1665,6 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -1918,9 +1882,6 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2042,9 +2003,6 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2277,9 +2235,6 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2402,9 +2357,6 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -2617,9 +2569,6 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -2763,9 +2712,6 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  *              failure_mssg to point to an appropriate error message.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
@@ -3038,9 +2984,6 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  *
  * Return:      void
  *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3262,9 +3205,6 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
  *              Note the associated validate_zoo() function.
  *
  * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
  *
  *-------------------------------------------------------------------------
  */

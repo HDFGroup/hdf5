@@ -42,9 +42,6 @@ hid_t fapl_id = H5I_INVALID_HID;
  * Return:      Success: 0
  *              Failure: Number of errors
  *
- * Programmer:  Neil Fortner
- *              December 16, 2010
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -466,9 +463,6 @@ error:
  * Return:      Success: 0
  *              Failure: Number of errors
  *
- * Programmer:  Neil Fortner
- *              January 4, 2011
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -788,9 +782,6 @@ error:
  *
  * Return:      Success: 0
  *              Failure: Number of errors
- *
- * Programmer:  Neil Fortner
- *              January 6, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2638,9 +2629,6 @@ error:
  * Purpose:     Test the external file cache code
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Neil Fortner
- *              December 16, 2010
  *
  *-------------------------------------------------------------------------
  */

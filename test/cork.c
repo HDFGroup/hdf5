@@ -83,8 +83,6 @@ static unsigned verify_multiple_cork(hbool_t swmr);
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -290,8 +288,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -494,8 +490,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -753,8 +747,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -921,8 +913,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1198,8 +1188,6 @@ error:
  *              for the correct cork status.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -1574,8 +1562,6 @@ error:
  *
  * Return:      0 on Success, 1 on Failure
  *
- * Programmer:  Vailin Choi; Feb 2014
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1875,8 +1861,6 @@ error:
  *manipulating datasets.
  *
  * Return:      0 on Success, 1 on Failure
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -2231,8 +2215,6 @@ error:
  * Return:      Success:
  *
  *              Failure:
- *
- * Programmer:  Vailin Choi; Feb 2014
  *
  *-------------------------------------------------------------------------
  */

@@ -2195,9 +2195,6 @@ error:
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Programmer:  Binh-Minh Ribler
- *              November 5, 2018
- *
  *-------------------------------------------------------------------------
  */
 int

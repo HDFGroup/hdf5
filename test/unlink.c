@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, September 25, 1998
- *
  * Purpose:    Test unlinking operations.
  */
 
@@ -74,9 +71,6 @@ static const char *FILENAME[] = {"unlink",          "new_move_a",     "new_move_
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -149,9 +143,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -257,9 +248,6 @@ error:
  *
  *        Failure:    number of errors
  *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -301,9 +289,6 @@ error:
  * Return:    Success:    0
  *
  *        Failure:    number of errors
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -365,9 +350,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        number of errors
- *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -467,9 +449,6 @@ error:
  *
  *              Failure:        number of errors
  *
- * Programmer:  Raymond Lu
- *              Thursday, April 25, 2002
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -526,9 +505,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 22, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1465,9 +1441,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Friday, April 11, 2003
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1528,9 +1501,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1607,9 +1577,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Saturday, August 16, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1719,9 +1686,6 @@ delete_node(hid_t pid, hid_t id)
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1805,9 +1769,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -1895,9 +1856,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, January 19, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2272,9 +2230,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  Quincey Koziol
- *              Wednesday, July 14, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2355,9 +2310,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2435,9 +2387,6 @@ error:
  * Return:      Success:        0
  *              Failure:        number of errors
  *
- * Programmer:  James Laird
- *              Wednesday, July 28, 2004
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -2511,9 +2460,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Monday, September 27, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -2609,9 +2555,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2770,9 +2713,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Wednesday, January 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -2947,9 +2887,6 @@ error:
  * Purpose:     Test unlinking operations
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Friday, September 25, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
- *
  * Purpose:    Tests datasets stored in external raw files.
  */
 #include "external_common.h"
@@ -29,9 +26,6 @@
  *
  * Return:      Success:    nonzero if same, zero if different.
  *              Failure:    zero
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -91,9 +85,6 @@ out:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -197,9 +188,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -257,9 +245,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -311,9 +296,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -371,9 +353,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -466,9 +445,6 @@ error:
  * Return:      Success:    0
  *              Failure:    -1
  *
- * Programmer:  Jacob Smith
- *              29 Sep 2019
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -502,9 +478,6 @@ add_external_files(hid_t dcpl_id, unsigned int n_external_files, off_t offset, h
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -590,9 +563,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -645,9 +615,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Robb Matzke
- *              Monday, November 23, 1998
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -693,9 +660,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -818,9 +782,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Robb Matzke
- *              Wednesday, March  4, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -949,9 +910,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1044,9 +1002,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1135,9 +1090,6 @@ error:
  *
  * Return:      Success:    0
  *              Failure:    1
- *
- * Programmer:  Steffen Kiess
- *              March 10, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -1303,9 +1255,6 @@ error:
  * Return:      Success:    0
  *              Failure:    1
  *
- * Programmer:  Dana Robinson
- *              March 2016
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -1406,9 +1355,6 @@ error:
  * Purpose:     Runs external dataset tests.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:  Robb Matzke
- *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
  */

@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Wednesday, March 17, 2010
- *
  * Purpose:     srcdir querying support.
  */
 #ifndef H5SRCDIR_H

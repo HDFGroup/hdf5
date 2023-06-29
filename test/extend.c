@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Friday, January 30, 1998
- *
  * Purpose:	Tests extendible datasets.
  */
 
@@ -39,9 +36,6 @@ static int  *buf2_data = NULL;
  *
  * Return:	Success:	0
  *		Failure:	-1
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, June 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -150,9 +144,6 @@ error:
  * Return:	Success:	0
  *		Failure:	-1
  *
- * Programmer:	Quincey Koziol
- *              Monday, October 8, 2007
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -249,9 +240,6 @@ error:
  * Purpose:     Tests extendible datasets
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:	Robb Matzke
- *              Friday, January 30, 1998
  *
  *-------------------------------------------------------------------------
  */

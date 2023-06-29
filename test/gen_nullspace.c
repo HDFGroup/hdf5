@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Saturday, April 17, 2004
- *
  * Purpose:	Create a dataset with a null dataspace and an attribute
  *      with a null dataspace.
  *		This program is used to create the test file `tnullspace.h5' which

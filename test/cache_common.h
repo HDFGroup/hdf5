@@ -136,9 +136,6 @@
  *
  * Return:      N/A
  *
- * Programmer:  John Mainzer
- *              5/14/20
- *
  ***********************************************************************/
 
 #define H5C_FLUSH_CACHE(file, flags, fail_mssg)                                                              \

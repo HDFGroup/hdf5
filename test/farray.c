@@ -714,9 +714,6 @@ error:
  * Return:	Success:	0
  *		Failure:	1
  *
- * Programmer:	Quincey Koziol
- *              Friday, December 18, 2015
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -1302,8 +1299,6 @@ static const farray_iter_t fa_iter_cyc = {
  *
  * Return:	Success:	0
  *		Failure:	1
- *
- * Programmer:  Vailin Choi; 6th August, 2009
  *
  *-------------------------------------------------------------------------
  */

@@ -6447,9 +6447,6 @@ error:
  * Return:      Success:        0
  *              Failure:        -1
  *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 14, 2006
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -7811,9 +7808,6 @@ error:
  * Return:      Success:        0
  *
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, July 26, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -13450,9 +13444,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  This is copied and modified from the customer's test program that
- *              exposed the problem.
  *
  *-------------------------------------------------------------------------
  */
@@ -19635,9 +19626,6 @@ error:
  *
  * Return:      Success:        0
  *              Failure:        -1
- *
- * Programmer:  Quincey Koziol
- *              Tuesday, November 14, 2006
  *
  *-------------------------------------------------------------------------
  */

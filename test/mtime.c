@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Thursday, July 30, 1998
- *
  * Purpose:    Determines if the modification time message is working
  *        properly.  Specifically, the code in H5O_mtime_decode() is
  *        very OS-dependent and this test tries to figure out if it's
@@ -35,9 +32,6 @@ static const char *FILENAME[] = {"mtime", NULL};
  * Purpose:    H5O_mtime_decode() test.
  *
  * Return:      EXIT_SUCCESS/EXIT_FAILURE
- *
- * Programmer:    Robb Matzke
- *              Thursday, July 30, 1998
  *
  *-------------------------------------------------------------------------
  */

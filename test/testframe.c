@@ -11,9 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol
- *              Tuesday, January  6, 2004
- *
  * Purpose:    Provides support functions for the testing framework.
  *
  */

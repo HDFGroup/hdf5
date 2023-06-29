@@ -14,9 +14,6 @@
  * Read-Only S3 Virtual File Driver (VFD)
  *
  * Purpose:    Unit tests for the S3 Communications (s3comms) module.
- *
- * Programmer: Jacob Smith
- *             2017-10-11
  */
 
 #include "h5test.h"
@@ -62,9 +59,6 @@
  *         JSVERIFY_NOT()   - long-int inequality check; prints
  *         JSVERIFY_STR()   - string equality check; prints
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *****************************************************************************/
 
 /*----------------------------------------------------------------------------
@@ -88,9 +82,6 @@
  *     Similar to `H5_FAILED(); AT();` from h5test.h
  *
  *     *FAILED* at somefile.c:12 in function_name()...
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -117,9 +108,6 @@
  *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
  *     similar to `TEST_ERROR` in h5test.h
  *
- * Programmer: Jacob Smith
- *             2017-10-23
- *
  *----------------------------------------------------------------------------
  */
 #define FAIL_IF(condition)                                                                                   \
@@ -144,9 +132,6 @@
  *     `FAIL_UNLESS( 5 == my_op() )`
  *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
  *         (see JSVERIFY)
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -175,9 +160,6 @@
  *     *FAILED* at myfile.c:488 in somefunc()...
  *       ! Expected 425
  *       ! Actual   3
- *
- * Programmer: Jacob Smith
- *             2017-10-24
  *
  *----------------------------------------------------------------------------
  */
@@ -221,9 +203,6 @@ jserr_long(long expected, long actual, const char *reason)
  *     !!! Actual:
  *     not what I expected at all
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 static inline void
@@ -258,9 +237,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(expected, actual, reason)                                                                   \
@@ -282,9 +258,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(expected, actual, reason)                                                               \
@@ -305,9 +278,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
  *     (with `reason`, if not NULL; expected/actual if NULL)
  *     and jump to `error` at end of function
  *
- * Programmer: Jacob Smith
- *             2017-10-24
- *
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
@@ -325,8 +295,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY()
  * See: JSVERIFY documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY(actual, expected, reason)                                                                   \
@@ -340,8 +308,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_NOT()
  * See: JSVERIFY_NOT documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_NOT(actual, expected, reason)                                                               \
@@ -354,8 +320,6 @@ jserr_str(const char *expected, const char *actual, const char *reason)
 /*----------------------------------------------------------------------------
  * Macro: JSVERIFY_STR()
  * See: JSVERIFY_STR documentation above.
- * Programmer: Jacob Smith
- *             2017-10-14
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
@@ -395,9 +359,6 @@ static hbool_t s3_test_bucket_defined                   = FALSE;
  *
  *     Demonstrate that the macro `S3COMMS_FORMAT_CREDENTIAL`
  *     performs as expected.
- *
- * Programmer: Jacob Smith
- *             2017-09-19
  *
  *----------------------------------------------------------------------------
  */
@@ -440,9 +401,6 @@ error:
  *     Elided / not yet implemented:
  *         Query strings
  *         request "body"
- *
- * Programmer: Jacob Smith
- *             2017-10-04
  *
  *---------------------------------------------------------------------------
  */
@@ -613,9 +571,6 @@ error:
  *     Success:  0
  *     Failure: -1
  *
- * Programmer: Jacob Smith
- *             2017-09-14
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -690,9 +645,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_hrb_init_request()`
- *
- * Programmer: Jacob Smith
- *             2017-09-20
  *
  *---------------------------------------------------------------------------
  */
@@ -812,9 +764,6 @@ error:
  * Purpose:
  *
  *     Test operations on hrb_node_t structure
- *
- * Programmer: Jacob Smith
- *             2017-09-22
  *
  *---------------------------------------------------------------------------
  */
@@ -1203,9 +1152,6 @@ error:
  *
  *     Define and verify behavior of `H5FD_s3comms_HMAC_SHA256()`
  *
- * Programmer: Jacob Smith
- *             2017-09-19
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1316,9 +1262,6 @@ error:
  *
  *     Define and verify behavior of `H5FD_s3comms_nlowercase()`
  *
- * Programmer: Jacob Smith
- *             2017-19-18
- *
  *----------------------------------------------------------------------------
  */
 static herr_t
@@ -1388,9 +1331,6 @@ error:
 /*---------------------------------------------------------------------------
  *
  * Function: test_parse_url()
- *
- * Programmer: Jacob Smith
- *             2017-11-??
  *
  *---------------------------------------------------------------------------
  */
@@ -1693,9 +1633,6 @@ error:
  *     Success:  0
  *     Failure: -1
  *
- * Programmer: Jacob Smith
- *             2017-09-14
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -1805,8 +1742,6 @@ error:
 
 /*---------------------------------------------------------------------------
  * Function: test_s3r_open()
- *
- * Programmer: Jacob Smith 2018-01-??
  *
  *---------------------------------------------------------------------------
  */
@@ -2009,9 +1944,6 @@ error:
  *
  *     Shows most basic curl iteration.
  *
- * Programmer: Jacob Smith
- *             2017-10-06
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -2174,9 +2106,6 @@ error:
  *
  *     More test cases would be a very good idea.
  *
- * Programmer: Jacob Smith
- *             2017-09-18
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -2279,9 +2208,6 @@ error:
  *     Success:  0
  *     Failure: -1
  *
- * Programmer: Jacob Smith
- *             2017-09-13
- *
  *---------------------------------------------------------------------------
  */
 static herr_t
@@ -2331,9 +2257,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_trim()`.
- *
- * Programmer: Jacob Smith
- *             2017-09-14
  *
  *----------------------------------------------------------------------------
  */
@@ -2440,9 +2363,6 @@ error:
  * Purpose:
  *
  *     Define and verify behavior of `H5FD_s3comms_uriencode()`.
- *
- * Programmer: Jacob Smith
- *             2017-09-14
  *
  *----------------------------------------------------------------------------
  */
@@ -2563,9 +2483,6 @@ error:
  *
  *     Success: 0
  *     Failure: 1
- *
- * Programmer:  Jacob Smith
- *              2017-10-12
  *
  *-------------------------------------------------------------------------
  */
