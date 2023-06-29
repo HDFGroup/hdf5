@@ -271,8 +271,6 @@ done:
  *  Inputs:      obj_id - object identifier
  *  Outputs:     0 = false, 1 = true
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  Elena Pourmal
- *  Tuesday, August 24, 2004
  *---------------------------------------------------------------------------*/
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)

@@ -1800,8 +1800,6 @@ h5pget_nfilters_c(hid_t_f *prp_id, int_f *nfilters)
  *  name - Name of the filter
  *  filter_id - filter identification number
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  Xiangyang Su
- *  Friday, February 25, 2000
  *---------------------------------------------------------------------------*/
 int_f
 h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *flags, size_t_f *cd_nelmts, int_f *cd_values,
@@ -5256,8 +5254,6 @@ h5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  *  rdcc_w0            -
  *
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  M. Scot Breitenfeld
- *  April 13, 2009
  *---------------------------------------------------------------------------*/
 
 int_f
@@ -5288,8 +5284,6 @@ h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nby
  *  rdcc_w0            -
  *
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  M. Scot Breitenfeld
- *  April 13, 2009
  *---------------------------------------------------------------------------*/
 
 int_f
@@ -5324,8 +5318,6 @@ h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nby
  *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
  *
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  M. Scot Breitenfeld
- *  February 19, 2012
  *---------------------------------------------------------------------------*/
 
 int_f
@@ -5354,8 +5346,6 @@ h5pset_file_image_c(hid_t_f *fapl_id, void *buf_ptr, size_t_f *buf_len)
  *  buf_len - Size of the supplied buffer, or 0 (zero) if no initial image is desired
  *
  *  Returns:     0 on success, -1 on failure
- *  Programmer:  M. Scot Breitenfeld
- *  February 19, 2012
  *---------------------------------------------------------------------------*/
 
 int_f

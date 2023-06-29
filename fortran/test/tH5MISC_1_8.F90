@@ -337,10 +337,6 @@ END SUBROUTINE test_h5s_encode
 !
 ! Return:      Success:        0
 !              Failure:        >0
-!
-! Programmer:  M. Scot Breitenfeld
-!              Decemeber 11, 2010
-!
 !-------------------------------------------------------------------------
 !
 
