@@ -1089,16 +1089,6 @@ done:
  *                      4. DO IO
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Muqun Yang
- *              Monday, Feb. 13th, 2006
- *
- * Modification:
- *  - Refctore to remove multi-chunk-without-opimization feature and update for
- *    multi-chunk-io accordingly
- * Programmer: Jonathan Kim
- * Date: 2012-10-10
- *
  *-------------------------------------------------------------------------
  */
 static herr_t

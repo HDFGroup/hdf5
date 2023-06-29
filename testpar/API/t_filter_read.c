@@ -47,11 +47,6 @@ static int mpi_size, mpi_rank;
  * Return:  1:  decode+encode is enabled
  *    0:  only decode is enabled
  *              -1: other
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -238,12 +233,6 @@ filter_read_internal(const char *filename, hid_t dcpl, hsize_t *dset_size)
  *
  * Purpose:    Tests parallel reading of datasets written serially using
  *              several (combinations of) filters.
- *
- * Programmer:    Christian Chilan
- *              Tuesday, May 15, 2007
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

@@ -13,9 +13,6 @@
  *
  * Purpose:     Tests chunk query API functions
  *
- * Modification:
- *              Many tests were added for HDFFV-10677. -BMR, August 2019
- *
  * Test structure:
  *          main()
  *              test_basic_query()

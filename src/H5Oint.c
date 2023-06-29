@@ -547,15 +547,6 @@ done:
  *        entry OBJ_ENT.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Robb Matzke
- *        Monday, January     5, 1998
- *
- * Modification:
- *              Raymond Lu
- *              5 November 2007
- *              Turn off the holding file variable if it's on.  When it's
- *              needed, the caller will turn it on again.
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -2186,12 +2186,6 @@ test_genprop(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              June 8, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

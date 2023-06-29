@@ -1502,14 +1502,6 @@ done:
  *              into table.
  *
  * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *        Dec 18 2006
- *
- * Modification:Raymond Lu
- *              24 June 2008
- *              Changed the table of attribute objects to be the table of
- *              pointers to attribute objects for the ease of operation.
  *-------------------------------------------------------------------------
  */
 static herr_t

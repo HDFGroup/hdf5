@@ -993,12 +993,6 @@ test_vlstrings(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Quincey Koziol
- *              September 10, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

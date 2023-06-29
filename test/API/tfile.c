@@ -8361,12 +8361,6 @@ test_file(void)
  * Purpose:    Cleanup temporary test files
  *
  * Return:    none
- *
- * Programmer:    Albert Cheng
- *              July 2, 1998
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void

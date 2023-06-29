@@ -99,15 +99,6 @@ TestErrPrintf(const char *format, ...)
  *
  * Return:  pointer to a string containing the value of the environment variable
  *     NULL if the variable doesn't exist in task 'root's environment.
- *
- * Programmer:  Leon Arber
- *              4/4/05
- *
- * Modifications:
- *    Use original getenv if MPI is not initialized. This happens
- *    one uses the PHDF5 library to build a serial nature code.
- *    Albert 2006/04/07
- *
  *-------------------------------------------------------------------------
  */
 char *

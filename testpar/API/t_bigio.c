@@ -1291,12 +1291,6 @@ coll_chunk1(void)
  * Return:    Success:    0
  *
  *        Failure:    -1
- *
- * Programmer:    Unknown
- *        July 12th, 2004
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 

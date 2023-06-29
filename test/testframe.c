@@ -151,9 +151,6 @@ TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser
 /*
  * Print test usage.
  *    First print the common test options, then the extra options if provided.
- *
- * Modification:
- *     2004/08/18 Albert Cheng.  Add TestPrivateUsage feature.
  */
 void
 TestUsage(void)
@@ -211,9 +208,6 @@ TestInfo(const char *ProgName)
  *
  * Return: Void
  *    exit EXIT_FAILURE if error is encountered.
- *
- * Modification:
- *     2004/08/18 Albert Cheng.  Add extra_parse feature.
  */
 void
 TestParseCmdLine(int argc, char *argv[])

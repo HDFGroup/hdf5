@@ -345,11 +345,6 @@ typedef struct {
  * Return:  1:  decode+encode is enabled
  *    0:  only decode is enabled
  *              -1: other
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int

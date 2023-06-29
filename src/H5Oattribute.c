@@ -1322,19 +1322,14 @@ done:
  *
  * Purpose:     Check for reverting from dense to compact attribute storage
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, February 14, 2007
- *
- * Modification:Raymond Lu
- *              24 June 2008
  *              When converting storage from dense to compact, if found
  *              the attribute is already opened, use the opened message
  *              to insert.  If not, still use the message in the attribute
  *              table. This will guarantee that the attribute message is
  *              shared between the object in metadata cache and the opened
  *              object.
+ *
+ * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 static herr_t
