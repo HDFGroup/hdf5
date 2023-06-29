@@ -189,7 +189,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
             case '1':
                 vol_info.type    = VOL_BY_VALUE;
-                vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
+                vol_info.u.value = (H5VL_class_value_t)atoi(H5_optarg);
                 custom_vol       = TRUE;
                 break;
 
@@ -205,7 +205,7 @@ parse_command_line(int argc, const char *const *argv, mkgrp_opt_t *options)
 
             case '4':
                 vfd_info.type    = VFD_BY_VALUE;
-                vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                vfd_info.u.value = (H5FD_class_value_t)atoi(H5_optarg);
                 custom_vfd       = TRUE;
                 break;
 

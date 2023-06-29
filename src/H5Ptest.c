@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Saturday May 31, 2003
- *
+/*
  * Purpose:	Generic Property Testing Functions
  */
 

@@ -72,7 +72,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 opts->filename = HDstrdup(optarg);
                 break;
             case 'i': /* iterations */
-                if ((opts->iterations = HDatoi(optarg)) <= 0) {
+                if ((opts->iterations = atoi(optarg)) <= 0) {
                     fprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
                     usage(opts->progname);
                     Hgoto_error(-1);
@@ -101,7 +101,7 @@ parse_option(int argc, char *const argv[], options_t *opts)
                 }
                 break;
             case 's': /* use swmr file open mode */
-                use_swmr = HDatoi(optarg);
+                use_swmr = atoi(optarg);
                 if (use_swmr != 0 && use_swmr != 1) {
                     fprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
                     usage(opts->progname);

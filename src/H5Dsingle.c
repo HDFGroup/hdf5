@@ -10,15 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Vailin Choi
- *	       	May 2011; updated 10/2015
- *
- * Purpose:	Single Chunk I/O functions.
- *		This is used when the dataset has only 1 chunk (with or without filter):
- *			cur_dims[] is equal to max_dims[] is equal to the chunk dims[]
- *		non-filter chunk record: [address of the chunk]
- *		filtered chunk record: 	[address of the chunk, chunk size, filter mask]
- *
+/*
+ * Purpose: Single Chunk I/O functions.
+ *          This is used when the dataset has only 1 chunk (with or without filter):
+ *          cur_dims[] is equal to max_dims[] is equal to the chunk dims[]
+ *          non-filter chunk record: [address of the chunk]
+ *          filtered chunk record: 	[address of the chunk, chunk size, filter mask]
  */
 
 /****************/

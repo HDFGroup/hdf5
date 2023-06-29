@@ -10,8 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *
+/*
  * Purpose:     v2 B-tree testing functions
  *
  */

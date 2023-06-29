@@ -530,7 +530,7 @@ ParseTestVerbosity(char *argv)
     else if (*argv == 'h')
         SetTestVerbosity(VERBO_HI);
     else
-        SetTestVerbosity(HDatoi(argv));
+        SetTestVerbosity(atoi(argv));
 }
 
 /*
@@ -646,7 +646,7 @@ TestAlarmOn(void)
         alarm_sec = (unsigned)strtoul(env_val, (char **)NULL, 10);
 
     /* Set the number of seconds before alarm goes off */
-    HDalarm((unsigned)alarm_sec);
+    alarm((unsigned)alarm_sec);
 #endif
 }
 
@@ -656,6 +656,6 @@ TestAlarmOff(void)
 {
 #ifdef H5_HAVE_ALARM
     /* Set the number of seconds to zero */
-    HDalarm(0);
+    alarm(0);
 #endif
 }

@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              10/27/05
- *
+/*
  *        This file contains common #defines, type definitions, and
  *        externs for tests of the cache implemented in H5C.c
  */

@@ -224,7 +224,7 @@ parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt, pack_opt_t 
                         if (str[u] == ',') {
                             stype[q] = '\0'; /* end digit */
                             if (l == -1) {
-                                filt->filtn = HDatoi(stype);
+                                filt->filtn = atoi(stype);
                                 l           = 0;
                             }
                             else if (f == -1) {
