@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              7/13/15
- *
+/*
  *              This file contains tests specific to the cache image
  *              feature implemented in H5C.c
  */

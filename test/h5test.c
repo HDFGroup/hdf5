@@ -958,7 +958,7 @@ h5_show_hostname(void)
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
-    if (HDgethostname(hostname, (size_t)80) < 0)
+    if (gethostname(hostname, (size_t)80) < 0)
         printf(" gethostname failed\n");
     else
         printf(" hostname=%s\n", hostname);

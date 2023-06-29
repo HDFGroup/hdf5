@@ -276,7 +276,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
-                        comp_level = HDatoi(argv[u + 1]);
+                        comp_level = atoi(argv[u + 1]);
                         if (comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -293,7 +293,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else

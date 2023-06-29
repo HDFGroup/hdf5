@@ -409,7 +409,7 @@ main(int argc, char *argv[])
                 switch (argv[u][1]) {
                     /* # of common symbols to poll */
                     case 'h':
-                        ncommon = HDatoi(argv[u + 1]);
+                        ncommon = atoi(argv[u + 1]);
                         if (ncommon < 0)
                             usage();
                         u += 2;
@@ -417,7 +417,7 @@ main(int argc, char *argv[])
 
                     /* # of random symbols to poll */
                     case 'l':
-                        nrandom = HDatoi(argv[u + 1]);
+                        nrandom = atoi(argv[u + 1]);
                         if (nrandom < 0)
                             usage();
                         u += 2;
@@ -432,7 +432,7 @@ main(int argc, char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp     = HDatoi(argv[u + 1]);
+                        temp     = atoi(argv[u + 1]);
                         if (temp < 0)
                             usage();
                         else
@@ -442,7 +442,7 @@ main(int argc, char *argv[])
 
                     /* # of seconds between polling */
                     case 's':
-                        poll_time = HDatoi(argv[u + 1]);
+                        poll_time = atoi(argv[u + 1]);
                         if (poll_time < 0)
                             usage();
                         u += 2;
@@ -455,7 +455,7 @@ main(int argc, char *argv[])
             }     /* end if */
             else {
                 /* Get the number of records to append */
-                nseconds = HDatol(argv[u]);
+                nseconds = atol(argv[u]);
                 if (nseconds <= 0)
                     usage();
 

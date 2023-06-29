@@ -706,7 +706,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         if (HDstrncmp(objname1, "/", 1) != 0) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if (HDasprintf(&obj1fullname, "/%s", objname1) < 0)
+            if (asprintf(&obj1fullname, "/%s", objname1) < 0)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
 #else  /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
@@ -725,7 +725,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         if (HDstrncmp(objname2, "/", 1) != 0) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            if (HDasprintf(&obj2fullname, "/%s", objname2) < 0)
+            if (asprintf(&obj2fullname, "/%s", objname2) < 0)
                 H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "name buffer allocation failed");
 #else  /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
@@ -1182,7 +1182,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                 /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
                 /* Use the asprintf() routine, since it does what we're trying to do below */
-                if (HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
+                if (asprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0) {
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
 #else  /* H5_HAVE_ASPRINTF */
@@ -1200,7 +1200,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
                 /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
                 /* Use the asprintf() routine, since it does what we're trying to do below */
-                if (HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
+                if (asprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0) {
                     H5TOOLS_ERROR(H5DIFF_ERR, "name buffer allocation failed");
                 }
 #else  /* H5_HAVE_ASPRINTF */

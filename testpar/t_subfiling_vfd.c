@@ -2093,7 +2093,7 @@ parse_subfiling_env_vars(void)
     }
 
     if (NULL != (env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE))) {
-        ioc_thread_pool_size_g = HDatoi(env_value);
+        ioc_thread_pool_size_g = atoi(env_value);
         if (ioc_thread_pool_size_g <= 0)
             ioc_thread_pool_size_g = -1;
     }

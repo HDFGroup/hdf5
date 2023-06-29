@@ -1352,7 +1352,7 @@ main(int argc, char *argv[])
 #if 0
 	env_var = HDgetenv("HDF5_H5DWALK_PRINT_CMDLINE");
     if (env_var) {
-		int enable = HDatoi(env_var);
+		int enable = atoi(env_var);
 		if (enable) {
 
 		}

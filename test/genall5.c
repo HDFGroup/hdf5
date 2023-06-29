@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *        9/23/15
- *
+/*
  *        This file contains a heavily edited and functionally reduce
  *        version of the test code first written by Quincey in a file
  *        of the same name.

@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  James Laird
- *              Monday, January 29, 2007
- *
+/*
  * Purpose:	A message holding "implicitly shared object header message"
  *              information in the superblock extension.
  */

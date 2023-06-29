@@ -10,17 +10,16 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Vailin Choi
- *	       	September 2010
- *
+/*
  * Purpose:	Implicit (Non Index) chunked I/O functions.
- *		This is used when the dataset is:
- *			extendible but with fixed max. dims
- *			with early allocation
- *			without filter
- *		The chunk coordinate is mapped into the actual disk addresses
- *		for the chunk without indexing.
  *
+ *          This is used when the dataset is:
+ *			- extendible but with fixed max. dims
+ *			- with early allocation
+ *			- without filter
+ *
+ *          The chunk coordinate is mapped into the actual disk addresses
+ *          for the chunk without indexing.
  */
 
 /****************/

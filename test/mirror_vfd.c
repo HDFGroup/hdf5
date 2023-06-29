@@ -2302,7 +2302,7 @@ parse_args(int argc, char **argv, struct mt_opts *opts)
         if (!HDstrncmp(argv[i], "--ip=", 5))
             HDstrncpy(opts->ip, argv[i] + 5, H5FD_MIRROR_MAX_IP_LEN);
         else if (!HDstrncmp(argv[i], "--port=", 7))
-            opts->portno = HDatoi(argv[i] + 7);
+            opts->portno = atoi(argv[i] + 7);
         else {
             printf("Unrecognized option: '%s'\n", argv[i]);
             return -1;

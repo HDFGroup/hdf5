@@ -144,11 +144,11 @@ parse_command_line(int argc, const char *const *argv)
             case 'i':
                 increment_eoa_eof = TRUE;
                 if (H5_optarg != NULL) {
-                    if (HDatoi(H5_optarg) < 0) {
+                    if (atoi(H5_optarg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(H5_optarg);
+                    increment = (hsize_t)atoi(H5_optarg);
                 }
                 break;
 

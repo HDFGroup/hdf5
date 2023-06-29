@@ -10,9 +10,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Mike McGreevy
- *              October 7, 2010
- */
 #include "h5test.h"
 
 #define H5F_FRIEND  /*suppress error about including H5Fpkg	  */

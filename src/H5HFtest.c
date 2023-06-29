@@ -10,9 +10,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol
- *              Thursday, February  3, 2006
- *
+/*
  * Purpose:	Fractal heap testing functions.
  *
  */
