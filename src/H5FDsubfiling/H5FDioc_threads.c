@@ -102,9 +102,6 @@ static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_r
  * Return:      SUCCESS (0) or FAIL (-1) if any errors are detected
  *              for the multi-threaded initialization.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -259,9 +256,6 @@ finalize_ioc_threads(void *_sf_context)
  *              the thread will return from 'ioc_main' and the thread
  *              exit status will be checked by the main program.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static HG_THREAD_RETURN_TYPE
@@ -331,9 +325,6 @@ ioc_thread_main(void *arg)
  *
  * Return:      None
  * Errors:      None
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -485,9 +476,6 @@ translate_opcode(io_op_t op)
  *
  * Return:      (none) Doesn't fail.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 static HG_THREAD_RETURN_TYPE
@@ -581,9 +569,6 @@ handle_work_request(void *arg)
  *
  * Return:      integer result of mutex_lock request.
  *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -599,9 +584,6 @@ H5FD_ioc_begin_thread_exclusive(void)
  *              of the locked mutex.
  *
  * Return:      result of mutex_unlock operation.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -664,9 +646,6 @@ from the thread pool threads...
  * Return:      The integer status returned by the Internal read_independent
  *              function.  Successful operations will return 0.
  * Errors:      An MPI related error value.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -853,9 +832,6 @@ done:
  * Return:      The integer status returned by the Internal read_independent
  *              function.  Successful operations will return 0.
  * Errors:      An MPI related error value.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
  *
  *-------------------------------------------------------------------------
  */
@@ -1199,9 +1175,6 @@ done:
  *
  * Return:      0 if successful, 1 or an MPI error code on failure.
  *
- * Programmer:  John Mainzer
- *              7/17/2020
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1264,8 +1237,6 @@ done:
  * Return:      Pointer to new instance of ioc_io_queue_entry_t
  *              on success, and NULL on failure.
  *
- * Programmer:  JRM -- 11/6/21
- *
  *-------------------------------------------------------------------------
  */
 static ioc_io_queue_entry_t *
@@ -1316,8 +1287,6 @@ ioc_io_queue_alloc_entry(void)
  *              a call to ioc_io_queue_dispatch_eligible_entries().
  *
  * Return:      void.
- *
- * Programmer:  JRM -- 11/7/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1437,8 +1406,6 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *              the queue.
  *
  * Return:      void.
- *
- * Programmer:  JRM -- 11/7/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1604,8 +1571,6 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
  *
  * Return:      void.
  *
- * Programmer:  JRM -- 11/7/21
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1687,8 +1652,6 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
  *              fields are NULL.
  *
  * Return:      void.
- *
- * Programmer:  JRM -- 11/6/21
  *
  *-------------------------------------------------------------------------
  */
