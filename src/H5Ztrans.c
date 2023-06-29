@@ -379,10 +379,10 @@ H5Z__get_token(H5Z_token *current)
     current->tok_begin = current->tok_end;
 
     while (current->tok_begin[0] != '\0') {
-        if (HDisspace(current->tok_begin[0])) {
+        if (isspace(current->tok_begin[0])) {
             /* ignore whitespace */
         }
-        else if (HDisdigit(current->tok_begin[0]) || current->tok_begin[0] == '.') {
+        else if (isdigit(current->tok_begin[0]) || current->tok_begin[0] == '.') {
             current->tok_end = current->tok_begin;
 
             /*
@@ -394,7 +394,7 @@ H5Z__get_token(H5Z_token *current)
                 /* is number */
                 current->tok_type = H5Z_XFORM_INTEGER;
 
-                while (HDisdigit(current->tok_end[0]))
+                while (isdigit(current->tok_end[0]))
                     ++current->tok_end;
             }
 
@@ -411,7 +411,7 @@ H5Z__get_token(H5Z_token *current)
                 if (current->tok_end[0] == '.')
                     do {
                         ++current->tok_end;
-                    } while (HDisdigit(current->tok_end[0]));
+                    } while (isdigit(current->tok_end[0]));
 
                 if (current->tok_end[0] == 'e' || current->tok_end[0] == 'E') {
                     ++current->tok_end;
@@ -419,18 +419,18 @@ H5Z__get_token(H5Z_token *current)
                     if (current->tok_end[0] == '-' || current->tok_end[0] == '+')
                         ++current->tok_end;
 
-                    if (!HDisdigit(current->tok_end[0])) {
+                    if (!isdigit(current->tok_end[0])) {
                         current->tok_type = H5Z_XFORM_ERROR;
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current,
                                     "Invalidly formatted floating point number")
                     }
 
-                    while (HDisdigit(current->tok_end[0]))
+                    while (isdigit(current->tok_end[0]))
                         ++current->tok_end;
                 }
 
                 /* Check that this is a properly formatted numerical value */
-                if (HDisalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
+                if (isalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
                     current->tok_type = H5Z_XFORM_ERROR;
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number")
                 }
@@ -438,12 +438,12 @@ H5Z__get_token(H5Z_token *current)
 
             break;
         }
-        else if (HDisalpha(current->tok_begin[0])) {
+        else if (isalpha(current->tok_begin[0])) {
             /* is symbol */
             current->tok_type = H5Z_XFORM_SYMBOL;
             current->tok_end  = current->tok_begin;
 
-            while (HDisalnum(current->tok_end[0]))
+            while (isalnum(current->tok_end[0]))
                 ++current->tok_end;
 
             break;
@@ -1420,11 +1420,11 @@ H5Z_xform_create(const char *expr)
      * A more sophisticated check is needed to support scientific notation.
      */
     for (i = 0; i < HDstrlen(expr); i++) {
-        if (HDisalpha(expr[i])) {
+        if (isalpha(expr[i])) {
             if ((i > 0) && (i < (HDstrlen(expr) - 1))) {
                 if (((expr[i] == 'E') || (expr[i] == 'e')) &&
-                    (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
-                    (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
+                    (isdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
+                    (isdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
                     continue;
             } /* end if */
 
@@ -1558,7 +1558,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
         /* Find the number of times "x" is used in this equation, and allocate room for storing that many
          * points */
         for (i = 0; i < HDstrlen(new_data_xform_prop->xform_exp); i++)
-            if (HDisalpha(new_data_xform_prop->xform_exp[i]))
+            if (isalpha(new_data_xform_prop->xform_exp[i]))
                 count++;
 
         if (count > 0)

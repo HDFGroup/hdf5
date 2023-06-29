@@ -144,7 +144,7 @@ H5AC_init(void)
         const char *s; /* String for environment variables */
 
         s = HDgetenv("H5_COLL_API_SANITY_CHECK");
-        if (s && HDisdigit(*s)) {
+        if (s && isdigit(*s)) {
             long env_val               = strtol(s, NULL, 0);
             H5_coll_api_sanity_check_g = (0 == env_val) ? FALSE : TRUE;
         }

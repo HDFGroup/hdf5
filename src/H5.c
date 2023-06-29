@@ -693,7 +693,7 @@ H5__debug_mask(const char *s)
 
     while (s && *s) {
 
-        if (HDisalpha(*s) || '-' == *s || '+' == *s) {
+        if (isalpha(*s) || '-' == *s || '+' == *s) {
 
             /* Enable or Disable debugging? */
             if ('-' == *s) {
@@ -709,7 +709,7 @@ H5__debug_mask(const char *s)
             } /* end if */
 
             /* Get the name */
-            for (i = 0; HDisalpha(*s); i++, s++)
+            for (i = 0; isalpha(*s); i++, s++)
                 if (i < sizeof pkg_name)
                     pkg_name[i] = *s;
             pkg_name[MIN(sizeof(pkg_name) - 1, i)] = '\0';
@@ -741,7 +741,7 @@ H5__debug_mask(const char *s)
                     fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
             } /* end if-else */
         }
-        else if (HDisdigit(*s)) {
+        else if (isdigit(*s)) {
             int                     fd = (int)strtol(s, &rest, 0);
             H5_debug_open_stream_t *open_stream;
 
@@ -885,7 +885,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         /* Allow different versions of the header files and library? */
         s = HDgetenv("HDF5_DISABLE_VERSION_CHECK");
 
-        if (s && HDisdigit(*s))
+        if (s && isdigit(*s))
             disable_version_check = (unsigned int)strtol(s, NULL, 0);
     }
 

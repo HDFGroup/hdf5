@@ -852,7 +852,7 @@ parse_command_line(int argc, const char *const *argv)
                     memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     if (!HDstrcasecmp(buf, "hdf5")) {
@@ -892,7 +892,7 @@ parse_command_line(int argc, const char *const *argv)
                         memset(buf, '\0', sizeof(buf));
 
                         for (i = 0; *end != '\0' && *end != ','; ++end)
-                            if (HDisalnum(*end) && i < 10)
+                            if (isalnum(*end) && i < 10)
                                 buf[i++] = *end;
 
                         cl_opts->chk_size[j] = parse_size_directive(buf);
@@ -918,14 +918,14 @@ parse_command_line(int argc, const char *const *argv)
                     memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (HDstrlen(buf) > 1 || HDisdigit(buf[0])) {
+                    if (HDstrlen(buf) > 1 || isdigit(buf[0])) {
                         size_t j;
 
                         for (j = 0; j < 10 && buf[j] != '\0'; ++j)
-                            if (!HDisdigit(buf[j])) {
+                            if (!isdigit(buf[j])) {
                                 fprintf(stderr, "sio_perf: invalid --debug option %s\n", buf);
                                 exit(EXIT_FAILURE);
                             }
@@ -975,7 +975,7 @@ parse_command_line(int argc, const char *const *argv)
                     memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->dset_size[j] = parse_size_directive(buf);
@@ -1044,7 +1044,7 @@ parse_command_line(int argc, const char *const *argv)
                     memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->buf_size[j] = parse_size_directive(buf);
@@ -1071,7 +1071,7 @@ parse_command_line(int argc, const char *const *argv)
                     memset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
-                        if (HDisalnum(*end) && i < 10)
+                        if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
                     cl_opts->order[j] = (int)parse_size_directive(buf);

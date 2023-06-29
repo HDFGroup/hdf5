@@ -1958,7 +1958,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
 
                 /* "trim" tailing whitespace by replacing with null terminator*/
                 buffer_i = 0;
-                while (!HDisspace(setting_pointers[setting_i][buffer_i]))
+                while (!isspace(setting_pointers[setting_i][buffer_i]))
                     buffer_i++;
                 setting_pointers[setting_i][buffer_i] = '\0';
 
@@ -2186,7 +2186,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     /* check for restrictions */
     for (i = 0; i < len; i++) {
         /* scheme = [a-zA-Z+-.]+ (terminated by ":") */
-        if (!HDisalpha(curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
+        if (!isalpha(curstr[i]) && '+' != curstr[i] && '-' != curstr[i] && '.' != curstr[i])
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid SCHEME construction");
     }
 
@@ -2252,7 +2252,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
         else if (len > urllen)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "problem with length of PORT substring");
         for (i = 0; i < len; i++)
-            if (!HDisdigit(curstr[i]))
+            if (!isdigit(curstr[i]))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "PORT is not a decimal string");
 
         /* copy port */
@@ -2699,7 +2699,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         /* Find first non-whitespace character from start;
          * reduce total length per character.
          */
-        while ((s_len > 0) && HDisspace((unsigned char)s[0]) && s_len > 0) {
+        while ((s_len > 0) && isspace((unsigned char)s[0]) && s_len > 0) {
             s++;
             s_len--;
         }
@@ -2711,7 +2711,7 @@ H5FD_s3comms_trim(char *dest, char *s, size_t s_len, size_t *n_written)
         if (s_len > 0) {
             do {
                 s_len--;
-            } while (HDisspace((unsigned char)s[s_len]));
+            } while (isspace((unsigned char)s[s_len]));
             s_len++;
 
             /* write output into dest */
@@ -2788,8 +2788,7 @@ H5FD_s3comms_uriencode(char *dest, const char *s, size_t s_len, hbool_t encode_s
      */
     for (s_off = 0; s_off < s_len; s_off++) {
         c = s[s_off];
-        if (HDisalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' ||
-            (c == '/' && encode_slash == FALSE))
+        if (isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || (c == '/' && encode_slash == FALSE))
             dest[dest_off++] = c;
         else {
             hex_off = 0;
