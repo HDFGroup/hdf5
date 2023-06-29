@@ -79,7 +79,7 @@ pause_proc(void)
                 printf("Proc %d (%*s, %d): to debug, attach %d\n", mpi_rank, mpi_namelen, mpi_name, pid, pid);
             }
             printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
-            HDfflush(stdout);
+            fflush(stdout);
             HDsleep(time_int);
         }
     MPI_Barrier(MPI_COMM_WORLD);

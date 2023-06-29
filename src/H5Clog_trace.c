@@ -244,7 +244,7 @@ H5C__log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int m
         HDsnprintf(file_name, n_chars, "%s.%d", log_location, mpi_rank);
 
     /* Open log file and set it to be unbuffered */
-    if (NULL == (trace_udata->outfile = HDfopen(file_name, "w")))
+    if (NULL == (trace_udata->outfile = fopen(file_name, "w")))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "can't create mdc log file")
     HDsetbuf(trace_udata->outfile, NULL);
 
@@ -301,7 +301,7 @@ H5C__trace_tear_down_logging(H5C_log_info_t *log_info)
     H5MM_xfree(trace_udata->message);
 
     /* Close log file */
-    if (EOF == HDfclose(trace_udata->outfile))
+    if (EOF == fclose(trace_udata->outfile))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "problem closing mdc log file")
     trace_udata->outfile = NULL;
 

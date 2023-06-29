@@ -375,7 +375,7 @@ main(int argc, char *argv[])
             printf("File created.\n");
     }
     /* flush output before possible fork */
-    HDfflush(stdout);
+    fflush(stdout);
 
     if (launch_g == UC_READWRITE) {
         /* fork process */

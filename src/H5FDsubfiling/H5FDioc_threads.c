@@ -196,7 +196,7 @@ initialize_ioc_threads(void *_sf_context)
 #ifdef H5FD_IOC_DEBUG
     if (sf_context->topology->ioc_idx == 0) {
         printf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
-        HDfflush(stdout);
+        fflush(stdout);
     }
 #endif
 
@@ -1178,7 +1178,7 @@ ioc_file_truncate(sf_work_request_t *msg)
 #ifdef H5FD_IOC_DEBUG
     printf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__, (long long)length,
            errno);
-    HDfflush(stdout);
+    fflush(stdout);
 #endif
 
 done:

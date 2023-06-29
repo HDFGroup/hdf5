@@ -64,7 +64,7 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
             fprintf(g_log_stream, __VA_ARGS__);                                                              \
-            HDfflush(g_log_stream);                                                                          \
+            fflush(g_log_stream);                                                                            \
         }                                                                                                    \
     } while (0)
 

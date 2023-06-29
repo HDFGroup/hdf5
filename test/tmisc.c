@@ -2341,35 +2341,35 @@ misc13_insert_user_block(const char *old_name, const char *new_name, const char 
     HDmemcpy(user_block, str, HDstrlen(str));
 
     /* Open the new file */
-    new_fp = HDfopen(new_name, "wb");
-    CHECK_PTR(new_fp, "HDfopen");
+    new_fp = fopen(new_name, "wb");
+    CHECK_PTR(new_fp, "fopen");
 
     /* Write the user block to the new file */
-    written = HDfwrite(user_block, (size_t)1, size, new_fp);
-    VERIFY(written, size, "HDfwrite");
+    written = fwrite(user_block, (size_t)1, size, new_fp);
+    VERIFY(written, size, "fwrite");
 
     /* Open the old file */
-    old_fp = HDfopen(old_name, "rb");
-    CHECK_PTR(old_fp, "HDfopen");
+    old_fp = fopen(old_name, "rb");
+    CHECK_PTR(old_fp, "fopen");
 
     /* Allocate space for the copy buffer */
     copy_buf = malloc((size_t)MISC13_COPY_BUF_SIZE);
     CHECK_PTR(copy_buf, "malloc");
 
     /* Copy data from the old file to the new file */
-    while ((read_in = HDfread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
+    while ((read_in = fread(copy_buf, (size_t)1, (size_t)MISC13_COPY_BUF_SIZE, old_fp)) > 0) {
         /* Write the data to the new file */
-        written = HDfwrite(copy_buf, (size_t)1, read_in, new_fp);
-        VERIFY(written, read_in, "HDfwrite");
+        written = fwrite(copy_buf, (size_t)1, read_in, new_fp);
+        VERIFY(written, read_in, "fwrite");
     }
 
     /* Close the old file */
-    ret = HDfclose(old_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(old_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Close the new file */
-    ret = HDfclose(new_fp);
-    VERIFY(ret, 0, "HDfclose");
+    ret = fclose(new_fp);
+    VERIFY(ret, 0, "fclose");
 
     /* Free the copy buffer */
     free(copy_buf);

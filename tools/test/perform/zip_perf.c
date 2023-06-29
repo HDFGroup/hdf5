@@ -258,7 +258,7 @@ usage(void)
     fprintf(stdout, "\n");
     fprintf(stdout, "      Example: 37M = 37 Megabytes = %d bytes\n", 37 * ONE_MB);
     fprintf(stdout, "\n");
-    HDfflush(stdout);
+    fflush(stdout);
 }
 
 /*

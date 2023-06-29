@@ -245,7 +245,7 @@ h5tools_set_data_output_file(const char *fname, int is_bin)
               * so that rawdatastream is changed only when succeeded */
 
     if (rawdatastream && rawdatastream != stdout) {
-        if (HDfclose(rawdatastream))
+        if (fclose(rawdatastream))
             HDperror("closing rawdatastream");
         else
             rawdatastream = NULL;
@@ -255,13 +255,13 @@ h5tools_set_data_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawdatastream = f;
                 retvalue      = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawdatastream = f;
                 retvalue      = SUCCEED;
             }
@@ -293,7 +293,7 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
               * so that rawattrstream is changed only when succeeded */
 
     if (rawattrstream && rawattrstream != stdout) {
-        if (HDfclose(rawattrstream))
+        if (fclose(rawattrstream))
             HDperror("closing rawattrstream");
         else
             rawattrstream = NULL;
@@ -303,13 +303,13 @@ h5tools_set_attr_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawattrstream = f;
                 retvalue      = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawattrstream = f;
                 retvalue      = SUCCEED;
             }
@@ -342,7 +342,7 @@ h5tools_set_input_file(const char *fname, int is_bin)
               * so that rawinstream is changed only when succeeded */
 
     if (rawinstream && rawinstream != stdin) {
-        if (HDfclose(rawinstream))
+        if (fclose(rawinstream))
             HDperror("closing rawinstream");
         else
             rawinstream = NULL;
@@ -351,13 +351,13 @@ h5tools_set_input_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "rb")) != NULL) {
+            if ((f = fopen(fname, "rb")) != NULL) {
                 rawinstream = f;
                 retvalue    = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "r")) != NULL) {
+            if ((f = fopen(fname, "r")) != NULL) {
                 rawinstream = f;
                 retvalue    = SUCCEED;
             }
@@ -390,7 +390,7 @@ h5tools_set_output_file(const char *fname, int is_bin)
               * so that rawoutstream is changed only when succeeded */
 
     if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
+        if (fclose(rawoutstream))
             HDperror("closing rawoutstream");
         else
             rawoutstream = NULL;
@@ -399,13 +399,13 @@ h5tools_set_output_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawoutstream = f;
                 retvalue     = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawoutstream = f;
                 retvalue     = SUCCEED;
             }
@@ -437,7 +437,7 @@ h5tools_set_error_file(const char *fname, int is_bin)
               * so that rawerrorstream is changed only when succeeded */
 
     if (rawerrorstream && rawerrorstream != stderr) {
-        if (HDfclose(rawerrorstream))
+        if (fclose(rawerrorstream))
             HDperror("closing rawerrorstream");
         else
             rawerrorstream = NULL;
@@ -447,13 +447,13 @@ h5tools_set_error_file(const char *fname, int is_bin)
     if (fname != NULL) {
         /* binary output */
         if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
+            if ((f = fopen(fname, "wb")) != NULL) {
                 rawerrorstream = f;
                 retvalue       = SUCCEED;
             }
         }
         else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
+            if ((f = fopen(fname, "w")) != NULL) {
                 rawerrorstream = f;
                 retvalue       = SUCCEED;
             }
@@ -1810,9 +1810,9 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                 else
                     bytes_in = (size_t)block_index;
 
-                bytes_wrote = HDfwrite(mem, 1, bytes_in, stream);
+                bytes_wrote = fwrite(mem, 1, bytes_in, stream);
 
-                if (bytes_wrote != bytes_in || (0 == bytes_wrote && HDferror(stream)))
+                if (bytes_wrote != bytes_in || (0 == bytes_wrote && ferror(stream)))
                     H5TOOLS_THROW((-1), "fwrite failed");
 
                 block_index -= (hsize_t)bytes_wrote;
@@ -1843,7 +1843,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                 }
                 for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                     HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
-                    if (1 != HDfwrite(&tempuchar, sizeof(unsigned char), 1, stream))
+                    if (1 != fwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                         H5TOOLS_THROW((-1), "fwrite failed");
                 } /* i */
             }     /* for (block_index = 0; block_index < block_nelmts; block_index++) */
@@ -1990,7 +1990,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
             H5TOOLS_DEBUG("H5T_OPAQUE");
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char *)_mem) + block_index * size;
-                if (size != HDfwrite(mem, sizeof(char), size, stream))
+                if (size != fwrite(mem, sizeof(char), size, stream))
                     H5TOOLS_THROW((-1), "fwrite failed");
             } /* end for */
             break;

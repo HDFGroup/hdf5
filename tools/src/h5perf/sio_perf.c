@@ -202,7 +202,7 @@ main(int argc, char *argv[])
     }
 
     if (opts->output_file) {
-        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
+        if ((output = fopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             HDperror(opts->output_file);
             goto finish;
@@ -1281,5 +1281,5 @@ usage(const char *prog)
     printf("      HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
     printf("      HDF5_PREFIX      Data file prefix\n");
     printf("\n");
-    HDfflush(stdout);
+    fflush(stdout);
 } /* end usage() */

@@ -375,7 +375,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
      */
     if (in->inputClass == 4 /* "IN" */ || in->inputClass == 3 /* "FP" */ || in->inputClass == 7 /* "UIN" */) {
 
-        if ((strm = HDfopen(infile, READ_OPEN_FLAGS)) == NULL) {
+        if ((strm = fopen(infile, READ_OPEN_FLAGS)) == NULL) {
             (void)fprintf(stderr, err1, infile);
             goto error;
         }
@@ -385,7 +385,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
      *-------------------------------------------------------------------------
      */
     else {
-        if ((strm = HDfopen(infile, "r")) == NULL) {
+        if ((strm = fopen(infile, "r")) == NULL) {
             (void)fprintf(stderr, err1, infile);
             goto error;
         }
@@ -459,7 +459,7 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
 
 error:
     if (strm)
-        HDfclose(strm);
+        fclose(strm);
     return retval;
 }
 
@@ -502,7 +502,7 @@ readIntegerData(FILE *strm, struct Input *in)
                 case 4: /* IN */
                     in08 = (H5DT_INT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
-                        if (HDfread((char *)in08, sizeof(H5DT_INT8), 1, strm) != 1) {
+                        if (fread((char *)in08, sizeof(H5DT_INT8), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -533,7 +533,7 @@ readIntegerData(FILE *strm, struct Input *in)
 
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in16++) {
-                        if (HDfread((char *)&temp16, sizeof(H5DT_INT16), 1, strm) != 1) {
+                        if (fread((char *)&temp16, sizeof(H5DT_INT16), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -569,7 +569,7 @@ readIntegerData(FILE *strm, struct Input *in)
 
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in32++) {
-                        if (HDfread((char *)&temp32, sizeof(H5DT_INT32), 1, strm) != 1) {
+                        if (fread((char *)&temp32, sizeof(H5DT_INT32), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -606,7 +606,7 @@ readIntegerData(FILE *strm, struct Input *in)
 
                 case 4: /* IN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (HDfread((char *)&temp64, sizeof(H5DT_INT64), 1, strm) != 1) {
+                        if (fread((char *)&temp64, sizeof(H5DT_INT64), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -673,7 +673,7 @@ readUIntegerData(FILE *strm, struct Input *in)
                 case 7: /* UIN */
                     in08 = (H5DT_UINT8 *)in->data;
                     for (i = 0; i < len; i++, in08++) {
-                        if (HDfread((char *)in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
+                        if (fread((char *)in08, sizeof(H5DT_UINT8), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -700,7 +700,7 @@ readUIntegerData(FILE *strm, struct Input *in)
 
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in16++) {
-                        if (HDfread((char *)&temp16, sizeof(H5DT_UINT16), 1, strm) != 1) {
+                        if (fread((char *)&temp16, sizeof(H5DT_UINT16), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -736,7 +736,7 @@ readUIntegerData(FILE *strm, struct Input *in)
 
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in32++) {
-                        if (HDfread((char *)&temp32, sizeof(H5DT_UINT32), 1, strm) != 1) {
+                        if (fread((char *)&temp32, sizeof(H5DT_UINT32), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -773,7 +773,7 @@ readUIntegerData(FILE *strm, struct Input *in)
 
                 case 7: /* UIN */
                     for (i = 0; i < len; i++, in64++) {
-                        if (HDfread((char *)&temp64, sizeof(H5DT_UINT64), 1, strm) != 1) {
+                        if (fread((char *)&temp64, sizeof(H5DT_UINT64), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -853,7 +853,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 3: /* FP */
                     bfp32 = (uint32_t *)in->data;
                     for (i = 0; i < len; i++, bfp32++) {
-                        if (HDfread((char *)&temp32, sizeof(uint32_t), 1, strm) != 1) {
+                        if (fread((char *)&temp32, sizeof(uint32_t), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -905,7 +905,7 @@ readFloatData(FILE *strm, struct Input *in)
                 case 3: /* FP */
                     bfp64 = (uint64_t *)in->data;
                     for (i = 0; i < len; i++, bfp64++) {
-                        if (HDfread((char *)&temp64, sizeof(uint64_t), 1, strm) != 1) {
+                        if (fread((char *)&temp64, sizeof(uint64_t), 1, strm) != 1) {
                             (void)fprintf(stderr, "%s", err1);
                             return (-1);
                         }
@@ -1462,7 +1462,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
     in->inputArchitecture = 0; /* default to NATIVE */
 
-    if ((strm = HDfopen(infile, "r")) == NULL) {
+    if ((strm = fopen(infile, "r")) == NULL) {
         (void)fprintf(stderr, err1, infile);
         goto error;
     }
@@ -2442,7 +2442,7 @@ processConfigurationFile(char *infile, struct Input *in)
 
 error:
     if (strm)
-        HDfclose(strm);
+        fclose(strm);
     return retval;
 }
 
@@ -4700,14 +4700,14 @@ process(struct Options *opt)
 
             if (in->configOptionVector[EXTERNALSTORE] == 1) {
                 /* creating the external file if it doesn't exist */
-                if ((extfile = HDfopen(in->externFilename, "ab")) == NULL) {
+                if ((extfile = fopen(in->externFilename, "ab")) == NULL) {
                     (void)fprintf(stderr, "%s", err4);
                     H5Pclose(proplist);
                     H5Sclose(dataspace);
                     H5Fclose(file_id);
                     return (-1);
                 }
-                HDfclose(extfile);
+                fclose(extfile);
                 H5Pset_external(proplist, in->externFilename, (off_t)0,
                                 numOfElements * (hsize_t)in->inputSize / 8);
             }

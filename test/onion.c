@@ -2619,7 +2619,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 HDputs("i  exp  act");
                 for (z = 0; z < wi->size; z++)
                     printf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
-                HDfflush(stdout);
+                fflush(stdout);
                 TEST_ERROR;
             }
             free(buf_vfy);
@@ -2751,7 +2751,7 @@ test_page_aligned_history_create(void)
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
-        HDfflush(stdout);
+        fflush(stdout);
         TEST_ERROR;
     }
     if (HDmemcmp(b_list_s, buf, a_off) != 0) {
@@ -2761,7 +2761,7 @@ test_page_aligned_history_create(void)
         for (k = 0; k < b_list_size_s; k++) {
             printf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
-        HDfflush(stdout);
+        fflush(stdout);
         TEST_ERROR;
     }
     if (H5FDclose(file) < 0)
@@ -3067,7 +3067,7 @@ test_integration_create(void)
             int expected = i * j - j;
             if (rdata->arr[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
-                HDfflush(stdout);
+                fflush(stdout);
                 TEST_ERROR;
             }
         }
@@ -3105,7 +3105,7 @@ test_integration_create(void)
             int expected = i * 6 + j + 1;
             if (rdata->arr[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
-                HDfflush(stdout);
+                fflush(stdout);
                 TEST_ERROR;
             }
         }
@@ -3144,11 +3144,11 @@ test_integration_create(void)
             int expected = i * 3 + j + 5;
             if (rdata->arr[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i][j]);
-                HDfflush(stdout);
+                fflush(stdout);
                 TEST_ERROR;
             }
             else {
-                HDfflush(stdout);
+                fflush(stdout);
             }
         }
     }

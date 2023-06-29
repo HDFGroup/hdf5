@@ -65,7 +65,7 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
         }
 
         fprintf(stream, "\n");
-        HDfflush(stream);
+        fflush(stream);
     } /* end if sufficiently verbose to print */
 } /* end mirror_log() */
 
@@ -163,7 +163,7 @@ mirror_log_init(char *path, const char *prefix, unsigned int verbosity)
 
         if (path && *path) {
             FILE *f = NULL;
-            f       = HDfopen(path, "w");
+            f       = fopen(path, "w");
             if (NULL == f) {
                 fprintf(MIRROR_LOG_DEFAULT_STREAM, "WARN custom logging path could not be opened: %s\n",
                         path);
@@ -196,7 +196,7 @@ mirror_log_term(loginfo_t *info)
         return FAIL;
     }
     if (info->stream != stderr || info->stream != stdout) {
-        if (HDfclose(info->stream) < 0) {
+        if (fclose(info->stream) < 0) {
             return FAIL;
         }
     }

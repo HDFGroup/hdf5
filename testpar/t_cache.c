@@ -486,7 +486,7 @@ print_stats(void)
             datum_flushes, datum_pinned_flushes, datum_loads);
     fprintf(stdout, "%d: pins: global / global dirty / local = %ld / %ld / %ld\n", world_mpi_rank,
             global_pins, global_dirty_pins, local_pins);
-    HDfflush(stdout);
+    fflush(stdout);
 
     return;
 
@@ -6420,11 +6420,11 @@ trace_file_check(int metadata_write_strategy)
         if (nerrors == 0) {
             HDsnprintf(trace_file_name, sizeof(trace_file_name), "t_cache_trace.txt.%d", (int)file_mpi_rank);
 
-            if ((trace_file_ptr = HDfopen(trace_file_name, "r")) == NULL) {
+            if ((trace_file_ptr = fopen(trace_file_name, "r")) == NULL) {
 
                 nerrors++;
                 if (verbose)
-                    fprintf(stdout, "%d:%s: HDfopen failed.\n", world_mpi_rank, __func__);
+                    fprintf(stdout, "%d:%s: fopen failed.\n", world_mpi_rank, __func__);
             }
         } /* end if */
 
@@ -6512,7 +6512,7 @@ trace_file_check(int metadata_write_strategy)
 
         /* Clean up the trace file */
         if (trace_file_ptr != NULL) {
-            HDfclose(trace_file_ptr);
+            fclose(trace_file_ptr);
             trace_file_ptr = NULL;
             HDremove(trace_file_name);
         }

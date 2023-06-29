@@ -413,7 +413,7 @@ test_fapl_config_validation(void)
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -621,7 +621,7 @@ test_hdfs_fapl(void)
     TESTING("HDFS fapl ");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -707,7 +707,7 @@ test_vfd_open(void)
     TESTING("HDFS VFD-level open");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -963,7 +963,7 @@ test_eof_eoa(void)
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1076,7 +1076,7 @@ test_H5FDread_without_eoa_set_fails(void)
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1178,7 +1178,7 @@ test_read(void)
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1388,7 +1388,7 @@ test_noops_and_autofails(void)
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1530,7 +1530,7 @@ test_H5F_integration(void)
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
     HDputs("    HDFS VFD is not enabled");
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 #else
@@ -1597,7 +1597,7 @@ error:
 
 #if HDFS_TEST_DEBUG
     printf("\nerror!");
-    HDfflush(stdout);
+    fflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {

@@ -5271,7 +5271,7 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
         buf[i] = i;
 
     /* create an empty external file */
-    HDfclose(HDfopen(FILE_EXT, "w"));
+    fclose(fopen(FILE_EXT, "w"));
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);

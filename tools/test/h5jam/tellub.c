@@ -37,7 +37,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg,
 static void
 usage(const char *prog)
 {
-    HDfflush(stdout);
+    fflush(stdout);
     fprintf(stdout, "usage: %s h5_file\n", prog);
     fprintf(stdout, "           Check that h5_fil is HDF5 file and print size of user block \n");
     fprintf(stdout, "       %s -h\n", prog);

@@ -4087,7 +4087,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5RS_acat(rs, ")");
     }
     HDfputs(H5RS_get_str(rs), out);
-    HDfflush(out);
+    fflush(out);
     H5RS_decr(rs);
 
     if (H5_debug_g.ttimes)

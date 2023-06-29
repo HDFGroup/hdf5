@@ -324,7 +324,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
     int    *buf = (int *)malloc(sizeof(int) * WRT_SIZE);
     int     i, j;
-    FILE   *out = HDfopen(DNAME, "w");
+    FILE   *out = fopen(DNAME, "w");
     hid_t   dcpl;
 
     switch (testsize) {
@@ -427,7 +427,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     if (H5Fclose(file) < 0)
         goto error;
     free(buf);
-    HDfclose(out);
+    fclose(out);
     PASSED();
     return 0;
 
@@ -445,7 +445,7 @@ error:
     if (buf)
         free(buf);
     if (out)
-        HDfclose(out);
+        fclose(out);
     return 1;
 }
 
@@ -475,7 +475,7 @@ reader(char *filename, hid_t fapl)
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
-    script = HDfopen(DNAME, "r");
+    script = fopen(DNAME, "r");
 
     /* Open HDF5 file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
@@ -498,7 +498,7 @@ reader(char *filename, hid_t fapl)
         i            = (int)HDstrtol(ln + 1, &s, 10);
         hs_offset[0] = HDstrtoull(s, NULL, 0);
         fprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
-        HDfflush(stdout);
+        fflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
             FAIL_STACK_ERROR;
@@ -535,7 +535,7 @@ reader(char *filename, hid_t fapl)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
     free(buf);
-    HDfclose(script);
+    fclose(script);
 
     return nerrors;
 
@@ -551,7 +551,7 @@ error:
     if (buf)
         free(buf);
     if (script)
-        HDfclose(script);
+        fclose(script);
     return 1;
 }
 
@@ -649,12 +649,12 @@ quit:
     /* Clean up the test file */
     h5_clean_files(FILENAME, fapl);
     HDremove(DNAME);
-    HDfflush(stdout);
+    fflush(stdout);
     return 0;
 
 error:
     HDputs("*** TEST FAILED ***");
-    HDfflush(stdout);
+    fflush(stdout);
     return 1;
 } /* end test_stdio() */
 

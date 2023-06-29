@@ -107,7 +107,7 @@ main(void)
     free(buf_data);
 
     HDputs(" PASSED");
-    HDfflush(stdout);
+    fflush(stdout);
 
     return EXIT_SUCCESS;
 }

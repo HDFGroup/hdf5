@@ -122,7 +122,7 @@ typedef struct H5FD_mirror_t {
         /* end partial line */                                                                               \
         fprintf(stdout, "\n");                                                                               \
         fprintf(stdout, "```\n");                                                                            \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define LOG_XMIT_BYTES(label, buf, len) /* no-op */
@@ -132,7 +132,7 @@ typedef struct H5FD_mirror_t {
 #define LOG_OP_CALL(name)                                                                                    \
     do {                                                                                                     \
         printf("called %s()\n", (name));                                                                     \
-        HDfflush(stdout);                                                                                    \
+        fflush(stdout);                                                                                      \
     } while (0)
 #else
 #define LOG_OP_CALL(name) /* no-op */

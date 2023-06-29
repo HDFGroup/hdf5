@@ -102,7 +102,7 @@ main(void)
         /* Removed print statement as it would lock system resources on Windows */
         /*
          * printf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
-         * HDfflush(stdout);
+         * fflush(stdout);
          */
         floatval = (float)j;
 

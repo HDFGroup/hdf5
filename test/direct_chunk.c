@@ -2333,7 +2333,7 @@ main(void)
             need_comma = TRUE;
         } /* end if */
         printf(":\n");
-        HDfflush(stdout);
+        fflush(stdout);
 
         nerrors += test_single_chunk(config);
     } /* end for */
