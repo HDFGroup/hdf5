@@ -3,8 +3,6 @@ name: hdf5 1.10 daily build
 # Controls when the action will run. Triggers the workflow on a schedule
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "4 0 * * *"
 
 permissions:
   contents: read
@@ -14,22 +12,29 @@ permissions:
 jobs:
   call-workflow-tarball:
     uses: ./.github/workflows/tarball.yml
+    with:
+      #use_tag: snapshot-1.10
+      use_environ: snapshots
 
   call-workflow-ctest:
     needs: call-workflow-tarball
     uses: ./.github/workflows/cmake-ctest.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
+      #use_tag: snapshot-1.10
+      #use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
   call-workflow-release:
     needs: [call-workflow-tarball, call-workflow-ctest]
     permissions:
       contents: write # In order to allow tag creation
-    uses: ./.github/workflows/release.yml
+    uses: ./.github/workflows/release-files.yml
     with:
       file_base: ${{ needs.call-workflow-tarball.outputs.file_base }}
       file_branch: ${{ needs.call-workflow-tarball.outputs.file_branch }}
       file_sha: ${{ needs.call-workflow-tarball.outputs.file_sha }}
+      use_tag: snapshot-1.10
+      use_environ: snapshots
     if: ${{ needs.call-workflow-tarball.outputs.has_changes == 'true' }}
 
